@@ -7571,7 +7571,8 @@ public final class io/getstream/video/android/core/Call {
 	public final fun disableClientCapabilities (Ljava/util/List;)V
 	public final fun enableClientCapabilities (Ljava/util/List;)V
 	public final fun end (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun fastReconnect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun fastReconnect (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun fastReconnect$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun fireEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
 	public final fun get (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getAudioFilter ()Lio/getstream/video/android/core/call/audio/InputAudioFilter;
@@ -7608,7 +7609,8 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun joinAndRing$default (Lio/getstream/video/android/core/Call;Ljava/util/List;Lio/getstream/video/android/core/CreateCallOptions;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun kickUser (Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun kickUser$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun leave ()V
+	public final fun leave (Ljava/lang/String;)V
+	public static synthetic fun leave$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun listRecordings (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun listRecordings$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun listTranscription (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -7626,7 +7628,8 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun reject (Lio/getstream/video/android/core/model/RejectReason;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun reject$default (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun rejoin (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun rejoin (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun rejoin$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun removeMembers (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun requestPermissions ([Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun revokePermissions (Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -12978,8 +12981,8 @@ public abstract interface class io/getstream/video/android/core/socket/common/So
 	public abstract fun sendEvent (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun state ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun updateToken (Ljava/lang/Object;)V
-	public abstract fun whenConnected (JLkotlin/jvm/functions/Function2;)V
-	public static synthetic fun whenConnected$default (Lio/getstream/video/android/core/socket/common/SocketActions;JLkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public abstract fun whenConnected (JLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun whenConnected$default (Lio/getstream/video/android/core/socket/common/SocketActions;JLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 }
 
 public final class io/getstream/video/android/core/socket/common/SocketActions$Companion {
@@ -13157,7 +13160,7 @@ public class io/getstream/video/android/core/socket/coordinator/CoordinatorSocke
 	public fun state ()Lkotlinx/coroutines/flow/StateFlow;
 	public synthetic fun updateToken (Ljava/lang/Object;)V
 	public fun updateToken (Ljava/lang/String;)V
-	public fun whenConnected (JLkotlin/jvm/functions/Function2;)V
+	public fun whenConnected (JLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 }
 
 public final class io/getstream/video/android/core/socket/coordinator/state/RestartReason : java/lang/Enum {
@@ -13367,7 +13370,7 @@ public final class io/getstream/video/android/core/socket/sfu/SfuSocketConnectio
 	public fun state ()Lkotlinx/coroutines/flow/StateFlow;
 	public synthetic fun updateToken (Ljava/lang/Object;)V
 	public fun updateToken (Ljava/lang/String;)V
-	public fun whenConnected (JLkotlin/jvm/functions/Function2;)V
+	public fun whenConnected (JLkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 }
 
 public final class io/getstream/video/android/core/socket/sfu/SfuSocketConnection$Companion {

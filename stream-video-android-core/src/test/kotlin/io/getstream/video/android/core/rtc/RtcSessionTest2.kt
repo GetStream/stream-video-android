@@ -461,8 +461,8 @@ class RtcSessionTest2 {
         val socketStateFlow =
             MutableStateFlow<SfuSocketState>(SfuSocketState.Connected(mockConnectedEvent))
         every { mockSocket.state() } returns socketStateFlow
-        every { mockSocket.whenConnected(any<Long>(), any()) } answers {
-            val callback = secondArg<suspend (String) -> Unit>()
+        every { mockSocket.whenConnected(any<Long>(), any(), any()) } answers {
+            val callback = thirdArg<suspend (String) -> Unit>()
             // Launch the callback in backgroundScope to simulate the real whenConnected behavior
             // The real impl launches in socket's scope; we launch in background scope for control
             testScope.backgroundScope.launch {

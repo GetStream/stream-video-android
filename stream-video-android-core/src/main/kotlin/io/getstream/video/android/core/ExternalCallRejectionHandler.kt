@@ -68,7 +68,7 @@ internal class ExternalCallRejectionHandler() {
                  *         onSuccess: (suspend (Call) -> Unit)?,
                  *         onError: (suspend (Exception) -> Unit)?,)
                  */
-                call.leave()
+                call.leave("rejected-on-wearable")
             }
         }
     }

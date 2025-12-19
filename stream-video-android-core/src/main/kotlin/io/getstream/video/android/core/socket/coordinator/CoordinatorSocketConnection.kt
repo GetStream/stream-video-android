@@ -208,12 +208,17 @@ public open class CoordinatorSocketConnection(
     }
     override fun whenConnected(
         connectionTimeout: Long,
+        connectionFailed: suspend (throwable: Throwable) -> Unit,
         connected: suspend (connectionId: String) -> Unit,
     ) {
         scope.launch {
-            internalSocket.awaitConnection(connectionTimeout)
-            internalSocket.connectionIdOrError().also {
-                connected(it)
+            try {
+                internalSocket.awaitConnection(connectionTimeout)
+                internalSocket.connectionIdOrError().also {
+                    connected(it)
+                }
+            } catch (e: Throwable) {
+                connectionFailed(e)
             }
         }
     }
