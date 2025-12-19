@@ -792,13 +792,13 @@ public class Call(
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
-                val session = this.session!!
+                val oldSession = this.session!!
                 val oldSessionStats = collectStats()
                 val currentOptions = this.session?.publisher?.currentOptions()
-                logger.i { "Rejoin SFU ${session?.sfuUrl} to ${cred.server.url}" }
+                logger.i { "Rejoin SFU ${oldSession?.sfuUrl} to ${cred.server.url}" }
 
                 this.sessionId = UUID.randomUUID().toString()
-                val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
+                val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
                 val reconnectDetails = ReconnectDetails(
                     previous_session_id = prevSessionId,
                     strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
@@ -808,7 +808,7 @@ public class Call(
                     reason = reason,
                 )
                 this.state.removeParticipant(prevSessionId)
-                session.prepareRejoin()
+                oldSession.prepareRejoin()
                 try {
                     this.session = RtcSession(
                         clientImpl,
@@ -827,8 +827,9 @@ public class Call(
                     )
                     this.session?.connect(reconnectDetails, currentOptions)
                     this.session?.sfuTracer?.trace("rejoin", reason)
-                    session.sendCallStats(oldSessionStats)
-                    session.cleanup()
+                    oldSession.sendCallStats(oldSessionStats)
+                    oldSession.leaveWithReason("Rejoin :: $reason")
+                    oldSession.cleanup()
                     monitorSession(joinResponse.value)
                 } catch (ex: Exception) {
                     logger.e(ex) {
@@ -924,10 +925,10 @@ public class Call(
     /** Leave the call, but don't end it for other users */
     fun leave(reason: String = "user") {
         logger.d { "[leave] #ringing; no args, call_cid:$cid" }
-        leave(null, reason)
+        internalLeave(null, reason)
     }
 
-    private fun leave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
+    private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
         val callId = id
         monitorSubscriberPCStateJob?.cancel()
         monitorPublisherPCStateJob?.cancel()

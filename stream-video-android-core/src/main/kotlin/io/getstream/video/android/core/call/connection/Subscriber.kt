@@ -341,12 +341,6 @@ internal class Subscriber(
         tracer.trace("iceRestart-error", it.message ?: "unknown")
     }
 
-    /*// TODO: Not a very great idea
-    private val pendingCalls: List<() -> Unit>
-    private fun ensureSocketIsConnected(block: () -> Unit) {
-       if (sfuConnectionModule.socketConnection.state().value !is SfuSocketState.Connected)
-    }*/
-
     /**
      * Sets the video subscriptions for the subscriber.
      *

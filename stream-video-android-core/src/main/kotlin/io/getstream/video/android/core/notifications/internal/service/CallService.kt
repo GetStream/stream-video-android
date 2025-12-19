@@ -840,7 +840,7 @@ internal open class CallService : Service() {
                         }
                     } else {
                         // ...and there are other users other than me and the caller, end the call just for me
-                        call.leave("call-service-end-call-incomming")
+                        call.leave("call-service-end-call-incoming")
                         logger.i { "[onTaskRemoved] Ended incoming call for me." }
                     }
                 } else {
