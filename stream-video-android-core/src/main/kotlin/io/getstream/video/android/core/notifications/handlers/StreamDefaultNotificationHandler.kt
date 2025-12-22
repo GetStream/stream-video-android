@@ -54,6 +54,7 @@ import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_MISSED_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
+import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
@@ -205,16 +206,12 @@ constructor(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
-        val notificationId = callId.hashCode()
-        val intent = intentResolver.searchMissedCallPendingIntent(callId, notificationId, payload) ?: run {
-            logger.e { "Couldn't find any activity for $ACTION_MISSED_CALL" }
-            intentResolver.getDefaultPendingIntent(payload)
-        }
+        val notificationId = callId.getNotificationId(NotificationType.Missed)
         getMissedCallNotification(
             callId,
             callDisplayName,
             payload,
-        ).showNotification(callId, callId.hashCode())
+        ).showNotification(callId, notificationId)
 
         val createdByUserId = try {
             payload["created_by_id"] as String
