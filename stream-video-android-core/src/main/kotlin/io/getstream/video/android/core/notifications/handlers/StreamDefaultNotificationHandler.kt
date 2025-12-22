@@ -216,12 +216,17 @@ constructor(
             payload,
         ).showNotification(callId, callId.hashCode())
 
+        val createdByUserId = try {
+            payload["created_by_id"] as String
+        } catch (ex: Exception) {
+            ""
+        }
         /**
          * Under poor internet there can be delay in receiving the
          *  [io.getstream.android.video.generated.models.CallRejectedEvent] so we emit [LocalCallMissedEvent]
          */
         StreamVideo.instanceOrNull()?.let {
-            (it as StreamVideoClient).fireEvent(LocalCallMissedEvent(callId.cid))
+            (it as StreamVideoClient).fireEvent(LocalCallMissedEvent(createdByUserId, callId.cid))
         }
     }
 

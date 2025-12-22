@@ -60,7 +60,7 @@ internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIn
                         ),
                     ),
                 )
-                ComponentName(context, CallService::class.java)
+
                 showIncomingCallResult = ShowIncomingCallResult.FG_SERVICE
             } else {
                 logger.d { "[showIncomingCall] Starting regular service" }
