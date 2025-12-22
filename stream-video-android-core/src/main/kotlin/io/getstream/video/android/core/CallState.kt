@@ -33,6 +33,7 @@ import io.getstream.android.video.generated.models.CallMemberAddedEvent
 import io.getstream.android.video.generated.models.CallMemberRemovedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedPermissionEvent
+import io.getstream.android.video.generated.models.CallMissedEvent
 import io.getstream.android.video.generated.models.CallModerationBlurEvent
 import io.getstream.android.video.generated.models.CallParticipantResponse
 import io.getstream.android.video.generated.models.CallReactionEvent
