@@ -80,7 +80,7 @@ class MicrophoneManagerTest {
 
         // Then
         verify(exactly = 9) {
-            // Setup will be called exactly 10 times
+            // Setup will be called exactly 9 times
             microphoneManager.setup(any(), any())
         }
     }
