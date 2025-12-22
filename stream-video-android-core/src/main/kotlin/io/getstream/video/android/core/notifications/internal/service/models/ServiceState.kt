@@ -23,6 +23,7 @@ import io.getstream.video.android.core.notifications.internal.receivers.ToggleCa
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
+import org.threeten.bp.OffsetDateTime
 
 internal class ServiceState {
 
@@ -30,6 +31,8 @@ internal class ServiceState {
     var soundPlayer: CallSoundAndVibrationPlayer? = null
     private var toggleCameraBroadcastReceiver: ToggleCameraBroadcastReceiver? = null
     private var isReceiverRegistered = false
+
+    var startTime: OffsetDateTime? = null
 
     internal fun registerToggleCameraBroadcastReceiver(service: Service, scope: CoroutineScope) {
         if (!isReceiverRegistered) {
