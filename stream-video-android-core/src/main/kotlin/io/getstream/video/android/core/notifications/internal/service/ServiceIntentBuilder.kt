@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
-import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import io.getstream.log.taggedLogger
@@ -68,36 +67,35 @@ internal class ServiceIntentBuilder {
         return serviceIntent
     }
 
-    fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam): Intent =
-        safeCallWithDefault(Intent(context, CallService::class.java)) {
-            val serviceClass = stopServiceParam.callServiceConfiguration.serviceClass
-
-            val intent = if (isServiceRunning(context, serviceClass)) {
-                Intent(context, serviceClass)
-            } else {
-                Intent(context, CallService::class.java)
-            }
-            stopServiceParam.call?.let { call ->
-                logger.d { "[buildStopIntent], call_id:${call.cid}" }
-                val streamCallId = StreamCallId(call.type, call.id, call.cid)
-                intent.putExtra(INTENT_EXTRA_CALL_CID, streamCallId)
-            }
-            intent.putExtra(EXTRA_STOP_SERVICE, true)
+    fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam): Intent? {
+        val serviceClass = stopServiceParam.callServiceConfiguration.serviceClass
+        val intent = if (isServiceRunning(serviceClass)) {
+            Intent(context, serviceClass)
+        } else {
+            return null
         }
+        logger.d {
+            "Noob [buildStopIntent], class:${intent.component?.shortClassName}, call: ${stopServiceParam.call}"
+        }
+        stopServiceParam.call?.let { call ->
+            logger.d { "[buildStopIntent] call_id:${call.cid}" }
+            val streamCallId = StreamCallId(call.type, call.id, call.cid)
+            intent.putExtra(INTENT_EXTRA_CALL_CID, streamCallId)
+        }
+        return intent.putExtra(EXTRA_STOP_SERVICE, true)
+    }
 
-    private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean =
+    private fun isServiceRunning(serviceClass: Class<*>): Boolean =
         safeCallWithDefault(true) {
-            val activityManager = context.getSystemService(
-                Context.ACTIVITY_SERVICE,
-            ) as ActivityManager
-            val runningServices = activityManager.getRunningServices(Int.MAX_VALUE)
-            for (service in runningServices) {
-                if (serviceClass.name == service.service.className) {
-                    logger.w { "Service is running: $serviceClass" }
-                    return true
+            if (CallService.isServiceRunning()) {
+                val runningServiceName = CallService.runningServiceClassName.filter {
+                    it.contains(serviceClass.simpleName)
                 }
+                logger.d { "[isServiceRunning], Service is running: $runningServiceName" }
+                return@safeCallWithDefault runningServiceName.isNotEmpty()
+            } else {
+                logger.w { "[isServiceRunning], Service is not running: $serviceClass" }
+                return@safeCallWithDefault true
             }
-            logger.w { "Service is NOT running: $serviceClass" }
-            return false
         }
 }

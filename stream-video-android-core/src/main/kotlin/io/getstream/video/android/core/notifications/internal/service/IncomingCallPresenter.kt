@@ -18,7 +18,6 @@ package io.getstream.video.android.core.notifications.internal.service
 
 import android.Manifest
 import android.app.Notification
-import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
