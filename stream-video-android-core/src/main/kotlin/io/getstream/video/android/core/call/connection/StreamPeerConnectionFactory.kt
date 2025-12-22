@@ -26,6 +26,7 @@ import io.getstream.video.android.core.call.connection.coding.SelectiveVideoDeco
 import io.getstream.video.android.core.call.utils.addAndConvertBuffers
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
+import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toPeerType
@@ -465,15 +466,17 @@ public class StreamPeerConnectionFactory(
         onIceCandidateRequest: (IceCandidate, StreamPeerType) -> Unit,
         rejoin: () -> Unit,
         fastReconnect: () -> Unit,
+        sfuConnectionModule: SfuConnectionModule,
     ): Subscriber {
         val peerConnection = Subscriber(
             sessionId = sessionId,
             sfuClient = sfuClient,
             coroutineScope = coroutineScope,
-            tracer = tracer,
             enableStereo = enableStereo,
+            tracer = tracer,
             rejoin = rejoin,
             fastReconnect = fastReconnect,
+            sfuConnectionModule = sfuConnectionModule,
             onIceCandidateRequest = onIceCandidateRequest,
         )
         val connection = makePeerConnectionInternal(

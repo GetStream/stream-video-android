@@ -105,12 +105,24 @@ public data class TrackPublishedEvent(
     val userId: String,
     val sessionId: String,
     val trackType: TrackType,
+    /**
+     * Optional participant information included for large calls optimization.
+     * When present, it should be used to create/update the participant.
+     * Not always available - don't assume it will be there.
+     */
+    val participant: Participant? = null,
 ) : SfuDataEvent()
 
 public data class TrackUnpublishedEvent(
     val userId: String,
     val sessionId: String,
     val trackType: TrackType,
+    /**
+     * Optional participant information included for large calls optimization.
+     * When present, it should be used to update the participant.
+     * Not always available - don't assume it will be there.
+     */
+    val participant: Participant? = null,
 ) : SfuDataEvent()
 
 public data class ParticipantJoinedEvent(

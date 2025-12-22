@@ -240,7 +240,7 @@ internal class StreamVideoClient internal constructor(
                 }
             }
         }
-        activeCall?.leave()
+        activeCall?.leave("client-cleanup")
     }
 
     /**
