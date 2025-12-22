@@ -707,21 +707,19 @@ class MicrophoneManager(
      */
     fun select(device: StreamAudioDevice?) {
         logger.i { "selecting device $device" }
-        enforceSetup {
-            ifAudioHandlerInitialized { it.selectDevice(device) }
-            _selectedDevice.value = device
+        ifAudioHandlerInitialized { it.selectDevice(device) }
+        _selectedDevice.value = device
 
-            if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
-                mediaManager.speaker._status.value = DeviceStatus.Disabled
-            }
+        if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
+            mediaManager.speaker._status.value = DeviceStatus.Disabled
+        }
 
-            if (device is StreamAudioDevice.Speakerphone) {
-                mediaManager.speaker._status.value = DeviceStatus.Enabled
-            }
+        if (device is StreamAudioDevice.Speakerphone) {
+            mediaManager.speaker._status.value = DeviceStatus.Enabled
+        }
 
-            if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
-                nonHeadsetFallbackDevice = device
-            }
+        if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
+            nonHeadsetFallbackDevice = device
         }
     }
 
@@ -730,21 +728,19 @@ class MicrophoneManager(
      */
     fun select(device: CustomAudioDevice?) {
         logger.i { "selecting device $device" }
-        enforceSetup {
-            ifAudioHandlerInitialized { it.selectCustomAudioDevice(device) }
-            _selectedNativeDevice.value = device
+        ifAudioHandlerInitialized { it.selectCustomAudioDevice(device) }
+        _selectedNativeDevice.value = device
 
-            if (device !is CustomAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
-                mediaManager.speaker._status.value = DeviceStatus.Disabled
-            }
+        if (device !is CustomAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
+            mediaManager.speaker._status.value = DeviceStatus.Disabled
+        }
 
-            if (device is CustomAudioDevice.Speakerphone) {
-                mediaManager.speaker._status.value = DeviceStatus.Enabled
-            }
+        if (device is CustomAudioDevice.Speakerphone) {
+            mediaManager.speaker._status.value = DeviceStatus.Enabled
+        }
 
-            if (device !is CustomAudioDevice.BluetoothHeadset && device !is CustomAudioDevice.WiredHeadset) {
-                nonHeadsetFallbackCustomeAudioDevice = device
-            }
+        if (device !is CustomAudioDevice.BluetoothHeadset && device !is CustomAudioDevice.WiredHeadset) {
+            nonHeadsetFallbackCustomeAudioDevice = device
         }
     }
 
