@@ -83,7 +83,16 @@ internal class CallEventObserver(
                 )
             }
             is CallEndedEvent -> onServiceStop()
-            is LocalCallMissedEvent -> onRemoveIncoming()
+            is LocalCallMissedEvent -> {
+                val activeCallExists = streamVideo.state.activeCall.value != null
+                if (activeCallExists) {
+                    // Another call is active - just remove incoming notification
+                    onRemoveIncoming()
+                } else {
+                    // No other call - stop service
+                    onServiceStop()
+                }
+            }
         }
     }
 
