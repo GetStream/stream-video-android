@@ -1495,7 +1495,7 @@ public class Call(
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
-        logger.d { "[accept] #ringing; no args, call_id:$id" }
+        logger.d { "Noob, [accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
         clientImpl.state.removeRingingCall(this)

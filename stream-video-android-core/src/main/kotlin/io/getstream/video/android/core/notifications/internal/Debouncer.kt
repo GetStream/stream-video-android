@@ -18,7 +18,7 @@ package io.getstream.video.android.core.notifications.internal
 
 import android.os.Handler
 import android.os.Looper
-import androidx.core.util.remove
+import io.getstream.log.taggedLogger
 import java.util.concurrent.ConcurrentHashMap
 
 internal class Debouncer {
@@ -36,7 +36,9 @@ internal class Debouncer {
     }
 }
 
-internal class Throttler {
+internal object Throttler {
+
+    private val logger by taggedLogger("Throttler")
 
     // A thread-safe map to store the last execution time for each key.
     // The value is the timestamp (in milliseconds) when the key's cooldown started.
@@ -51,12 +53,14 @@ internal class Throttler {
      */
     fun throttleFirst(key: String, cooldownMs: Long, action: () -> Unit) {
         val currentTime = System.currentTimeMillis()
-        val lastExecutionTime = lastExecutionTimestamps[key]
+        val lastExecutionTime = lastExecutionTimestamps[key] ?: 0L
+        val timeDiff = currentTime - lastExecutionTime
 
         // Check if the key is not on cooldown.
         // This is true if the key has never been used (lastExecutionTime is null)
         // or if the cooldown period has passed.
-        if (lastExecutionTime == null || (currentTime - lastExecutionTime) >= cooldownMs) {
+        logger.d { "[throttleFirst], timeDiff: $timeDiff, current: $currentTime, lastExecutionTime: $lastExecutionTime, key:$key, hashcode: ${hashCode()}" }
+        if (lastExecutionTime == 0L || (timeDiff) >= cooldownMs) {
             // Update the last execution time for this key to the current time.
             lastExecutionTimestamps[key] = currentTime
             // Execute the action.

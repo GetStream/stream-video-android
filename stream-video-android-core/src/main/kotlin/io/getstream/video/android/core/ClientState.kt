@@ -228,6 +228,7 @@ class ClientState(private val client: StreamVideo) {
      * This depends on the flag in [StreamVideoBuilder] called `runForegroundServiceForCalls`
      */
     internal fun maybeStartForegroundService(call: Call, trigger: String) {
+        logger.d { "Noob, [maybeStartForegroundService], trigger: $trigger" }
         when (trigger) {
             CallService.TRIGGER_ONGOING_CALL -> serviceLauncher.showOnGoingCall(
                 call,
@@ -253,7 +254,7 @@ class ClientState(private val client: StreamVideo) {
         if (callConfig.runCallServiceInForeground) {
             val context = streamVideoClient.context
 
-            logger.d { "Building stop intent for call_id: ${call.cid}" }
+            logger.d { "Noob, Building stop intent for call_id: ${call.cid}" }
             val serviceLauncher = ServiceLauncher(context)
             serviceLauncher.stopService(call)
         }

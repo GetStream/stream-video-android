@@ -44,6 +44,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
+import io.getstream.video.android.core.notifications.internal.Throttler
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper
@@ -229,29 +230,38 @@ internal class ServiceLauncher(val context: Context) {
     }
 
     fun stopService(call: Call) {
-        stopCallServiceInternal(call)
+        logger.d { "[stopService]" }
+        // noob enable later
+        Throttler.throttleFirst(1000) {
+            logger.d { "[stopService], inside throttler.throttleFirst, time in ms: ${System.currentTimeMillis()}" }
+            stopCallServiceInternal(call)
+        }
     }
 
     private fun stopCallServiceInternal(call: Call) {
+        logger.d { "[stopCallServiceInternal]"}
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
         streamVideo?.let { streamVideoClient ->
             val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
             if (callConfig.runCallServiceInForeground) {
                 val context = streamVideoClient.context
-
                 val serviceIntent = serviceIntentBuilder.buildStopIntent(
                     context,
                     StopServiceParam(call, callConfig),
                 )
-                logger.d { "Building stop intent for call_id: ${call.cid}" }
-                serviceIntent.extras?.let {
-                    logBundle(it)
+                serviceIntent?.let {
+                    logger.d {
+                        "Building stop intent, class: ${serviceIntent.component?.className} for call_id: ${call.cid}"
+                    }
+                    serviceIntent.extras?.let {
+                        logBundle(it)
+                    }
+                    context.startService(serviceIntent)
+//                    context.stopService(serviceIntent)
                 }
-                context.startService(serviceIntent)
             }
         }
     }
-
     private fun logBundle(bundle: Bundle) {
         val keys = bundle.keySet()
         if (keys != null) {

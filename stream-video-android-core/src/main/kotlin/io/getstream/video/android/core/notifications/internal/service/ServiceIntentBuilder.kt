@@ -32,11 +32,11 @@ import io.getstream.video.android.model.StreamCallId
 
 internal class ServiceIntentBuilder {
 
-    private val logger by taggedLogger("TelecomIntentBuilder")
+    private val logger by taggedLogger("ServiceIntentBuilder")
 
     fun buildStartIntent(context: Context, startService: StartServiceParam): Intent {
         val serviceClass = startService.callServiceConfiguration.serviceClass
-        logger.i { "Resolved service class: $serviceClass" }
+        logger.i { "[buildStartIntent], Resolved service class: $serviceClass" }
         val serviceIntent = Intent(context, serviceClass)
         serviceIntent.putExtra(INTENT_EXTRA_CALL_CID, startService.callId)
 
@@ -68,6 +68,7 @@ internal class ServiceIntentBuilder {
     }
 
     fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam): Intent? {
+        logger.d { "[buildStopIntent]" }
         val serviceClass = stopServiceParam.callServiceConfiguration.serviceClass
         val intent = if (isServiceRunning(serviceClass)) {
             Intent(context, serviceClass)
@@ -75,10 +76,9 @@ internal class ServiceIntentBuilder {
             return null
         }
         logger.d {
-            "Noob [buildStopIntent], class:${intent.component?.shortClassName}, call: ${stopServiceParam.call}"
+            "[buildStopIntent], class:${intent.component?.shortClassName}, call_id: ${stopServiceParam.call?.cid}"
         }
         stopServiceParam.call?.let { call ->
-            logger.d { "[buildStopIntent] call_id:${call.cid}" }
             val streamCallId = StreamCallId(call.type, call.id, call.cid)
             intent.putExtra(INTENT_EXTRA_CALL_CID, streamCallId)
         }
