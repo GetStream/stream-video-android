@@ -59,7 +59,9 @@ internal object Throttler {
         // Check if the key is not on cooldown.
         // This is true if the key has never been used (lastExecutionTime is null)
         // or if the cooldown period has passed.
-        logger.d { "[throttleFirst], timeDiff: $timeDiff, current: $currentTime, lastExecutionTime: $lastExecutionTime, key:$key, hashcode: ${hashCode()}" }
+        logger.d {
+            "[throttleFirst], timeDiff: $timeDiff, current: $currentTime, lastExecutionTime: $lastExecutionTime, key:$key, hashcode: ${hashCode()}"
+        }
         if (lastExecutionTime == 0L || (timeDiff) >= cooldownMs) {
             // Update the last execution time for this key to the current time.
             lastExecutionTimestamps[key] = currentTime

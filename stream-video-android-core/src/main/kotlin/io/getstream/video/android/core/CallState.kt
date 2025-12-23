@@ -64,7 +64,9 @@ import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.LocalCallAcceptedEvent
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
+import io.getstream.android.video.generated.models.LocalCallRejectedEvent
 import io.getstream.android.video.generated.models.MemberResponse
 import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
@@ -700,6 +702,7 @@ public class CallState(
      */
     internal val atomicNotification: AtomicReference<Notification?> =
         AtomicReference<Notification?>(null)
+    internal var notificationId: Int? = null
 
     @InternalStreamVideoApi
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
@@ -748,6 +751,15 @@ public class CallState(
                     // Then leave the call on this device
                     if (!acceptedOnThisDevice) call.leave()
                 }
+                call.fireEvent(
+                    LocalCallAcceptedEvent(
+                        event.callCid,
+                        event.createdAt,
+                        event.call,
+                        event.user,
+                        event.type,
+                    ),
+                )
             }
 
             is CallMissedEvent -> {
@@ -768,6 +780,16 @@ public class CallState(
                             else -> RejectReason.Custom(alias = it)
                         }
                     },
+                )
+                call.fireEvent(
+                    LocalCallRejectedEvent(
+                        event.callCid,
+                        event.createdAt,
+                        event.call,
+                        event.user,
+                        event.type,
+                        event.reason,
+                    ),
                 )
             }
 
@@ -1651,8 +1673,9 @@ public class CallState(
         _rejectActionBundle.value = bundle
     }
 
-    fun updateNotification(notification: Notification) {
-        atomicNotification.set(notification)
+    fun updateNotification(notificationId: Int, notification: Notification) {
+        this.notificationId = notificationId
+        this.atomicNotification.set(notification)
     }
 }
 

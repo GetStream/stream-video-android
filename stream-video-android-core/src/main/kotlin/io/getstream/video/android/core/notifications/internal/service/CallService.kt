@@ -277,7 +277,7 @@ internal open class CallService : Service() {
     ): Boolean {
         if (notification == null) {
             return if (trigger == TRIGGER_REMOVE_INCOMING_CALL) {
-                removeIncomingCall(notificationId)
+                removeIncomingCall(notificationId, call)
                 true
             } else {
                 logger.e { "Could not get notification for trigger: $trigger, callId: ${callId.id}" }
@@ -292,9 +292,10 @@ internal open class CallService : Service() {
             }
 
             else -> {
-                call.state.updateNotification(notification)
+                val notificationId = callId.hashCode()
+                call.state.updateNotification(notificationId, notification)
                 startForegroundWithServiceType(
-                    callId.hashCode(),
+                    notificationId,
                     notification,
                     trigger,
                     permissionManager.getServiceType(baseContext, trigger),
@@ -406,7 +407,7 @@ internal open class CallService : Service() {
 
         if (!hasActiveCall) {
             StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
-                ?.state?.updateNotification(notification)
+                ?.state?.updateNotification(notificationId, notification)
 
             startForegroundWithServiceType(
                 notificationId,
@@ -422,12 +423,12 @@ internal open class CallService : Service() {
         }
     }
 
-    private fun removeIncomingCall(notificationId: Int) {
+    private fun removeIncomingCall(notificationId: Int, call: Call) {
         logger.d {
-            "[removeIncomingCall] notificationId: $notificationId, serviceState.currentCallId: ${serviceState.currentCallId}"
+            "[removeIncomingCall] notificationId: $notificationId, serviceState.currentCallId?.cid == call.cid: ${serviceState.currentCallId?.cid == call.cid}"
         }
 //        NotificationManagerCompat.from(this).cancel(notificationId)
-        if (serviceState.currentCallId == null) {
+        if (serviceState.currentCallId?.cid == call.cid) {
             stopServiceGracefully()
         }
     }
@@ -444,6 +445,7 @@ internal open class CallService : Service() {
                 onRemoveIncoming = {
                     removeIncomingCall(
                         callId.getNotificationId(NotificationType.Incoming),
+                        call,
                     )
                 },
             )

@@ -462,6 +462,9 @@ public class Call(
         }
 
         response.onSuccess {
+            if (ring) {
+                client.state._ringingCall.value = this
+            }
             state.updateFromResponse(it)
             if (ring) {
                 client.state.addRingingCall(this, RingingState.Outgoing())
@@ -907,7 +910,6 @@ public class Call(
     }
 
     private fun leave(disconnectionReason: Throwable?) = atomicLeave {
-        val callId = id
         session?.leaveWithReason(disconnectionReason?.message ?: "user")
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
@@ -1498,8 +1500,7 @@ public class Call(
         logger.d { "Noob, [accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall(this)
-        clientImpl.state.maybeStopForegroundService(call = this)
+        clientImpl.state.transitionToAcceptCall(this)
         return clientImpl.accept(type, id)
     }
 

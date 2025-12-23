@@ -202,8 +202,9 @@ internal class ServiceLauncher(val context: Context) {
         callId: StreamCallId,
     ) {
         notification?.let {
+            val notificationId = callId.getNotificationId(NotificationType.Incoming)
             streamVideo.call(callId.type, callId.id)
-                .state.updateNotification(notification)
+                .state.updateNotification(notificationId, notification)
         }
     }
 
@@ -233,13 +234,15 @@ internal class ServiceLauncher(val context: Context) {
         logger.d { "[stopService]" }
         // noob enable later
         Throttler.throttleFirst(1000) {
-            logger.d { "[stopService], inside throttler.throttleFirst, time in ms: ${System.currentTimeMillis()}" }
+            logger.d {
+                "[stopService], inside throttler.throttleFirst, time in ms: ${System.currentTimeMillis()}"
+            }
             stopCallServiceInternal(call)
         }
     }
 
     private fun stopCallServiceInternal(call: Call) {
-        logger.d { "[stopCallServiceInternal]"}
+        logger.d { "[stopCallServiceInternal]" }
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
         streamVideo?.let { streamVideoClient ->
             val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)

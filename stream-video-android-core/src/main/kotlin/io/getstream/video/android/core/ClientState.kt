@@ -163,13 +163,22 @@ class ClientState(private val client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         this._activeCall.value = call
-        removeRingingCall(call)
-        call.scope.launch {
-            /**
-             * Temporary fix: `maybeStartForegroundService` is called just before this code, which can stop the service
-             */
-            delay(500L)
-            maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+        val ringingState = call.state.ringingState.value
+        when (ringingState) {
+            is RingingState.Incoming -> {
+                transitionToAcceptCall(call)
+                maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+            }
+            else -> {
+                removeRingingCall(call)
+                call.scope.launch {
+                    /**
+                     * Temporary fix: `maybeStartForegroundService` is called just before this code, which can stop the service
+                     */
+                    delay(500L)
+                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                }
+            }
         }
     }
 
@@ -219,6 +228,13 @@ class ClientState(private val client: StreamVideo) {
             ringingCall.value?.let {
                 maybeStopForegroundService(it)
             }
+            _ringingCall.value = null
+        }
+    }
+
+    fun transitionToAcceptCall(call: Call) {
+        if (call.id == ringingCall.value?.id) {
+            (client as StreamVideoClient).callSoundAndVibrationPlayer.stopCallSound()
             _ringingCall.value = null
         }
     }

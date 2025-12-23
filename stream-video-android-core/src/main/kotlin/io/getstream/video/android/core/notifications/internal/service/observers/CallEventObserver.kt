@@ -16,10 +16,10 @@
 
 package io.getstream.video.android.core.notifications.internal.service.observers
 
-import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallEndedEvent
-import io.getstream.android.video.generated.models.CallRejectedEvent
+import io.getstream.android.video.generated.models.LocalCallAcceptedEvent
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
+import io.getstream.android.video.generated.models.LocalCallRejectedEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
@@ -50,7 +50,6 @@ internal class CallEventObserver(
     private fun observeCallEvents(onServiceStop: () -> Unit, onRemoveIncoming: () -> Unit) {
         call.scope.launch {
             call.events.collect { event ->
-                logger.i { "Received event in service: $event" }
                 handleCallEvent(event, onServiceStop, onRemoveIncoming)
             }
         }
@@ -65,14 +64,14 @@ internal class CallEventObserver(
         onRemoveIncoming: () -> Unit,
     ) {
         when (event) {
-            is CallAcceptedEvent -> {
+            is LocalCallAcceptedEvent -> {
                 handleIncomingCallAcceptedByMeOnAnotherDevice(
                     event.user.id,
                     streamVideo.userId,
                     onServiceStop,
                 )
             }
-            is CallRejectedEvent -> {
+            is LocalCallRejectedEvent -> {
                 handleIncomingCallRejectedByMeOrCaller(
                     rejectedByUserId = event.user.id,
                     myUserId = streamVideo.userId,
@@ -109,7 +108,7 @@ internal class CallEventObserver(
 
         // If I accepted the call on another device while this device is still ringing
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
-            onServiceStop()
+            onServiceStop() // noob 1
         }
     }
 
