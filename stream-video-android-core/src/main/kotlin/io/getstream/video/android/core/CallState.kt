@@ -749,7 +749,7 @@ public class CallState(
                 } else if (callRingState is RingingState.Incoming && event.user.id == client.userId) {
                     // Call accepted by me + this device is Incoming => I accepted on another device
                     // Then leave the call on this device
-                    if (!acceptedOnThisDevice) call.leave()
+                    if (!acceptedOnThisDevice) call.leave("accepted-on-another-device")
                 }
                 call.fireEvent(
                     LocalCallAcceptedEvent(
@@ -801,7 +801,7 @@ public class CallState(
                     }
                     _rejectedBy.value = newRejectedBySet.toSet()
                     _ringingState.value = RingingState.RejectedByAll
-                    call.leave()
+                    call.leave("LocalCallMissedEvent")
                 }
             }
 
@@ -810,12 +810,12 @@ public class CallState(
                 updateFromResponse(event.call)
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
-                call.leave()
+                call.leave("CallEndedEvent")
             }
 
             is CallEndedSfuEvent -> {
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
-                call.leave()
+                call.leave("CallEndedSfuEvent")
             }
 
             is CallMemberUpdatedEvent -> {
@@ -1217,7 +1217,7 @@ public class CallState(
         } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
             (rejectedBy.contains(createdBy?.id) && hasRingingCall)
         ) {
-            call.leave()
+            call.leave("updateRingingState-rejected")
             cancelTimeout()
 
             if (rejectReason?.alias == REJECT_REASON_TIMEOUT) {
@@ -1329,7 +1329,7 @@ public class CallState(
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
                     ringingStateUpdatesStopped = false
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
-                    call.leave()
+                    call.leave("start-ringing-timeout")
                 }
             } else {
                 logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }

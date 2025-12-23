@@ -80,6 +80,7 @@ interface SocketActions<EventIn, EventOut, Error, State, Token, ConnectData> {
      */
     fun whenConnected(
         connectionTimeout: Long = DEFAULT_SOCKET_TIMEOUT,
+        connectionFailed: suspend (throwable: Throwable) -> Unit = {},
         connected: suspend (connectionId: String) -> Unit,
     )
 }

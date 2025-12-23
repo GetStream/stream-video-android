@@ -188,8 +188,8 @@ internal class Publisher(
             trackInfos.joinToString(separator = ";") { it.toString() },
         )
         if (trackInfos.isEmpty()) {
-            logger.e { ("rejoin cause, Can't negotiate without announcing any tracks") }
-            rejoin.invoke()
+            logger.d { "No local tracks to publish, skipping publisher negotiate" }
+            return@submit
         }
         logger.i { "Negotiating with tracks: $trackInfos" }
         logger.i { "Offer: ${offer.description}" }

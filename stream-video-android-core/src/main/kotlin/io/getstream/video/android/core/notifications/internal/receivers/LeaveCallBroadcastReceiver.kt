@@ -37,7 +37,7 @@ internal class LeaveCallBroadcastReceiver : GenericCallActionBroadcastReceiver()
     override suspend fun onReceive(call: Call, context: Context, intent: Intent) {
         logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
 
-        call.leave()
+        call.leave("LeaveCallBroadcastReceiver")
         val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
         NotificationManagerCompat.from(context).cancel(notificationId)
     }

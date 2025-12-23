@@ -91,6 +91,7 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -362,12 +363,12 @@ public class Call(
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                fastReconnect()
+                fastReconnect("NetworkStateListener#onConnected")
             } else {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                rejoin()
+                rejoin("NetworkStateListener#onConnected")
             }
         }
 
@@ -579,7 +580,7 @@ public class Call(
             }.onError {
                 logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
                 state.toggleRingingStateUpdates(false)
-                leave()
+                leave("ring-failed (${it.message})")
             }
         }
     }
@@ -681,6 +682,19 @@ public class Call(
             }
         }
         monitorPublisherPCStateJob?.cancel()
+        monitorPublisherPCStateJob = scope.launch {
+            session?.publisher?.iceState?.collect {
+                when (it) {
+                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
+                        session?.publisher?.connection?.restartIce()
+                    }
+
+                    else -> {
+                        logger.d { "[monitorPubConnectionState] Ice connection state is $it" }
+                    }
+                }
+            }
+        }
 
         monitorSubscriberPCStateJob?.cancel()
         monitorSubscriberPCStateJob = scope.launch {
@@ -691,7 +705,7 @@ public class Call(
                     }
 
                     else -> {
-                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
+                        logger.d { "[monitorSubConnectionState] Ice connection state is $it" }
                     }
                 }
             }
@@ -741,7 +755,7 @@ public class Call(
     /**
      * Fast reconnect to the same SFU with the same participant session.
      */
-    suspend fun fastReconnect() = schedule("fast") {
+    suspend fun fastReconnect(reason: String = "unknown") = schedule("fast") {
         logger.d { "[fastReconnect] Reconnecting, reconnectAttepmts:$reconnectAttepmts" }
         session?.prepareReconnect()
         this@Call.state._connection.value = RealtimeConnection.Reconnecting
@@ -756,8 +770,11 @@ public class Call(
                 announced_tracks = publishingInfo,
                 subscriptions = subscriptionsInfo,
                 reconnect_attempt = reconnectAttepmts,
+                reason = reason,
             )
             session.fastReconnect(reconnectDetails)
+            val oldSessionStats = collectStats()
+            session.sendCallStats(oldSessionStats)
         } else {
             logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
             this@Call.state._connection.value = RealtimeConnection.Disconnected
@@ -767,7 +784,7 @@ public class Call(
     /**
      * Rejoin a call. Creates a new session and joins as a new participant.
      */
-    suspend fun rejoin() = schedule("rejoin") {
+    suspend fun rejoin(reason: String = "unknown") = schedule("rejoin") {
         logger.d { "[rejoin] Rejoining" }
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
@@ -778,21 +795,23 @@ public class Call(
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
-                val session = this.session!!
+                val oldSession = this.session!!
+                val oldSessionStats = collectStats()
                 val currentOptions = this.session?.publisher?.currentOptions()
-                logger.i { "Rejoin SFU ${session?.sfuUrl} to ${cred.server.url}" }
+                logger.i { "Rejoin SFU ${oldSession?.sfuUrl} to ${cred.server.url}" }
 
                 this.sessionId = UUID.randomUUID().toString()
-                val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
+                val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
                 val reconnectDetails = ReconnectDetails(
                     previous_session_id = prevSessionId,
                     strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
                     announced_tracks = publishingInfo,
                     subscriptions = subscriptionsInfo,
                     reconnect_attempt = reconnectAttepmts,
+                    reason = reason,
                 )
                 this.state.removeParticipant(prevSessionId)
-                session.prepareRejoin()
+                oldSession.prepareRejoin()
                 try {
                     this.session = RtcSession(
                         clientImpl,
@@ -810,7 +829,10 @@ public class Call(
                         },
                     )
                     this.session?.connect(reconnectDetails, currentOptions)
-                    session.cleanup()
+                    this.session?.sfuTracer?.trace("rejoin", reason)
+                    oldSession.sendCallStats(oldSessionStats)
+                    oldSession.leaveWithReason("Rejoin :: $reason")
+                    oldSession.cleanup()
                     monitorSession(joinResponse.value)
                 } catch (ex: Exception) {
                     logger.e(ex) {
@@ -904,13 +926,17 @@ public class Call(
     }
 
     /** Leave the call, but don't end it for other users */
-    fun leave() {
+    fun leave(reason: String = "user") {
         logger.d { "[leave] #ringing; no args, call_cid:$cid" }
-        leave(disconnectionReason = null)
+        internalLeave(null, reason)
     }
 
-    private fun leave(disconnectionReason: Throwable?) = atomicLeave {
-        session?.leaveWithReason(disconnectionReason?.message ?: "user")
+    private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
+        monitorSubscriberPCStateJob?.cancel()
+        monitorPublisherPCStateJob?.cancel()
+        monitorPublisherPCStateJob = null
+        monitorSubscriberPCStateJob = null
+        session?.leaveWithReason("[reason=$reason, error=${disconnectionReason?.message}]")
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
@@ -944,7 +970,18 @@ public class Call(
             .leaveCall(this)
 
         (client as StreamVideoClient).onCallCleanUp(this)
-        cleanup()
+
+        clientImpl.scope.launch {
+            safeCall {
+                session?.sfuTracer?.trace(
+                    "leave-call",
+                    "[reason=$reason, error=${disconnectionReason?.message}]",
+                )
+                val stats = collectStats()
+                session?.sendCallStats(stats)
+            }
+            cleanup()
+        }
     }
 
     /** ends the call for yourself as well as other users */
@@ -952,7 +989,7 @@ public class Call(
         // end the call for everyone
         val result = clientImpl.endCall(type, id)
         // cleanup
-        leave()
+        leave("call-ended")
         return result
     }
 
@@ -1497,7 +1534,7 @@ public class Call(
     }
 
     suspend fun accept(): Result<AcceptCallResponse> {
-        logger.d { "Noob, [accept] #ringing; no args, call_id:$id" }
+        logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
         clientImpl.state.transitionToAcceptCall(this)
@@ -1704,9 +1741,9 @@ public class Call(
             }
         }
 
-        fun fastReconnect() {
+        fun fastReconnect(reason: String = "Debug") {
             call.scope.launch {
-                call.fastReconnect()
+                call.fastReconnect(reason)
             }
         }
     }

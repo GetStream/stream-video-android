@@ -81,6 +81,7 @@ public object RTCEventMapper {
                     user_id,
                     session_id,
                     type,
+                    participant, // Include optional participant for large call optimization
                 )
             }
 
@@ -89,6 +90,7 @@ public object RTCEventMapper {
                     user_id,
                     session_id,
                     type,
+                    participant, // Include optional participant for large call optimization
                 )
             }
 
