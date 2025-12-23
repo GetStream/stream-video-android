@@ -52,6 +52,10 @@ public sealed class StreamAudioDevice {
      * The Twilio AudioDevice instance.
      * Used when using Twilio's AudioSwitch implementation.
      */
+    @Deprecated(
+        message = "Use audioDeviceInfo instead for native Android audio device management",
+        replaceWith = ReplaceWith("audioDeviceInfo"),
+    )
     public abstract val audio: AudioDevice
 
     /**
