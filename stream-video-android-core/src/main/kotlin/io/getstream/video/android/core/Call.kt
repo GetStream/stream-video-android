@@ -1371,10 +1371,10 @@ public class Call(
             } else {
                 logger.d { "[monitorHeadset] no headset found" }
 
-            microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
-                logger.d { "[monitorHeadset] before device selected" }
-                microphone.select(deviceBeforeHeadset)
-            }
+                microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
+                    logger.d { "[monitorHeadset] before device selected" }
+                    microphone.select(deviceBeforeHeadset)
+                }
             }
         }.launchIn(scope)
     }
