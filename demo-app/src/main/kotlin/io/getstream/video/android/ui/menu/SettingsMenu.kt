@@ -254,7 +254,7 @@ internal fun SettingsMenu(
             it,
             it.name,
             icon,
-            isSelected,
+            it.audioDeviceInfo?.id == selectedMicroPhoneDevice?.audioDeviceInfo?.id,
         )
     }
 
