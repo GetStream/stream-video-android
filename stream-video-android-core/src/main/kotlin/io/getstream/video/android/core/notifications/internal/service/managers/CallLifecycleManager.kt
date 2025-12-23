@@ -82,7 +82,7 @@ internal class CallLifecycleManager {
                     }
 
                     else -> {
-                        call.leave()
+                        call.leave("call-service-end-call-unknown")
                         logger.i { "[onTaskRemoved] Ended ongoing call for me" }
                     }
                 }
@@ -100,7 +100,7 @@ internal class CallLifecycleManager {
                 logger.i { "[handleIncomingCallTaskRemoved] Ended incoming call for both users" }
             }
         } else {
-            call.leave()
+            call.leave("call-service-end-call-incoming")
             logger.i { "[handleIncomingCallTaskRemoved] Ended incoming call for me" }
         }
     }
