@@ -8032,7 +8032,7 @@ public final class io/getstream/video/android/core/MediaManagerImpl {
 	public final fun getScope ()Lkotlinx/coroutines/CoroutineScope;
 	public final fun getScreenShareTrack ()Lorg/webrtc/VideoTrack;
 	public final fun getScreenShareVideoSource ()Lorg/webrtc/VideoSource;
-	public final fun getUseCustomAudioSwitch ()Z
+	public final fun getuseInBuiltAudioSwitch ()Z
 	public final fun getVideoSource ()Lorg/webrtc/VideoSource;
 	public final fun getVideoTrack ()Lorg/webrtc/VideoTrack;
 	public final fun setAudioTrack (Lorg/webrtc/AudioTrack;)V

@@ -44,7 +44,7 @@ internal class LegacyAudioDeviceManager(
 
     private val logger by taggedLogger(TAG)
 
-    private var selectedDevice: CustomAudioDevice? = null
+    private var selectedDevice: StreamAudioDevice? = null
     private val mainHandler = Handler(Looper.getMainLooper())
 
     // Legacy listener support
@@ -69,8 +69,8 @@ internal class LegacyAudioDeviceManager(
     private val bluetoothScoTimeoutHandler = Handler(Looper.getMainLooper())
     private var bluetoothScoTimeoutRunnable: Runnable? = null
 
-    override fun enumerateDevices(): List<CustomAudioDevice> {
-        val devices = mutableListOf<CustomAudioDevice>()
+    override fun enumerateDevices(): List<StreamAudioDevice> {
+        val devices = mutableListOf<StreamAudioDevice>()
 
         // Detect Bluetooth devices - use profile proxy if available, otherwise fall back to AudioDeviceInfo
         if (bluetoothProfileProxyAvailable && bluetoothHeadset != null) {
@@ -98,13 +98,13 @@ internal class LegacyAudioDeviceManager(
         logger.d { "[enumerateDevices] Found ${androidDevices.size} available communication devices" }
 
         // Track Bluetooth devices by address to deduplicate SCO and A2DP for the same device
-        val bluetoothDevicesByAddress = mutableMapOf<String, CustomAudioDevice.BluetoothHeadset>()
+        val bluetoothDevicesByAddress = mutableMapOf<String, StreamAudioDevice.BluetoothHeadset>()
 
         for (androidDevice in androidDevices) {
-            val customAudioDevice = CustomAudioDevice.fromAudioDeviceInfo(androidDevice)
-            if (customAudioDevice != null) {
-                when (customAudioDevice) {
-                    is CustomAudioDevice.BluetoothHeadset -> {
+            val streamAudioDevice = StreamAudioDevice.fromAudioDeviceInfo(androidDevice)
+            if (streamAudioDevice != null) {
+                when (streamAudioDevice) {
+                    is StreamAudioDevice.BluetoothHeadset -> {
                         // If profile proxy is available, skip AudioDeviceInfo Bluetooth devices (we already got them from profile)
                         if (bluetoothProfileProxyAvailable && bluetoothHeadset != null) {
                             continue
@@ -114,18 +114,18 @@ internal class LegacyAudioDeviceManager(
                         val existing = bluetoothDevicesByAddress[address]
                         if (existing == null) {
                             logger.d {
-                                "[enumerateDevices] Detected Bluetooth device via AudioDeviceInfo: ${customAudioDevice.name}, type=${androidDevice.type}, address=$address"
+                                "[enumerateDevices] Detected Bluetooth device via AudioDeviceInfo: ${streamAudioDevice.name}, type=${androidDevice.type}, address=$address"
                             }
-                            bluetoothDevicesByAddress[address] = customAudioDevice
+                            bluetoothDevicesByAddress[address] = streamAudioDevice
                         } else {
                             // Prefer SCO over A2DP
                             val isSco = androidDevice.type == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_SCO
                             val existingIsSco = existing.audioDeviceInfo?.type == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_SCO
                             if (isSco && !existingIsSco) {
                                 logger.d {
-                                    "[enumerateDevices] Replacing A2DP with SCO for Bluetooth device: ${customAudioDevice.name}, address=$address"
+                                    "[enumerateDevices] Replacing A2DP with SCO for Bluetooth device: ${streamAudioDevice.name}, address=$address"
                                 }
-                                bluetoothDevicesByAddress[address] = customAudioDevice
+                                bluetoothDevicesByAddress[address] = streamAudioDevice
                             } else {
                                 logger.d {
                                     "[enumerateDevices] Skipping duplicate Bluetooth device (keeping ${if (existingIsSco) "SCO" else "A2DP"}): type=${androidDevice.type}, address=$address"
@@ -135,14 +135,14 @@ internal class LegacyAudioDeviceManager(
                     }
                     else -> {
                         logger.d {
-                            "[enumerateDevices] Detected device: ${customAudioDevice::class.simpleName} (${customAudioDevice.name})"
+                            "[enumerateDevices] Detected device: ${streamAudioDevice::class.simpleName} (${streamAudioDevice.name})"
                         }
-                        devices.add(customAudioDevice)
+                        devices.add(streamAudioDevice)
                     }
                 }
             } else {
                 logger.w {
-                    "[enumerateDevices] Could not convert AudioDeviceInfo to CustomAudioDevice: type=${androidDevice.type}, name=${androidDevice.productName}"
+                    "[enumerateDevices] Could not convert AudioDeviceInfo to StreamAudioDevice: type=${androidDevice.type}, name=${androidDevice.productName}"
                 }
             }
         }
@@ -154,7 +154,7 @@ internal class LegacyAudioDeviceManager(
 
         // Check for wired headset using ACTION_HEADSET_PLUG state
         // (getDevices() might not always detect it reliably)
-        if (devices.none { it is CustomAudioDevice.WiredHeadset }) {
+        if (devices.none { it is StreamAudioDevice.WiredHeadset }) {
             @Suppress("DEPRECATION")
             val isWiredHeadsetOn = try {
                 audioManager.isWiredHeadsetOn
@@ -163,22 +163,22 @@ internal class LegacyAudioDeviceManager(
             }
             if (isWiredHeadsetOn) {
                 logger.d { "[enumerateDevices] Adding WiredHeadset via fallback check (isWiredHeadsetOn=true)" }
-                devices.add(CustomAudioDevice.WiredHeadset())
+                devices.add(StreamAudioDevice.WiredHeadset())
             }
         }
 
         // Add speakerphone - always available
-        if (devices.none { it is CustomAudioDevice.Speakerphone }) {
+        if (devices.none { it is StreamAudioDevice.Speakerphone }) {
             logger.d { "[enumerateDevices] Adding Speakerphone (always available)" }
-            devices.add(CustomAudioDevice.Speakerphone())
+            devices.add(StreamAudioDevice.Speakerphone())
         }
 
         // Add earpiece only if device has telephony feature (is a phone)
-        if (devices.none { it is CustomAudioDevice.Earpiece }) {
+        if (devices.none { it is StreamAudioDevice.Earpiece }) {
             val hasEarpiece = hasEarpiece(context)
             if (hasEarpiece) {
                 logger.d { "[enumerateDevices] Adding Earpiece (device has telephony feature)" }
-                devices.add(CustomAudioDevice.Earpiece())
+                devices.add(StreamAudioDevice.Earpiece())
             } else {
                 logger.d { "[enumerateDevices] Skipping Earpiece (device does not have telephony feature)" }
             }
@@ -192,23 +192,23 @@ internal class LegacyAudioDeviceManager(
         return devices
     }
 
-    override fun selectDevice(device: CustomAudioDevice): Boolean {
+    override fun selectDevice(device: StreamAudioDevice): Boolean {
         when (device) {
-            is CustomAudioDevice.Speakerphone -> {
+            is StreamAudioDevice.Speakerphone -> {
                 stopBluetoothSco()
                 @Suppress("DEPRECATION")
                 audioManager.isSpeakerphoneOn = true
                 selectedDevice = device
                 return true
             }
-            is CustomAudioDevice.Earpiece -> {
+            is StreamAudioDevice.Earpiece -> {
                 stopBluetoothSco()
                 @Suppress("DEPRECATION")
                 audioManager.isSpeakerphoneOn = false
                 selectedDevice = device
                 return true
             }
-            is CustomAudioDevice.BluetoothHeadset -> {
+            is StreamAudioDevice.BluetoothHeadset -> {
                 @Suppress("DEPRECATION")
                 audioManager.isSpeakerphoneOn = false
                 // All Bluetooth devices detected via BluetoothHeadset profile support SCO
@@ -218,7 +218,7 @@ internal class LegacyAudioDeviceManager(
                 selectedDevice = device
                 return true
             }
-            is CustomAudioDevice.WiredHeadset -> {
+            is StreamAudioDevice.WiredHeadset -> {
                 stopBluetoothSco()
                 @Suppress("DEPRECATION")
                 audioManager.isSpeakerphoneOn = false
@@ -235,7 +235,7 @@ internal class LegacyAudioDeviceManager(
         selectedDevice = null
     }
 
-    override fun getSelectedDevice(): CustomAudioDevice? = selectedDevice
+    override fun getSelectedDevice(): StreamAudioDevice? = selectedDevice
 
     override fun start() {
         registerLegacyListeners()
@@ -389,13 +389,13 @@ internal class LegacyAudioDeviceManager(
      * Detects Bluetooth devices using BluetoothHeadset profile
      * This only returns devices that support SCO and are actually connected.
      */
-    private fun detectBluetoothDevices(): List<CustomAudioDevice.BluetoothHeadset> {
+    private fun detectBluetoothDevices(): List<StreamAudioDevice.BluetoothHeadset> {
         if (bluetoothHeadset == null) {
             logger.d { "[detectBluetoothDevices] bluetoothHeadset is null, profile proxy not connected yet" }
             return emptyList()
         }
 
-        val devices = mutableListOf<CustomAudioDevice.BluetoothHeadset>()
+        val devices = mutableListOf<StreamAudioDevice.BluetoothHeadset>()
 
         try {
             val connectedDevices: List<BluetoothDevice>? = bluetoothHeadset?.connectedDevices
@@ -426,10 +426,10 @@ internal class LegacyAudioDeviceManager(
 
             // Only add device if it's actually connected
             if (connectionState == BluetoothHeadset.STATE_CONNECTED) {
-                // Create CustomAudioDevice for the Bluetooth headset
+                // Create StreamAudioDevice for the Bluetooth headset
                 // Note: We don't have AudioDeviceInfo here, but that's okay - we know it supports SCO
                 devices.add(
-                    CustomAudioDevice.BluetoothHeadset(
+                    StreamAudioDevice.BluetoothHeadset(
                         name = deviceName,
                         audioDeviceInfo = null, // We don't have AudioDeviceInfo from headset profile
                     ),

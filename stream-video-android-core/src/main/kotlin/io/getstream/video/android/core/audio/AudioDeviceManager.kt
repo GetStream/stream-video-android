@@ -19,20 +19,20 @@ package io.getstream.video.android.core.audio
 /**
  * Interface for managing audio device operations.
  * Different implementations handle API level differences.
- * Uses NativeStreamAudioDevice for the custom audio switch implementation.
+ * Uses StreamAudioDevice for the custom audio switch implementation.
  */
 internal interface AudioDeviceManager {
     /**
      * Enumerates available audio devices.
      */
-    fun enumerateDevices(): List<CustomAudioDevice>
+    fun enumerateDevices(): List<StreamAudioDevice>
 
     /**
      * Selects an audio device for routing.
      * @param device The device to select
      * @return true if selection was successful, false otherwise
      */
-    fun selectDevice(device: CustomAudioDevice): Boolean
+    fun selectDevice(device: StreamAudioDevice): Boolean
 
     /**
      * Clears the current device selection.
@@ -42,7 +42,7 @@ internal interface AudioDeviceManager {
     /**
      * Gets the currently selected device.
      */
-    fun getSelectedDevice(): CustomAudioDevice?
+    fun getSelectedDevice(): StreamAudioDevice?
 
     /**
      * Starts the device manager (registers listeners, etc.)

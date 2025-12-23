@@ -348,7 +348,7 @@ public class Call(
                 eglBaseContext = eglBase.eglBaseContext,
                 audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
                 audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
-                useCustomAudioSwitch = clientImpl.useCustomAudioSwitch,
+                useInBuiltAudioSwitch = clientImpl.useInBuiltAudioSwitch,
             )
         }
     }
@@ -1354,11 +1354,7 @@ public class Call(
         microphone.devices.onEach { availableDevices ->
             logger.d {
                 "[monitorHeadset] new available devices, prev selected: ${
-                    if (clientImpl.useCustomAudioSwitch) {
-                        microphone.nonHeadsetFallbackCustomeAudioDevice
-                    } else {
-                        microphone.nonHeadsetFallbackDevice
-                    }
+                    microphone.nonHeadsetFallbackDevice
                 }"
             }
 
@@ -1375,17 +1371,10 @@ public class Call(
             } else {
                 logger.d { "[monitorHeadset] no headset found" }
 
-                if (clientImpl.useCustomAudioSwitch) {
-                    microphone.nonHeadsetFallbackCustomeAudioDevice?.let { deviceBeforeHeadset ->
-                        logger.d { "[monitorHeadset] before device selected" }
-                        microphone.select(deviceBeforeHeadset)
-                    }
-                } else {
-                    microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
-                        logger.d { "[monitorHeadset] before device selected" }
-                        microphone.select(deviceBeforeHeadset)
-                    }
-                }
+            microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
+                logger.d { "[monitorHeadset] before device selected" }
+                microphone.select(deviceBeforeHeadset)
+            }
             }
         }.launchIn(scope)
     }

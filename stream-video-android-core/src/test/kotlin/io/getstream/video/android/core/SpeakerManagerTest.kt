@@ -17,7 +17,7 @@
 package io.getstream.video.android.core
 
 import android.media.AudioAttributes
-import io.getstream.video.android.core.audio.CustomAudioDevice
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.mockk.every
 import io.mockk.mockk
@@ -36,27 +36,27 @@ class SpeakerManagerTest {
         val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
         val speakerManager = SpeakerManager(mediaManager, microphoneManager)
 
-        val speakerDevice = CustomAudioDevice.Speakerphone("test-speaker")
-        val earpieceDevice = CustomAudioDevice.Earpiece("test-earpiece")
+        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker")
+        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece")
 
         val devices = listOf(speakerDevice, earpieceDevice)
-        val deviceSlot = slot<CustomAudioDevice>()
+        val deviceSlot = slot<StreamAudioDevice>()
 
         // Set up enforceSetup to execute the lambda immediately
         every { microphoneManager.enforceSetup(any(), any()) } answers {
             secondArg<() -> Unit>().invoke()
         }
-        every { microphoneManager.customAudioDevices.value } returns devices
-        every { microphoneManager.selectedCustomAudioDevice.value } returns earpieceDevice
+        every { microphoneManager.devices.value } returns devices
+        every { microphoneManager.selectedDevice.value } returns earpieceDevice
         every { microphoneManager.select(capture(deviceSlot)) } answers { Unit }
 
         // When
-        speakerManager.setSpeakerPhone(true, null as CustomAudioDevice?)
+        speakerManager.setSpeakerPhone(true, null)
 
         // Then
         verify { microphoneManager.enforceSetup(preferSpeaker = true, any()) }
         assertEquals(speakerDevice, deviceSlot.captured)
-        assertEquals(earpieceDevice, speakerManager.selectedBeforeSpeakerCustomAudioDevice)
+        assertEquals(earpieceDevice, speakerManager.selectedBeforeSpeaker)
         assertEquals(true, speakerManager.speakerPhoneEnabled.value)
     }
 
@@ -67,24 +67,24 @@ class SpeakerManagerTest {
         val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
         val speakerManager = SpeakerManager(mediaManager, microphoneManager)
 
-        val speakerDevice = CustomAudioDevice.Speakerphone("test-speaker")
-        val earpieceDevice = CustomAudioDevice.Earpiece("test-earpiece")
+        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker")
+        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece")
 
-        speakerManager.selectedBeforeSpeakerCustomAudioDevice = earpieceDevice
+        speakerManager.selectedBeforeSpeaker = earpieceDevice
 
-        val deviceSlot = slot<CustomAudioDevice>()
+        val deviceSlot = slot<StreamAudioDevice>()
         val devices = listOf(speakerDevice, earpieceDevice)
 
         // Set up enforceSetup to execute the lambda immediately
         every { microphoneManager.enforceSetup(any(), any()) } answers {
             secondArg<() -> Unit>().invoke()
         }
-        every { microphoneManager.customAudioDevices.value } returns devices
-        every { microphoneManager.selectedCustomAudioDevice.value } returns speakerDevice
+        every { microphoneManager.devices.value } returns devices
+        every { microphoneManager.selectedDevice.value } returns speakerDevice
         every { microphoneManager.select(capture(deviceSlot)) } answers { Unit }
 
         // When
-        speakerManager.setSpeakerPhone(false, null as CustomAudioDevice?)
+        speakerManager.setSpeakerPhone(false, null)
 
         // Then
         verify { microphoneManager.enforceSetup(preferSpeaker = false, any()) }
@@ -99,24 +99,24 @@ class SpeakerManagerTest {
         val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
         val speakerManager = SpeakerManager(mediaManager, microphoneManager)
 
-        val speakerDevice = CustomAudioDevice.Speakerphone("test-speaker")
-        val earpieceDevice = CustomAudioDevice.Earpiece("test-earpiece")
+        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker")
+        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece")
         val devices = listOf(speakerDevice, earpieceDevice)
 
         speakerManager.selectedBeforeSpeaker = null
 
-        val deviceSlot = slot<CustomAudioDevice>()
+        val deviceSlot = slot<StreamAudioDevice>()
 
         // Set up enforceSetup to execute the lambda immediately
         every { microphoneManager.enforceSetup(any(), any()) } answers {
             secondArg<() -> Unit>().invoke()
         }
-        every { microphoneManager.customAudioDevices.value } returns devices
-        every { microphoneManager.selectedCustomAudioDevice.value } returns speakerDevice
+        every { microphoneManager.devices.value } returns devices
+        every { microphoneManager.selectedDevice.value } returns speakerDevice
         every { microphoneManager.select(capture(deviceSlot)) } answers { Unit }
 
         // When
-        speakerManager.setSpeakerPhone(false, null as CustomAudioDevice?)
+        speakerManager.setSpeakerPhone(false)
 
         // Then
         verify { microphoneManager.enforceSetup(preferSpeaker = false, any()) }
@@ -131,19 +131,19 @@ class SpeakerManagerTest {
         val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
         val speakerManager = SpeakerManager(mediaManager, microphoneManager)
 
-        val speakerDevice = CustomAudioDevice.Speakerphone("test-speaker")
-        val earpieceDevice = CustomAudioDevice.Earpiece("test-earpiece")
-        val wiredHeadsetDevice = CustomAudioDevice.WiredHeadset("test-wired")
+        val speakerDevice = StreamAudioDevice.Speakerphone("test-speaker")
+        val earpieceDevice = StreamAudioDevice.Earpiece("test-earpiece")
+        val wiredHeadsetDevice = StreamAudioDevice.WiredHeadset("test-wired")
 
         val devices = listOf(speakerDevice, earpieceDevice, wiredHeadsetDevice)
-        val deviceSlot = slot<CustomAudioDevice>()
+        val deviceSlot = slot<StreamAudioDevice>()
 
         // Set up enforceSetup to execute the lambda immediately
         every { microphoneManager.enforceSetup(any(), any()) } answers {
             secondArg<() -> Unit>().invoke()
         }
-        every { microphoneManager.customAudioDevices.value } returns devices
-        every { microphoneManager.selectedCustomAudioDevice.value } returns speakerDevice
+        every { microphoneManager.devices.value } returns devices
+        every { microphoneManager.selectedDevice.value } returns speakerDevice
         every { microphoneManager.select(capture(deviceSlot)) } answers { Unit }
 
         // When
@@ -162,34 +162,34 @@ class SpeakerManagerTest {
         val microphoneManager = mockk<MicrophoneManager>(relaxed = true)
         val speakerManager = SpeakerManager(mediaManager, microphoneManager)
 
-        val speakerDevice1 = CustomAudioDevice.Speakerphone("test-speaker-1")
-        val speakerDevice2 = CustomAudioDevice.Speakerphone("test-speaker-2")
+        val speakerDevice1 = StreamAudioDevice.Speakerphone("test-speaker-1")
+        val speakerDevice2 = StreamAudioDevice.Speakerphone("test-speaker-2")
 
         // Only speaker devices are available
         val devices = listOf(speakerDevice1, speakerDevice2)
 
         // No previously selected device
-        speakerManager.selectedBeforeSpeakerCustomAudioDevice = null
+        speakerManager.selectedBeforeSpeaker = null
 
-        val deviceSlot = slot<CustomAudioDevice>()
+        val deviceSlot = slot<StreamAudioDevice>()
 
         // Set up enforceSetup to execute the lambda immediately
         every { microphoneManager.enforceSetup(any(), any()) } answers {
             secondArg<() -> Unit>().invoke()
         }
-        every { microphoneManager.customAudioDevices.value } returns devices
-        every { microphoneManager.selectedCustomAudioDevice.value } returns speakerDevice1
+        every { microphoneManager.devices.value } returns devices
+        every { microphoneManager.selectedDevice.value } returns speakerDevice1
         every { microphoneManager.select(capture(deviceSlot)) } answers { Unit }
 
         // When
-        speakerManager.setSpeakerPhone(false, null as CustomAudioDevice?)
+        speakerManager.setSpeakerPhone(false, null)
 
         // Then
         verify { microphoneManager.enforceSetup(preferSpeaker = false, any()) }
         // Since we only have speakers available, verify we selected the first one
         verify {
             microphoneManager.select(
-                any<CustomAudioDevice>(),
+                any<StreamAudioDevice>(),
             )
         } // Verify the select method was called
         assertEquals(false, speakerManager.speakerPhoneEnabled.value)

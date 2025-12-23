@@ -150,7 +150,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
      * If true, uses the custom StreamAudioSwitch implementation (native Android APIs).
      * If false, uses Twilio's AudioSwitch library (default for backward compatibility).
      */
-    private val useCustomAudioSwitch: Boolean = false,
+    private val useInBuiltAudioSwitch: Boolean = false,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -280,7 +280,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableStereoForSubscriber = enableStereoForSubscriber,
             telecomConfig = telecomConfig,
             tokenRepository = tokenRepository,
-            useCustomAudioSwitch = useCustomAudioSwitch,
+            useInBuiltAudioSwitch = useInBuiltAudioSwitch,
         )
 
         if (user.type == UserType.Guest) {

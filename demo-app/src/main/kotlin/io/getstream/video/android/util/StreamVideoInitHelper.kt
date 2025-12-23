@@ -335,7 +335,7 @@ object StreamVideoInitHelper {
             telecomConfig = TelecomConfig(
                 context.packageName,
             ),
-            useCustomAudioSwitch = true,
+            useInBuiltAudioSwitch = true,
         ).build()
     }
 }

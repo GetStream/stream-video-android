@@ -25,7 +25,6 @@ import com.twilio.audioswitch.AudioDeviceChangeListener
 import com.twilio.audioswitch.AudioSwitch
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
-import kotlin.DeprecationLevel
 
 public interface AudioHandler {
     /**
@@ -39,8 +38,6 @@ public interface AudioHandler {
     public fun stop()
 
     public fun selectDevice(audioDevice: StreamAudioDevice?)
-
-    public fun selectCustomAudioDevice(customAudioDevice: io.getstream.video.android.core.audio.CustomAudioDevice?)
 }
 
 /**
@@ -89,16 +86,9 @@ public class AudioSwitchHandler(
         }
     }
 
-    @Deprecated(
-        message = "StreamAudioDevice is deprecated. Use NativeStreamAudioDevice when useCustomAudioSwitch is true.",
-        level = DeprecationLevel.WARNING,
-    )
     override fun selectDevice(audioDevice: StreamAudioDevice?) {
         val twilioDevice = convertStreamDeviceToTwilioDevice(audioDevice)
         selectDevice(twilioDevice)
-    }
-
-    override fun selectCustomAudioDevice(customAudioDevice: io.getstream.video.android.core.audio.CustomAudioDevice?) {
     }
 
     public fun selectDevice(audioDevice: AudioDevice?) {

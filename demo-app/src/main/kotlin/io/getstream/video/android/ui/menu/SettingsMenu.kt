@@ -58,7 +58,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.audio.CustomAudioDevice
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -94,7 +94,7 @@ internal fun SettingsMenu(
     onClosedCaptionsToggle: () -> Unit,
 ) {
     val context = LocalContext.current
-    val availableDevices by call.microphone.customAudioDevices.collectAsStateWithLifecycle()
+    val availableDevices by call.microphone.devices.collectAsStateWithLifecycle()
     val currentAudioUsage by call.speaker.audioUsage.collectAsStateWithLifecycle()
 
     val audioUsageUiState = remember(currentAudioUsage) {
@@ -208,13 +208,13 @@ internal fun SettingsMenu(
         }
     }
 
-    val selectedMicroPhoneDevice by call.microphone.selectedCustomAudioDevice.collectAsStateWithLifecycle()
+    val selectedMicroPhoneDevice by call.microphone.selectedDevice.collectAsStateWithLifecycle()
     val audioDeviceUiStateList: List<AudioDeviceUiState> = availableDevices.map {
         val icon = when (it) {
-            is CustomAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
-            is CustomAudioDevice.Earpiece -> Icons.Default.Headphones
-            is CustomAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
-            is CustomAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
+            is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
+            is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
+            is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
+            is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
         }
         // Compare devices by type and audioDeviceInfo ID (if available) since audio can be null when using custom audio switch
         val selected = selectedMicroPhoneDevice
@@ -223,16 +223,16 @@ internal fun SettingsMenu(
             else -> {
                 // First try to compare by audioDeviceInfo ID if both have it
                 val itInfoId = when (it) {
-                    is CustomAudioDevice.BluetoothHeadset -> it.audioDeviceInfo?.id
-                    is CustomAudioDevice.WiredHeadset -> it.audioDeviceInfo?.id
-                    is CustomAudioDevice.Earpiece -> it.audioDeviceInfo?.id
-                    is CustomAudioDevice.Speakerphone -> it.audioDeviceInfo?.id
+                    is StreamAudioDevice.BluetoothHeadset -> it.audioDeviceInfo?.id
+                    is StreamAudioDevice.WiredHeadset -> it.audioDeviceInfo?.id
+                    is StreamAudioDevice.Earpiece -> it.audioDeviceInfo?.id
+                    is StreamAudioDevice.Speakerphone -> it.audioDeviceInfo?.id
                 }
                 val selectedInfoId = when (selected) {
-                    is CustomAudioDevice.BluetoothHeadset -> selected.audioDeviceInfo?.id
-                    is CustomAudioDevice.WiredHeadset -> selected.audioDeviceInfo?.id
-                    is CustomAudioDevice.Earpiece -> selected.audioDeviceInfo?.id
-                    is CustomAudioDevice.Speakerphone -> selected.audioDeviceInfo?.id
+                    is StreamAudioDevice.BluetoothHeadset -> selected.audioDeviceInfo?.id
+                    is StreamAudioDevice.WiredHeadset -> selected.audioDeviceInfo?.id
+                    is StreamAudioDevice.Earpiece -> selected.audioDeviceInfo?.id
+                    is StreamAudioDevice.Speakerphone -> selected.audioDeviceInfo?.id
                 }
 
                 if (itInfoId != null && selectedInfoId != null) {
@@ -241,10 +241,10 @@ internal fun SettingsMenu(
                 } else {
                     // Fall back to type comparison
                     when {
-                        it is CustomAudioDevice.BluetoothHeadset && selected is CustomAudioDevice.BluetoothHeadset -> true
-                        it is CustomAudioDevice.WiredHeadset && selected is CustomAudioDevice.WiredHeadset -> true
-                        it is CustomAudioDevice.Earpiece && selected is CustomAudioDevice.Earpiece -> true
-                        it is CustomAudioDevice.Speakerphone && selected is CustomAudioDevice.Speakerphone -> true
+                        it is StreamAudioDevice.BluetoothHeadset && selected is StreamAudioDevice.BluetoothHeadset -> true
+                        it is StreamAudioDevice.WiredHeadset && selected is StreamAudioDevice.WiredHeadset -> true
+                        it is StreamAudioDevice.Earpiece && selected is StreamAudioDevice.Earpiece -> true
+                        it is StreamAudioDevice.Speakerphone && selected is StreamAudioDevice.Speakerphone -> true
                         else -> false
                     }
                 }

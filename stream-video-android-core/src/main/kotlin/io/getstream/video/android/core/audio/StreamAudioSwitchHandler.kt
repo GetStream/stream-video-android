@@ -28,8 +28,8 @@ import io.getstream.log.taggedLogger
  */
 internal class StreamAudioSwitchHandler(
     private val context: Context,
-    private val preferredDeviceList: List<Class<out CustomAudioDevice>>,
-    private var audioDeviceChangeListener: CustomAudioDeviceChangeListener,
+    private val preferredDeviceList: List<Class<out StreamAudioDevice>>,
+    private var audioDeviceChangeListener: StreamAudioDeviceChangeListener,
 ) : AudioHandler {
 
     private val logger by taggedLogger(TAG)
@@ -69,11 +69,7 @@ internal class StreamAudioSwitchHandler(
     }
 
     override fun selectDevice(audioDevice: StreamAudioDevice?) {
-    }
-
-    override fun selectCustomAudioDevice(customAudioDevice: CustomAudioDevice?) {
-        logger.i { "[selectDevice] audioDevice: $customAudioDevice" }
-        streamAudioSwitch?.selectCustomAudioDevice(customAudioDevice)
+        streamAudioSwitch?.selectDevice(audioDevice)
     }
 
     public companion object {

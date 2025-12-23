@@ -30,9 +30,9 @@ internal class ModernAudioDeviceManager(
 ) : AudioDeviceManager {
 
     private val logger by taggedLogger(TAG)
-    private var selectedDevice: CustomAudioDevice? = null
+    private var selectedDevice: StreamAudioDevice? = null
 
-    override fun enumerateDevices(): List<CustomAudioDevice> {
+    override fun enumerateDevices(): List<StreamAudioDevice> {
         val androidDevices = StreamAudioManager.getAvailableCommunicationDevices(audioManager)
         logger.d { "[enumerateDevices] Found ${androidDevices.size} available communication devices" }
 
@@ -46,33 +46,33 @@ internal class ModernAudioDeviceManager(
             }
         }
 
-        val customAudioDevices = mutableListOf<CustomAudioDevice>()
+        val streamAudioDevices = mutableListOf<StreamAudioDevice>()
 
         for (androidDevice in androidDevices) {
-            val customAudioDevice = CustomAudioDevice.fromAudioDeviceInfo(androidDevice)
-            if (customAudioDevice != null) {
+            val streamAudioDevice = StreamAudioDevice.fromAudioDeviceInfo(androidDevice)
+            if (streamAudioDevice != null) {
                 logger.d {
-                    "[enumerateDevices] Detected device: ${customAudioDevice::class.simpleName} (${customAudioDevice.name})"
+                    "[enumerateDevices] Detected device: ${streamAudioDevice::class.simpleName} (${streamAudioDevice.name})"
                 }
-                customAudioDevices.add(customAudioDevice)
+                streamAudioDevices.add(streamAudioDevice)
             } else {
                 logger.w {
-                    "[enumerateDevices] Could not convert AudioDeviceInfo to CustomAudioDevice: type=${androidDevice.type}, name=${androidDevice.productName}"
+                    "[enumerateDevices] Could not convert AudioDeviceInfo to StreamAudioDevice: type=${androidDevice.type}, name=${androidDevice.productName}"
                 }
             }
         }
 
-        logger.d { "[enumerateDevices] Total enumerated devices: ${customAudioDevices.size}" }
-        customAudioDevices.forEachIndexed { index, device ->
+        logger.d { "[enumerateDevices] Total enumerated devices: ${streamAudioDevices.size}" }
+        streamAudioDevices.forEachIndexed { index, device ->
             logger.d { "[enumerateDevices] Final device $index: ${device::class.simpleName} (${device.name})" }
         }
 
-        return customAudioDevices
+        return streamAudioDevices
     }
 
-    override fun selectDevice(device: CustomAudioDevice): Boolean {
+    override fun selectDevice(device: StreamAudioDevice): Boolean {
         val androidDevice = device.audioDeviceInfo
-            ?: CustomAudioDevice.toAudioDeviceInfo(device, audioManager)
+            ?: StreamAudioDevice.toAudioDeviceInfo(device, audioManager)
         logger.d { "[selectDevice] :: $device" }
         return if (androidDevice != null) {
             val success = StreamAudioManager.setCommunicationDevice(audioManager, androidDevice)
@@ -90,14 +90,14 @@ internal class ModernAudioDeviceManager(
         selectedDevice = null
     }
 
-    override fun getSelectedDevice(): CustomAudioDevice? {
+    override fun getSelectedDevice(): StreamAudioDevice? {
         // Try to get from AudioManager first
         val currentDevice = StreamAudioManager.getCommunicationDevice(audioManager)
         if (currentDevice != null) {
-            val customAudioDevice = CustomAudioDevice.fromAudioDeviceInfo(currentDevice)
-            if (customAudioDevice != null) {
-                selectedDevice = customAudioDevice
-                return customAudioDevice
+            val streamAudioDevice = StreamAudioDevice.fromAudioDeviceInfo(currentDevice)
+            if (streamAudioDevice != null) {
+                selectedDevice = streamAudioDevice
+                return streamAudioDevice
             }
         }
         return selectedDevice

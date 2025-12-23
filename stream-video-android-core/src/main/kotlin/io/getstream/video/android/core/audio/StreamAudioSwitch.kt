@@ -31,25 +31,25 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Listener interface for audio device changes using NativeStreamAudioDevice.
+ * Listener interface for audio device changes using StreamAudioDevice.
  */
-internal typealias CustomAudioDeviceChangeListener = (
-    devices: List<CustomAudioDevice>,
-    selectedDevice: CustomAudioDevice?,
+internal typealias StreamAudioDeviceChangeListener = (
+    devices: List<StreamAudioDevice>,
+    selectedDevice: StreamAudioDevice?,
 ) -> Unit
 
 /**
  * Custom AudioSwitch implementation using Android's AudioManager APIs.
  * Replaces Twilio's AudioSwitch library with native Android functionality.
- * Uses NativeStreamAudioDevice for all device operations.
+ * Uses StreamAudioDevice for all device operations.
  */
 internal class StreamAudioSwitch(
     private val context: Context,
-    preferredDeviceList: List<Class<out CustomAudioDevice>>? = null,
+    preferredDeviceList: List<Class<out StreamAudioDevice>>? = null,
 ) {
     private val logger by taggedLogger(TAG)
 
-    private val preferredDeviceList: List<Class<out CustomAudioDevice>> =
+    private val preferredDeviceList: List<Class<out StreamAudioDevice>> =
         preferredDeviceList ?: getDefaultPreferredDeviceList()
 
     private val audioManager: AudioManager = context.getSystemService(
@@ -57,7 +57,7 @@ internal class StreamAudioSwitch(
     ) as AudioManager
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    private var audioDeviceChangeListener: CustomAudioDeviceChangeListener? = null
+    private var audioDeviceChangeListener: StreamAudioDeviceChangeListener? = null
     private var audioDeviceCallback: AudioDeviceCallback? = null
     private var isStarted = false
 
@@ -80,20 +80,20 @@ internal class StreamAudioSwitch(
         logger.d { "[onAudioFocusChange] focusChange: $typeOfChange" }
     }
 
-    private val _availableDevices = MutableStateFlow<List<CustomAudioDevice>>(emptyList())
-    public val availableDevices: StateFlow<List<CustomAudioDevice>> = _availableDevices.asStateFlow()
+    private val _availableDevices = MutableStateFlow<List<StreamAudioDevice>>(emptyList())
+    public val availableDevices: StateFlow<List<StreamAudioDevice>> = _availableDevices.asStateFlow()
 
-    private val _selectedDeviceState = MutableStateFlow<CustomAudioDevice?>(null)
-    public val selectedDeviceState: StateFlow<CustomAudioDevice?> = _selectedDeviceState.asStateFlow()
+    private val _selectedDeviceState = MutableStateFlow<StreamAudioDevice?>(null)
+    public val selectedDeviceState: StateFlow<StreamAudioDevice?> = _selectedDeviceState.asStateFlow()
 
     // Track previous device before Bluetooth was selected (for fallback on Bluetooth failure)
-    private var previousDeviceBeforeBluetooth: CustomAudioDevice? = null
+    private var previousDeviceBeforeBluetooth: StreamAudioDevice? = null
 
     /**
      * Starts monitoring audio devices and begins device enumeration.
      * @param listener Callback that receives device updates
      */
-    public fun start(listener: CustomAudioDeviceChangeListener? = null) {
+    public fun start(listener: StreamAudioDeviceChangeListener? = null) {
         synchronized(this) {
             if (isStarted) {
                 logger.w { "[start] AudioSwitch already started" }
@@ -170,8 +170,8 @@ internal class StreamAudioSwitch(
      * Selects an audio device for routing.
      * @param device The device to select, or null for automatic selection
      */
-    public fun selectDevice(device: CustomAudioDevice?) {
-        selectCustomAudioDevice(device)
+    public fun selectDevice(device: StreamAudioDevice?) {
+        selectStreamAudioDevice(device)
     }
 
     /**
@@ -187,25 +187,25 @@ internal class StreamAudioSwitch(
     /**
      * Gets the currently selected device.
      */
-    public fun getSelectedDevice(): CustomAudioDevice? = _selectedDeviceState.value
+    public fun getSelectedDevice(): StreamAudioDevice? = _selectedDeviceState.value
 
     /**
      * Gets the list of available devices.
      */
-    public fun getAvailableDevices(): List<CustomAudioDevice> = _availableDevices.value
+    public fun getAvailableDevices(): List<StreamAudioDevice> = _availableDevices.value
 
     /**
      * Selects a native audio device for routing.
-     * @param device The native device to select, or null for automatic selection
+     * @param device The device to select, or null for automatic selection
      */
-    public fun selectCustomAudioDevice(device: CustomAudioDevice?) {
+    public fun selectStreamAudioDevice(device: StreamAudioDevice?) {
         synchronized(this) {
             if (!isStarted) {
-                logger.w { "[selectCustomAudioDevice] AudioSwitch not started" }
+                logger.w { "[selectStreamAudioDevice] AudioSwitch not started" }
                 return
             }
 
-            logger.i { "[selectCustomAudioDevice] Selecting native device: $device" }
+            logger.i { "[selectStreamAudioDevice] Selecting native device: $device" }
 
             val deviceToSelect = device ?: selectCustomDeviceByPriority()
             val currentSelected = _selectedDeviceState.value
@@ -214,9 +214,9 @@ internal class StreamAudioSwitch(
                 val manager = deviceManager
                 if (manager != null) {
                     // If switching to Bluetooth, save the previous device for fallback
-                    if (deviceToSelect is CustomAudioDevice.BluetoothHeadset &&
+                    if (deviceToSelect is StreamAudioDevice.BluetoothHeadset &&
                         currentSelected != null &&
-                        currentSelected !is CustomAudioDevice.BluetoothHeadset
+                        currentSelected !is StreamAudioDevice.BluetoothHeadset
                     ) {
                         previousDeviceBeforeBluetooth = currentSelected
                         logger.d {
@@ -233,7 +233,7 @@ internal class StreamAudioSwitch(
                         // Fallback to automatic selection if the requested device is not available
                         val autoSelected = selectCustomDeviceByPriority()
                         if (autoSelected != null && autoSelected != deviceToSelect) {
-                            selectCustomAudioDevice(autoSelected)
+                            selectStreamAudioDevice(autoSelected)
                         }
                     }
                 } else {
@@ -250,7 +250,7 @@ internal class StreamAudioSwitch(
     /**
      * Selects a device by priority from available native devices.
      */
-    private fun selectCustomDeviceByPriority(): CustomAudioDevice? {
+    private fun selectCustomDeviceByPriority(): StreamAudioDevice? {
         val availableDevices = _availableDevices.value
         if (availableDevices.isEmpty()) {
             return null
@@ -340,7 +340,7 @@ internal class StreamAudioSwitch(
             if (availableDevices.contains(previousDevice)) {
                 logger.d { "[handleBluetoothConnectionFailure] Reverting to previous device: $previousDevice" }
                 previousDeviceBeforeBluetooth = null // Clear after use
-                selectCustomAudioDevice(previousDevice)
+                selectStreamAudioDevice(previousDevice)
                 return
             } else {
                 logger.d {
@@ -354,7 +354,7 @@ internal class StreamAudioSwitch(
         logger.d { "[handleBluetoothConnectionFailure] No previous device, using automatic selection" }
         val autoSelected = selectCustomDeviceByPriority()
         if (autoSelected != null) {
-            selectCustomAudioDevice(autoSelected)
+            selectStreamAudioDevice(autoSelected)
         }
     }
 
@@ -435,12 +435,12 @@ internal class StreamAudioSwitch(
          * BluetoothHeadset -> WiredHeadset -> Earpiece -> Speakerphone
          */
         @JvmStatic
-        fun getDefaultPreferredDeviceList(): List<Class<out CustomAudioDevice>> {
+        fun getDefaultPreferredDeviceList(): List<Class<out StreamAudioDevice>> {
             return listOf(
-                CustomAudioDevice.BluetoothHeadset::class.java,
-                CustomAudioDevice.WiredHeadset::class.java,
-                CustomAudioDevice.Earpiece::class.java,
-                CustomAudioDevice.Speakerphone::class.java,
+                StreamAudioDevice.BluetoothHeadset::class.java,
+                StreamAudioDevice.WiredHeadset::class.java,
+                StreamAudioDevice.Earpiece::class.java,
+                StreamAudioDevice.Speakerphone::class.java,
             )
         }
     }

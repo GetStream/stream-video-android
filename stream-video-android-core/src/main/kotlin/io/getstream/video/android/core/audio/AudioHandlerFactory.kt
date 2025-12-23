@@ -26,33 +26,31 @@ import com.twilio.audioswitch.AudioDeviceChangeListener as TwilioAudioDeviceChan
  */
 internal object AudioHandlerFactory {
     /**
-     * Creates an AudioHandler instance based on the useCustomAudioSwitch flag.
+     * Creates an AudioHandler instance based on the useInBuiltAudioSwitch flag.
      *
      * @param context Android context
-     * @param preferredDeviceList List of preferred audio device types in priority order
-     * @param audioDeviceChangeListener Callback for device changes
-     * @param useCustomAudioSwitch If true, uses custom StreamAudioSwitch; if false, uses Twilio AudioSwitch
+     * @param preferredStreamAudioDeviceList List of preferred audio device types in priority order
+     * @param twilioAudioDeviceChangeListener Callback for device changes
+     * @param useInBuiltAudioSwitch If true, uses custom StreamAudioSwitch; if false, uses Twilio AudioSwitch
      * @return An AudioHandler instance
      */
     fun create(
         context: Context,
-        preferredDeviceList: List<Class<out StreamAudioDevice>>,
-        preferredNativeDeviceList:
-        List<Class<out io.getstream.video.android.core.audio.CustomAudioDevice>>,
-        audioDeviceChangeListener: TwilioAudioDeviceChangeListener,
-        audioNativeDeviceListener: CustomAudioDeviceChangeListener,
-        useCustomAudioSwitch: Boolean,
+        preferredStreamAudioDeviceList: List<Class<out StreamAudioDevice>>,
+        twilioAudioDeviceChangeListener: TwilioAudioDeviceChangeListener,
+        streamAudioDeviceChangeListener: StreamAudioDeviceChangeListener,
+        useInBuiltAudioSwitch: Boolean,
     ): AudioHandler {
-        return if (useCustomAudioSwitch) {
+        return if (useInBuiltAudioSwitch) {
             StreamAudioSwitchHandler(
                 context = context,
-                preferredDeviceList = preferredNativeDeviceList,
-                audioDeviceChangeListener = audioNativeDeviceListener,
+                preferredDeviceList = preferredStreamAudioDeviceList,
+                audioDeviceChangeListener = streamAudioDeviceChangeListener,
             )
         } else {
             // Twilio audio switcher
             // Convert StreamAudioDevice types to Twilio AudioDevice types
-            val twilioPreferredDevices = preferredDeviceList.map { streamDeviceClass ->
+            val twilioPreferredDevices = preferredStreamAudioDeviceList.map { streamDeviceClass ->
                 when (streamDeviceClass) {
                     StreamAudioDevice.BluetoothHeadset::class.java -> AudioDevice.BluetoothHeadset::class.java
                     StreamAudioDevice.WiredHeadset::class.java -> AudioDevice.WiredHeadset::class.java
@@ -62,23 +60,10 @@ internal object AudioHandlerFactory {
                 }
             }
 
-            // Convert our AudioDeviceChangeListener to Twilio's AudioDeviceChangeListener
-            val twilioListener: TwilioAudioDeviceChangeListener = { devices, selected ->
-                // Convert Twilio AudioDevice to StreamAudioDevice
-                val streamDevices = devices.map { twilioDevice ->
-                    convertTwilioDeviceToStreamDevice(twilioDevice)
-                }
-                val streamSelected = selected?.let { convertTwilioDeviceToStreamDevice(it) }
-                // The callback expects Twilio AudioDevice types, so convert back
-                val twilioDevices = streamDevices.map { it.audio }
-                val twilioSelected = streamSelected?.audio
-                audioDeviceChangeListener(devices, selected)
-            }
-
             AudioSwitchHandler(
                 context = context,
                 preferredDeviceList = twilioPreferredDevices,
-                audioDeviceChangeListener = twilioListener,
+                audioDeviceChangeListener = twilioAudioDeviceChangeListener,
             )
         }
     }
