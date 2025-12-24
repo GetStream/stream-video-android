@@ -9,9 +9,9 @@ on:
 jobs:
   build_dogfooding_sample_app:
     name: Build and Distribute Dogfooding Android
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: GetStream/android-ci-actions/actions/setup-java@main
       - name: Prepare environment
         run: |
