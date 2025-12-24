@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.livestream
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -134,7 +135,7 @@ public fun LivestreamPlayer(
     val backstage by call.state.backstage.collectAsStateWithLifecycle()
     var hasJoinedSuccessfully by rememberSaveable { mutableStateOf(false) }
     var livestreamState by rememberSaveable { mutableStateOf(LivestreamState.INITIAL) }
-
+    Log.d("LivestreamPlayer", "hostVideoAvailable: $hostVideoAvailable")
     LaunchedEffect(connection, endedAt, backstage) {
         when (connection) {
             is RealtimeConnection.Connected -> {
