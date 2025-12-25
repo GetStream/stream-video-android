@@ -18,7 +18,6 @@ package io.getstream.video.android.core.notifications.internal.service
 
 import android.Manifest
 import android.app.Notification
-import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
@@ -60,7 +59,7 @@ internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIn
                         ),
                     ),
                 )
-                ComponentName(context, CallService::class.java)
+
                 showIncomingCallResult = ShowIncomingCallResult.FG_SERVICE
             } else {
                 logger.d { "[showIncomingCall] Starting regular service" }

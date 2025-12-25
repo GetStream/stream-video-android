@@ -35,7 +35,7 @@ abstract class LocalEvent : WSCallEvent, VideoEvent()
  * allowing the SDK to handle it as if a [io.getstream.android.video.generated.models.CallRejectedEvent] had
  * been received in real time (or to apply adjusted logic if needed).
  */
-data class LocalCallMissedEvent(val callCid: String) : LocalEvent() {
+data class LocalCallMissedEvent(val createdById: String, val callCid: String) : LocalEvent() {
     override fun getCallCID(): String {
         return callCid
     }

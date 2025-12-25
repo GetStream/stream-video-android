@@ -34,7 +34,7 @@ class DefaultNotificationDispatcher(
     override fun notify(streamCallId: StreamCallId, id: Int, notification: Notification) {
         logger.d { "[notify] callId: ${streamCallId.id}, notificationId: $id" }
         StreamVideo.instanceOrNull()?.call(streamCallId.type, streamCallId.id)
-            ?.state?.updateNotification(notification)
+            ?.state?.updateNotification(id, notification)
 
         notificationManager.notify(id, notification)
     }
