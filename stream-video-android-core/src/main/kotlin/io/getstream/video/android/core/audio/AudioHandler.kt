@@ -36,6 +36,8 @@ public interface AudioHandler {
      * Called when a room is disconnected.
      */
     public fun stop()
+
+    public fun selectDevice(audioDevice: StreamAudioDevice?)
 }
 
 /**
@@ -84,10 +86,23 @@ public class AudioSwitchHandler(
         }
     }
 
+    override fun selectDevice(audioDevice: StreamAudioDevice?) {
+        val twilioDevice = convertStreamDeviceToTwilioDevice(audioDevice)
+        selectDevice(twilioDevice)
+    }
+
     public fun selectDevice(audioDevice: AudioDevice?) {
         logger.i { "[selectDevice] audioDevice: $audioDevice" }
         audioSwitch?.selectDevice(audioDevice)
         audioSwitch?.activate()
+    }
+
+    /**
+     * Converts a StreamAudioDevice to Twilio's AudioDevice.
+     * Returns null if the input is null.
+     */
+    private fun convertStreamDeviceToTwilioDevice(streamDevice: StreamAudioDevice?): AudioDevice? {
+        return streamDevice?.audio
     }
 
     public companion object {
