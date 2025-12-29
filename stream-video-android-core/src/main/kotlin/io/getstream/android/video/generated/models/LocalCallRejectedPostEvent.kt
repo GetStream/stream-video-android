@@ -23,23 +23,14 @@
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
 import org.threeten.bp.OffsetDateTime
 
 /**
- * This event is sent when a user accepts a notification to join a call.
+ * This event is sent when a user rejects a notification to join a call.
  */
 
-data class LocalCallAcceptedEvent (
+data class LocalCallRejectedPostEvent (
     @Json(name = "call_cid")
     val callCid: String,
 
@@ -53,7 +44,10 @@ data class LocalCallAcceptedEvent (
     val user: UserResponse,
 
     @Json(name = "type")
-    val type: String
+    val type: String,
+
+    @Json(name = "reason")
+    val reason: String? = null
 )
 : VideoEvent(), WSCallEvent
 {

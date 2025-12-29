@@ -32,8 +32,8 @@ import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
 import kotlin.getValue
 
-internal class CallNotificationManager {
-    private val logger by taggedLogger("CallNotificationManager")
+internal class CallServiceNotificationManager {
+    private val logger by taggedLogger("CallServiceNotificationManager")
 
     @SuppressLint("MissingPermission")
     fun justNotify(

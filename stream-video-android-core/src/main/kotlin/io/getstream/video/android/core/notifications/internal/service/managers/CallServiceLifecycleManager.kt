@@ -25,8 +25,8 @@ import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-internal class CallLifecycleManager {
-    private val logger by taggedLogger("CallLifecycleManager")
+internal class CallServiceLifecycleManager {
+    private val logger by taggedLogger("CallServiceLifecycleManager")
     fun initializeCallAndSocket(
         scope: CoroutineScope,
         streamVideo: StreamVideo,

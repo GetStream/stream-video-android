@@ -142,7 +142,7 @@ class ServiceIntentBuilderTest {
 
         // Then
         assertNotNull(intent)
-        assertEquals(CallService::class.java.name, intent.component?.className)
+        assertEquals(CallService::class.java.name, intent?.component?.className)
     }
 
 //

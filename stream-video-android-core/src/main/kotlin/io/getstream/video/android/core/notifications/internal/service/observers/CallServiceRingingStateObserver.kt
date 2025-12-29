@@ -28,7 +28,7 @@ import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-internal class RingingStateObserver(
+internal class CallServiceRingingStateObserver(
     private val call: Call,
     private val soundPlayer: CallSoundAndVibrationPlayer?,
     private val streamVideo: StreamVideoClient,

@@ -34,13 +34,13 @@ import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.handlers.StreamDefaultNotificationHandler
 import io.getstream.video.android.core.notifications.internal.Debouncer
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.EXTRA_STOP_SERVICE
-import io.getstream.video.android.core.notifications.internal.service.managers.CallLifecycleManager
-import io.getstream.video.android.core.notifications.internal.service.managers.CallNotificationManager
+import io.getstream.video.android.core.notifications.internal.service.managers.CallServiceLifecycleManager
+import io.getstream.video.android.core.notifications.internal.service.managers.CallServiceNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.models.CallIntentParams
 import io.getstream.video.android.core.notifications.internal.service.models.ServiceState
-import io.getstream.video.android.core.notifications.internal.service.observers.CallEventObserver
-import io.getstream.video.android.core.notifications.internal.service.observers.NotificationUpdateObserver
-import io.getstream.video.android.core.notifications.internal.service.observers.RingingStateObserver
+import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceEventObserver
+import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceNotificationUpdateObserver
+import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceRingingStateObserver
 import io.getstream.video.android.core.notifications.internal.service.permissions.ForegroundServicePermissionManager
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
@@ -64,8 +64,8 @@ internal open class CallService : Service() {
     internal open val logger by taggedLogger("CallService")
     internal open val permissionManager = ForegroundServicePermissionManager()
 
-    internal val callLifecycleManager = CallLifecycleManager()
-    private val notificationManager = CallNotificationManager()
+    internal val callServiceLifecycleManager = CallServiceLifecycleManager()
+    private val notificationManager = CallServiceNotificationManager()
     internal val serviceState = ServiceState()
     private var startId: Stack<Int>? = null
 
@@ -248,12 +248,12 @@ internal open class CallService : Service() {
         callId: StreamCallId,
         trigger: String,
     ) {
-        callLifecycleManager.initializeCallAndSocket(serviceScope, streamVideo, callId) {
+        callServiceLifecycleManager.initializeCallAndSocket(serviceScope, streamVideo, callId) {
 //            stopServiceGracefully()
         }
 
         if (trigger == TRIGGER_INCOMING_CALL) {
-            callLifecycleManager.updateRingingCall(
+            callServiceLifecycleManager.updateRingingCall(
                 serviceScope,
                 streamVideo,
                 callId,
@@ -436,10 +436,10 @@ internal open class CallService : Service() {
     private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoClient) {
         val call = streamVideo.call(callId.type, callId.id)
 
-        RingingStateObserver(call, serviceState.soundPlayer, streamVideo, serviceScope)
+        CallServiceRingingStateObserver(call, serviceState.soundPlayer, streamVideo, serviceScope)
             .observe { stopServiceGracefully() }
 
-        CallEventObserver(call, streamVideo)
+        CallServiceEventObserver(call, streamVideo)
             .observe(
                 onServiceStop = { stopServiceGracefully() },
                 onRemoveIncoming = {
@@ -451,7 +451,7 @@ internal open class CallService : Service() {
             )
 
         if (streamVideo.enableCallNotificationUpdates) {
-            NotificationUpdateObserver(
+            CallServiceNotificationUpdateObserver(
                 call,
                 streamVideo,
                 serviceScope,
@@ -482,7 +482,7 @@ internal open class CallService : Service() {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         logger.w { "[onTaskRemoved]" }
-        callLifecycleManager.endCall(serviceScope, serviceState.currentCallId)
+        callServiceLifecycleManager.endCall(serviceScope, serviceState.currentCallId)
         stopServiceGracefully()
     }
 

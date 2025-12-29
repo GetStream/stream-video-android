@@ -64,9 +64,9 @@ import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.JoinCallResponse
-import io.getstream.android.video.generated.models.LocalCallAcceptedEvent
+import io.getstream.android.video.generated.models.LocalCallAcceptedPostEvent
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
-import io.getstream.android.video.generated.models.LocalCallRejectedEvent
+import io.getstream.android.video.generated.models.LocalCallRejectedPostEvent
 import io.getstream.android.video.generated.models.MemberResponse
 import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
@@ -752,7 +752,7 @@ public class CallState(
                     if (!acceptedOnThisDevice) call.leave("accepted-on-another-device")
                 }
                 call.fireEvent(
-                    LocalCallAcceptedEvent(
+                    LocalCallAcceptedPostEvent(
                         event.callCid,
                         event.createdAt,
                         event.call,
@@ -782,7 +782,7 @@ public class CallState(
                     },
                 )
                 call.fireEvent(
-                    LocalCallRejectedEvent(
+                    LocalCallRejectedPostEvent(
                         event.callCid,
                         event.createdAt,
                         event.call,

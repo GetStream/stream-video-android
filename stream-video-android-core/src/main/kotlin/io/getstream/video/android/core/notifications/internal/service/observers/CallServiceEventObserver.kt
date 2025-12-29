@@ -17,9 +17,9 @@
 package io.getstream.video.android.core.notifications.internal.service.observers
 
 import io.getstream.android.video.generated.models.CallEndedEvent
-import io.getstream.android.video.generated.models.LocalCallAcceptedEvent
+import io.getstream.android.video.generated.models.LocalCallAcceptedPostEvent
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
-import io.getstream.android.video.generated.models.LocalCallRejectedEvent
+import io.getstream.android.video.generated.models.LocalCallRejectedPostEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
@@ -29,7 +29,7 @@ import io.getstream.video.android.core.utils.toUser
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-internal class CallEventObserver(
+internal class CallServiceEventObserver(
     private val call: Call,
     private val streamVideo: StreamVideoClient,
 ) {
@@ -64,14 +64,14 @@ internal class CallEventObserver(
         onRemoveIncoming: () -> Unit,
     ) {
         when (event) {
-            is LocalCallAcceptedEvent -> {
+            is LocalCallAcceptedPostEvent -> {
                 handleIncomingCallAcceptedByMeOnAnotherDevice(
                     event.user.id,
                     streamVideo.userId,
                     onServiceStop,
                 )
             }
-            is LocalCallRejectedEvent -> {
+            is LocalCallRejectedPostEvent -> {
                 handleIncomingCallRejectedByMeOrCaller(
                     rejectedByUserId = event.user.id,
                     myUserId = streamVideo.userId,

@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-internal class NotificationUpdateObserver(
+internal class CallServiceNotificationUpdateObserver(
     private val call: Call,
     private val streamVideo: StreamVideoClient,
     private val scope: CoroutineScope,
