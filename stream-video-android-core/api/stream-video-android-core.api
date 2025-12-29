@@ -7826,6 +7826,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateFromResponse (Lio/getstream/android/video/generated/models/StopLiveResponse;)V
 	public final fun updateFromResponse (Lio/getstream/android/video/generated/models/UpdateCallResponse;)V
 	public final fun updateNotification (ILandroid/app/Notification;)V
+	public final fun updateNotification (Landroid/app/Notification;)V
 	public final fun updateParticipant (Lio/getstream/video/android/core/ParticipantState;)V
 	public final fun updateParticipantSortingOrder (Ljava/util/Comparator;)V
 	public final fun updateParticipantVisibility (Ljava/lang/String;Lio/getstream/video/android/core/model/VisibilityOnScreenState;)V
