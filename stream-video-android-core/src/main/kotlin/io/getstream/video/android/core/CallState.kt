@@ -1673,6 +1673,11 @@ public class CallState(
         _rejectActionBundle.value = bundle
     }
 
+    @Deprecated("Use updateNotification(Int, Notification) instead")
+    fun updateNotification(notification: Notification) {
+        atomicNotification.set(notification)
+    }
+
     fun updateNotification(notificationId: Int, notification: Notification) {
         this.notificationId = notificationId
         this.atomicNotification.set(notification)
