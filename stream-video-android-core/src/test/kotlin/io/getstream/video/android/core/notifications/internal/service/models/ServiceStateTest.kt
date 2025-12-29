@@ -31,8 +31,11 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
+@RunWith(RobolectricTestRunner::class)
 class ServiceStateTest {
 
     private val testDispatcher = StandardTestDispatcher()
@@ -49,17 +52,6 @@ class ServiceStateTest {
     fun tearDown() {
         Dispatchers.resetMain()
         unmockkAll()
-    }
-
-    @Test
-    fun `unregisterToggleCameraBroadcastReceiver unregisters receiver`() {
-        val sut = ServiceState()
-        sut.registerToggleCameraBroadcastReceiver(service, testScope)
-        sut.unregisterToggleCameraBroadcastReceiver(service)
-
-        verify {
-            service.unregisterReceiver(any())
-        }
     }
 
     @Test
@@ -105,6 +97,21 @@ class ServiceStateTest {
 
         verify {
             service wasNot Called
+        }
+    }
+
+    /**
+     * Ignored because of unknown reason of failure, it will fail when running all tests
+     */
+    @Test
+    fun `unregisterToggleCameraBroadcastReceiver unregisters receiver`() {
+        println("[unregisterToggleCameraBroadcastReceiver unregisters receiver]")
+        val sut = ServiceState()
+        sut.registerToggleCameraBroadcastReceiver(service, testScope)
+        sut.unregisterToggleCameraBroadcastReceiver(service)
+
+        verify {
+            service.unregisterReceiver(any())
         }
     }
 
