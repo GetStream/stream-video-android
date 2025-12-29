@@ -179,15 +179,17 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     }
 
     /**
-     * Builds the [StreamVideo] client.
+     * Constructs and initializes a configured StreamVideo client.
      *
-     * @return The [StreamVideo] client.
+     * Performs validation, sets up logging and time library, initializes notification and connection modules,
+     * attempts background coordinator connection and location loading, installs the client as the singleton,
+     * and returns the created client.
      *
-     * @throws RuntimeException If an instance of the client already exists and [ensureSingleInstance] is set to true.
-     * @throws IllegalArgumentException If [apiKey] is blank.
-     * @throws IllegalArgumentException If [user] type is [UserType.Authenticated] and the [user] id is blank.
-     * @throws IllegalArgumentException If [user] type is [UserType.Authenticated] and both [token] and [tokenProvider] are empty.
-     * @throws ConnectException If the WebSocket connection fails.
+     * @return The initialized StreamVideo client.
+     * @throws RuntimeException If an existing StreamVideo instance is present and `ensureSingleInstance` is true.
+     * @throws IllegalArgumentException If `apiKey` is blank.
+     * @throws IllegalArgumentException If `token` is blank.
+     * @throws IllegalArgumentException If `user` is of type `UserType.Authenticated` and the user id is blank.
      */
     public fun build(): StreamVideo {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle

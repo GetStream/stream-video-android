@@ -29,8 +29,12 @@ import androidx.annotation.RequiresApi
 internal object StreamAudioManager {
 
     /**
-     * Registers an audio device callback to monitor device changes.
-     * always available since minSdk is 24 (Available from API 23+)
+     * Register an AudioDeviceCallback to receive audio device change events.
+     *
+     * @param audioManager The AudioManager used to register the callback.
+     * @param callback The AudioDeviceCallback to register.
+     * @param handler Optional Handler on which callback methods will be invoked; if null the system selects the caller's thread.
+     * @return `true` if registration succeeded, `false` if an exception occurred.
      */
     fun registerAudioDeviceCallback(
         audioManager: AudioManager,
@@ -46,8 +50,10 @@ internal object StreamAudioManager {
     }
 
     /**
-     * Unregisters an audio device callback.
-     * always available since minSdk is 24 (Available from API 23+)
+     * Unregisters an AudioDeviceCallback from the given AudioManager.
+     *
+     * @param callback The AudioDeviceCallback to unregister.
+     * @return `true` if the callback was unregistered successfully, `false` if an exception occurred.
      */
     fun unregisterAudioDeviceCallback(
         audioManager: AudioManager,
@@ -62,10 +68,12 @@ internal object StreamAudioManager {
     }
 
     /**
-     * Gets the list of available communication devices.
-     * For API 31+: Uses getAvailableCommunicationDevices()
-     * For API 24-30: Uses getDevices(AudioManager.GET_DEVICES_OUTPUTS) to get only output devices
-     * (using GET_DEVICES_ALL would include both input and output, causing duplicates for Bluetooth devices)
+     * Retrieve the list of available communication devices.
+     *
+     * On API 31+ this reflects the platform communication devices; on earlier API levels it returns available output devices.
+     *
+     * @param audioManager The AudioManager to query.
+     * @return A list of AudioDeviceInfo representing available communication devices; an empty list is returned if querying fails.
      */
     fun getAvailableCommunicationDevices(audioManager: AudioManager): List<AudioDeviceInfo> {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -86,8 +94,9 @@ internal object StreamAudioManager {
     }
 
     /**
-     * Gets the currently selected communication device.
-     * On API < 31, returns null.
+     * Retrieves the currently selected communication device.
+     *
+     * @return The selected communication `AudioDeviceInfo`, or `null` if no device is selected or an error occurs. 
      */
     @RequiresApi(Build.VERSION_CODES.S)
     fun getCommunicationDevice(audioManager: AudioManager): AudioDeviceInfo? {
@@ -99,9 +108,10 @@ internal object StreamAudioManager {
     }
 
     /**
-     * Sets the communication device
-     * For API 31+: Uses setCommunicationDevice()
-     * For API < 31: Returns false (use setDeviceLegacy in StreamAudioSwitch instead)
+     * Sets or clears the current communication audio device.
+     *
+     * @param device The AudioDeviceInfo to select for communication; pass `null` to clear the selection.
+     * @return `true` if the device was set or cleared successfully, `false` otherwise.
      */
     @RequiresApi(Build.VERSION_CODES.S)
     fun setCommunicationDevice(
@@ -121,8 +131,9 @@ internal object StreamAudioManager {
     }
 
     /**
-     * Clears the communication device selection.
-     * On API < 31, uses legacy AudioManager APIs.
+     * Clears the currently selected communication device.
+     *
+     * @return `true` if the communication device was cleared successfully, `false` otherwise.
      */
     @RequiresApi(Build.VERSION_CODES.S)
     fun clearCommunicationDevice(audioManager: AudioManager): Boolean {

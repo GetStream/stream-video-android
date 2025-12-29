@@ -94,11 +94,21 @@ public sealed class StreamAudioDevice {
     ) : StreamAudioDevice()
 
     public companion object {
+        /**
+         * Obtain the Twilio AudioDevice backing this StreamAudioDevice.
+         *
+         * @return The underlying `AudioDevice` instance.
+         */
         @JvmStatic
         public fun StreamAudioDevice.toAudioDevice(): AudioDevice {
             return this.audio
         }
 
+        /**
+         * Map a Twilio AudioDevice to the corresponding StreamAudioDevice.
+         *
+         * @return A StreamAudioDevice corresponding to the receiver audio device.
+         */
         @JvmStatic
         public fun AudioDevice.fromAudio(): StreamAudioDevice {
             return when (this) {
@@ -110,9 +120,14 @@ public sealed class StreamAudioDevice {
         }
 
         /**
-         * Converts an Android AudioDeviceInfo to a StreamAudioDevice.
-         * Returns null if the device type is not supported.
-         * Available from API 23+ (always available since minSdk is 24).
+         * Map an Android AudioDeviceInfo to the corresponding StreamAudioDevice variant.
+         *
+         * Maps Bluetooth SCO/A2DP to BluetoothHeadset, wired and USB headsets to WiredHeadset,
+         * built-in earpiece to Earpiece, and built-in speaker to Speakerphone. Returns `null`
+         * for device types that have no corresponding StreamAudioDevice.
+         *
+         * @param deviceInfo The Android AudioDeviceInfo to convert.
+         * @return The matching StreamAudioDevice, or `null` if the device type is unsupported.
          */
         @JvmStatic
         public fun fromAudioDeviceInfo(deviceInfo: AudioDeviceInfo): StreamAudioDevice? {
@@ -147,9 +162,13 @@ public sealed class StreamAudioDevice {
         }
 
         /**
-         * Converts a StreamAudioDevice to an AudioDeviceInfo by finding a matching device
-         * from the available communication devices.
-         * Returns null if no matching device is found.
+         * Finds an Android AudioDeviceInfo that corresponds to the provided StreamAudioDevice.
+         *
+         * Prefers the device referenced by streamDevice.audioDeviceInfo when present; on API 31+ searches available communication devices and on older APIs falls back to output devices.
+         *
+         * @param streamDevice The StreamAudioDevice to match.
+         * @param audioManager AudioManager used to query available audio devices.
+         * @return The matching `AudioDeviceInfo` for the given streamDevice, or `null` if none is found.
          */
         @RequiresApi(Build.VERSION_CODES.S)
         @JvmStatic
@@ -220,36 +239,51 @@ public sealed class StreamAudioDevice {
         }
 
         /**
-         * Creates a Twilio AudioDevice.BluetoothHeadset instance using reflection.
+         * Create a Twilio `AudioDevice.BluetoothHeadset` instance via reflection.
+         *
+         * @return A newly constructed `AudioDevice.BluetoothHeadset`.
+         * @throws IllegalStateException If a suitable constructor cannot be invoked to create the instance.
          */
         internal fun createTwilioBluetoothHeadset(): AudioDevice {
             return createTwilioAudioDevice(AudioDevice.BluetoothHeadset::class.java)
         }
 
         /**
-         * Creates a Twilio AudioDevice.WiredHeadset instance using reflection.
+         * Create a Twilio `AudioDevice.WiredHeadset` instance.
+         *
+         * @return A new `AudioDevice.WiredHeadset` instance.
          */
         internal fun createTwilioWiredHeadset(): AudioDevice {
             return createTwilioAudioDevice(AudioDevice.WiredHeadset::class.java)
         }
 
         /**
-         * Creates a Twilio AudioDevice.Earpiece instance using reflection.
+         * Create a Twilio `AudioDevice.Earpiece` instance.
+         *
+         * @return An `AudioDevice.Earpiece` instance.
          */
         internal fun createTwilioEarpiece(): AudioDevice {
             return createTwilioAudioDevice(AudioDevice.Earpiece::class.java)
         }
 
         /**
-         * Creates a Twilio AudioDevice.Speakerphone instance using reflection.
+         * Create a Twilio `AudioDevice.Speakerphone` instance.
+         *
+         * @return A new `AudioDevice` representing the speakerphone.
+         * @throws IllegalStateException If a `AudioDevice.Speakerphone` instance cannot be instantiated.
          */
         internal fun createTwilioSpeakerphone(): AudioDevice {
             return createTwilioAudioDevice(AudioDevice.Speakerphone::class.java)
         }
 
         /**
-         * Generic method to create Twilio AudioDevice instances using reflection.
-         * Accesses the private constructor and creates an instance.
+         * Instantiate a Twilio `AudioDevice` implementation by attempting to invoke its constructors via reflection.
+         *
+         * Tries each declared constructor with reasonable default argument values (empty string for `String`, zero/false for primitives, `null` otherwise) and returns the first successfully created instance.
+         *
+         * @param deviceClass The concrete `AudioDevice` class to instantiate.
+         * @return A new instance of the requested `AudioDevice` subclass.
+         * @throws IllegalStateException If the class has no constructors or none of its constructors could be invoked to create an instance.
          */
         @Suppress("UNCHECKED_CAST")
         private fun <T : AudioDevice> createTwilioAudioDevice(deviceClass: Class<T>): T {

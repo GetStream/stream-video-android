@@ -72,6 +72,31 @@ import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateMan
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import java.nio.ByteBuffer
 
+/**
+ * Displays a settings popup for a Call with device, audio, video filter, transcription, and debug controls.
+ *
+ * Provides UI and actions to select audio/video devices and codecs, toggle audio usage and filters,
+ * control noise cancellation and incoming video visibility, manage recordings/transcriptions, and
+ * perform debug operations (ICE/SFU actions). The popup dismisses via onDismissed.
+ *
+ * @param call The active Call instance whose state and actions the menu manipulates.
+ * @param selectedVideoFilter Index of the currently selected video filter.
+ * @param showDebugOptions Whether debug-related menu items should be shown.
+ * @param noiseCancellationFeatureEnabled Whether the noise-cancellation feature is available.
+ * @param noiseCancellationEnabled Whether noise cancellation is currently enabled.
+ * @param onDismissed Callback invoked when the menu should be dismissed.
+ * @param onSelectVideoFilter Callback invoked with the selected filter index.
+ * @param onShowFeedback Callback invoked to open feedback UI.
+ * @param onNoiseCancellation Callback invoked to toggle or configure noise cancellation.
+ * @param selectedIncomingVideoResolution Currently selected preferred incoming video resolution, or null.
+ * @param onSelectIncomingVideoResolution Callback invoked with a new preferred incoming video resolution or null.
+ * @param isIncomingVideoEnabled Whether incoming video is enabled.
+ * @param onToggleIncomingVideoVisibility Callback invoked to show/hide incoming video.
+ * @param onShowCallStats Callback invoked to display call statistics.
+ * @param onSelectScaleType Callback invoked to change the remote video scaling type.
+ * @param closedCaptionUiState UI state for closed captions.
+ * @param onClosedCaptionsToggle Callback invoked to toggle closed captions.
+ */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 internal fun SettingsMenu(

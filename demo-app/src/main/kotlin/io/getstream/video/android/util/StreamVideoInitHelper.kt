@@ -216,7 +216,11 @@ object StreamVideoInitHelper {
         ).enqueue()
     }
 
-    /** Sets up and returns the [StreamVideo] required to connect to the API. */
+    /**
+     * Builds a configured StreamVideo instance for the provided API key and user.
+     *
+     * @return A ready-to-use StreamVideo configured with the given user, token, logging level, call service registry, notification and telecom settings.
+     */
     @OptIn(ExperimentalStreamVideoApi::class)
     private fun initializeStreamVideo(
         context: Context,

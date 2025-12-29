@@ -629,7 +629,11 @@ class MicrophoneManager(
     }
 
     /**
-     * Select a specific device
+     * Selects the given audio output device and updates related internal state.
+     *
+     * Requests the initialized audio handler to switch to `device`, sets the manager's selected device state, updates the speaker manager status when the speakerphone is (de)selected, and records a non-headset fallback device for future use.
+     *
+     * @param device The desired `StreamAudioDevice` to select, or `null` to clear selection.
      */
     fun select(device: StreamAudioDevice?) {
         logger.i { "selecting device $device" }
@@ -719,7 +723,17 @@ class MicrophoneManager(
 
     fun canHandleDeviceSwitch() = audioUsageProvider.invoke() != AudioAttributes.USAGE_MEDIA
 
-    // Internal logic
+    /**
+     * Initializes audio routing and device handling for the microphone manager.
+     *
+     * Sets up the Android AudioManager and, if device switching is supported and not already initialized,
+     * creates and starts an AudioHandler configured with a device priority that respects `preferSpeaker`.
+     * Once device information becomes available (or immediately if already set up), the optional
+     * `onAudioDevicesUpdate` callback is invoked and internal device/selection state is updated.
+     *
+     * @param preferSpeaker When true, prioritizes the speakerphone over the earpiece when building the preferred device list.
+     * @param onAudioDevicesUpdate Optional callback invoked once the available audio devices and current selection have been populated (or immediately if setup was already completed).
+     */
     internal fun setup(preferSpeaker: Boolean = false, onAudioDevicesUpdate: (() -> Unit)? = null) {
         synchronized(this) {
             var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
@@ -790,11 +804,25 @@ class MicrophoneManager(
         }
     }
 
+    /**
+     * Ensures audio handler setup (initializing it if necessary) and runs the provided action when audio devices update.
+     *
+     * @param preferSpeaker If true, prefer speakerphone in the initial device priority when setting up.
+     * @param actual Action to invoke when the audio devices are updated.
+     */
     internal fun enforceSetup(preferSpeaker: Boolean = false, actual: () -> Unit) = setup(
         preferSpeaker,
         onAudioDevicesUpdate = actual,
     )
 
+    /**
+     * Invokes the provided block with the initialized `AudioHandler` if available.
+     *
+     * If the audio handler has been initialized, the `then` lambda is called with it;
+     * otherwise the function logs an error indicating setup() must be called first.
+     *
+     * @param then Lambda to execute with the initialized `AudioHandler`.
+     */
     private fun ifAudioHandlerInitialized(then: (audioHandler: AudioHandler) -> Unit) {
         if (this::audioHandler.isInitialized) {
             then(this.audioHandler)

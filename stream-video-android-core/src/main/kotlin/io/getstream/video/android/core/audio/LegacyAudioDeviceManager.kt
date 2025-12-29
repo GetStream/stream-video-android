@@ -69,6 +69,15 @@ internal class LegacyAudioDeviceManager(
     private val bluetoothScoTimeoutHandler = Handler(Looper.getMainLooper())
     private var bluetoothScoTimeoutRunnable: Runnable? = null
 
+    /**
+     * Build a deduplicated list of available audio devices on legacy Android (API 24–30).
+     *
+     * Detects Bluetooth headsets using the Bluetooth HEADSET profile proxy when available or falls back
+     * to AudioDeviceInfo enumeration; deduplicates SCO vs A2DP devices by Bluetooth address (preferring
+     * SCO), includes wired headset (with a fallback check), always includes speakerphone, and adds
+     * earpiece only if the device has telephony capability.
+     *
+     * @return A list of detected StreamAudioDevice instances representing available audio routes. */
     override fun enumerateDevices(): List<StreamAudioDevice> {
         val devices = mutableListOf<StreamAudioDevice>()
 
@@ -192,6 +201,16 @@ internal class LegacyAudioDeviceManager(
         return devices
     }
 
+    /**
+     * Selects the specified audio device and configures system audio routing accordingly.
+     *
+     * For speakerphone and wired headset selection this enables/disables the speakerphone as appropriate.
+     * For earpiece selection this disables the speakerphone. For Bluetooth headset selection this
+     * disables the speakerphone and initiates a Bluetooth SCO connection.
+     *
+     * @param device The audio device to select.
+     * @return `true` if the selection and the corresponding system audio configuration were initiated, `false` otherwise.
+     */
     override fun selectDevice(device: StreamAudioDevice): Boolean {
         when (device) {
             is StreamAudioDevice.Speakerphone -> {
@@ -228,6 +247,9 @@ internal class LegacyAudioDeviceManager(
         }
     }
 
+    /**
+     * Resets audio routing to a neutral state by stopping Bluetooth SCO, turning off the speakerphone, and clearing the selected device.
+     */
     override fun clearDevice() {
         stopBluetoothSco()
         @Suppress("DEPRECATION")
@@ -235,12 +257,29 @@ internal class LegacyAudioDeviceManager(
         selectedDevice = null
     }
 
-    override fun getSelectedDevice(): StreamAudioDevice? = selectedDevice
+    /**
+ * Retrieve the currently selected audio device.
+ *
+ * @return The currently selected [StreamAudioDevice], or `null` if no device is selected.
+ */
+override fun getSelectedDevice(): StreamAudioDevice? = selectedDevice
 
+    /**
+     * Begin monitoring legacy audio device changes.
+     *
+     * Registers the legacy listeners required to detect wired headset plug events,
+     * Bluetooth headset/profile state and SCO/audio state updates so device
+     * availability and connection changes are reported to the manager's callbacks.
+     */
     override fun start() {
         registerLegacyListeners()
     }
 
+    /**
+     * Stops the legacy audio device manager and releases audio-related resources.
+     *
+     * Unregisters legacy listeners, stops any ongoing Bluetooth SCO connection, and clears the currently selected device.
+     */
     override fun stop() {
         unregisterLegacyListeners()
         stopBluetoothSco()
@@ -248,13 +287,23 @@ internal class LegacyAudioDeviceManager(
     }
 
     /**
-     * Registers legacy listeners for API 24-30:
-     * - BroadcastReceiver for ACTION_HEADSET_PLUG (wired headset)
-     * - BluetoothManager for Bluetooth device detection
+     * Register legacy audio listeners and initialize Bluetooth HEADSET profile proxy for API 24–30.
+     *
+     * Registers a BroadcastReceiver for wired headset plug/unplug events and a BroadcastReceiver for
+     * Bluetooth headset connection, audio, and SCO state updates. Initializes BluetoothManager and
+     * BluetoothAdapter and requests a HEADSET profile proxy; if the device does not support Bluetooth,
+     * SCO is unavailable, or a SecurityException occurs while requesting the profile proxy, the manager
+     * records that the profile proxy is unavailable and continues using the fallback enumeration path.
      */
     private fun registerLegacyListeners() {
         // Register BroadcastReceiver for wired headset plug/unplug
         headsetPlugReceiver = object : BroadcastReceiver() {
+            /**
+             * Receives headset plug/unplug broadcasts and triggers device re-enumeration.
+             *
+             * @param context The context in which the receiver is running.
+             * @param intent The broadcast intent; expects AudioManager.ACTION_HEADSET_PLUG and reads the `state` and `microphone` extras.
+             */
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == AudioManager.ACTION_HEADSET_PLUG) {
                     val state = intent.getIntExtra("state", -1)
@@ -319,6 +368,16 @@ internal class LegacyAudioDeviceManager(
 
         // Register Bluetooth state change receiver
         bluetoothStateReceiver = object : BroadcastReceiver() {
+            /**
+             * Handles incoming broadcast intents related to Bluetooth headset connection, Bluetooth audio state, and SCO audio state,
+             * extracting the relevant state values and dispatching them to the manager's internal handlers.
+             *
+             * @param context The Context in which the receiver is running.
+             * @param intent The received Intent; expected to contain one of:
+             *  - BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED (contains BluetoothHeadset.EXTRA_STATE)
+             *  - BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED (contains BluetoothHeadset.EXTRA_STATE)
+             *  - AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED (contains AudioManager.EXTRA_SCO_AUDIO_STATE)
+             */
             override fun onReceive(context: Context, intent: Intent) {
                 val action = intent.action
                 when {
@@ -349,7 +408,11 @@ internal class LegacyAudioDeviceManager(
     }
 
     /**
-     * Unregisters legacy listeners.
+     * Stops and cleans up legacy audio listeners and Bluetooth resources.
+     *
+     * Unregisters the wired-headset and Bluetooth broadcast receivers if registered,
+     * closes the Bluetooth HEADSET profile proxy when available, and clears related
+     * Bluetooth manager, adapter, headset proxy, and device references.
      */
     private fun unregisterLegacyListeners() {
         headsetPlugReceiver?.let { receiver ->
@@ -386,8 +449,11 @@ internal class LegacyAudioDeviceManager(
     }
 
     /**
-     * Detects Bluetooth devices using BluetoothHeadset profile
-     * This only returns devices that support SCO and are actually connected.
+     * Detects connected Bluetooth headsets that support SCO.
+     *
+     * Returns a list of BluetoothHeadset devices that are currently connected via the HEADSET profile and suitable for SCO audio.
+     *
+     * @return A list of StreamAudioDevice.BluetoothHeadset representing connected SCO-capable Bluetooth headsets; empty if none are available or the HEADSET profile proxy is not connected.
      */
     private fun detectBluetoothDevices(): List<StreamAudioDevice.BluetoothHeadset> {
         if (bluetoothHeadset == null) {
@@ -455,6 +521,19 @@ internal class LegacyAudioDeviceManager(
      * BluetoothProfile.ServiceListener for BluetoothHeadset profile proxy.
      */
     private val bluetoothProfileServiceListener = object : BluetoothProfile.ServiceListener {
+        /**
+         * Handles Bluetooth profile connection events for the HEADSET profile.
+         *
+         * When the HEADSET profile is connected, stores the provided proxy as the internal
+         * `BluetoothHeadset` proxy, marks the profile proxy as available, inspects any
+         * currently connected Bluetooth devices (logging their name, address, and connection state),
+         * and triggers device enumeration via `onDeviceChange()`. SecurityExceptions thrown
+         * while querying device state are caught and logged. Logs a warning for unexpected profiles.
+         *
+         * @param profile The Bluetooth profile constant (from `BluetoothProfile`) that was connected.
+         * @param proxy The profile proxy instance; expected to be castable to `BluetoothHeadset` when `profile`
+         *              equals `BluetoothProfile.HEADSET`. May be null.
+         */
         override fun onServiceConnected(profile: Int, proxy: BluetoothProfile?) {
             if (profile == BluetoothProfile.HEADSET) {
                 mainHandler.post {
@@ -494,6 +573,14 @@ internal class LegacyAudioDeviceManager(
             }
         }
 
+        /**
+         * Handles disconnection of a Bluetooth profile service and updates internal Bluetooth state.
+         *
+         * When the HEADSET profile is disconnected, posts a task to the main handler that stops
+         * Bluetooth SCO, clears the HEADSET profile proxy and targeted Bluetooth device, marks
+         * the profile proxy as unavailable, and triggers `onDeviceChange()`. For other profiles,
+         * logs a warning indicating an unexpected profile disconnection.
+         */
         override fun onServiceDisconnected(profile: Int) {
             if (profile == BluetoothProfile.HEADSET) {
                 mainHandler.post {
@@ -511,7 +598,13 @@ internal class LegacyAudioDeviceManager(
     }
 
     /**
-     * Handles Bluetooth headset connection state changes.
+     * Update internal state and notify listeners when the Bluetooth HEADSET profile connection state changes.
+     *
+     * For `BluetoothHeadset.STATE_CONNECTED` this resets SCO connection attempts and signals device availability changes.
+     * For `BluetoothHeadset.STATE_DISCONNECTED` this stops any active Bluetooth SCO connection and signals device availability changes.
+     *
+     * @param connectionState The Bluetooth HEADSET profile connection state (one of `BluetoothHeadset.STATE_CONNECTED`,
+     * `BluetoothHeadset.STATE_DISCONNECTED`, etc.).
      */
     private fun onHeadsetConnectionStateChanged(connectionState: Int) {
         logger.d { "[onHeadsetConnectionStateChanged] Connection state: $connectionState" }
@@ -528,7 +621,15 @@ internal class LegacyAudioDeviceManager(
     }
 
     /**
-     * Handles Bluetooth audio state changes.
+     * Process Bluetooth headset audio connection state updates and adjust internal SCO state.
+     *
+     * Cancels any pending SCO connection timeout when audio becomes connected; if the manager
+     * was attempting to connect, marks SCO as connected and resets retry attempts. When audio
+     * becomes disconnected, ignores the initial sticky broadcast and otherwise triggers a device
+     * availability update.
+     *
+     * @param audioState One of the BluetoothHeadset audio state constants (e.g. `STATE_AUDIO_CONNECTED`, `STATE_AUDIO_DISCONNECTED`).
+     * @param isInitialStateChange `true` when the received broadcast represents an initial sticky state delivered on registration, otherwise `false`.
      */
     private fun onAudioStateChanged(audioState: Int, isInitialStateChange: Boolean) {
         logger.d { "[onAudioStateChanged] Audio state: $audioState, isInitial: $isInitialStateChange" }
@@ -551,7 +652,13 @@ internal class LegacyAudioDeviceManager(
     }
 
     /**
-     * Handles Bluetooth SCO audio state updates.
+     * Updates internal Bluetooth SCO state and reacts to SCO audio state changes.
+     *
+     * Updates the manager's internal SCO state to CONNECTING, CONNECTED, or DISCONNECTED based on the provided
+     * AudioManager SCO state, clears any pending SCO connection timeout when connected, resets connection attempts
+     * after a successful connection, and invokes Bluetooth connection failure handling on errors or failed connect attempts.
+     *
+     * @param state One of the AudioManager.SCO_AUDIO_STATE_* constants indicating the current SCO audio state.
      */
     private fun handleBluetoothScoStateUpdate(state: Int) {
         logger.d { "[handleBluetoothScoStateUpdate] SCO state: $state" }
@@ -594,8 +701,13 @@ internal class LegacyAudioDeviceManager(
     }
 
     /**
-     * Starts Bluetooth SCO connection with robust error handling and retry logic.
-     * checks if SCO is available and device is connected.
+     * Initiates a Bluetooth SCO audio connection with attempt limits and failure handling.
+     *
+     * Verifies that a headset profile proxy and target device are available and connected, enforces
+     * the maximum retry limit, updates internal SCO state and attempt counters, and schedules a
+     * timeout to detect and handle connection failures.
+     *
+     * @return `true` if the SCO start was initiated or SCO is already connecting/connected, `false` otherwise.
      */
     private fun startBluetoothSco(): Boolean {
         if (bluetoothScoConnectionAttempts >= maxBluetoothScoAttempts) {
@@ -676,7 +788,10 @@ internal class LegacyAudioDeviceManager(
     }
 
     /**
-     * Stops Bluetooth SCO connection.
+     * Stops an active or pending Bluetooth SCO connection.
+     *
+     * Takes no action if SCO is not currently connecting or connected.
+     * Resets the connection attempt counter for future reconnection attempts.
      */
     private fun stopBluetoothSco() {
         if (bluetoothScoState != BluetoothScoState.CONNECTING && bluetoothScoState != BluetoothScoState.CONNECTED) {
@@ -730,8 +845,9 @@ internal class LegacyAudioDeviceManager(
     }
 
     /**
-     * Checks if the device has an earpiece (i.e., is a phone).
-     * checks for telephony feature.
+     * Determines whether the device includes a built-in earpiece (has telephony capability).
+     *
+     * @return `true` if the device reports the telephony feature, `false` otherwise.
      */
     private fun hasEarpiece(context: Context): Boolean {
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
