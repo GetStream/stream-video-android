@@ -260,7 +260,6 @@ internal class ServiceLauncher(val context: Context) {
                         logBundle(it)
                     }
                     context.startService(serviceIntent)
-//                    context.stopService(serviceIntent)
                 }
             }
         }

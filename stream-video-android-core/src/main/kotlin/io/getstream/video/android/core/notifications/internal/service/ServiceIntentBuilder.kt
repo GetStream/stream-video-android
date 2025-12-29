@@ -85,6 +85,7 @@ internal class ServiceIntentBuilder {
         return intent.putExtra(EXTRA_STOP_SERVICE, true)
     }
 
+    // TODO Rahul: Do before merge, check what was the problem with older method
     private fun isServiceRunning(serviceClass: Class<*>): Boolean =
         safeCallWithDefault(true) {
             if (CallService.isServiceRunning()) {
