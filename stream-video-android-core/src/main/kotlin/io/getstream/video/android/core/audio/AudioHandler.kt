@@ -33,11 +33,22 @@ public interface AudioHandler {
     public fun start()
 
     /**
-     * Called when a room is disconnected.
-     */
+ * Stops audio device management and releases related resources.
+ *
+ * Cancels any pending initialization, stops any active audio switch on the main thread,
+ * and clears internal references so audio handling is fully stopped when a room is disconnected.
+ */
     public fun stop()
 
-    public fun selectDevice(audioDevice: StreamAudioDevice?)
+    /**
+ * Selects the given StreamAudioDevice for audio output.
+ *
+ * Converts the provided StreamAudioDevice to its underlying Twilio AudioDevice and applies it.
+ * Passing `null` clears the current selection.
+ *
+ * @param audioDevice The StreamAudioDevice to select, or `null` to clear selection.
+ */
+public fun selectDevice(audioDevice: StreamAudioDevice?)
 }
 
 /**
@@ -77,6 +88,12 @@ public class AudioSwitchHandler(
         }
     }
 
+    /**
+     * Stops and releases the audio switcher, cancelling any pending initialization.
+     *
+     * Cancels any pending main-thread runnables related to audio-switch initialization and schedules
+     * a main-thread task to stop the active AudioSwitch (if any) and clear its reference.
+     */
     override fun stop() {
         logger.d { "[stop] no args" }
         mainThreadHandler.removeCallbacksAndMessages(null)
@@ -86,11 +103,21 @@ public class AudioSwitchHandler(
         }
     }
 
+    /**
+     * Selects the given StreamAudioDevice for audio output by converting it to Twilio's AudioDevice and delegating to the existing selection logic.
+     *
+     * @param audioDevice The StreamAudioDevice to select; pass `null` to clear the current selection.
+     */
     override fun selectDevice(audioDevice: StreamAudioDevice?) {
         val twilioDevice = convertStreamDeviceToTwilioDevice(audioDevice)
         selectDevice(twilioDevice)
     }
 
+    /**
+     * Selects the given Twilio audio device and applies the change.
+     *
+     * @param audioDevice The Twilio `AudioDevice` to select; pass `null` to clear the current selection.
+     */
     public fun selectDevice(audioDevice: AudioDevice?) {
         logger.i { "[selectDevice] audioDevice: $audioDevice" }
         audioSwitch?.selectDevice(audioDevice)
@@ -98,8 +125,10 @@ public class AudioSwitchHandler(
     }
 
     /**
-     * Converts a StreamAudioDevice to Twilio's AudioDevice.
-     * Returns null if the input is null.
+     * Extracts the underlying Twilio `AudioDevice` from a `StreamAudioDevice`.
+     *
+     * @param streamDevice The `StreamAudioDevice` to convert, or `null`.
+     * @return The contained `AudioDevice`, or `null` if `streamDevice` is `null`.
      */
     private fun convertStreamDeviceToTwilioDevice(streamDevice: StreamAudioDevice?): AudioDevice? {
         return streamDevice?.audio

@@ -90,8 +90,11 @@ internal class StreamAudioSwitch(
     private var previousDeviceBeforeBluetooth: StreamAudioDevice? = null
 
     /**
-     * Starts monitoring audio devices and begins device enumeration.
-     * @param listener Callback that receives device updates
+     * Begins monitoring system audio devices, requests audio focus, registers callbacks, and performs an initial device enumeration.
+     *
+     * If the switch is already started, this method is a no-op.
+     *
+     * @param listener Optional callback invoked when available devices or the selected device change.
      */
     public fun start(listener: StreamAudioDeviceChangeListener? = null) {
         synchronized(this) {
@@ -134,7 +137,11 @@ internal class StreamAudioSwitch(
     }
 
     /**
-     * Stops monitoring audio devices and releases resources.
+     * Stop monitoring audio devices and release internal resources.
+     *
+     * Deactivates audio routing, abandons any held audio focus, unregisters the system
+     * audio device callback, stops and clears the underlying device manager, clears the
+     * device-change listener and resets available/selected device state.
      */
     public fun stop() {
         synchronized(this) {
@@ -167,15 +174,18 @@ internal class StreamAudioSwitch(
     }
 
     /**
-     * Selects an audio device for routing.
-     * @param device The device to select, or null for automatic selection
+     * Sets the active audio device used for routing.
+     *
+     * @param device The device to select; pass `null` to let the switch choose a device automatically based on the configured priority list.
      */
     public fun selectDevice(device: StreamAudioDevice?) {
         selectStreamAudioDevice(device)
     }
 
     /**
-     * Deactivates audio routing.
+     * Deactivates audio routing and logs the action.
+     *
+     * This does not change or abandon audio focus; audio focus is managed by WebRTC.
      */
     public fun deactivate() {
         synchronized(this) {
@@ -185,18 +195,29 @@ internal class StreamAudioSwitch(
     }
 
     /**
-     * Gets the currently selected device.
-     */
+ * Retrieve the currently selected audio device.
+ *
+ * @return The currently selected StreamAudioDevice, or `null` if no device is selected.
+ */
     public fun getSelectedDevice(): StreamAudioDevice? = _selectedDeviceState.value
 
     /**
-     * Gets the list of available devices.
-     */
+ * Return the current list of available audio devices.
+ *
+ * @return The list of currently available `StreamAudioDevice` instances.
+ */
     public fun getAvailableDevices(): List<StreamAudioDevice> = _availableDevices.value
 
     /**
-     * Selects a native audio device for routing.
-     * @param device The device to select, or null for automatic selection
+     * Selects and routes audio to the given StreamAudioDevice or, when `device` is null,
+     * chooses a device automatically using the configured priority list.
+     *
+     * Attempts to route through the active device manager and updates the internal selected-device state.
+     * When switching to a Bluetooth headset, preserves the previous device for potential fallback.
+     * If the requested routing fails, attempts an automatic re-selection by priority. If no device is available,
+     * clears the current selection and underlying routing.
+     *
+     * @param device The device to select, or `null` to select the highest-priority available device automatically.
      */
     public fun selectStreamAudioDevice(device: StreamAudioDevice?) {
         synchronized(this) {
@@ -248,7 +269,13 @@ internal class StreamAudioSwitch(
     }
 
     /**
-     * Selects a device by priority from available native devices.
+     * Selects the highest-priority available audio device from the current available devices.
+     *
+     * Checks the resolved preferred device type order and returns the first available device
+     * that matches the priority list; if no preferred types are present, returns the first
+     * available device. Returns `null` when no devices are available.
+     *
+     * @return The selected StreamAudioDevice according to priority, or `null` if none are available.
      */
     private fun selectCustomDeviceByPriority(): StreamAudioDevice? {
         val availableDevices = _availableDevices.value
@@ -268,6 +295,13 @@ internal class StreamAudioSwitch(
         return availableDevices.firstOrNull()
     }
 
+    /**
+     * Registers and starts an AudioDeviceCallback to monitor system audio device changes.
+     *
+     * If a callback is already registered this method is a no-op. When audio devices are added
+     * or removed the callback triggers a device enumeration via `enumerateDevices()`. The callback
+     * is registered with StreamAudioManager using this class's `audioManager` and `mainHandler`.
+     */
     private fun registerDeviceCallback() {
         if (audioDeviceCallback != null) {
             return
@@ -292,6 +326,11 @@ internal class StreamAudioSwitch(
         )
     }
 
+    /**
+     * Unregisters the current AudioDeviceCallback from the AudioManager and clears the stored reference.
+     *
+     * If no callback is registered, this function does nothing.
+     */
     private fun unregisterDeviceCallback() {
         audioDeviceCallback?.let { callback ->
             StreamAudioManager.unregisterAudioDeviceCallback(audioManager, callback)
@@ -299,6 +338,15 @@ internal class StreamAudioSwitch(
         }
     }
 
+    /**
+     * Refreshes the list of available native audio devices and reconciles the current selection.
+     *
+     * Updates the internal available-devices state from the device manager, clears the selected device
+     * if it is no longer present, otherwise updates the selection from the manager's current routing.
+     * If the previously selected device is gone, requests the device manager to clear its routing.
+     * Finally invokes the external device-change listener with the current available devices and
+     * selected device.
+     */
     private fun enumerateDevices() {
         // Enumerate devices using the device manager (which works with NativeStreamAudioDevice)
         val manager = deviceManager
@@ -325,7 +373,9 @@ internal class StreamAudioSwitch(
     }
 
     /**
-     * Handles Bluetooth connection failure by reverting to the previously selected device.
+     * Restore audio routing after a Bluetooth connection failure.
+     *
+     * Attempts to reselect the device that was active before Bluetooth was chosen; if that device is no longer available, clears the stored previous-device reference and falls back to the automatic priority-based selection.
      */
     private fun handleBluetoothConnectionFailure() {
         logger.w {
@@ -359,8 +409,11 @@ internal class StreamAudioSwitch(
     }
 
     /**
-     * Requests audio focus for audio routing.
-     * Uses AudioFocusRequest on API 26+ and legacy requestAudioFocus on older versions.
+     * Requests transient audio focus suitable for voice communication and updates internal focus state.
+     *
+     * Attempts to obtain audio focus and, when an AudioFocusRequest is created, stores it in the
+     * `audioFocusRequest` property. The result of the request is logged; any exceptions encountered
+     * during the request are caught and logged.
      */
     private fun requestAudioFocus() {
         try {
@@ -407,7 +460,10 @@ internal class StreamAudioSwitch(
     }
 
     /**
-     * Abandons audio focus.
+     * Releases any previously requested audio focus and clears internal focus state.
+     *
+     * Uses an `AudioFocusRequest` on API 26+ and the legacy `abandonAudioFocus` on older APIs.
+     * Logs the abandonment result and suppresses any exceptions so callers are not thrown.
      */
     private fun abandonAudioFocus() {
         try {
@@ -431,8 +487,9 @@ internal class StreamAudioSwitch(
         private const val TAG = "StreamAudioSwitch"
 
         /**
-         * Returns the default preferred device list matching Twilio's priority:
-         * BluetoothHeadset -> WiredHeadset -> Earpiece -> Speakerphone
+         * Provides the default preferred device priority list.
+         *
+         * @return List of `StreamAudioDevice` classes ordered by preference: BluetoothHeadset, WiredHeadset, Earpiece, Speakerphone.
          */
         @JvmStatic
         fun getDefaultPreferredDeviceList(): List<Class<out StreamAudioDevice>> {

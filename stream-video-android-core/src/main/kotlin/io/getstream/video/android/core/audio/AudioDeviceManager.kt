@@ -23,15 +23,18 @@ package io.getstream.video.android.core.audio
  */
 internal interface AudioDeviceManager {
     /**
-     * Enumerates available audio devices.
-     */
+ * Lists the currently available audio devices.
+ *
+ * @return A list of available StreamAudioDevice instances representing detected audio input/output devices.
+ */
     fun enumerateDevices(): List<StreamAudioDevice>
 
     /**
-     * Selects an audio device for routing.
-     * @param device The device to select
-     * @return true if selection was successful, false otherwise
-     */
+ * Sets the active audio routing device.
+ *
+ * @param device The device to make active for audio routing.
+ * @return `true` if the device was successfully selected, `false` otherwise.
+ */
     fun selectDevice(device: StreamAudioDevice): Boolean
 
     /**
@@ -40,17 +43,21 @@ internal interface AudioDeviceManager {
     fun clearDevice()
 
     /**
-     * Gets the currently selected device.
-     */
+ * Returns the currently selected audio device.
+ *
+ * @return The selected StreamAudioDevice, or `null` if no device is selected.
+ */
     fun getSelectedDevice(): StreamAudioDevice?
 
     /**
-     * Starts the device manager (registers listeners, etc.)
-     */
+ * Initializes the device manager and prepares it for use.
+ */
     fun start()
 
     /**
-     * Stops the device manager (unregisters listeners, etc.)
-     */
+ * Releases resources and tears down the device manager.
+ *
+ * Stops device monitoring, unregisters listeners or observers, and performs any necessary cleanup so the manager is no longer active. The manager must be started again before it can be used after this call.
+ */
     fun stop()
 }

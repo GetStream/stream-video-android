@@ -32,6 +32,14 @@ internal class ModernAudioDeviceManager(
     private val logger by taggedLogger(TAG)
     private var selectedDevice: StreamAudioDevice? = null
 
+    /**
+     * Enumerates available communication audio devices and returns them as StreamAudioDevice instances.
+     *
+     * Converts Android AudioDeviceInfo entries reported by StreamAudioManager into StreamAudioDevice objects,
+     * omitting any devices that cannot be converted.
+     *
+     * @return A list of converted StreamAudioDevice objects representing available communication devices.
+     */
     override fun enumerateDevices(): List<StreamAudioDevice> {
         val androidDevices = StreamAudioManager.getAvailableCommunicationDevices(audioManager)
         logger.d { "[enumerateDevices] Found ${androidDevices.size} available communication devices" }
@@ -70,6 +78,14 @@ internal class ModernAudioDeviceManager(
         return streamAudioDevices
     }
 
+    /**
+     * Selects the given StreamAudioDevice as the system communication audio device.
+     *
+     * If the platform AudioDeviceInfo for the device can be resolved and setting it succeeds, the manager's selected device is updated.
+     *
+     * @param device The StreamAudioDevice to select.
+     * @return `true` if the device was successfully set as the communication device, `false` otherwise.
+     */
     override fun selectDevice(device: StreamAudioDevice): Boolean {
         val androidDevice = device.audioDeviceInfo
             ?: StreamAudioDevice.toAudioDeviceInfo(device, audioManager)
@@ -85,11 +101,24 @@ internal class ModernAudioDeviceManager(
         }
     }
 
+    /**
+     * Clears the current communication audio device and resets the cached selection.
+     *
+     * This removes any device previously set as the communication device from the system
+     * and sets the manager's selectedDevice to null.
+     */
     override fun clearDevice() {
         StreamAudioManager.clearCommunicationDevice(audioManager)
         selectedDevice = null
     }
 
+    /**
+     * Retrieve the currently active communication audio device.
+     *
+     * Attempts to read the active communication device from the system AudioManager and convert it to a StreamAudioDevice; if conversion succeeds, caches and returns that device. If no system device is available or conversion fails, returns the locally cached selection.
+     *
+     * @return The current StreamAudioDevice if available and convertible, otherwise the cached selected device, or `null` if none is set.
+     */
     override fun getSelectedDevice(): StreamAudioDevice? {
         // Try to get from AudioManager first
         val currentDevice = StreamAudioManager.getCommunicationDevice(audioManager)
@@ -103,10 +132,20 @@ internal class ModernAudioDeviceManager(
         return selectedDevice
     }
 
+    /**
+     * Initialize audio device management resources if required.
+     *
+     * This implementation is a no-op for Android API 31+ because no startup work is necessary.
+     */
     override fun start() {
         // No special setup needed for modern API
     }
 
+    /**
+     * Stops the audio device manager and clears any selected communication device.
+     *
+     * Clears the manager's selected device state so no communication device remains set.
+     */
     override fun stop() {
         clearDevice()
     }

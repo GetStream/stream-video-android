@@ -1350,6 +1350,13 @@ public class Call(
         }
     }
 
+    /**
+     * Observes available microphone devices and ensures an appropriate audio input is selected.
+     *
+     * When a Bluetooth headset becomes available it is selected; otherwise a wired headset is selected
+     * if present. If no headset is available, the previously saved non-headset fallback device is
+     * restored when available.
+     */
     private fun monitorHeadset() {
         microphone.devices.onEach { availableDevices ->
             logger.d {

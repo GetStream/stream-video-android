@@ -26,13 +26,18 @@ import com.twilio.audioswitch.AudioDeviceChangeListener as TwilioAudioDeviceChan
  */
 internal object AudioHandlerFactory {
     /**
-     * Creates an AudioHandler instance based on the useInBuiltAudioSwitch flag.
+     * Create an AudioHandler configured either with the in-built StreamAudioSwitch or the Twilio AudioSwitch.
      *
-     * @param context Android context
-     * @param preferredStreamAudioDeviceList List of preferred audio device types in priority order
-     * @param twilioAudioDeviceChangeListener Callback for device changes
-     * @param useInBuiltAudioSwitch If true, uses custom StreamAudioSwitch; if false, uses Twilio AudioSwitch
-     * @return An AudioHandler instance
+     * When `useInBuiltAudioSwitch` is true, returns a StreamAudioSwitchHandler using `preferredStreamAudioDeviceList`
+     * and `streamAudioDeviceChangeListener`. When false, returns an AudioSwitchHandler with `preferredStreamAudioDeviceList`
+     * mapped to Twilio `AudioDevice` types (unmapped types fall back to speakerphone) and `twilioAudioDeviceChangeListener`.
+     *
+     * @param context Android context used to initialize the audio handler.
+     * @param preferredStreamAudioDeviceList Preferred StreamAudioDevice classes in priority order.
+     * @param twilioAudioDeviceChangeListener Callback invoked on Twilio audio device changes (used when not using in-built switch).
+     * @param streamAudioDeviceChangeListener Callback invoked on Stream audio device changes (used when using in-built switch).
+     * @param useInBuiltAudioSwitch If true, use the in-built StreamAudioSwitch; otherwise use the Twilio AudioSwitch.
+     * @return An AudioHandler instance configured according to `useInBuiltAudioSwitch` and the provided preferences/listeners.
      */
     fun create(
         context: Context,
@@ -69,7 +74,10 @@ internal object AudioHandlerFactory {
     }
 
     /**
-     * Converts a Twilio AudioDevice to StreamAudioDevice.
+     * Map a Twilio `AudioDevice` to the corresponding `StreamAudioDevice`.
+     *
+     * @param twilioDevice The Twilio `AudioDevice` to convert.
+     * @return A `StreamAudioDevice` instance representing the same physical device as the provided Twilio `AudioDevice`.
      */
     private fun convertTwilioDeviceToStreamDevice(twilioDevice: AudioDevice): StreamAudioDevice {
         return when (twilioDevice) {

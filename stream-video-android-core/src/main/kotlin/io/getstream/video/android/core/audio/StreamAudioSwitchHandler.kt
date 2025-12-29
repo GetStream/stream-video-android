@@ -37,6 +37,13 @@ internal class StreamAudioSwitchHandler(
     private val mainThreadHandler = Handler(Looper.getMainLooper())
     private var isAudioSwitchInitScheduled = false
 
+    /**
+     * Initializes and starts the underlying StreamAudioSwitch on the main thread if not already scheduled.
+     *
+     * Schedules creation of a StreamAudioSwitch using the handler's context and preferred device list, stores the
+     * created instance, and starts it with the configured audio device change listener. If initialization has already
+     * been scheduled, this method is a no-op.
+     */
     override fun start() {
         synchronized(this) {
             if (!isAudioSwitchInitScheduled) {
@@ -59,6 +66,12 @@ internal class StreamAudioSwitchHandler(
         }
     }
 
+    /**
+     * Stops and releases the active StreamAudioSwitch.
+     *
+     * Removes any pending main-thread callbacks, stops the active StreamAudioSwitch if present,
+     * and clears the stored reference. All teardown is performed on the main thread.
+     */
     override fun stop() {
         logger.d { "[stop] no args" }
         mainThreadHandler.removeCallbacksAndMessages(null)
@@ -68,6 +81,13 @@ internal class StreamAudioSwitchHandler(
         }
     }
 
+    /**
+     * Selects an audio device for use.
+     *
+     * If the internal audio switch is initialized, forwards the selection to it; otherwise no-op.
+     *
+     * @param audioDevice The device to select, or `null` to clear the current selection.
+     */
     override fun selectDevice(audioDevice: StreamAudioDevice?) {
         streamAudioSwitch?.selectDevice(audioDevice)
     }
