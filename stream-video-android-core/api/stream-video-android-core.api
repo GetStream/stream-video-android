@@ -7933,7 +7933,6 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun removeRingingCall ()V
 	public final fun removeRingingCall (Lio/getstream/video/android/core/Call;)V
 	public final fun setActiveCall (Lio/getstream/video/android/core/Call;)V
-	public final fun transitionToAcceptCall (Lio/getstream/video/android/core/Call;)V
 }
 
 public abstract interface class io/getstream/video/android/core/ConnectionState {

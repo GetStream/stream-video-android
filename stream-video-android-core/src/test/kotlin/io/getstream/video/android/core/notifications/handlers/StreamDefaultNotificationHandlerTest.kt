@@ -301,7 +301,7 @@ class StreamDefaultNotificationHandlerTest {
         verify { mockNotificationManager.notify(notificationId, any()) }
     }
 
-    @Test // failed
+    @Test
     fun `onMissedCall falls back to default intent when specific intent not found`() {
         // Given
         val callDisplayName = "Bob Wilson"

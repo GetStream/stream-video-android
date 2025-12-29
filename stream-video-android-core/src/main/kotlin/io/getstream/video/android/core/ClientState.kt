@@ -232,7 +232,7 @@ class ClientState(private val client: StreamVideo) {
         }
     }
 
-    fun transitionToAcceptCall(call: Call) {
+    internal fun transitionToAcceptCall(call: Call) {
         if (call.id == ringingCall.value?.id) {
             (client as StreamVideoClient).callSoundAndVibrationPlayer.stopCallSound()
             _ringingCall.value = null
