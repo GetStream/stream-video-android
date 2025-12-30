@@ -34,6 +34,25 @@ import io.getstream.video.android.model.StreamCallId
 internal class ServiceNotificationRetriever {
     private val logger by taggedLogger("ServiceNotificationRetriever")
 
+    /**
+     * Builds a notification and its corresponding notification ID for a given call trigger.
+     *
+     * This method is responsible for creating (or updating) the call-related notification
+     * based on the provided trigger and current call context.
+     *
+     * @param context The Android [Context] used to build the notification.
+     * @param trigger A string indicating the reason for the notification update
+     *                eg. [CallService.TRIGGER_INCOMING_CALL], [CallService.TRIGGER_ONGOING_CALL], [CallService.TRIGGER_OUTGOING_CALL]
+     * @param streamVideo The active [StreamVideoClient] instance used to access call and SDK state.
+     * @param streamCallId The unique identifier of the call this notification belongs to.
+     * @param intentCallDisplayName Optional display name for the call, typically
+     *                              shown in the notification UI.
+     *
+     * @return A [Pair] where:
+     * - **first**: The [Notification] to be displayed, or `null` if no notification
+     *   should be shown for the given trigger.
+     * - **second**: The notification ID used to post or update the notification.
+     */
     open fun getNotificationPair(
         context: Context,
         trigger: String,

@@ -27,10 +27,10 @@ import com.squareup.moshi.Json
 import org.threeten.bp.OffsetDateTime
 
 /**
- * This event is sent when a user rejects a notification to join a call.
+ * This event is sent after [CallRejectedEvent] is consumed in [io.getstream.video.android.core.CallState]
  */
 
-data class LocalCallRejectedPostEvent (
+internal data class LocalCallRejectedPostEvent (
     @Json(name = "call_cid")
     val callCid: String,
 

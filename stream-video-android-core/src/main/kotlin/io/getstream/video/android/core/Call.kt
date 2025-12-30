@@ -463,6 +463,9 @@ public class Call(
         }
 
         response.onSuccess {
+            /**
+             * Because [CallState.updateFromResponse] reads the value of [ClientState.ringingCall]
+             */
             if (ring) {
                 client.state._ringingCall.value = this
             }

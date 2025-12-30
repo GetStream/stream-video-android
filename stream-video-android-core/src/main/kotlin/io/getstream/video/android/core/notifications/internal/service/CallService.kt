@@ -203,13 +203,6 @@ internal open class CallService : Service() {
     ): Int {
         maybeHandleMediaIntent(intent, params.callId)
 
-        // Promote early to foreground
-//        maybePromoteToForegroundService(
-//            params.streamVideo,
-//            params.callId.hashCode(),
-//            params.trigger,
-//        )
-
         val call = params.streamVideo.call(params.callId.type, params.callId.id)
 
         if (!verifyPermissions(params.streamVideo, call, params.callId, params.trigger)) {
@@ -371,30 +364,6 @@ internal open class CallService : Service() {
             streamCallId,
             intentCallDisplayName,
         )
-    }
-
-    private fun maybePromoteToForegroundService(
-        videoClient: StreamVideoClient,
-        notificationId: Int,
-        trigger: String,
-    ) {
-        val hasActiveCall = videoClient.state.activeCall.value != null
-        val not = if (hasActiveCall) " not" else ""
-
-        logger.d {
-            "[maybePromoteToForegroundService] hasActiveCall: $hasActiveCall. Will$not call startForeground early."
-        }
-
-        if (!hasActiveCall) {
-            videoClient.getSettingUpCallNotification()?.let { notification ->
-                startForegroundWithServiceType(
-                    notificationId,
-                    notification,
-                    trigger,
-                    permissionManager.getServiceType(baseContext, trigger),
-                )
-            }
-        }
     }
 
     private fun showIncomingCall(

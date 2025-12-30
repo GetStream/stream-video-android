@@ -27,10 +27,10 @@ import com.squareup.moshi.Json
 import org.threeten.bp.OffsetDateTime
 
 /**
- * This event is sent when a user accepts a notification to join a call.
+ * This event is sent after [CallAcceptedEvent] is consumed in [io.getstream.video.android.core.CallState]
  */
 
-data class LocalCallAcceptedPostEvent (
+internal data class LocalCallAcceptedPostEvent (
     @Json(name = "call_cid")
     val callCid: String,
 
