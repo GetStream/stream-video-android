@@ -225,6 +225,11 @@ internal class ServiceLauncher(val context: Context) {
                 ),
             )!!
         }.onError {
+            logger.d {
+                "[removeIncomingCall] notificationId: ${callId.getNotificationId(
+                    NotificationType.Incoming,
+                )}"
+            }
             NotificationManagerCompat.from(context)
                 .cancel(callId.getNotificationId(NotificationType.Incoming))
         }

@@ -62,45 +62,71 @@ internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIn
 
                 showIncomingCallResult = ShowIncomingCallResult.FG_SERVICE
             } else {
-                logger.d { "[showIncomingCall] Starting regular service" }
-                context.startService(
-                    serviceIntentBuilder.buildStartIntent(
-                        context,
-                        StartServiceParam(
-                            callId,
-                            TRIGGER_INCOMING_CALL,
-                            callDisplayName,
-                            callServiceConfiguration,
-                        ),
-                    ),
+                /**
+                 * If already same service is running either FG or background then we skip it & show normal notification
+                 */
+
+                val startServiceParam = StartServiceParam(
+                    callId,
+                    TRIGGER_INCOMING_CALL,
+                    callDisplayName,
+                    callServiceConfiguration,
                 )
-                showIncomingCallResult = ShowIncomingCallResult.SERVICE
+                val serviceClass = startServiceParam.callServiceConfiguration.serviceClass
+                if (ServiceIntentBuilder().isServiceRunning(serviceClass)) {
+                    showNotification(context, notification, callId, null)
+                } else {
+                    logger.d { "[showIncomingCall] Starting regular service" }
+                    context.startService(
+                        serviceIntentBuilder.buildStartIntent(
+                            context,
+                            startServiceParam,
+                        ),
+                    )
+                    showIncomingCallResult = ShowIncomingCallResult.SERVICE
+                }
             }
         }.onError {
             // Show notification
-            logger.e { "Could not start service, showing notification only: $it" }
-            val hasPermission = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS,
-            ) == PackageManager.PERMISSION_GRANTED
-            logger.i { "Has permission: $hasPermission" }
-            logger.i { "Notification: $notification" }
-            if (hasPermission && notification != null) {
-                logger.d {
-                    "[showIncomingCall] Showing notification fallback with ID: ${callId.getNotificationId(
-                        NotificationType.Incoming,
-                    )}"
-                }
-                StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()?.notify(
-                    callId,
-                    callId.getNotificationId(NotificationType.Incoming),
-                    notification,
-                )
-                showIncomingCallResult = ShowIncomingCallResult.ONLY_NOTIFICATION
-            } else {
-                logger.w {
-                    "[showIncomingCall] Cannot show notification - hasPermission: $hasPermission, notification: ${notification != null}"
-                }
+            logger.d { "[showIncomingCall] onError" }
+            showNotification(context, notification, callId, it)
+        }
+        return showIncomingCallResult
+    }
+
+    private fun showNotification(
+        context: Context,
+        notification: Notification?,
+        callId: StreamCallId,
+        error: Any?,
+    ): ShowIncomingCallResult {
+        var showIncomingCallResult = ShowIncomingCallResult.ERROR
+        if (error != null) {
+            logger.e { "[showNotification] Could not start service, showing notification only: $error" }
+        } else {
+            logger.e { "[showNotification] Could not start service, showing notification only" }
+        }
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED
+        logger.i { "Has permission: $hasPermission" }
+        logger.i { "Notification: $notification" }
+        if (hasPermission && notification != null) {
+            logger.d {
+                "[showIncomingCall] Showing notification fallback with ID: ${callId.getNotificationId(
+                    NotificationType.Incoming,
+                )}"
+            }
+            StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()?.notify(
+                callId,
+                callId.getNotificationId(NotificationType.Incoming),
+                notification,
+            )
+            showIncomingCallResult = ShowIncomingCallResult.ONLY_NOTIFICATION
+        } else {
+            logger.w {
+                "[showIncomingCall] Cannot show notification - hasPermission: $hasPermission, notification: ${notification != null}"
             }
         }
         return showIncomingCallResult

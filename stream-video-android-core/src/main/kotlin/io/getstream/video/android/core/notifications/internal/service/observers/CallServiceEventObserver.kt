@@ -18,7 +18,6 @@ package io.getstream.video.android.core.notifications.internal.service.observers
 
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.LocalCallAcceptedPostEvent
-import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.android.video.generated.models.LocalCallRejectedPostEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
@@ -82,16 +81,16 @@ internal class CallServiceEventObserver(
                 )
             }
             is CallEndedEvent -> onServiceStop()
-            is LocalCallMissedEvent -> {
-                val activeCallExists = streamVideo.state.activeCall.value != null
-                if (activeCallExists) {
-                    // Another call is active - just remove incoming notification
-                    onRemoveIncoming()
-                } else {
-                    // No other call - stop service
-                    onServiceStop()
-                }
-            }
+//            is LocalCallMissedEvent -> {
+//                val activeCallExists = streamVideo.state.activeCall.value != null
+//                if (activeCallExists) {
+//                    // Another call is active - just remove incoming notification
+//                    onRemoveIncoming()
+//                } else {
+//                    // No other call - stop service
+//                    onServiceStop()
+//                }
+//            }
         }
     }
 

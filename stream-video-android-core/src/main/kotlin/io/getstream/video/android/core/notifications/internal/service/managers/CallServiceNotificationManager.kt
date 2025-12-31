@@ -26,7 +26,6 @@ import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.handlers.StreamDefaultNotificationHandler
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
@@ -51,14 +50,23 @@ internal class CallServiceNotificationManager {
         }
     }
 
-    fun cancelNotifications(service: Service, callId: StreamCallId?) {
-        logger.d { "[cancelNotifications]" }
+    fun cancelNotifications(service: Service, callId: StreamCallId) {
+        logger.d { "[cancelNotifications], notificationId: " }
 
         val notificationManager = NotificationManagerCompat.from(service)
 
-        callId?.let {
+        callId.let {
+            logger.d { "[cancelNotifications], 1: notificationId via hashcode: ${it.hashCode()}" }
             notificationManager.cancel(it.hashCode())
-            notificationManager.cancel(it.getNotificationId(NotificationType.Incoming))
+        }
+
+        val call = (StreamVideo.Companion.instanceOrNull() as? StreamVideoClient)?.call(
+            callId.type,
+            callId.id,
+        )
+        call?.state?.notificationId?.let { notificationId ->
+            logger.d { "[cancelNotifications], 2: notificationId: $notificationId" }
+            notificationManager.cancel(notificationId)
         }
 
         safeCall {

@@ -86,7 +86,7 @@ internal class ServiceIntentBuilder {
     }
 
     // TODO Rahul: Do before merge, check what was the problem with older method
-    private fun isServiceRunning(serviceClass: Class<*>): Boolean =
+    internal fun isServiceRunning(serviceClass: Class<*>): Boolean =
         safeCallWithDefault(true) {
             if (CallService.isServiceRunning()) {
                 val runningServiceName = CallService.runningServiceClassName.filter {
