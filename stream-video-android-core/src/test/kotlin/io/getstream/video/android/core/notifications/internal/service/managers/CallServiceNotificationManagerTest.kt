@@ -24,10 +24,10 @@ import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationConfig
-import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.handlers.CompatibilityStreamNotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
@@ -39,6 +39,7 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
+import kotlinx.coroutines.test.TestScope
 import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -54,7 +55,6 @@ class CallServiceNotificationManagerTest {
     private val notification: Notification = mockk()
     private val callId = StreamCallId("default", "call-123")
 
-//    private val dispatcher: StreamNotificationDispatcher = mockk(relaxed = true)
     private val notificationDispatcher: NotificationDispatcher = mockk(relaxed = true)
     private val notificationManagerCompat: NotificationManagerCompat = mockk(relaxed = true)
 
@@ -133,13 +133,23 @@ class CallServiceNotificationManagerTest {
 
     @Test
     fun `cancelNotifications cancels call notifications`() {
+        val streamVideoClient = mockk<StreamVideoClient> {}
+
+        every { StreamVideo.instanceOrNull() } returns streamVideoClient
+
+        every { streamVideoClient.scope } returns TestScope()
+
+        val call = Call(streamVideoClient, callId.type, callId.id, mockk())
+        every { streamVideoClient.call(callId.type, callId.id) } returns call
+        every { StreamVideo.instanceOrNull() } returns streamVideoClient
+
         sut.cancelNotifications(service, callId)
 
         verify {
             notificationManagerCompat.cancel(callId.hashCode())
-            notificationManagerCompat.cancel(
-                callId.getNotificationId(NotificationType.Incoming),
-            )
+            call.state.notificationId?.let {
+                notificationManagerCompat.cancel(it)
+            }
         }
     }
 
@@ -159,6 +169,10 @@ class CallServiceNotificationManagerTest {
             every { this@mockk.streamNotificationManager } returns streamNotificationManager
         }
 
+        every { streamVideoClient.scope } returns TestScope()
+
+        val call = Call(streamVideoClient, callId.type, callId.id, mockk())
+        every { streamVideoClient.call(callId.type, callId.id) } returns call
         every { StreamVideo.instanceOrNull() } returns streamVideoClient
 
         sut.cancelNotifications(service, callId)
