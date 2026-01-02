@@ -138,7 +138,6 @@ internal class CallServiceNotificationUpdateObserver(
         notification: Notification,
     ) {
         logger.d { "[updateNotification] Showing active call notification" }
-//        val notificationId = callId.hashCode()
         val notificationId =
             call.state.notificationId ?: callId.getNotificationId(NotificationType.Ongoing)
         startForegroundWithServiceType(
