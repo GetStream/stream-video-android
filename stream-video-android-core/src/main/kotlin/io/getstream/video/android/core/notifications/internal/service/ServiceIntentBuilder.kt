@@ -33,11 +33,11 @@ import io.getstream.video.android.model.StreamCallId
 
 internal class ServiceIntentBuilder {
 
-    private val logger by taggedLogger("TelecomIntentBuilder")
+    private val logger by taggedLogger("ServiceIntentBuilder")
 
     fun buildStartIntent(context: Context, startService: StartServiceParam): Intent {
         val serviceClass = startService.callServiceConfiguration.serviceClass
-        logger.i { "Resolved service class: $serviceClass" }
+        logger.i { "[buildStartIntent], Resolved service class: $serviceClass" }
         val serviceIntent = Intent(context, serviceClass)
         serviceIntent.putExtra(INTENT_EXTRA_CALL_CID, startService.callId)
 
@@ -68,24 +68,25 @@ internal class ServiceIntentBuilder {
         return serviceIntent
     }
 
-    fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam): Intent =
-        safeCallWithDefault(Intent(context, CallService::class.java)) {
-            val serviceClass = stopServiceParam.callServiceConfiguration.serviceClass
-
-            val intent = if (isServiceRunning(context, serviceClass)) {
-                Intent(context, serviceClass)
-            } else {
-                Intent(context, CallService::class.java)
-            }
-            stopServiceParam.call?.let { call ->
-                logger.d { "[buildStopIntent], call_id:${call.cid}" }
-                val streamCallId = StreamCallId(call.type, call.id, call.cid)
-                intent.putExtra(INTENT_EXTRA_CALL_CID, streamCallId)
-            }
-            intent.putExtra(EXTRA_STOP_SERVICE, true)
+    fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam): Intent? {
+        logger.d { "[buildStopIntent]" }
+        val serviceClass = stopServiceParam.callServiceConfiguration.serviceClass
+        val intent = if (isServiceRunning(context, serviceClass)) {
+            Intent(context, serviceClass)
+        } else {
+            return null
         }
+        logger.d {
+            "[buildStopIntent], class:${intent.component?.shortClassName}, call_id: ${stopServiceParam.call?.cid}"
+        }
+        stopServiceParam.call?.let { call ->
+            val streamCallId = StreamCallId(call.type, call.id, call.cid)
+            intent.putExtra(INTENT_EXTRA_CALL_CID, streamCallId)
+        }
+        return intent.putExtra(EXTRA_STOP_SERVICE, true)
+    }
 
-    private fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean =
+    internal fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean =
         safeCallWithDefault(true) {
             val activityManager = context.getSystemService(
                 Context.ACTIVITY_SERVICE,
@@ -93,11 +94,11 @@ internal class ServiceIntentBuilder {
             val runningServices = activityManager.getRunningServices(Int.MAX_VALUE)
             for (service in runningServices) {
                 if (serviceClass.name == service.service.className) {
-                    logger.w { "Service is running: $serviceClass" }
+                    logger.d { "[isServiceRunning], Service is running: $serviceClass" }
                     return true
                 }
             }
-            logger.w { "Service is NOT running: $serviceClass" }
+            logger.d { "[isServiceRunning], Service is NOT running: $serviceClass" }
             return false
         }
 }

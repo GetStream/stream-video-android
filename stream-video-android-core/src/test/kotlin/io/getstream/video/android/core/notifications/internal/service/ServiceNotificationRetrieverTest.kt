@@ -18,6 +18,7 @@ package io.getstream.video.android.core.notifications.internal.service
 
 import android.app.Notification
 import android.content.Context
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
@@ -28,6 +29,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
+import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -48,14 +50,18 @@ class ServiceNotificationRetrieverTest {
     private lateinit var context: Context
     private lateinit var serviceNotificationRetriever: ServiceNotificationRetriever
     private lateinit var testCallId: StreamCallId
+    private lateinit var call: Call
 
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
         context = RuntimeEnvironment.getApplication()
-//        callService = CallService()
         serviceNotificationRetriever = ServiceNotificationRetriever()
         testCallId = StreamCallId(type = "default", id = "test-call-123")
+        every { mockStreamVideoClient.scope } returns TestScope()
+
+        call = Call(mockStreamVideoClient, "default", "test-call-123", mockk())
+        every { mockStreamVideoClient.call(testCallId.type, testCallId.id) } returns call
     }
 
     // Test notification generation logic
@@ -77,7 +83,7 @@ class ServiceNotificationRetrieverTest {
 
         // Then
         assertEquals(mockNotification, result.first)
-        assertEquals(testCallId.hashCode(), result.second)
+        assertEquals(testCallId.getNotificationId(NotificationType.Ongoing), result.second)
     }
 
     @Test

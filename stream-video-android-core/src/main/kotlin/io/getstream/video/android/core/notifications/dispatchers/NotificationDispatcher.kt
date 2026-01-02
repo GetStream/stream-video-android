@@ -19,6 +19,15 @@ package io.getstream.video.android.core.notifications.dispatchers
 import android.app.Notification
 import io.getstream.video.android.model.StreamCallId
 
+/**
+ * Dispatches a notification associated with a specific call.
+ */
 interface NotificationDispatcher {
+
+    /**
+     * @param streamCallId The unique identifier of the call this notification belongs to.
+     * @param id The notification ID used by the system to post or update the notification.
+     * @param notification The [Notification] instance to be displayed.
+     */
     fun notify(streamCallId: StreamCallId, id: Int, notification: Notification)
 }

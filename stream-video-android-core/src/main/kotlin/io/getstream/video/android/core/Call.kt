@@ -463,6 +463,12 @@ public class Call(
         }
 
         response.onSuccess {
+            /**
+             * Because [CallState.updateFromResponse] reads the value of [ClientState.ringingCall]
+             */
+            if (ring) {
+                client.state._ringingCall.value = this
+            }
             state.updateFromResponse(it)
             if (ring) {
                 client.state.addRingingCall(this, RingingState.Outgoing())
@@ -929,7 +935,6 @@ public class Call(
     }
 
     private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
-        val callId = id
         monitorSubscriberPCStateJob?.cancel()
         monitorPublisherPCStateJob?.cancel()
         monitorPublisherPCStateJob = null
@@ -1535,8 +1540,7 @@ public class Call(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall(this)
-        clientImpl.state.maybeStopForegroundService(call = this)
+        clientImpl.state.transitionToAcceptCall(this)
         return clientImpl.accept(type, id)
     }
 
