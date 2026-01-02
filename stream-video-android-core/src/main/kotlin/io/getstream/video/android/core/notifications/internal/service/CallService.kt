@@ -530,11 +530,6 @@ internal open class CallService : Service() {
         logger.d { stack.takeLast(count).joinToString("\n") }
     }
 
-    override fun stopService(name: Intent?): Boolean {
-        logger.d { "Noob, [stopService(name)], Callservice hashcode: ${hashCode()}" }
-        return super.stopService(name)
-    }
-
     private fun streamDefaultNotificationHandler(): StreamDefaultNotificationHandler? {
         val client = StreamVideo.instanceOrNull() as StreamVideoClient
         val handler =
@@ -572,7 +567,7 @@ internal open class CallService : Service() {
     }
 
     private fun internalStopServiceGracefully() {
-        logger.d { "Noob, [internalStopServiceGracefully]" }
+        logger.d { "[internalStopServiceGracefully]" }
 
         stopForeground(STOP_FOREGROUND_REMOVE)
         serviceState.currentCallId?.let {

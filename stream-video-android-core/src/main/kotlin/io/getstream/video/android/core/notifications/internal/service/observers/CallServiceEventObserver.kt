@@ -81,16 +81,6 @@ internal class CallServiceEventObserver(
                 )
             }
             is CallEndedEvent -> onServiceStop()
-//            is LocalCallMissedEvent -> {
-//                val activeCallExists = streamVideo.state.activeCall.value != null
-//                if (activeCallExists) {
-//                    // Another call is active - just remove incoming notification
-//                    onRemoveIncoming()
-//                } else {
-//                    // No other call - stop service
-//                    onServiceStop()
-//                }
-//            }
         }
     }
 
@@ -107,7 +97,7 @@ internal class CallServiceEventObserver(
 
         // If I accepted the call on another device while this device is still ringing
         if (acceptedByUserId == myUserId && callRingingState is RingingState.Incoming) {
-            onServiceStop() // noob 1
+            onServiceStop()
         }
     }
 
