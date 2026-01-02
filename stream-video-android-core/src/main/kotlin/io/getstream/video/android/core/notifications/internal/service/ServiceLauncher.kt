@@ -235,13 +235,13 @@ internal class ServiceLauncher(val context: Context) {
         }
     }
 
+    /**
+     * Throttling the service by [CallService.SERVICE_DESTROY_THROTTLE_TIME_MS] such that the stop
+     * service is invoked once (at least less frequently)
+     */
     fun stopService(call: Call) {
         logger.d { "[stopService]" }
-        // TODO Rahul: check before merge
-        Throttler.throttleFirst(1000) {
-            logger.d {
-                "[stopService], inside throttler.throttleFirst, time in ms: ${System.currentTimeMillis()}"
-            }
+        Throttler.throttleFirst(CallService.SERVICE_DESTROY_THROTTLE_TIME_MS) {
             stopCallServiceInternal(call)
         }
     }

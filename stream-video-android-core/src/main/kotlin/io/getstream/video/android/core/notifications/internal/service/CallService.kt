@@ -101,6 +101,7 @@ internal open class CallService : Service() {
         const val EXTRA_STOP_SERVICE = "io.getstream.video.android.core.stop_service"
 
         const val SERVICE_DESTROY_THRESHOLD_TIME_SECONDS = 2L
+        const val SERVICE_DESTROY_THROTTLE_TIME_MS = 1_000L
 
         private val logger by taggedLogger("CallService")
 
