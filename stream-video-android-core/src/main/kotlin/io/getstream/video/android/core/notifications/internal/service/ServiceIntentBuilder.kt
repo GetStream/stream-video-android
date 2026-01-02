@@ -96,7 +96,7 @@ internal class ServiceIntentBuilder {
                 return@safeCallWithDefault runningServiceName.isNotEmpty()
             } else {
                 logger.w { "[isServiceRunning], Service is not running: $serviceClass" }
-                return@safeCallWithDefault true
+                return@safeCallWithDefault false
             }
         }
 }
