@@ -250,7 +250,7 @@ internal open class CallService : Service() {
         trigger: String,
     ) {
         callServiceLifecycleManager.initializeCallAndSocket(serviceScope, streamVideo, callId) {
-//            stopServiceGracefully() TODO Rahul enable it before merge
+            stopServiceGracefully()
         }
 
         if (trigger == TRIGGER_INCOMING_CALL) {
@@ -545,7 +545,7 @@ internal open class CallService : Service() {
      * Should be invoke carefully for the calls which are still present in [StreamVideoClient.calls]
      * Else stopping service by an expired call can cancel current call's notification and the service itself
      */
-    private fun stopServiceGracefully() {
+    private fun stopServiceGracefully(source: String? = null) {
         serviceState.startTime?.let { startTime ->
 
             val currentTime = OffsetDateTime.now()
