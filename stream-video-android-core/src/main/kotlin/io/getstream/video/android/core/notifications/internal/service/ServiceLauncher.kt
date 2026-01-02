@@ -237,7 +237,7 @@ internal class ServiceLauncher(val context: Context) {
 
     fun stopService(call: Call) {
         logger.d { "[stopService]" }
-        // noob enable later
+        // TODO Rahul: check before merge
         Throttler.throttleFirst(1000) {
             logger.d {
                 "[stopService], inside throttler.throttleFirst, time in ms: ${System.currentTimeMillis()}"
@@ -253,6 +253,7 @@ internal class ServiceLauncher(val context: Context) {
             val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
             if (callConfig.runCallServiceInForeground) {
                 val context = streamVideoClient.context
+
                 val serviceIntent = serviceIntentBuilder.buildStopIntent(
                     context,
                     StopServiceParam(call, callConfig),
@@ -269,6 +270,7 @@ internal class ServiceLauncher(val context: Context) {
             }
         }
     }
+
     private fun logBundle(bundle: Bundle) {
         val keys = bundle.keySet()
         if (keys != null) {

@@ -163,6 +163,9 @@ class ClientState(private val client: StreamVideo) {
 
     fun setActiveCall(call: Call) {
         this._activeCall.value = call
+        /**
+         * Transition incoming/outgoing call to active on the same service
+         */
         val ringingState = call.state.ringingState.value
         when (ringingState) {
             is RingingState.Incoming -> {
