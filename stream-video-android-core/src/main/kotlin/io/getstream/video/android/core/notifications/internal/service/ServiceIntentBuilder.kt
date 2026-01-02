@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import io.getstream.log.taggedLogger
@@ -70,7 +71,7 @@ internal class ServiceIntentBuilder {
     fun buildStopIntent(context: Context, stopServiceParam: StopServiceParam): Intent? {
         logger.d { "[buildStopIntent]" }
         val serviceClass = stopServiceParam.callServiceConfiguration.serviceClass
-        val intent = if (isServiceRunning(serviceClass)) {
+        val intent = if (isServiceRunning(context, serviceClass)) {
             Intent(context, serviceClass)
         } else {
             return null
@@ -85,18 +86,19 @@ internal class ServiceIntentBuilder {
         return intent.putExtra(EXTRA_STOP_SERVICE, true)
     }
 
-    // TODO Rahul: Do before merge, check what was the problem with older method
-    internal fun isServiceRunning(serviceClass: Class<*>): Boolean =
+    internal fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean =
         safeCallWithDefault(true) {
-            if (CallService.isServiceRunning()) {
-                val runningServiceName = CallService.runningServiceClassName.filter {
-                    it.contains(serviceClass.simpleName)
+            val activityManager = context.getSystemService(
+                Context.ACTIVITY_SERVICE,
+            ) as ActivityManager
+            val runningServices = activityManager.getRunningServices(Int.MAX_VALUE)
+            for (service in runningServices) {
+                if (serviceClass.name == service.service.className) {
+                    logger.d { "[isServiceRunning], Service is running: $serviceClass" }
+                    return true
                 }
-                logger.d { "[isServiceRunning], Service is running: $runningServiceName" }
-                return@safeCallWithDefault runningServiceName.isNotEmpty()
-            } else {
-                logger.w { "[isServiceRunning], Service is not running: $serviceClass" }
-                return@safeCallWithDefault false
             }
+            logger.d { "[isServiceRunning], Service is NOT running: $serviceClass" }
+            return false
         }
 }

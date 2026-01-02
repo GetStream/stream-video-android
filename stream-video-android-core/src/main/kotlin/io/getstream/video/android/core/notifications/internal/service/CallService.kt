@@ -94,10 +94,6 @@ internal open class CallService : Service() {
 
         const val SERVICE_DESTROY_THRESHOLD_TIME_SECONDS = 2L
 
-        @Volatile
-        public var runningServiceClassName: HashSet<String> = HashSet()
-
-        fun isServiceRunning(): Boolean = runningServiceClassName.isNotEmpty()
         private val logger by taggedLogger("CallService")
 
         val handler = CoroutineExceptionHandler { _, exception ->
@@ -110,7 +106,6 @@ internal open class CallService : Service() {
     override fun onCreate() {
         super.onCreate()
         serviceState.startTime = OffsetDateTime.now()
-        runningServiceClassName.add(this::class.java.simpleName)
     }
 
     private fun shouldStopService(intent: Intent?): Boolean {
@@ -520,7 +515,6 @@ internal open class CallService : Service() {
         logger.d {
             "Noob, [onDestroy], Callservice hashcode: ${hashCode()}, call_cid: ${serviceState.currentCallId?.cid}"
         }
-        runningServiceClassName.remove(this::class.java.simpleName)
         serviceState.soundPlayer?.cleanUpAudioResources()
         super.onDestroy()
     }

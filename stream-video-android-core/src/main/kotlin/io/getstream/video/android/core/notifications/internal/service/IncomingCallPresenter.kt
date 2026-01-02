@@ -73,7 +73,7 @@ internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIn
                     callServiceConfiguration,
                 )
                 val serviceClass = startServiceParam.callServiceConfiguration.serviceClass
-                if (ServiceIntentBuilder().isServiceRunning(serviceClass)) {
+                if (ServiceIntentBuilder().isServiceRunning(context, serviceClass)) {
                     showNotification(context, notification, callId, null)
                 } else {
                     logger.d { "[showIncomingCall] Starting regular service" }
