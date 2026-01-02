@@ -55,7 +55,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import org.threeten.bp.Duration
 import org.threeten.bp.OffsetDateTime
-import java.util.Stack
 import kotlin.math.absoluteValue
 
 /**
@@ -68,7 +67,16 @@ internal open class CallService : Service() {
     internal val callServiceLifecycleManager = CallServiceLifecycleManager()
     private val notificationManager = CallServiceNotificationManager()
     internal val serviceState = ServiceState()
-    private var startId: Stack<Int>? = null
+
+    /**
+     * A debouncer used to delay the final stopping of the service.
+     *
+     * This is a workaround for an Android framework behavior where killing a Foreground Service
+     * too quickly (e.g., within ~2 seconds) can prevent its associated notification from being
+     * dismissed, especially if the notification tray is open. By debouncing the stop action,
+     * we ensure enough time has passed for the system to process the notification removal.
+     */
+    internal val debouncer = Debouncer()
 
     open val serviceType: Int
         @SuppressLint("InlinedApi")
@@ -168,11 +176,6 @@ internal open class CallService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         logger.d { "[onStartCommand], intent = $intent, flags:$flags, startId:$startId" }
-        if (this.startId == null) {
-            this.startId = Stack<Int>()
-        }
-        this.startId?.push(startId)
-
         logIntentExtras(intent)
 
         // Early exit conditions
@@ -541,7 +544,6 @@ internal open class CallService : Service() {
      * Should be invoke carefully for the calls which are still present in [StreamVideoClient.calls]
      * Else stopping service by an expired call can cancel current call's notification and the service itself
      */
-    val debouncer = Debouncer()
     private fun stopServiceGracefully() {
         serviceState.startTime?.let { startTime ->
 
