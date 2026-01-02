@@ -51,12 +51,10 @@ internal class CallServiceNotificationManager {
     }
 
     fun cancelNotifications(service: Service, callId: StreamCallId) {
-        logger.d { "[cancelNotifications], notificationId: " }
-
         val notificationManager = NotificationManagerCompat.from(service)
 
         callId.let {
-            logger.d { "[cancelNotifications], 1: notificationId via hashcode: ${it.hashCode()}" }
+            logger.d { "[cancelNotifications], notificationId via hashcode: ${it.hashCode()}" }
             notificationManager.cancel(it.hashCode())
         }
 
@@ -65,7 +63,7 @@ internal class CallServiceNotificationManager {
             callId.id,
         )
         call?.state?.notificationId?.let { notificationId ->
-            logger.d { "[cancelNotifications], 2: notificationId: $notificationId" }
+            logger.d { "[cancelNotifications], notificationId from call.state: $notificationId" }
             notificationManager.cancel(notificationId)
         }
 

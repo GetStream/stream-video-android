@@ -263,7 +263,7 @@ internal open class CallService : Service() {
         }
 
         serviceState.soundPlayer = streamVideo.callSoundAndVibrationPlayer
-        logger.d { "[initializeService] soundPlayer hashcode: ${serviceState.soundPlayer?.hashCode()}" }
+        logger.d { "[initializeService] soundPlayer's hashcode: ${serviceState.soundPlayer?.hashCode()}" }
 
         observeCall(callId, streamVideo)
         serviceState.registerToggleCameraBroadcastReceiver(this, serviceScope)
@@ -276,87 +276,121 @@ internal open class CallService : Service() {
         trigger: String,
         call: Call,
     ): CallServiceHandleNotificationResult {
-        logger.d {
-            "[handleNotification] Noob 1, trigger: $trigger, call.state.notificationId: ${call.state.notificationId}, notificationId: $notificationId, hashcode: ${hashCode()}"
-        }
+        logHandleStart(trigger, call, notificationId)
+
         if (notification == null) {
-            return if (trigger == TRIGGER_REMOVE_INCOMING_CALL) {
-                val ifServiceWasStartedForThisCall = serviceState.currentCallId?.id == callId.id
-                if (ifServiceWasStartedForThisCall) {
-                    removeIncomingCall(notificationId, call)
-                    CallServiceHandleNotificationResult.START
-                } else {
-                    /**
-                     * Means we only posted notification for this call, Service was never started for this call
-                     */
-                    val notificationId = call.state.notificationId
-                        ?: callId.getNotificationId(NotificationType.Incoming)
-                    NotificationManagerCompat.from(this).cancel(notificationId)
-                    CallServiceHandleNotificationResult.START_NO_CHANGE
-                }
-            } else {
-                logger.e { "Could not get notification for trigger: $trigger, callId: ${callId.id}" }
-                CallServiceHandleNotificationResult.REDELIVER
-            }
+            return handleNullNotification(trigger, callId, call, notificationId)
         }
 
-        // TODO Rahul, problematic in-case of getting an incoming call while still on active call
+        serviceState.currentCallId = callId
 
         return when (trigger) {
             TRIGGER_INCOMING_CALL -> {
-                serviceState.currentCallId = callId
                 showIncomingCall(callId, notificationId, notification)
                 CallServiceHandleNotificationResult.START
             }
-            TRIGGER_ONGOING_CALL -> {
-                serviceState.currentCallId = callId
-                val notificationId = call.state.notificationId
-                    ?: callId.getNotificationId(NotificationType.Ongoing)
-                logger.d {
-                    "[handleNotification] Noob 2, trigger: $trigger, call.state.notificationId: ${call.state.notificationId}, notificationId: $notificationId, hashcode: ${hashCode()}"
-                }
-                call.state.updateNotification(notificationId, notification)
-                startForegroundWithServiceType(
-                    notificationId,
-                    notification,
-                    trigger,
-                    permissionManager.getServiceType(baseContext, trigger),
-                )
-                CallServiceHandleNotificationResult.START
-            }
-            TRIGGER_OUTGOING_CALL -> {
-                serviceState.currentCallId = callId
-                val notificationId = call.state.notificationId
-                    ?: callId.getNotificationId(NotificationType.Outgoing)
-                logger.d {
-                    "[handleNotification] Noob 3, trigger: $trigger, call.state.notificationId: ${call.state.notificationId}, notificationId: $notificationId, hashcode: ${hashCode()}"
-                }
-                call.state.updateNotification(notificationId, notification)
-                startForegroundWithServiceType(
-                    notificationId,
-                    notification,
-                    trigger,
-                    permissionManager.getServiceType(baseContext, trigger),
-                )
-                CallServiceHandleNotificationResult.START
-            }
 
-            else -> {
-                serviceState.currentCallId = callId
-                val notificationId = call.state.notificationId
-                    ?: callId.hashCode() // instead get notification from call object
-                logger.d {
-                    "[handleNotification] Noob 4, trigger: $trigger, call.state.notificationId: ${call.state.notificationId}, notificationId: $notificationId, hashcode: ${hashCode()}"
-                }
-                call.state.updateNotification(notificationId, notification)
-                startForegroundWithServiceType(
-                    notificationId,
+            TRIGGER_ONGOING_CALL ->
+                startForegroundForCall(
+                    call,
+                    callId,
                     notification,
+                    NotificationType.Ongoing,
                     trigger,
-                    permissionManager.getServiceType(baseContext, trigger),
                 )
-                CallServiceHandleNotificationResult.START
+
+            TRIGGER_OUTGOING_CALL ->
+                startForegroundForCall(
+                    call,
+                    callId,
+                    notification,
+                    NotificationType.Outgoing,
+                    trigger,
+                )
+
+            else ->
+                startForegroundForCall(
+                    call,
+                    callId,
+                    notification,
+                    null,
+                    trigger,
+                )
+        }
+    }
+
+    private fun handleNullNotification(
+        trigger: String,
+        callId: StreamCallId,
+        call: Call,
+        fallbackNotificationId: Int,
+    ): CallServiceHandleNotificationResult {
+        if (trigger != TRIGGER_REMOVE_INCOMING_CALL) {
+            logger.e {
+                "[handleNullNotification], Could not get notification for trigger: $trigger, callId: ${callId.id}"
             }
+            return CallServiceHandleNotificationResult.REDELIVER
+        }
+
+        val serviceStartedForThisCall = serviceState.currentCallId?.id == callId.id
+
+        return if (serviceStartedForThisCall) {
+            removeIncomingCall(fallbackNotificationId, call)
+            CallServiceHandleNotificationResult.START
+        } else {
+            /**
+             * Means we only posted notification for this call, Service was never started for this call
+             */
+            val notificationId =
+                call.state.notificationId
+                    ?: callId.getNotificationId(NotificationType.Incoming)
+
+            NotificationManagerCompat.from(this).cancel(notificationId)
+            CallServiceHandleNotificationResult.START_NO_CHANGE
+        }
+    }
+
+    private fun startForegroundForCall(
+        call: Call,
+        callId: StreamCallId,
+        notification: Notification,
+        type: NotificationType?,
+        trigger: String,
+    ): CallServiceHandleNotificationResult {
+        val resolvedNotificationId =
+            call.state.notificationId
+                ?: type?.let { callId.getNotificationId(it) }
+                ?: callId.hashCode()
+
+        logger.d {
+            "[startForegroundForCall] trigger=$trigger, " +
+                "call.state.notificationId=${call.state.notificationId}, " +
+                "notificationId=$resolvedNotificationId, " +
+                "hashcode=${hashCode()}"
+        }
+
+        call.state.updateNotification(resolvedNotificationId, notification)
+
+        startForegroundWithServiceType(
+            resolvedNotificationId,
+            notification,
+            trigger,
+            permissionManager.getServiceType(baseContext, trigger),
+        )
+
+        return CallServiceHandleNotificationResult.START
+    }
+
+    private fun logHandleStart(
+        trigger: String,
+        call: Call,
+        notificationId: Int,
+    ) {
+        logger.d {
+            "[logHandleStart] trigger=$trigger, " +
+                "call.state.notificationId=${call.state.notificationId}, " +
+                "notificationId=$notificationId, " +
+                "hashcode=${hashCode()}"
         }
     }
 
@@ -455,7 +489,9 @@ internal open class CallService : Service() {
     }
 
     private fun removeIncomingCall(notificationId: Int, call: Call) {
-        logger.d { "[removeIncomingCall] notificationId: $notificationId" }
+        logger.d {
+            "[removeIncomingCall] notificationId: $notificationId, ${this.javaClass.name} hashcode: ${hashCode()}"
+        }
         if (serviceState.currentCallId?.cid == call.cid) {
             stopServiceGracefully()
         }
@@ -467,7 +503,7 @@ internal open class CallService : Service() {
         CallServiceRingingStateObserver(call, serviceState.soundPlayer, streamVideo, serviceScope)
             .observe { stopServiceGracefully() }
 
-        CallServiceEventObserver(call, streamVideo)
+        CallServiceEventObserver(call, streamVideo, serviceScope)
             .observe(
                 onServiceStop = { stopServiceGracefully() },
                 onRemoveIncoming = {
@@ -517,9 +553,10 @@ internal open class CallService : Service() {
 
     override fun onDestroy() {
         logger.d {
-            "Noob, [onDestroy], Callservice hashcode: ${hashCode()}, call_cid: ${serviceState.currentCallId?.cid}"
+            "[onDestroy], hashcode: ${hashCode()}, call_cid: ${serviceState.currentCallId?.cid}"
         }
         serviceState.soundPlayer?.cleanUpAudioResources()
+        serviceScope.cancel()
         super.onDestroy()
     }
 
@@ -564,7 +601,7 @@ internal open class CallService : Service() {
     }
 
     private fun internalStopServiceGracefully() {
-        logger.d { "[internalStopServiceGracefully]" }
+        logger.d { "[internalStopServiceGracefully] hashcode: ${hashCode()}" }
 
         stopForeground(STOP_FOREGROUND_REMOVE)
         serviceState.currentCallId?.let {

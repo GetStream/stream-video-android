@@ -25,12 +25,14 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.utils.toUser
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 internal class CallServiceEventObserver(
     private val call: Call,
     private val streamVideo: StreamVideoClient,
+    private val scope: CoroutineScope,
 ) {
 
     private val logger by taggedLogger("CallEventObserver")
@@ -47,7 +49,7 @@ internal class CallServiceEventObserver(
      * Observes call events (accepted, rejected, ended, missed).
      */
     private fun observeCallEvents(onServiceStop: () -> Unit, onRemoveIncoming: () -> Unit) {
-        call.scope.launch {
+        scope.launch {
             call.events.collect { event ->
                 handleCallEvent(event, onServiceStop, onRemoveIncoming)
             }
