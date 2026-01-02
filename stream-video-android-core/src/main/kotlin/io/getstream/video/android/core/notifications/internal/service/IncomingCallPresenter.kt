@@ -38,60 +38,65 @@ internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIn
         callServiceConfiguration: CallServiceConfig,
         notification: Notification?,
     ): ShowIncomingCallResult {
-        logger.d {
-            "[showIncomingCall] callId: ${callId.id}, callDisplayName: $callDisplayName, notification: ${notification != null}"
-        }
-        val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
-        logger.d { "[showIncomingCall] hasActiveCall: $hasActiveCall" }
-        var showIncomingCallResult = ShowIncomingCallResult.ERROR
+        logInput(callId, callDisplayName, notification)
+
+        val startParams = StartServiceParam(
+            callId = callId,
+            trigger = TRIGGER_INCOMING_CALL,
+            callDisplayName = callDisplayName,
+            callServiceConfiguration = callServiceConfiguration,
+        )
+
+        var result = ShowIncomingCallResult.ERROR
         safeCallWithResult {
-            if (!hasActiveCall) {
-                logger.d { "[showIncomingCall] Starting foreground service" }
-                ContextCompat.startForegroundService(
-                    context,
-                    serviceIntentBuilder.buildStartIntent(
-                        context,
-                        StartServiceParam(
-                            callId,
-                            TRIGGER_INCOMING_CALL,
-                            callDisplayName,
-                            callServiceConfiguration,
-                        ),
-                    ),
-                )
-
-                showIncomingCallResult = ShowIncomingCallResult.FG_SERVICE
+            if (hasNoActiveCall()) {
+                startForegroundService(context, startParams)
+                result = ShowIncomingCallResult.FG_SERVICE
             } else {
-                /**
-                 * If already same service is running either FG or background then we skip it & show normal notification
-                 */
-
-                val startServiceParam = StartServiceParam(
-                    callId,
-                    TRIGGER_INCOMING_CALL,
-                    callDisplayName,
-                    callServiceConfiguration,
-                )
-                val serviceClass = startServiceParam.callServiceConfiguration.serviceClass
-                if (ServiceIntentBuilder().isServiceRunning(context, serviceClass)) {
-                    showNotification(context, notification, callId, null)
-                } else {
-                    logger.d { "[showIncomingCall] Starting regular service" }
-                    context.startService(
-                        serviceIntentBuilder.buildStartIntent(
-                            context,
-                            startServiceParam,
-                        ),
-                    )
-                    showIncomingCallResult = ShowIncomingCallResult.SERVICE
-                }
+                result = handleWhileActiveCall(context, startParams, notification)
             }
-        }.onError {
-            // Show notification
+        }.onError { error ->
             logger.d { "[showIncomingCall] onError" }
-            showNotification(context, notification, callId, it)
+            result = showNotification(context, notification, callId, error)
         }
-        return showIncomingCallResult
+        return result
+    }
+
+    // ----------------------------------
+    // Decision branches
+    // ----------------------------------
+
+    private fun handleWhileActiveCall(
+        context: Context,
+        startParams: StartServiceParam,
+        notification: Notification?,
+    ): ShowIncomingCallResult {
+        val serviceClass = startParams.callServiceConfiguration.serviceClass
+
+        return if (serviceIntentBuilder.isServiceRunning(context, serviceClass)) {
+            showNotification(context, notification, startParams.callId, null)
+        } else {
+            logger.d { "[showIncomingCall] Starting regular service" }
+            context.startService(
+                serviceIntentBuilder.buildStartIntent(context, startParams),
+            )
+            ShowIncomingCallResult.SERVICE
+        }
+    }
+
+    // ----------------------------------
+    // Side effects
+    // ----------------------------------
+
+    private fun startForegroundService(
+        context: Context,
+        params: StartServiceParam,
+    ) {
+        logger.d { "[showIncomingCall] Starting foreground service" }
+        ContextCompat.startForegroundService(
+            context,
+            serviceIntentBuilder.buildStartIntent(context, params),
+        )
     }
 
     private fun showNotification(
@@ -100,36 +105,53 @@ internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIn
         callId: StreamCallId,
         error: Any?,
     ): ShowIncomingCallResult {
-        var showIncomingCallResult = ShowIncomingCallResult.ERROR
-        if (error != null) {
-            logger.e { "[showNotification] Could not start service, showing notification only: $error" }
-        } else {
-            logger.e { "[showNotification] Could not start service, showing notification only" }
-        }
-        val hasPermission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS,
-        ) == PackageManager.PERMISSION_GRANTED
-        logger.i { "Has permission: $hasPermission" }
-        logger.i { "Notification: $notification" }
-        if (hasPermission && notification != null) {
-            logger.d {
-                "[showIncomingCall] Showing notification fallback with ID: ${callId.getNotificationId(
-                    NotificationType.Incoming,
-                )}"
+        if (!hasNotificationPermission(context) || notification == null) {
+            logger.w {
+                "[showIncomingCall] Cannot show notification - " +
+                    "permission=${hasNotificationPermission(context)}, " +
+                    "notification=${notification != null}"
             }
-            StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()?.notify(
+            return ShowIncomingCallResult.ERROR
+        }
+
+        StreamVideo.instanceOrNull()
+            ?.getStreamNotificationDispatcher()
+            ?.notify(
                 callId,
                 callId.getNotificationId(NotificationType.Incoming),
                 notification,
             )
-            showIncomingCallResult = ShowIncomingCallResult.ONLY_NOTIFICATION
-        } else {
-            logger.w {
-                "[showIncomingCall] Cannot show notification - hasPermission: $hasPermission, notification: ${notification != null}"
-            }
+
+        return ShowIncomingCallResult.ONLY_NOTIFICATION
+    }
+
+    // ----------------------------------
+    // State / helpers
+    // ----------------------------------
+
+    private fun hasNoActiveCall(): Boolean {
+        val hasActiveCall =
+            StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
+        logger.d { "[showIncomingCall] hasActiveCall: $hasActiveCall" }
+        return !hasActiveCall
+    }
+
+    private fun hasNotificationPermission(context: Context): Boolean =
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS,
+        ) == PackageManager.PERMISSION_GRANTED
+
+    private fun logInput(
+        callId: StreamCallId,
+        callDisplayName: String?,
+        notification: Notification?,
+    ) {
+        logger.d {
+            "[showIncomingCall] callId=${callId.id}, " +
+                "callDisplayName=$callDisplayName, " +
+                "notification=${notification != null}"
         }
-        return showIncomingCallResult
     }
 }
 

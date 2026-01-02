@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.content.Context
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
@@ -28,6 +29,9 @@ import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
 import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -37,6 +41,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class ServiceIntentBuilderTest {
@@ -136,33 +141,93 @@ class ServiceIntentBuilderTest {
     }
 
     @Test
-    fun `buildStopIntent creates correct intent`() {
-        // When
-        val intent = ServiceIntentBuilder().buildStopIntent(context, StopServiceParam())
+    fun `buildStopIntent returns null when service is not running`() {
+        val builder = spyk(ServiceIntentBuilder())
 
-        // Then
-        assertNotNull(intent)
-        assertEquals(CallService::class.java.name, intent?.component?.className)
+        // given
+        val serviceClass = CallService::class.java
+        val config = CallServiceConfig(serviceClass = serviceClass)
+        val param = StopServiceParam(
+            callServiceConfiguration = config,
+            call = null,
+        )
+
+        every {
+            builder.isServiceRunning(context, serviceClass)
+        } returns false
+
+        // when
+        val intent = builder.buildStopIntent(context, param)
+
+        // then
+        assertNull(intent)
     }
 
-//
     @Test
-    fun `buildStopIntent uses custom service class from configuration`() {
-        // Given
-        val customConfig = CallServiceConfig(
-            serviceClass = LivestreamCallService::class.java,
+    fun `buildStopIntent returns intent with stop flag when service is running`() {
+        // given
+        val builder = spyk(ServiceIntentBuilder())
+
+        // given
+        val serviceClass = CallService::class.java
+        val config = CallServiceConfig(serviceClass = serviceClass)
+        val param = StopServiceParam(
+            callServiceConfiguration = config,
+            call = null,
         )
 
-        // When
-        val intent = ServiceIntentBuilder().buildStopIntent(
-            context,
-            StopServiceParam(callServiceConfiguration = customConfig),
-        )
+        every {
+            builder.isServiceRunning(context, serviceClass)
+        } returns true
 
-        // Then
+        // when
+        val intent = builder.buildStopIntent(context, param)
+
+        // then
         assertNotNull(intent)
-        // Note: The actual implementation has some complex logic for running services
-        // so we just verify the intent is created
+        assertEquals(serviceClass.name, intent!!.component?.className)
+        assertTrue(intent.getBooleanExtra(CallService.EXTRA_STOP_SERVICE, false))
+    }
+
+    @Test
+    fun `buildStopIntent attaches call cid when call is present`() {
+        // given
+        val builder = spyk(ServiceIntentBuilder())
+
+        // given
+        val serviceClass = CallService::class.java
+        val config = CallServiceConfig(serviceClass = serviceClass)
+
+        val call = mockk<Call> {
+            every { type } returns "default"
+            every { id } returns "123"
+            every { cid } returns "default:123"
+        }
+
+        val param = StopServiceParam(
+            callServiceConfiguration = config,
+            call = call,
+        )
+
+        every {
+            builder.isServiceRunning(context, serviceClass)
+        } returns true
+
+        // when
+        val intent = builder.buildStopIntent(context, param)
+
+        // then
+        assertNotNull(intent)
+
+        val streamCallId =
+            intent!!.getParcelableExtra<StreamCallId>(INTENT_EXTRA_CALL_CID)
+
+        assertNotNull(streamCallId)
+        assertEquals("default", streamCallId!!.type)
+        assertEquals("123", streamCallId.id)
+        assertEquals("default:123", streamCallId.cid)
+
+        assertTrue(intent.getBooleanExtra(CallService.EXTRA_STOP_SERVICE, false))
     }
 
     @Test

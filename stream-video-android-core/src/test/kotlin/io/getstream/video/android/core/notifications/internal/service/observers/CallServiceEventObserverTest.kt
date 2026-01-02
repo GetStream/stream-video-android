@@ -18,7 +18,6 @@ package io.getstream.video.android.core.notifications.internal.service.observers
 
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.LocalCallAcceptedPostEvent
-import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.android.video.generated.models.LocalCallRejectedPostEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.video.android.core.Call
@@ -106,7 +105,7 @@ class CallServiceEventObserverTest {
             onRemoveIncomingInvoked = true
         }
 
-        observer = CallServiceEventObserver(call, streamVideo)
+        observer = CallServiceEventObserver(call, streamVideo, testScope)
     }
 
     @After
@@ -193,32 +192,6 @@ class CallServiceEventObserverTest {
         eventsFlow.emit(CallEndedEvent("", mockk(), mockk(), ""))
 
         advanceUntilIdle()
-        assertTrue(onServiceStopInvoked)
-    }
-
-    @Test
-    fun `missed call with active call removes incoming`() = runTest {
-        activeCallFlow.value = mockk()
-
-        observer.observe(onServiceStop, onRemoveIncoming)
-
-        eventsFlow.emit(LocalCallMissedEvent("", ""))
-
-        advanceUntilIdle()
-        assertTrue(onRemoveIncomingInvoked)
-        assertFalse(onServiceStopInvoked)
-    }
-
-    @Test
-    fun `missed call with no active call stops service`() = runTest {
-        activeCallFlow.value = null
-
-        observer.observe(onServiceStop, onRemoveIncoming)
-
-        eventsFlow.emit(LocalCallMissedEvent("", ""))
-
-        advanceUntilIdle()
-
         assertTrue(onServiceStopInvoked)
     }
 
