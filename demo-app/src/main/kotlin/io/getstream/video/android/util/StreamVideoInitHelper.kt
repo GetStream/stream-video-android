@@ -333,7 +333,7 @@ object StreamVideoInitHelper {
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
             telecomConfig = TelecomConfig(context.packageName),
-            autoConnect = false,
+            connectOnInit = false,
         ).build()
     }
 }

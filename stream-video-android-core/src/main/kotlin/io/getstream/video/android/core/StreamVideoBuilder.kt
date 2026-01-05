@@ -91,6 +91,8 @@ import java.net.ConnectException
  * @property callServiceConfigRegistry The audio processor used for custom modifications to audio data within WebRTC.
  * @property leaveAfterDisconnectSeconds The number of seconds to wait before leaving the call after the connection is disconnected.
  * @property callUpdatesAfterLeave Whether to update the call state after leaving the call.
+ * @property connectOnInit A flag that determines if the socket should attempt to connect as soon as a user is set.
+ *                      If `false`, the connection will only be established when explicitly requested or if core-sdk feature(s) like audio/video call is used
  *
  * @see build
  * @see ClientState.connection
@@ -146,7 +148,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     @InternalStreamVideoApi
     private val enableStereoForSubscriber: Boolean = true,
     private val telecomConfig: TelecomConfig? = null,
-    private val autoConnect: Boolean = true,
+    private val connectOnInit: Boolean = true,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -292,7 +294,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
                     if (notificationConfig.autoRegisterPushDevice) {
                         client.registerPushDevice()
                     }
-                    if (autoConnect) {
+                    if (connectOnInit) {
                         val result = client.connectAsync().await()
                         result.onSuccess {
                             streamLog { "Connection succeeded! (duration: ${result.getOrNull()})" }
