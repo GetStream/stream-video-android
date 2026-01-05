@@ -469,15 +469,21 @@ internal class StreamVideoClient internal constructor(
     override suspend fun connect(): Result<Unit> {
         return try {
             withContext(scope.coroutineContext) {
+                guestUserJob?.await()
                 socketImpl.connect(user)
             }
-            Result.Success(Unit)
+            Success(Unit)
         } catch (e: ErrorResponse) {
-            Result.Failure(
-                Error.GenericError("Unable to connect with error: ${e.message}"),
-            )
+            if (e.code == VideoErrorCode.TOKEN_EXPIRED.code) {
+                refreshToken(e)
+                Failure(Error.GenericError("Initialize error. Token expired."))
+            } else {
+                Failure(
+                    Error.GenericError("Unable to connect with error: ${e.message}"),
+                )
+            }
         } catch (e: Throwable) {
-            Result.Failure(Error.ThrowableError("Unable to connect with error: ${e.message}", e))
+            Failure(Error.ThrowableError("Unable to connect with error: ${e.message}", e))
         }
     }
 
