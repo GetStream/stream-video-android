@@ -55,7 +55,6 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.notification.LiveStreamMediaNotificationInterceptor
 import io.getstream.video.android.notification.PausePlayMediaSessionCallback
-import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.util.config.AppConfig
@@ -161,12 +160,6 @@ object StreamVideoInitHelper {
                     token = authData.token,
                     loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
                 )
-                /**
-                 * Because E2E tests does not rely on Push Notification
-                 */
-                if (StreamBuildFlavorUtil.isE2eTesting) {
-                    StreamVideo.instance().connect()
-                }
             }
             Log.i("StreamVideoInitHelper", "Init successful.")
             _initState.value = InitializedState.FINISHED

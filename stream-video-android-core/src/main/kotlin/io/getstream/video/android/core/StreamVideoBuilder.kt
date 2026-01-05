@@ -91,8 +91,12 @@ import java.net.ConnectException
  * @property callServiceConfigRegistry The audio processor used for custom modifications to audio data within WebRTC.
  * @property leaveAfterDisconnectSeconds The number of seconds to wait before leaving the call after the connection is disconnected.
  * @property callUpdatesAfterLeave Whether to update the call state after leaving the call.
- * @property connectOnInit A flag that determines if the socket should attempt to connect as soon as a user is set.
- *                      If `false`, the connection will only be established when explicitly requested or if core-sdk feature(s) like audio/video call is used
+ * @property connectOnInit Determines whether the socket should automatically connect as soon as a user is set.
+ *          If `false`, the connection is established only when explicitly requested or when core SDK features
+ *          (such as audio or video calls) are used.
+ *          When `false` and the socket is not connected, incoming calls will not be delivered via WebSocket events;
+ *          the SDK will rely on push notifications instead.
+ *          To start receiving WebSocket events, explicitly invoke `client.connect()`.
  *
  * @see build
  * @see ClientState.connection

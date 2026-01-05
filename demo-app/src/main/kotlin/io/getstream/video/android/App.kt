@@ -63,6 +63,15 @@ class App : Application() {
                 dataStore = StreamUserDataStore.instance(),
                 useRandomUserAsFallback = false,
             )
+            /**
+             * The `connectOnInit` flag in `StreamVideoInitHelper` is set to `false` to give us
+             * manual control over the connection.
+             *
+             * We explicitly call `connect()` here to establish a WebSocket connection at startup.
+             * This is required for end-to-end (E2E) tests, which rely on WebSocket events
+             * to receive calls instead of Push Notifications (PN).
+             */
+            StreamVideo.instanceOrNull()?.connect()
         }
 
         observePolicyViolation()
