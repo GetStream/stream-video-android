@@ -145,6 +145,10 @@ public interface StreamVideo : NotificationHandler {
     public suspend fun getEdges(): Result<List<EdgeData>>
 
     public suspend fun connectAsync(): Deferred<Result<Long>>
+
+    /**
+     * Connects the user
+     */
     public suspend fun connect(): Result<Unit>
 
     /**
