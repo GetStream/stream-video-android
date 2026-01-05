@@ -466,6 +466,21 @@ internal class StreamVideoClient internal constructor(
         }
     }
 
+    override suspend fun connect(): Result<Unit> {
+        return try {
+            withContext(scope.coroutineContext) {
+                socketImpl.connect(user)
+            }
+            Result.Success(Unit)
+        } catch (e: ErrorResponse) {
+            Result.Failure(
+                Error.GenericError("Unable to connect with error: ${e.message}"),
+            )
+        } catch (e: Throwable) {
+            Result.Failure(Error.ThrowableError("Unable to connect with error: ${e.message}", e))
+        }
+    }
+
     private suspend fun refreshToken(error: Throwable) {
         tokenProvider?.let {
             val newToken = tokenProvider.loadToken()

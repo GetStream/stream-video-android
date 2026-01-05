@@ -145,6 +145,7 @@ public interface StreamVideo : NotificationHandler {
     public suspend fun getEdges(): Result<List<EdgeData>>
 
     public suspend fun connectAsync(): Deferred<Result<Long>>
+    public suspend fun connect(): Result<Unit>
 
     /**
      * Clears the internal user state, removes push notification devices and clears the call state.
