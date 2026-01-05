@@ -149,7 +149,7 @@ public interface StreamVideo : NotificationHandler {
     /**
      * Connects the user
      */
-    public suspend fun connect(): Result<Unit>
+    public suspend fun connect(): Result<Long>
 
     /**
      * Clears the internal user state, removes push notification devices and clears the call state.

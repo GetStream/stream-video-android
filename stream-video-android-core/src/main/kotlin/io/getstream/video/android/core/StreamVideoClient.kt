@@ -460,31 +460,16 @@ internal class StreamVideoClient internal constructor(
                     refreshToken(e)
                     Failure(Error.GenericError("Initialize error. Token expired."))
                 } else {
-                    throw e
+                    Failure(Error.ThrowableError("Error to connect user", e))
                 }
+            } catch (e: Throwable) {
+                Failure(Error.ThrowableError("Error to connect user", e))
             }
         }
     }
 
-    override suspend fun connect(): Result<Unit> {
-        return try {
-            withContext(scope.coroutineContext) {
-                guestUserJob?.await()
-                socketImpl.connect(user)
-            }
-            Success(Unit)
-        } catch (e: ErrorResponse) {
-            if (e.code == VideoErrorCode.TOKEN_EXPIRED.code) {
-                refreshToken(e)
-                Failure(Error.GenericError("Initialize error. Token expired."))
-            } else {
-                Failure(
-                    Error.GenericError("Unable to connect with error: ${e.message}"),
-                )
-            }
-        } catch (e: Throwable) {
-            Failure(Error.ThrowableError("Unable to connect with error: ${e.message}", e))
-        }
+    override suspend fun connect(): Result<Long> {
+        return connectAsync().await()
     }
 
     private suspend fun refreshToken(error: Throwable) {
