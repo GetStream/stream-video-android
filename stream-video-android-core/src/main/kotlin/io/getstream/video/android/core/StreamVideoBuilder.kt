@@ -146,6 +146,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     @InternalStreamVideoApi
     private val enableStereoForSubscriber: Boolean = true,
     private val telecomConfig: TelecomConfig? = null,
+    private val autoConnect: Boolean = true,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -288,14 +289,16 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         if (user.type != UserType.Anonymous) {
             scope.launch {
                 try {
-                    val result = client.connectAsync().await()
                     if (notificationConfig.autoRegisterPushDevice) {
                         client.registerPushDevice()
                     }
-                    result.onSuccess {
-                        streamLog { "Connection succeeded! (duration: ${result.getOrNull()})" }
-                    }.onError {
-                        streamLog { it.message }
+                    if (autoConnect) {
+                        val result = client.connectAsync().await()
+                        result.onSuccess {
+                            streamLog { "Connection succeeded! (duration: ${result.getOrNull()})" }
+                        }.onError {
+                            streamLog { it.message }
+                        }
                     }
                 } catch (e: Throwable) {
                     // If the connect continuation was resumed with an exception, we catch it here.

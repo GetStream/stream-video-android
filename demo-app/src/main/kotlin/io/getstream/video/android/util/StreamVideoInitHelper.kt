@@ -33,6 +33,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.moderations.ModerationConfig
 import io.getstream.video.android.core.moderations.ModerationWarningConfig
@@ -332,9 +333,8 @@ object StreamVideoInitHelper {
             callUpdatesAfterLeave = true,
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
-            telecomConfig = TelecomConfig(
-                context.packageName,
-            ),
+            telecomConfig = TelecomConfig(context.packageName),
+            autoConnect = false,
         ).build()
     }
 }
