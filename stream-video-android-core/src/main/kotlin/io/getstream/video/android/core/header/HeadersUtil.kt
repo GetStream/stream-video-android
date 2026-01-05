@@ -82,7 +82,7 @@ class HeadersUtil {
             append("|device_model=${Build.MANUFACTURER} ${Build.MODEL}")
             append(buildAppVersionForHeader())
             append(buildAppName()) // Assumes buildAppName() returns a properly formatted string
-        }.sanitize() /**/
+        }.sanitize()
     }
 
     private fun buildAppVersionForHeader() = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.let { streamVideoImpl ->
