@@ -22,6 +22,7 @@ import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import java.text.Normalizer
 
 @InternalStreamVideoApi
 class HeadersUtil {
@@ -81,7 +82,7 @@ class HeadersUtil {
             append("|device_model=${Build.MANUFACTURER} ${Build.MODEL}")
             append(buildAppVersionForHeader())
             append(buildAppName()) // Assumes buildAppName() returns a properly formatted string
-        }
+        }.sanitize() /**/
     }
 
     private fun buildAppVersionForHeader() = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.let { streamVideoImpl ->
@@ -95,5 +96,10 @@ class HeadersUtil {
 
     private fun getContext(): Context? {
         return StreamVideo.instanceOrNull()?.context
+    }
+
+    private fun String.sanitize(): String {
+        return Normalizer.normalize(this, Normalizer.Form.NFD)
+            .replace("[^\\p{ASCII}]".toRegex(), "")
     }
 }
