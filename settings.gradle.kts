@@ -5,6 +5,7 @@ import com.github.burrunan.s3cache.AwsS3BuildCache
 pluginManagement {
     includeBuild("build-logic")
     repositories {
+        maven { url = uri("https://maven.google.com") }
         gradlePluginPortal()
         google()
         mavenCentral()
@@ -14,6 +15,7 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        maven { url = uri("https://maven.google.com") }
         google()
         mavenCentral()
         maven(url = "https://plugins.gradle.org/m2/")
