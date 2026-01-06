@@ -460,10 +460,16 @@ internal class StreamVideoClient internal constructor(
                     refreshToken(e)
                     Failure(Error.GenericError("Initialize error. Token expired."))
                 } else {
-                    throw e
+                    Failure(Error.ThrowableError("Error to connect user", e))
                 }
+            } catch (e: Throwable) {
+                Failure(Error.ThrowableError("Error to connect user", e))
             }
         }
+    }
+
+    override suspend fun connect(): Result<Long> {
+        return connectAsync().await()
     }
 
     private suspend fun refreshToken(error: Throwable) {
