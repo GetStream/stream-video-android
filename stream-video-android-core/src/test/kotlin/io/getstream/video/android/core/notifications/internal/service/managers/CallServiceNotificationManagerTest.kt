@@ -101,7 +101,7 @@ class CallServiceNotificationManagerTest {
     @Test
     fun `justNotify does nothing when permission is denied`() {
         every {
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+            ContextCompat.checkSelfPermission(any(), Manifest.permission.POST_NOTIFICATIONS)
         } returns PackageManager.PERMISSION_DENIED
 
         val streamVideo = mockk<StreamVideo>(relaxed = true)
@@ -180,13 +180,6 @@ class CallServiceNotificationManagerTest {
         verify {
             handler.clearMediaSession(callId)
         }
-    }
-
-//    @Test
-    fun `cancelNotifications is safe when callId is null`() {
-//        sut.cancelNotifications(service, null)
-
-//        verify { notificationManagerCompat wasNot Called }
     }
 
     @Test

@@ -161,34 +161,32 @@ class ClientState(private val client: StreamVideo) {
         _connection.value = ConnectionState.Failed(error)
     }
 
+    /**
+     * Transition incoming/outgoing call to active on the same service
+     */
     fun setActiveCall(call: Call) {
         this._activeCall.value = call
-        /**
-         * Transition incoming/outgoing call to active on the same service
-         */
+        val serviceTransitionDelayMs = 500L
         val ringingState = call.state.ringingState.value
         when (ringingState) {
             is RingingState.Incoming -> {
                 call.scope.launch {
                     transitionToAcceptCall(call)
-                    delay(500L)
+                    delay(serviceTransitionDelayMs)
                     maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
                 }
             }
             is RingingState.Outgoing -> {
                 call.scope.launch {
                     transitionToAcceptCall(call)
-                    delay(500L)
+                    delay(serviceTransitionDelayMs)
                     maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
                 }
             }
             else -> {
                 removeRingingCall(call)
                 call.scope.launch {
-                    /**
-                     * Temporary fix: `maybeStartForegroundService` is called just before this code, which can stop the service
-                     */
-                    delay(500L)
+                    delay(serviceTransitionDelayMs)
                     maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
                 }
             }

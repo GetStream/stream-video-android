@@ -77,6 +77,8 @@ internal open class CallService : Service() {
      * we ensure enough time has passed for the system to process the notification removal.
      */
     internal val debouncer = Debouncer()
+    internal val serviceScope: CoroutineScope =
+        CoroutineScope(Dispatchers.IO.limitedParallelism(1) + handler + SupervisorJob())
 
     open val serviceType: Int
         @SuppressLint("InlinedApi")
@@ -100,7 +102,7 @@ internal open class CallService : Service() {
         const val TRIGGER_ONGOING_CALL = "ongoing_call"
         const val EXTRA_STOP_SERVICE = "io.getstream.video.android.core.stop_service"
 
-        const val SERVICE_DESTROY_THRESHOLD_TIME_SECONDS = 2L
+        const val SERVICE_DESTROY_THRESHOLD_TIME_MS = 2_000L
         const val SERVICE_DESTROY_THROTTLE_TIME_MS = 1_000L
 
         private val logger by taggedLogger("CallService")
@@ -108,8 +110,6 @@ internal open class CallService : Service() {
         val handler = CoroutineExceptionHandler { _, exception ->
             logger.e(exception) { "[CallService#Scope] Uncaught exception: $exception" }
         }
-        val serviceScope: CoroutineScope =
-            CoroutineScope(Dispatchers.IO.limitedParallelism(1) + handler + SupervisorJob())
     }
 
     override fun onCreate() {
@@ -556,17 +556,18 @@ internal open class CallService : Service() {
             "[onDestroy], hashcode: ${hashCode()}, call_cid: ${serviceState.currentCallId?.cid}"
         }
         serviceState.soundPlayer?.cleanUpAudioResources()
+        debouncer.cancel()
         serviceScope.cancel()
         super.onDestroy()
     }
 
-    fun printLastStackFrames(count: Int = 10) {
+    private fun debugPrintLastStackFrames(count: Int = 10) {
         val stack = Thread.currentThread().stackTrace
         logger.d { stack.takeLast(count).joinToString("\n") }
     }
 
     private fun streamDefaultNotificationHandler(): StreamDefaultNotificationHandler? {
-        val client = StreamVideo.instanceOrNull() as StreamVideoClient
+        val client = StreamVideo.instanceOrNull() as? StreamVideoClient ?: return null
         val handler =
             client.streamNotificationManager.notificationConfig.notificationHandler as? StreamDefaultNotificationHandler
         return handler
@@ -588,7 +589,7 @@ internal open class CallService : Service() {
             val currentTime = OffsetDateTime.now()
             val duration = Duration.between(startTime, currentTime)
             val differenceInSeconds = duration.seconds.absoluteValue
-            val debouncerThresholdTime = SERVICE_DESTROY_THRESHOLD_TIME_SECONDS
+            val debouncerThresholdTime = SERVICE_DESTROY_THRESHOLD_TIME_MS
             logger.d { "[stopServiceGracefully] differenceInSeconds: $differenceInSeconds" }
             if (differenceInSeconds >= debouncerThresholdTime) {
                 internalStopServiceGracefully()

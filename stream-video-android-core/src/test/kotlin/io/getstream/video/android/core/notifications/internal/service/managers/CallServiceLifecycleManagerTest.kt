@@ -188,6 +188,8 @@ class CallServiceLifecycleManagerTest {
 
     @Test
     fun `endCall does nothing when callId is null`() = testScope.runTest {
+        mockkObject(StreamVideo.Companion)
+        every { StreamVideo.instanceOrNull() } returns streamVideo
         sut.endCall(this, null)
 
         advanceUntilIdle()

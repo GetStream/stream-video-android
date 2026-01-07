@@ -32,4 +32,9 @@ internal class Debouncer {
             handler.postDelayed(it, delayMs)
         }
     }
+
+    fun cancel() {
+        runnable?.let { handler.removeCallbacks(it) }
+        runnable = null
+    }
 }

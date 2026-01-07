@@ -105,7 +105,6 @@ class ServiceStateTest {
      */
     @Test
     fun `unregisterToggleCameraBroadcastReceiver unregisters receiver`() {
-        println("[unregisterToggleCameraBroadcastReceiver unregisters receiver]")
         val sut = ServiceState()
         sut.registerToggleCameraBroadcastReceiver(service, testScope)
         sut.unregisterToggleCameraBroadcastReceiver(service)
