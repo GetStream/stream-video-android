@@ -121,7 +121,7 @@ class CallServiceNotificationManagerTest {
     @Test
     fun `justNotify is safe when StreamVideo instance is null`() {
         every {
-            ActivityCompat.checkSelfPermission(any(), any())
+            ContextCompat.checkSelfPermission(any(), any())
         } returns PackageManager.PERMISSION_GRANTED
 
         every { StreamVideo.instanceOrNull() } returns null

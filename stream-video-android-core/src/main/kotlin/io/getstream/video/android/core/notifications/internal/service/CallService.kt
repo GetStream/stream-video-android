@@ -434,10 +434,10 @@ internal open class CallService : Service() {
     private fun maybeHandleMediaIntent(intent: Intent?, callId: StreamCallId?) = safeCall {
         val handler = streamDefaultNotificationHandler()
         if (handler != null && callId != null) {
-            val isMediaNotification = notificationConfig().mediaNotificationCallTypes.contains(
+            val isMediaNotification = notificationConfig()?.mediaNotificationCallTypes?.contains(
                 callId.type,
             )
-            if (isMediaNotification) {
+            if (isMediaNotification == true) {
                 logger.d { "[maybeHandleMediaIntent] Handling media intent" }
                 MediaButtonReceiver.handleIntent(
                     handler.mediaSession(callId),
@@ -573,8 +573,8 @@ internal open class CallService : Service() {
         return handler
     }
 
-    private fun notificationConfig(): NotificationConfig {
-        val client = StreamVideo.instanceOrNull() as StreamVideoClient
+    private fun notificationConfig(): NotificationConfig? {
+        val client = StreamVideo.instanceOrNull() as? StreamVideoClient ?: return null
         return client.streamNotificationManager.notificationConfig
     }
 
@@ -589,12 +589,12 @@ internal open class CallService : Service() {
             val currentTime = OffsetDateTime.now()
             val duration = Duration.between(startTime, currentTime)
             val differenceInSeconds = duration.seconds.absoluteValue
-            val debouncerThresholdTime = SERVICE_DESTROY_THRESHOLD_TIME_MS
+            val debouncerThresholdTimeInSeconds = SERVICE_DESTROY_THRESHOLD_TIME_MS / 1_000
             logger.d { "[stopServiceGracefully] differenceInSeconds: $differenceInSeconds" }
-            if (differenceInSeconds >= debouncerThresholdTime) {
+            if (differenceInSeconds >= debouncerThresholdTimeInSeconds) {
                 internalStopServiceGracefully()
             } else {
-                debouncer.submit(debouncerThresholdTime) {
+                debouncer.submit(debouncerThresholdTimeInSeconds) {
                     internalStopServiceGracefully()
                 }
             }
