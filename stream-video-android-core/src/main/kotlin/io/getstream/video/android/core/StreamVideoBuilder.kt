@@ -91,6 +91,12 @@ import java.net.ConnectException
  * @property callServiceConfigRegistry The audio processor used for custom modifications to audio data within WebRTC.
  * @property leaveAfterDisconnectSeconds The number of seconds to wait before leaving the call after the connection is disconnected.
  * @property callUpdatesAfterLeave Whether to update the call state after leaving the call.
+ * @property connectOnInit Determines whether the socket should automatically connect as soon as a user is set.
+ *          If `false`, the connection is established only when explicitly requested or when core SDK features
+ *          (such as audio or video calls) are used.
+ *          When `false` and the socket is not connected, incoming calls will not be delivered via WebSocket events;
+ *          the SDK will rely on push notifications instead.
+ *          To start receiving WebSocket events, explicitly invoke `client.connect()`.
  *
  * @see build
  * @see ClientState.connection
@@ -146,6 +152,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     @InternalStreamVideoApi
     private val enableStereoForSubscriber: Boolean = true,
     private val telecomConfig: TelecomConfig? = null,
+    private val connectOnInit: Boolean = true,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -288,14 +295,16 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         if (user.type != UserType.Anonymous) {
             scope.launch {
                 try {
-                    val result = client.connectAsync().await()
                     if (notificationConfig.autoRegisterPushDevice) {
                         client.registerPushDevice()
                     }
-                    result.onSuccess {
-                        streamLog { "Connection succeeded! (duration: ${result.getOrNull()})" }
-                    }.onError {
-                        streamLog { it.message }
+                    if (connectOnInit) {
+                        val result = client.connectAsync().await()
+                        result.onSuccess {
+                            streamLog { "Connection succeeded! (duration: ${result.getOrNull()})" }
+                        }.onError {
+                            streamLog { it.message }
+                        }
                     }
                 } catch (e: Throwable) {
                     // If the connect continuation was resumed with an exception, we catch it here.

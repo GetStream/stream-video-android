@@ -147,6 +147,11 @@ public interface StreamVideo : NotificationHandler {
     public suspend fun connectAsync(): Deferred<Result<Long>>
 
     /**
+     * Connects the user
+     */
+    public suspend fun connect(): Result<Long>
+
+    /**
      * Clears the internal user state, removes push notification devices and clears the call state.
      */
     public fun logOut()

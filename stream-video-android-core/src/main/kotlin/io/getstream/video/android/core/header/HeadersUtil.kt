@@ -22,6 +22,7 @@ import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import java.text.Normalizer
 
 @InternalStreamVideoApi
 class HeadersUtil {
@@ -32,6 +33,7 @@ class HeadersUtil {
         @InternalStreamVideoApi
         @JvmStatic
         public var VERSION_PREFIX_HEADER: VersionPrefixHeader = VersionPrefixHeader.Default
+        private val NON_ASCII_REGEX = "[^\\p{ASCII}]".toRegex()
     }
 
     /**
@@ -81,7 +83,7 @@ class HeadersUtil {
             append("|device_model=${Build.MANUFACTURER} ${Build.MODEL}")
             append(buildAppVersionForHeader())
             append(buildAppName()) // Assumes buildAppName() returns a properly formatted string
-        }
+        }.sanitize()
     }
 
     private fun buildAppVersionForHeader() = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.let { streamVideoImpl ->
@@ -95,5 +97,19 @@ class HeadersUtil {
 
     private fun getContext(): Context? {
         return StreamVideo.instanceOrNull()?.context
+    }
+
+    /**
+     * Sanitizes a string to contain only ASCII characters.
+     *
+     * Uses Unicode NFD (canonical decomposition) to decompose accented characters
+     * into base characters and combining marks, then strips all non-ASCII characters.
+     * For example, "café" becomes "cafe", "Müller" becomes "Muller".
+     *
+     * @return ASCII-only version of the string.
+     */
+    private fun String.sanitize(): String {
+        return Normalizer.normalize(this, Normalizer.Form.NFD)
+            .replace(NON_ASCII_REGEX, "")
     }
 }
