@@ -257,3 +257,9 @@ internal fun isAppInForeground(): Boolean {
         false // fallback if lifecycle isn't initialized yet
     }
 }
+
+internal fun debugPrintLastStackFrames(tag: String, count: Int = 10) {
+    val stack = Thread.currentThread().stackTrace
+    val message = stack.takeLast(count).joinToString("\n")
+    Log.d(tag, message)
+}

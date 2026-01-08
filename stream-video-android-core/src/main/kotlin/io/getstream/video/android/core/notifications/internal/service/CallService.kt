@@ -561,11 +561,6 @@ internal open class CallService : Service() {
         super.onDestroy()
     }
 
-    private fun debugPrintLastStackFrames(count: Int = 10) {
-        val stack = Thread.currentThread().stackTrace
-        logger.d { stack.takeLast(count).joinToString("\n") }
-    }
-
     private fun streamDefaultNotificationHandler(): StreamDefaultNotificationHandler? {
         val client = StreamVideo.instanceOrNull() as? StreamVideoClient ?: return null
         val handler =
