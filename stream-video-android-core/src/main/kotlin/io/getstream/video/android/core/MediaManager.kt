@@ -40,9 +40,8 @@ import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.extractCause
 import io.getstream.video.android.core.audio.AudioHandler
-import io.getstream.video.android.core.audio.AudioHandlerFactory
 import io.getstream.video.android.core.audio.StreamAudioDevice
-import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
+import io.getstream.video.android.core.audio.StreamAudioSwitchHandler
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.camera.CameraCharacteristicsValidator
 import io.getstream.video.android.core.camera.DefaultCameraCharacteristicsValidator
@@ -754,21 +753,10 @@ class MicrophoneManager(
                     )
                 }
 
-                audioHandler = AudioHandlerFactory.create(
+                audioHandler = StreamAudioSwitchHandler(
                     context = mediaManager.context,
-                    preferredStreamAudioDeviceList = preferredDeviceList,
-                    twilioAudioDeviceChangeListener = { devices, selected ->
-                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
-
-                        _devices.value = devices.map { it.fromAudio() }
-                        _selectedDevice.value = selected?.fromAudio()
-
-                        setupCompleted = true
-
-                        capturedOnAudioDevicesUpdate?.invoke()
-                        capturedOnAudioDevicesUpdate = null
-                    },
-                    streamAudioDeviceChangeListener = { devices, selected ->
+                    preferredDeviceList = preferredDeviceList,
+                    audioDeviceChangeListener = { devices, selected ->
                         logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
                         _devices.value = devices
                         _selectedDevice.value = selected
@@ -778,7 +766,6 @@ class MicrophoneManager(
                         capturedOnAudioDevicesUpdate?.invoke()
                         capturedOnAudioDevicesUpdate = null
                     },
-                    useInBuiltAudioSwitch = mediaManager.useInBuiltAudioSwitch,
                 )
 
                 logger.d { "[setup] Calling start on instance $audioHandler" }
@@ -1267,7 +1254,6 @@ class MediaManagerImpl(
     @Deprecated("Use audioUsageProvider instead", replaceWith = ReplaceWith("audioUsageProvider"))
     val audioUsage: Int = defaultAudioUsage,
     val audioUsageProvider: (() -> Int) = { audioUsage },
-    val useInBuiltAudioSwitch: Boolean = false,
 ) {
     internal val camera =
         CameraManager(this, eglBaseContext, DefaultCameraCharacteristicsValidator())

@@ -708,7 +708,7 @@ internal class LegacyAudioDeviceManager(
     }
 
     /**
-     * Handles Bluetooth connection failure by reverting to earpiece (matching Twilio behavior).
+     * Handles Bluetooth connection failure by reverting to earpiece
      */
     private fun handleBluetoothConnectionFailure() {
         logger.w { "[handleBluetoothConnectionFailure] Bluetooth connection failed, reverting to earpiece" }

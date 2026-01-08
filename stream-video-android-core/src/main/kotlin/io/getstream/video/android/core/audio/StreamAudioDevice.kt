@@ -20,94 +20,49 @@ import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.twilio.audioswitch.AudioDevice
-
-// Lazy initialization of default Twilio AudioDevice instances
-private val defaultBluetoothHeadsetAudioDevice: AudioDevice by lazy {
-    StreamAudioDevice.Companion.createTwilioBluetoothHeadset()
-}
-private val defaultWiredHeadsetAudioDevice: AudioDevice by lazy {
-    StreamAudioDevice.Companion.createTwilioWiredHeadset()
-}
-private val defaultEarpieceAudioDevice: AudioDevice by lazy {
-    StreamAudioDevice.Companion.createTwilioEarpiece()
-}
-private val defaultSpeakerphoneAudioDevice: AudioDevice by lazy {
-    StreamAudioDevice.Companion.createTwilioSpeakerphone()
-}
 
 /**
  * Represents an audio device for audio switching.
- * Supports both Twilio's AudioSwitch implementation and native Android audio device management.
  *
- * @see AudioDevice
  * @see AudioDeviceInfo
  */
-public sealed class StreamAudioDevice {
+sealed class StreamAudioDevice {
 
     /** The friendly name of the device.*/
-    public abstract val name: String
-
-    /**
-     * The Twilio AudioDevice instance.
-     * Used when using Twilio's AudioSwitch implementation.
-     */
-    @Deprecated(
-        message = "Use audioDeviceInfo instead for native Android audio device management",
-        replaceWith = ReplaceWith("audioDeviceInfo"),
-    )
-    public abstract val audio: AudioDevice
+    abstract val name: String
 
     /**
      * The Android AudioDeviceInfo instance.
      * This provides device identification and capabilities when using native Android audio management.
      * @see android.media.AudioDeviceInfo
      */
-    public abstract val audioDeviceInfo: AudioDeviceInfo?
+    abstract val audioDeviceInfo: AudioDeviceInfo?
 
     /** A [StreamAudioDevice] representing a Bluetooth Headset.*/
-    public data class BluetoothHeadset constructor(
+    data class BluetoothHeadset constructor(
         override val name: String = "Bluetooth",
-        override val audio: AudioDevice = defaultBluetoothHeadsetAudioDevice,
         override val audioDeviceInfo: AudioDeviceInfo? = null,
     ) : StreamAudioDevice()
 
     /** A [StreamAudioDevice] representing a Wired Headset.*/
-    public data class WiredHeadset constructor(
+    data class WiredHeadset constructor(
         override val name: String = "Wired Headset",
-        override val audio: AudioDevice = defaultWiredHeadsetAudioDevice,
         override val audioDeviceInfo: AudioDeviceInfo? = null,
     ) : StreamAudioDevice()
 
     /** A [StreamAudioDevice] representing the Earpiece.*/
-    public data class Earpiece constructor(
+    data class Earpiece constructor(
         override val name: String = "Earpiece",
-        override val audio: AudioDevice = defaultEarpieceAudioDevice,
         override val audioDeviceInfo: AudioDeviceInfo? = null,
     ) : StreamAudioDevice()
 
     /** A [StreamAudioDevice] representing the Speakerphone.*/
-    public data class Speakerphone constructor(
+    data class Speakerphone constructor(
         override val name: String = "Speakerphone",
-        override val audio: AudioDevice = defaultSpeakerphoneAudioDevice,
         override val audioDeviceInfo: AudioDeviceInfo? = null,
     ) : StreamAudioDevice()
 
-    public companion object {
-        @JvmStatic
-        public fun StreamAudioDevice.toAudioDevice(): AudioDevice {
-            return this.audio
-        }
-
-        @JvmStatic
-        public fun AudioDevice.fromAudio(): StreamAudioDevice {
-            return when (this) {
-                is AudioDevice.BluetoothHeadset -> BluetoothHeadset(audio = this)
-                is AudioDevice.WiredHeadset -> WiredHeadset(audio = this)
-                is AudioDevice.Earpiece -> Earpiece(audio = this)
-                is AudioDevice.Speakerphone -> Speakerphone(audio = this)
-            }
-        }
+    companion object {
 
         /**
          * Converts an Android AudioDeviceInfo to a StreamAudioDevice.
@@ -115,7 +70,7 @@ public sealed class StreamAudioDevice {
          * Available from API 23+ (always available since minSdk is 24).
          */
         @JvmStatic
-        public fun fromAudioDeviceInfo(deviceInfo: AudioDeviceInfo): StreamAudioDevice? {
+        fun fromAudioDeviceInfo(deviceInfo: AudioDeviceInfo): StreamAudioDevice? {
             return when (deviceInfo.type) {
                 AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
                 AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
@@ -217,83 +172,6 @@ public sealed class StreamAudioDevice {
                     }
                 }
             }
-        }
-
-        /**
-         * Creates a Twilio AudioDevice.BluetoothHeadset instance using reflection.
-         */
-        internal fun createTwilioBluetoothHeadset(): AudioDevice {
-            return createTwilioAudioDevice(AudioDevice.BluetoothHeadset::class.java)
-        }
-
-        /**
-         * Creates a Twilio AudioDevice.WiredHeadset instance using reflection.
-         */
-        internal fun createTwilioWiredHeadset(): AudioDevice {
-            return createTwilioAudioDevice(AudioDevice.WiredHeadset::class.java)
-        }
-
-        /**
-         * Creates a Twilio AudioDevice.Earpiece instance using reflection.
-         */
-        internal fun createTwilioEarpiece(): AudioDevice {
-            return createTwilioAudioDevice(AudioDevice.Earpiece::class.java)
-        }
-
-        /**
-         * Creates a Twilio AudioDevice.Speakerphone instance using reflection.
-         */
-        internal fun createTwilioSpeakerphone(): AudioDevice {
-            return createTwilioAudioDevice(AudioDevice.Speakerphone::class.java)
-        }
-
-        /**
-         * Generic method to create Twilio AudioDevice instances using reflection.
-         * Accesses the private constructor and creates an instance.
-         */
-        @Suppress("UNCHECKED_CAST")
-        private fun <T : AudioDevice> createTwilioAudioDevice(deviceClass: Class<T>): T {
-            // Get all declared constructors
-            val constructors = deviceClass.declaredConstructors
-            if (constructors.isEmpty()) {
-                throw IllegalStateException("No constructor found for ${deviceClass.simpleName}")
-            }
-
-            // Try each constructor with different parameter combinations
-            var lastException: Exception? = null
-            for (constructor in constructors) {
-                try {
-                    constructor.isAccessible = true
-                    val paramTypes = constructor.parameterTypes
-
-                    // Create appropriate arguments based on parameter types
-                    val args = paramTypes.map { paramType ->
-                        when {
-                            paramType == String::class.java -> ""
-                            paramType.isPrimitive -> when (paramType.name) {
-                                "int", "long" -> 0
-                                "boolean" -> false
-                                "float", "double" -> 0.0
-                                else -> null
-                            }
-                            else -> null
-                        }
-                    }.toTypedArray()
-
-                    @Suppress("UNCHECKED_CAST")
-                    return constructor.newInstance(*args) as T
-                } catch (e: Exception) {
-                    lastException = e
-                    // Try next constructor
-                    continue
-                }
-            }
-
-            throw IllegalStateException(
-                "Failed to create Twilio AudioDevice instance for ${deviceClass.simpleName}. " +
-                    "None of the constructors could be invoked.",
-                lastException,
-            )
         }
     }
 }

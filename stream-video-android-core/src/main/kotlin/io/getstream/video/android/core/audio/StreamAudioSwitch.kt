@@ -145,7 +145,7 @@ internal class StreamAudioSwitch(
 
             logger.d { "[stop] Stopping AudioSwitch" }
 
-            // Deactivate audio routing (matches Twilio behavior)
+            // Deactivate audio routing
             deactivate()
 
             // Abandon audio focus
@@ -431,7 +431,7 @@ internal class StreamAudioSwitch(
         private const val TAG = "StreamAudioSwitch"
 
         /**
-         * Returns the default preferred device list matching Twilio's priority:
+         * Returns the default preferred device list:
          * BluetoothHeadset -> WiredHeadset -> Earpiece -> Speakerphone
          */
         @JvmStatic

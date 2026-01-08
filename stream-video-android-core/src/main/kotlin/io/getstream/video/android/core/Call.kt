@@ -348,7 +348,6 @@ public class Call(
                 eglBaseContext = eglBase.eglBaseContext,
                 audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
                 audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
-                useInBuiltAudioSwitch = clientImpl.useInBuiltAudioSwitch,
             )
         }
     }

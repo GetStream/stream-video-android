@@ -72,7 +72,7 @@ internal class StreamAudioSwitchHandler(
         streamAudioSwitch?.selectDevice(audioDevice)
     }
 
-    public companion object {
+    companion object {
         private const val TAG = "StreamAudioSwitchHandler"
     }
 }
