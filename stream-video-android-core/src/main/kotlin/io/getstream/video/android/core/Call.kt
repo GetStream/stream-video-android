@@ -237,7 +237,6 @@ public class Call(
 
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
-    internal val yuvFrame = YuvFrame()
 
     /**
      * EGL base context shared between peerConnectionFactory and mediaManager
@@ -1585,7 +1584,7 @@ public class Call(
                     return@VideoSink
                 }
                 it.retain()
-                val bitmap = yuvFrame.bitmapFromVideoFrame(it)
+                val bitmap = YuvFrame.bitmapFromVideoFrame(it)
                 it.release()
 
                 // This has to be launched asynchronously - removing the sink on the

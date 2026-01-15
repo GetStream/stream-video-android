@@ -42,7 +42,6 @@ internal class FilterVideoProcessor(
     private var yuvBuffer: VideoFrame.I420Buffer? = null
     private val textures = IntArray(1)
     private var inputFrameBitmap: Bitmap? = null
-    internal val yuvFrame = YuvFrame()
 
     init {
         GLES20.glGenTextures(1, textures, 0)
@@ -66,7 +65,7 @@ internal class FilterVideoProcessor(
             sink?.onFrame(filteredFrame)
         } else if (currentFilter is BitmapVideoFilter) {
             // first prepare a Bitmap for the client
-            inputFrameBitmap = yuvFrame.bitmapFromVideoFrame(frame)
+            inputFrameBitmap = YuvFrame.bitmapFromVideoFrame(frame)
 
             if (inputFrameBitmap != null && sink != null) {
                 // Prepare helpers (runs only once or if the dimensions change)
