@@ -10549,6 +10549,11 @@ public abstract class io/getstream/video/android/core/call/video/RawVideoFilter 
 public class io/getstream/video/android/core/call/video/VideoFilter {
 }
 
+public final class io/getstream/video/android/core/call/video/YuvFrame {
+	public static final field INSTANCE Lio/getstream/video/android/core/call/video/YuvFrame;
+	public final fun bitmapFromVideoFrame (Lorg/webrtc/VideoFrame;)Landroid/graphics/Bitmap;
+}
+
 public final class io/getstream/video/android/core/closedcaptions/ClosedCaptionDeduplicationConfig {
 	public fun <init> ()V
 	public fun <init> (JZI)V

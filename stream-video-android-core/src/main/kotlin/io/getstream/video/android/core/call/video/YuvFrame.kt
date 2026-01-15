@@ -18,7 +18,6 @@ package io.getstream.video.android.core.call.video
 
 import android.graphics.Bitmap
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.github.crow_misia.libyuv.AbgrBuffer
 import io.github.crow_misia.libyuv.I420Buffer
 import io.github.crow_misia.libyuv.PlanePrimitive
@@ -26,8 +25,7 @@ import io.github.crow_misia.libyuv.RotateMode
 import io.github.crow_misia.libyuv.RowStride
 import org.webrtc.VideoFrame
 
-// Make it an internal class instead of object
-@InternalStreamVideoApi
+// TODO: should be an internal class instead of object
 object YuvFrame {
 
     private val logger by taggedLogger("YuvFrame")
