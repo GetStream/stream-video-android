@@ -25,7 +25,7 @@ import io.github.crow_misia.libyuv.RotateMode
 import io.github.crow_misia.libyuv.RowStride
 import org.webrtc.VideoFrame
 
-object YuvFrame {
+class YuvFrame {
     private val logger by taggedLogger("YuvFrame")
 
     private lateinit var webRtcI420Buffer: VideoFrame.I420Buffer
@@ -47,8 +47,9 @@ object YuvFrame {
             createLibYuvI420Buffer()
             rotateLibYuvI420Buffer(videoFrame.rotation)
             createLibYuvAbgrBuffer()
+            val bitmap = libYuvAbgrBuffer!!.asBitmap()
             cleanUp()
-            libYuvAbgrBuffer!!.asBitmap()
+            bitmap
         } catch (t: Throwable) {
             logger.e(t) { "Failed to convert a VideoFrame" }
             null
