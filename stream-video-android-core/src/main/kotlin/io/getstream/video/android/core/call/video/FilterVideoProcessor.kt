@@ -21,7 +21,6 @@ import android.graphics.Matrix
 import android.opengl.GLES20
 import android.opengl.GLUtils
 import androidx.core.graphics.get
-import io.getstream.log.taggedLogger
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.TextureBufferImpl
 import org.webrtc.VideoFrame
@@ -43,27 +42,7 @@ internal class FilterVideoProcessor(
     private var yuvBuffer: VideoFrame.I420Buffer? = null
     private val textures = IntArray(1)
     private var inputFrameBitmap: Bitmap? = null
-    private val logger by taggedLogger("FilterVideoProcessor")
-    private var frameCount = 0L
-    private var lastLogTime = System.currentTimeMillis()
-    private val logIntervalMs = 10_000L // Log every 10 seconds
     internal val yuvFrame = YuvFrame()
-
-    private fun logPerformanceMetrics() {
-        frameCount++
-        val now = System.currentTimeMillis()
-        val elapsed = now - lastLogTime
-
-        if (elapsed >= logIntervalMs) {
-            val fps = (frameCount.toDouble() / elapsed) * 1000.0
-            logger.i {
-                "FilterVideoProcessor: ${String.format("%.1f", fps)} fps, " +
-                    "Frames processed: $frameCount"
-            }
-            frameCount = 0
-            lastLogTime = now
-        }
-    }
 
     init {
         GLES20.glGenTextures(1, textures, 0)
@@ -117,11 +96,11 @@ internal class FilterVideoProcessor(
                 yuvBuffer = yuvConverter.convert(inputBuffer)
 
                 sink?.onFrame(VideoFrame(yuvBuffer, 0, frame.timestampNs))
+                inputFrameBitmap?.recycle()
             }
         } else {
             throw Error("Unsupported video filter type ${filter.invoke()}")
         }
-        logPerformanceMetrics()
     }
 
     override fun setSink(sink: VideoSink?) {
