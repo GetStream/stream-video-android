@@ -63,7 +63,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @Deprecated(
-    message = "This class is deprecated. Use the notification interceptors instead.",
+    message = "This class is deprecated. Use CompatibilityStreamNotificationHandler instead.",
 )
 public open class DefaultNotificationHandler(
     private val application: Application,
