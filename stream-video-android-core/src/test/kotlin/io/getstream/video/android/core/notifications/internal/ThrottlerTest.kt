@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2025 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,18 @@ import kotlin.test.assertTrue
 
 class ThrottlerTest {
 
+    private val throttler = Throttler()
+
     @Before
     fun setup() {
-        Throttler.resetAll()
+        throttler.resetAll()
     }
 
     @Test
     fun `first throttle call executes immediately`() {
         var executed = false
 
-        Throttler.throttleFirst("key", 1_000) {
+        throttler.throttleFirst("key", 1_000) {
             executed = true
         }
 
@@ -43,11 +45,11 @@ class ThrottlerTest {
     fun `second call within cooldown does not execute`() {
         var count = 0
 
-        Throttler.throttleFirst("key", 10_000) {
+        throttler.throttleFirst("key", 10_000) {
             count++
         }
 
-        Throttler.throttleFirst("key", 10_000) {
+        throttler.throttleFirst("key", 10_000) {
             count++
         }
 
@@ -58,13 +60,13 @@ class ThrottlerTest {
     fun `reset allows execution again`() {
         var count = 0
 
-        Throttler.throttleFirst("key", 10_000) {
+        throttler.throttleFirst("key", 10_000) {
             count++
         }
 
-        Throttler.reset("key")
+        throttler.reset("key")
 
-        Throttler.throttleFirst("key", 10_000) {
+        throttler.throttleFirst("key", 10_000) {
             count++
         }
 
@@ -75,13 +77,13 @@ class ThrottlerTest {
     fun `resetAll clears all cooldowns`() {
         var count = 0
 
-        Throttler.throttleFirst("key1", 10_000) { count++ }
-        Throttler.throttleFirst("key2", 10_000) { count++ }
+        throttler.throttleFirst("key1", 10_000) { count++ }
+        throttler.throttleFirst("key2", 10_000) { count++ }
 
-        Throttler.resetAll()
+        throttler.resetAll()
 
-        Throttler.throttleFirst("key1", 10_000) { count++ }
-        Throttler.throttleFirst("key2", 10_000) { count++ }
+        throttler.throttleFirst("key1", 10_000) { count++ }
+        throttler.throttleFirst("key2", 10_000) { count++ }
 
         assertEquals(4, count)
     }
@@ -90,8 +92,8 @@ class ThrottlerTest {
     fun `throttleFirst without key throttles same call site`() {
         var count = 0
 
-        Throttler.throttleFirst(10_000) { count++ }
-        Throttler.throttleFirst(10_000) { count++ }
+        throttler.throttleFirst(10_000) { count++ }
+        throttler.throttleFirst(10_000) { count++ }
 
         assertEquals(1, count)
     }
