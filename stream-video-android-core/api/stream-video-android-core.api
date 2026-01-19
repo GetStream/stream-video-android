@@ -3559,6 +3559,7 @@ public final class io/getstream/android/video/generated/models/ListTranscription
 
 public final class io/getstream/android/video/generated/models/LocalCallMissedEvent : io/getstream/android/video/generated/models/LocalEvent {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/android/video/generated/models/LocalCallMissedEvent;

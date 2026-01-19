@@ -20,7 +20,7 @@ import io.getstream.log.taggedLogger
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.getValue
 
-internal object Throttler {
+internal class Throttler {
 
     private val logger by taggedLogger("Throttler")
 

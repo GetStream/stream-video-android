@@ -35,10 +35,10 @@ import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.handlers.StreamDefaultNotificationHandler
 import io.getstream.video.android.core.notifications.internal.Debouncer
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.EXTRA_STOP_SERVICE
+import io.getstream.video.android.core.notifications.internal.service.controllers.ServiceStateController
 import io.getstream.video.android.core.notifications.internal.service.managers.CallServiceLifecycleManager
 import io.getstream.video.android.core.notifications.internal.service.managers.CallServiceNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.models.CallIntentParams
-import io.getstream.video.android.core.notifications.internal.service.models.ServiceState
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceEventObserver
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceNotificationUpdateObserver
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceRingingStateObserver
@@ -66,7 +66,7 @@ internal open class CallService : Service() {
 
     internal val callServiceLifecycleManager = CallServiceLifecycleManager()
     private val notificationManager = CallServiceNotificationManager()
-    internal val serviceState = ServiceState()
+    internal val serviceStateController = ServiceStateController()
 
     /**
      * A debouncer used to delay the final stopping of the service.
@@ -114,17 +114,17 @@ internal open class CallService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        serviceState.startTime = OffsetDateTime.now()
+        serviceStateController.setStartTime(OffsetDateTime.now())
     }
 
     private fun shouldStopService(intent: Intent?): Boolean {
         val intentCallId = intent?.streamCallId(INTENT_EXTRA_CALL_CID)
         val shouldStopService = intent?.getBooleanExtra(EXTRA_STOP_SERVICE, false) ?: false
         logger.d {
-            "[shouldStopService]: service hashcode: ${this.hashCode()}, serviceState.currentCallId!=null : ${serviceState.currentCallId != null}, serviceState.currentCallId == intentCallId && shouldStopService : ${serviceState.currentCallId == intentCallId && shouldStopService}"
+            "[shouldStopService]: service hashcode: ${this.hashCode()}, serviceState.currentCallId!=null : ${serviceStateController.currentCallId != null}, serviceState.currentCallId == intentCallId && shouldStopService : ${serviceStateController.currentCallId == intentCallId && shouldStopService}"
         }
 
-        if (serviceState.currentCallId != null && serviceState.currentCallId == intentCallId && shouldStopService) {
+        if (serviceStateController.state.value.currentCallId != null && serviceStateController.currentCallId == intentCallId && shouldStopService) {
             logger.d { "[shouldStopService]: true, call_cid:${intentCallId?.cid}" }
             return true
         }
@@ -210,7 +210,7 @@ internal open class CallService : Service() {
 
         if (!verifyPermissions(params.streamVideo, call, params.callId, params.trigger)) {
             stopServiceGracefully()
-            return START_REDELIVER_INTENT
+            return START_NOT_STICKY
         }
 
         val (notification, notificationId) = getNotificationPair(
@@ -262,11 +262,13 @@ internal open class CallService : Service() {
             )
         }
 
-        serviceState.soundPlayer = streamVideo.callSoundAndVibrationPlayer
-        logger.d { "[initializeService] soundPlayer's hashcode: ${serviceState.soundPlayer?.hashCode()}" }
+        serviceStateController.setSoundPlayer(streamVideo.callSoundAndVibrationPlayer)
+        logger.d {
+            "[initializeService] soundPlayer's hashcode: ${serviceStateController.soundPlayer?.hashCode()}"
+        }
 
         observeCall(callId, streamVideo)
-        serviceState.registerToggleCameraBroadcastReceiver(this, serviceScope)
+        serviceStateController.registerToggleCameraBroadcastReceiver(this, serviceScope)
     }
 
     private fun handleNotification(
@@ -282,7 +284,7 @@ internal open class CallService : Service() {
             return handleNullNotification(trigger, callId, call, notificationId)
         }
 
-        serviceState.currentCallId = callId
+        serviceStateController.setCurrentCallId(callId)
 
         return when (trigger) {
             TRIGGER_INCOMING_CALL -> {
@@ -332,7 +334,7 @@ internal open class CallService : Service() {
             return CallServiceHandleNotificationResult.REDELIVER
         }
 
-        val serviceStartedForThisCall = serviceState.currentCallId?.id == callId.id
+        val serviceStartedForThisCall = serviceStateController.currentCallId?.id == callId.id
 
         return if (serviceStartedForThisCall) {
             removeIncomingCall(fallbackNotificationId, call)
@@ -467,24 +469,26 @@ internal open class CallService : Service() {
         notificationId: Int,
         notification: Notification,
     ) {
-        logger.d { "[showIncomingCall] notificationId: $notificationId" }
-        val hasActiveCall = StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
+        StreamVideo.instanceOrNull()?.let { client ->
+            logger.d { "[showIncomingCall] notificationId: $notificationId" }
+            val hasActiveCall = client.state.activeCall.value != null
 
-        if (!hasActiveCall) {
-            StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
-                ?.state?.updateNotification(notificationId, notification)
+            if (!hasActiveCall) {
+                client.call(callId.type, callId.id)
+                    .state.updateNotification(notificationId, notification)
 
-            startForegroundWithServiceType(
-                notificationId,
-                notification,
-                TRIGGER_INCOMING_CALL,
-                permissionManager.getServiceType(baseContext, TRIGGER_INCOMING_CALL),
-            ).onError {
-                logger.e { "[showIncomingCall] Failed to start foreground: $it" }
+                startForegroundWithServiceType(
+                    notificationId,
+                    notification,
+                    TRIGGER_INCOMING_CALL,
+                    permissionManager.getServiceType(baseContext, TRIGGER_INCOMING_CALL),
+                ).onError {
+                    logger.e { "[showIncomingCall] Failed to start foreground: $it" }
+                    notificationManager.justNotify(this, callId, notificationId, notification)
+                }
+            } else {
                 notificationManager.justNotify(this, callId, notificationId, notification)
             }
-        } else {
-            notificationManager.justNotify(this, callId, notificationId, notification)
         }
     }
 
@@ -492,7 +496,7 @@ internal open class CallService : Service() {
         logger.d {
             "[removeIncomingCall] notificationId: $notificationId, ${this.javaClass.name} hashcode: ${hashCode()}"
         }
-        if (serviceState.currentCallId?.cid == call.cid) {
+        if (serviceStateController.currentCallId?.cid == call.cid) {
             stopServiceGracefully()
         }
     }
@@ -500,7 +504,12 @@ internal open class CallService : Service() {
     private fun observeCall(callId: StreamCallId, streamVideo: StreamVideoClient) {
         val call = streamVideo.call(callId.type, callId.id)
 
-        CallServiceRingingStateObserver(call, serviceState.soundPlayer, streamVideo, serviceScope)
+        CallServiceRingingStateObserver(
+            call,
+            serviceStateController.soundPlayer,
+            streamVideo,
+            serviceScope,
+        )
             .observe { stopServiceGracefully() }
 
         CallServiceEventObserver(call, streamVideo, serviceScope)
@@ -547,15 +556,15 @@ internal open class CallService : Service() {
         super.onTaskRemoved(rootIntent)
         logger.w { "[onTaskRemoved]" }
 
-        callServiceLifecycleManager.endCall(serviceScope, serviceState.currentCallId)
+        callServiceLifecycleManager.endCall(serviceScope, serviceStateController.currentCallId)
         stopServiceGracefully()
     }
 
     override fun onDestroy() {
         logger.d {
-            "[onDestroy], hashcode: ${hashCode()}, call_cid: ${serviceState.currentCallId?.cid}"
+            "[onDestroy], hashcode: ${hashCode()}, call_cid: ${serviceStateController.currentCallId?.cid}"
         }
-        serviceState.soundPlayer?.cleanUpAudioResources()
+        serviceStateController.soundPlayer?.cleanUpAudioResources()
         debouncer.cancel()
         serviceScope.cancel()
         super.onDestroy()
@@ -579,7 +588,7 @@ internal open class CallService : Service() {
      * Else stopping service by an expired call can cancel current call's notification and the service itself
      */
     private fun stopServiceGracefully(source: String? = null) {
-        serviceState.startTime?.let { startTime ->
+        serviceStateController.startTime?.let { startTime ->
 
             val currentTime = OffsetDateTime.now()
             val duration = Duration.between(startTime, currentTime)
@@ -600,17 +609,17 @@ internal open class CallService : Service() {
         logger.d { "[internalStopServiceGracefully] hashcode: ${hashCode()}" }
 
         stopForeground(STOP_FOREGROUND_REMOVE)
-        serviceState.currentCallId?.let {
+        serviceStateController.currentCallId?.let {
             notificationManager.cancelNotifications(this, it)
         }
 
-        serviceState.unregisterToggleCameraBroadcastReceiver(this)
+        serviceStateController.unregisterToggleCameraBroadcastReceiver(this)
 
         /**
          * Temp Fix!! The observeRingingState scope was getting cancelled and as a result,
          * ringing state was not properly updated
          */
-        serviceState.soundPlayer?.stopCallSound() // TODO should check which call owns the sound
+        serviceStateController.soundPlayer?.stopCallSound() // TODO should check which call owns the sound
         serviceScope.cancel()
         stopSelf()
     }

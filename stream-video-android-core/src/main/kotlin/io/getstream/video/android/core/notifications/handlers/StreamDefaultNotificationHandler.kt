@@ -222,7 +222,7 @@ constructor(
          *  [io.getstream.android.video.generated.models.CallRejectedEvent] so we emit [LocalCallMissedEvent]
          */
         StreamVideo.instanceOrNull()?.let {
-            (it as StreamVideoClient).fireEvent(LocalCallMissedEvent(createdByUserId, callId.cid))
+            (it as StreamVideoClient).fireEvent(LocalCallMissedEvent(callId.cid, createdByUserId))
         }
     }
 

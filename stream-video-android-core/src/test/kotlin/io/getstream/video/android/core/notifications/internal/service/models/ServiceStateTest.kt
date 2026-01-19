@@ -19,6 +19,7 @@ package io.getstream.video.android.core.notifications.internal.service.models
 import android.app.Service
 import android.content.IntentFilter
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
+import io.getstream.video.android.core.notifications.internal.service.controllers.ServiceStateController
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
@@ -56,7 +57,7 @@ class ServiceStateTest {
 
     @Test
     fun `registerToggleCameraBroadcastReceiver registers receiver`() {
-        val sut = ServiceState()
+        val sut = ServiceStateController()
         sut.registerToggleCameraBroadcastReceiver(service, testScope)
 
         verify(exactly = 1) {
@@ -69,7 +70,7 @@ class ServiceStateTest {
 
     @Test
     fun `registerToggleCameraBroadcastReceiver does not re-register if already registered`() {
-        val sut = ServiceState()
+        val sut = ServiceStateController()
         sut.registerToggleCameraBroadcastReceiver(service, testScope)
         sut.registerToggleCameraBroadcastReceiver(service, testScope)
 
@@ -80,7 +81,7 @@ class ServiceStateTest {
 
     @Test
     fun `registerToggleCameraBroadcastReceiver swallows exception`() {
-        val sut = ServiceState()
+        val sut = ServiceStateController()
         every {
             service.registerReceiver(any(), any())
         } throws RuntimeException("boom")
@@ -92,7 +93,7 @@ class ServiceStateTest {
 
     @Test
     fun `unregisterToggleCameraBroadcastReceiver does nothing if not registered`() {
-        val sut = ServiceState()
+        val sut = ServiceStateController()
         sut.unregisterToggleCameraBroadcastReceiver(service)
 
         verify {
@@ -105,7 +106,7 @@ class ServiceStateTest {
      */
     @Test
     fun `unregisterToggleCameraBroadcastReceiver unregisters receiver`() {
-        val sut = ServiceState()
+        val sut = ServiceStateController()
         sut.registerToggleCameraBroadcastReceiver(service, testScope)
         sut.unregisterToggleCameraBroadcastReceiver(service)
 
@@ -116,7 +117,7 @@ class ServiceStateTest {
 
     @Test
     fun `unregisterToggleCameraBroadcastReceiver swallows exception`() {
-        val sut = ServiceState()
+        val sut = ServiceStateController()
         sut.registerToggleCameraBroadcastReceiver(service, testScope)
 
         every {

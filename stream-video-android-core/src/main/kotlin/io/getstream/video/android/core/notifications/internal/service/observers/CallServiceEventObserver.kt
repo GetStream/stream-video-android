@@ -49,7 +49,7 @@ internal class CallServiceEventObserver(
      * Observes call events (accepted, rejected, ended, missed).
      */
     private fun observeCallEvents(onServiceStop: () -> Unit, onRemoveIncoming: () -> Unit) {
-        scope.launch {
+        call.scope.launch {
             call.events.collect { event ->
                 handleCallEvent(event, onServiceStop, onRemoveIncoming)
             }

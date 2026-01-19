@@ -65,6 +65,7 @@ internal class ServiceLauncher(val context: Context) {
     private val telecomHelper = TelecomHelper()
     private val telecomPermissions = TelecomPermissions()
     private val jetpackTelecomRepositoryProvider = JetpackTelecomRepositoryProvider(context)
+    private val throttler = Throttler()
 
     @SuppressLint("MissingPermission", "NewApi")
     fun showIncomingCall(
@@ -241,7 +242,7 @@ internal class ServiceLauncher(val context: Context) {
      */
     fun stopService(call: Call) {
         logger.d { "[stopService]" }
-        Throttler.throttleFirst(CallService.SERVICE_DESTROY_THROTTLE_TIME_MS) {
+        throttler.throttleFirst(CallService.SERVICE_DESTROY_THROTTLE_TIME_MS) {
             stopCallServiceInternal(call)
         }
     }
