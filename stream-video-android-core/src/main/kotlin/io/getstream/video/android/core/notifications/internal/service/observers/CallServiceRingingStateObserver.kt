@@ -23,7 +23,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.RejectReason
-import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -110,7 +109,7 @@ internal class CallServiceRingingStateObserver(
      * Handles rejected by all state - rejects call and stops service.
      */
     private fun handleRejectedByAllState(onStopService: () -> Unit) {
-        ClientScope().launch {
+        streamVideo.scope.launch {
             call.reject(
                 source = "RingingState.RejectedByAll",
                 reason = RejectReason.Decline,

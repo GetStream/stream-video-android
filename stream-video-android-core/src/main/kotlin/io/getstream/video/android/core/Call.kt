@@ -1544,6 +1544,11 @@ public class Call(
         return clientImpl.accept(type, id)
     }
 
+    /**
+     * Should outlive both the call scope and the service scope and needs to be executed in the client-level scope.
+     * Because the call scope or service scope may be cancelled or finished while the network request is still in flight
+     * TODO: Run this in clientImpl.scope internally
+     */
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
         logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
         return clientImpl.reject(type, id, reason)
