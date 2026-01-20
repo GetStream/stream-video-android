@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import io.getstream.video.android.Configuration
 import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.maven.publish)
     id("io.getstream.video.android.library")
     id("io.getstream.video.generateServices")
     id(libs.plugins.kotlin.serialization.get().pluginId)
@@ -62,10 +60,17 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-proguard-rules.pro")
-        buildConfigField("String", "STREAM_VIDEO_VERSION", "\"${Configuration.versionName}\"")
-        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MAJOR", "${Configuration.majorVersion}")
-        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MINOR", "${Configuration.minorVersion}")
-        buildConfigField("Integer", "STREAM_VIDEO_VERSION_PATCH", "${Configuration.patchVersion}")
+
+        val versionParts =
+            version.toString()
+                .takeWhile { it.isDigit() || it == '.' }
+                .split(".")
+                .mapNotNull(String::toIntOrNull)
+                .also { require(it.size == 3) { "Unexpected version format: $version" } }
+        buildConfigField("String", "STREAM_VIDEO_VERSION", "\"$version\"")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MAJOR", "${versionParts[0]}")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MINOR", "${versionParts[1]}")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_PATCH", "${versionParts[2]}")
         buildConfigField(
             "String",
             "STREAM_WEBRTC_VERSION",
@@ -224,21 +229,6 @@ dependencies {
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.turbine)
-}
-
-mavenPublishing {
-    coordinates(
-        groupId = Configuration.artifactGroup,
-        artifactId = "stream-video-android-core",
-        version = rootProject.version.toString(),
-    )
-    configure(
-        AndroidSingleVariantLibrary(
-            variant = "release",
-            sourcesJar = true,
-            publishJavadocJar = true,
-        ),
-    )
 }
 
 afterEvaluate {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -145,6 +145,11 @@ public interface StreamVideo : NotificationHandler {
     public suspend fun getEdges(): Result<List<EdgeData>>
 
     public suspend fun connectAsync(): Deferred<Result<Long>>
+
+    /**
+     * Connects the user
+     */
+    public suspend fun connect(): Result<Long>
 
     /**
      * Clears the internal user state, removes push notification devices and clears the call state.
