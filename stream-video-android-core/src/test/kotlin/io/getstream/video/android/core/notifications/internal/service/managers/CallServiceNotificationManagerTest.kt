@@ -31,6 +31,7 @@ import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.handlers.CompatibilityStreamNotificationHandler
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
+import io.getstream.video.android.core.notifications.internal.service.controllers.ServiceStateController
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.Called
 import io.mockk.every
@@ -39,6 +40,7 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import org.junit.After
 import org.junit.Before
@@ -57,11 +59,14 @@ class CallServiceNotificationManagerTest {
 
     private val notificationDispatcher: NotificationDispatcher = mockk(relaxed = true)
     private val notificationManagerCompat: NotificationManagerCompat = mockk(relaxed = true)
+    private val stateController: ServiceStateController = mockk(relaxed = true)
+    private val dispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(dispatcher)
 
     @Before
     fun setup() {
         context = mockk(relaxed = true)
-        sut = CallServiceNotificationManager()
+        sut = CallServiceNotificationManager(stateController, testScope)
 
         mockkStatic(ActivityCompat::class)
         mockkStatic(ContextCompat::class)
@@ -147,7 +152,7 @@ class CallServiceNotificationManagerTest {
 
         verify {
             notificationManagerCompat.cancel(callId.hashCode())
-            call.state.notificationId?.let {
+            call.state.notificationIdFlow.value?.let {
                 notificationManagerCompat.cancel(it)
             }
         }

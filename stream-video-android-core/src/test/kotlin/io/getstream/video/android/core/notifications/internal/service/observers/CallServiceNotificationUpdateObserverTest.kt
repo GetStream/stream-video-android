@@ -67,6 +67,7 @@ class CallServiceNotificationUpdateObserverTest {
     // StateFlows
     private val ringingStateFlow = MutableStateFlow<RingingState>(RingingState.Idle)
     private val membersFlow = MutableStateFlow(emptyList<MemberState>())
+    private val testNotificationIdFlow: MutableStateFlow<Int?> = MutableStateFlow(null)
     private val remoteParticipantsFlow = MutableStateFlow(emptyList<ParticipantState>())
     private val backstageFlow = MutableStateFlow(false)
 
@@ -82,7 +83,7 @@ class CallServiceNotificationUpdateObserverTest {
             every { members } returns membersFlow
             every { remoteParticipants } returns remoteParticipantsFlow
             every { backstage } returns backstageFlow
-            every { notificationId } returns null
+            every { notificationIdFlow } returns testNotificationIdFlow
         }
 
         call = mockk {

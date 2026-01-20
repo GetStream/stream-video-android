@@ -84,7 +84,7 @@ class CallServiceLifecycleManagerTest {
         sut.initializeCallAndSocket(
             scope = this,
             streamVideo = streamVideo,
-            callId = callId,
+            call = call,
             onError = onError,
         )
 
@@ -100,7 +100,7 @@ class CallServiceLifecycleManagerTest {
         val getCallResponseSuccess = mockk<Result.Success<GetCallResponse>>(relaxed = true)
         coEvery { call.get() } returns getCallResponseSuccess
 
-        sut.initializeCallAndSocket(this, streamVideo, callId, onError)
+        sut.initializeCallAndSocket(this, streamVideo, call, onError)
 
         advanceUntilIdle()
 
@@ -115,7 +115,7 @@ class CallServiceLifecycleManagerTest {
         sut.updateRingingCall(
             scope = this,
             streamVideo = streamVideo,
-            callId = callId,
+            call = call,
             ringingState = ringingState,
         )
 
