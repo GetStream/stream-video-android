@@ -139,7 +139,7 @@ internal class CallServiceNotificationUpdateObserver(
     ) {
         logger.d { "[showActiveCallNotification] Showing active call notification" }
         val notificationId =
-            call.state.notificationId ?: callId.getNotificationId(NotificationType.Ongoing)
+            call.state.notificationIdFlow.value ?: callId.getNotificationId(NotificationType.Ongoing)
         startForegroundWithServiceType(
             notificationId,
             notification,
@@ -155,7 +155,7 @@ internal class CallServiceNotificationUpdateObserver(
     ) {
         logger.d { "[showOutgoingCallNotification] Showing outgoing call notification" }
         val notificationId =
-            call.state.notificationId ?: callId.getNotificationId(NotificationType.Outgoing)
+            call.state.notificationIdFlow.value ?: callId.getNotificationId(NotificationType.Outgoing)
         startForegroundWithServiceType(
             notificationId,
             notification,
@@ -171,7 +171,7 @@ internal class CallServiceNotificationUpdateObserver(
     ) {
         logger.d { "[showIncomingCallNotification] Showing incoming call notification" }
         val notificationId =
-            call.state.notificationId ?: callId.getNotificationId(NotificationType.Incoming)
+            call.state.notificationIdFlow.value ?: callId.getNotificationId(NotificationType.Incoming)
         startForegroundWithServiceType(
             notificationId,
             notification,

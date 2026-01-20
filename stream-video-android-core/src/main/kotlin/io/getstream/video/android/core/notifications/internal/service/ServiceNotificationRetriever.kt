@@ -53,7 +53,7 @@ internal class ServiceNotificationRetriever {
      *   should be shown for the given trigger.
      * - **second**: The notification ID used to post or update the notification.
      */
-    open fun getNotificationPair(
+    fun getNotificationPair(
         context: Context,
         trigger: String,
         streamVideo: StreamVideoClient,
@@ -67,7 +67,7 @@ internal class ServiceNotificationRetriever {
         val notificationData: Pair<Notification?, Int> = when (trigger) {
             TRIGGER_ONGOING_CALL -> {
                 logger.d { "[getNotificationPair] Creating ongoing call notification" }
-                val notificationId = call.state.notificationId
+                val notificationId = call.state.notificationIdFlow.value
                     ?: streamCallId.getNotificationId(NotificationType.Ongoing)
 
                 Pair(
@@ -83,7 +83,7 @@ internal class ServiceNotificationRetriever {
             TRIGGER_INCOMING_CALL -> {
                 val shouldHaveContentIntent = streamVideo.state.activeCall.value == null
                 logger.d { "[getNotificationPair] Creating incoming call notification" }
-                val notificationId = call.state.notificationId
+                val notificationId = call.state.notificationIdFlow.value
                     ?: streamCallId.getNotificationId(NotificationType.Incoming)
 
                 Pair(
@@ -100,7 +100,7 @@ internal class ServiceNotificationRetriever {
 
             TRIGGER_OUTGOING_CALL -> {
                 logger.d { "[getNotificationPair] Creating outgoing call notification" }
-                val notificationId = call.state.notificationId
+                val notificationId = call.state.notificationIdFlow.value
                     ?: streamCallId.getNotificationId(NotificationType.Outgoing)
 
                 Pair(

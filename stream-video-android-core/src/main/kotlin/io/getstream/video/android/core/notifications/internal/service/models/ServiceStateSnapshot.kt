@@ -23,6 +23,7 @@ import org.threeten.bp.OffsetDateTime
 
 internal data class ServiceStateSnapshot(
     val currentCallId: StreamCallId? = null,
+    val notificationId: Int? = null,
     val soundPlayer: CallSoundAndVibrationPlayer? = null,
     val toggleCameraBroadcastReceiver: ToggleCameraBroadcastReceiver? = null,
     val isReceiverRegistered: Boolean = false,

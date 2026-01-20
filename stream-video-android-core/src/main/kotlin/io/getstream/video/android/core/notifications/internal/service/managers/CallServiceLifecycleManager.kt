@@ -30,11 +30,10 @@ internal class CallServiceLifecycleManager {
     fun initializeCallAndSocket(
         scope: CoroutineScope,
         streamVideo: StreamVideo,
-        callId: StreamCallId,
+        call: Call,
         onError: () -> Unit,
     ) {
         scope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
             val update = call.get()
 
             if (update.isFailure) {
@@ -51,11 +50,10 @@ internal class CallServiceLifecycleManager {
     fun updateRingingCall(
         scope: CoroutineScope,
         streamVideo: StreamVideo,
-        callId: StreamCallId,
+        call: Call,
         ringingState: RingingState,
     ) {
         scope.launch {
-            val call = streamVideo.call(callId.type, callId.id)
             streamVideo.state.addRingingCall(call, ringingState)
         }
     }

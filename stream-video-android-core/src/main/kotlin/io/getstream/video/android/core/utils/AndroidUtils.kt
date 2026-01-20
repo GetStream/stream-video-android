@@ -258,8 +258,8 @@ internal fun isAppInForeground(): Boolean {
     }
 }
 
-internal fun debugPrintLastStackFrames(tag: String, count: Int = 10) {
+internal fun debugPrintLastStackFrames(tag: String, messagePrefix: String = "", count: Int = 5) {
     val stack = Thread.currentThread().stackTrace
     val message = stack.takeLast(count).joinToString("\n")
-    Log.d(tag, message)
+    Log.d(tag, "$messagePrefix:$message")
 }

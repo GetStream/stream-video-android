@@ -36,21 +36,28 @@ internal class ServiceStateController {
     val currentCallId: StreamCallId?
         get() = state.value.currentCallId
 
+    val notificationId: Int?
+        get() = state.value.notificationId
+
     val soundPlayer: CallSoundAndVibrationPlayer?
         get() = state.value.soundPlayer
 
     val startTime: OffsetDateTime?
         get() = state.value.startTime
 
-    fun setCurrentCallId(callId: StreamCallId?) {
+    fun setCurrentCallId(callId: StreamCallId) {
         _state.update { it.copy(currentCallId = callId) }
     }
 
-    fun setSoundPlayer(player: CallSoundAndVibrationPlayer?) {
+    fun setCallNotificationId(notificationId: Int) {
+        _state.update { it.copy(notificationId = notificationId) }
+    }
+
+    fun setSoundPlayer(player: CallSoundAndVibrationPlayer) {
         _state.update { it.copy(soundPlayer = player) }
     }
 
-    fun setStartTime(time: OffsetDateTime?) {
+    fun setStartTime(time: OffsetDateTime) {
         _state.update { it.copy(startTime = time) }
     }
 

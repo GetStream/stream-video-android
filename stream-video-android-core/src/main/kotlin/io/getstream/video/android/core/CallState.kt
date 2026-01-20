@@ -705,7 +705,9 @@ public class CallState(
      */
     internal val atomicNotification: AtomicReference<Notification?> =
         AtomicReference<Notification?>(null)
-    internal var notificationId: Int? = null
+
+    private var _notificationIdFlow = MutableStateFlow<Int?>(null)
+    internal val notificationIdFlow: StateFlow<Int?> = _notificationIdFlow
 
     @InternalStreamVideoApi
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
@@ -1694,7 +1696,7 @@ public class CallState(
     }
 
     fun updateNotification(notificationId: Int, notification: Notification) {
-        this.notificationId = notificationId
+        this._notificationIdFlow.value = notificationId
         this.atomicNotification.set(notification)
     }
 }

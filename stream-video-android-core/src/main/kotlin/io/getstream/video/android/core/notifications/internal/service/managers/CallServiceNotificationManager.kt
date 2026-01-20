@@ -24,15 +24,27 @@ import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.handlers.StreamDefaultNotificationHandler
+import io.getstream.video.android.core.notifications.internal.service.controllers.ServiceStateController
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 import kotlin.getValue
 
-internal class CallServiceNotificationManager {
+internal class CallServiceNotificationManager(val stateController: ServiceStateController, val scope: CoroutineScope) {
     private val logger by taggedLogger("CallServiceNotificationManager")
+
+    fun observeCallNotification(call: Call) {
+        scope.launch {
+            call.state.notificationIdFlow.filterNotNull()
+                .collect { stateController.setCallNotificationId(it) }
+        }
+    }
 
     @SuppressLint("MissingPermission")
     fun justNotify(
@@ -58,12 +70,8 @@ internal class CallServiceNotificationManager {
             notificationManager.cancel(it.hashCode())
         }
 
-        val call = (StreamVideo.Companion.instanceOrNull() as? StreamVideoClient)?.call(
-            callId.type,
-            callId.id,
-        )
-        call?.state?.notificationId?.let { notificationId ->
-            logger.d { "[cancelNotifications], notificationId from call.state: $notificationId" }
+        stateController.notificationId?.let { notificationId ->
+            logger.d { "[cancelNotifications], notificationId from stateController: $notificationId" }
             notificationManager.cancel(notificationId)
         }
 
