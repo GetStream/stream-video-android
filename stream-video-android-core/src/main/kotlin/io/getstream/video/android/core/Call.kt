@@ -138,21 +138,11 @@ public class Call(
 
     private val callLocks = CallLocks(clientImpl.scope)
 
-    /**
-     * The coroutine scope for this Call.
-     * Gets the current scope, which may be recreated after leave() and rejoin.
-     *
-     * THREAD SAFETY: Safe to access from any thread due to @Volatile on currentScope.
-     */
     internal val scope: CoroutineScope
         get() = callLocks.currentScope
 
     private var powerManager: PowerManager? = null
 
-    /**
-     * Session manager handles RTC sessions.
-     * INTERNAL: Not part of public API.
-     */
     internal val sessionManager = CallSessionManager(
         call = this,
         clientImpl = clientImpl,
