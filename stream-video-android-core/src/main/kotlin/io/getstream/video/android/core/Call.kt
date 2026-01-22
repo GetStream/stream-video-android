@@ -253,8 +253,10 @@ public class Call(
     var sessionId = UUID.randomUUID().toString()
     internal val unifiedSessionId = UUID.randomUUID().toString()
 
-    internal var connectStartTime = 0L
-    internal var reconnectStartTime = 0L
+    internal val connectStartTime: Long
+        get() = sessionManager.connectStartTime
+    internal val reconnectStartTime: Long
+        get() = sessionManager.reconnectStartTime
 
 // ============================================================================
 // NEW: Thread-safe state management with Mutex
@@ -282,15 +284,6 @@ public class Call(
      * Reading/writing this field outside mutex is NOT safe.
      */
     internal var cleanupJob: Job? = null
-
-    /**
-     * Indicates whether this Call has been left at least once.
-     * Used to determine if reinitialization is needed on next join().
-     *
-     * THREAD SAFETY: Access must be protected using cleanupMutex.withLock { }.
-     * Reading/writing this field outside mutex is NOT safe.
-     */
-    internal var hasBeenLeft = false
 
     /**
      * Current supervisor job for this Call's coroutine scope.

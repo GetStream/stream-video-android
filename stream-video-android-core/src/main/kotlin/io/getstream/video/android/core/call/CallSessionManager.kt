@@ -69,8 +69,9 @@ internal class CallSessionManager(
     internal var session: RtcSession? = null
     internal var sessionId = UUID.randomUUID().toString()
 
-    var reconnectAttempts = 0
+    private var reconnectAttempts = 0
     internal var reconnectStartTime = 0L
+    internal var connectStartTime = 0L
     private var lastDisconnect = 0L
     private var reconnectDeadlineMils: Int = 10_000
     private var leaveTimeoutAfterDisconnect: Job? = null
@@ -83,6 +84,15 @@ internal class CallSessionManager(
     internal val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 
     private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(call.scope)
+
+    /**
+     * Indicates whether this Call has been left at least once.
+     * Used to determine if reinitialization is needed on next join().
+     *
+     * THREAD SAFETY: Access must be protected using cleanupMutex.withLock { }.
+     * Reading/writing this field outside mutex is NOT safe.
+     */
+    internal var hasBeenLeft = false
 
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
@@ -154,8 +164,8 @@ internal class CallSessionManager(
 
         // Reinitialize if needed
         val needsReinit = call.cleanupMutex.withLock {
-            if (call.hasBeenLeft) {
-                call.hasBeenLeft = false
+            if (hasBeenLeft) {
+                hasBeenLeft = false
                 true
             } else {
                 false
@@ -245,7 +255,7 @@ internal class CallSessionManager(
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
 
-        call.connectStartTime = System.currentTimeMillis()
+        connectStartTime = System.currentTimeMillis()
 
         // step 1. call the join endpoint to get a list of SFUs
         val locationResult = clientImpl.getCachedLocation()
