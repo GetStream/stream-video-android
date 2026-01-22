@@ -19,10 +19,15 @@ package io.getstream.video.android.core.call
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.EventSubscription
+import io.getstream.video.android.core.events.GoAwayEvent
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 
 internal class CallEventManager(
     private val events: MutableSharedFlow<VideoEvent>,
+    private val sessionManager: CallSessionManager,
+    private val callScope: CoroutineScope, // TODO Rahul must check if this still working after leave() join()
     private val subscriptionsProvider: () -> Set<EventSubscription>,
 ) {
 
@@ -47,6 +52,17 @@ internal class CallEventManager(
 
         if (!events.tryEmit(event)) {
             logger.e { "Failed to emit event to observers: [event: $event]" }
+        }
+    }
+
+    fun handleEvent(event: VideoEvent) {
+        logger.v { "[call handleEvent] #sfu; event.type: ${event.getEventType()}" }
+
+        when (event) {
+            is GoAwayEvent ->
+                callScope.launch {
+                    sessionManager.migrate()
+                }
         }
     }
 }

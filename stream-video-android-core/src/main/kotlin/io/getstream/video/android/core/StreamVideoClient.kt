@@ -581,7 +581,7 @@ internal class StreamVideoClient internal constructor(
             // Update calls as usual
             calls[selectedCid]?.let {
                 it.state.handleEvent(event)
-                it.session?.handleEvent(event)
+                it.sessionManager.session?.handleEvent(event)
                 it.handleEvent(event)
             }
             deliverIntentToDestroyedCalls(event)

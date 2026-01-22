@@ -58,6 +58,7 @@ private const val PERMISSION_ERROR = "\n[Call.join()] called without having the 
 
 internal class CallSessionManager(
     private val call: Call,
+    private val callLocks: CallLocks,
     private val clientImpl: StreamVideoClient,
     private val powerManager: PowerManager?,
 
@@ -66,6 +67,7 @@ internal class CallSessionManager(
 
     internal var callStatsReportingJob: Job? = null
 
+    /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     internal var sessionId = UUID.randomUUID().toString()
 
@@ -145,7 +147,7 @@ internal class CallSessionManager(
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
         // Wait for cleanup
-        val job = call.cleanupMutex.withLock { call.cleanupJob?.takeIf { it.isActive } }
+        val job = callLocks.cleanupMutex.withLock { callLocks.cleanupJob?.takeIf { it.isActive } }
         job?.let {
             logger.d { "[join] Waiting for cleanup job: $it" }
             try {
@@ -155,15 +157,15 @@ internal class CallSessionManager(
                 logger.w { "[join] Cleanup timeout, proceeding anyway" }
             }
 
-            call.cleanupMutex.withLock {
-                if (call.cleanupJob == it) {
-                    call.cleanupJob = null
+            callLocks.cleanupMutex.withLock {
+                if (callLocks.cleanupJob == it) {
+                    callLocks.cleanupJob = null
                 }
             }
         }
 
         // Reinitialize if needed
-        val needsReinit = call.cleanupMutex.withLock {
+        val needsReinit = callLocks.cleanupMutex.withLock {
             if (hasBeenLeft) {
                 hasBeenLeft = false
                 true

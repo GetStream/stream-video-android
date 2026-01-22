@@ -57,6 +57,7 @@ import io.getstream.result.flatMap
 import io.getstream.video.android.core.call.CallApiDelegate
 import io.getstream.video.android.core.call.CallEventManager
 import io.getstream.video.android.core.call.CallLifecycleManager
+import io.getstream.video.android.core.call.CallLocks
 import io.getstream.video.android.core.call.CallMediaManager
 import io.getstream.video.android.core.call.CallRenderer
 import io.getstream.video.android.core.call.CallSessionManager
@@ -69,7 +70,6 @@ import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
-import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -86,13 +86,11 @@ import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
@@ -138,6 +136,8 @@ public class Call(
 
     private val logger by taggedLogger("Call:$type:$id")
 
+    private val callLocks = CallLocks(clientImpl.scope)
+
     /**
      * The coroutine scope for this Call.
      * Gets the current scope, which may be recreated after leave() and rejoin.
@@ -145,41 +145,29 @@ public class Call(
      * THREAD SAFETY: Safe to access from any thread due to @Volatile on currentScope.
      */
     internal val scope: CoroutineScope
-        get() = currentScope
+        get() = callLocks.currentScope
 
-    /**
-     * The supervisor job for this Call's scope.
-     * Gets the current supervisor job, which may be recreated after leave() and rejoin.
-     *
-     * THREAD SAFETY: Safe to access from any thread due to @Volatile on currentSupervisorJob.
-     */
-    private val supervisorJob: Job
-        get() = currentSupervisorJob
     private var powerManager: PowerManager? = null
 
     /**
      * Session manager handles RTC sessions.
      * INTERNAL: Not part of public API.
      */
-    private val sessionManager = CallSessionManager(
+    internal val sessionManager = CallSessionManager(
         call = this,
         clientImpl = clientImpl,
         powerManager = powerManager,
+        callLocks = callLocks,
     )
 
     private val callRenderer = CallRenderer()
-
-    /**
-     * API delegate for backend calls.
-     * INTERNAL: Not part of public API.
-     */
     private val apiDelegate = CallApiDelegate(
         clientImpl = clientImpl,
         type = type,
         id = id,
         call = this,
         screenShareProvider = { screenShare },
-        setScreenTrackCallBack = { session?.setScreenShareTrack() },
+        setScreenTrackCallBack = { sessionManager.session?.setScreenShareTrack() },
     )
 
     /** The call state contains all state such as the participant list, reactions etc */
@@ -248,8 +236,6 @@ public class Call(
      */
     internal var isDestroyed = false
 
-    /** Session handles all real time communication for video and audio */
-    internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
     internal val unifiedSessionId = UUID.randomUUID().toString()
 
@@ -257,56 +243,6 @@ public class Call(
         get() = sessionManager.connectStartTime
     internal val reconnectStartTime: Long
         get() = sessionManager.reconnectStartTime
-
-// ============================================================================
-// NEW: Thread-safe state management with Mutex
-// ============================================================================
-
-    /**
-     * Mutex for thread-safe access to cleanup state.
-     * Used to protect access to cleanupJob and hasBeenLeft.
-     *
-     * Using Mutex instead of synchronized because:
-     * - Mutex is suspendable (doesn't block threads)
-     * - Better for coroutine-based code
-     * - More efficient in coroutine contexts
-     *
-     * CRITICAL: Always use mutex.withLock { } and keep critical sections minimal.
-     * Never perform blocking operations inside withLock { }.
-     */
-    internal val cleanupMutex = Mutex()
-
-    /**
-     * Tracks the cleanup job so join() can wait for it to complete.
-     * Cleanup happens in background but runs synchronously within the job.
-     *
-     * THREAD SAFETY: Access must be protected using cleanupMutex.withLock { }.
-     * Reading/writing this field outside mutex is NOT safe.
-     */
-    internal var cleanupJob: Job? = null
-
-    /**
-     * Current supervisor job for this Call's coroutine scope.
-     * Recreated after leave() to allow rejoin.
-     *
-     * THREAD SAFETY: This is safe to access without mutex because:
-     * - It's only modified during reinitialization (which is already synchronized)
-     * - The scope property getter provides safe access
-     */
-    @Volatile
-    private var currentSupervisorJob: Job = SupervisorJob()
-
-    /**
-     * Current coroutine scope for this Call.
-     * Recreated after leave() to allow rejoin.
-     *
-     * THREAD SAFETY: This is safe to access without mutex because:
-     * - It's only modified during reinitialization (which is already synchronized)
-     * - The scope property getter provides safe access
-     */
-    @Volatile
-    private var currentScope: CoroutineScope =
-        CoroutineScope(clientImpl.scope.coroutineContext + currentSupervisorJob)
 
     /**
      * EGL base context shared between peerConnectionFactory and mediaManager
@@ -316,7 +252,8 @@ public class Call(
         EglBase.create()
     }
     val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
-    internal val callEventManager = CallEventManager(events, { subscriptions })
+    internal val callEventManager =
+        CallEventManager(events, sessionManager, scope, { subscriptions })
 
     // peerConnectionFactory is nullable and recreated when audioBitrateProfile changes (before joining)
     private var _peerConnectionFactory: StreamPeerConnectionFactory? = null
@@ -379,6 +316,7 @@ public class Call(
         call = this,
         sessionManager = sessionManager,
         mediaManagerProvider = { mediaManager },
+        callLocks = callLocks,
         clientScope = clientImpl.scope,
     )
 
@@ -492,8 +430,8 @@ public class Call(
         // This allows leave() to remain non-suspending
         scope.launch {
             // Thread-safe check for existing cleanup using mutex
-            val shouldProceed = cleanupMutex.withLock {
-                val currentJob = cleanupJob
+            val shouldProceed = callLocks.cleanupMutex.withLock {
+                val currentJob = callLocks.cleanupJob
                 if (currentJob?.isActive == true) {
                     logger.w {
                         "[leave] Cleanup already in progress (job: $currentJob), " +
@@ -516,7 +454,9 @@ public class Call(
         sessionManager.cleanupMonitor()
 
         // Leave session
-        session?.leaveWithReason("[reason=$reason, error=${disconnectionReason?.message}]")
+        sessionManager.session?.leaveWithReason(
+            "[reason=$reason, error=${disconnectionReason?.message}]",
+        )
 
         // Cancel network monitoring
         sessionManager.cleanupNetworkMonitoring()
@@ -553,12 +493,12 @@ public class Call(
 
         val newCleanupJob = clientImpl.scope.launch {
             safeCall {
-                session?.sfuTracer?.trace(
+                sessionManager.session?.sfuTracer?.trace(
                     "leave-call",
                     "[reason=$reason, error=${disconnectionReason?.message}]",
                 )
                 val stats = sessionManager.collectStats()
-                session?.sendCallStats(stats)
+                sessionManager.session?.sendCallStats(stats)
             }
             cleanup()
         }
@@ -566,9 +506,9 @@ public class Call(
         // Clear the job reference after it completes
         newCleanupJob.invokeOnCompletion {
             scope.launch {
-                cleanupMutex.withLock {
-                    if (cleanupJob == newCleanupJob) {
-                        cleanupJob = null
+                callLocks.cleanupMutex.withLock {
+                    if (callLocks.cleanupJob == newCleanupJob) {
+                        callLocks.cleanupJob = null
                         logger.v { "[cleanupJob] Cleared job reference" }
                     }
                 }
@@ -626,7 +566,7 @@ public class Call(
         logger.i {
             "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
-        session?.updateTrackDimensions(
+        sessionManager.session?.updateTrackDimensions(
             sessionId,
             trackType,
             visible,
@@ -646,7 +586,7 @@ public class Call(
         logger.i {
             "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
-        session?.updateTrackDimensions(
+        sessionManager.session?.updateTrackDimensions(
             sessionId,
             trackType,
             visible,
@@ -656,14 +596,7 @@ public class Call(
     }
 
     fun handleEvent(event: VideoEvent) {
-        logger.v { "[call handleEvent] #sfu; event.type: ${event.getEventType()}" }
-
-        when (event) {
-            is GoAwayEvent ->
-                scope.launch {
-                    migrate()
-                }
-        }
+        callEventManager.handleEvent(event)
     }
 
     // TODO: review this
@@ -685,7 +618,7 @@ public class Call(
         sessionId,
         trackType,
         eglBase,
-        session,
+        sessionManager.session,
         onRendered,
         viewportId,
     )
@@ -917,7 +850,7 @@ public class Call(
     internal fun reinitializeForRejoin() {
         synchronized(this) {
             val oldSessionId = sessionId
-            val oldSupervisorJob = currentSupervisorJob
+            val oldSupervisorJob = callLocks.currentSupervisorJob
 
             logger.d {
                 "[reinitializeForRejoin] Starting reinitialization. " +
@@ -925,9 +858,9 @@ public class Call(
             }
 
             // Recreate coroutine infrastructure
-            currentSupervisorJob = SupervisorJob()
-            currentScope = CoroutineScope(
-                clientImpl.scope.coroutineContext + currentSupervisorJob,
+            callLocks.currentSupervisorJob = SupervisorJob()
+            callLocks.currentScope = CoroutineScope(
+                clientImpl.scope.coroutineContext + callLocks.currentSupervisorJob,
             )
 
             // Generate new session ID
@@ -1060,7 +993,7 @@ public class Call(
         resolution: PreferredVideoResolution?,
         sessionIds: List<String>? = null,
     ) {
-        session?.let { session ->
+        sessionManager.session?.let { session ->
             session.trackOverridesHandler.updateOverrides(
                 sessionIds = sessionIds,
                 dimensions = resolution?.let { VideoDimension(it.width, it.height) },
@@ -1075,7 +1008,10 @@ public class Call(
      * @param sessionIds The participant session IDs to enable/disable the video feed for. If `null`, the setting will be applied to all participants.
      */
     fun setIncomingVideoEnabled(enabled: Boolean?, sessionIds: List<String>? = null) {
-        session?.trackOverridesHandler?.updateOverrides(sessionIds, visible = enabled)
+        sessionManager.session?.trackOverridesHandler?.updateOverrides(
+            sessionIds,
+            visible = enabled,
+        )
     }
 
     /**
@@ -1090,7 +1026,7 @@ public class Call(
      * If `null`, the audio setting is applied to all participants currently in the session.
      */
     fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) =
-        callMediaManager.setIncomingAudioEnabled(session, enabled, sessionIds)
+        callMediaManager.setIncomingAudioEnabled(sessionManager.session, enabled, sessionIds)
 
     @InternalStreamVideoApi
     public val debug = Debug(this)
@@ -1099,11 +1035,11 @@ public class Call(
     public class Debug(val call: Call) {
 
         public fun pause() {
-            call.session?.subscriber?.disable()
+            call.sessionManager.session?.subscriber?.disable()
         }
 
         public fun resume() {
-            call.session?.subscriber?.enable()
+            call.sessionManager.session?.subscriber?.enable()
         }
 
         public fun rejoin() {
@@ -1113,11 +1049,11 @@ public class Call(
         }
 
         public fun restartSubscriberIce() {
-            call.session?.subscriber?.connection?.restartIce()
+            call.sessionManager.session?.subscriber?.connection?.restartIce()
         }
 
         public fun restartPublisherIce() {
-            call.session?.publisher?.connection?.restartIce()
+            call.sessionManager.session?.publisher?.connection?.restartIce()
         }
 
         fun migrate() {
