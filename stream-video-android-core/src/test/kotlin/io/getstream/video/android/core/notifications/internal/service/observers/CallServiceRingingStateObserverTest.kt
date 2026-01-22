@@ -183,6 +183,7 @@ class CallServiceRingingStateObserverTest {
 
     @Test
     fun `rejected by all rejects call and stops service`() = runTest {
+        every { streamVideo.scope } returns testScope
         observer.observe { onStopServiceInvoked.add(Unit) }
         advanceUntilIdle()
 
