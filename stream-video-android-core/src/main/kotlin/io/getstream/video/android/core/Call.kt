@@ -171,7 +171,6 @@ public class Call(
     )
 
     private val callRenderer = CallRenderer()
-    private val callMediaManager = CallMediaManager(this)
 
     /**
      * API delegate for backend calls.
@@ -194,6 +193,17 @@ public class Call(
     val microphone by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.microphone }
     val speaker by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.speaker }
     val screenShare by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.screenShare }
+
+    private val callMediaManager = CallMediaManager(
+        this,
+        { mediaManager },
+        { camera },
+        { microphone },
+        { speaker },
+        { screenShare },
+        { _peerConnectionFactory },
+        { _peerConnectionFactory = null },
+    )
 
     /** The cid is type:id */
     val cid = "$type:$id"
@@ -237,12 +247,6 @@ public class Call(
      * Contains stats history.
      */
     val statLatencyHistory: MutableStateFlow<List<Int>> = MutableStateFlow(listOf(0, 0, 0))
-
-    /**
-     * Time (in millis) when the full reconnection flow started. Will be null again once
-     * the reconnection flow ends (success or failure)
-     */
-    private var sfuSocketReconnectionTime: Long? = null
 
     /**
      * Call has been left and the object is cleaned up and destroyed.
@@ -355,59 +359,7 @@ public class Call(
      * when first accessed, so no recreation is needed.
      */
     internal fun ensureFactoryMatchesAudioProfile() {
-        val factory = _peerConnectionFactory
-
-        // If factory hasn't been created yet, it will be created with current profile automatically
-        if (factory == null) {
-            return
-        }
-
-        // Check if current profile differs from the profile used to create the factory
-        val factoryProfile = factory.audioBitrateProfile
-        val currentProfile = mediaManager.microphone.audioBitrateProfile.value
-
-        if (factoryProfile != null && currentProfile != factoryProfile) {
-            logger.i {
-                "Audio bitrate profile changed from $factoryProfile to $currentProfile. " +
-                    "Recreating factory before joining."
-            }
-            recreateFactoryAndAudioTracks()
-        }
-    }
-
-    /**
-     * Recreates peerConnectionFactory, audioSource, audioTrack, videoSource and videoTrack
-     * with the current audioBitrateProfile. This should only be called before the call is joined.
-     */
-    internal fun recreateFactoryAndAudioTracks() {
-        val wasMicrophoneEnabled = microphone.status.value is DeviceStatus.Enabled
-        val wasCameraEnabled = camera.status.value is DeviceStatus.Enabled
-
-        // Dispose all tracks and sources first
-        mediaManager.disposeTracksAndSources()
-
-        // Recreate the factory (which will use the new audioBitrateProfile)
-        recreatePeerConnectionFactory()
-
-        // Re-enable tracks if they were enabled
-        if (wasMicrophoneEnabled) {
-            // audioTrack will be recreated on next access, then we enable it
-            microphone.enable(fromUser = false)
-        }
-        if (wasCameraEnabled) {
-            // videoTrack will be recreated on next access, then we enable it
-            camera.enable(fromUser = false)
-        }
-    }
-
-    /**
-     * Recreates peerConnectionFactory with the current audioBitrateProfile.
-     * This should only be called before the call is joined.
-     */
-    internal fun recreatePeerConnectionFactory() {
-        _peerConnectionFactory?.dispose()
-        _peerConnectionFactory = null
-        // Next access to peerConnectionFactory will recreate it with current profile
+        callMediaManager.ensureFactoryMatchesAudioProfile()
     }
 
     internal val clientCapabilities = ConcurrentHashMap<String, ClientCapability>().apply {
@@ -439,18 +391,9 @@ public class Call(
         call = this,
         sessionManager = sessionManager,
         mediaManagerProvider = { mediaManager },
-        scope = clientImpl.scope,
         clientScope = clientImpl.scope,
     )
 
-    private var leaveTimeoutAfterDisconnect: Job? = null
-    private var lastDisconnect = 0L
-    private var reconnectDeadlineMils: Int = 10_000
-
-    internal var monitorPublisherPCStateJob: Job? = null
-    internal var monitorSubscriberPCStateJob: Job? = null
-    internal var sfuListener: Job? = null
-    internal var sfuEvents: Job? = null
     private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(scope)
 
     init {
@@ -560,18 +503,14 @@ public class Call(
         sessionManager.migrate()
     }
 
-    private var reconnectJob: Job? = null
-
     private suspend fun schedule(key: String, block: suspend () -> Unit) {
         logger.d { "[schedule] #reconnect; no args" }
-
         streamSingleFlightProcessorImpl.run(key, block)
     }
 
     /** Leave the call, but don't end it for other users */
     fun leave(reason: String = "user") {
         logger.d { "[leave] #ringing; no args, call_cid:$cid" }
-//        internalLeave(null, reason)
         // Launch coroutine to check cleanup state with mutex
         // This allows leave() to remain non-suspending
         scope.launch {
@@ -597,19 +536,13 @@ public class Call(
     }
 
     private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
-        monitorSubscriberPCStateJob?.cancel()
-        monitorPublisherPCStateJob?.cancel()
-        monitorPublisherPCStateJob = null
-        monitorSubscriberPCStateJob = null
+        sessionManager.cleanupMonitor()
 
         // Leave session
         session?.leaveWithReason("[reason=$reason, error=${disconnectionReason?.message}]")
 
         // Cancel network monitoring
-        leaveTimeoutAfterDisconnect?.cancel()
-        sessionManager.unsubscribe()
-        sfuListener?.cancel()
-        sfuEvents?.cancel()
+        sessionManager.cleanupNetworkMonitoring()
 
         // Update connection state
         state._connection.value = RealtimeConnection.Disconnected
@@ -620,8 +553,6 @@ public class Call(
             return@atomicLeave
         }
         isDestroyed = true
-
-        sfuSocketReconnectionTime = null
 
         /**
          * TODO Rahul, need to check which call has owned the media at the moment(probably use active call)

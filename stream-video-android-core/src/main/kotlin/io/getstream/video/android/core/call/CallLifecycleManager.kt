@@ -38,14 +38,11 @@ import java.util.UUID
 
 /**
  * Manages the lifecycle of a Call - joining, leaving, and cleanup.
- *
- * INTERNAL: This class is not part of the public API.
  */
 internal class CallLifecycleManager(
     private val call: Call,
     private val sessionManager: CallSessionManager,
     private val mediaManagerProvider: () -> MediaManagerImpl, // ← Lambda provider
-    private val scope: CoroutineScope,
     private val clientScope: CoroutineScope,
 ) {
     private val logger by taggedLogger("CallLifecycleManager")
@@ -59,7 +56,7 @@ internal class CallLifecycleManager(
 
     @Volatile
     private var currentScope: CoroutineScope =
-        CoroutineScope(scope.coroutineContext + currentSupervisorJob)
+        CoroutineScope(clientScope.coroutineContext + currentSupervisorJob)
 
     // Lazy access to mediaManager via provider
     private val mediaManager: MediaManagerImpl by lazy {
@@ -200,7 +197,7 @@ internal class CallLifecycleManager(
             // Recreate coroutine infrastructure
             currentSupervisorJob = SupervisorJob()
             currentScope = CoroutineScope(
-                scope.coroutineContext + currentSupervisorJob,
+                clientScope.coroutineContext + currentSupervisorJob,
             )
 
             // Generate new session ID

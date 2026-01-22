@@ -22,15 +22,30 @@ import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CameraDirection
+import io.getstream.video.android.core.CameraManager
 import io.getstream.video.android.core.DeviceStatus
+import io.getstream.video.android.core.MediaManagerImpl
+import io.getstream.video.android.core.MicrophoneManager
+import io.getstream.video.android.core.ScreenShareManager
+import io.getstream.video.android.core.SpeakerManager
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.model.AudioTrack
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import stream.video.sfu.models.TrackType
 import kotlin.getValue
 
-internal class CallMediaManager(private val call: Call) {
+internal class CallMediaManager(
+    private val call: Call,
+    private val mediaManagerProvider: () -> MediaManagerImpl,
+    private val cameraProvider: () -> CameraManager,
+    private val microphoneProvider: () -> MicrophoneManager,
+    private val speakerProvider: () -> SpeakerManager,
+    private val screenShareProvider: () -> ScreenShareManager,
+    private val peerConnectionFactoryProvider: () -> StreamPeerConnectionFactory?,
+    private val resetPeerConnectionFactory: () -> Unit,
+) {
 
     private val logger by taggedLogger("CallMediaManager")
 
@@ -124,5 +139,68 @@ internal class CallMediaManager(private val call: Call) {
                 }
             }
         }.launchIn(call.scope)
+    }
+
+    /**
+     * Checks if the audioBitrateProfile has changed since the factory was created,
+     * and recreates the factory if needed. This should only be called before joining.
+     *
+     * If the factory hasn't been created yet, it will be created with the current profile
+     * when first accessed, so no recreation is needed.
+     */
+    internal fun ensureFactoryMatchesAudioProfile() {
+        val factory = peerConnectionFactoryProvider.invoke()
+
+        // If factory hasn't been created yet, it will be created with current profile automatically
+        if (factory == null) {
+            return
+        }
+
+        // Check if current profile differs from the profile used to create the factory
+        val factoryProfile = factory.audioBitrateProfile
+        val currentProfile = mediaManagerProvider.invoke().microphone.audioBitrateProfile.value
+
+        if (factoryProfile != null && currentProfile != factoryProfile) {
+            logger.i {
+                "Audio bitrate profile changed from $factoryProfile to $currentProfile. " +
+                    "Recreating factory before joining."
+            }
+            recreateFactoryAndAudioTracks()
+        }
+    }
+
+    /**
+     * Recreates peerConnectionFactory, audioSource, audioTrack, videoSource and videoTrack
+     * with the current audioBitrateProfile. This should only be called before the call is joined.
+     */
+    internal fun recreateFactoryAndAudioTracks() {
+        val wasMicrophoneEnabled = microphoneProvider.invoke().status.value is DeviceStatus.Enabled
+        val wasCameraEnabled = cameraProvider.invoke().status.value is DeviceStatus.Enabled
+
+        // Dispose all tracks and sources first
+        mediaManagerProvider.invoke().disposeTracksAndSources()
+
+        // Recreate the factory (which will use the new audioBitrateProfile)
+        recreatePeerConnectionFactory()
+
+        // Re-enable tracks if they were enabled
+        if (wasMicrophoneEnabled) {
+            // audioTrack will be recreated on next access, then we enable it
+            microphoneProvider.invoke().enable(fromUser = false)
+        }
+        if (wasCameraEnabled) {
+            // videoTrack will be recreated on next access, then we enable it
+            cameraProvider.invoke().enable(fromUser = false)
+        }
+    }
+
+    /**
+     * Recreates peerConnectionFactory with the current audioBitrateProfile.
+     * This should only be called before the call is joined.
+     */
+    internal fun recreatePeerConnectionFactory() {
+        peerConnectionFactoryProvider.invoke()?.dispose()
+        resetPeerConnectionFactory()
+        // Next access to peerConnectionFactory will recreate it with current profile
     }
 }

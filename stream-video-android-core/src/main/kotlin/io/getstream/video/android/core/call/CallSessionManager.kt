@@ -36,6 +36,7 @@ import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -72,6 +73,11 @@ internal class CallSessionManager(
     private var lastDisconnect = 0L
     private var reconnectDeadlineMils: Int = 10_000
     private var leaveTimeoutAfterDisconnect: Job? = null
+
+    internal var monitorPublisherPCStateJob: Job? = null
+    internal var monitorSubscriberPCStateJob: Job? = null
+    internal var sfuListener: Job? = null
+    internal var sfuEvents: Job? = null
 
     internal val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
     private val listener = object : NetworkStateProvider.NetworkStateListener {
@@ -179,7 +185,7 @@ internal class CallSessionManager(
         call.state._connection.value = RealtimeConnection.InProgress
         var retryCount = 0
 
-        var result: io.getstream.result.Result<RtcSession>
+        var result: Result<RtcSession>
 
         call.atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
@@ -225,8 +231,8 @@ internal class CallSessionManager(
         notify: Boolean = false,
     ): Result<RtcSession> {
         reconnectAttempts = 0
-        call.sfuEvents?.cancel()
-        call.sfuListener?.cancel()
+        sfuEvents?.cancel()
+        sfuListener?.cancel()
 
         if (session != null) {
             return Failure(Error.GenericError("Call $call.cid has already been joined"))
@@ -398,11 +404,11 @@ internal class CallSessionManager(
     }
 
     internal fun monitorSession(result: JoinCallResponse) {
-        call.sfuEvents?.cancel()
-        call.sfuListener?.cancel()
+        sfuEvents?.cancel()
+        sfuListener?.cancel()
         startCallStatsReporting(result.statsOptions.reportingIntervalMs.toLong())
         // listen to Signal WS
-        call.sfuEvents = call.scope.launch {
+        sfuEvents = call.scope.launch {
             session?.let {
                 it.socket.events().collect { event ->
                     if (event is JoinCallResponseEvent) {
@@ -412,8 +418,8 @@ internal class CallSessionManager(
                 }
             }
         }
-        call.monitorPublisherPCStateJob?.cancel()
-        call.monitorPublisherPCStateJob = call.scope.launch {
+        monitorPublisherPCStateJob?.cancel()
+        monitorPublisherPCStateJob = call.scope.launch {
             session?.publisher?.iceState?.collect {
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
@@ -427,8 +433,8 @@ internal class CallSessionManager(
             }
         }
 
-        call.monitorSubscriberPCStateJob?.cancel()
-        call.monitorSubscriberPCStateJob = call.scope.launch {
+        monitorSubscriberPCStateJob?.cancel()
+        monitorSubscriberPCStateJob = call.scope.launch {
             session?.subscriber?.iceState?.collect {
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
@@ -548,12 +554,26 @@ internal class CallSessionManager(
         return report
     }
 
-    fun unsubscribe() {
+    private fun unsubscribe() {
         network.unsubscribe(listener)
     }
 
     fun cleanup() {
         session?.cleanup()
         session = null
+    }
+
+    fun cleanupMonitor() {
+        monitorSubscriberPCStateJob?.cancel()
+        monitorPublisherPCStateJob?.cancel()
+        monitorPublisherPCStateJob = null
+        monitorSubscriberPCStateJob = null
+    }
+
+    fun cleanupNetworkMonitoring() {
+        leaveTimeoutAfterDisconnect?.cancel()
+        unsubscribe()
+        sfuListener?.cancel()
+        sfuEvents?.cancel()
     }
 }
