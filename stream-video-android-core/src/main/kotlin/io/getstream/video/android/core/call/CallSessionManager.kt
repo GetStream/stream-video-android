@@ -34,6 +34,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.utils.AtomicUnitCall
+import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
@@ -80,6 +81,9 @@ internal class CallSessionManager(
     internal var sfuEvents: Job? = null
 
     internal val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
+
+    private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(call.scope)
+
     private val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             leaveTimeoutAfterDisconnect?.cancel()
@@ -92,12 +96,12 @@ internal class CallSessionManager(
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                call.fastReconnect("NetworkStateListener#onConnected")
+                fastReconnect("NetworkStateListener#onConnected")
             } else {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                call.rejoin("NetworkStateListener#onConnected")
+                rejoin("NetworkStateListener#onConnected")
             }
         }
 
@@ -224,7 +228,7 @@ internal class CallSessionManager(
     }
 
     @SuppressLint("VisibleForTests")
-    internal suspend fun _join(
+    private suspend fun _join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
         ring: Boolean = false,
@@ -305,18 +309,14 @@ internal class CallSessionManager(
         return true
     }
 
-    suspend fun fastReconnect(
-        reason: String,
-        reconnectionAttemptsProvider: () -> Int,
-        onReconnectStartTime: (Long) -> Unit,
-    ) {
+    suspend fun fastReconnect(reason: String) = schedule("fast") {
         logger.d {
-            "[fastReconnect] Reconnecting, reconnectAttempts:${reconnectionAttemptsProvider.invoke()}"
+            "[fastReconnect] Reconnecting, reconnectAttempts:$reconnectAttempts"
         }
         session?.prepareReconnect()
         call.state._connection.value = RealtimeConnection.Reconnecting
         if (session != null) {
-            onReconnectStartTime(System.currentTimeMillis())
+            reconnectStartTime = System.currentTimeMillis()
 
             val session = session!!
             val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
@@ -325,7 +325,7 @@ internal class CallSessionManager(
                 strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                 announced_tracks = publishingInfo,
                 subscriptions = subscriptionsInfo,
-                reconnect_attempt = reconnectionAttemptsProvider.invoke(),
+                reconnect_attempt = reconnectAttempts,
                 reason = reason,
             )
             session.fastReconnect(reconnectDetails)
@@ -338,7 +338,7 @@ internal class CallSessionManager(
     }
 
     @SuppressLint("VisibleForTests")
-    internal suspend fun rejoin(reason: String) {
+    internal suspend fun rejoin(reason: String) = schedule("rejoin") {
         logger.d { "[rejoin] Rejoining" }
         reconnectAttempts++
         call.state._connection.value = RealtimeConnection.Reconnecting
@@ -465,7 +465,7 @@ internal class CallSessionManager(
         }
     }
 
-    suspend fun migrate() {
+    suspend fun migrate() = schedule("migrate") {
         logger.d { "[migrate] Migrating" }
         call.state._connection.value = RealtimeConnection.Migrating
         call.location?.let {
@@ -552,6 +552,11 @@ internal class CallSessionManager(
         }
 
         return report
+    }
+
+    private suspend fun schedule(key: String, block: suspend () -> Unit) {
+        logger.d { "[schedule] #reconnect; no args" }
+        streamSingleFlightProcessorImpl.run(key, block)
     }
 
     private fun unsubscribe() {

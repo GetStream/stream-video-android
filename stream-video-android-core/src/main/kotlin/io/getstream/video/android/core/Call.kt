@@ -81,7 +81,6 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
-import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
@@ -89,7 +88,6 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -132,7 +130,6 @@ public class Call(
     internal var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
-    internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
     internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
@@ -217,8 +214,6 @@ public class Call(
      * Set a custom [InputAudioFilter] that will be applied to the audio stream recorded on your device.
      */
     var audioFilter: InputAudioFilter? = null
-
-    // val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
 
     private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
         if (!microphone.isEnabled.value) {
@@ -394,8 +389,6 @@ public class Call(
         clientScope = clientImpl.scope,
     )
 
-    private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(scope)
-
     init {
         scope.launch {
             soundInputProcessor.currentAudioLevel.collect {
@@ -481,31 +474,22 @@ public class Call(
     /**
      * Fast reconnect to the same SFU with the same participant session.
      */
-    suspend fun fastReconnect(reason: String = "unknown") = schedule("fast") {
-        sessionManager.fastReconnect(
-            reason,
-            { reconnectAttepmts },
-            { System.currentTimeMillis() },
-        )
+    suspend fun fastReconnect(reason: String = "unknown") {
+        sessionManager.fastReconnect(reason)
     }
 
     /**
      * Rejoin a call. Creates a new session and joins as a new participant.
      */
-    suspend fun rejoin(reason: String = "unknown") = schedule("rejoin") {
+    suspend fun rejoin(reason: String = "unknown") {
         sessionManager.rejoin(reason)
     }
 
     /**
      * Migrate to another SFU.
      */
-    suspend fun migrate() = schedule("migrate") {
+    suspend fun migrate() {
         sessionManager.migrate()
-    }
-
-    private suspend fun schedule(key: String, block: suspend () -> Unit) {
-        logger.d { "[schedule] #reconnect; no args" }
-        streamSingleFlightProcessorImpl.run(key, block)
     }
 
     /** Leave the call, but don't end it for other users */
@@ -968,15 +952,6 @@ public class Call(
                     "oldJob cancelled: ${oldSupervisorJob.isCancelled}"
             }
         }
-    }
-
-    // This will allow the Rest APIs to be executed which are in queue before leave
-    private fun shutDownJobsGracefully() {
-        clientImpl.scope.launch {
-            supervisorJob.children.forEach { it.join() }
-            supervisorJob.cancel()
-        }
-        scope.cancel()
     }
 
     suspend fun ring(): Result<GetCallResponse> {
