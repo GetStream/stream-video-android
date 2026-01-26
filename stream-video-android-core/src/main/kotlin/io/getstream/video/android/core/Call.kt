@@ -344,7 +344,6 @@ public class Call(
             MediaManagerImpl(
                 clientImpl.context,
                 this,
-                scope,
                 eglBase.eglBaseContext,
                 clientImpl.callServiceConfigRegistry.get(type).audioUsage,
             ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }

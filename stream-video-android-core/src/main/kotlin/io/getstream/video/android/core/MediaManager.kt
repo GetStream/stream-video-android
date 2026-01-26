@@ -1249,12 +1249,15 @@ class CameraManager(
 class MediaManagerImpl(
     val context: Context,
     val call: Call,
-    val scope: CoroutineScope,
     val eglBaseContext: EglBase.Context,
     @Deprecated("Use audioUsageProvider instead", replaceWith = ReplaceWith("audioUsageProvider"))
     val audioUsage: Int = defaultAudioUsage,
     val audioUsageProvider: (() -> Int) = { audioUsage },
 ) {
+    // Use call.scope dynamically to support scope recreation after leave()
+    val scope: CoroutineScope
+        get() = call.scope
+
     internal val camera =
         CameraManager(this, eglBaseContext, DefaultCameraCharacteristicsValidator())
     internal val microphone = MicrophoneManager(this, audioUsage, audioUsageProvider)
