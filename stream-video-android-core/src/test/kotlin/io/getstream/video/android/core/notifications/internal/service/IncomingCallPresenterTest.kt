@@ -19,14 +19,16 @@ package io.getstream.video.android.core.notifications.internal.service
 import android.Manifest
 import android.app.Notification
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
+import io.getstream.video.android.core.ClientState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.notifications.NotificationType
-import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
+import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.model.StreamCallId
+import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -34,12 +36,12 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
@@ -49,16 +51,19 @@ class IncomingCallPresenterTest {
     private lateinit var serviceIntentBuilder: ServiceIntentBuilder
     private lateinit var presenter: IncomingCallPresenter
     private lateinit var callServiceConfig: CallServiceConfig
-    private lateinit var callId: StreamCallId
     private lateinit var notification: Notification
     private lateinit var streamVideoClient: StreamVideoClient
 
+    private val callId = StreamCallId("default", "123", "default:123")
+    private val serviceClass = CallService::class.java
+    private val config = CallServiceConfig(serviceClass = serviceClass)
+
     @Before
     fun setup() {
+        MockKAnnotations.init(this, relaxed = true)
         context = mockk(relaxed = true)
         serviceIntentBuilder = mockk(relaxed = true)
         callServiceConfig = CallServiceConfig(enableTelecom = true)
-        callId = StreamCallId("default", "123")
         notification = mockk(relaxed = true)
         streamVideoClient = mockk(relaxed = true)
 
@@ -76,121 +81,165 @@ class IncomingCallPresenterTest {
         unmockkAll()
     }
 
-    // region 1️⃣ Foreground service branch (no active call)
-
     @Test
-    fun `when no active call should start foreground service and return FG_SERVICE`() {
-        // Given no active call
-        every { StreamVideo.instanceOrNull()?.state?.activeCall?.value } returns null
-        every {
-            ContextCompat.startForegroundService(context, any())
-        } returns mockk(relaxed = true)
+    fun `returns FG_SERVICE when no active call`() {
+        // given
+        mockNoActiveCall()
 
-        // When
+        every {
+            serviceIntentBuilder.buildStartIntent(any(), any())
+        } returns Intent()
+
+        // when
         val result = presenter.showIncomingCall(
             context = context,
             callId = callId,
-            callDisplayName = "Caller",
-            callServiceConfiguration = callServiceConfig,
-            notification = notification,
+            callDisplayName = "Test",
+            callServiceConfiguration = config,
+            notification = mockk(),
         )
 
-        // Then
-        verify { ContextCompat.startForegroundService(context, any()) }
-        Assert.assertEquals(ShowIncomingCallResult.FG_SERVICE, result)
-    }
-
-    // endregion
-
-    // region 2️⃣ Normal service branch (active call exists)
-
-    @Test
-    fun `when active call exists should start normal service and return SERVICE`() {
-        every { StreamVideo.instanceOrNull()?.state?.activeCall?.value } returns mockk(relaxed = true)
-
-        val intent = mockk<android.content.Intent>(relaxed = true)
-        every { serviceIntentBuilder.buildStartIntent(any(), any()) } returns intent
-
-        val result = presenter.showIncomingCall(
-            context = context,
-            callId = callId,
-            callDisplayName = "TestCaller",
-            callServiceConfiguration = callServiceConfig,
-            notification = notification,
-        )
-
-        verify { context.startService(any()) }
-        Assert.assertEquals(ShowIncomingCallResult.SERVICE, result)
-    }
-
-    // endregion
-
-    // region 3️⃣ Error branch (service start fails → fallback to notification)
-
-    @Test
-    fun `when service start fails and permission granted should show notification`() {
-        every { streamVideoClient.state.activeCall.value } returns null
-
-        val notificationDispatcher = mockk<NotificationDispatcher>(relaxed = true)
-        every { streamVideoClient.getStreamNotificationDispatcher() } returns notificationDispatcher
-
-        // Force exception inside safeCallWithResult
-        every {
-            ContextCompat.startForegroundService(context, any())
-        } throws RuntimeException("service fail")
-
-        // Mock permission granted
-        every {
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-        } returns PackageManager.PERMISSION_GRANTED
-
-        val result = presenter.showIncomingCall(
-            context,
-            callId,
-            "Caller",
-            callServiceConfig,
-            notification,
-        )
+        // then
+        assertEquals(ShowIncomingCallResult.FG_SERVICE, result)
 
         verify {
-            notificationDispatcher.notify(
-                callId,
-                callId.getNotificationId(NotificationType.Incoming),
-                notification,
-            )
+            ContextCompat.startForegroundService(context, any())
         }
-
-        Assert.assertEquals(ShowIncomingCallResult.ONLY_NOTIFICATION, result)
     }
 
-    // endregion
-
-    // region 4️⃣ Error branch (service start fails, no permission)
-
     @Test
-    fun `when service start fails and no permission should return ERROR`() {
-        every { streamVideoClient.state.activeCall.value } returns null
+    fun `returns ONLY_NOTIFICATION when active call and service already running`() {
+        // given
+        mockActiveCall()
+        every { serviceIntentBuilder.isServiceRunning(any(), any()) } returns true
+        mockNotificationPermission(granted = true)
 
+        val dispatcher = mockk<DefaultNotificationDispatcher>(relaxed = true)
         every {
-            ContextCompat.startForegroundService(context, any())
-        } throws RuntimeException("fail")
+            StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()
+        } returns dispatcher
 
-        every {
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-        } returns PackageManager.PERMISSION_DENIED
-
+        // when
         val result = presenter.showIncomingCall(
             context,
             callId,
-            "Caller",
-            callServiceConfig,
-            notification,
+            "Test",
+            config,
+            mockk(),
         )
 
-        verify(exactly = 0) {
-            streamVideoClient.getStreamNotificationDispatcher().notify(any(), any(), any())
-        }
+        // then
+        assertEquals(ShowIncomingCallResult.ONLY_NOTIFICATION, result)
 
-        Assert.assertEquals(ShowIncomingCallResult.ERROR, result)
+        verify {
+            dispatcher.notify(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `returns SERVICE when active call and service not running`() {
+        // given
+        mockActiveCall()
+        every { serviceIntentBuilder.isServiceRunning(any(), any()) } returns false
+
+        every {
+            serviceIntentBuilder.buildStartIntent(any(), any())
+        } returns Intent()
+
+        // when
+        val result = presenter.showIncomingCall(
+            context,
+            callId,
+            "Test",
+            config,
+            mockk(),
+        )
+
+        // then
+        assertEquals(ShowIncomingCallResult.SERVICE, result)
+
+        verify {
+            context.startService(any())
+        }
+    }
+
+    @Test
+    fun `returns ONLY_NOTIFICATION on exception but has notification`() {
+        // given
+        mockNoActiveCall()
+        mockNotificationPermission(granted = true)
+
+        every {
+            serviceIntentBuilder.buildStartIntent(any(), any())
+        } throws RuntimeException("Boom")
+
+        val dispatcher = mockk<DefaultNotificationDispatcher>(relaxed = true)
+        every {
+            StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()
+        } returns dispatcher
+
+        // when
+        val result = presenter.showIncomingCall(
+            context,
+            callId,
+            "Test",
+            config,
+            mockk(),
+        )
+
+        // then
+        assertEquals(ShowIncomingCallResult.ONLY_NOTIFICATION, result)
+
+        verify {
+            dispatcher.notify(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `returns ERROR when notification permission missing`() {
+        // given
+        mockNoActiveCall()
+        mockNotificationPermission(granted = false)
+
+        every {
+            serviceIntentBuilder.buildStartIntent(any(), any())
+        } throws RuntimeException("Boom")
+
+        // when
+        val result = presenter.showIncomingCall(
+            context,
+            callId,
+            "Test",
+            config,
+            mockk(),
+        )
+
+        // then
+        assertEquals(ShowIncomingCallResult.ERROR, result)
+    }
+
+    // ---------- helpers ----------
+
+    private fun mockNoActiveCall() {
+        val state = mockk<ClientState> {
+            every { activeCall.value } returns null
+        }
+        every { StreamVideo.instanceOrNull()?.state } returns state
+    }
+
+    private fun mockActiveCall() {
+        val state = mockk<ClientState> {
+            every { activeCall.value } returns mockk()
+        }
+        every { StreamVideo.instanceOrNull()?.state } returns state
+    }
+
+    private fun mockNotificationPermission(granted: Boolean) {
+        every {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS,
+            )
+        } returns if (granted) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED
     }
 }

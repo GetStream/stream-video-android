@@ -34,7 +34,26 @@ import io.getstream.video.android.model.StreamCallId
 internal class ServiceNotificationRetriever {
     private val logger by taggedLogger("ServiceNotificationRetriever")
 
-    open fun getNotificationPair(
+    /**
+     * Builds a notification and its corresponding notification ID for a given call trigger.
+     *
+     * This method is responsible for creating (or updating) the call-related notification
+     * based on the provided trigger and current call context.
+     *
+     * @param context The Android [Context] used to build the notification.
+     * @param trigger A string indicating the reason for the notification update
+     *                eg. [CallService.TRIGGER_INCOMING_CALL], [CallService.TRIGGER_ONGOING_CALL], [CallService.TRIGGER_OUTGOING_CALL]
+     * @param streamVideo The active [StreamVideoClient] instance used to access call and SDK state.
+     * @param streamCallId The unique identifier of the call this notification belongs to.
+     * @param intentCallDisplayName Optional display name for the call, typically
+     *                              shown in the notification UI.
+     *
+     * @return A [Pair] where:
+     * - **first**: The [Notification] to be displayed, or `null` if no notification
+     *   should be shown for the given trigger.
+     * - **second**: The notification ID used to post or update the notification.
+     */
+    fun getNotificationPair(
         context: Context,
         trigger: String,
         streamVideo: StreamVideoClient,
@@ -44,23 +63,29 @@ internal class ServiceNotificationRetriever {
         logger.d {
             "[getNotificationPair] trigger: $trigger, callId: ${streamCallId.id}, callDisplayName: $intentCallDisplayName"
         }
+        val call = streamVideo.call(streamCallId.type, streamCallId.id)
         val notificationData: Pair<Notification?, Int> = when (trigger) {
             TRIGGER_ONGOING_CALL -> {
                 logger.d { "[getNotificationPair] Creating ongoing call notification" }
+                val notificationId = call.state.notificationIdFlow.value
+                    ?: streamCallId.getNotificationId(NotificationType.Ongoing)
+
                 Pair(
                     first = streamVideo.getOngoingCallNotification(
                         callId = streamCallId,
                         callDisplayName = intentCallDisplayName,
                         payload = emptyMap(),
                     ),
-                    second = streamCallId.hashCode(),
+                    second = notificationId,
                 )
             }
 
             TRIGGER_INCOMING_CALL -> {
-                logger.d { "[getNotificationPair] Creating incoming call notification" }
                 val shouldHaveContentIntent = streamVideo.state.activeCall.value == null
-                logger.d { "[getNotificationPair] shouldHaveContentIntent: $shouldHaveContentIntent" }
+                logger.d { "[getNotificationPair] Creating incoming call notification" }
+                val notificationId = call.state.notificationIdFlow.value
+                    ?: streamCallId.getNotificationId(NotificationType.Incoming)
+
                 Pair(
                     first = streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Incoming(),
@@ -69,12 +94,15 @@ internal class ServiceNotificationRetriever {
                         shouldHaveContentIntent = shouldHaveContentIntent,
                         payload = emptyMap(),
                     ),
-                    second = streamCallId.getNotificationId(NotificationType.Incoming),
+                    second = notificationId,
                 )
             }
 
             TRIGGER_OUTGOING_CALL -> {
                 logger.d { "[getNotificationPair] Creating outgoing call notification" }
+                val notificationId = call.state.notificationIdFlow.value
+                    ?: streamCallId.getNotificationId(NotificationType.Outgoing)
+
                 Pair(
                     first = streamVideo.getRingingCallNotification(
                         ringingState = RingingState.Outgoing(),
@@ -84,9 +112,7 @@ internal class ServiceNotificationRetriever {
                         ),
                         payload = emptyMap(),
                     ),
-                    second = streamCallId.getNotificationId(
-                        NotificationType.Incoming, // TODO Rahul, should we change it to outgoing?
-                    ), // Same for incoming and outgoing
+                    second = notificationId,
                 )
             }
 

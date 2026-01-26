@@ -16,11 +16,22 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
-import io.getstream.log.TaggedLogger
-import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.notifications.internal.service.permissions.AudioCallPermissionManager
+internal enum class CallServiceHandleNotificationResult {
+    /**
+     * The notification was handled successfully and the service should start as usual,
+     * initializing its state and resources.
+     */
+    START,
 
-internal class AudioCallService : CallService() {
-    override val logger: TaggedLogger by taggedLogger("AudioCallService")
-    override val permissionManager = AudioCallPermissionManager()
+    /**
+     * The notification was handled, but it did not change the service's state.
+     * The service should continue running but should not re-initialize its components.
+     */
+    START_NO_CHANGE,
+
+    /**
+     * The notification could not be handled properly.
+     * The service should stop and request the system to redeliver the intent at a later time.
+     */
+    REDELIVER,
 }

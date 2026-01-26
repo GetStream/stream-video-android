@@ -463,6 +463,12 @@ public class Call(
         }
 
         response.onSuccess {
+            /**
+             * Because [CallState.updateFromResponse] reads the value of [ClientState.ringingCall]
+             */
+            if (ring) {
+                client.state._ringingCall.value = this
+            }
             state.updateFromResponse(it)
             if (ring) {
                 client.state.addRingingCall(this, RingingState.Outgoing())
@@ -929,7 +935,6 @@ public class Call(
     }
 
     private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
-        val callId = id
         monitorSubscriberPCStateJob?.cancel()
         monitorPublisherPCStateJob?.cancel()
         monitorPublisherPCStateJob = null
@@ -1535,11 +1540,15 @@ public class Call(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall(this)
-        clientImpl.state.maybeStopForegroundService(call = this)
+        clientImpl.state.transitionToAcceptCall(this)
         return clientImpl.accept(type, id)
     }
 
+    /**
+     * Should outlive both the call scope and the service scope and needs to be executed in the client-level scope.
+     * Because the call scope or service scope may be cancelled or finished while the network request is still in flight
+     * TODO: Run this in clientImpl.scope internally
+     */
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
         logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
         return clientImpl.reject(type, id, reason)

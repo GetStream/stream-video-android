@@ -237,7 +237,10 @@ object StreamVideoInitHelper {
         val callServiceConfigRegistry = CallServiceConfigRegistry()
         callServiceConfigRegistry.apply {
             register(DefaultCallConfigurations.getLivestreamGuestCallServiceConfig())
-            register(CallType.AudioCall.name) { enableTelecom(true) }
+            register(
+                CallType.AudioCall.name,
+                DefaultCallConfigurations.audioCall.copy(enableTelecom = true),
+            )
             register(CallType.AnyMarker.name) {
                 setModerationConfig(
                     ModerationConfig(

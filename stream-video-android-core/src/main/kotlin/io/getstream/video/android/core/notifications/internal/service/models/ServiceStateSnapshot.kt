@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.dispatchers
+package io.getstream.video.android.core.notifications.internal.service.models
 
-import android.app.Notification
+import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
+import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.model.StreamCallId
+import org.threeten.bp.OffsetDateTime
 
-/**
- * Dispatches a notification associated with a specific call.
- */
-interface NotificationDispatcher {
-
-    /**
-     * @param streamCallId The unique identifier of the call this notification belongs to.
-     * @param id The notification ID used by the system to post or update the notification.
-     * @param notification The [Notification] instance to be displayed.
-     */
-    fun notify(streamCallId: StreamCallId, id: Int, notification: Notification)
-}
+internal data class ServiceStateSnapshot(
+    val currentCallId: StreamCallId? = null,
+    val notificationId: Int? = null,
+    val soundPlayer: CallSoundAndVibrationPlayer? = null,
+    val toggleCameraBroadcastReceiver: ToggleCameraBroadcastReceiver? = null,
+    val isReceiverRegistered: Boolean = false,
+    val startTime: OffsetDateTime? = null,
+)

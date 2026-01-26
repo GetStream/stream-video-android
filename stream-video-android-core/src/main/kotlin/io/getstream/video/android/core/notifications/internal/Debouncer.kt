@@ -14,13 +14,27 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.service
+package io.getstream.video.android.core.notifications.internal
 
-import io.getstream.log.TaggedLogger
-import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.notifications.internal.service.permissions.AudioCallPermissionManager
+import android.os.Handler
+import android.os.Looper
 
-internal class AudioCallService : CallService() {
-    override val logger: TaggedLogger by taggedLogger("AudioCallService")
-    override val permissionManager = AudioCallPermissionManager()
+internal class Debouncer {
+
+    private val handler = Handler(Looper.getMainLooper())
+    private var runnable: Runnable? = null
+
+    fun submit(delayMs: Long, action: () -> Unit) {
+        runnable?.let { handler.removeCallbacks(it) }
+
+        runnable = Runnable { action() }
+        runnable?.let {
+            handler.postDelayed(it, delayMs)
+        }
+    }
+
+    fun cancel() {
+        runnable?.let { handler.removeCallbacks(it) }
+        runnable = null
+    }
 }

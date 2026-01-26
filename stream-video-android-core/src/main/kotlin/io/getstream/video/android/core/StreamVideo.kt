@@ -53,6 +53,7 @@ public interface StreamVideo : NotificationHandler {
 
     /**
      * Create a call with the given type and id.
+     * For GetStream Devs: Careful when invoking it during call/service cleanup as it will fill itself in [io.getstream.video.android.core.StreamVideoClient.calls] map
      */
     public fun call(type: String, id: String = ""): Call
 

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.service
+package io.getstream.video.android.core.notifications.internal.service.models
 
-import io.getstream.log.TaggedLogger
-import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.notifications.internal.service.permissions.AudioCallPermissionManager
+import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.model.StreamCallId
 
-internal class AudioCallService : CallService() {
-    override val logger: TaggedLogger by taggedLogger("AudioCallService")
-    override val permissionManager = AudioCallPermissionManager()
-}
+internal data class CallIntentParams(
+    val streamVideo: StreamVideoClient,
+    val callId: StreamCallId,
+    val trigger: String,
+    val displayName: String?,
+)

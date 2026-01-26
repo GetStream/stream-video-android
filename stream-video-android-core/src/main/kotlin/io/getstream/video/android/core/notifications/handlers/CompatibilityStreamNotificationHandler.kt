@@ -42,7 +42,68 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 
 /**
- * This class is for compatibility with the old notification handler.
+ * Compatibility notification handler that bridges the new notification system
+ * with the legacy notification handler behavior.
+ *
+ * This class allows applications that previously relied on the old notification
+ * handler APIs to continue working while adopting the new notification
+ * interception mechanism.
+ *
+ * ## Usage
+ *
+ * ```kotlin
+ * notificationHandler = CompatibilityStreamNotificationHandler(
+ *     context.app,
+ *     initialNotificationBuilderInterceptor =
+ *         object : StreamNotificationBuilderInterceptors() {
+ *
+ *             override fun onBuildIncomingCallNotification(
+ *                 builder: NotificationCompat.Builder,
+ *                 fullScreenPendingIntent: PendingIntent,
+ *                 acceptCallPendingIntent: PendingIntent,
+ *                 rejectCallPendingIntent: PendingIntent,
+ *                 callerName: String?,
+ *                 shouldHaveContentIntent: Boolean
+ *             ): NotificationCompat.Builder {
+ *                 builder.setContentTitle("My new and shiny incoming call")
+ *                 builder.setContentText(
+ *                     "This is my new content text that I've changed!!!"
+ *                 )
+ *                 return builder
+ *             }
+ *         },
+ *
+ *     updateNotificationBuilderInterceptor =
+ *         object : StreamNotificationUpdateInterceptors() {
+ *
+ *             private suspend fun loadBitmapFromUrl(url: String): Bitmap =
+ *                 withContext(Dispatchers.IO) {
+ *                     URL(url).openStream().use {
+ *                         BitmapFactory.decodeStream(it)
+ *                     }
+ *                 }
+ *
+ *             override suspend fun onUpdateIncomingCallNotification(
+ *                 builder: NotificationCompat.Builder,
+ *                 callDisplayName: String?,
+ *                 call: Call
+ *             ): NotificationCompat.Builder {
+ *                 // For demonstration purposes, a delay can be added here.
+ *                 // delay(4_000)
+ *
+ *                 val userImageUrl = "MyImageURL"
+ *                 val bitmap = loadBitmapFromUrl(userImageUrl)
+ *
+ *                 builder.setContentText("My new notification with my image!!")
+ *                 builder.setLargeIcon(bitmap)
+ *                 return builder
+ *             }
+ *         }
+ * )
+ * ```
+ *
+ * @see StreamNotificationBuilderInterceptors
+ * @see StreamNotificationUpdateInterceptors
  */
 @OptIn(ExperimentalStreamVideoApi::class)
 open class CompatibilityStreamNotificationHandler

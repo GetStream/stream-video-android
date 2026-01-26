@@ -39,6 +39,7 @@ internal class LeaveCallBroadcastReceiver : GenericCallActionBroadcastReceiver()
 
         call.leave("LeaveCallBroadcastReceiver")
         val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
+        logger.d { "[onReceive], notificationId: $notificationId" }
         NotificationManagerCompat.from(context).cancel(notificationId)
     }
 }
