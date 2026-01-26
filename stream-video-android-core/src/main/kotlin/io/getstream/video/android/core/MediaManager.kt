@@ -279,7 +279,7 @@ class ScreenShareManager(
 
     private val logger by taggedLogger("Media:ScreenShareManager")
 
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    internal val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     val status: StateFlow<DeviceStatus> = _status
 
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
@@ -550,7 +550,7 @@ class MicrophoneManager(
     internal var priorStatus: DeviceStatus? = null
 
     // Exposed state
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    internal val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
 
     /** The status of the audio */
     val status: StateFlow<DeviceStatus> = _status
@@ -719,6 +719,13 @@ class MicrophoneManager(
         setupCompleted = false
     }
 
+    /**
+     * Resets the speaker status to NotSelected to allow re-initialization on next join.
+     */
+    fun reset() {
+        _status.value = DeviceStatus.NotSelected
+    }
+
     fun canHandleDeviceSwitch() = audioUsageProvider.invoke() != AudioAttributes.USAGE_MEDIA
 
     // Internal logic
@@ -829,7 +836,7 @@ class CameraManager(
     private val logger by taggedLogger("Media:CameraManager")
 
     /** The status of the camera. enabled or disabled */
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    internal val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     public val status: StateFlow<DeviceStatus> = _status
 
     /** Represents whether the camera is enabled */
@@ -1174,6 +1181,13 @@ class CameraManager(
         setupCompleted = false
     }
 
+    /**
+     * Resets the camera status to NotSelected to allow re-initialization on next join.
+     */
+    fun reset() {
+        _status.value = DeviceStatus.NotSelected
+    }
+
     private fun createCameraDeviceWrapper(
         id: String,
         cameraManager: CameraManager?,
@@ -1379,6 +1393,17 @@ class MediaManagerImpl(
         // Cleanup camera and microphone infrastructure
         camera.cleanup()
         microphone.cleanup()
+    }
+
+    /**
+     * Resets device statuses to NotSelected to allow re-initialization on next join.
+     * Should be called after cleanup when preparing for rejoin.
+     */
+    fun reset() {
+        camera._status.value = DeviceStatus.NotSelected
+        microphone._status.value = DeviceStatus.NotSelected
+        speaker._status.value = DeviceStatus.NotSelected
+        screenShare._status.value = DeviceStatus.NotSelected
     }
 }
 
