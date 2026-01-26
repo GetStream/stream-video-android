@@ -1510,7 +1510,7 @@ public class Call(
     /**
      * Resets the scopes to allow the Call to be reusable after leave().
      * This recreates the supervisorJob, scope, resets the scopeProvider, generates new session IDs,
-     * and resets device statuses.
+     * resets device statuses, and clears participants.
      */
     private fun resetScopes() {
         logger.d { "[resetScopes] Recreating scopes to make Call reusable" }
@@ -1522,6 +1522,9 @@ public class Call(
         sessionId = UUID.randomUUID().toString()
         unifiedSessionId = UUID.randomUUID().toString()
         logger.d { "[resetScopes] New sessionId: $sessionId, unifiedSessionId: $unifiedSessionId" }
+
+        // Clear participants to remove stale video/audio tracks from previous session
+        state.clearParticipants()
 
         // Reset device statuses to NotSelected so they get re-initialized on next join
         mediaManager.reset()
