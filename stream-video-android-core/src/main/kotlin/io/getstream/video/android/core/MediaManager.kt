@@ -720,9 +720,9 @@ class MicrophoneManager(
     }
 
     /**
-     * Resets the speaker status to NotSelected to allow re-initialization on next join.
+     * Resets the microphone status to NotSelected to allow re-initialization on next join.
      */
-    fun reset() {
+    internal fun reset() {
         _status.value = DeviceStatus.NotSelected
     }
 
@@ -1184,7 +1184,7 @@ class CameraManager(
     /**
      * Resets the camera status to NotSelected to allow re-initialization on next join.
      */
-    fun reset() {
+    internal fun reset() {
         _status.value = DeviceStatus.NotSelected
     }
 
@@ -1260,9 +1260,12 @@ class CameraManager(
  * @see AudioSwitch
  * @see BluetoothHeadsetManager
  */
+@Suppress("UNUSED_PARAMETER")
 class MediaManagerImpl(
     val context: Context,
     val call: Call,
+    // Deprecated: This parameter is no longer used. Scope is now obtained dynamically from call.scope
+    scope: CoroutineScope? = null,
     val eglBaseContext: EglBase.Context,
     @Deprecated("Use audioUsageProvider instead", replaceWith = ReplaceWith("audioUsageProvider"))
     val audioUsage: Int = defaultAudioUsage,
@@ -1399,7 +1402,7 @@ class MediaManagerImpl(
      * Resets device statuses to NotSelected to allow re-initialization on next join.
      * Should be called after cleanup when preparing for rejoin.
      */
-    fun reset() {
+    internal fun reset() {
         camera._status.value = DeviceStatus.NotSelected
         microphone._status.value = DeviceStatus.NotSelected
         speaker._status.value = DeviceStatus.NotSelected

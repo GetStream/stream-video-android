@@ -86,8 +86,6 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
-import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
@@ -343,10 +341,10 @@ public class Call(
             testInstanceProvider.mediaManagerCreator!!.invoke()
         } else {
             MediaManagerImpl(
-                clientImpl.context,
-                this,
-                eglBase.eglBaseContext,
-                clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+                context = clientImpl.context,
+                call = this,
+                eglBaseContext = eglBase.eglBaseContext,
+                audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
             ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }
         }
     }
@@ -1504,7 +1502,6 @@ public class Call(
     fun cleanup() {
         // monitor.stop()
         session?.cleanup()
-        shutDownJobsGracefully()
         callStatsReportingJob?.cancel()
         mediaManager.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
         session = null
@@ -1513,12 +1510,15 @@ public class Call(
     }
 
     /**
-     * Resets the scopes to allow the Call to be reusable after leave().
-     * This recreates the supervisorJob, scope, resets the scopeProvider, generates new session IDs,
-     * resets device statuses, and clears participants.
+     * Resets state to allow the Call to be reusable after leave().
+     * Generates new session IDs, resets the scopeProvider, clears participants, and resets device statuses.
+     *
+     * IMPORTANT: We do NOT recreate [scope] or [supervisorJob] because [CallState] and its
+     * StateFlows depend on the original scope. The scope lives for the entire lifetime of
+     * the Call object.
      */
     private fun resetScopes() {
-        logger.d { "[resetScopes] Recreating scopes to make Call reusable" }
+        logger.d { "[resetScopes] Resetting state to make Call reusable" }
 
         // Reset the destroyed flag to allow rejoin
         isDestroyed = false
@@ -1537,20 +1537,12 @@ public class Call(
         // Reset the scope provider to allow reuse
         scopeProvider.reset()
 
-        // Recreate supervisor job and scope
-        supervisorJob = SupervisorJob()
-        scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+        // NOTE: We intentionally do NOT recreate supervisorJob or scope here.
+        // CallState's StateFlows (duration, participants, etc.) use stateIn(scope, ...)
+        // which captures the scope at initialization. If we recreated scope, those
+        // StateFlows would become dead and never emit again.
 
-        logger.d { "[resetScopes] Scopes recreated successfully" }
-    }
-
-    // This will allow the Rest APIs to be executed which are in queue before leave
-    private fun shutDownJobsGracefully() {
-        UserScope(ClientScope()).launch {
-            supervisorJob.children.forEach { it.join() }
-            supervisorJob.cancel()
-        }
-        scope.cancel()
+        logger.d { "[resetScopes] State reset successfully" }
     }
 
     suspend fun ring(): Result<GetCallResponse> {

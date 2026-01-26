@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import android.media.AudioAttributes
-import androidx.collection.LruCache
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.push.PushDevice
 import io.getstream.android.video.generated.models.AcceptCallResponse
