@@ -176,6 +176,10 @@ internal class StreamVideoClient internal constructor(
     internal val audioProcessing: ManagedAudioProcessingFactory? = null,
     internal val leaveAfterDisconnectSeconds: Long = 30,
     internal val appVersion: String? = null,
+    @Deprecated(
+        message = "This parameter is no longer needed. Call updates are now always enabled after leave() to support call reusability.",
+        level = DeprecationLevel.WARNING,
+    )
     internal val enableCallUpdatesAfterLeave: Boolean = false,
     internal val enableStatsCollection: Boolean = true,
     internal val enableStereoForSubscriber: Boolean = true,
@@ -202,24 +206,18 @@ internal class StreamVideoClient internal constructor(
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
-    private val destroyedCalls = LruCache<Int, Call>(maxSize = 100)
     internal val callSoundAndVibrationPlayer = CallSoundAndVibrationPlayer(context)
 
     val socketImpl = coordinatorConnectionModule.socketConnection
 
     fun onCallCleanUp(call: Call) {
-        if (enableCallUpdatesAfterLeave) {
-            logger.d { "[cleanup] Call updates are required, preserve the instance: ${call.cid}" }
-            destroyedCalls.put(call.hashCode(), call)
-        }
-        logger.d { "[cleanup] Removing call from cache: ${call.cid}" }
-        calls.remove(call.cid)
+        logger.d { "[cleanup] Call cleaned up but kept in cache for reuse: ${call.cid}" }
+        // Call remains in the 'calls' map to allow rejoin and continue receiving updates
     }
 
     override fun cleanup() {
         // remove all cached calls
         calls.clear()
-        destroyedCalls.evictAll()
         // stop all running coroutines
         scope.cancel()
         // call cleanup on the active call
@@ -560,7 +558,7 @@ internal class StreamVideoClient internal constructor(
         // call level subscriptions
         if (selectedCid.isNotEmpty()) {
             calls[selectedCid]?.fireEvent(event)
-            notifyDestroyedCalls(event)
+            // No need to notify destroyed calls - calls remain in map after leave()
         }
 
         if (selectedCid.isNotEmpty()) {
@@ -584,37 +582,7 @@ internal class StreamVideoClient internal constructor(
                 it.session?.handleEvent(event)
                 it.handleEvent(event)
             }
-            deliverIntentToDestroyedCalls(event)
-        }
-    }
-
-    private fun shouldProcessDestroyedCall(event: VideoEvent, callCid: String): Boolean {
-        return when (event) {
-            is WSCallEvent -> event.getCallCID() == callCid
-            else -> true
-        }
-    }
-
-    private fun deliverIntentToDestroyedCalls(event: VideoEvent) {
-        safeCall {
-            destroyedCalls.snapshot().forEach { (_, call) ->
-                call.let {
-                    if (shouldProcessDestroyedCall(event, call.cid)) {
-                        it.state.handleEvent(event)
-                        it.handleEvent(event)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun notifyDestroyedCalls(event: VideoEvent) {
-        safeCall {
-            destroyedCalls.snapshot().forEach { (_, call) ->
-                if (shouldProcessDestroyedCall(event, call.cid)) {
-                    call.fireEvent(event)
-                }
-            }
+            // No need to deliver to destroyed calls - calls remain in map after leave()
         }
     }
 

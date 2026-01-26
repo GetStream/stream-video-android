@@ -153,17 +153,17 @@ public class Call(
 
     internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
-    internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
+    internal var scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
     // Atomic controls
     private var atomicLeave = AtomicUnitCall()
 
     private val logger by taggedLogger("Call:$type:$id")
-    private val supervisorJob = SupervisorJob()
+    private var supervisorJob = SupervisorJob()
     private var callStatsReportingJob: Job? = null
     private var powerManager: PowerManager? = null
 
-    internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+    internal var scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(client, this, user, scope)
@@ -979,6 +979,7 @@ public class Call(
                 session?.sendCallStats(stats)
             }
             cleanup()
+            resetScopes()
         }
     }
 
@@ -1505,6 +1506,26 @@ public class Call(
         session = null
         // Cleanup the call's scope provider
         scopeProvider.cleanup()
+    }
+
+    /**
+     * Resets the scopes to allow the Call to be reusable after leave().
+     * This recreates the supervisorJob, scope, and resets the scopeProvider.
+     */
+    private fun resetScopes() {
+        logger.d { "[resetScopes] Recreating scopes to make Call reusable" }
+
+        // Reset the destroyed flag to allow rejoin
+        isDestroyed = false
+
+        // Reset the scope provider to allow reuse
+        scopeProvider.reset()
+
+        // Recreate supervisor job and scope
+        supervisorJob = SupervisorJob()
+        scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+
+        logger.d { "[resetScopes] Scopes recreated successfully" }
     }
 
     // This will allow the Rest APIs to be executed which are in queue before leave

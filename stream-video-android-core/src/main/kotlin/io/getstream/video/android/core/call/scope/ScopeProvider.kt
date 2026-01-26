@@ -40,4 +40,10 @@ internal interface ScopeProvider {
      * Cleans up resources when the provider is no longer needed.
      */
     fun cleanup()
+
+    /**
+     * Resets the provider to allow reuse after cleanup.
+     * This clears the cleanup flag and allows executors to be recreated.
+     */
+    fun reset()
 }
