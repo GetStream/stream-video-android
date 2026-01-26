@@ -161,6 +161,7 @@ public class Call(
     private val logger by taggedLogger("Call:$type:$id")
     private var supervisorJob = SupervisorJob()
     private var callStatsReportingJob: Job? = null
+    private var cleanupJob: Job? = null
     private var powerManager: PowerManager? = null
 
     internal var scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
@@ -596,6 +597,10 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
+        // Wait for any pending cleanup to complete before rejoining
+        cleanupJob?.join()
+        cleanupJob = null
+
         reconnectAttepmts = 0
         sfuEvents?.cancel()
         sfuListener?.cancel()
@@ -968,7 +973,7 @@ public class Call(
 
         (client as StreamVideoClient).onCallCleanUp(this)
 
-        clientImpl.scope.launch {
+        cleanupJob = clientImpl.scope.launch {
             safeCall {
                 session?.sfuTracer?.trace(
                     "leave-call",
