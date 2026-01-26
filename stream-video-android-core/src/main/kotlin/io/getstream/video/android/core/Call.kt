@@ -233,7 +233,7 @@ public class Call(
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
-    internal val unifiedSessionId = UUID.randomUUID().toString()
+    internal var unifiedSessionId = UUID.randomUUID().toString()
 
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
@@ -1509,13 +1509,18 @@ public class Call(
 
     /**
      * Resets the scopes to allow the Call to be reusable after leave().
-     * This recreates the supervisorJob, scope, and resets the scopeProvider.
+     * This recreates the supervisorJob, scope, resets the scopeProvider, and generates new session IDs.
      */
     private fun resetScopes() {
         logger.d { "[resetScopes] Recreating scopes to make Call reusable" }
 
         // Reset the destroyed flag to allow rejoin
         isDestroyed = false
+
+        // Generate new session IDs for fresh connection
+        sessionId = UUID.randomUUID().toString()
+        unifiedSessionId = UUID.randomUUID().toString()
+        logger.d { "[resetScopes] New sessionId: $sessionId, unifiedSessionId: $unifiedSessionId" }
 
         // Reset the scope provider to allow reuse
         scopeProvider.reset()
