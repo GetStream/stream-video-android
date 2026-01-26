@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ public interface StreamVideo : NotificationHandler {
 
     /**
      * Create a call with the given type and id.
+     * For GetStream Devs: Careful when invoking it during call/service cleanup as it will fill itself in [io.getstream.video.android.core.StreamVideoClient.calls] map
      */
     public fun call(type: String, id: String = ""): Call
 

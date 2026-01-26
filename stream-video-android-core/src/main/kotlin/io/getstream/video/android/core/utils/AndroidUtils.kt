@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -256,4 +256,10 @@ internal fun isAppInForeground(): Boolean {
     } catch (e: IllegalStateException) {
         false // fallback if lifecycle isn't initialized yet
     }
+}
+
+internal fun debugPrintLastStackFrames(tag: String, messagePrefix: String = "", count: Int = 5) {
+    val stack = Thread.currentThread().stackTrace
+    val message = stack.takeLast(count).joinToString("\n")
+    Log.d(tag, "$messagePrefix:$message")
 }

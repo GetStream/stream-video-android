@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import android.app.Notification
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.Stable
+import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.video.generated.models.BlockedUserEvent
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallClosedCaption
@@ -33,6 +34,7 @@ import io.getstream.android.video.generated.models.CallMemberAddedEvent
 import io.getstream.android.video.generated.models.CallMemberRemovedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedPermissionEvent
+import io.getstream.android.video.generated.models.CallMissedEvent
 import io.getstream.android.video.generated.models.CallModerationBlurEvent
 import io.getstream.android.video.generated.models.CallParticipantResponse
 import io.getstream.android.video.generated.models.CallReactionEvent
@@ -63,7 +65,9 @@ import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.LocalCallAcceptedPostEvent
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
+import io.getstream.android.video.generated.models.LocalCallRejectedPostEvent
 import io.getstream.android.video.generated.models.MemberResponse
 import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
@@ -109,6 +113,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.moderations.ModerationManager
 import io.getstream.video.android.core.notifications.IncomingNotificationData
+import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.permission.PermissionRequest
@@ -122,6 +127,7 @@ import io.getstream.video.android.core.utils.TaskSchedulerWithDebounce
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.toUser
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -700,6 +706,9 @@ public class CallState(
     internal val atomicNotification: AtomicReference<Notification?> =
         AtomicReference<Notification?>(null)
 
+    private var _notificationIdFlow = MutableStateFlow<Int?>(null)
+    internal val notificationIdFlow: StateFlow<Int?> = _notificationIdFlow
+
     @InternalStreamVideoApi
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
 
@@ -707,6 +716,7 @@ public class CallState(
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
+
         when (event) {
             is BlockedUserEvent -> {
                 val newBlockedUsers = _blockedUsers.value.toMutableSet()
@@ -747,9 +757,23 @@ public class CallState(
                     // Then leave the call on this device
                     if (!acceptedOnThisDevice) call.leave("accepted-on-another-device")
                 }
+                call.fireEvent(
+                    LocalCallAcceptedPostEvent(
+                        event.callCid,
+                        event.createdAt,
+                        event.call,
+                        event.user,
+                        event.type,
+                    ),
+                )
+            }
+
+            is CallMissedEvent -> {
+                _createdBy.value = event.call.createdBy.toUser()
             }
 
             is CallRejectedEvent -> {
+                _createdBy.value = event.call.createdBy.toUser()
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
@@ -763,6 +787,16 @@ public class CallState(
                         }
                     },
                 )
+                call.fireEvent(
+                    LocalCallRejectedPostEvent(
+                        event.callCid,
+                        event.createdAt,
+                        event.call,
+                        event.user,
+                        event.type,
+                        event.reason,
+                    ),
+                )
             }
 
             is LocalCallMissedEvent -> {
@@ -774,6 +808,17 @@ public class CallState(
                     _rejectedBy.value = newRejectedBySet.toSet()
                     _ringingState.value = RingingState.RejectedByAll
                     call.leave("LocalCallMissedEvent")
+
+                    val activeCallExists = client.state.activeCall.value != null
+                    if (activeCallExists) {
+                        // Another call is active - just remove incoming notification
+                        val streamCallId = StreamCallId(call.type, call.id)
+                        NotificationManagerCompat.from(client.context)
+                            .cancel(streamCallId.getNotificationId(NotificationType.Incoming))
+                    } else {
+                        // No other call - stop service
+                        client.state.maybeStopForegroundService(call)
+                    }
                 }
             }
 
@@ -1645,8 +1690,14 @@ public class CallState(
         _rejectActionBundle.value = bundle
     }
 
+    @Deprecated("Use updateNotification(Int, Notification) instead")
     fun updateNotification(notification: Notification) {
         atomicNotification.set(notification)
+    }
+
+    fun updateNotification(notificationId: Int, notification: Notification) {
+        this._notificationIdFlow.value = notificationId
+        this.atomicNotification.set(notification)
     }
 }
 

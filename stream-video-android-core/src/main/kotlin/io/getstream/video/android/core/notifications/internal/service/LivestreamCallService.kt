@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,20 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
-import android.annotation.SuppressLint
-import android.content.pm.ServiceInfo
-import android.os.Build
-import androidx.annotation.RequiresApi
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.notifications.internal.service.permissions.ForegroundServicePermissionManager
+import io.getstream.video.android.core.notifications.internal.service.permissions.LivestreamAudioCallPermissionManager
+import io.getstream.video.android.core.notifications.internal.service.permissions.LivestreamCallPermissionManager
+import io.getstream.video.android.core.notifications.internal.service.permissions.LivestreamViewerPermissionManager
 
 /**
  * Due to the nature of the livestream calls, the service that is used is of different type.
  */
 internal open class LivestreamCallService : CallService() {
     override val logger: TaggedLogger by taggedLogger("LivestreamHostCallService")
-
-    override val requiredForegroundTypes: Set<Int>
-        @SuppressLint("InlinedApi")
-        get() = setOf(
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA,
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
-        )
+    override val permissionManager: ForegroundServicePermissionManager =
+        LivestreamCallPermissionManager()
 }
 
 /**
@@ -42,12 +37,7 @@ internal open class LivestreamCallService : CallService() {
  */
 internal open class LivestreamAudioCallService : CallService() {
     override val logger: TaggedLogger by taggedLogger("LivestreamAudioCallService")
-
-    override val requiredForegroundTypes: Set<Int>
-        @SuppressLint("InlinedApi")
-        get() = setOf(
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
-        )
+    override val permissionManager = LivestreamAudioCallPermissionManager()
 }
 
 /**
@@ -55,23 +45,5 @@ internal open class LivestreamAudioCallService : CallService() {
  */
 internal class LivestreamViewerService : LivestreamCallService() {
     override val logger: TaggedLogger by taggedLogger("LivestreamViewerService")
-    override val requiredForegroundTypes: Set<Int>
-        @SuppressLint("InlinedApi")
-        get() = setOf(
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
-        )
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    override fun androidQServiceType(): Int {
-        return ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-    }
-
-    @SuppressLint("InlinedApi")
-    override fun noPermissionServiceType(): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-        } else {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
-        }
-    }
+    override val permissionManager = LivestreamViewerPermissionManager()
 }
