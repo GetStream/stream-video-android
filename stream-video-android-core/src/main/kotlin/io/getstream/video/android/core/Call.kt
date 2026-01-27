@@ -55,9 +55,9 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.call.CallApiDelegate
+import io.getstream.video.android.core.call.CallCleanupManager
 import io.getstream.video.android.core.call.CallEventManager
 import io.getstream.video.android.core.call.CallJoinCoordinator
-import io.getstream.video.android.core.call.CallLifecycleManager
 import io.getstream.video.android.core.call.CallMediaManager
 import io.getstream.video.android.core.call.CallReInitializer
 import io.getstream.video.android.core.call.CallRenderer
@@ -317,7 +317,7 @@ public class Call(
      * Lifecycle manager handles join/leave/cleanup.
      * INTERNAL: Not part of public API.
      */
-    private val lifecycleManager = CallLifecycleManager(
+    private val lifecycleManager = CallCleanupManager(
         call = this,
         sessionManager = sessionManager,
         client = clientImpl,

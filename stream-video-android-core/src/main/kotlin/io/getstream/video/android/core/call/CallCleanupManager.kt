@@ -29,9 +29,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 
 /**
- * Manages the lifecycle of a Call - joining, leaving, and cleanup.
+ * Manages call cleanup
  */
-internal class CallLifecycleManager(
+internal class CallCleanupManager(
     private val call: Call,
     private val sessionManager: CallSessionManager,
     private val client: StreamVideoClient,
