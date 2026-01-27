@@ -148,7 +148,6 @@ public class Call(
         call = this,
         clientImpl = clientImpl,
         powerManager = powerManager,
-        callReInitializer = callReinitializer,
         testInstanceProvider = testInstanceProvider,
     )
 
@@ -387,7 +386,7 @@ public class Call(
         createOptions: CreateCallOptions? = null,
         ring: Boolean = false,
         notify: Boolean = false,
-    ): Result<RtcSession> = sessionManager.join(create, createOptions, ring, notify)
+    ): Result<RtcSession> = callJoinCoordinator.join(create, createOptions, ring, notify)
 
     suspend fun joinAndRing(
         members: List<String>,

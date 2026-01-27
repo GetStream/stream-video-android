@@ -29,9 +29,7 @@ import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
-import kotlinx.coroutines.delay
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.UUID
@@ -45,7 +43,6 @@ private const val PERMISSION_ERROR = "\n[Call.join()] called without having the 
 
 internal class CallSessionManager(
     private val call: Call,
-    private val callReInitializer: CallReInitializer,
     private val clientImpl: StreamVideoClient,
     private val powerManager: PowerManager?,
     private val testInstanceProvider: Call.Companion.TestInstanceProvider,
@@ -85,79 +82,6 @@ internal class CallSessionManager(
     val iceConnectionMonitor = CallIceConnectionMonitor(call.scope, { session })
     val networkSubscriptionController =
         CallNetworkSubscriptionController(network, callConnectivityMonitor.listener)
-
-    suspend fun join(
-        create: Boolean,
-        createOptions: CreateCallOptions?,
-        ring: Boolean,
-        notify: Boolean,
-    ): Result<RtcSession> {
-        logger.d {
-            "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
-        }
-
-        callReInitializer.waitFromCleanup()
-        callReInitializer.reinitialiseCoroutinesIfNeeded()
-
-        // CRITICAL: Reset isDestroyed for new session
-        call.isDestroyed.set(false)
-        logger.d { "[join] isDestroyed reset to false for new session" }
-
-        val permissionPass =
-            clientImpl.permissionCheck.checkAndroidPermissionsGroup(clientImpl.context, call)
-        // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
-        if (!permissionPass.first) {
-            logger.w { PERMISSION_ERROR }
-        }
-        // if we are a guest user, make sure we wait for the token before running the join flow
-        clientImpl.guestUserJob?.await()
-
-        // Ensure factory is created with the current audioBitrateProfile before joining
-        call.ensureFactoryMatchesAudioProfile()
-
-        // the join flow should retry up to 3 times
-        // if the error is not permanent
-        // and fail immediately on permanent errors
-        call.state._connection.value = RealtimeConnection.InProgress
-        var retryCount = 0
-
-        var result: Result<RtcSession>
-
-        call.atomicLeave = AtomicUnitCall()
-        while (retryCount < 3) {
-            result = _join(create, createOptions, ring, notify)
-            if (result is Success) {
-                // we initialise the camera, mic and other according to local + backend settings
-                // only when the call is joined to make sure we don't switch and override
-                // the settings during a call.
-                val settings = call.state.settings.value
-                if (settings != null) {
-                    call.updateMediaManagerFromSettings(settings)
-                } else {
-                    logger.w {
-                        "[join] Call settings were null - this should never happen after a call" +
-                            "is joined. MediaManager will not be initialised with server settings."
-                    }
-                }
-                return result
-            }
-            if (result is Failure) {
-                session = null
-                logger.e { "Join failed with error $result" }
-                if (isPermanentError(result.value)) {
-                    call.state._connection.value = RealtimeConnection.Failed(result.value)
-                    return result
-                } else {
-                    retryCount += 1
-                }
-            }
-            delay(retryCount - 1 * 1000L)
-        }
-        session = null
-        val errorMessage = "Join failed after 3 retries"
-        call.state._connection.value = RealtimeConnection.Failed(errorMessage)
-        return Failure(value = Error.GenericError(errorMessage))
-    }
 
     @SuppressLint("VisibleForTests")
     internal suspend fun _join(
@@ -216,15 +140,6 @@ internal class CallSessionManager(
         } else {
             null
         }
-    }
-
-    internal fun isPermanentError(error: Any): Boolean {
-        if (error is Error.ThrowableError) {
-            if (error.message.contains("Unable to resolve host")) {
-                return false
-            }
-        }
-        return true
     }
 
     suspend fun fastReconnect(reason: String) = schedule("fast") {
