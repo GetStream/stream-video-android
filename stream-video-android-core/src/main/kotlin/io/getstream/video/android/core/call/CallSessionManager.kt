@@ -25,29 +25,16 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.Call.Companion.testInstanceProvider
-import io.getstream.video.android.core.CallStatsReport
 import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.events.JoinCallResponseEvent
-import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
-import org.webrtc.PeerConnection
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.UUID
-import kotlin.collections.plus
 
 private const val PERMISSION_ERROR = "\n[Call.join()] called without having the required permissions.\n" +
     "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
@@ -58,14 +45,13 @@ private const val PERMISSION_ERROR = "\n[Call.join()] called without having the 
 
 internal class CallSessionManager(
     private val call: Call,
-    private val callLocks: CallLocks,
+    private val callReInitializer: CallReInitializer,
     private val clientImpl: StreamVideoClient,
     private val powerManager: PowerManager?,
+    private val testInstanceProvider: Call.Companion.TestInstanceProvider,
 
 ) {
     private val logger by taggedLogger("CallSessionManager")
-
-    internal var callStatsReportingJob: Job? = null
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
@@ -74,68 +60,31 @@ internal class CallSessionManager(
     private var reconnectAttempts = 0
     internal var reconnectStartTime = 0L
     internal var connectStartTime = 0L
-    private var lastDisconnect = 0L
-    private var reconnectDeadlineMils: Int = 10_000
-    private var leaveTimeoutAfterDisconnect: Job? = null
 
-    internal var monitorPublisherPCStateJob: Job? = null
-    internal var monitorSubscriberPCStateJob: Job? = null
-    internal var sfuListener: Job? = null
-    internal var sfuEvents: Job? = null
-
+    private val callConnectivityMonitorState = CallConnectivityMonitorState()
     internal val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
-
     private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(call.scope)
-
-    /**
-     * Indicates whether this Call has been left at least once.
-     * Used to determine if reinitialization is needed on next join().
-     *
-     * THREAD SAFETY: Access must be protected using cleanupMutex.withLock { }.
-     * Reading/writing this field outside mutex is NOT safe.
-     */
-    internal var hasBeenLeft = false
-
-    private val listener = object : NetworkStateProvider.NetworkStateListener {
-        override suspend fun onConnected() {
-            leaveTimeoutAfterDisconnect?.cancel()
-
-            val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
-            logger.d {
-                "[NetworkStateListener#onConnected] #network; no args, elapsedTimeMils:$elapsedTimeMils, lastDisconnect:$lastDisconnect, reconnectDeadlineMils:$reconnectDeadlineMils"
-            }
-            if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
-                logger.d {
-                    "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
-                }
-                fastReconnect("NetworkStateListener#onConnected")
-            } else {
-                logger.d {
-                    "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
-                }
-                rejoin("NetworkStateListener#onConnected")
-            }
-        }
-
-        override suspend fun onDisconnected() {
+    private val callStatsReporter = CallStatsReporter(call)
+    private val callConnectivityMonitor = CallConnectivityMonitor(
+        call.scope,
+        callConnectivityMonitorState,
+        clientImpl.leaveAfterDisconnectSeconds,
+        {
+            fastReconnect("NetworkStateListener#onConnected")
+        },
+        {
+            rejoin("NetworkStateListener#onConnected")
+        },
+        {
             call.state._connection.value = RealtimeConnection.Reconnecting
-            logger.d {
-                "[NetworkStateListener#onDisconnected] #network; old lastDisconnect:$lastDisconnect, clientImpl.leaveAfterDisconnectSeconds:${clientImpl.leaveAfterDisconnectSeconds}"
-            }
-            lastDisconnect = System.currentTimeMillis()
-            logger.d {
-                "[NetworkStateListener#onDisconnected] #network; new lastDisconnect:$lastDisconnect"
-            }
-            leaveTimeoutAfterDisconnect = call.scope.launch {
-                delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
-                logger.d {
-                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
-                }
-                call.leave()
-            }
-            logger.d { "[NetworkStateListener#onDisconnected] #network; at $lastDisconnect" }
-        }
-    }
+        },
+        { call.leave() },
+    )
+
+    val sfuEventMonitor = CallSfuEventMonitor(call.scope, { session }, callConnectivityMonitorState)
+    val iceConnectionMonitor = CallIceConnectionMonitor(call.scope, { session })
+    val networkSubscriptionController =
+        CallNetworkSubscriptionController(network, callConnectivityMonitor.listener)
 
     suspend fun join(
         create: Boolean,
@@ -146,41 +95,12 @@ internal class CallSessionManager(
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
-        // Wait for cleanup
-        val job = callLocks.cleanupMutex.withLock { callLocks.cleanupJob?.takeIf { it.isActive } }
-        job?.let {
-            logger.d { "[join] Waiting for cleanup job: $it" }
-            try {
-                withTimeout(5000) { it.join() }
-                logger.d { "[join] Cleanup complete" }
-            } catch (e: TimeoutCancellationException) {
-                logger.w { "[join] Cleanup timeout, proceeding anyway" }
-            }
 
-            callLocks.cleanupMutex.withLock {
-                if (callLocks.cleanupJob == it) {
-                    callLocks.cleanupJob = null
-                }
-            }
-        }
-
-        // Reinitialize if needed
-        val needsReinit = callLocks.cleanupMutex.withLock {
-            if (hasBeenLeft) {
-                hasBeenLeft = false
-                true
-            } else {
-                false
-            }
-        }
-
-        if (needsReinit) {
-            logger.d { "[join] Reinitializing for rejoin" }
-            call.reinitializeForRejoin()
-        }
+        callReInitializer.waitFromCleanup()
+        callReInitializer.reinitialiseCoroutinesIfNeeded()
 
         // CRITICAL: Reset isDestroyed for new session
-        call.isDestroyed = false
+        call.isDestroyed.set(false)
         logger.d { "[join] isDestroyed reset to false for new session" }
 
         val permissionPass =
@@ -240,15 +160,14 @@ internal class CallSessionManager(
     }
 
     @SuppressLint("VisibleForTests")
-    private suspend fun _join(
+    internal suspend fun _join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
         reconnectAttempts = 0
-        sfuEvents?.cancel()
-        sfuListener?.cancel()
+        sfuEventMonitor.stop()
 
         if (session != null) {
             return Failure(Error.GenericError("Call $call.cid has already been joined"))
@@ -266,50 +185,37 @@ internal class CallSessionManager(
         }
         call.location = locationResult.value
 
-        val options = createOptions
-            ?: if (create) {
-                CreateCallOptions()
-            } else {
-                null
-            }
-        val result = call.joinRequest(options, locationResult.value, ring = ring, notify = notify)
+        val result = call.joinRequest(
+            getOptions(create, createOptions),
+            locationResult.value,
+            ring = ring,
+            notify = notify,
+        )
 
         if (result !is Success) {
             return result as Failure
         }
-        val sfuToken = result.value.credentials.token
-        val sfuUrl = result.value.credentials.server.url
-        val sfuWsUrl = result.value.credentials.server.wsEndpoint
-        val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
+
         try {
-            session = if (testInstanceProvider.rtcSessionCreator != null) {
-                testInstanceProvider.rtcSessionCreator!!.invoke()
-            } else {
-                RtcSession(
-                    sessionId = this.sessionId,
-                    apiKey = clientImpl.apiKey,
-                    lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                    client = clientImpl,
-                    call = call,
-                    sfuUrl = sfuUrl,
-                    sfuWsUrl = sfuWsUrl,
-                    sfuToken = sfuToken,
-                    remoteIceServers = iceServers,
-                    powerManager = powerManager,
-                )
-            }
-
-            session?.let {
-                call.state._connection.value = RealtimeConnection.Joined(it)
-            }
-
-            session?.connect()
+            createJoinRtcSession(result.value)
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
+
         clientImpl.state.setActiveCall(call)
         monitorSession(result.value)
         return Success(value = session!!)
+    }
+
+    internal fun getOptions(
+        create: Boolean = false,
+        createOptions: CreateCallOptions? = null,
+    ): CreateCallOptions? {
+        return createOptions ?: if (create) {
+            CreateCallOptions()
+        } else {
+            null
+        }
     }
 
     internal fun isPermanentError(error: Any): Boolean {
@@ -341,7 +247,7 @@ internal class CallSessionManager(
                 reason = reason,
             )
             session.fastReconnect(reconnectDetails)
-            val oldSessionStats = collectStats()
+            val oldSessionStats = callStatsReporter.collectStats(session)
             session.sendCallStats(oldSessionStats)
         } else {
             logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:${call.id}" }
@@ -359,53 +265,7 @@ internal class CallSessionManager(
 
             val joinResponse = call.joinRequest(location = it)
             if (joinResponse is Success) {
-                // switch to the new SFU
-                val cred = joinResponse.value.credentials
-                val oldSession = this.session!!
-                val oldSessionStats = collectStats()
-                val currentOptions = this.session?.publisher?.currentOptions()
-                logger.i { "Rejoin SFU ${oldSession?.sfuUrl} to ${cred.server.url}" }
-
-                this.sessionId = UUID.randomUUID().toString()
-                val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
-                val reconnectDetails = ReconnectDetails(
-                    previous_session_id = prevSessionId,
-                    strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-                    announced_tracks = publishingInfo,
-                    subscriptions = subscriptionsInfo,
-                    reconnect_attempt = reconnectAttempts,
-                    reason = reason,
-                )
-                call.state.removeParticipant(prevSessionId)
-                oldSession.prepareRejoin()
-                try {
-                    this.session = RtcSession(
-                        clientImpl,
-                        reconnectAttempts,
-                        powerManager,
-                        call,
-                        sessionId,
-                        clientImpl.apiKey,
-                        clientImpl.coordinatorConnectionModule.lifecycle,
-                        cred.server.url,
-                        cred.server.wsEndpoint,
-                        cred.token,
-                        cred.iceServers.map { ice ->
-                            ice.toIceServer()
-                        },
-                    )
-                    this.session?.connect(reconnectDetails, currentOptions)
-                    this.session?.sfuTracer?.trace("rejoin", reason)
-                    oldSession.sendCallStats(oldSessionStats)
-                    oldSession.leaveWithReason("Rejoin :: $reason")
-                    oldSession.cleanup()
-                    monitorSession(joinResponse.value)
-                } catch (ex: Exception) {
-                    logger.e(ex) {
-                        "[rejoin] Failed to join response with ex: ${ex.message}"
-                    }
-                    call.state._connection.value = RealtimeConnection.Failed(ex)
-                }
+                replaceSession(joinResponse.value, reason)
             } else {
                 logger.e {
                     "[rejoin] Failed to get a join response ${joinResponse.errorOrNull()}"
@@ -414,67 +274,14 @@ internal class CallSessionManager(
             }
         }
     }
-
     internal fun monitorSession(result: JoinCallResponse) {
-        sfuEvents?.cancel()
-        sfuListener?.cancel()
-        startCallStatsReporting(result.statsOptions.reportingIntervalMs.toLong())
-        // listen to Signal WS
-        sfuEvents = call.scope.launch {
-            session?.let {
-                it.socket.events().collect { event ->
-                    if (event is JoinCallResponseEvent) {
-                        reconnectDeadlineMils = event.fastReconnectDeadlineSeconds * 1000
-                        logger.d { "[join] #deadline for reconnect is ${reconnectDeadlineMils / 1000} seconds" }
-                    }
-                }
-            }
-        }
-        monitorPublisherPCStateJob?.cancel()
-        monitorPublisherPCStateJob = call.scope.launch {
-            session?.publisher?.iceState?.collect {
-                when (it) {
-                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session?.publisher?.connection?.restartIce()
-                    }
-
-                    else -> {
-                        logger.d { "[monitorPubConnectionState] Ice connection state is $it" }
-                    }
-                }
-            }
-        }
-
-        monitorSubscriberPCStateJob?.cancel()
-        monitorSubscriberPCStateJob = call.scope.launch {
-            session?.subscriber?.iceState?.collect {
-                when (it) {
-                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session?.requestSubscriberIceRestart()
-                    }
-
-                    else -> {
-                        logger.d { "[monitorSubConnectionState] Ice connection state is $it" }
-                    }
-                }
-            }
-        }
-        network.subscribe(listener)
-    }
-
-    private fun startCallStatsReporting(reportingIntervalMs: Long = 10_000) {
-        callStatsReportingJob?.cancel()
-        callStatsReportingJob = call.scope.launch {
-            // Wait a bit before we start capturing stats
-            delay(reportingIntervalMs)
-
-            while (isActive) {
-                delay(reportingIntervalMs)
-                session?.sendCallStats(
-                    report = collectStats(),
-                )
-            }
-        }
+        callStatsReporter.startCallStatsReporting(
+            session,
+            result.statsOptions.reportingIntervalMs.toLong(),
+        )
+        sfuEventMonitor.start()
+        iceConnectionMonitor.start()
+        networkSubscriptionController.start()
     }
 
     suspend fun migrate() = schedule("migrate") {
@@ -542,37 +349,94 @@ internal class CallSessionManager(
         }
     }
 
-    internal suspend fun collectStats(): CallStatsReport {
-        val publisherStats = session?.getPublisherStats()
-        val subscriberStats = session?.getSubscriberStats()
-        call.state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
-        call.state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
-        call.state.stats.updateLocalStats()
-        val local = call.state.stats._local.value
+    suspend fun createJoinRtcSession(result: JoinCallResponse) {
+        session = createJoinRtcSessionInner(result)
+        session?.let { call.state._connection.value = RealtimeConnection.Joined(it) }
+        session?.connect()
+    }
 
-        val report = CallStatsReport(
-            publisher = publisherStats,
-            subscriber = subscriberStats,
-            local = local,
-            stateStats = call.state.stats,
-        )
-
-        call.statsReport.value = report
-        call.statLatencyHistory.value += report.stateStats.publisher.latency.value
-        if (call.statLatencyHistory.value.size > 20) {
-            call.statLatencyHistory.value = call.statLatencyHistory.value.takeLast(20)
+    fun createJoinRtcSessionInner(result: JoinCallResponse): RtcSession {
+        return if (testInstanceProvider.rtcSessionCreator != null) {
+            testInstanceProvider.rtcSessionCreator!!.invoke()
+        } else {
+            RtcSession(
+                sessionId = this.sessionId,
+                apiKey = clientImpl.apiKey,
+                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
+                client = clientImpl,
+                call = call,
+                sfuUrl = result.credentials.server.url,
+                sfuWsUrl = result.credentials.server.wsEndpoint,
+                sfuToken = result.credentials.token,
+                remoteIceServers = result.credentials.iceServers.map { it.toIceServer() },
+                powerManager = powerManager,
+            )
         }
+    }
 
-        return report
+    fun createRejoinSession(joinResponse: JoinCallResponse): RtcSession {
+        val cred = joinResponse.credentials
+        return RtcSession(
+            clientImpl,
+            reconnectAttempts,
+            powerManager,
+            call,
+            sessionId,
+            clientImpl.apiKey,
+            clientImpl.coordinatorConnectionModule.lifecycle,
+            cred.server.url,
+            cred.server.wsEndpoint,
+            cred.token,
+            cred.iceServers.map { ice ->
+                ice.toIceServer()
+            },
+        )
+    }
+
+    fun createReconnectDetails(session: RtcSession, reason: String): ReconnectDetails {
+        val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
+        return ReconnectDetails(
+            previous_session_id = prevSessionId,
+            strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+            announced_tracks = publishingInfo,
+            subscriptions = subscriptionsInfo,
+            reconnect_attempt = reconnectAttempts,
+            reason = reason,
+        )
+    }
+
+    suspend fun replaceSession(joinResponse: JoinCallResponse, reason: String) {
+        // switch to the new SFU
+        val cred = joinResponse.credentials
+        val oldSession = this.session!!
+        val oldSessionStats = callStatsReporter.collectStats(session)
+        val currentOptions = this.session?.publisher?.currentOptions()
+        logger.i { "Rejoin SFU ${oldSession?.sfuUrl} to ${cred.server.url}" }
+
+        this.sessionId = UUID.randomUUID().toString()
+        val (prevSessionId, _, _) = oldSession.currentSfuInfo()
+        val reconnectDetails = createReconnectDetails(oldSession, reason)
+        call.state.removeParticipant(prevSessionId)
+        oldSession.prepareRejoin()
+        try {
+            this.session = createRejoinSession(joinResponse)
+            this.session?.connect(reconnectDetails, currentOptions)
+            this.session?.sfuTracer?.trace("rejoin", reason)
+            oldSession.sendCallStats(oldSessionStats)
+            oldSession.leaveWithReason("Rejoin :: $reason")
+            oldSession.cleanup()
+            monitorSession(joinResponse)
+        } catch (ex: Exception) {
+            logger.e(ex) {
+                "[rejoin] Failed to join response with ex: ${ex.message}"
+            }
+            call.state._connection.value = RealtimeConnection.Failed(ex)
+        }
     }
 
     private suspend fun schedule(key: String, block: suspend () -> Unit) {
         logger.d { "[schedule] #reconnect; no args" }
         streamSingleFlightProcessorImpl.run(key, block)
-    }
-
-    private fun unsubscribe() {
-        network.unsubscribe(listener)
     }
 
     fun cleanup() {
@@ -581,16 +445,11 @@ internal class CallSessionManager(
     }
 
     fun cleanupMonitor() {
-        monitorSubscriberPCStateJob?.cancel()
-        monitorPublisherPCStateJob?.cancel()
-        monitorPublisherPCStateJob = null
-        monitorSubscriberPCStateJob = null
+        iceConnectionMonitor.stop()
+        sfuEventMonitor.stop()
     }
 
     fun cleanupNetworkMonitoring() {
-        leaveTimeoutAfterDisconnect?.cancel()
-        unsubscribe()
-        sfuListener?.cancel()
-        sfuEvents?.cancel()
+        networkSubscriptionController.stop()
     }
 }

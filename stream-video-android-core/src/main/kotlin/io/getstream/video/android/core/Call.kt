@@ -56,11 +56,13 @@ import io.getstream.result.Result
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.call.CallApiDelegate
 import io.getstream.video.android.core.call.CallEventManager
+import io.getstream.video.android.core.call.CallJoinCoordinator
 import io.getstream.video.android.core.call.CallLifecycleManager
-import io.getstream.video.android.core.call.CallLocks
 import io.getstream.video.android.core.call.CallMediaManager
+import io.getstream.video.android.core.call.CallReInitializer
 import io.getstream.video.android.core.call.CallRenderer
 import io.getstream.video.android.core.call.CallSessionManager
+import io.getstream.video.android.core.call.CallStatsReporter
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -78,20 +80,16 @@ import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.withLock
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
@@ -101,6 +99,7 @@ import stream.video.sfu.models.VideoDimension
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * How long do we keep trying to make a full-reconnect (once the SFU signalling WS went down)
@@ -136,10 +135,12 @@ public class Call(
 
     private val logger by taggedLogger("Call:$type:$id")
 
-    private val callLocks = CallLocks(clientImpl.scope)
+    private val callReinitializer = CallReInitializer(clientImpl.scope) {
+        reInitialise()
+    }
 
     internal val scope: CoroutineScope
-        get() = callLocks.currentScope
+        get() = callReinitializer.currentScope
 
     private var powerManager: PowerManager? = null
 
@@ -147,7 +148,22 @@ public class Call(
         call = this,
         clientImpl = clientImpl,
         powerManager = powerManager,
-        callLocks = callLocks,
+        callReInitializer = callReinitializer,
+        testInstanceProvider = testInstanceProvider,
+    )
+
+    private val callStatsReporter: CallStatsReporter = CallStatsReporter(this)
+    internal val callJoinCoordinator = CallJoinCoordinator(
+        call = this,
+        client = clientImpl,
+        callReInitializer = callReinitializer,
+        onJoinFail = {
+            sessionManager.session = null
+        },
+        createJoinSession = { create, createOptions, ring, notify ->
+            sessionManager._join(create, createOptions, ring, notify)
+        },
+        onRejoin = { reason -> sessionManager.rejoin(reason) },
     )
 
     private val callRenderer = CallRenderer()
@@ -224,7 +240,7 @@ public class Call(
     /**
      * Call has been left and the object is cleaned up and destroyed.
      */
-    internal var isDestroyed = false
+    internal var isDestroyed = AtomicBoolean(false)
 
     var sessionId = UUID.randomUUID().toString()
     internal val unifiedSessionId = UUID.randomUUID().toString()
@@ -305,9 +321,11 @@ public class Call(
     private val lifecycleManager = CallLifecycleManager(
         call = this,
         sessionManager = sessionManager,
+        client = clientImpl,
         mediaManagerProvider = { mediaManager },
-        callLocks = callLocks,
+        callReInitializer = callReinitializer,
         clientScope = clientImpl.scope,
+        callStatsReporter = callStatsReporter,
     )
 
     init {
@@ -415,104 +433,12 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave(reason: String = "user") {
-        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
-        // Launch coroutine to check cleanup state with mutex
-        // This allows leave() to remain non-suspending
-        scope.launch {
-            // Thread-safe check for existing cleanup using mutex
-            val shouldProceed = callLocks.cleanupMutex.withLock {
-                val currentJob = callLocks.cleanupJob
-                if (currentJob?.isActive == true) {
-                    logger.w {
-                        "[leave] Cleanup already in progress (job: $currentJob), " +
-                            "ignoring duplicate leave call"
-                    }
-                    false
-                } else {
-                    logger.v { "[leave] No active cleanup, proceeding with leave" }
-                    true
-                }
-            }
-
-            if (shouldProceed) {
-                internalLeave(null, reason)
-            }
-        }
+        lifecycleManager.leave(reason)
     }
-
-    private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
-        sessionManager.cleanupMonitor()
-
-        // Leave session
-        sessionManager.session?.leaveWithReason(
-            "[reason=$reason, error=${disconnectionReason?.message}]",
-        )
-
-        // Cancel network monitoring
-        sessionManager.cleanupNetworkMonitoring()
-
-        // Update connection state
-        state._connection.value = RealtimeConnection.Disconnected
-
-        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = $id" }
-        if (isDestroyed) {
-            logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
-            return@atomicLeave
-        }
-        isDestroyed = true
-
-        /**
-         * TODO Rahul, need to check which call has owned the media at the moment(probably use active call)
-         */
-        stopScreenSharing()
-        camera.disable()
-        microphone.disable()
-
-        if (id == client.state.activeCall.value?.id) {
-            client.state.removeActiveCall(this) // Will also stop CallService
-        }
-
-        if (id == client.state.ringingCall.value?.id) {
-            client.state.removeRingingCall(this)
-        }
-
-        TelecomCallController(client.context)
-            .leaveCall(this)
-
-        (client as StreamVideoClient).onCallCleanUp(this)
-
-        val newCleanupJob = clientImpl.scope.launch {
-            safeCall {
-                sessionManager.session?.sfuTracer?.trace(
-                    "leave-call",
-                    "[reason=$reason, error=${disconnectionReason?.message}]",
-                )
-                val stats = sessionManager.collectStats()
-                sessionManager.session?.sendCallStats(stats)
-            }
-            cleanup()
-        }
-
-        // Clear the job reference after it completes
-        newCleanupJob.invokeOnCompletion {
-            scope.launch {
-                callLocks.cleanupMutex.withLock {
-                    if (callLocks.cleanupJob == newCleanupJob) {
-                        callLocks.cleanupJob = null
-                        logger.v { "[cleanupJob] Cleared job reference" }
-                    }
-                }
-            }
-        }
-    }
-
-    internal suspend fun collectStats(): CallStatsReport = sessionManager.collectStats()
 
     /** ends the call for yourself as well as other users */
     suspend fun end(): Result<Unit> {
-        // end the call for everyone
         val result = clientImpl.endCall(type, id)
-        // cleanup
         leave("call-ended")
         return result
     }
@@ -824,52 +750,6 @@ public class Call(
         lifecycleManager.cleanup()
     }
 
-    /**
-     * Reinitializes the Call instance after it has been left, preparing it for rejoin.
-     *
-     * This method:
-     * - Recreates the coroutine scope and supervisor job
-     * - Generates a new session ID
-     * - Resets connection state
-     * - Resets atomic leave guard
-     *
-     * THREAD SAFETY: Uses synchronized block to ensure thread-safe modification.
-     * This should only be called after confirming hasBeenLeft is true and resetting it to false
-     * (both operations should be done atomically inside cleanupMutex.withLock).
-     */
-    internal fun reinitializeForRejoin() {
-        synchronized(this) {
-            val oldSessionId = sessionId
-            val oldSupervisorJob = callLocks.currentSupervisorJob
-
-            logger.d {
-                "[reinitializeForRejoin] Starting reinitialization. " +
-                    "oldSessionId: $oldSessionId"
-            }
-
-            // Recreate coroutine infrastructure
-            callLocks.currentSupervisorJob = SupervisorJob()
-            callLocks.currentScope = CoroutineScope(
-                clientImpl.scope.coroutineContext + callLocks.currentSupervisorJob,
-            )
-
-            // Generate new session ID
-            sessionId = UUID.randomUUID().toString()
-
-            // Reset connection state
-            state._connection.value = RealtimeConnection.Disconnected
-
-            // Reset atomic leave guard
-            atomicLeave = AtomicUnitCall()
-
-            logger.i {
-                "[reinitializeForRejoin] ✓ Reinitialization complete. " +
-                    "oldSessionId: $oldSessionId → newSessionId: $sessionId, " +
-                    "oldJob cancelled: ${oldSupervisorJob.isCancelled}"
-            }
-        }
-    }
-
     suspend fun ring(): Result<GetCallResponse> {
         logger.d { "[ring] #ringing; no args" }
         return clientImpl.ring(type, id)
@@ -1017,6 +897,14 @@ public class Call(
      */
     fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) =
         callMediaManager.setIncomingAudioEnabled(sessionManager.session, enabled, sessionIds)
+
+    private fun reInitialise() {
+        val oldSessionId = sessionId
+        sessionId = UUID.randomUUID().toString()
+        state._connection.value = RealtimeConnection.Disconnected
+        atomicLeave = AtomicUnitCall()
+        logger.d { "[reInitialise] oldSessionId: $oldSessionId → newSessionId: $sessionId" }
+    }
 
     @InternalStreamVideoApi
     public val debug = Debug(this)

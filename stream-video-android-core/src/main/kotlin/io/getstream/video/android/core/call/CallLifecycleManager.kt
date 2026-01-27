@@ -17,22 +17,16 @@
 package io.getstream.video.android.core.call
 
 import io.getstream.log.taggedLogger
-import io.getstream.result.Result
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.RealtimeConnection
-import io.getstream.video.android.core.utils.AtomicUnitCall
+import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
-import java.util.UUID
 
 /**
  * Manages the lifecycle of a Call - joining, leaving, and cleanup.
@@ -40,168 +34,98 @@ import java.util.UUID
 internal class CallLifecycleManager(
     private val call: Call,
     private val sessionManager: CallSessionManager,
-    private val callLocks: CallLocks,
+    private val client: StreamVideoClient,
+    private val callReInitializer: CallReInitializer,
     private val mediaManagerProvider: () -> MediaManagerImpl, // ← Lambda provider
     private val clientScope: CoroutineScope,
+    private val callStatsReporter: CallStatsReporter,
 ) {
     private val logger by taggedLogger("CallLifecycleManager")
-    private var hasBeenLeft = false
     private val mediaManager: MediaManagerImpl by lazy {
         mediaManagerProvider()
     }
 
-    val lifecycleScope: CoroutineScope get() = callLocks.currentScope
-
     fun leave(reason: String = "user") {
-        logger.d { "[leave] reason: $reason" }
+        logger.d { "[leave] #ringing; no args, call_cid:${call.cid}" }
 
-        callLocks.currentScope.launch {
-            val shouldProceed = callLocks.cleanupMutex.withLock {
-                val currentJob = callLocks.cleanupJob
-                if (currentJob?.isActive == true) {
-                    logger.w {
-                        "[leave] Cleanup already in progress (job: $currentJob), " +
-                            "ignoring duplicate leave call"
-                    }
-                    false
-                } else {
-                    logger.v { "[leave] No active cleanup, proceeding with leave" }
-                    true
-                }
-            }
-
+        callReInitializer.currentScope.launch {
+            val shouldProceed = !isCleanupInProgress()
             if (shouldProceed) {
-                performLeave(reason)
+                internalLeave(null, reason)
             }
         }
     }
 
-    private fun performLeave(reason: String) {
-        logger.d { "[performLeave] Starting leave process" }
-
-        // All immediate cleanup operations
-        call.stopScreenSharing()
-
-        // Access mediaManager through lazy provider - only initialized if needed
-        mediaManager.camera.disable()
-        mediaManager.microphone.disable()
-
-        // Launch cleanup job
-        val newCleanupJob = clientScope.launch(Dispatchers.IO) {
-            logger.d { "[cleanupJob] Starting" }
-
-            safeCall {
-                sessionManager.session?.sfuTracer?.trace("leave-call", "[reason=$reason]")
-                val stats = call.collectStats()
-                sessionManager.session?.sendCallStats(stats)
-            }
-
-            cleanup()
-
-            logger.d { "[cleanupJob] Complete" }
-        }
-
-        // Clear job reference when it completes
-        newCleanupJob.invokeOnCompletion {
-            callLocks.currentScope.launch {
-                callLocks.cleanupMutex.withLock {
-                    if (callLocks.cleanupJob == newCleanupJob) {
-                        callLocks.cleanupJob = null
-                        logger.v { "[cleanupJob] Cleared job reference" }
-                    }
+    private suspend fun isCleanupInProgress(): Boolean {
+        return callReInitializer.cleanupMutex.withLock {
+            val currentJob = callReInitializer.cleanupJob
+            if (currentJob?.isActive == true) {
+                logger.w {
+                    "[isCleanupInProgress] Cleanup already in progress (job: $currentJob), " +
+                        "ignoring duplicate leave call"
                 }
-            }
-        }
-
-        // Thread-safe assignment
-        callLocks.currentScope.launch {
-            callLocks.cleanupMutex.withLock {
-                hasBeenLeft = true
-                callLocks.cleanupJob = newCleanupJob
-                logger.d { "[performLeave] Cleanup job assigned" }
-            }
-        }
-
-        logger.d { "[performLeave] Leave complete, cleanup in background" }
-    }
-
-    suspend fun join(
-        create: Boolean = false,
-        createOptions: CreateCallOptions? = null,
-        ring: Boolean = false,
-        notify: Boolean = false,
-    ): Result<RtcSession> {
-        logger.d { "[join] Starting join" }
-
-        // Wait for cleanup
-        val job = callLocks.cleanupMutex.withLock { callLocks.cleanupJob?.takeIf { it.isActive } }
-
-        job?.let {
-            logger.d { "[join] Waiting for cleanup job: $it" }
-            try {
-                withTimeout(5000) { it.join() }
-                logger.d { "[join] Cleanup complete" }
-            } catch (e: TimeoutCancellationException) {
-                logger.w { "[join] Cleanup timeout, proceeding anyway" }
-            }
-
-            callLocks.cleanupMutex.withLock {
-                if (callLocks.cleanupJob == it) {
-                    callLocks.cleanupJob = null
-                }
-            }
-        }
-
-        // Reinitialize if needed
-        val needsReinit = callLocks.cleanupMutex.withLock {
-            if (hasBeenLeft) {
-                hasBeenLeft = false
                 true
             } else {
+                logger.v { "[isCleanupInProgress] No active cleanup, proceeding with leave" }
                 false
             }
         }
-
-        if (needsReinit) {
-            logger.d { "[join] Reinitializing for rejoin" }
-            reinitialize()
-        }
-
-        // Delegate to session manager for actual join
-        return sessionManager.join(create, createOptions, ring, notify)
     }
 
-    private fun reinitialize() {
-        synchronized(this) {
-            val oldSessionId = call.sessionId
-            val oldSupervisorJob = callLocks.currentSupervisorJob
+    private fun internalLeave(disconnectionReason: Throwable?, reason: String) = call.atomicLeave {
+        sessionManager.cleanupMonitor()
 
-            logger.d {
-                "[reinitialize] Starting reinitialization. " +
-                    "oldSessionId: $oldSessionId"
-            }
+        // Leave session
+        sessionManager.session?.leaveWithReason(
+            "[reason=$reason, error=${disconnectionReason?.message}]",
+        )
 
-            // Recreate coroutine infrastructure
-            callLocks.currentSupervisorJob = SupervisorJob()
-            callLocks.currentScope = CoroutineScope(
-                clientScope.coroutineContext + callLocks.currentSupervisorJob,
-            )
+        // Cancel network monitoring
+        sessionManager.cleanupNetworkMonitoring()
 
-            // Generate new session ID
-            call.sessionId = UUID.randomUUID().toString()
+        // Update connection state
+        call.state._connection.value = RealtimeConnection.Disconnected
 
-            // Reset connection state
-            call.state._connection.value = RealtimeConnection.Disconnected
-
-            // Reset atomic leave guard
-            call.atomicLeave = AtomicUnitCall()
-
-            logger.i {
-                "[reinitialize] ✓ Reinitialization complete. " +
-                    "oldSessionId: $oldSessionId → newSessionId: ${call.sessionId}, " +
-                    "oldJob cancelled: ${oldSupervisorJob.isCancelled}"
-            }
+        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = ${call.id}" }
+        if (call.isDestroyed.get()) {
+            logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
+            return@atomicLeave
         }
+        call.isDestroyed.set(true)
+
+        /**
+         * TODO Rahul, need to check which call has owned the media at the moment(probably use active call)
+         */
+        call.stopScreenSharing()
+        mediaManager.camera.disable()
+        mediaManager.microphone.disable()
+
+        if (call.id == client.state.activeCall.value?.id) {
+            client.state.removeActiveCall(call) // Will also stop CallService
+        }
+
+        if (call.id == client.state.ringingCall.value?.id) {
+            client.state.removeRingingCall(call)
+        }
+
+        TelecomCallController(client.context)
+            .leaveCall(call)
+
+        client.onCallCleanUp(call)
+
+        val newCleanupJob = client.scope.launch {
+            safeCall {
+                sessionManager.session?.sfuTracer?.trace(
+                    "leave-call",
+                    "[reason=$reason, error=${disconnectionReason?.message}]",
+                )
+                val stats = callStatsReporter.collectStats(sessionManager.session)
+                sessionManager.session?.sendCallStats(stats)
+            }
+            cleanup()
+        }
+        callReInitializer.cleanupJobReference(newCleanupJob)
+        callReInitializer.cleanupLockVars(newCleanupJob)
     }
 
     internal fun cleanup() {
@@ -209,21 +133,19 @@ internal class CallLifecycleManager(
 
         sessionManager.cleanup()
         shutDownJobsGracefully()
-        sessionManager.callStatsReportingJob?.cancel()
+//        sessionManager.callStatsReportingJob?.cancel() //TODO Rahul, check its usage
 
         // Access mediaManager through lazy provider
         mediaManager.cleanup()
-
         call.scopeProvider.cleanup()
-
         logger.d { "[cleanup] Cleanup complete" }
     }
 
     private fun shutDownJobsGracefully() {
         clientScope.launch {
-            callLocks.currentSupervisorJob.children.forEach { it.join() }
-            callLocks.currentSupervisorJob.cancel()
+            callReInitializer.currentSupervisorJob.children.forEach { it.join() }
+            callReInitializer.currentSupervisorJob.cancel()
         }
-        callLocks.currentScope.cancel()
+        callReInitializer.currentScope.cancel()
     }
 }

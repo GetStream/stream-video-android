@@ -16,19 +16,17 @@
 
 package io.getstream.video.android.core.call
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.sync.Mutex
+import io.getstream.result.Result
+import io.getstream.video.android.core.CreateCallOptions
 
-internal class CallLocks(clientScope: CoroutineScope) {
-    internal val cleanupMutex = Mutex()
-    internal var cleanupJob: Job? = null
+internal interface CallJoinContract {
 
-    @Volatile
-    internal var currentSupervisorJob: Job = SupervisorJob()
+    suspend fun join(
+        create: Boolean,
+        createOptions: CreateCallOptions?,
+        ring: Boolean,
+        notify: Boolean,
+    ): io.getstream.result.Result<RtcSession>
 
-    @Volatile
-    internal var currentScope: CoroutineScope =
-        CoroutineScope(clientScope.coroutineContext + currentSupervisorJob)
+    suspend fun rejoin(reason: String)
 }

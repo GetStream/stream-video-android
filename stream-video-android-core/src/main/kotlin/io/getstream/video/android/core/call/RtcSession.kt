@@ -117,7 +117,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -267,6 +266,7 @@ public class RtcSession internal constructor(
 
     private val logger by taggedLogger("Video:RtcSession")
     private val parser: VideoParser = MoshiVideoParser()
+    private val callStatsReporter = CallStatsReporter(call)
 
     /**
      * Data class representing a track that arrived before its participant existed.
@@ -791,12 +791,13 @@ public class RtcSession internal constructor(
     private suspend fun sendConnectionTimeStats(reconnectStrategy: WebsocketReconnectStrategy? = null) {
         if (reconnectStrategy == null) {
             sendCallStats(
-                report = call.collectStats(),
+
+                report = callStatsReporter.collectStats(this),
                 connectionTimeSeconds = (System.currentTimeMillis() - call.connectStartTime) / 1000f,
             )
         } else {
             sendCallStats(
-                report = call.collectStats(),
+                report = callStatsReporter.collectStats(this),
                 reconnectionTimeSeconds = Pair(
                     (System.currentTimeMillis() - call.reconnectStartTime) / 1000f,
                     reconnectStrategy,
@@ -1805,7 +1806,7 @@ public class RtcSession internal constructor(
                     } else {
                         publisher?.restartIce("peerConnection is usable")
                         sendCallStats(
-                            report = call.collectStats(),
+                            report = callStatsReporter.collectStats(this@RtcSession),
                             reconnectionTimeSeconds = Pair(
                                 (System.currentTimeMillis() - call.reconnectStartTime) / 1000f,
                                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
