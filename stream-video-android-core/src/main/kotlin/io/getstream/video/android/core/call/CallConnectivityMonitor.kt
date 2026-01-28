@@ -38,7 +38,6 @@ internal class CallConnectivityMonitor(
     internal val listener = object : NetworkStateProvider.NetworkStateListener {
         override suspend fun onConnected() {
             leaveTimeoutAfterDisconnect?.cancel()
-
             val elapsedTimeMils = System.currentTimeMillis() - state.lastDisconnect
             if (state.lastDisconnect > 0 && elapsedTimeMils < state.reconnectDeadlineMils) {
                 onFastReconnect()

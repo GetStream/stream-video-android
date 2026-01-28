@@ -133,7 +133,7 @@ internal class CallCleanupManager(
 
         sessionManager.cleanup()
         shutDownJobsGracefully()
-//        sessionManager.callStatsReportingJob?.cancel() //TODO Rahul, check its usage
+        callStatsReporter.cancelJobs()
 
         // Access mediaManager through lazy provider
         mediaManager.cleanup()

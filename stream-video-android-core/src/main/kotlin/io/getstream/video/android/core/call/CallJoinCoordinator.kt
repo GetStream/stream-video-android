@@ -90,7 +90,7 @@ internal class CallJoinCoordinator(
         call.state._connection.value = RealtimeConnection.InProgress
         var retryCount = 0
 
-        var result: io.getstream.result.Result<RtcSession>
+        var result: Result<RtcSession>
 
         call.atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {

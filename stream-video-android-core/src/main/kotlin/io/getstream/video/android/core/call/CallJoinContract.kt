@@ -26,7 +26,7 @@ internal interface CallJoinContract {
         createOptions: CreateCallOptions?,
         ring: Boolean,
         notify: Boolean,
-    ): io.getstream.result.Result<RtcSession>
+    ): Result<RtcSession>
 
     suspend fun rejoin(reason: String)
 }

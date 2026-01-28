@@ -23,9 +23,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-internal class CallStatsReporter(val call: Call) {
+internal class CallStatsReporter(private val call: Call) {
 
-    internal var callStatsReportingJob: Job? = null
+    private var callStatsReportingJob: Job? = null
 
     internal suspend fun collectStats(session: RtcSession?): CallStatsReport {
         val publisherStats = session?.getPublisherStats()
@@ -47,12 +47,11 @@ internal class CallStatsReporter(val call: Call) {
         if (call.statLatencyHistory.value.size > 20) {
             call.statLatencyHistory.value = call.statLatencyHistory.value.takeLast(20)
         }
-
         return report
     }
 
     internal fun startCallStatsReporting(session: RtcSession?, reportingIntervalMs: Long = 10_000) {
-        callStatsReportingJob?.cancel()
+        cancelJobs()
         callStatsReportingJob = call.scope.launch {
             // Wait a bit before we start capturing stats
             delay(reportingIntervalMs)
@@ -64,5 +63,9 @@ internal class CallStatsReporter(val call: Call) {
                 )
             }
         }
+    }
+
+    internal fun cancelJobs() {
+        callStatsReportingJob?.cancel()
     }
 }
