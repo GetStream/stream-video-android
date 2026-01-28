@@ -241,7 +241,12 @@ public class Call(
      */
     internal var isDestroyed = AtomicBoolean(false)
 
-    var sessionId = UUID.randomUUID().toString()
+    var sessionId: String
+        get() = sessionManager.sessionId
+        set(value) {
+            sessionManager.sessionId = value
+        }
+
     internal val unifiedSessionId = UUID.randomUUID().toString()
 
     internal val connectStartTime: Long
@@ -898,11 +903,11 @@ public class Call(
         callMediaManager.setIncomingAudioEnabled(sessionManager.session, enabled, sessionIds)
 
     private fun reInitialise() {
-        val oldSessionId = sessionId
-        sessionId = UUID.randomUUID().toString()
+        logger.d { "[reInitialise]" }
+        sessionManager.reset()
         state._connection.value = RealtimeConnection.Disconnected
         atomicLeave = AtomicUnitCall()
-        logger.d { "[reInitialise] oldSessionId: $oldSessionId → newSessionId: $sessionId" }
+        scopeProvider.reset()
     }
 
     @InternalStreamVideoApi

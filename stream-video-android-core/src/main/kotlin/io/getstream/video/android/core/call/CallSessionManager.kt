@@ -34,13 +34,6 @@ import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.UUID
 
-private const val PERMISSION_ERROR = "\n[Call.join()] called without having the required permissions.\n" +
-    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
-    "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
-    "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
-    "otherwise the service will fail to start, resulting in a crash.\n" +
-    "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
-
 internal class CallSessionManager(
     private val call: Call,
     private val clientImpl: StreamVideoClient,
@@ -366,5 +359,9 @@ internal class CallSessionManager(
 
     fun cleanupNetworkMonitoring() {
         networkSubscriptionController.stop()
+    }
+
+    fun reset() {
+        this.sessionId = UUID.randomUUID().toString()
     }
 }
