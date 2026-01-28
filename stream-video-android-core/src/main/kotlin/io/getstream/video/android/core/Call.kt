@@ -322,7 +322,7 @@ public class Call(
      * Lifecycle manager handles join/leave/cleanup.
      * INTERNAL: Not part of public API.
      */
-    private val lifecycleManager = CallCleanupManager(
+    private val callCleanupManager = CallCleanupManager(
         call = this,
         sessionManager = sessionManager,
         client = clientImpl,
@@ -437,7 +437,7 @@ public class Call(
 
     /** Leave the call, but don't end it for other users */
     fun leave(reason: String = "user") {
-        lifecycleManager.leave(reason)
+        callCleanupManager.leave(reason)
     }
 
     /** ends the call for yourself as well as other users */
@@ -751,7 +751,11 @@ public class Call(
     )
 
     fun cleanup() {
-        lifecycleManager.cleanup()
+        callCleanupManager.cleanup()
+    }
+
+    fun cleanupMedia() {
+        callCleanupManager.cleanupMedia()
     }
 
     suspend fun ring(): Result<GetCallResponse> {

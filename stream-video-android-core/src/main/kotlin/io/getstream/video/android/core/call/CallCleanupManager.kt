@@ -136,9 +136,13 @@ internal class CallCleanupManager(
         callStatsReporter.cancelJobs()
 
         // Access mediaManager through lazy provider
-        mediaManager.cleanup()
+        cleanupMedia()
         call.scopeProvider.cleanup()
         logger.d { "[cleanup] Cleanup complete" }
+    }
+
+    fun cleanupMedia() {
+        mediaManager.cleanup()
     }
 
     private fun shutDownJobsGracefully() {

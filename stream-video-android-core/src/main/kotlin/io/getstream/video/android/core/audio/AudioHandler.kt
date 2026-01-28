@@ -78,6 +78,7 @@ public class AudioSwitchHandler(
     override fun stop() {
         logger.d { "[stop] no args" }
         mainThreadHandler.removeCallbacksAndMessages(null)
+        isAudioSwitchInitScheduled = false
         mainThreadHandler.post {
             audioSwitch?.stop()
             audioSwitch = null

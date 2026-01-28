@@ -75,6 +75,8 @@ import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.VideoDimension
 import java.nio.ByteBuffer
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.resumeWithException
 
 sealed class DeviceStatus {
@@ -544,8 +546,9 @@ class MicrophoneManager(
     // Internal data
     private val logger by taggedLogger("Media:MicrophoneManager")
 
-    private lateinit var audioHandler: AudioHandler
-    private var setupCompleted: Boolean = false
+    private var audioHandler: AudioHandler? = null
+    private var setupCompleted: AtomicBoolean = AtomicBoolean(false)
+    private var mediaManagerSetupState = AtomicReference(MediaManagerSetupState.NONE)
     internal var audioManager: AudioManager? = null
     internal var priorStatus: DeviceStatus? = null
 
@@ -716,7 +719,8 @@ class MicrophoneManager(
 
     fun cleanup() {
         ifAudioHandlerInitialized { it.stop() }
-        setupCompleted = false
+        setupCompleted.set(false)
+        audioHandler = null
     }
 
     /**
@@ -724,6 +728,7 @@ class MicrophoneManager(
      */
     internal fun reset() {
         _status.value = DeviceStatus.NotSelected
+        mediaManagerSetupState.set(MediaManagerSetupState.NONE)
     }
 
     fun canHandleDeviceSwitch() = audioUsageProvider.invoke() != AudioAttributes.USAGE_MEDIA
@@ -731,12 +736,18 @@ class MicrophoneManager(
     // Internal logic
     internal fun setup(preferSpeaker: Boolean = false, onAudioDevicesUpdate: (() -> Unit)? = null) {
         synchronized(this) {
+            logger.d {
+                "[setup] setupCompleted = ${setupCompleted.get()}, mediaManagerSetupState = ${mediaManagerSetupState.get()}"
+            }
+            if (mediaManagerSetupState.get() != MediaManagerSetupState.NONE) return
+
+            mediaManagerSetupState.set(MediaManagerSetupState.STARTED)
+
             var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
 
-            if (setupCompleted) {
+            if (setupCompleted.get()) {
                 capturedOnAudioDevicesUpdate?.invoke()
                 capturedOnAudioDevicesUpdate = null
-
                 return
             }
 
@@ -746,7 +757,7 @@ class MicrophoneManager(
             }
 
             if (canHandleDeviceSwitch()) {
-                if (!::audioHandler.isInitialized) {
+                if (audioHandler == null) {
                     // First time initialization
                     audioHandler = AudioSwitchHandler(
                         context = mediaManager.context,
@@ -770,23 +781,25 @@ class MicrophoneManager(
                             _devices.value = devices.map { it.fromAudio() }
                             _selectedDevice.value = selected?.fromAudio()
 
-                            setupCompleted = true
-
+                            setupCompleted.set(true)
+                            mediaManagerSetupState.set(MediaManagerSetupState.FINISHED)
                             capturedOnAudioDevicesUpdate?.invoke()
                             capturedOnAudioDevicesUpdate = null
                         },
                     )
 
                     logger.d { "[setup] Calling start on instance $audioHandler" }
-                    audioHandler.start()
+                    audioHandler?.start()
                 } else {
                     // audioHandler exists but was stopped (cleanup was called), restart it
                     logger.d { "[setup] Restarting audioHandler after cleanup" }
-                    audioHandler.start()
+                    audioHandler?.start()
+                    mediaManagerSetupState.set(MediaManagerSetupState.FINISHED)
                 }
             } else {
                 logger.d { "[MediaManager#setup] Usage is MEDIA" }
                 capturedOnAudioDevicesUpdate?.invoke()
+                mediaManagerSetupState.set(MediaManagerSetupState.FINISHED)
             }
         }
     }
@@ -797,7 +810,7 @@ class MicrophoneManager(
     )
 
     private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
-        if (this::audioHandler.isInitialized) {
+        if (audioHandler != null) {
             then(this.audioHandler as AudioSwitchHandler)
         } else {
             logger.e { "Audio handler not initialized. Ensure calling setup(), before using the handler." }
@@ -1278,6 +1291,8 @@ class MediaManagerImpl(
     val audioUsage: Int = defaultAudioUsage,
     val audioUsageProvider: (() -> Int) = { audioUsage },
 ) {
+    private val logger by taggedLogger("MediaManagerImpl")
+
     // Use call.scope dynamically to support scope recreation after leave()
     val scope: CoroutineScope
         get() = call.scope
@@ -1398,11 +1413,13 @@ class MediaManagerImpl(
     }
 
     fun cleanup() {
+        logger.d { "[cleanup]" }
         // Dispose all tracks and sources
         disposeTracksAndSources()
         // Cleanup camera and microphone infrastructure
         camera.cleanup()
         microphone.cleanup()
+        reset()
     }
 
     /**
@@ -1410,11 +1427,17 @@ class MediaManagerImpl(
      * Should be called after cleanup when preparing for rejoin.
      */
     internal fun reset() {
-        camera._status.value = DeviceStatus.NotSelected
-        microphone._status.value = DeviceStatus.NotSelected
+        logger.d { "[reset]" }
+        camera.reset()
+        microphone.reset()
+
         speaker._status.value = DeviceStatus.NotSelected
         screenShare._status.value = DeviceStatus.NotSelected
     }
 }
 
 fun MediaStreamTrack.trySetEnabled(enabled: Boolean) = safeCall { setEnabled(enabled) }
+
+internal enum class MediaManagerSetupState {
+    NONE, STARTED, FINISHED
+}
