@@ -66,6 +66,9 @@ internal class StreamAudioSwitchHandler(
             streamAudioSwitch?.stop()
             streamAudioSwitch = null
         }
+        synchronized(this) {
+            isAudioSwitchInitScheduled = false
+        }
     }
 
     override fun selectDevice(audioDevice: StreamAudioDevice?) {
