@@ -225,7 +225,14 @@ public class Call(
     private var sfuSocketReconnectionTime: Long? = null
 
     /**
+     * Lock for synchronizing join/leave lifecycle operations.
+     * Protects access to isDestroyed, cleanupJob, and scope re-initialization.
+     */
+    private val lifecycleLock = Any()
+
+    /**
      * Call has been left and the object is cleaned up and destroyed.
+     * Must be accessed under [lifecycleLock].
      */
     private var isDestroyed = false
 
@@ -529,10 +536,13 @@ public class Call(
 
         var result: Result<RtcSession>
 
-        atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
             result = _join(create, createOptions, ring, notify)
             if (result is Success) {
+                // Reset atomicLeave AFTER successful join (after cleanup is complete)
+                // This prevents race conditions where leave() is called during the join process
+                atomicLeave = AtomicUnitCall()
+
                 // we initialise the camera, mic and other according to local + backend settings
                 // only when the call is joined to make sure we don't switch and override
                 // the settings during a call.
@@ -602,8 +612,10 @@ public class Call(
         notify: Boolean = false,
     ): Result<RtcSession> {
         // Wait for any pending cleanup to complete before rejoining
-        cleanupJob?.join()
-        cleanupJob = null
+        // Read cleanupJob under lock to prevent race conditions
+        val pendingCleanup = synchronized(lifecycleLock) { cleanupJob }
+        pendingCleanup?.join()
+        // Note: cleanupJob is cleared by resetScopes() at the end of cleanup
 
         reconnectAttepmts = 0
         sfuEvents?.cancel()
@@ -948,11 +960,21 @@ public class Call(
         sfuEvents?.cancel()
         state._connection.value = RealtimeConnection.Disconnected
         logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = $id" }
-        if (isDestroyed) {
-            logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
-            return@atomicLeave
+
+        // Synchronize access to isDestroyed and cleanupJob to prevent race conditions
+        synchronized(lifecycleLock) {
+            if (isDestroyed) {
+                logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
+                return@atomicLeave
+            }
+            isDestroyed = true
+
+            // Guard against overwriting cleanupJob if cleanup is already in progress
+            if (cleanupJob?.isActive == true) {
+                logger.w { "[leave] Cleanup already in progress, skipping duplicate cleanup" }
+                return@atomicLeave
+            }
         }
-        isDestroyed = true
 
         sfuSocketReconnectionTime = null
 
@@ -976,17 +998,19 @@ public class Call(
 
         (client as StreamVideoClient).onCallCleanUp(this)
 
-        cleanupJob = clientImpl.scope.launch {
-            safeCall {
-                session?.sfuTracer?.trace(
-                    "leave-call",
-                    "[reason=$reason, error=${disconnectionReason?.message}]",
-                )
-                val stats = collectStats()
-                session?.sendCallStats(stats)
+        synchronized(lifecycleLock) {
+            cleanupJob = clientImpl.scope.launch {
+                safeCall {
+                    session?.sfuTracer?.trace(
+                        "leave-call",
+                        "[reason=$reason, error=${disconnectionReason?.message}]",
+                    )
+                    val stats = collectStats()
+                    session?.sendCallStats(stats)
+                }
+                cleanup()
+                resetScopes()
             }
-            cleanup()
-            resetScopes()
         }
     }
 
@@ -1525,8 +1549,11 @@ public class Call(
     private fun resetScopes() {
         logger.d { "[resetScopes] Resetting state to make Call reusable" }
 
-        // Reset the destroyed flag to allow rejoin
-        isDestroyed = false
+        // Reset the destroyed flag and clear cleanupJob under lock to prevent race conditions
+        synchronized(lifecycleLock) {
+            isDestroyed = false
+            cleanupJob = null
+        }
 
         // Generate new session IDs for fresh connection
         sessionId = UUID.randomUUID().toString()

@@ -745,40 +745,47 @@ class MicrophoneManager(
                 audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
             }
 
-            if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {
-                audioHandler = AudioSwitchHandler(
-                    context = mediaManager.context,
-                    preferredDeviceList = listOf(
-                        AudioDevice.BluetoothHeadset::class.java,
-                        AudioDevice.WiredHeadset::class.java,
-                    ) + if (preferSpeaker) {
-                        listOf(
-                            AudioDevice.Speakerphone::class.java,
-                            AudioDevice.Earpiece::class.java,
-                        )
-                    } else {
-                        listOf(
-                            AudioDevice.Earpiece::class.java,
-                            AudioDevice.Speakerphone::class.java,
-                        )
-                    },
-                    audioDeviceChangeListener = { devices, selected ->
-                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
+            if (canHandleDeviceSwitch()) {
+                if (!::audioHandler.isInitialized) {
+                    // First time initialization
+                    audioHandler = AudioSwitchHandler(
+                        context = mediaManager.context,
+                        preferredDeviceList = listOf(
+                            AudioDevice.BluetoothHeadset::class.java,
+                            AudioDevice.WiredHeadset::class.java,
+                        ) + if (preferSpeaker) {
+                            listOf(
+                                AudioDevice.Speakerphone::class.java,
+                                AudioDevice.Earpiece::class.java,
+                            )
+                        } else {
+                            listOf(
+                                AudioDevice.Earpiece::class.java,
+                                AudioDevice.Speakerphone::class.java,
+                            )
+                        },
+                        audioDeviceChangeListener = { devices, selected ->
+                            logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
 
-                        _devices.value = devices.map { it.fromAudio() }
-                        _selectedDevice.value = selected?.fromAudio()
+                            _devices.value = devices.map { it.fromAudio() }
+                            _selectedDevice.value = selected?.fromAudio()
 
-                        setupCompleted = true
+                            setupCompleted = true
 
-                        capturedOnAudioDevicesUpdate?.invoke()
-                        capturedOnAudioDevicesUpdate = null
-                    },
-                )
+                            capturedOnAudioDevicesUpdate?.invoke()
+                            capturedOnAudioDevicesUpdate = null
+                        },
+                    )
 
-                logger.d { "[setup] Calling start on instance $audioHandler" }
-                audioHandler.start()
+                    logger.d { "[setup] Calling start on instance $audioHandler" }
+                    audioHandler.start()
+                } else {
+                    // audioHandler exists but was stopped (cleanup was called), restart it
+                    logger.d { "[setup] Restarting audioHandler after cleanup" }
+                    audioHandler.start()
+                }
             } else {
-                logger.d { "[MediaManager#setup] Usage is MEDIA or audioHandle is already initialized" }
+                logger.d { "[MediaManager#setup] Usage is MEDIA" }
                 capturedOnAudioDevicesUpdate?.invoke()
             }
         }
