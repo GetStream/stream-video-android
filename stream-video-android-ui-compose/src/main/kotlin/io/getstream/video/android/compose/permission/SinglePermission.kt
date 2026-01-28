@@ -97,5 +97,3 @@ public fun LaunchMicrophonePermissions(
         rememberMicrophonePermissionState(call = call, onPermissionsResult = onPermissionsResult)
     LaunchedEffect(key1 = call) { callPermissionsState.launchPermissionRequest() }
 }
-
-
