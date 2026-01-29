@@ -111,8 +111,9 @@ internal object StreamAudioManager {
         return try {
             if (device != null) {
                 audioManager.setCommunicationDevice(device)
+            } else {
+                audioManager.clearCommunicationDevice()
             }
-            audioManager.clearCommunicationDevice()
             true
         } catch (e: Exception) {
             false
