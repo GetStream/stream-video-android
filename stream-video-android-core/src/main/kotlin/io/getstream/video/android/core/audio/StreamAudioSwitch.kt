@@ -315,7 +315,10 @@ internal class StreamAudioSwitch(
 
         // Update selected device
         val currentSelected = _selectedDeviceState.value
-        if (currentSelected != null && !nativeDevices.contains(currentSelected)) {
+        val selectedStillAvailable = currentSelected?.let { selected ->
+            nativeDevices.any { candidate -> isSameAudioDevice(candidate, selected, nativeDevices) }
+        } ?: false
+        if (currentSelected != null && !selectedStillAvailable) {
             logger.w { "[enumerateDevices] Selected device no longer available: $currentSelected" }
             deviceManager?.clearDevice()
             _selectedDeviceState.value = null
@@ -329,6 +332,21 @@ internal class StreamAudioSwitch(
 
         // Notify listener
         audioDeviceChangeListener?.invoke(nativeDevices, _selectedDeviceState.value)
+    }
+
+    private fun isSameAudioDevice(
+        first: StreamAudioDevice,
+        second: StreamAudioDevice,
+        availableDevices: List<StreamAudioDevice>,
+    ): Boolean {
+        if (first::class != second::class) return false
+        if (first is StreamAudioDevice.BluetoothHeadset && second is StreamAudioDevice.BluetoothHeadset) {
+            val firstId = first.audioDeviceInfo?.id
+            val secondId = second.audioDeviceInfo?.id
+            return firstId != null && secondId != null && firstId == secondId
+        }
+
+        return true
     }
 
     /**
