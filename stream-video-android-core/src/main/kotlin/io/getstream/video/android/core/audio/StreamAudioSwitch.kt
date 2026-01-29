@@ -60,6 +60,7 @@ internal class StreamAudioSwitch(
     private var audioDeviceChangeListener: StreamAudioDeviceChangeListener? = null
     private var audioDeviceCallback: AudioDeviceCallback? = null
     private var isStarted = false
+    private var previousAudioMode: Int? = null
 
     // Device manager - selected based on SDK version in start()
     private var deviceManager: AudioDeviceManager? = null
@@ -119,6 +120,9 @@ internal class StreamAudioSwitch(
                 )
             }
 
+            // Set audio mode to communication for call audio
+            setAudioModeInCommunication()
+
             // Request audio focus for voice communication
             requestAudioFocus()
 
@@ -150,6 +154,9 @@ internal class StreamAudioSwitch(
 
             // Abandon audio focus
             abandonAudioFocus()
+
+            // Restore previous audio mode
+            restoreAudioMode()
 
             // Unregister device callback
             unregisterDeviceCallback()
@@ -424,6 +431,30 @@ internal class StreamAudioSwitch(
             }
         } catch (e: Exception) {
             logger.e(e) { "[abandonAudioFocus] Error abandoning audio focus: ${e.message}" }
+        }
+    }
+
+    private fun setAudioModeInCommunication() {
+        try {
+            if (previousAudioMode == null) {
+                previousAudioMode = audioManager.mode
+            }
+            audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+            logger.d { "[setAudioModeInCommunication] mode=${audioManager.mode}" }
+        } catch (e: Exception) {
+            logger.e(e) { "[setAudioModeInCommunication] Error setting audio mode: ${e.message}" }
+        }
+    }
+
+    private fun restoreAudioMode() {
+        val modeToRestore = previousAudioMode ?: return
+        try {
+            audioManager.mode = modeToRestore
+            logger.d { "[restoreAudioMode] mode=${audioManager.mode}" }
+        } catch (e: Exception) {
+            logger.e(e) { "[restoreAudioMode] Error restoring audio mode: ${e.message}" }
+        } finally {
+            previousAudioMode = null
         }
     }
 
