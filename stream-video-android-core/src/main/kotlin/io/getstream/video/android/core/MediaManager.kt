@@ -766,6 +766,16 @@ class MicrophoneManager(
                         capturedOnAudioDevicesUpdate?.invoke()
                         capturedOnAudioDevicesUpdate = null
                     },
+                    onDeviceSelected = { device ->
+                        mediaManager.call.session?.sfuTracer?.trace(
+                            "audio-device-selected",
+                            mapOf(
+                                "device" to device.name,
+                                "type" to device::class.simpleName,
+                                "id" to device.audioDeviceInfo?.id,
+                            ),
+                        )
+                    },
                 )
 
                 logger.d { "[setup] Calling start on instance $audioHandler" }

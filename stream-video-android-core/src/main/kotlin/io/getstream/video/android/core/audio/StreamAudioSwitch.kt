@@ -46,6 +46,7 @@ internal typealias StreamAudioDeviceChangeListener = (
 internal class StreamAudioSwitch(
     private val context: Context,
     preferredDeviceList: List<Class<out StreamAudioDevice>>? = null,
+    private val onDeviceSelected: ((StreamAudioDevice) -> Unit)? = null,
 ) {
     private val logger by taggedLogger(TAG)
 
@@ -235,6 +236,7 @@ internal class StreamAudioSwitch(
                     if (success) {
                         _selectedDeviceState.value = deviceToSelect
                         logger.d { "[selectNativeDevice] Native device selected: $deviceToSelect" }
+                        traceDeviceSelected(deviceToSelect)
                     } else {
                         logger.w { "[selectNativeDevice] Failed to select native device: $deviceToSelect" }
                         // Fallback to automatic selection if the requested device is not available
@@ -326,7 +328,12 @@ internal class StreamAudioSwitch(
             // Update from manager
             val managerSelected = manager?.getSelectedDevice()
             if (managerSelected != null) {
+                val hasChanged = currentSelected == null ||
+                    !isSameAudioDevice(managerSelected, currentSelected, nativeDevices)
                 _selectedDeviceState.value = managerSelected
+                if (hasChanged) {
+                    traceDeviceSelected(managerSelected)
+                }
             }
         }
 
@@ -347,6 +354,14 @@ internal class StreamAudioSwitch(
         }
 
         return true
+    }
+
+    private fun traceDeviceSelected(device: StreamAudioDevice) {
+        try {
+            onDeviceSelected?.invoke(device)
+        } catch (e: Exception) {
+            logger.e(e) { "[traceDeviceSelected] Failed to emit trace: ${e.message}" }
+        }
     }
 
     /**

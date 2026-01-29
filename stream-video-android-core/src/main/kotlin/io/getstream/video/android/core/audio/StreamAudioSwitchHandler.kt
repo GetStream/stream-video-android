@@ -30,6 +30,7 @@ internal class StreamAudioSwitchHandler(
     private val context: Context,
     private val preferredDeviceList: List<Class<out StreamAudioDevice>>,
     private var audioDeviceChangeListener: StreamAudioDeviceChangeListener,
+    private val onDeviceSelected: ((StreamAudioDevice) -> Unit)? = null,
 ) : AudioHandler {
 
     private val logger by taggedLogger(TAG)
@@ -51,6 +52,7 @@ internal class StreamAudioSwitchHandler(
                     val switch = StreamAudioSwitch(
                         context = context,
                         preferredDeviceList = preferredDeviceList,
+                        onDeviceSelected = onDeviceSelected,
                     )
                     streamAudioSwitch = switch
                     switch.start(audioDeviceChangeListener)
