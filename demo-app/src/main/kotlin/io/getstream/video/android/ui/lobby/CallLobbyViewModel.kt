@@ -209,7 +209,7 @@ class CallLobbyViewModel @Inject constructor(
 
     fun leaveCall() {
         call.leave()
-        call.cleanup()
+        call.cleanup() // TODO Rahul, call.leave() should be call this internally. As call.leave() is the last method that devs should invoke
     }
 }
 
