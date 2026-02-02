@@ -7564,7 +7564,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun accept (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun blockUser (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun cleanup ()V
-	public final fun cleanupMedia ()V
 	public final fun collectUserFeedback (ILjava/lang/String;Ljava/util/Map;)V
 	public static synthetic fun collectUserFeedback$default (Lio/getstream/video/android/core/Call;ILjava/lang/String;Ljava/util/Map;ILjava/lang/Object;)V
 	public final fun create (Ljava/util/List;Ljava/util/List;Ljava/util/Map;Lio/getstream/android/video/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ZZLjava/lang/Boolean;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

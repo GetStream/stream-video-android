@@ -757,7 +757,7 @@ public class Call(
         callCleanupManager.cleanup()
     }
 
-    fun cleanupMedia() {
+    internal fun cleanupMedia() {
         callCleanupManager.cleanupMedia()
     }
 
