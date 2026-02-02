@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call.state
 
-import com.twilio.audioswitch.AudioDevice
 import io.getstream.video.android.core.ParticipantState
 
 /**
@@ -29,13 +28,6 @@ public sealed interface CallAction
  */
 public data class ToggleSpeakerphone(
     val isEnabled: Boolean,
-) : CallAction
-
-/**
- * Action to select an audio device for playback.
- */
-public data class SelectAudioDevice(
-    val audioDevice: AudioDevice,
 ) : CallAction
 
 /**

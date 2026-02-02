@@ -20,7 +20,7 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
 import io.getstream.android.video.generated.models.OwnCapability
-import io.getstream.video.android.core.audio.AudioSwitchHandler
+import io.getstream.video.android.core.audio.AudioHandler
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -60,7 +60,7 @@ class MicrophoneManagerTest {
         every { microphoneManager.setup(any(), capture(slot)) } answers { slot.captured.invoke() }
         every {
             microphoneManager["ifAudioHandlerInitialized"](
-                any<(AudioSwitchHandler) -> Unit>(),
+                any<(AudioHandler) -> Unit>(),
             )
         } answers { true }
 
@@ -79,7 +79,7 @@ class MicrophoneManagerTest {
 
         // Then
         verify(exactly = 9) {
-            // Setup will be called exactly 10 times
+            // Setup will be called exactly 9 times
             microphoneManager.setup(any(), any())
         }
     }

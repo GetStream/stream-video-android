@@ -37,7 +37,6 @@ class MediaManagerTest : IntegrationTestBase(connectCoordinatorWS = false) {
     var runtimePermissionRule = GrantPermissionRule.grant(
         Manifest.permission.CAMERA,
         Manifest.permission.RECORD_AUDIO,
-        Manifest.permission.BLUETOOTH_CONNECT,
     )
 
     @Before

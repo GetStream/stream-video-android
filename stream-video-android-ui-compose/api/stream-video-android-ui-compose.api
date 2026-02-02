@@ -32,7 +32,6 @@ public abstract interface class io/getstream/video/android/compose/permission/La
 public final class io/getstream/video/android/compose/permission/SinglePermissionKt {
 	public static final fun LaunchCameraPermissions (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 	public static final fun LaunchMicrophonePermissions (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
-	public static final fun rememberBluetoothPermissionState (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
 	public static final fun rememberCameraPermissionState (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
 	public static final fun rememberMicrophonePermissionState (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/permission/VideoPermissionsState;
 }
