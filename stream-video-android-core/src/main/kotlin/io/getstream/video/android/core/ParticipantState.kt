@@ -20,6 +20,8 @@ import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
+import io.getstream.video.android.core.coroutines.flows.RestartableStateFlow
+import io.getstream.video.android.core.coroutines.scopes.RestartableProducerScope
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.MediaTrack
@@ -31,10 +33,8 @@ import io.getstream.video.android.core.utils.combineStates
 import io.getstream.video.android.core.utils.mapState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
@@ -46,24 +46,55 @@ import stream.video.sfu.models.TrackType
  * Represents the state of a participant in a call.
  *
  * * A list of participants is shared when you join a call the SFU send you the participant joined event.
- *
+ * @param sessionId The SFU returns a session id for each participant. This session id is unique
+ * @param restartableProducerScope A coroutine scope abstraction that allows restarting state-producing coroutines when the call scope is recreated (see [RestartableProducerScope] for details).
+ * @param callActions The call actions interface for performing operations on this participant
+ * @param initialUserId The current version of the user, this is the start for participant.user stateflow
+ * @param source
+ * @param trackLookupPrefix A prefix to identify tracks, internal
  */
 @Stable
 public data class ParticipantState(
-    /** The SFU returns a session id for each participant. This session id is unique */
     var sessionId: String = "",
-    /** The coroutine scope for this participant */
+    @Deprecated(
+        message = "Do not use this directly. Kept for binary compatibility.",
+        level = DeprecationLevel.ERROR,
+    )
     private val scope: CoroutineScope,
-    /** The call actions interface for performing operations on this participant */
     private val callActions: CallActions,
-    /** The current version of the user, this is the start for participant.user stateflow */
     private val initialUserId: String,
     val source: ParticipantSource = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
-    /** A prefix to identify tracks, internal */
     @InternalStreamVideoApi
     var trackLookupPrefix: String = "",
 ) {
+    private lateinit var restartableProducerScope: RestartableProducerScope
 
+    /**
+     * TODO Rahul, this needs to be fixed before merge as this code would run when invoking copy()
+     */
+    init {
+        if (!::restartableProducerScope.isInitialized) {
+            restartableProducerScope = RestartableProducerScope()
+        }
+    }
+
+    internal constructor(
+        sessionId: String = "",
+        restartableProducerScope: RestartableProducerScope,
+        callActions: CallActions,
+        initialUserId: String,
+        source: ParticipantSource = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+        trackLookupPrefix: String = "",
+    ) : this(
+        sessionId = sessionId,
+        scope = restartableProducerScope,
+        callActions = callActions,
+        initialUserId = initialUserId,
+        source = source,
+        trackLookupPrefix = trackLookupPrefix,
+    ) {
+        this.restartableProducerScope = restartableProducerScope
+    }
     private val logger by taggedLogger("ParticipantState")
 
     val isLocal by lazy {
@@ -155,8 +186,7 @@ public data class ParticipantState(
 
     internal val _reactions = MutableStateFlow<List<Reaction>>(emptyList())
     val reactions: StateFlow<List<Reaction>> = _reactions
-
-    val video: StateFlow<Video?> = combine(
+    private val tempVideo = combine(
         _videoTrack,
         _videoEnabled,
         _videoPaused,
@@ -167,7 +197,8 @@ public data class ParticipantState(
             enabled = enabled,
             paused = paused,
         )
-    }.stateIn(scope, SharingStarted.Lazily, null)
+    }
+    val video: StateFlow<Video?> = RestartableStateFlow(null, tempVideo, restartableProducerScope)
 
     val audio: StateFlow<Audio?> = combineStates(_audioTrack, _audioEnabled) { track, enabled ->
         Audio(

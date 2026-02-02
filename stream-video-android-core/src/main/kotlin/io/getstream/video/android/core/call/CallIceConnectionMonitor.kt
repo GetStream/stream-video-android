@@ -17,13 +17,13 @@
 package io.getstream.video.android.core.call
 
 import io.getstream.log.taggedLogger
-import kotlinx.coroutines.CoroutineScope
+import io.getstream.video.android.core.coroutines.scopes.RestartableProducerScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.webrtc.PeerConnection
 
 internal class CallIceConnectionMonitor(
-    private val scope: CoroutineScope,
+    private val scope: RestartableProducerScope,
     private val sessionProvider: () -> RtcSession?,
 ) {
 

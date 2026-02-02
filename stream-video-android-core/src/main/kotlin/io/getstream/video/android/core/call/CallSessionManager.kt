@@ -56,7 +56,7 @@ internal class CallSessionManager(
     private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(call.scope)
     private val callStatsReporter = CallStatsReporter(call)
     private val callConnectivityMonitor = CallConnectivityMonitor(
-        call.scope,
+        call.restartableProducerScope,
         callConnectivityMonitorState,
         clientImpl.leaveAfterDisconnectSeconds,
         {
@@ -71,8 +71,13 @@ internal class CallSessionManager(
         { call.leave() },
     )
 
-    val sfuEventMonitor = CallSfuEventMonitor(call.scope, { session }, callConnectivityMonitorState)
-    val iceConnectionMonitor = CallIceConnectionMonitor(call.scope, { session })
+    val sfuEventMonitor =
+        CallSfuEventMonitor(
+            call.restartableProducerScope,
+            { session },
+            callConnectivityMonitorState,
+        )
+    val iceConnectionMonitor = CallIceConnectionMonitor(call.restartableProducerScope, { session })
     val networkSubscriptionController =
         CallNetworkSubscriptionController(network, callConnectivityMonitor.listener)
 

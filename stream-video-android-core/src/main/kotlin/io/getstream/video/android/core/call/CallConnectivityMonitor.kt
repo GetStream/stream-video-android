@@ -17,14 +17,14 @@
 package io.getstream.video.android.core.call
 
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.coroutines.scopes.RestartableProducerScope
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal class CallConnectivityMonitor(
-    val callScope: CoroutineScope,
+    val callScope: RestartableProducerScope,
     val state: CallConnectivityMonitorState,
     val leaveAfterDisconnectSeconds: Long,
     onFastReconnect: suspend () -> Unit,

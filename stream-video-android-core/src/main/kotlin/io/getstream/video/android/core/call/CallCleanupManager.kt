@@ -124,8 +124,10 @@ internal class CallCleanupManager(
             }
             cleanup()
         }
-        callReInitializer.cleanupJobReference(newCleanupJob)
-        callReInitializer.cleanupLockVars(newCleanupJob)
+        with(callReInitializer) {
+            cleanupJobReference(newCleanupJob)
+            cleanupLockVars(newCleanupJob)
+        }
     }
 
     internal fun cleanup() {

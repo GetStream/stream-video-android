@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 internal class CallEventManager(
     private val events: MutableSharedFlow<VideoEvent>,
     private val sessionManager: CallSessionManager,
-    private val callScope: CoroutineScope, // TODO Rahul must check if this still working after leave() join()
+    private val callScope: CoroutineScope, // TODO Rahul, need to change. It won't work after leave() -> join()
     private val subscriptionsProvider: () -> Set<EventSubscription>,
 ) {
 

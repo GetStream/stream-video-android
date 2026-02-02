@@ -208,6 +208,7 @@ internal class StreamVideoClient internal constructor(
     val socketImpl = coordinatorConnectionModule.socketConnection
 
     fun onCallCleanUp(call: Call) {
+        if (true) return
         if (enableCallUpdatesAfterLeave) {
             logger.d { "[cleanup] Call updates are required, preserve the instance: ${call.cid}" }
             destroyedCalls.put(call.hashCode(), call)

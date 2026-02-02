@@ -17,13 +17,13 @@
 package io.getstream.video.android.core.call
 
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.coroutines.scopes.RestartableProducerScope
 import io.getstream.video.android.core.events.JoinCallResponseEvent
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 internal class CallSfuEventMonitor(
-    private val scope: CoroutineScope,
+    private val scope: RestartableProducerScope,
     private val sessionProvider: () -> RtcSession?,
     private val connectivityState: CallConnectivityMonitorState,
 ) {

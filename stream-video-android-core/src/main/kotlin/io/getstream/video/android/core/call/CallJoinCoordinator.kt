@@ -51,7 +51,8 @@ internal class CallJoinCoordinator(
     ) -> Result<RtcSession>,
     private val onRejoin: suspend (reason: String) -> Unit,
 ) : CallJoinContract {
-    private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(call.scope)
+    private val streamSingleFlightProcessorImpl =
+        StreamSingleFlightProcessorImpl(call.restartableProducerScope)
 
     private val logger by taggedLogger("CallJoinCoordinator")
 
@@ -65,8 +66,10 @@ internal class CallJoinCoordinator(
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
 
-        callReInitializer.waitFromCleanup()
-        callReInitializer.reinitialiseCoroutinesIfNeeded()
+        with(callReInitializer) {
+            waitFromCleanup()
+            reinitialiseCoroutinesIfNeeded()
+        }
 
         // CRITICAL: Reset isDestroyed for new session
         call.isDestroyed.set(false)

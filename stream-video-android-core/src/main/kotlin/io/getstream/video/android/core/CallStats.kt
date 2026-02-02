@@ -19,12 +19,13 @@ package io.getstream.video.android.core
 import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
+import io.getstream.video.android.core.coroutines.flows.RestartableStateFlow
+import io.getstream.video.android.core.coroutines.scopes.RestartableProducerScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.RTCStats
 import stream.video.sfu.models.TrackType
@@ -51,7 +52,11 @@ data class MediaStatsInfo(
     }
 }
 
-public class PeerConnectionStats(scope: CoroutineScope) {
+public class PeerConnectionStats internal constructor() {
+    constructor(scope: CoroutineScope) : this() {
+        // Scope is intentionally ignored
+    }
+
     internal var _latency: MutableStateFlow<Int> = MutableStateFlow(0)
     val latency: StateFlow<Int> = _latency
 
@@ -80,19 +85,44 @@ public data class LocalStats(
     val sdkVersion: String,
     val deviceModel: String,
 )
+public class CallStats internal constructor(
+    val call: Call,
+    private val restartableProducerScope: RestartableProducerScope,
+) {
 
-public class CallStats(val call: Call, val callScope: CoroutineScope) {
+    @Deprecated(
+        "Do not use this directly. Kept for binary compatibility.",
+        level = DeprecationLevel.ERROR,
+    )
+    public constructor(
+        call: Call,
+        scope: CoroutineScope,
+    ) : this(call, call.restartableProducerScope)
+
     private val logger by taggedLogger("CallStats")
 
     private val supervisorJob = SupervisorJob()
-    private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)
+    private var scope = CoroutineScope(restartableProducerScope.coroutineContext + supervisorJob)
     // TODO: cleanup the scope
 
-    val publisher = PeerConnectionStats(scope)
-    val subscriber = PeerConnectionStats(scope)
+    val publisher = PeerConnectionStats()
+    val subscriber = PeerConnectionStats()
     val _local = MutableStateFlow<LocalStats?>(null)
-    val local: StateFlow<LocalStats?> =
-        _local.stateIn(scope, SharingStarted.WhileSubscribed(), null)
+    val local: StateFlow<LocalStats?> = RestartableStateFlow(null, _local, restartableProducerScope)
+
+    init {
+        this.restartableProducerScope.onAttach {
+            scope.cancel()
+            supervisorJob.cancel()
+            scope = CoroutineScope(restartableProducerScope.coroutineContext + supervisorJob)
+        }
+    }
+
+    @Deprecated(
+        "Do not use this directly. Kept for binary compatibility.",
+        level = DeprecationLevel.ERROR,
+    )
+    public final fun getCallScope() = scope
 
     fun updateFromRTCStats(stats: RtcStatsReport?, isPublisher: Boolean = true) {
         if (stats == null) return

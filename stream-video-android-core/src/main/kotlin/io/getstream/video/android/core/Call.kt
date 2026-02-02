@@ -72,6 +72,7 @@ import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
+import io.getstream.video.android.core.coroutines.scopes.RestartableProducerScope
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -135,48 +136,18 @@ public class Call(
 
     private val logger by taggedLogger("Call:$type:$id")
 
-    private val callReinitializer = CallReInitializer(clientImpl.scope) {
+    private val callReInitializer = CallReInitializer(clientImpl.scope) {
         reInitialise()
     }
 
     internal val scope: CoroutineScope
-        get() = callReinitializer.currentScope
+        get() = callReInitializer.currentScope
 
     private var powerManager: PowerManager? = null
 
-    internal val sessionManager = CallSessionManager(
-        call = this,
-        clientImpl = clientImpl,
-        powerManager = powerManager,
-        testInstanceProvider = testInstanceProvider,
-    )
-
-    private val callStatsReporter: CallStatsReporter = CallStatsReporter(this)
-    internal val callJoinCoordinator = CallJoinCoordinator(
-        call = this,
-        client = clientImpl,
-        callReInitializer = callReinitializer,
-        onJoinFail = {
-            sessionManager.session = null
-        },
-        createJoinSession = { create, createOptions, ring, notify ->
-            sessionManager._join(create, createOptions, ring, notify)
-        },
-        onRejoin = { reason -> sessionManager.rejoin(reason) },
-    )
-
-    private val callRenderer = CallRenderer()
-    private val apiDelegate = CallApiDelegate(
-        clientImpl = clientImpl,
-        type = type,
-        id = id,
-        call = this,
-        screenShareProvider = { screenShare },
-        setScreenTrackCallBack = { sessionManager.session?.setScreenShareTrack() },
-    )
-
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(client, this, user, scope)
+    internal val restartableProducerScope = RestartableProducerScope()
+    val state = CallState(client, this, user, restartableProducerScope)
 
     /** Camera gives you access to the local camera */
     val camera by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.camera }
@@ -240,6 +211,37 @@ public class Call(
      * Call has been left and the object is cleaned up and destroyed.
      */
     internal var isDestroyed = AtomicBoolean(false)
+
+    internal val sessionManager = CallSessionManager(
+        call = this,
+        clientImpl = clientImpl,
+        powerManager = powerManager,
+        testInstanceProvider = testInstanceProvider,
+    )
+
+    private val callStatsReporter: CallStatsReporter = CallStatsReporter(this)
+    internal val callJoinCoordinator = CallJoinCoordinator(
+        call = this,
+        client = clientImpl,
+        callReInitializer = callReInitializer,
+        onJoinFail = {
+            sessionManager.session = null
+        },
+        createJoinSession = { create, createOptions, ring, notify ->
+            sessionManager._join(create, createOptions, ring, notify)
+        },
+        onRejoin = { reason -> sessionManager.rejoin(reason) },
+    )
+
+    private val callRenderer = CallRenderer()
+    private val apiDelegate = CallApiDelegate(
+        clientImpl = clientImpl,
+        type = type,
+        id = id,
+        call = this,
+        screenShareProvider = { screenShare },
+        setScreenTrackCallBack = { sessionManager.session?.setScreenShareTrack() },
+    )
 
     var sessionId: String
         get() = sessionManager.sessionId
@@ -327,7 +329,7 @@ public class Call(
         sessionManager = sessionManager,
         client = clientImpl,
         mediaManagerProvider = { mediaManager },
-        callReInitializer = callReinitializer,
+        callReInitializer = callReInitializer,
         clientScope = clientImpl.scope,
         callStatsReporter = callStatsReporter,
     )
@@ -341,6 +343,7 @@ public class Call(
         powerManager = safeCallWithDefault(null) {
             clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
+        restartableProducerScope.attach(scope)
     }
 
     /** Basic crud operations */
@@ -912,6 +915,10 @@ public class Call(
         state._connection.value = RealtimeConnection.Disconnected
         atomicLeave = AtomicUnitCall()
         scopeProvider.reset()
+        with(restartableProducerScope) {
+            detach()
+            attach(scope)
+        }
     }
 
     @InternalStreamVideoApi
