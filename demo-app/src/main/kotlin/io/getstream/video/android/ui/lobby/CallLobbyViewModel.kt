@@ -209,7 +209,7 @@ class CallLobbyViewModel @Inject constructor(
 
     fun leaveCall() {
         call.leave()
-        call.cleanupMedia()
+        call.cleanup()
     }
 }
 
