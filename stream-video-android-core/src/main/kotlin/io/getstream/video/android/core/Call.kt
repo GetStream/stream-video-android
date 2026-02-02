@@ -49,7 +49,6 @@ import io.getstream.android.video.generated.models.StopTranscriptionResponse
 import io.getstream.android.video.generated.models.UnpinResponse
 import io.getstream.android.video.generated.models.UpdateCallMembersRequest
 import io.getstream.android.video.generated.models.UpdateCallMembersResponse
-import io.getstream.android.video.generated.models.UpdateCallRequest
 import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
 import io.getstream.android.video.generated.models.VideoEvent
@@ -61,6 +60,10 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.CallApiDelegate
+import io.getstream.video.android.core.call.CallEventManager
+import io.getstream.video.android.core.call.CallRenderer
+import io.getstream.video.android.core.call.CallSessionManager
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -69,15 +72,13 @@ import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
-import io.getstream.video.android.core.call.video.YuvFrame
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
-import io.getstream.video.android.core.events.GoAwayEvent
+import io.getstream.video.android.core.coroutines.scopes.RestartableProducerScope
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.AudioTrack
-import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
@@ -93,7 +94,6 @@ import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
-import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
@@ -108,12 +108,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
 import org.webrtc.PeerConnection
-import org.webrtc.RendererCommon
-import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.ClientCapability
@@ -123,7 +120,6 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.resume
 
 /**
  * How long do we keep trying to make a full-reconnect (once the SFU signalling WS went down)
@@ -165,8 +161,10 @@ public class Call(
 
     internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
+    internal val restartableProducerScope = RestartableProducerScope()
+
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(client, this, user, scope)
+    val state = CallState(client, this, user, restartableProducerScope)
 
     private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 
@@ -266,6 +264,26 @@ public class Call(
         set(value) {
             _peerConnectionFactory = value
         }
+
+    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
+    private val callRenderer = CallRenderer()
+    internal val sessionManager = CallSessionManager(
+        call = this,
+        clientImpl = clientImpl,
+        powerManager = powerManager,
+        testInstanceProvider = testInstanceProvider,
+    )
+
+    private val apiDelegate = CallApiDelegate(
+        clientImpl = clientImpl,
+        type = type,
+        id = id,
+        call = this,
+        screenShareProvider = { screenShare },
+        setScreenTrackCallBack = { sessionManager.session?.setScreenShareTrack() },
+    )
+    internal val callEventManager =
+        CallEventManager(events, sessionManager, restartableProducerScope, { subscriptions })
 
     /**
      * Checks if the audioBitrateProfile has changed since the factory was created,
@@ -434,47 +452,17 @@ public class Call(
         notify: Boolean = false,
         video: Boolean? = null,
     ): Result<GetOrCreateCallResponse> {
-        val response = if (members != null) {
-            clientImpl.getOrCreateCallFullMembers(
-                type = type,
-                id = id,
-                members = members,
-                custom = custom,
-                settingsOverride = settings,
-                startsAt = startsAt,
-                team = team,
-                ring = ring,
-                notify = notify,
-                video = video,
-            )
-        } else {
-            clientImpl.getOrCreateCall(
-                type = type,
-                id = id,
-                memberIds = memberIds,
-                custom = custom,
-                settingsOverride = settings,
-                startsAt = startsAt,
-                team = team,
-                ring = ring,
-                notify = notify,
-                video = video,
-            )
-        }
-
-        response.onSuccess {
-            /**
-             * Because [CallState.updateFromResponse] reads the value of [ClientState.ringingCall]
-             */
-            if (ring) {
-                client.state._ringingCall.value = this
-            }
-            state.updateFromResponse(it)
-            if (ring) {
-                client.state.addRingingCall(this, RingingState.Outgoing())
-            }
-        }
-        return response
+        return apiDelegate.create(
+            memberIds,
+            members,
+            custom,
+            settings,
+            startsAt,
+            team,
+            ring,
+            notify,
+            video,
+        )
     }
 
     /** Update a call */
@@ -483,16 +471,7 @@ public class Call(
         settingsOverride: CallSettingsRequest? = null,
         startsAt: OffsetDateTime? = null,
     ): Result<UpdateCallResponse> {
-        val request = UpdateCallRequest(
-            custom = custom,
-            settingsOverride = settingsOverride,
-            startsAt = startsAt,
-        )
-        val response = clientImpl.updateCall(type, id, request)
-        response.onSuccess {
-            state.updateFromResponse(it)
-        }
-        return response
+        return apiDelegate.update(custom, settingsOverride, startsAt)
     }
 
     suspend fun join(
@@ -1018,31 +997,13 @@ public class Call(
         limit: Int = 25,
         prev: String? = null,
         next: String? = null,
-    ): Result<QueriedMembers> {
-        return clientImpl.queryMembersInternal(
-            type = type,
-            id = id,
-            filter = filter,
-            sort = sort,
-            prev = prev,
-            next = next,
-            limit = limit,
-        ).onSuccess { state.updateFromResponse(it) }.map { it.toQueriedMembers() }
-    }
+    ): Result<QueriedMembers> = apiDelegate.queryMembers(filter, sort, limit, prev, next)
 
     suspend fun muteAllUsers(
         audio: Boolean = true,
         video: Boolean = false,
         screenShare: Boolean = false,
-    ): Result<MuteUsersResponse> {
-        val request = MuteUsersData(
-            muteAllUsers = true,
-            audio = audio,
-            video = video,
-            screenShare = screenShare,
-        )
-        return clientImpl.muteUsers(type, id, request)
-    }
+    ): Result<MuteUsersResponse> = apiDelegate.muteAllUsers(audio, video, screenShare)
 
     fun setVisibility(
         sessionId: String,
@@ -1083,14 +1044,7 @@ public class Call(
     }
 
     fun handleEvent(event: VideoEvent) {
-        logger.v { "[call handleEvent] #sfu; event.type: ${event.getEventType()}" }
-
-        when (event) {
-            is GoAwayEvent ->
-                scope.launch {
-                    migrate()
-                }
-        }
+        callEventManager.handleEvent(event)
     }
 
     // TODO: review this
@@ -1107,61 +1061,15 @@ public class Call(
         trackType: TrackType,
         onRendered: (VideoTextureViewRenderer) -> Unit = {},
         viewportId: String = sessionId,
-    ) {
-        logger.d { "[initRenderer] #sfu; #track; sessionId: $sessionId" }
-
-        // Note this comes from the shared eglBase
-        videoRenderer.init(
-            eglBase.eglBaseContext,
-            object : RendererCommon.RendererEvents {
-                override fun onFirstFrameRendered() {
-                    val width = videoRenderer.measuredWidth
-                    val height = videoRenderer.measuredHeight
-                    logger.i {
-                        "[initRenderer.onFirstFrameRendered] #sfu; #track; " +
-                            "trackType: $trackType, dimension: ($width - $height), " +
-                            "sessionId: $sessionId"
-                    }
-                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session?.updateTrackDimensions(
-                            sessionId,
-                            trackType,
-                            true,
-                            VideoDimension(width, height),
-                            viewportId,
-                        )
-                    }
-                    onRendered(videoRenderer)
-                }
-
-                override fun onFrameResolutionChanged(
-                    videoWidth: Int,
-                    videoHeight: Int,
-                    rotation: Int,
-                ) {
-                    val width = videoRenderer.measuredWidth
-                    val height = videoRenderer.measuredHeight
-                    logger.v {
-                        "[initRenderer.onFrameResolutionChanged] #sfu; #track; " +
-                            "trackType: $trackType, " +
-                            "viewport size: ($width - $height), " +
-                            "video size: ($videoWidth - $videoHeight), " +
-                            "sessionId: $sessionId"
-                    }
-
-                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session?.updateTrackDimensions(
-                            sessionId,
-                            trackType,
-                            true,
-                            VideoDimension(width, height),
-                            viewportId,
-                        )
-                    }
-                }
-            },
-        )
-    }
+    ) = callRenderer.initRenderer(
+        videoRenderer,
+        sessionId,
+        trackType,
+        eglBase,
+        sessionManager.session,
+        onRendered,
+        viewportId,
+    )
 
     /**
      * Enables the provided client capabilities.
@@ -1185,24 +1093,9 @@ public class Call(
         startHls: Boolean = false,
         startRecording: Boolean = false,
         startTranscription: Boolean = false,
-    ): Result<GoLiveResponse> {
-        val result = clientImpl.goLive(
-            type = type,
-            id = id,
-            startHls = startHls,
-            startRecording = startRecording,
-            startTranscription = startTranscription,
-        )
-        result.onSuccess { state.updateFromResponse(it) }
+    ): Result<GoLiveResponse> = apiDelegate.goLive(startHls, startRecording, startTranscription)
 
-        return result
-    }
-
-    suspend fun stopLive(): Result<StopLiveResponse> {
-        val result = clientImpl.stopLive(type, id)
-        result.onSuccess { state.updateFromResponse(it) }
-        return result
-    }
+    suspend fun stopLive(): Result<StopLiveResponse> = apiDelegate.stopLive()
 
     suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendCallEventResponse> {
         return clientImpl.sendCustomEvent(this.type, this.id, data)
@@ -1233,29 +1126,13 @@ public class Call(
     fun startScreenSharing(
         mediaProjectionPermissionResultData: Intent,
         includeAudio: Boolean = false,
-    ) {
-        if (state.ownCapabilities.value.contains(OwnCapability.Screenshare)) {
-            session?.setScreenShareTrack()
-            screenShare.enable(mediaProjectionPermissionResultData, includeAudio = includeAudio)
-        } else {
-            logger.w { "Can't start screen sharing - user doesn't have wnCapability.Screenshare permission" }
-        }
-    }
+    ): Unit = apiDelegate.startScreenSharing(mediaProjectionPermissionResultData, includeAudio)
 
-    fun stopScreenSharing() {
-        screenShare.disable(fromUser = true)
-    }
+    fun stopScreenSharing(): Unit = apiDelegate.stopScreenSharing()
 
-    suspend fun startHLS(): Result<Any> {
-        return clientImpl.startBroadcasting(type, id)
-            .onSuccess {
-                state.updateFromResponse(it)
-            }
-    }
+    suspend fun startHLS(): Result<Any> = apiDelegate.startHLS()
 
-    suspend fun stopHLS(): Result<Any> {
-        return clientImpl.stopBroadcasting(type, id)
-    }
+    suspend fun stopHLS(): Result<Any> = apiDelegate.stopHLS()
 
     public fun subscribeFor(
         vararg eventTypes: Class<out VideoEvent>,
@@ -1328,8 +1205,6 @@ public class Call(
         val request = UpdateCallMembersRequest(updateMembers = memberRequests)
         return clientImpl.updateMembers(type, id, request)
     }
-
-    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
 
     fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
         subscriptions.forEach { sub ->
@@ -1447,32 +1322,14 @@ public class Call(
         audio: Boolean = true,
         video: Boolean = false,
         screenShare: Boolean = false,
-    ): Result<MuteUsersResponse> {
-        val request = MuteUsersData(
-            users = listOf(userId),
-            muteAllUsers = false,
-            audio = audio,
-            video = video,
-            screenShare = screenShare,
-        )
-        return clientImpl.muteUsers(type, id, request)
-    }
+    ): Result<MuteUsersResponse> = apiDelegate.muteUser(userId, audio, video, screenShare)
 
     suspend fun muteUsers(
         userIds: List<String>,
         audio: Boolean = true,
         video: Boolean = false,
         screenShare: Boolean = false,
-    ): Result<MuteUsersResponse> {
-        val request = MuteUsersData(
-            users = userIds,
-            muteAllUsers = false,
-            audio = audio,
-            video = video,
-            screenShare = screenShare,
-        )
-        return clientImpl.muteUsers(type, id, request)
-    }
+    ): Result<MuteUsersResponse> = apiDelegate.muteUsers(userIds, audio, video, screenShare)
 
     @VisibleForTesting
     internal suspend fun joinRequest(
@@ -1481,25 +1338,13 @@ public class Call(
         migratingFrom: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
-    ): Result<JoinCallResponse> {
-        val result = clientImpl.joinCall(
-            type, id,
-            create = create != null,
-            members = create?.memberRequestsFromIds(),
-            custom = create?.custom,
-            settingsOverride = create?.settings,
-            startsAt = create?.startsAt,
-            team = create?.team,
-            ring = ring,
-            notify = notify,
-            location = location,
-            migratingFrom = migratingFrom,
-        )
-        result.onSuccess {
-            state.updateFromResponse(it)
-        }
-        return result
-    }
+    ): Result<JoinCallResponse> = apiDelegate.joinRequest(
+        create,
+        location,
+        migratingFrom,
+        ring,
+        notify,
+    )
 
     fun cleanup() {
         // monitor.stop()
@@ -1536,13 +1381,7 @@ public class Call(
         return clientImpl.notify(type, id)
     }
 
-    suspend fun accept(): Result<AcceptCallResponse> {
-        logger.d { "[accept] #ringing; no args, call_id:$id" }
-        state.acceptedOnThisDevice = true
-
-        clientImpl.state.transitionToAcceptCall(this)
-        return clientImpl.accept(type, id)
-    }
+    suspend fun accept(): Result<AcceptCallResponse> = apiDelegate.accept()
 
     /**
      * Should outlive both the call scope and the service scope and needs to be executed in the client-level scope.
@@ -1571,43 +1410,9 @@ public class Call(
         rating: Int,
         reason: String? = null,
         custom: Map<String, Any>? = null,
-    ) {
-        scope.launch {
-            clientImpl.collectFeedback(
-                callType = type,
-                id = id,
-                sessionId = sessionId,
-                rating = rating,
-                reason = reason,
-                custom = custom,
-            )
-        }
-    }
+    ): Unit = apiDelegate.collectUserFeedback(rating, reason, custom)
 
-    suspend fun takeScreenshot(track: VideoTrack): Bitmap? {
-        return suspendCancellableCoroutine { continuation ->
-            var screenshotSink: VideoSink? = null
-            screenshotSink = VideoSink {
-                // make sure we stop after first frame is delivered
-                if (!continuation.isActive) {
-                    return@VideoSink
-                }
-                it.retain()
-                val bitmap = YuvFrame.bitmapFromVideoFrame(it)
-                it.release()
-
-                // This has to be launched asynchronously - removing the sink on the
-                // same thread as the videoframe is delivered will lead to a deadlock
-                // (needs investigation why)
-                scope.launch {
-                    track.video.removeSink(screenshotSink)
-                }
-                continuation.resume(bitmap)
-            }
-
-            track.video.addSink(screenshotSink)
-        }
-    }
+    suspend fun takeScreenshot(track: VideoTrack): Bitmap? = apiDelegate.takeScreenshot(track)
 
     fun isPinnedParticipant(sessionId: String): Boolean =
         state.pinnedParticipants.value.containsKey(
