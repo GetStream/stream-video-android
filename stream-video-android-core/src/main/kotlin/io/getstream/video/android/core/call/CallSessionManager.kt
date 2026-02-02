@@ -18,6 +18,7 @@ package io.getstream.video.android.core.call
 
 import android.annotation.SuppressLint
 import android.os.PowerManager
+import androidx.lifecycle.AtomicReference
 import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -35,6 +36,7 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.UUID
 import kotlin.collections.map
 import kotlin.let
+import kotlin.toString
 
 internal class CallSessionManager(
     private val call: Call,
@@ -46,8 +48,8 @@ internal class CallSessionManager(
     private val logger by taggedLogger("CallSessionManager")
 
     /** Session handles all real time communication for video and audio */
-    internal var session: RtcSession? = null
-    internal var sessionId = UUID.randomUUID().toString()
+    internal var session: AtomicReference<RtcSession?> = AtomicReference(null)
+    internal var sessionId: AtomicReference<String> = AtomicReference(UUID.randomUUID().toString())
 
     private var reconnectAttempts = 0
     internal var reconnectStartTime = 0L
@@ -76,10 +78,11 @@ internal class CallSessionManager(
     val sfuEventMonitor =
         CallSfuEventMonitor(
             call.restartableProducerScope,
-            { session },
+            { session.get() },
             callConnectivityMonitorState,
         )
-    val iceConnectionMonitor = CallIceConnectionMonitor(call.restartableProducerScope, { session })
+    val iceConnectionMonitor =
+        CallIceConnectionMonitor(call.restartableProducerScope, { session.get() })
     val networkSubscriptionController =
         CallNetworkSubscriptionController(network, callConnectivityMonitor.listener)
 
@@ -128,7 +131,7 @@ internal class CallSessionManager(
 
         clientImpl.state.setActiveCall(call)
         monitorSession(result.value)
-        return Success(value = session!!)
+        return Success(value = session.get()!!)
     }
 
     internal fun getOptions(
@@ -146,12 +149,12 @@ internal class CallSessionManager(
         logger.d {
             "[fastReconnect] Reconnecting, reconnectAttempts:$reconnectAttempts"
         }
-        session?.prepareReconnect()
+        session.get()?.prepareReconnect()
         call.state._connection.value = RealtimeConnection.Reconnecting
         if (session != null) {
             reconnectStartTime = System.currentTimeMillis()
 
-            val session = session!!
+            val session = session.get()!!
             val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
             val reconnectDetails = ReconnectDetails(
                 previous_session_id = prevSessionId,
@@ -191,7 +194,7 @@ internal class CallSessionManager(
     }
     internal fun monitorSession(result: JoinCallResponse) {
         callStatsReporter.startCallStatsReporting(
-            session,
+            session.get(),
             result.statsOptions.reportingIntervalMs.toLong(),
         )
         sfuEventMonitor.start()
@@ -209,12 +212,12 @@ internal class CallSessionManager(
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
-                val session = this.session!!
-                val currentOptions = this.session?.publisher?.currentOptions()
+                val session = this.session.get()!!
+                val currentOptions = this.session.get()?.publisher?.currentOptions()
                 val oldSfuUrl = session.sfuUrl
                 logger.i { "Rejoin SFU $oldSfuUrl to ${cred.server.url}" }
 
-                this.sessionId = UUID.randomUUID().toString()
+                this.sessionId.set(UUID.randomUUID().toString())
                 val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
                 val reconnectDetails = ReconnectDetails(
                     previous_session_id = prevSessionId,
@@ -231,7 +234,7 @@ internal class CallSessionManager(
                         reconnectAttempts,
                         powerManager,
                         call,
-                        sessionId,
+                        sessionId.get(),
                         clientImpl.apiKey,
                         clientImpl.coordinatorConnectionModule.lifecycle,
                         cred.server.url,
@@ -241,9 +244,9 @@ internal class CallSessionManager(
                             ice.toIceServer()
                         },
                     )
-                    val oldSession = this.session
-                    this.session = newSession
-                    this.session?.connect(reconnectDetails, currentOptions)
+                    val oldSession = this.session.get()
+                    this.session.set(newSession)
+                    newSession.connect(reconnectDetails, currentOptions)
                     monitorSession(joinResponse.value)
                     oldSession?.leaveWithReason("migrating")
                     oldSession?.cleanup()
@@ -264,10 +267,11 @@ internal class CallSessionManager(
         }
     }
 
+    // TODO Rahul, refactor before using
     suspend fun createJoinRtcSession(result: JoinCallResponse) {
-        session = createJoinRtcSessionInner(result)
-        session?.let { call.state._connection.value = RealtimeConnection.Joined(it) }
-        session?.connect()
+        session.set(createJoinRtcSessionInner(result))
+        session.get()?.let { call.state._connection.value = RealtimeConnection.Joined(it) }
+        session.get()?.connect()
     }
 
     fun createJoinRtcSessionInner(result: JoinCallResponse): RtcSession {
@@ -275,7 +279,7 @@ internal class CallSessionManager(
             testInstanceProvider.rtcSessionCreator!!.invoke()
         } else {
             RtcSession(
-                sessionId = this.sessionId,
+                sessionId = this.sessionId.get(),
                 apiKey = clientImpl.apiKey,
                 lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
                 client = clientImpl,
@@ -296,7 +300,7 @@ internal class CallSessionManager(
             reconnectAttempts,
             powerManager,
             call,
-            sessionId,
+            sessionId.get(),
             clientImpl.apiKey,
             clientImpl.coordinatorConnectionModule.lifecycle,
             cred.server.url,
@@ -323,20 +327,20 @@ internal class CallSessionManager(
     suspend fun replaceSession(joinResponse: JoinCallResponse, reason: String) {
         // switch to the new SFU
         val cred = joinResponse.credentials
-        val oldSession = this.session!!
-        val oldSessionStats = callStatsReporter.collectStats(session)
-        val currentOptions = this.session?.publisher?.currentOptions()
+        val oldSession = this.session.get()!!
+        val oldSessionStats = callStatsReporter.collectStats(session.get())
+        val currentOptions = this.session.get()?.publisher?.currentOptions()
         logger.i { "Rejoin SFU ${oldSession?.sfuUrl} to ${cred.server.url}" }
 
-        this.sessionId = UUID.randomUUID().toString()
+        this.sessionId.set(UUID.randomUUID().toString())
         val (prevSessionId, _, _) = oldSession.currentSfuInfo()
         val reconnectDetails = createReconnectDetails(oldSession, reason)
         call.state.removeParticipant(prevSessionId)
         oldSession.prepareRejoin()
         try {
-            this.session = createRejoinSession(joinResponse)
-            this.session?.connect(reconnectDetails, currentOptions)
-            this.session?.sfuTracer?.trace("rejoin", reason)
+            this.session.set(createRejoinSession(joinResponse))
+            this.session.get()?.connect(reconnectDetails, currentOptions)
+            this.session.get()?.sfuTracer?.trace("rejoin", reason)
             oldSession.sendCallStats(oldSessionStats)
             oldSession.leaveWithReason("Rejoin :: $reason")
             oldSession.cleanup()
@@ -355,8 +359,8 @@ internal class CallSessionManager(
     }
 
     fun cleanup() {
-        session?.cleanup()
-        session = null
+        session.get()?.cleanup()
+        session.set(null)
     }
 
     fun cleanupMonitor() {
@@ -369,6 +373,6 @@ internal class CallSessionManager(
     }
 
     fun reset() {
-        this.sessionId = UUID.randomUUID().toString()
+        this.sessionId.set(UUID.randomUUID().toString())
     }
 }
