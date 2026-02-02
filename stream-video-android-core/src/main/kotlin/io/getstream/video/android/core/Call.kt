@@ -23,7 +23,6 @@ import android.os.PowerManager
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.AcceptCallResponse
-import io.getstream.android.video.generated.models.AudioSettingsResponse
 import io.getstream.android.video.generated.models.BlockUserResponse
 import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.CallSettingsResponse
@@ -52,7 +51,6 @@ import io.getstream.android.video.generated.models.UpdateCallMembersResponse
 import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
 import io.getstream.android.video.generated.models.VideoEvent
-import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
@@ -62,6 +60,9 @@ import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.CallApiDelegate
 import io.getstream.video.android.core.call.CallEventManager
+import io.getstream.video.android.core.call.CallJoinCoordinator
+import io.getstream.video.android.core.call.CallMediaManager
+import io.getstream.video.android.core.call.CallReInitializer
 import io.getstream.video.android.core.call.CallRenderer
 import io.getstream.video.android.core.call.CallSessionManager
 import io.getstream.video.android.core.call.RtcSession
@@ -78,7 +79,6 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
@@ -120,6 +120,7 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * How long do we keep trying to make a full-reconnect (once the SFU signalling WS went down)
@@ -152,7 +153,7 @@ public class Call(
     internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
     // Atomic controls
-    private var atomicLeave = AtomicUnitCall()
+    internal var atomicLeave = AtomicUnitCall()
 
     private val logger by taggedLogger("Call:$type:$id")
     private val supervisorJob = SupervisorJob()
@@ -173,6 +174,17 @@ public class Call(
     val microphone by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.microphone }
     val speaker by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.speaker }
     val screenShare by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.screenShare }
+
+    private val callMediaManager = CallMediaManager(
+        this,
+        { mediaManager },
+        { camera },
+        { microphone },
+        { speaker },
+        { screenShare },
+        { _peerConnectionFactory },
+        { _peerConnectionFactory = null },
+    )
 
     /** The cid is type:id */
     val cid = "$type:$id"
@@ -226,7 +238,7 @@ public class Call(
     /**
      * Call has been left and the object is cleaned up and destroyed.
      */
-    private var isDestroyed = false
+    internal var isDestroyed = AtomicBoolean(false)
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
@@ -285,6 +297,35 @@ public class Call(
     internal val callEventManager =
         CallEventManager(events, sessionManager, restartableProducerScope, { subscriptions })
 
+    private val callReInitializer = CallReInitializer(clientImpl.scope) {
+        reInitialise()
+    }
+
+    internal val callJoinCoordinator = CallJoinCoordinator(
+        call = this,
+        client = clientImpl,
+        callReInitializer = callReInitializer,
+        onJoinFail = {
+            sessionManager.session = null
+        },
+        createJoinSession = { create, createOptions, ring, notify ->
+            sessionManager._join(create, createOptions, ring, notify)
+        },
+        onRejoin = { reason -> sessionManager.rejoin(reason) },
+    )
+
+    private fun reInitialise() {
+        logger.d { "[reInitialise]" }
+        sessionManager.reset()
+        state._connection.value = RealtimeConnection.Disconnected
+        atomicLeave = AtomicUnitCall()
+        scopeProvider.reset()
+        with(restartableProducerScope) {
+            detach()
+            attach(scope)
+        }
+    }
+
     /**
      * Checks if the audioBitrateProfile has changed since the factory was created,
      * and recreates the factory if needed. This should only be called before joining.
@@ -292,26 +333,8 @@ public class Call(
      * If the factory hasn't been created yet, it will be created with the current profile
      * when first accessed, so no recreation is needed.
      */
-    internal fun ensureFactoryMatchesAudioProfile() {
-        val factory = _peerConnectionFactory
-
-        // If factory hasn't been created yet, it will be created with current profile automatically
-        if (factory == null) {
-            return
-        }
-
-        // Check if current profile differs from the profile used to create the factory
-        val factoryProfile = factory.audioBitrateProfile
-        val currentProfile = mediaManager.microphone.audioBitrateProfile.value
-
-        if (factoryProfile != null && currentProfile != factoryProfile) {
-            logger.i {
-                "Audio bitrate profile changed from $factoryProfile to $currentProfile. " +
-                    "Recreating factory before joining."
-            }
-            recreateFactoryAndAudioTracks()
-        }
-    }
+    internal fun ensureFactoryMatchesAudioProfile() =
+        callMediaManager.ensureFactoryMatchesAudioProfile()
 
     /**
      * Recreates peerConnectionFactory, audioSource, audioTrack, videoSource and videoTrack
@@ -416,7 +439,6 @@ public class Call(
 
     private var monitorPublisherPCStateJob: Job? = null
     private var monitorSubscriberPCStateJob: Job? = null
-    private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
     private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(scope)
 
@@ -546,6 +568,13 @@ public class Call(
         return Failure(value = Error.GenericError(errorMessage))
     }
 
+    suspend fun join1(
+        create: Boolean = false,
+        createOptions: CreateCallOptions? = null,
+        ring: Boolean = false,
+        notify: Boolean = false,
+    ): Result<RtcSession> = callJoinCoordinator.join(create, createOptions, ring, notify)
+
     suspend fun joinAndRing(
         members: List<String>,
         createOptions: CreateCallOptions? = CreateCallOptions(members),
@@ -584,7 +613,6 @@ public class Call(
     ): Result<RtcSession> {
         reconnectAttepmts = 0
         sfuEvents?.cancel()
-        sfuListener?.cancel()
 
         if (session != null) {
             return Failure(Error.GenericError("Call $cid has already been joined"))
@@ -613,28 +641,8 @@ public class Call(
         if (result !is Success) {
             return result as Failure
         }
-        val sfuToken = result.value.credentials.token
-        val sfuUrl = result.value.credentials.server.url
-        val sfuWsUrl = result.value.credentials.server.wsEndpoint
-        val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
         try {
-            session = if (testInstanceProvider.rtcSessionCreator != null) {
-                testInstanceProvider.rtcSessionCreator!!.invoke()
-            } else {
-                RtcSession(
-                    sessionId = this.sessionId,
-                    apiKey = clientImpl.apiKey,
-                    lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                    client = client,
-                    call = this,
-                    sfuUrl = sfuUrl,
-                    sfuWsUrl = sfuWsUrl,
-                    sfuToken = sfuToken,
-                    remoteIceServers = iceServers,
-                    powerManager = powerManager,
-                )
-            }
-
+            session = sessionManager.createJoinRtcSessionInner(result.value)
             session?.let {
                 state._connection.value = RealtimeConnection.Joined(it)
             }
@@ -650,7 +658,6 @@ public class Call(
 
     private fun Call.monitorSession(result: JoinCallResponse) {
         sfuEvents?.cancel()
-        sfuListener?.cancel()
         startCallStatsReporting(result.statsOptions.reportingIntervalMs.toLong())
         // listen to Signal WS
         sfuEvents = scope.launch {
@@ -921,15 +928,14 @@ public class Call(
         session?.leaveWithReason("[reason=$reason, error=${disconnectionReason?.message}]")
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
-        sfuListener?.cancel()
         sfuEvents?.cancel()
         state._connection.value = RealtimeConnection.Disconnected
         logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = $id" }
-        if (isDestroyed) {
+        if (isDestroyed.get()) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
             return@atomicLeave
         }
-        isDestroyed = true
+        isDestroyed.set(true)
 
         sfuSocketReconnectionTime = null
 
@@ -1255,41 +1261,8 @@ public class Call(
         }.launchIn(scope)
     }
 
-    private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
-        // Speaker
-        if (speaker.status.value is DeviceStatus.NotSelected) {
-            val enableSpeaker =
-                if (callSettings.video.cameraDefaultOn || camera.status.value is DeviceStatus.Enabled) {
-                    // if camera is enabled then enable speaker. Eventually this should
-                    // be a new audio.defaultDevice setting returned from backend
-                    true
-                } else {
-                    callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
-                        callSettings.audio.speakerDefaultOn
-                }
-
-            speaker.setEnabled(enabled = enableSpeaker)
-        }
-
-        monitorHeadset()
-
-        // Camera
-        if (camera.status.value is DeviceStatus.NotSelected) {
-            val defaultDirection =
-                if (callSettings.video.cameraFacing == VideoSettingsResponse.CameraFacing.Front) {
-                    CameraDirection.Front
-                } else {
-                    CameraDirection.Back
-                }
-            camera.setDirection(defaultDirection)
-            camera.setEnabled(callSettings.video.cameraDefaultOn)
-        }
-
-        // Mic
-        if (microphone.status.value == DeviceStatus.NotSelected) {
-            val enabled = callSettings.audio.micDefaultOn
-            microphone.setEnabled(enabled)
-        }
+    internal fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
+        callMediaManager.updateMediaManagerFromSettings(callSettings)
     }
 
     /**
@@ -1507,18 +1480,8 @@ public class Call(
      * @param sessionIds Optional list of participant session IDs for which to toggle incoming audio.
      * If `null`, the audio setting is applied to all participants currently in the session.
      */
-    fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) {
-        val participantTrackMap = session?.subscriber?.tracks ?: return
-
-        val targetTracks = when {
-            sessionIds != null -> sessionIds.mapNotNull { participantTrackMap[it] }
-            else -> participantTrackMap.values.toList()
-        }
-
-        targetTracks
-            .mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as? AudioTrack }
-            .forEach { it.enableAudio(enabled) }
-    }
+    fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) =
+        callMediaManager.setIncomingAudioEnabled(sessionManager.session, enabled, sessionIds)
 
     @InternalStreamVideoApi
     public val debug = Debug(this)
