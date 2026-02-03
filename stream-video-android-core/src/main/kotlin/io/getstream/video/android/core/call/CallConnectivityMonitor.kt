@@ -39,20 +39,39 @@ internal class CallConnectivityMonitor(
         override suspend fun onConnected() {
             leaveTimeoutAfterDisconnect?.cancel()
             val elapsedTimeMils = System.currentTimeMillis() - state.lastDisconnect
+            logger.d {
+                "[NetworkStateListener#onConnected] #network; no args, elapsedTimeMils:$elapsedTimeMils, lastDisconnect:${state.lastDisconnect}, reconnectDeadlineMils:${state.reconnectDeadlineMils}"
+            }
             if (state.lastDisconnect > 0 && elapsedTimeMils < state.reconnectDeadlineMils) {
+                logger.d {
+                    "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${state.reconnectDeadlineMils / 1000} seconds"
+                }
                 onFastReconnect()
             } else {
+                logger.d {
+                    "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${state.reconnectDeadlineMils / 1000} seconds"
+                }
                 onRejoin()
             }
         }
 
         override suspend fun onDisconnected() {
             onDisconnected()
+            logger.d {
+                "[NetworkStateListener#onDisconnected] #network; old lastDisconnect:${state.lastDisconnect}, clientImpl.leaveAfterDisconnectSeconds:$leaveAfterDisconnectSeconds"
+            }
             state.lastDisconnect = System.currentTimeMillis()
+            logger.d {
+                "[NetworkStateListener#onDisconnected] #network; new lastDisconnect:${state.lastDisconnect}"
+            }
             leaveTimeoutAfterDisconnect = callScope.launch {
                 delay(leaveAfterDisconnectSeconds * 1000)
+                logger.d {
+                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for $leaveAfterDisconnectSeconds"
+                }
                 onLeaveTimeout()
             }
+            logger.d { "[NetworkStateListener#onDisconnected] #network; at ${state.lastDisconnect}" }
         }
     }
 

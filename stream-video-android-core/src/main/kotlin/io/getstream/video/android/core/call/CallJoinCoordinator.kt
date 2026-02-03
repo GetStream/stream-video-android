@@ -42,6 +42,7 @@ internal class CallJoinCoordinator(
     private val call: Call,
     private val client: StreamVideoClient,
     private val callReInitializer: CallReInitializer,
+    private val streamSingleFlightProcessorImpl: StreamSingleFlightProcessorImpl,
     private val onJoinFail: () -> Unit,
     private val createJoinSession: suspend (
         create: Boolean,
@@ -51,8 +52,6 @@ internal class CallJoinCoordinator(
     ) -> Result<RtcSession>,
     private val onRejoin: suspend (reason: String) -> Unit,
 ) : CallJoinContract {
-    private val streamSingleFlightProcessorImpl =
-        StreamSingleFlightProcessorImpl(call.restartableProducerScope)
 
     private val logger by taggedLogger("CallJoinCoordinator")
 

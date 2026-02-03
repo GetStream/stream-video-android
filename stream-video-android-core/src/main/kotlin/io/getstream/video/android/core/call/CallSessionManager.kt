@@ -44,7 +44,7 @@ internal class CallSessionManager(
     private val call: Call,
     private val clientImpl: StreamVideoClient,
     private val testInstanceProvider: Call.Companion.TestInstanceProvider,
-
+    private val streamSingleFlightProcessorImpl: StreamSingleFlightProcessorImpl,
 ) {
     private val logger by taggedLogger("CallSessionManager")
     private var powerManager: PowerManager? = null
@@ -60,7 +60,6 @@ internal class CallSessionManager(
 
     private val callConnectivityMonitorState = CallConnectivityMonitorState()
     internal val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
-    private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(call.scope)
     private val callStatsReporter = CallStatsReporter(call)
     private val callConnectivityMonitor = CallConnectivityMonitor(
         call.restartableProducerScope,
@@ -343,9 +342,10 @@ internal class CallSessionManager(
         call.state.removeParticipant(prevSessionId)
         oldSession.prepareRejoin()
         try {
-            this.session.set(createRejoinSession(joinResponse))
-            this.session.get()?.connect(reconnectDetails, currentOptions)
-            this.session.get()?.sfuTracer?.trace("rejoin", reason)
+            val localSession = createRejoinSession(joinResponse)
+            this.session.set(localSession)
+            localSession.connect(reconnectDetails, currentOptions)
+            localSession.sfuTracer.trace("rejoin", reason)
             oldSession.sendCallStats(oldSessionStats)
             oldSession.leaveWithReason("Rejoin :: $reason")
             oldSession.cleanup()
@@ -360,7 +360,11 @@ internal class CallSessionManager(
 
     private suspend fun schedule(key: String, block: suspend () -> Unit) {
         logger.d { "[schedule] #reconnect; no args, key: $key" }
-        streamSingleFlightProcessorImpl.run(key, block)
+        val result = streamSingleFlightProcessorImpl.run(key, block)
+        result.onSuccess { logger.d { "[schedule] success #reconnect; no args, key: $key" } }
+            .onFailure {
+                logger.d { "[schedule] fail with${result.exceptionOrNull()} #reconnect; no args, key: $key" }
+            }
     }
 
     fun cleanup() {
@@ -380,6 +384,7 @@ internal class CallSessionManager(
         reconnectStartTime = 0L
         connectStartTime = 0L
         streamSingleFlightProcessorImpl.stop()
+        streamSingleFlightProcessorImpl.reset()
         callConnectivityMonitor.reset()
     }
 }
