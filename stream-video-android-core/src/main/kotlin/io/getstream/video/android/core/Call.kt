@@ -88,11 +88,9 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -201,8 +199,6 @@ public class Call(
      * Set a custom [InputAudioFilter] that will be applied to the audio stream recorded on your device.
      */
     var audioFilter: InputAudioFilter? = null
-
-    // val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
 
     private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
         if (!microphone.isEnabled.value) {
@@ -515,85 +511,6 @@ public class Call(
         startsAt: OffsetDateTime? = null,
     ): Result<UpdateCallResponse> {
         return apiDelegate.update(custom, settingsOverride, startsAt)
-    }
-
-    suspend fun join1(
-        create: Boolean = false,
-        createOptions: CreateCallOptions? = null,
-        ring: Boolean = false,
-        notify: Boolean = false,
-    ): Result<RtcSession> {
-        logger.d {
-            "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
-        }
-        with(callReInitializer) {
-            waitFromCleanup()
-            reinitialiseCoroutinesIfNeeded()
-        }
-
-        isDestroyed.set(false)
-
-        val permissionPass =
-            clientImpl.permissionCheck.checkAndroidPermissionsGroup(clientImpl.context, this)
-        // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
-        if (!permissionPass.first) {
-            logger.w {
-                "\n[Call.join()] called without having the required permissions.\n" +
-                    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
-                    "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
-                    "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
-                    "otherwise the service will fail to start, resulting in a crash.\n" +
-                    "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
-            }
-        }
-        // if we are a guest user, make sure we wait for the token before running the join flow
-        clientImpl.guestUserJob?.await()
-
-        // Ensure factory is created with the current audioBitrateProfile before joining
-        ensureFactoryMatchesAudioProfile()
-
-        // the join flow should retry up to 3 times
-        // if the error is not permanent
-        // and fail immediately on permanent errors
-        state._connection.value = RealtimeConnection.InProgress
-        var retryCount = 0
-
-        var result: Result<RtcSession>
-
-        atomicLeave = AtomicUnitCall()
-        while (retryCount < 3) {
-            result = _join(create, createOptions, ring, notify)
-            if (result is Success) {
-                // we initialise the camera, mic and other according to local + backend settings
-                // only when the call is joined to make sure we don't switch and override
-                // the settings during a call.
-                val settings = state.settings.value
-                if (settings != null) {
-                    updateMediaManagerFromSettings(settings)
-                } else {
-                    logger.w {
-                        "[join] Call settings were null - this should never happen after a call" +
-                            "is joined. MediaManager will not be initialised with server settings."
-                    }
-                }
-                return result
-            }
-            if (result is Failure) {
-                sessionManager.session.set(null)
-                logger.e { "Join failed with error $result" }
-                if (isPermanentError(result.value)) {
-                    state._connection.value = RealtimeConnection.Failed(result.value)
-                    return result
-                } else {
-                    retryCount += 1
-                }
-            }
-            delay(retryCount - 1 * 1000L)
-        }
-        sessionManager.session.set(null)
-        val errorMessage = "Join failed after 3 retries"
-        state._connection.value = RealtimeConnection.Failed(errorMessage)
-        return Failure(value = Error.GenericError(errorMessage))
     }
 
     suspend fun join(
@@ -944,68 +861,8 @@ public class Call(
     }
 
     /** Leave the call, but don't end it for other users */
-    fun leave1(reason: String = "user") {
-        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
-        internalLeave(null, reason)
-    }
-
     fun leave(reason: String = "user") {
         callCleanupManager.leave(reason)
-    }
-
-    private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
-        monitorSubscriberPCStateJob?.cancel()
-        monitorPublisherPCStateJob?.cancel()
-        monitorPublisherPCStateJob = null
-        monitorSubscriberPCStateJob = null
-        sessionManager.session.get()?.leaveWithReason(
-            "[reason=$reason, error=${disconnectionReason?.message}]",
-        )
-        leaveTimeoutAfterDisconnect?.cancel()
-        network.unsubscribe(listener)
-        sfuEvents?.cancel()
-        state._connection.value = RealtimeConnection.Disconnected
-        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = $id" }
-        if (isDestroyed.get()) {
-            logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
-            return@atomicLeave
-        }
-        isDestroyed.set(true)
-
-        sfuSocketReconnectionTime = null
-
-        /**
-         * TODO Rahul, need to check which call has owned the media at the moment(probably use active call)
-         */
-        stopScreenSharing()
-        camera.disable()
-        microphone.disable()
-
-        if (id == client.state.activeCall.value?.id) {
-            client.state.removeActiveCall(this) // Will also stop CallService
-        }
-
-        if (id == client.state.ringingCall.value?.id) {
-            client.state.removeRingingCall(this)
-        }
-
-        TelecomCallController(client.context)
-            .leaveCall(this)
-
-        (client as StreamVideoClient).onCallCleanUp(this)
-
-        clientImpl.scope.launch {
-            safeCall {
-                val session = sessionManager.session.get()
-                session?.sfuTracer?.trace(
-                    "leave-call",
-                    "[reason=$reason, error=${disconnectionReason?.message}]",
-                )
-                val stats = collectStats()
-                session?.sendCallStats(stats)
-            }
-            cleanup()
-        }
     }
 
     /** ends the call for yourself as well as other users */

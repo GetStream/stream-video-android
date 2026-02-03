@@ -7608,16 +7608,12 @@ public final class io/getstream/video/android/core/Call {
 	public final fun isVideoEnabled ()Z
 	public final fun join (ZLio/getstream/video/android/core/CreateCallOptions;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun join$default (Lio/getstream/video/android/core/Call;ZLio/getstream/video/android/core/CreateCallOptions;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun join1 (ZLio/getstream/video/android/core/CreateCallOptions;ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun join1$default (Lio/getstream/video/android/core/Call;ZLio/getstream/video/android/core/CreateCallOptions;ZZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun joinAndRing (Ljava/util/List;Lio/getstream/video/android/core/CreateCallOptions;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun joinAndRing$default (Lio/getstream/video/android/core/Call;Ljava/util/List;Lio/getstream/video/android/core/CreateCallOptions;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun kickUser (Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun kickUser$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun leave (Ljava/lang/String;)V
 	public static synthetic fun leave$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;ILjava/lang/Object;)V
-	public final fun leave1 (Ljava/lang/String;)V
-	public static synthetic fun leave1$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun listRecordings (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun listRecordings$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun listTranscription (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
