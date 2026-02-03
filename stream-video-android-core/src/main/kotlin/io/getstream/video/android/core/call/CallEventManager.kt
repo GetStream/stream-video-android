@@ -19,15 +19,15 @@ package io.getstream.video.android.core.call
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.EventSubscription
+import io.getstream.video.android.core.coroutines.scopes.RestartableProducerScope
 import io.getstream.video.android.core.events.GoAwayEvent
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 internal class CallEventManager(
     private val events: MutableSharedFlow<VideoEvent>,
     private val sessionManager: CallSessionManager,
-    private val callScope: CoroutineScope, // TODO Rahul, need to change. It won't work after leave() -> join()
+    private val callScope: RestartableProducerScope,
     private val subscriptionsProvider: () -> Set<EventSubscription>,
 ) {
 

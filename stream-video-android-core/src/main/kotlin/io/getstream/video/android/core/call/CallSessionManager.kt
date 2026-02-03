@@ -119,7 +119,9 @@ internal class CallSessionManager(
         }
 
         try {
-            createJoinRtcSession(result.value)
+            session = createJoinRtcSessionInner(result.value)
+            session?.let { call.state._connection.value = RealtimeConnection.Joined(it) }
+            session?.connect()
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
@@ -260,12 +262,6 @@ internal class CallSessionManager(
                 call.state._connection.value = RealtimeConnection.Reconnecting
             }
         }
-    }
-
-    suspend fun createJoinRtcSession(result: JoinCallResponse) {
-        session = createJoinRtcSessionInner(result)
-        session?.let { call.state._connection.value = RealtimeConnection.Joined(it) }
-        session?.connect()
     }
 
     fun createJoinRtcSessionInner(result: JoinCallResponse): RtcSession {

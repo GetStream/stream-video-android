@@ -265,7 +265,7 @@ public class Call(
     }
     val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
     internal val callEventManager =
-        CallEventManager(events, sessionManager, scope, { subscriptions })
+        CallEventManager(events, sessionManager, restartableProducerScope, { subscriptions })
 
     // peerConnectionFactory is nullable and recreated when audioBitrateProfile changes (before joining)
     private var _peerConnectionFactory: StreamPeerConnectionFactory? = null
@@ -295,9 +295,8 @@ public class Call(
      * If the factory hasn't been created yet, it will be created with the current profile
      * when first accessed, so no recreation is needed.
      */
-    internal fun ensureFactoryMatchesAudioProfile() {
+    internal fun ensureFactoryMatchesAudioProfile() =
         callMediaManager.ensureFactoryMatchesAudioProfile()
-    }
 
     internal val clientCapabilities = ConcurrentHashMap<String, ClientCapability>().apply {
         put(
@@ -568,13 +567,9 @@ public class Call(
         startHls: Boolean = false,
         startRecording: Boolean = false,
         startTranscription: Boolean = false,
-    ): Result<GoLiveResponse> {
-        return apiDelegate.goLive(startHls, startRecording, startTranscription)
-    }
+    ): Result<GoLiveResponse> = apiDelegate.goLive(startHls, startRecording, startTranscription)
 
-    suspend fun stopLive(): Result<StopLiveResponse> {
-        return apiDelegate.stopLive()
-    }
+    suspend fun stopLive(): Result<StopLiveResponse> = apiDelegate.stopLive()
 
     suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendCallEventResponse> {
         return clientImpl.sendCustomEvent(this.type, this.id, data)
@@ -605,21 +600,13 @@ public class Call(
     fun startScreenSharing(
         mediaProjectionPermissionResultData: Intent,
         includeAudio: Boolean = false,
-    ) {
-        apiDelegate.startScreenSharing(mediaProjectionPermissionResultData, includeAudio)
-    }
+    ): Unit = apiDelegate.startScreenSharing(mediaProjectionPermissionResultData, includeAudio)
 
-    fun stopScreenSharing() {
-        apiDelegate.stopScreenSharing()
-    }
+    fun stopScreenSharing(): Unit = apiDelegate.stopScreenSharing()
 
-    suspend fun startHLS(): Result<Any> {
-        return apiDelegate.startHLS()
-    }
+    suspend fun startHLS(): Result<Any> = apiDelegate.startHLS()
 
-    suspend fun stopHLS(): Result<Any> {
-        return apiDelegate.stopHLS()
-    }
+    suspend fun stopHLS(): Result<Any> = apiDelegate.stopHLS()
 
     public fun subscribeFor(
         vararg eventTypes: Class<out VideoEvent>,
@@ -776,9 +763,7 @@ public class Call(
         return clientImpl.notify(type, id)
     }
 
-    suspend fun accept(): Result<AcceptCallResponse> {
-        return apiDelegate.accept()
-    }
+    suspend fun accept(): Result<AcceptCallResponse> = apiDelegate.accept()
 
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
         logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
@@ -802,13 +787,9 @@ public class Call(
         rating: Int,
         reason: String? = null,
         custom: Map<String, Any>? = null,
-    ) {
-        apiDelegate.collectUserFeedback(rating, reason, custom)
-    }
+    ): Unit = apiDelegate.collectUserFeedback(rating, reason, custom)
 
-    suspend fun takeScreenshot(track: VideoTrack): Bitmap? {
-        return apiDelegate.takeScreenshot(track)
-    }
+    suspend fun takeScreenshot(track: VideoTrack): Bitmap? = apiDelegate.takeScreenshot(track)
 
     fun isPinnedParticipant(sessionId: String): Boolean =
         state.pinnedParticipants.value.containsKey(
