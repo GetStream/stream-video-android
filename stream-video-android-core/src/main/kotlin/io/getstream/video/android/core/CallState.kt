@@ -1469,6 +1469,7 @@ public class CallState internal constructor(
 
     fun clearParticipants() {
         internalParticipants.clear()
+        pendingParticipantsJoined.clear()
         _participants.value = HashMap(internalParticipants)
     }
 
@@ -1689,6 +1690,42 @@ public class CallState internal constructor(
         } else {
             null
         }
+    }
+
+    internal fun clearSessionState() {
+        clearParticipants()
+        _activeSpeakers.value = emptyList()
+        _dominantSpeaker.value = null
+        _screenSharingSession.value = null
+        pendingParticipantsJoined.clear()
+
+        _localPins.value = emptyMap()
+        _serverPins.value = emptyMap()
+
+        _session.value = null
+        _participantCounts.value = null
+
+        _ringingState.value = RingingState.Idle
+        _acceptedBy.value = emptySet()
+        _rejectedBy.value = emptySet()
+        _rejectActionBundle.value = null
+        _startedAt.value = null
+        _reactions.value = emptyList()
+        _errors.value = emptyList()
+        _permissionRequests.value = emptyList()
+        _speakingWhileMuted.value = false
+        _participantVideoEnabledOverrides.value = emptyMap()
+        acceptedOnThisDevice = false
+
+        _recording.value = false
+        _transcribing.value = false
+        _broadcasting.value = false
+        _egress.value = null
+
+        _notificationIdFlow.value = null
+        atomicNotification.set(null)
+
+        cancelTimeout()
     }
 
     fun updateRejectedBy(userId: Set<String>) {

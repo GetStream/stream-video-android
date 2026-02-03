@@ -327,6 +327,10 @@ public class Call(
         state._connection.value = RealtimeConnection.Disconnected
         atomicLeave = AtomicUnitCall()
         scopeProvider.reset()
+
+        // Clear stale video tracks from participants Claude
+        state.clearSessionState()
+
         with(restartableProducerScope) {
             detach()
             attach(scope)

@@ -374,6 +374,12 @@ internal class CallSessionManager(
     }
 
     fun reset() {
+        this.session.set(null)
         this.sessionId.set(UUID.randomUUID().toString())
+        reconnectAttempts = 0
+        reconnectStartTime = 0L
+        connectStartTime = 0L
+        streamSingleFlightProcessorImpl.stop()
+        callConnectivityMonitor.reset()
     }
 }

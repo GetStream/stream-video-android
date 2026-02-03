@@ -55,6 +55,10 @@ internal class CallConnectivityMonitor(
             }
         }
     }
+
+    fun reset() {
+        leaveTimeoutAfterDisconnect?.cancel()
+    }
 }
 
 internal data class CallConnectivityMonitorState(var lastDisconnect: Long = 0L, var reconnectDeadlineMils: Int = 10_000)
