@@ -19,12 +19,12 @@ package io.getstream.video.android.core
 import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
+import io.getstream.video.android.core.coroutines.flows.RestartableStateFlow
+import io.getstream.video.android.core.coroutines.scopes.RestartableProducerScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.RTCStats
 import stream.video.sfu.models.TrackType
@@ -81,18 +81,37 @@ public data class LocalStats(
     val deviceModel: String,
 )
 
-public class CallStats(val call: Call, val callScope: CoroutineScope) {
+// TODO Rahul, need to pass RestartableScope
+public class CallStats internal constructor(
+    val call: Call,
+    private val restartableProducerScope: RestartableProducerScope,
+) {
+
+    @Deprecated(
+        "Kept for binary compatibility.",
+        level = DeprecationLevel.ERROR,
+    )
+    public constructor(
+        call: Call,
+        callScope: CoroutineScope,
+    ) : this(call, RestartableProducerScope())
     private val logger by taggedLogger("CallStats")
 
     private val supervisorJob = SupervisorJob()
-    private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)
+
+    private val scope = CoroutineScope(restartableProducerScope.coroutineContext + supervisorJob)
     // TODO: cleanup the scope
 
     val publisher = PeerConnectionStats(scope)
     val subscriber = PeerConnectionStats(scope)
     val _local = MutableStateFlow<LocalStats?>(null)
-    val local: StateFlow<LocalStats?> =
-        _local.stateIn(scope, SharingStarted.WhileSubscribed(), null)
+    val local: StateFlow<LocalStats?> = RestartableStateFlow(_local, restartableProducerScope, null)
+
+    @Deprecated(
+        "Kept for binary compatibility.",
+        level = DeprecationLevel.ERROR,
+    )
+    fun getCallScope(): CoroutineScope = restartableProducerScope
 
     fun updateFromRTCStats(stats: RtcStatsReport?, isPublisher: Boolean = true) {
         if (stats == null) return

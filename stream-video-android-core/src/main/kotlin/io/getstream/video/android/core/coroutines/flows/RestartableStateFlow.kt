@@ -17,11 +17,14 @@
 package io.getstream.video.android.core.coroutines.flows
 
 import io.getstream.video.android.core.coroutines.scopes.RestartableProducerScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalForInheritanceCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
 /**
@@ -78,9 +81,10 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalForInheritanceCoroutinesApi::class)
 internal class RestartableStateFlow<T>(
-    initialValue: T,
     upstream: Flow<T>,
     scope: RestartableProducerScope,
+    initialValue: T,
+    started: SharingStarted = SharingStarted.WhileSubscribed(),
 ) : StateFlow<T> {
 
     private val state = MutableStateFlow(initialValue)
@@ -88,9 +92,13 @@ internal class RestartableStateFlow<T>(
     init {
         scope.onAttach { realScope ->
             realScope.launch {
-                upstream.collect { value ->
-                    state.value = value
-                }
+                upstream
+                    .shareIn(
+                        scope = this,
+                        started = started,
+                        replay = 1,
+                    )
+                    .collect { state.value = it }
             }
         }
     }

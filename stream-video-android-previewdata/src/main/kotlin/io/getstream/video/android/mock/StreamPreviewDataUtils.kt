@@ -48,6 +48,7 @@ public object StreamPreviewDataUtils {
 }
 
 /** Mock a [Call] that contains a mock user. */
+@Suppress("DEPRECATION_ERROR")
 public val previewCall: Call = Call(
     client = StreamPreviewDataUtils.streamVideo,
     type = "default",
@@ -115,6 +116,7 @@ public val previewUsers: List<User>
     )
 
 /** Mock a new list of [ParticipantState]. */
+@Suppress("DEPRECATION_ERROR")
 public val previewParticipantsList: List<ParticipantState>
     inline get() {
         val participants = arrayListOf<ParticipantState>()

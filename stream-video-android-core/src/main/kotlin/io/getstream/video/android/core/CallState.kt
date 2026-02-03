@@ -388,8 +388,7 @@ public class CallState internal constructor(
                          """,
         ),
     )
-    val livestream: StateFlow<ParticipantState.Video?> =
-        livestreamFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
+    val livestream: StateFlow<ParticipantState.Video?>
 
     private var _sortedParticipantsState: SortedParticipantsState
 
@@ -463,24 +462,13 @@ public class CallState internal constructor(
     }
 
     /** how long the call has been running, rounded to seconds, null if the call didn't start yet */
-    public val duration: StateFlow<Duration?> =
-        _durationInMs.transform { emit(((it ?: 0L) / 1000L).toDuration(DurationUnit.SECONDS)) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+    public val duration: StateFlow<Duration?>
 
     /** how many milliseconds the call has been running, null if the call didn't start yet */
-    public val durationInMs: StateFlow<Long?> =
-        _durationInMs.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+    public val durationInMs: StateFlow<Long?>
 
     /** how many milliseconds the call has been running in the simple date format. */
-    public val durationInDateFormat: StateFlow<String?> = durationInMs.mapState { durationInMs ->
-        if (durationInMs == null) {
-            null
-        } else {
-            val date = Date(durationInMs)
-            val dateFormat = SimpleDateFormat("HH:MM:SS", Locale.US)
-            dateFormat.format(date)
-        }
-    }
+    public val durationInDateFormat: StateFlow<String?>
 
     /** Check if you have permissions to do things like share your audio, video, screen etc */
     public fun hasPermission(permission: String): StateFlow<Boolean> {
@@ -673,10 +661,10 @@ public class CallState internal constructor(
     init {
         /**
          * If we assign [_pinnedParticipants] at declaration line, then [restartableProducerScope]
-         * will be null. As val's are assigned before constructor code has run
+         * will be null. As val's are assigned before constructor code has run.
+         * So we cannot use constructor args in class val
          */
         _pinnedParticipants = RestartableStateFlow(
-            emptyMap(),
             combine(_localPins, _serverPins) { local, server ->
                 val combined = mutableMapOf<String, PinUpdateAtTime>()
                 combined.putAll(local)
@@ -686,6 +674,7 @@ public class CallState internal constructor(
                 }
             },
             restartableProducerScope,
+            emptyMap(),
         )
 
         pinnedParticipants = _pinnedParticipants
@@ -700,7 +689,6 @@ public class CallState internal constructor(
         sortedParticipants = _sortedParticipantsState.asFlow().debounce(100)
 
         liveDurationInMs = RestartableStateFlow(
-            null,
             flow {
                 while (currentCoroutineContext().isActive) {
                     delay(1000)
@@ -716,10 +704,34 @@ public class CallState internal constructor(
                 }
             }.distinctUntilChanged(),
             restartableProducerScope,
+            null,
         )
 
         liveDuration = liveDurationInMs.mapState { durationInMs ->
             durationInMs?.takeIf { it >= 1000 }?.let { (it / 1000).toDuration(DurationUnit.SECONDS) }
+        }
+
+        livestream = RestartableStateFlow(
+            livestreamFlow.debounce(1000),
+            restartableProducerScope,
+            null,
+            SharingStarted.WhileSubscribed(10_000L),
+        )
+        duration = RestartableStateFlow(
+            _durationInMs.transform {
+                emit(((it ?: 0L) / 1000L).toDuration(DurationUnit.SECONDS))
+            },
+            restartableProducerScope, null, SharingStarted.WhileSubscribed(10000L),
+        )
+        durationInMs = RestartableStateFlow(_durationInMs, restartableProducerScope, null, SharingStarted.WhileSubscribed(10000L))
+        durationInDateFormat = durationInMs.mapState { durationInMs ->
+            if (durationInMs == null) {
+                null
+            } else {
+                val date = Date(durationInMs)
+                val dateFormat = SimpleDateFormat("HH:MM:SS", Locale.US)
+                dateFormat.format(date)
+            }
         }
     }
 
@@ -1428,7 +1440,7 @@ public class CallState internal constructor(
         } else {
             ParticipantState(
                 sessionId = sessionId,
-                scope = scope,
+                restartableProducerScope = restartableProducerScope,
                 callActions = callActions,
                 initialUserId = userId,
                 source = source,
