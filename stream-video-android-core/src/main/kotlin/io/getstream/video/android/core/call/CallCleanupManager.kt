@@ -25,7 +25,6 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomCal
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.safeCall
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
@@ -37,10 +36,10 @@ import kotlin.sequences.forEach
 internal class CallCleanupManager(
     private val call: Call,
     private val sessionManager: CallSessionManager,
+    private val callApiDelegate: CallApiDelegate,
     private val client: StreamVideoClient,
     private val callReInitializer: CallReInitializer,
     private val mediaManagerProvider: () -> MediaManagerImpl, // ← Lambda provider
-    private val clientScope: CoroutineScope,
     private val callStatsReporter: CallStatsReporter,
 ) {
     private val logger by taggedLogger("CallLifecycleManager")
@@ -78,13 +77,11 @@ internal class CallCleanupManager(
     private fun internalLeave(disconnectionReason: Throwable?, reason: String) = call.atomicLeave {
         sessionManager.cleanupMonitor()
 
+        val currentSession = sessionManager.session.get()
         // Leave session
-        sessionManager.session.get()?.leaveWithReason(
+        currentSession?.leaveWithReason(
             "[reason=$reason, error=${disconnectionReason?.message}]",
         )
-
-        // Cancel network monitoring
-        sessionManager.cleanupNetworkMonitoring()
 
         // Update connection state
         call.state._connection.value = RealtimeConnection.Disconnected
@@ -99,9 +96,11 @@ internal class CallCleanupManager(
         /**
          * TODO Rahul, need to check which call has owned the media at the moment(probably use active call)
          */
-        call.stopScreenSharing()
-        mediaManager.camera.disable()
-        mediaManager.microphone.disable()
+        callApiDelegate.stopScreenSharing()
+        with(mediaManager) {
+            camera.disable()
+            microphone.disable()
+        }
 
         if (call.id == client.state.activeCall.value?.id) {
             client.state.removeActiveCall(call) // Will also stop CallService
@@ -118,12 +117,15 @@ internal class CallCleanupManager(
 
         val newCleanupJob = client.scope.launch {
             safeCall {
-                sessionManager.session.get()?.sfuTracer?.trace(
-                    "leave-call",
-                    "[reason=$reason, error=${disconnectionReason?.message}]",
-                )
-                val stats = callStatsReporter.collectStats(sessionManager.session.get())
-                sessionManager.session.get()?.sendCallStats(stats)
+                currentSession?.let { session ->
+                    with(session) {
+                        sfuTracer.trace(
+                            "leave-call",
+                            "[reason=$reason, error=${disconnectionReason?.message}]",
+                        )
+                        session.sendCallStats(callStatsReporter.collectStats(session))
+                    }
+                }
             }
             cleanup()
         }

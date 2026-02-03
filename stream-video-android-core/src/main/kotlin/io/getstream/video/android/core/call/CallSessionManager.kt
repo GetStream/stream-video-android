@@ -373,10 +373,6 @@ internal class CallSessionManager(
         sfuEventMonitor.stop()
     }
 
-    fun cleanupNetworkMonitoring() {
-        networkSubscriptionController.stop()
-    }
-
     fun reset() {
         this.sessionId.set(UUID.randomUUID().toString())
     }

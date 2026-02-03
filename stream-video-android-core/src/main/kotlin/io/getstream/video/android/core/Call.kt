@@ -392,7 +392,7 @@ public class Call(
             MediaManagerImpl(
                 clientImpl.context,
                 this,
-                scope,
+                restartableProducerScope,
                 eglBase.eglBaseContext,
                 clientImpl.callServiceConfigRegistry.get(type).audioUsage,
             ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }
@@ -452,10 +452,10 @@ public class Call(
     private val callCleanupManager = CallCleanupManager(
         call = this,
         sessionManager = sessionManager,
+        callApiDelegate = apiDelegate,
         client = clientImpl,
         mediaManagerProvider = { mediaManager },
         callReInitializer = callReInitializer,
-        clientScope = clientImpl.scope,
         callStatsReporter = callStatsReporter,
     )
     init {
@@ -940,9 +940,13 @@ public class Call(
     }
 
     /** Leave the call, but don't end it for other users */
-    fun leave(reason: String = "user") {
+    fun leave1(reason: String = "user") {
         logger.d { "[leave] #ringing; no args, call_cid:$cid" }
         internalLeave(null, reason)
+    }
+
+    fun leave(reason: String = "user") {
+        callCleanupManager.leave(reason)
     }
 
     private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {

@@ -7616,6 +7616,8 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun kickUser$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun leave (Ljava/lang/String;)V
 	public static synthetic fun leave$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun leave1 (Ljava/lang/String;)V
+	public static synthetic fun leave1$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun listRecordings (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun listRecordings$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun listTranscription (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
