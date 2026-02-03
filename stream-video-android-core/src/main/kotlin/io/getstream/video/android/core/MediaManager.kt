@@ -739,7 +739,15 @@ class MicrophoneManager(
             logger.d {
                 "[setup] setupCompleted = ${setupCompleted.get()}, mediaManagerSetupState = ${mediaManagerSetupState.get()}"
             }
-            if (mediaManagerSetupState.get() != MediaManagerSetupState.NONE) return
+            val localMediaManagerSetupState = mediaManagerSetupState.get()
+            when (localMediaManagerSetupState) {
+                MediaManagerSetupState.FINISHED -> {
+                    onAudioDevicesUpdate?.invoke()
+                    return@synchronized
+                }
+                MediaManagerSetupState.STARTED -> return@synchronized // TODO Rahul, ideally the method call should be queued. Test this before merge
+                else -> {}
+            }
 
             mediaManagerSetupState.set(MediaManagerSetupState.STARTED)
 
@@ -1429,7 +1437,3 @@ class MediaManagerImpl(
 }
 
 fun MediaStreamTrack.trySetEnabled(enabled: Boolean) = safeCall { setEnabled(enabled) }
-
-internal enum class MediaManagerSetupState {
-    NONE, STARTED, FINISHED
-}
