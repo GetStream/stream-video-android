@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.call
 
 import android.annotation.SuppressLint
+import android.content.Context.POWER_SERVICE
 import android.os.PowerManager
 import androidx.lifecycle.AtomicReference
 import io.getstream.android.video.generated.models.JoinCallResponse
@@ -31,6 +32,7 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.UUID
@@ -41,11 +43,11 @@ import kotlin.toString
 internal class CallSessionManager(
     private val call: Call,
     private val clientImpl: StreamVideoClient,
-    private val powerManager: PowerManager?,
     private val testInstanceProvider: Call.Companion.TestInstanceProvider,
 
 ) {
     private val logger by taggedLogger("CallSessionManager")
+    private var powerManager: PowerManager? = null
 
     /** Session handles all real time communication for video and audio */
     internal var session: AtomicReference<RtcSession?> = AtomicReference(null)
@@ -86,6 +88,12 @@ internal class CallSessionManager(
         CallIceConnectionMonitor(call.restartableProducerScope, { session.get() })
     val networkSubscriptionController =
         CallNetworkSubscriptionController(network, callConnectivityMonitor.listener)
+
+    init {
+        powerManager = safeCallWithDefault(null) {
+            clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
+        }
+    }
 
     @SuppressLint("VisibleForTests")
     internal suspend fun _join(

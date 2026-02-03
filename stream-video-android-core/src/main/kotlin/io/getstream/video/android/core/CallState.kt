@@ -83,6 +83,7 @@ import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
+import io.getstream.video.android.core.call.CallSessionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.coroutines.flows.RestartableStateFlow
@@ -184,6 +185,7 @@ public class CallState internal constructor(
     private val call: Call,
     private val user: User,
     private val restartableProducerScope: RestartableProducerScope,
+    private val sessionManager: () -> CallSessionManager, // Todo Rahul, can be made non-lambda
 ) {
 
     @Deprecated(
@@ -196,14 +198,14 @@ public class CallState internal constructor(
         call: Call,
         user: User,
         scope: CoroutineScope,
-    ) : this(client, call, user, call.restartableProducerScope)
+    ) : this(client, call, user, call.restartableProducerScope, { call.sessionManager })
 
     private val logger by taggedLogger("CallState")
     private var participantsVisibilityMonitor: Job? = null
 
     @InternalStreamVideoApi
     val scope: CoroutineScope
-        get() = call.scope
+        get() = restartableProducerScope
 
     // Create a CallActions implementation that delegates to the Call object
     @InternalStreamVideoApi
@@ -221,15 +223,15 @@ public class CallState internal constructor(
         }
 
         override suspend fun pinParticipant(userId: String, sessionId: String) {
-            call.state.pin(userId, sessionId)
+            pin(userId, sessionId)
         }
 
         override suspend fun unpinParticipant(sessionId: String) {
-            call.state.unpin(sessionId)
+            unpin(sessionId)
         }
 
         override fun isLocalParticipant(sessionId: String): Boolean {
-            return sessionId == call.sessionId
+            return sessionId == sessionManager().sessionId.get()
         }
     }
 
@@ -263,7 +265,9 @@ public class CallState internal constructor(
 
     /** Your own participant state */
     public val me: StateFlow<ParticipantState?> = _participants.mapState { map ->
-        map[call.sessionId] ?: participants.value.find { it.isLocal }
+        map[sessionManager.invoke().sessionId.get()] ?: participants.value.find {
+            it.isLocal
+        } // TODO Rahul, made this needs to go inside init {}
     }
 
     /** Your own participant state */
@@ -276,7 +280,9 @@ public class CallState internal constructor(
 
     /** participants other than yourself */
     public val remoteParticipants: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.filterKeys { key -> key != call.sessionId }.values.toList() }
+        _participants.mapState {
+            it.filterKeys { key -> key != sessionManager.invoke().sessionId.get() }.values.toList()
+        } // TODO Rahul, made this needs to go inside init {}
 
     /** the dominant speaker */
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
@@ -826,7 +832,7 @@ public class CallState internal constructor(
             }
 
             is CallEndedEvent -> {
-                call.state.cancelTimeout()
+                cancelTimeout()
                 updateFromResponse(event.call)
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
@@ -976,7 +982,7 @@ public class CallState internal constructor(
             }
 
             is ChangePublishQualityEvent -> {
-                call.session?.handleEvent(event)
+                sessionManager().session.get()?.handleEvent(event)
             }
 
             is ErrorEvent -> {
@@ -1187,9 +1193,9 @@ public class CallState internal constructor(
                 scope.launch {
                     val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
                     if (callServiceConfig.moderationConfig.videoModerationConfig.enable) {
-                        call.state.moderationManager.applyVideoModeration()
+                        moderationManager.applyVideoModeration()
                         delay(callServiceConfig.moderationConfig.videoModerationConfig.blurDuration)
-                        call.state.moderationManager.clearVideoModeration()
+                        moderationManager.clearVideoModeration()
                     }
                 }
             }

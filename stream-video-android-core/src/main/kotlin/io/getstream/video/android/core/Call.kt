@@ -59,12 +59,14 @@ import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.CallApiDelegate
+import io.getstream.video.android.core.call.CallCleanupManager
 import io.getstream.video.android.core.call.CallEventManager
 import io.getstream.video.android.core.call.CallJoinCoordinator
 import io.getstream.video.android.core.call.CallMediaManager
 import io.getstream.video.android.core.call.CallReInitializer
 import io.getstream.video.android.core.call.CallRenderer
 import io.getstream.video.android.core.call.CallSessionManager
+import io.getstream.video.android.core.call.CallStatsReporter
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -87,8 +89,6 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
-import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
@@ -98,7 +98,6 @@ import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -155,16 +154,21 @@ public class Call(
     internal var atomicLeave = AtomicUnitCall()
 
     private val logger by taggedLogger("Call:$type:$id")
-    private val supervisorJob = SupervisorJob()
+
     private var callStatsReportingJob: Job? = null
     private var powerManager: PowerManager? = null
 
-    internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
-
     internal val restartableProducerScope = RestartableProducerScope()
 
+    private val callReInitializer = CallReInitializer(clientImpl.scope) {
+        reInitialise()
+    }
+
+    internal val scope: CoroutineScope
+        get() = callReInitializer.currentScope
+
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(client, this, user, restartableProducerScope)
+    val state = CallState(client, this, user, restartableProducerScope, { sessionManager })
 
     private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 
@@ -283,7 +287,6 @@ public class Call(
     internal val sessionManager = CallSessionManager(
         call = this,
         clientImpl = clientImpl,
-        powerManager = powerManager,
         testInstanceProvider = testInstanceProvider,
     )
 
@@ -304,10 +307,6 @@ public class Call(
     )
     internal val callEventManager =
         CallEventManager(events, sessionManager, restartableProducerScope, { subscriptions })
-
-    private val callReInitializer = CallReInitializer(clientImpl.scope) {
-        reInitialise()
-    }
 
     internal val callJoinCoordinator = CallJoinCoordinator(
         call = this,
@@ -449,7 +448,16 @@ public class Call(
     private var monitorSubscriberPCStateJob: Job? = null
     private var sfuEvents: Job? = null
     private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(scope)
-
+    private val callStatsReporter: CallStatsReporter = CallStatsReporter(this)
+    private val callCleanupManager = CallCleanupManager(
+        call = this,
+        sessionManager = sessionManager,
+        client = clientImpl,
+        mediaManagerProvider = { mediaManager },
+        callReInitializer = callReInitializer,
+        clientScope = clientImpl.scope,
+        callStatsReporter = callStatsReporter,
+    )
     init {
         scope.launch {
             soundInputProcessor.currentAudioLevel.collect {
@@ -459,6 +467,7 @@ public class Call(
         powerManager = safeCallWithDefault(null) {
             clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
+        restartableProducerScope.attach(scope)
     }
 
     /** Basic crud operations */
@@ -1354,11 +1363,7 @@ public class Call(
 
     // This will allow the Rest APIs to be executed which are in queue before leave
     private fun shutDownJobsGracefully() {
-        UserScope(ClientScope()).launch {
-            supervisorJob.children.forEach { it.join() }
-            supervisorJob.cancel()
-        }
-        scope.cancel()
+        callCleanupManager.shutDownJobsGracefully()
     }
 
     suspend fun ring(): Result<GetCallResponse> {
