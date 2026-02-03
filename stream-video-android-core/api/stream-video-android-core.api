@@ -7649,6 +7649,7 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun setIncomingVideoEnabled$default (Lio/getstream/video/android/core/Call;Ljava/lang/Boolean;Ljava/util/List;ILjava/lang/Object;)V
 	public final fun setPreferredIncomingVideoResolution (Lio/getstream/video/android/core/model/PreferredVideoResolution;Ljava/util/List;)V
 	public static synthetic fun setPreferredIncomingVideoResolution$default (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/PreferredVideoResolution;Ljava/util/List;ILjava/lang/Object;)V
+	public final fun setSessionId (Ljava/lang/String;)V
 	public final fun setVideoFilter (Lio/getstream/video/android/core/call/video/VideoFilter;)V
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLjava/lang/String;)V
 	public final fun setVisibility (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLjava/lang/String;II)V

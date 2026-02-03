@@ -359,7 +359,7 @@ internal class CallSessionManager(
     }
 
     private suspend fun schedule(key: String, block: suspend () -> Unit) {
-        logger.d { "[schedule] #reconnect; no args" }
+        logger.d { "[schedule] #reconnect; no args, key: $key" }
         streamSingleFlightProcessorImpl.run(key, block)
     }
 

@@ -288,8 +288,15 @@ public class Call(
 
     internal val session: RtcSession?
         get() = sessionManager.session.get()
-    val sessionId: String
+
+    var sessionId: String
         get() = sessionManager.sessionId.get()
+        @Deprecated(
+            message = "Setter kept for binary compatibility. Do not use.", //TODO Rahul ask in Pr Review, whether to mark it deprecated or not
+            level = DeprecationLevel.ERROR
+        )
+        set(value) = sessionManager.sessionId.set(value)
+
     internal val reconnectAttempts: Int
         get() = sessionManager.reconnectAttempts
 
@@ -332,6 +339,7 @@ public class Call(
             attach(scope)
         }
     }
+
 
     /**
      * Checks if the audioBitrateProfile has changed since the factory was created,
