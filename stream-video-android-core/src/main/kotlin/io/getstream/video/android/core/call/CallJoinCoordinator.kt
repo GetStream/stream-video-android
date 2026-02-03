@@ -73,7 +73,6 @@ internal class CallJoinCoordinator(
 
         // CRITICAL: Reset isDestroyed for new session
         call.isDestroyed.set(false)
-        logger.d { "[join] isDestroyed reset to false for new session" }
 
         val permissionPass =
             client.permissionCheck.checkAndroidPermissionsGroup(client.context, call)
@@ -115,7 +114,6 @@ internal class CallJoinCoordinator(
             }
             if (result is Failure) {
                 onJoinFail()
-//                session = null
                 logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     call.state._connection.value = RealtimeConnection.Failed(result.value)
@@ -131,10 +129,9 @@ internal class CallJoinCoordinator(
 
     private fun onJoinFailAfterAllRetries(): Result<RtcSession> {
         onJoinFail()
-//        session = null
         val errorMessage = "Join failed after 3 retries"
         call.state._connection.value = RealtimeConnection.Failed(errorMessage)
-        return Failure(value = io.getstream.result.Error.GenericError(errorMessage))
+        return Failure(value = Error.GenericError(errorMessage))
     }
 
     @SuppressLint("VisibleForTests")

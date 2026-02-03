@@ -37,7 +37,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
 
         // Rejoin
         call.rejoin()
-        assertEquals(1, call.reconnectAttepmts)
+        assertEquals(1, call.reconnectAttempts)
     }
 
     @Test
@@ -49,7 +49,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
 
         // Rejoin
         call.fastReconnect()
-        assertEquals(0, call.reconnectAttepmts)
+        assertEquals(0, call.reconnectAttempts)
     }
 
     @Test
@@ -62,6 +62,6 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
         // Rejoin
         call.rejoin()
         call.rejoin()
-        assertEquals(2, call.reconnectAttepmts)
+        assertEquals(2, call.reconnectAttempts)
     }
 }

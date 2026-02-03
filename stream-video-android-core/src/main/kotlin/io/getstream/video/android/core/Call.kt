@@ -148,7 +148,6 @@ public class Call(
     internal var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
-    internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
     internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
@@ -245,8 +244,10 @@ public class Call(
 //    var sessionId = UUID.randomUUID().toString()
     internal val unifiedSessionId = UUID.randomUUID().toString()
 
-    internal var connectStartTime = 0L
-    internal var reconnectStartTime = 0L
+    internal val connectStartTime: Long
+        get() = sessionManager.connectStartTime
+    internal val reconnectStartTime: Long
+        get() = sessionManager.reconnectStartTime
 
     /**
      * EGL base context shared between peerConnectionFactory and mediaManager
@@ -290,6 +291,8 @@ public class Call(
         get() = sessionManager.session.get()
     val sessionId: String
         get() = sessionManager.sessionId.get()
+    internal val reconnectAttempts: Int
+        get() = sessionManager.reconnectAttempts
 
     private val apiDelegate = CallApiDelegate(
         clientImpl = clientImpl,
@@ -501,7 +504,7 @@ public class Call(
         return apiDelegate.update(custom, settingsOverride, startsAt)
     }
 
-    suspend fun join(
+    suspend fun join1(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
         ring: Boolean = false,
@@ -580,7 +583,7 @@ public class Call(
         return Failure(value = Error.GenericError(errorMessage))
     }
 
-    suspend fun join1(
+    suspend fun join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
         ring: Boolean = false,
@@ -623,7 +626,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
-        reconnectAttepmts = 0
+        sessionManager.reconnectAttempts = 0
         sfuEvents?.cancel()
 
         if (sessionManager.session.get() != null) {
@@ -633,7 +636,7 @@ public class Call(
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
 
-        connectStartTime = System.currentTimeMillis()
+        sessionManager.connectStartTime = System.currentTimeMillis()
 
         // step 1. call the join endpoint to get a list of SFUs
         val locationResult = clientImpl.getCachedLocation()
@@ -654,10 +657,10 @@ public class Call(
             return result as Failure
         }
         try {
-            val session = sessionManager.createJoinRtcSessionInner(result.value)
-            sessionManager.session.set(session)
-            state._connection.value = RealtimeConnection.Joined(session)
-            session.connect()
+            val localSession = sessionManager.createJoinRtcSessionInner(result.value)
+            sessionManager.session.set(localSession)
+            state._connection.value = RealtimeConnection.Joined(localSession)
+            localSession.connect()
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
@@ -758,11 +761,11 @@ public class Call(
      */
     suspend fun fastReconnect(reason: String = "unknown") = schedule("fast") {
         val session = sessionManager.session.get()
-        logger.d { "[fastReconnect] Reconnecting, reconnectAttepmts:$reconnectAttepmts" }
+        logger.d { "[fastReconnect] Reconnecting, reconnectAttepmts:$reconnectAttempts" }
         session?.prepareReconnect()
         this@Call.state._connection.value = RealtimeConnection.Reconnecting
         if (session != null) {
-            reconnectStartTime = System.currentTimeMillis()
+            sessionManager.reconnectStartTime = System.currentTimeMillis()
 
 //            val session = session!!
             val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
@@ -771,7 +774,7 @@ public class Call(
                 strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                 announced_tracks = publishingInfo,
                 subscriptions = subscriptionsInfo,
-                reconnect_attempt = reconnectAttepmts,
+                reconnect_attempt = reconnectAttempts,
                 reason = reason,
             )
             session.fastReconnect(reconnectDetails)
@@ -789,10 +792,10 @@ public class Call(
     suspend fun rejoin(reason: String = "unknown") = schedule("rejoin") {
         val session = sessionManager.session.get()
         logger.d { "[rejoin] Rejoining" }
-        reconnectAttepmts++
+        sessionManager.reconnectAttempts++
         state._connection.value = RealtimeConnection.Reconnecting
         location?.let {
-            reconnectStartTime = System.currentTimeMillis()
+            sessionManager.reconnectStartTime = System.currentTimeMillis()
 
             val joinResponse = joinRequest(location = it)
             if (joinResponse is Success) {
@@ -809,7 +812,7 @@ public class Call(
                     strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
                     announced_tracks = publishingInfo,
                     subscriptions = subscriptionsInfo,
-                    reconnect_attempt = reconnectAttepmts,
+                    reconnect_attempt = reconnectAttempts,
                     reason = reason,
                 )
                 this.state.removeParticipant(prevSessionId)
@@ -818,7 +821,7 @@ public class Call(
                 try {
                     val session = RtcSession(
                         clientImpl,
-                        reconnectAttepmts,
+                        reconnectAttempts,
                         powerManager,
                         this,
                         sessionManager.sessionId.get(),
@@ -860,7 +863,7 @@ public class Call(
         logger.d { "[migrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         location?.let {
-            reconnectStartTime = System.currentTimeMillis()
+            sessionManager.reconnectStartTime = System.currentTimeMillis()
 
             val joinResponse = joinRequest(location = it)
             if (joinResponse is Success) {
@@ -879,13 +882,13 @@ public class Call(
                     announced_tracks = publishingInfo,
                     subscriptions = subscriptionsInfo,
                     from_sfu_id = oldSfuUrl,
-                    reconnect_attempt = reconnectAttepmts,
+                    reconnect_attempt = reconnectAttempts,
                 )
                 session.prepareRejoin()
                 try {
                     val newSession = RtcSession(
                         clientImpl,
-                        reconnectAttepmts,
+                        reconnectAttempts,
                         powerManager,
                         this,
                         sessionId,

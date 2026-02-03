@@ -51,7 +51,8 @@ internal class CallSessionManager(
     internal var session: AtomicReference<RtcSession?> = AtomicReference(null)
     internal var sessionId: AtomicReference<String> = AtomicReference(UUID.randomUUID().toString())
 
-    private var reconnectAttempts = 0
+    // TODO Rahul, these variables could be atomicInt or AtomicLong, not sure yet
+    internal var reconnectAttempts = 0
     internal var reconnectStartTime = 0L
     internal var connectStartTime = 0L
 
@@ -96,7 +97,7 @@ internal class CallSessionManager(
         reconnectAttempts = 0
         sfuEventMonitor.stop()
 
-        if (session != null) {
+        if (session.get() != null) {
             return Failure(Error.GenericError("Call $call.cid has already been joined"))
         }
         logger.d {
@@ -124,7 +125,10 @@ internal class CallSessionManager(
         }
 
         try {
-            createJoinRtcSession(result.value)
+            val localSession = createJoinRtcSessionInner(result.value)
+            session.set(localSession)
+            call.state._connection.value = RealtimeConnection.Joined(localSession)
+            localSession.connect()
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
@@ -151,7 +155,7 @@ internal class CallSessionManager(
         }
         session.get()?.prepareReconnect()
         call.state._connection.value = RealtimeConnection.Reconnecting
-        if (session != null) {
+        if (session.get() != null) {
             reconnectStartTime = System.currentTimeMillis()
 
             val session = session.get()!!
@@ -265,13 +269,6 @@ internal class CallSessionManager(
                 call.state._connection.value = RealtimeConnection.Reconnecting
             }
         }
-    }
-
-    // TODO Rahul, refactor before using
-    suspend fun createJoinRtcSession(result: JoinCallResponse) {
-        session.set(createJoinRtcSessionInner(result))
-        session.get()?.let { call.state._connection.value = RealtimeConnection.Joined(it) }
-        session.get()?.connect()
     }
 
     fun createJoinRtcSessionInner(result: JoinCallResponse): RtcSession {
