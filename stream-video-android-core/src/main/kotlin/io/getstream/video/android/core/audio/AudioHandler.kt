@@ -76,11 +76,15 @@ public class AudioSwitchHandler(
     }
 
     override fun stop() {
-        logger.d { "[stop] no args" }
-        mainThreadHandler.removeCallbacksAndMessages(null)
-        mainThreadHandler.post {
-            audioSwitch?.stop()
-            audioSwitch = null
+        synchronized(this) {
+            logger.d { "[stop] no args" }
+            mainThreadHandler.removeCallbacksAndMessages(null)
+            mainThreadHandler.post {
+                audioSwitch?.stop()
+                audioSwitch = null
+            }
+            // Reset flag to allow restart after stop
+            isAudioSwitchInitScheduled = false
         }
     }
 

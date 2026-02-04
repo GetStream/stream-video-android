@@ -90,7 +90,7 @@ import java.net.ConnectException
  * @property audioProcessing The audio processor used for custom modifications to audio data within WebRTC.
  * @property callServiceConfigRegistry The audio processor used for custom modifications to audio data within WebRTC.
  * @property leaveAfterDisconnectSeconds The number of seconds to wait before leaving the call after the connection is disconnected.
- * @property callUpdatesAfterLeave Whether to update the call state after leaving the call.
+ * @property callUpdatesAfterLeave [Deprecated] This parameter is no longer needed. Call updates are now always enabled after leave().
  * @property connectOnInit Determines whether the socket should automatically connect as soon as a user is set.
  *          If `false`, the connection is established only when explicitly requested or when core SDK features
  *          (such as audio or video calls) are used.
@@ -147,6 +147,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val appName: String? = null,
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
     private val leaveAfterDisconnectSeconds: Long = 30,
+    @Deprecated(
+        message = "This parameter is no longer needed. Call updates are now always enabled after leave() to support call reusability.",
+        level = DeprecationLevel.WARNING,
+    )
     private val callUpdatesAfterLeave: Boolean = false,
     private val enableStatsReporting: Boolean = true,
     @InternalStreamVideoApi
