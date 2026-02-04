@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 }
 
 include(":convention")
+include(":code-guard")

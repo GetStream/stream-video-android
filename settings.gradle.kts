@@ -10,6 +10,9 @@ pluginManagement {
         mavenCentral()
         mavenLocal()
     }
+    plugins {
+        kotlin("jvm") version "1.9.25"
+    }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -25,6 +28,9 @@ plugins {
     id("com.github.burrunan.s3-build-cache").version("1.2")
 }
 rootProject.name = "stream-video-android"
+
+include(":hello-compiler-plugin")
+project(":hello-compiler-plugin").projectDir = file("build-logic/hello-compiler-plugin")
 
 // Sample apps
 include(":demo-app")
