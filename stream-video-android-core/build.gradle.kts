@@ -16,10 +16,6 @@
 import io.getstream.video.android.Configuration
 import java.io.FileInputStream
 import java.util.Properties
-import org.gradle.jvm.tasks.Jar
-
-val helloCompilerPluginJar = project(":hello-compiler-plugin").tasks.named<Jar>("jar")
-val helloCompilerPluginJarArchive = helloCompilerPluginJar.flatMap { it.archiveFile }
 
 plugins {
     id("io.getstream.video.android.library")
@@ -27,6 +23,7 @@ plugins {
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.kotlin.parcelize.get().pluginId)
     id(libs.plugins.wire.get().pluginId)
+    id("io.getstream.video.buildlogic.hello-compiler-convention")
 }
 
 wire {
@@ -233,13 +230,6 @@ dependencies {
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.turbine)
-
-    add("kotlinCompilerPluginClasspath", project(":hello-compiler-plugin"))
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    dependsOn(helloCompilerPluginJar)
-    kotlinOptions.freeCompilerArgs += "-Xplugin=${helloCompilerPluginJarArchive.get().asFile.absolutePath}"
 }
 
 afterEvaluate {

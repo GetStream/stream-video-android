@@ -528,9 +528,8 @@ public class Call(
         type: String,
         emoji: String? = null,
         custom: Map<String, Any>? = null,
-    ): Result<SendReactionResponse> {
-        return clientImpl.sendReaction(this.type, id, type, emoji, custom)
-    }
+    ): Result<SendReactionResponse> =
+        clientImpl.sendReaction(this.type, id, type, emoji, custom)
 
     suspend fun queryMembers(
         filter: Map<String, Any>,

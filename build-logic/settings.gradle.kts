@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 include(":convention")
 include(":code-guard")
+include(":hello-compiler-convention")
