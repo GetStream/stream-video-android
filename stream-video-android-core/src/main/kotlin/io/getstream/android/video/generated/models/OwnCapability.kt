@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -66,11 +66,15 @@ sealed class OwnCapability(val value: kotlin.String) {
             "start-broadcast-call" -> StartBroadcastCall
             "start-closed-captions-call" -> StartClosedCaptionsCall
             "start-frame-record-call" -> StartFrameRecordCall
+            "start-individual-record-call" -> StartIndividualRecordCall
+            "start-raw-record-call" -> StartRawRecordCall
             "start-record-call" -> StartRecordCall
             "start-transcription-call" -> StartTranscriptionCall
             "stop-broadcast-call" -> StopBroadcastCall
             "stop-closed-captions-call" -> StopClosedCaptionsCall
             "stop-frame-record-call" -> StopFrameRecordCall
+            "stop-individual-record-call" -> StopIndividualRecordCall
+            "stop-raw-record-call" -> StopRawRecordCall
             "stop-record-call" -> StopRecordCall
             "stop-transcription-call" -> StopTranscriptionCall
             "update-call" -> UpdateCall
@@ -101,11 +105,15 @@ sealed class OwnCapability(val value: kotlin.String) {
     object StartBroadcastCall : OwnCapability("start-broadcast-call")
     object StartClosedCaptionsCall : OwnCapability("start-closed-captions-call")
     object StartFrameRecordCall : OwnCapability("start-frame-record-call")
+    object StartIndividualRecordCall : OwnCapability("start-individual-record-call")
+    object StartRawRecordCall : OwnCapability("start-raw-record-call")
     object StartRecordCall : OwnCapability("start-record-call")
     object StartTranscriptionCall : OwnCapability("start-transcription-call")
     object StopBroadcastCall : OwnCapability("stop-broadcast-call")
     object StopClosedCaptionsCall : OwnCapability("stop-closed-captions-call")
     object StopFrameRecordCall : OwnCapability("stop-frame-record-call")
+    object StopIndividualRecordCall : OwnCapability("stop-individual-record-call")
+    object StopRawRecordCall : OwnCapability("stop-raw-record-call")
     object StopRecordCall : OwnCapability("stop-record-call")
     object StopTranscriptionCall : OwnCapability("stop-transcription-call")
     object UpdateCall : OwnCapability("update-call")

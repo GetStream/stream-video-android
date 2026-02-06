@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,9 @@ data class CallRecordingStartedEvent (
     @Json(name = "egress_id")
     val egressId: kotlin.String,
 
+    @Json(name = "recording_type")
+    val recordingType: RecordingType,
+
     @Json(name = "type")
     val type: kotlin.String
 )
@@ -60,5 +63,39 @@ data class CallRecordingStartedEvent (
 
     override fun getCallCID(): kotlin.String {
         return callCid
+    }
+    
+    /**
+    * RecordingType Enum
+    */
+    sealed class RecordingType(val value: kotlin.String) {
+            override fun toString(): String = value
+
+            companion object {
+                fun fromString(s: kotlin.String): RecordingType = when (s) {
+                    "composite" -> Composite
+                    "individual" -> Individual
+                    "raw" -> Raw
+                    else -> Unknown(s)
+                }
+            }
+            object Composite : RecordingType("composite")
+            object Individual : RecordingType("individual")
+            object Raw : RecordingType("raw")
+            data class Unknown(val unknownValue: kotlin.String) : RecordingType(unknownValue)
+        
+
+        class RecordingTypeAdapter : JsonAdapter<RecordingType>() {
+            @FromJson
+            override fun fromJson(reader: JsonReader): RecordingType? {
+                val s = reader.nextString() ?: return null
+                return RecordingType.fromString(s)
+            }
+
+            @ToJson
+            override fun toJson(writer: JsonWriter, value: RecordingType?) {
+                writer.value(value?.value)
+            }
+        }
     }    
 }

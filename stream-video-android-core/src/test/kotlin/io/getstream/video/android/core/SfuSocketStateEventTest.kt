@@ -54,12 +54,24 @@ class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false
     fun `test start and stop recording`() = runTest {
         // start by sending the start recording event
         val event =
-            CallRecordingStartedEvent(callCid = call.cid, nowUtc, "", "call.recording_started")
+            CallRecordingStartedEvent(
+                callCid = call.cid,
+                nowUtc,
+                "",
+                CallRecordingStartedEvent.RecordingType.Composite,
+                "call.recording_started",
+            )
         clientImpl.fireEvent(event)
         assertThat(call.state.recording.value).isTrue()
         // now stop recording
         val stopRecordingEvent =
-            CallRecordingStoppedEvent(callCid = call.cid, nowUtc, "", "call.recording_stopped")
+            CallRecordingStoppedEvent(
+                callCid = call.cid,
+                nowUtc,
+                "",
+                CallRecordingStoppedEvent.RecordingType.Composite,
+                "call.recording_stopped",
+            )
         clientImpl.fireEvent(stopRecordingEvent)
         assertThat(call.state.recording.value).isFalse()
     }
