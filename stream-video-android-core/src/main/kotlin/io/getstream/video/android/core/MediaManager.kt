@@ -691,7 +691,7 @@ class MicrophoneManager(
     /**
      * Sets up USB audio device detection using Android's AudioDeviceCallback.
      *
-     * This detects USB input devices (microphones) that are not recognized by AudioSwitch,
+     * This detects USB input devices (microphones),
      * such as the Rode Wireless Go II and other professional USB microphones.
      *
      * Requires Android M (API 23) or higher.
@@ -752,6 +752,14 @@ class MicrophoneManager(
             "[updateUsbDeviceList] Found ${usbDevices.size} USB input devices: ${usbDevices.map { it.name }}"
         }
         _usbInputDevices.value = usbDevices
+
+        if (_selectedUsbDevice.value == null && usbDevices.isNotEmpty()) {
+            val defaultUsbDevice = usbDevices.first()
+            logger.i {
+                "[updateUsbDeviceList] Auto-selecting USB device: ${defaultUsbDevice.name}"
+            }
+            selectUsbDevice(defaultUsbDevice)
+        }
     }
 
     /**
@@ -894,6 +902,9 @@ class MicrophoneManager(
             audioManager = mediaManager.context.getSystemService()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                setupUsbDeviceDetection()
             }
 
             if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {
