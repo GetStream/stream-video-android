@@ -18,7 +18,9 @@ package io.getstream.video.android.core.call.connection
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioDeviceInfo
 import android.os.Build
+import androidx.annotation.RequiresApi
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.api.SignalServerService
@@ -335,6 +337,39 @@ public class StreamPeerConnectionFactory(
             }
 
         return adm
+    }
+
+    /**
+     * Sets the preferred audio input device for recording.
+     *
+     * This allows routing audio input to a specific device, such as a USB microphone
+     * that may not be detected by AudioSwitch (e.g., Rode Wireless Go II).
+     *
+     * Must be called on API 23+ (Android M). On older versions, this is a no-op.
+     *
+     * @param deviceInfo The AudioDeviceInfo to use for recording, or null to restore default routing.
+     * @return true if the preference was set successfully, false otherwise.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun setPreferredAudioInputDevice(deviceInfo: AudioDeviceInfo?): Boolean {
+        return try {
+            adm?.setPreferredInputDevice(deviceInfo)
+            audioLogger.i {
+                "[setPreferredAudioInputDevice] Set preferred input device: ${deviceInfo?.productName}"
+            }
+            true
+        } catch (e: Exception) {
+            audioLogger.e { "[setPreferredAudioInputDevice] Failed to set preferred device: ${e.message}" }
+            false
+        }
+    }
+
+    /**
+     * Clears the preferred audio input device, restoring default routing.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun clearPreferredAudioInputDevice() {
+        setPreferredAudioInputDevice(null)
     }
 
     /**

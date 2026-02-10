@@ -8103,6 +8103,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;ILkotlin/jvm/functions/Function0;)V
 	public final fun canHandleDeviceSwitch ()Z
 	public final fun cleanup ()V
+	public final fun clearUsbDeviceSelection ()V
 	public final fun disable (Z)V
 	public static synthetic fun disable$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
 	public final fun getAudioBitrateProfile ()Lkotlinx/coroutines/flow/StateFlow;
@@ -8111,17 +8112,22 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getSelectedUsbDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getUsbInputDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun listDevices ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun listUsbDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun pause (Z)V
 	public static synthetic fun pause$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
 	public final fun resume (Z)V
 	public static synthetic fun resume$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
 	public final fun select (Lio/getstream/video/android/core/audio/StreamAudioDevice;)V
+	public final fun selectUsbDevice (Lio/getstream/video/android/core/audio/UsbAudioInputDevice;)Z
 	public final fun setAudioBitrateProfile-gIAlu-s (Lstream/video/sfu/models/AudioBitrateProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setEnabled (ZZ)V
 	public static synthetic fun setEnabled$default (Lio/getstream/video/android/core/MicrophoneManager;ZZILjava/lang/Object;)V
+	public final fun setupUsbDeviceDetection ()V
 }
 
 public final class io/getstream/video/android/core/ParticipantState {
@@ -8593,6 +8599,27 @@ public final class io/getstream/video/android/core/audio/StreamAudioDevice$Wired
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/audio/UsbAudioInputDevice {
+	public static final field Companion Lio/getstream/video/android/core/audio/UsbAudioInputDevice$Companion;
+	public fun <init> (Landroid/media/AudioDeviceInfo;)V
+	public final fun component1 ()Landroid/media/AudioDeviceInfo;
+	public final fun copy (Landroid/media/AudioDeviceInfo;)Lio/getstream/video/android/core/audio/UsbAudioInputDevice;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/audio/UsbAudioInputDevice;Landroid/media/AudioDeviceInfo;ILjava/lang/Object;)Lio/getstream/video/android/core/audio/UsbAudioInputDevice;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeviceInfo ()Landroid/media/AudioDeviceInfo;
+	public final fun getId ()I
+	public final fun getName ()Ljava/lang/String;
+	public final fun getType ()I
+	public final fun getTypeName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/audio/UsbAudioInputDevice$Companion {
+	public final fun getUSB_INPUT_TYPES ()Ljava/util/List;
+	public final fun isUsbInputDevice (Landroid/media/AudioDeviceInfo;)Z
+}
+
 public abstract class io/getstream/video/android/core/call/CallType {
 	public static final field Companion Lio/getstream/video/android/core/call/CallType$Companion;
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -8710,6 +8737,7 @@ public class io/getstream/video/android/core/call/connection/StreamPeerConnectio
 public final class io/getstream/video/android/core/call/connection/StreamPeerConnectionFactory {
 	public fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
 	public synthetic fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clearPreferredAudioInputDevice ()V
 	public final fun getEglBase ()Lorg/webrtc/EglBase;
 	public final fun getSenderCapabilities (Lorg/webrtc/MediaStreamTrack$MediaType;)Lorg/webrtc/RtpCapabilities;
 	public final fun isAudioProcessingEnabled ()Z
@@ -8722,6 +8750,7 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun setAudioProcessingEnabled (Z)V
 	public final fun setAudioRecordDataCallback (Lkotlin/jvm/functions/Function4;)V
 	public final fun setAudioSampleCallback (Lkotlin/jvm/functions/Function1;)V
+	public final fun setPreferredAudioInputDevice (Landroid/media/AudioDeviceInfo;)Z
 	public final fun toggleAudioProcessing ()Z
 }
 
