@@ -132,6 +132,32 @@ internal class ServiceNotificationRetriever {
         return notificationData
     }
 
+    internal fun getNotificationId(
+        trigger: String,
+        streamVideo: StreamVideo,
+        streamCallId: StreamCallId,
+    ): Int {
+        val call = streamVideo.call(streamCallId.type, streamCallId.id)
+        return when (trigger) {
+            TRIGGER_ONGOING_CALL ->
+                call.state.notificationIdFlow.value
+                    ?: streamCallId.getNotificationId(NotificationType.Ongoing)
+
+            TRIGGER_INCOMING_CALL ->
+                call.state.notificationIdFlow.value
+                    ?: streamCallId.getNotificationId(NotificationType.Incoming)
+
+            TRIGGER_OUTGOING_CALL ->
+                call.state.notificationIdFlow.value
+                    ?: streamCallId.getNotificationId(NotificationType.Outgoing)
+
+            TRIGGER_REMOVE_INCOMING_CALL -> streamCallId.getNotificationId(
+                NotificationType.Incoming,
+            )
+            else -> streamCallId.hashCode()
+        }
+    }
+
     fun notificationConfig(): NotificationConfig {
         val client = StreamVideo.instanceOrNull() as StreamVideoClient
         return client.streamNotificationManager.notificationConfig
