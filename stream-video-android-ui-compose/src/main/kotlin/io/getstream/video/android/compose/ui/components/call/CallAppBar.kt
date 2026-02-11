@@ -32,7 +32,9 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,6 +53,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.Le
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.LeaveCall
+import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.R
@@ -128,7 +131,19 @@ internal fun DefaultCallAppBarLeadingContent(
 @Composable
 internal fun RowScope.DefaultCallAppBarCenterContent(call: Call, title: String) {
     val isReconnecting by call.state.isReconnecting.collectAsStateWithLifecycle()
-    val isRecording by call.state.recording.collectAsStateWithLifecycle()
+    val compositeRecording by call.state.recording.collectAsStateWithLifecycle()
+    val rawRecording by call.state.rawRecording.collectAsStateWithLifecycle()
+    val individualRecording by call.state.individualRecording.collectAsStateWithLifecycle()
+
+    val isRecording by remember {
+        derivedStateOf {
+            buildSet {
+                if (compositeRecording) add(RecordingType.Composite)
+                if (individualRecording) add(RecordingType.Individual)
+                if (rawRecording) add(RecordingType.Raw)
+            }.isNotEmpty()
+        }
+    }
     val duration by call.state.duration.collectAsStateWithLifecycle()
     CalLCenterContent(
         modifier = Modifier.align(CenterVertically),
