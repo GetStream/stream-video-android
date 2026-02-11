@@ -955,16 +955,19 @@ public class CallState(
             }
 
             is CallRecordingStoppedEvent -> {
-                _recording.value = false
                 when (event.recordingType) {
                     CallRecordingStoppedEvent.RecordingType.Individual ->
-                        _individualRecording.value =
-                            false
-
-                    CallRecordingStoppedEvent.RecordingType.Raw -> _rawRecording.value = false
-                    CallRecordingStoppedEvent.RecordingType.Composite -> _compositeRecording.value = false
+                        _individualRecording.value = false
+                    CallRecordingStoppedEvent.RecordingType.Raw ->
+                        _rawRecording.value = false
+                    CallRecordingStoppedEvent.RecordingType.Composite ->
+                        _compositeRecording.value = false
                     else -> {}
                 }
+                // Only set recording=false when ALL recording types are inactive
+                _recording.value = _compositeRecording.value ||
+                    _individualRecording.value ||
+                    _rawRecording.value
             }
 
             is CallLiveStartedEvent -> {
