@@ -250,7 +250,7 @@ internal fun SettingsMenu(
             }
         }
     }
-    val compositeRecording by call.state.recording.collectAsStateWithLifecycle()
+    val compositeRecording by call.state.compositeRecording.collectAsStateWithLifecycle()
     val individualRecording by call.state.individualRecording.collectAsStateWithLifecycle()
     val rawRecording by call.state.rawRecording.collectAsStateWithLifecycle()
     val enabledRecordingTypes by remember {

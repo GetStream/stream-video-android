@@ -1214,12 +1214,19 @@ public class Call(
         return clientImpl.requestPermissions(type, id, permission.toList())
     }
 
-    suspend fun startRecording(recordingType: RecordingType = RecordingType.Composite): Result<Any> {
+    suspend fun startRecording(): Result<Any> {
+        return startRecording(RecordingType.Composite)
+    }
+    suspend fun startRecording(recordingType: RecordingType): Result<Any> {
         return clientImpl.startRecording(type, id, recordingType = recordingType)
     }
 
-    suspend fun stopRecording(recordingType: RecordingType = RecordingType.Composite): Result<Any> {
-        return clientImpl.stopRecording(type, id, recordingType = recordingType)
+    suspend fun stopRecording(): Result<Any> {
+        return stopRecording(RecordingType.Composite)
+    }
+
+    suspend fun stopRecording(recordingType: RecordingType): Result<Any> {
+        return clientImpl.stopRecording(type, id, recordingType)
     }
 
     /**

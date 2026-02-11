@@ -471,6 +471,9 @@ public class CallState(
     private val _rawRecording: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val rawRecording: StateFlow<Boolean> = _rawRecording
 
+    private val _compositeRecording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val compositeRecording: StateFlow<Boolean> = _compositeRecording
+
     /** The list of users that are blocked from joining this call */
     private val _blockedUsers: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
     val blockedUsers: StateFlow<Set<String>> = _blockedUsers
@@ -937,25 +940,27 @@ public class CallState(
             }
 
             is CallRecordingStartedEvent -> {
+                _recording.value = true
                 when (event.recordingType) {
                     CallRecordingStartedEvent.RecordingType.Individual ->
                         _individualRecording.value =
                             true
 
                     CallRecordingStartedEvent.RecordingType.Raw -> _rawRecording.value = true
-                    CallRecordingStartedEvent.RecordingType.Composite -> _recording.value = true
+                    CallRecordingStartedEvent.RecordingType.Composite -> _compositeRecording.value = true
                     else -> {}
                 }
             }
 
             is CallRecordingStoppedEvent -> {
+                _recording.value = false
                 when (event.recordingType) {
                     CallRecordingStoppedEvent.RecordingType.Individual ->
                         _individualRecording.value =
                             false
 
                     CallRecordingStoppedEvent.RecordingType.Raw -> _rawRecording.value = false
-                    CallRecordingStoppedEvent.RecordingType.Composite -> _recording.value = false
+                    CallRecordingStoppedEvent.RecordingType.Composite -> _compositeRecording.value = false
                     else -> {}
                 }
             }
