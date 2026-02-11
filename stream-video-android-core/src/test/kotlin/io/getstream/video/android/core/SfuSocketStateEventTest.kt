@@ -174,6 +174,26 @@ class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false
         assertThat(call.state.compositeRecording.value).isFalse()
         assertThat(call.state.individualRecording.value).isTrue()
         assertThat(call.state.rawRecording.value).isTrue()
+
+        // Cleanup: stop remaining recordings to avoid polluting other tests
+        clientImpl.fireEvent(
+            CallRecordingStoppedEvent(
+                call.cid,
+                nowUtc,
+                "",
+                CallRecordingStoppedEvent.RecordingType.Individual,
+                "call.recording_stopped",
+            ),
+        )
+        clientImpl.fireEvent(
+            CallRecordingStoppedEvent(
+                call.cid,
+                nowUtc,
+                "",
+                CallRecordingStoppedEvent.RecordingType.Raw,
+                "call.recording_stopped",
+            ),
+        )
     }
 
     @Test
