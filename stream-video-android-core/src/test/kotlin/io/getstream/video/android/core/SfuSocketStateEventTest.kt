@@ -51,17 +51,149 @@ import stream.video.sfu.models.TrackType
 @RunWith(RobolectricTestRunner::class)
 class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
-    fun `test start and stop recording`() = runTest {
-        // start by sending the start recording event
-        val event =
-            CallRecordingStartedEvent(callCid = call.cid, nowUtc, "", "call.recording_started")
-        clientImpl.fireEvent(event)
+    fun `test start and stop composite recording`() = runTest {
+        val startEvent = CallRecordingStartedEvent(
+            callCid = call.cid,
+            nowUtc,
+            "",
+            CallRecordingStartedEvent.RecordingType.Composite,
+            "call.recording_started",
+        )
+        clientImpl.fireEvent(startEvent)
         assertThat(call.state.recording.value).isTrue()
-        // now stop recording
-        val stopRecordingEvent =
-            CallRecordingStoppedEvent(callCid = call.cid, nowUtc, "", "call.recording_stopped")
-        clientImpl.fireEvent(stopRecordingEvent)
+        assertThat(call.state.compositeRecording.value).isTrue()
+
+        val stopEvent = CallRecordingStoppedEvent(
+            callCid = call.cid,
+            nowUtc,
+            "",
+            CallRecordingStoppedEvent.RecordingType.Composite,
+            "call.recording_stopped",
+        )
+        clientImpl.fireEvent(stopEvent)
         assertThat(call.state.recording.value).isFalse()
+        assertThat(call.state.compositeRecording.value).isFalse()
+    }
+
+    @Test
+    fun `test start and stop individual recording`() = runTest {
+        val startEvent = CallRecordingStartedEvent(
+            callCid = call.cid,
+            nowUtc,
+            "",
+            CallRecordingStartedEvent.RecordingType.Individual,
+            "call.recording_started",
+        )
+        clientImpl.fireEvent(startEvent)
+        assertThat(call.state.recording.value).isTrue()
+        assertThat(call.state.individualRecording.value).isTrue()
+
+        val stopEvent = CallRecordingStoppedEvent(
+            callCid = call.cid,
+            nowUtc,
+            "",
+            CallRecordingStoppedEvent.RecordingType.Individual,
+            "call.recording_stopped",
+        )
+        clientImpl.fireEvent(stopEvent)
+        assertThat(call.state.recording.value).isFalse()
+        assertThat(call.state.individualRecording.value).isFalse()
+    }
+
+    @Test
+    fun `test start and stop raw recording`() = runTest {
+        val startEvent = CallRecordingStartedEvent(
+            callCid = call.cid,
+            nowUtc,
+            "",
+            CallRecordingStartedEvent.RecordingType.Raw,
+            "call.recording_started",
+        )
+        clientImpl.fireEvent(startEvent)
+        assertThat(call.state.recording.value).isTrue()
+        assertThat(call.state.rawRecording.value).isTrue()
+
+        val stopEvent = CallRecordingStoppedEvent(
+            callCid = call.cid,
+            nowUtc,
+            "",
+            CallRecordingStoppedEvent.RecordingType.Raw,
+            "call.recording_stopped",
+        )
+        clientImpl.fireEvent(stopEvent)
+        assertThat(call.state.recording.value).isFalse()
+        assertThat(call.state.rawRecording.value).isFalse()
+    }
+
+    @Test
+    fun `test recording types are independent of each other`() = runTest {
+        // Start all three recording types
+        clientImpl.fireEvent(
+            CallRecordingStartedEvent(
+                call.cid,
+                nowUtc,
+                "",
+                CallRecordingStartedEvent.RecordingType.Composite,
+                "call.recording_started",
+            ),
+        )
+        clientImpl.fireEvent(
+            CallRecordingStartedEvent(
+                call.cid,
+                nowUtc,
+                "",
+                CallRecordingStartedEvent.RecordingType.Individual,
+                "call.recording_started",
+            ),
+        )
+        clientImpl.fireEvent(
+            CallRecordingStartedEvent(
+                call.cid,
+                nowUtc,
+                "",
+                CallRecordingStartedEvent.RecordingType.Raw,
+                "call.recording_started",
+            ),
+        )
+
+        assertThat(call.state.compositeRecording.value).isTrue()
+        assertThat(call.state.individualRecording.value).isTrue()
+        assertThat(call.state.rawRecording.value).isTrue()
+
+        // Stop only composite — other types should remain true
+        clientImpl.fireEvent(
+            CallRecordingStoppedEvent(
+                call.cid,
+                nowUtc,
+                "",
+                CallRecordingStoppedEvent.RecordingType.Composite,
+                "call.recording_stopped",
+            ),
+        )
+
+        assertThat(call.state.compositeRecording.value).isFalse()
+        assertThat(call.state.individualRecording.value).isTrue()
+        assertThat(call.state.rawRecording.value).isTrue()
+
+        // Cleanup: stop remaining recordings to avoid polluting other tests
+        clientImpl.fireEvent(
+            CallRecordingStoppedEvent(
+                call.cid,
+                nowUtc,
+                "",
+                CallRecordingStoppedEvent.RecordingType.Individual,
+                "call.recording_stopped",
+            ),
+        )
+        clientImpl.fireEvent(
+            CallRecordingStoppedEvent(
+                call.cid,
+                nowUtc,
+                "",
+                CallRecordingStoppedEvent.RecordingType.Raw,
+                "call.recording_stopped",
+            ),
+        )
     }
 
     @Test

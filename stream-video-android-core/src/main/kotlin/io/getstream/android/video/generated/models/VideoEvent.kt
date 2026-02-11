@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,7 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "call.closed_captions_stopped" -> io.getstream.android.video.generated.models.CallClosedCaptionsStoppedEvent::class.java
             "call.created" -> io.getstream.android.video.generated.models.CallCreatedEvent::class.java
             "call.deleted" -> io.getstream.android.video.generated.models.CallDeletedEvent::class.java
+            "call.dtmf" -> io.getstream.android.video.generated.models.CallDTMFEvent::class.java
             "call.ended" -> io.getstream.android.video.generated.models.CallEndedEvent::class.java
             "call.frame_recording_failed" -> io.getstream.android.video.generated.models.CallFrameRecordingFailedEvent::class.java
             "call.frame_recording_ready" -> io.getstream.android.video.generated.models.CallFrameRecordingFrameReadyEvent::class.java
@@ -123,6 +124,9 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "connection.ok" -> io.getstream.android.video.generated.models.ConnectedEvent::class.java
             "custom" -> io.getstream.android.video.generated.models.CustomVideoEvent::class.java
             "health.check" -> io.getstream.android.video.generated.models.HealthCheckEvent::class.java
+            "ingress.error" -> io.getstream.android.video.generated.models.IngressErrorEvent::class.java
+            "ingress.started" -> io.getstream.android.video.generated.models.IngressStartedEvent::class.java
+            "ingress.stopped" -> io.getstream.android.video.generated.models.IngressStoppedEvent::class.java
             "user.banned" -> io.getstream.android.video.generated.models.UserBannedEvent::class.java
             "user.deactivated" -> io.getstream.android.video.generated.models.UserDeactivatedEvent::class.java
             "user.muted" -> io.getstream.android.video.generated.models.UserMutedEvent::class.java

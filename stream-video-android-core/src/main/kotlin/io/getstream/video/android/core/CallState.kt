@@ -465,6 +465,15 @@ public class CallState(
     private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val recording: StateFlow<Boolean> = _recording
 
+    private val _individualRecording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val individualRecording: StateFlow<Boolean> = _individualRecording
+
+    private val _rawRecording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val rawRecording: StateFlow<Boolean> = _rawRecording
+
+    private val _compositeRecording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val compositeRecording: StateFlow<Boolean> = _compositeRecording
+
     /** The list of users that are blocked from joining this call */
     private val _blockedUsers: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
     val blockedUsers: StateFlow<Set<String>> = _blockedUsers
@@ -934,10 +943,31 @@ public class CallState(
 
             is CallRecordingStartedEvent -> {
                 _recording.value = true
+                when (event.recordingType) {
+                    CallRecordingStartedEvent.RecordingType.Individual ->
+                        _individualRecording.value =
+                            true
+
+                    CallRecordingStartedEvent.RecordingType.Raw -> _rawRecording.value = true
+                    CallRecordingStartedEvent.RecordingType.Composite -> _compositeRecording.value = true
+                    else -> {}
+                }
             }
 
             is CallRecordingStoppedEvent -> {
-                _recording.value = false
+                when (event.recordingType) {
+                    CallRecordingStoppedEvent.RecordingType.Individual ->
+                        _individualRecording.value = false
+                    CallRecordingStoppedEvent.RecordingType.Raw ->
+                        _rawRecording.value = false
+                    CallRecordingStoppedEvent.RecordingType.Composite ->
+                        _compositeRecording.value = false
+                    else -> {}
+                }
+                // Only set recording=false when ALL recording types are inactive
+                _recording.value = _compositeRecording.value ||
+                    _individualRecording.value ||
+                    _rawRecording.value
             }
 
             is CallLiveStartedEvent -> {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,16 @@ object Serializer {
     val moshiBuilder: Moshi.Builder = Moshi.Builder()
         .add(io.getstream.android.video.generated.models.AudioSettingsRequest.DefaultDevice.DefaultDeviceAdapter())
         .add(io.getstream.android.video.generated.models.AudioSettingsResponse.DefaultDevice.DefaultDeviceAdapter())
+        .add(io.getstream.android.video.generated.models.CallRecordingFailedEvent.RecordingType.RecordingTypeAdapter())
+        .add(io.getstream.android.video.generated.models.CallRecordingReadyEvent.RecordingType.RecordingTypeAdapter())
+        .add(io.getstream.android.video.generated.models.CallRecordingStartedEvent.RecordingType.RecordingTypeAdapter())
+        .add(io.getstream.android.video.generated.models.CallRecordingStoppedEvent.RecordingType.RecordingTypeAdapter())
         .add(io.getstream.android.video.generated.models.CreateDeviceRequest.PushProvider.PushProviderAdapter())
         .add(io.getstream.android.video.generated.models.FrameRecordingSettingsRequest.Mode.ModeAdapter())
         .add(io.getstream.android.video.generated.models.FrameRecordingSettingsRequest.Quality.QualityAdapter())
         .add(io.getstream.android.video.generated.models.FrameRecordingSettingsResponse.Mode.ModeAdapter())
+        .add(io.getstream.android.video.generated.models.IndividualRecordingSettingsRequest.Mode.ModeAdapter())
+        .add(io.getstream.android.video.generated.models.IndividualRecordingSettingsResponse.Mode.ModeAdapter())
         .add(io.getstream.android.video.generated.models.IngressAudioEncodingOptionsRequest.Channels.ChannelsAdapter())
         .add(io.getstream.android.video.generated.models.IngressSourceRequest.Fps.FpsAdapter())
         .add(io.getstream.android.video.generated.models.IngressVideoLayerRequest.Codec.CodecAdapter())
@@ -42,8 +48,11 @@ object Serializer {
         .add(io.getstream.android.video.generated.models.OwnCapability.OwnCapabilityAdapter())
         .add(io.getstream.android.video.generated.models.RTMPBroadcastRequest.Quality.QualityAdapter())
         .add(io.getstream.android.video.generated.models.RTMPSettingsRequest.Quality.QualityAdapter())
+        .add(io.getstream.android.video.generated.models.RawRecordingSettingsRequest.Mode.ModeAdapter())
+        .add(io.getstream.android.video.generated.models.RawRecordingSettingsResponse.Mode.ModeAdapter())
         .add(io.getstream.android.video.generated.models.RecordSettingsRequest.Mode.ModeAdapter())
         .add(io.getstream.android.video.generated.models.RecordSettingsRequest.Quality.QualityAdapter())
+        .add(io.getstream.android.video.generated.models.SortParamRequest.Type.TypeAdapter())
         .add(io.getstream.android.video.generated.models.StartClosedCaptionsRequest.Language.LanguageAdapter())
         .add(io.getstream.android.video.generated.models.StartTranscriptionRequest.Language.LanguageAdapter())
         .add(io.getstream.android.video.generated.models.TranscriptionSettingsRequest.ClosedCaptionMode.ClosedCaptionModeAdapter())
