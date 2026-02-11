@@ -33,13 +33,18 @@ package io.getstream.video.android.ui.common.permission
  */
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.Call
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.getValue
 
 /**
  * Interface used to keep track of permissions needed for the Video call to work.
@@ -75,6 +80,7 @@ public interface PermissionManager {
     public fun requestPermission(permission: String): Boolean
 
     public companion object {
+        private val logger by taggedLogger("PermissionManager")
         public fun create(
             activity: ComponentActivity,
             onPermissionResult: (String, Boolean) -> Unit,
@@ -86,6 +92,47 @@ public interface PermissionManager {
                 onShowRequestPermissionRationale = onShowRequestPermissionRationale,
             )
         }
+
+        /**
+         * Checks if the required Android permissions for this call are granted.
+         * For audio calls: RECORD_AUDIO. For video calls: RECORD_AUDIO + CAMERA.
+         */
+        internal suspend fun hasRequiredCallPermissions(context: Context, call: Call): Boolean {
+            var capabilities = call.state.ownCapabilities.value
+            if (capabilities.isEmpty()) {
+                val result = call.get()
+                if (result.isFailure) {
+                    // Do nothing. Keep existing behaviour
+                    // TODO improve later after discussion, keep existing behavior for now
+                    logger.e { "[hasRequiredCallPermissions] Fail to get capabilities" }
+                    return true
+                } else {
+                    capabilities = call.state.ownCapabilities.value
+                }
+            }
+            logger.d { "[hasRequiredCallPermissions] capabilities $capabilities" }
+            if (capabilities.contains(OwnCapability.SendAudio)) {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return false
+                }
+            }
+            if (capabilities.contains(OwnCapability.SendVideo)) {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return false
+                }
+            }
+            return true
+        }
+
+        internal fun hasNotificationPermission(context: Context): Boolean =
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
     }
 }
 
