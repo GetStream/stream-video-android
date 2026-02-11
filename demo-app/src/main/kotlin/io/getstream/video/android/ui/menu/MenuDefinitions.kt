@@ -283,18 +283,12 @@ fun scaleTypeMenu(onSelectScaleType: (VideoScalingType) -> Unit): List<MenuItem>
 fun recordingTypeMenu(onSelectRecording: (RecordingType) -> Unit, selectedRecordingTypes: Set<RecordingType>): List<MenuItem> {
     return arrayListOf(
         ActionMenuItem(
-            title = if (selectedRecordingTypes.contains(
-                    RecordingType.Raw,
-                )
-            ) {
+            title = if (selectedRecordingTypes.contains(RecordingType.Raw)) {
                 "Stop raw recording"
             } else {
                 "Start raw recording"
             },
-            icon = if (selectedRecordingTypes.contains(
-                    RecordingType.Raw,
-                )
-            ) {
+            icon = if (selectedRecordingTypes.contains(RecordingType.Raw)) {
                 Icons.Default.RawOn
             } else {
                 Icons.Default.RawOff
