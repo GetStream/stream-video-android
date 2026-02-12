@@ -1239,6 +1239,10 @@ public class CallState(
     }
 
     private fun updateRingingState(rejectReason: RejectReason? = null) {
+        if (ringingState.value == RingingState.RejectedByAll) {
+            return
+        }
+
         // this is only true when we are in the session (we have accepted/joined the call)
         val rejectedBy = _rejectedBy.value
         val isRejectedByMe = _rejectedBy.value.contains(client.userId)
