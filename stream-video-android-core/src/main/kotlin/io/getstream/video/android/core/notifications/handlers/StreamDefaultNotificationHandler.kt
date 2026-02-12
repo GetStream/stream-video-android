@@ -46,8 +46,8 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
-import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.IncomingNotificationAction
@@ -63,7 +63,6 @@ import io.getstream.video.android.core.notifications.internal.service.ServiceLau
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
-import kotlinx.coroutines.launch
 
 /**
  * Default implementation of the [StreamNotificationHandler] interface.
@@ -160,13 +159,9 @@ constructor(
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instance()
-        if (streamVideo.state.hasActiveOrRingingCall() && streamVideo.state.rejectCallWhenBusy) {
-            (streamVideo as StreamVideoClient).scope.launch {
-                val call = streamVideo.call(callId.type, callId.id)
-                call.reject(RejectReason.Busy)
-            }
-            return
-        }
+        val callBusyHandler = CallBusyHandler(streamVideo as StreamVideoClient)
+        if (callBusyHandler.rejectIfBusy(callId)) return
+
         serviceLauncher.showIncomingCall(
             application,
             callId,

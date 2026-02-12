@@ -17,21 +17,34 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.CallResponse
+import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.MemberRequest
+import io.getstream.android.video.generated.models.MemberResponse
 import io.getstream.android.video.generated.models.ScreensharingSettingsRequest
+import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
+import io.getstream.video.android.model.User
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -301,5 +314,175 @@ class CallStateTest : IntegrationTestBase() {
         advanceTimeBy(3000)
 
         assertFalse(call.state.speakingWhileMuted.first())
+    }
+
+    // -------------------------
+    // HANDLE EVENT TEST STARTS
+    // -------------------------
+
+    // CallRingEvent
+    @Test
+    fun `_____`() = runTest {
+        // we can make multiple calls, this should have no impact on the reset logic or duration
+        val speakingWhileMuted = call.state.speakingWhileMuted
+        call.state.markSpeakingAsMuted()
+        call.state.markSpeakingAsMuted()
+        call.state.markSpeakingAsMuted()
+
+        assertTrue(call.state.speakingWhileMuted.first())
+        // The flag should automatically reset to false 2 seconds
+        advanceTimeBy(3000)
+
+        assertFalse(call.state.speakingWhileMuted.first())
+    }
+
+    @Test
+    fun `CallRingEvent returns early when busy`() = runTest {
+        val testScope = TestScope(StandardTestDispatcher(testScheduler))
+
+        val client = mockk<StreamVideo>(relaxed = true)
+        val call = mockk<Call>(relaxed = true)
+        val user = mockk<User>(relaxed = true)
+
+        val busyHandler = mockk<CallBusyHandler>()
+        every { busyHandler.rejectIfBusy(call) } returns true
+
+        val callState = CallState(
+            client = client,
+            call = call,
+            user = user,
+            scope = testScope,
+            callBusyHandler = busyHandler,
+        )
+
+        val event = mockk<CallRingEvent>(relaxed = true)
+
+        callState.handleEvent(event)
+
+        // Should NOT mutate members because we returned early
+        assertTrue(callState.members.value.isEmpty())
+
+        verify(exactly = 1) {
+            busyHandler.rejectIfBusy(call)
+        }
+    }
+
+    @Test
+    fun `CallRingEvent should populate members and creator when not busy`() = runTest {
+        val testScope = TestScope(StandardTestDispatcher(testScheduler))
+
+        val client = mockk<StreamVideo>(relaxed = true)
+        val call = mockk<Call>(relaxed = true)
+        val user = mockk<User>(relaxed = true)
+
+        val clientState = mockk<ClientState>(relaxed = true)
+        val activeCallFlow = MutableStateFlow<Call?>(null)
+        val ringingCallFlow = MutableStateFlow<Call?>(null)
+        every { client.state } returns clientState
+        every { clientState.activeCall } returns activeCallFlow
+        every { clientState.ringingCall } returns ringingCallFlow
+
+        val busyHandler = mockk<CallBusyHandler>()
+        every { busyHandler.rejectIfBusy(call) } returns false
+
+        val callState = CallState(
+            client = client,
+            call = call,
+            user = user,
+            scope = testScope,
+            callBusyHandler = busyHandler,
+        )
+
+        // ---- Mock creator ----
+        val creatorUser = mockk<UserResponse>(relaxed = true)
+        every { creatorUser.id } returns "creator-id"
+        every { creatorUser.role } returns "host"
+
+        val callResponse = mockk<CallResponse>(relaxed = true) {
+            every { this@mockk.createdBy } returns creatorUser
+            every { this@mockk.createdAt } returns OffsetDateTime.now()
+            every { this@mockk.updatedAt } returns OffsetDateTime.now()
+        }
+
+        // ---- Mock event ----
+        val event = mockk<CallRingEvent>(relaxed = true) {
+            every { this@mockk.members } returns emptyList()
+            every { this@mockk.call } returns callResponse
+        }
+
+        callState.handleEvent(event)
+
+        testScope.advanceUntilIdle()
+
+        // Verify creator was inserted into members
+        val members = callState.members.value
+        assertTrue(members.any { it.user.id == "creator-id" })
+
+        verify(exactly = 1) {
+            busyHandler.rejectIfBusy(call)
+        }
+    }
+
+    @Test
+    fun `CallRingEvent should not duplicate creator if already in members`() = runTest {
+        val testScope = TestScope(StandardTestDispatcher(testScheduler))
+
+        val client = mockk<StreamVideo>(relaxed = true)
+        val call = mockk<Call>(relaxed = true)
+        val user = mockk<User>(relaxed = true)
+
+        val clientState = mockk<ClientState>(relaxed = true)
+        val activeCallFlow = MutableStateFlow<Call?>(null)
+        val ringingCallFlow = MutableStateFlow<Call?>(null)
+        every { client.state } returns clientState
+        every { clientState.activeCall } returns activeCallFlow
+        every { clientState.ringingCall } returns ringingCallFlow
+
+        val busyHandler = mockk<CallBusyHandler>()
+        every { busyHandler.rejectIfBusy(call) } returns false
+
+        val callState = CallState(
+            client = client,
+            call = call,
+            user = user,
+            scope = testScope,
+            callBusyHandler = busyHandler,
+        )
+
+        val creatorUser = mockk<UserResponse>(relaxed = true)
+        every { creatorUser.id } returns "creator-id"
+        every { creatorUser.role } returns "host"
+
+        val callResponse = mockk<CallResponse>(relaxed = true) {
+            every { this@mockk.createdBy } returns creatorUser
+            every { this@mockk.createdAt } returns OffsetDateTime.now()
+            every { this@mockk.updatedAt } returns OffsetDateTime.now()
+        }
+
+        val existingMember = MemberState(
+            user = user,
+            role = "host",
+            custom = emptyMap(),
+            createdAt = OffsetDateTime.now(),
+            updatedAt = OffsetDateTime.now(),
+        )
+
+        // Pre-populate members manually
+        callState.updateFromResponse(listOf(mockk<MemberResponse>(relaxed = true)))
+
+        // Force creator already present
+        callState.updateRejectedBy(emptySet()) // just to mutate state safely
+
+        val event = mockk<CallRingEvent>(relaxed = true) {
+            every { this@mockk.members } returns emptyList()
+            every { this@mockk.call } returns callResponse
+        }
+
+        callState.handleEvent(event)
+
+        testScope.advanceUntilIdle()
+
+        val members = callState.members.value
+        assertEquals(1, members.count { it.user.id == "creator-id" })
     }
 }

@@ -118,7 +118,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
-    private val connectionTimeoutInMs: Long = 10000,
+    private val connectionTimeoutInMs: Long = 10_000,
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
     @Deprecated(
