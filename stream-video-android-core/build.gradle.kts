@@ -55,7 +55,7 @@ apiValidation {
 
 metalava {
     hiddenAnnotations.set(
-        setOf("io.getstream.video.android.core.internal.InternalStreamVideoApi")
+        setOf("io.getstream.video.android.core.internal.InternalStreamVideoApi"),
     )
 }
 
