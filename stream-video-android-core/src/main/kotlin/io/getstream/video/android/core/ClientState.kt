@@ -86,6 +86,8 @@ class ClientState(private val client: StreamVideo) {
     public val callConfigRegistry = (client as StreamVideoClient).callServiceConfigRegistry
     private val serviceLauncher = ServiceLauncher(client.context)
 
+    val rejectCallWhenBusy: Boolean = (client as StreamVideoClient).rejectCallWhenBusy
+
     /**
      * Returns true if there is an active or ringing call
      */

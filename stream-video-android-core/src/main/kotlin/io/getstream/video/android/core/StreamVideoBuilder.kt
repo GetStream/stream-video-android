@@ -153,6 +153,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val enableStereoForSubscriber: Boolean = true,
     private val telecomConfig: TelecomConfig? = null,
     private val connectOnInit: Boolean = true,
+    private val rejectCallWhenBusy: Boolean = false,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -282,6 +283,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableStereoForSubscriber = enableStereoForSubscriber,
             telecomConfig = telecomConfig,
             tokenRepository = tokenRepository,
+            rejectCallWhenBusy = rejectCallWhenBusy,
         )
 
         if (user.type == UserType.Guest) {

@@ -181,6 +181,7 @@ internal class StreamVideoClient internal constructor(
     internal val enableStatsCollection: Boolean = true,
     internal val enableStereoForSubscriber: Boolean = true,
     internal val telecomConfig: TelecomConfig? = null,
+    internal val rejectCallWhenBusy: Boolean = false,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null

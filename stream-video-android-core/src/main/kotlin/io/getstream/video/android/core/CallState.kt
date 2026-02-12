@@ -130,6 +130,7 @@ import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.currentCoroutineContext
@@ -864,6 +865,12 @@ public class CallState(
             }
 
             is CallRingEvent -> {
+                if (client.state.hasActiveOrRingingCall() && client.state.rejectCallWhenBusy) {
+                    (client as StreamVideoClient).scope.launch(Dispatchers.IO) {
+                        call.reject(RejectReason.Busy)
+                    }
+                    return
+                }
                 getOrCreateMembers(event.members)
                 updateFromResponse(event.call)
 
