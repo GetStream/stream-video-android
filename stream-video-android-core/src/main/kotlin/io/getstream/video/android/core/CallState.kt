@@ -1252,15 +1252,34 @@ public class CallState(
         val userIsParticipant =
             _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
+        val createdBySelf = createdBy?.id == client.userId
 
         Log.d("RingingState", "Current: ${_ringingState.value}, call_id: ${call.cid}")
+
+        val ringingStateLogs = arrayListOf(
+            ("call.id: ${call.id}"),
+            ("acceptedBy: ${acceptedBy.joinToString()}"),
+            ("client.state.activeCall.id: ${client.state.activeCall.value?.id}"),
+            ("acceptedByMe: $isAcceptedByMe"),
+            ("isRejectedByMe: $isRejectedByMe"),
+            ("rejectReason: $rejectReason"),
+            ("hasActiveCall: $hasActiveCall"),
+            ("hasRingingCall: $hasRingingCall"),
+            ("userIsParticipant: $userIsParticipant"),
+        ).joinToString("") { it + "\n" }
+
         Log.d(
             "RingingState",
-            "call_id: ${call.cid}, Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]",
+            "call_id: ${call.cid}, Flags: $ringingStateLogs",
         )
 
         // no members - call is empty, we can join
         val state: RingingState = if (hasActiveCall && !ringingStateUpdatesStopped) {
+            logger.d { "RingingState.Active source 1" }
+            cancelTimeout()
+            RingingState.Active
+        } else if (hasActiveCall && createdBySelf && acceptedBy.isNotEmpty() && !isAcceptedByMe) { // for joinAndRing
+            logger.d { "RingingState.Active source 4" }
             cancelTimeout()
             RingingState.Active
         } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
@@ -1279,6 +1298,7 @@ public class CallState(
             // If it's already accepted by me then we are in an Active call
             if (userIsParticipant) {
                 cancelTimeout()
+                logger.d { "RingingState.Active source 2" }
                 RingingState.Active
             } else {
                 RingingState.Incoming(acceptedByMe = isAcceptedByMe)
@@ -1296,6 +1316,7 @@ public class CallState(
                 // call is accepted and we are already in the call
                 ringingStateUpdatesStopped = false
                 cancelTimeout()
+                logger.d { "RingingState.Active source 3" }
                 RingingState.Active
             }
         } else {
