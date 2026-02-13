@@ -26,11 +26,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
@@ -135,7 +137,7 @@ private fun Body(
     toggleUserSelection: (Int) -> Unit,
     onStartCallClick: (cid: StreamCallId, membersList: String, joinAndRing: Boolean) -> Unit,
 ) {
-    var callerJoinsFirst by rememberSaveable { mutableStateOf(false) }
+    var callerJoinsFirst by rememberSaveable { mutableStateOf(true) }
 
     Box(
         modifier = Modifier
@@ -164,9 +166,18 @@ private fun Body(
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text("Join First", color = Color.White)
-                        Checkbox(callerJoinsFirst, onCheckedChange = {
-                            callerJoinsFirst = !callerJoinsFirst
-                        })
+                        Checkbox(
+                            callerJoinsFirst,
+                            modifier = Modifier.offset(x = 10.dp),
+                            colors = CheckboxDefaults.colors(
+                                uncheckedColor = Color.White, // Border color when unchecked
+                                checkedColor = Color.White, // Fill color when checked
+                                checkmarkColor = VideoTheme.colors.buttonBrandDefault, // Tick color
+                            ),
+                            onCheckedChange = {
+                                callerJoinsFirst = !callerJoinsFirst
+                            },
+                        )
                     }
                     UserList(
                         entries = users,
