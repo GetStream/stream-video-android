@@ -84,6 +84,7 @@ playAppUpdate = "2.1.0"
 hilt = "2.52"
 leakCanary = "2.13"
 binaryCompatabilityValidator = "0.16.3"
+metalavaGradle = "0.5.0"
 playPublisher = "3.12.1"
 
 googleMlKitSelfieSegmentation = "16.0.0-beta6"
@@ -223,6 +224,7 @@ android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", ver
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
+metalava-gradlePlugin = { group = "me.tylerbwong.gradle.metalava", name = "me.tylerbwong.gradle.metalava.gradle.plugin", version.ref = "metalavaGradle" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraCore" }
 play-services-mlkit-barcode-scanning = { group = "com.google.android.gms", name = "play-services-mlkit-barcode-scanning", version = "18.3.0" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraCore" }
@@ -256,3 +258,4 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 play-publisher = { id = "com.github.triplet.play", version.ref = "playPublisher" }
 baseline-profile = { id = "androidx.baselineprofile", version.ref = "androidxMacroBenchmark" }
+metalava-gradle = { id = "me.tylerbwong.gradle.metalava", version.ref = "metalavaGradle" }

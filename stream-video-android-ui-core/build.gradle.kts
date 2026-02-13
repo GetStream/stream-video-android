@@ -16,6 +16,7 @@
 
 plugins {
     id("io.getstream.video.android.library")
+    id("io.getstream.video.android.metalava")
 }
 
 android {
