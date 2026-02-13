@@ -61,6 +61,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -167,7 +168,7 @@ public class Call(
     internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(client, this, user, scope)
+    val state = CallState(client, this, user, scope, CallBusyHandler(client as StreamVideoClient))
 
     private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 
