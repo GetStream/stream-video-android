@@ -31,7 +31,10 @@ import androidx.compose.material.icons.filled.ClosedCaptionOff
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.material.icons.filled.RawOff
+import androidx.compose.material.icons.filled.RawOn
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.SettingsBackupRestore
@@ -46,6 +49,7 @@ import androidx.compose.material.icons.filled.VideocamOff
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.model.PreferredVideoResolution
+import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicSubMenuItem
@@ -89,6 +93,8 @@ fun defaultStreamMenu(
     audioDeviceUiStateList: List<AudioDeviceUiState> = emptyList(),
     audioUsageUiState: AudioUsageUiState = AudioUsageVoiceCommunicationUiState,
     onToggleAudioUsage: () -> Unit = {},
+    selectedRecordingTypes: Set<RecordingType> = emptySet(),
+    onSelectRecordingType: (RecordingType) -> Unit = {},
 ) = buildList<MenuItem> {
     if (noiseCancellationFeatureEnabled) {
         add(
@@ -165,6 +171,8 @@ fun defaultStreamMenu(
                     loadTranscriptions,
                     audioUsageUiState,
                     onToggleAudioUsage,
+                    selectedRecordingTypes,
+                    onSelectRecordingType,
                 ),
             ),
         )
@@ -272,6 +280,51 @@ fun scaleTypeMenu(onSelectScaleType: (VideoScalingType) -> Unit): List<MenuItem>
     ),
 )
 
+fun recordingTypeMenu(onSelectRecording: (RecordingType) -> Unit, selectedRecordingTypes: Set<RecordingType>): List<MenuItem> {
+    return arrayListOf(
+        ActionMenuItem(
+            title = if (selectedRecordingTypes.contains(RecordingType.Raw)) {
+                "Stop raw recording"
+            } else {
+                "Start raw recording"
+            },
+            icon = if (selectedRecordingTypes.contains(RecordingType.Raw)) {
+                Icons.Default.RawOn
+            } else {
+                Icons.Default.RawOff
+            },
+            highlight = selectedRecordingTypes.contains(RecordingType.Raw),
+            action = { onSelectRecording(RecordingType.Raw) },
+        ),
+        ActionMenuItem(
+            title = if (selectedRecordingTypes.contains(
+                    RecordingType.Individual,
+                )
+            ) {
+                "Stop individual recording"
+            } else {
+                "Start individual recording"
+            },
+            icon = Icons.Default.Person,
+            highlight = selectedRecordingTypes.contains(RecordingType.Individual),
+            action = { onSelectRecording(RecordingType.Individual) },
+        ),
+        ActionMenuItem(
+            title = if (selectedRecordingTypes.contains(
+                    RecordingType.Composite,
+                )
+            ) {
+                "Stop composite recording"
+            } else {
+                "Start composite recording"
+            },
+            icon = Icons.Default.CropFree,
+            highlight = selectedRecordingTypes.contains(RecordingType.Composite),
+            action = { onSelectRecording(RecordingType.Composite) },
+        ),
+    )
+}
+
 /**
  * Optionally defines the debug sub-menu of the demo app.
  */
@@ -294,6 +347,8 @@ fun debugSubmenu(
     loadTranscriptions: suspend () -> List<MenuItem>,
     audioUsageUiState: AudioUsageUiState,
     onToggleAudioUsage: () -> Unit,
+    selectedRecordingTypes: Set<RecordingType>,
+    onSelectRecordingType: (RecordingType) -> Unit,
 ) = listOf(
     DynamicSubMenuItem(
         title = "List Transcriptions",
@@ -380,18 +435,10 @@ fun debugSubmenu(
         highlight = audioUsageUiState.highlight,
         action = onToggleAudioUsage,
     ),
-    ActionMenuItem(
+    SubMenuItem(
         title = "Start/stop recording",
         icon = Icons.Default.RadioButtonChecked,
-        action = {
-//                scope.launch {
-//                    if (isRecording) {
-//                        showEndRecordingDialog = true
-//                    } else {
-//                        call.startRecording()
-//                    }
-//                }
-        },
+        items = recordingTypeMenu(onSelectRecordingType, selectedRecordingTypes),
     ),
     DynamicSubMenuItem(
         title = "Recordings",

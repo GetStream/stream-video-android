@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,9 @@ data class ResolveSipInboundRequest (
 
     @Json(name = "challenge")
     val challenge: io.getstream.android.video.generated.models.SIPChallenge,
+
+    @Json(name = "routing_number")
+    val routingNumber: kotlin.String? = null,
 
     @Json(name = "sip_headers")
     val sipHeaders: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()

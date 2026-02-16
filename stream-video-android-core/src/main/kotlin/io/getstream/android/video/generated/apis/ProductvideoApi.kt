@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -346,6 +346,40 @@ interface ProductvideoApi {
     ): io.getstream.android.video.generated.models.ListRecordingsResponse
     
     /**
+     * Start recording
+     * Starts recording
+     */
+    @POST("/video/call/{type}/{id}/recordings/{recording_type}/start")
+    suspend fun startRecording(
+        @Path("type") type: kotlin.String,
+        @Path("id") id: kotlin.String,
+        @Path("recording_type") recordingType: kotlin.String ,
+        @Body startRecordingRequest: io.getstream.android.video.generated.models.StartRecordingRequest
+    ): io.getstream.android.video.generated.models.StartRecordingResponse
+    
+    /**
+     * Start recording
+     * Starts recording
+     */
+    @POST("/video/call/{type}/{id}/recordings/{recording_type}/start")
+    suspend fun startRecording(
+        @Path("type") type: kotlin.String,
+        @Path("id") id: kotlin.String,
+        @Path("recording_type") recordingType: kotlin.String
+    ): io.getstream.android.video.generated.models.StartRecordingResponse
+    
+    /**
+     * Stop recording
+     * Stops recording
+     */
+    @POST("/video/call/{type}/{id}/recordings/{recording_type}/stop")
+    suspend fun stopRecording(
+        @Path("type") type: kotlin.String,
+        @Path("id") id: kotlin.String,
+        @Path("recording_type") recordingType: kotlin.String
+    ): io.getstream.android.video.generated.models.StopRecordingResponse
+    
+    /**
      * Reject Call
      * 
      */
@@ -431,6 +465,36 @@ interface ProductvideoApi {
     ): io.getstream.android.video.generated.models.StopAllRTMPBroadcastsResponse
     
     /**
+     * Get call participant session metrics
+     * 
+     */
+    @GET("/video/call/{type}/{id}/session/{session}/participant/{user}/{user_session}/details/track")
+    suspend fun getCallParticipantSessionMetrics(
+        @Path("type") type: kotlin.String,
+        @Path("id") id: kotlin.String,
+        @Path("session") session: kotlin.String,
+        @Path("user") user: kotlin.String,
+        @Path("user_session") userSession: kotlin.String,
+        @Query("since") since: org.threeten.bp.OffsetDateTime? = null,
+        @Query("until") until: org.threeten.bp.OffsetDateTime? = null
+    ): io.getstream.android.video.generated.models.GetCallParticipantSessionMetricsResponse
+    
+    /**
+     * Query call participant sessions
+     * 
+     */
+    @GET("/video/call/{type}/{id}/session/{session}/participant_sessions")
+    suspend fun queryCallParticipantSessions(
+        @Path("type") type: kotlin.String,
+        @Path("id") id: kotlin.String,
+        @Path("session") session: kotlin.String,
+        @Query("limit") limit: kotlin.Int? = null,
+        @Query("prev") prev: kotlin.String? = null,
+        @Query("next") next: kotlin.String? = null,
+        @Query("filter_conditions") filterConditions: kotlin.collections.Map<kotlin.String, Any?>? = null
+    ): io.getstream.android.video.generated.models.QueryCallParticipantSessionsResponse
+    
+    /**
      * Start HLS broadcasting
      * Starts HLS broadcasting
      */
@@ -481,27 +545,6 @@ interface ProductvideoApi {
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String
     ): io.getstream.android.video.generated.models.StartFrameRecordingResponse
-    
-    /**
-     * Start recording
-     * Starts recording
-     */
-    @POST("/video/call/{type}/{id}/start_recording")
-    suspend fun startRecording(
-        @Path("type") type: kotlin.String,
-        @Path("id") id: kotlin.String ,
-        @Body startRecordingRequest: io.getstream.android.video.generated.models.StartRecordingRequest
-    ): io.getstream.android.video.generated.models.StartRecordingResponse
-    
-    /**
-     * Start recording
-     * Starts recording
-     */
-    @POST("/video/call/{type}/{id}/start_recording")
-    suspend fun startRecording(
-        @Path("type") type: kotlin.String,
-        @Path("id") id: kotlin.String
-    ): io.getstream.android.video.generated.models.StartRecordingResponse
     
     /**
      * Start transcription
@@ -585,16 +628,6 @@ interface ProductvideoApi {
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String
     ): io.getstream.android.video.generated.models.StopLiveResponse
-    
-    /**
-     * Stop recording
-     * Stops recording
-     */
-    @POST("/video/call/{type}/{id}/stop_recording")
-    suspend fun stopRecording(
-        @Path("type") type: kotlin.String,
-        @Path("id") id: kotlin.String
-    ): io.getstream.android.video.generated.models.StopRecordingResponse
     
     /**
      * Stop transcription
@@ -685,6 +718,22 @@ interface ProductvideoApi {
     ): io.getstream.android.video.generated.models.DeleteTranscriptionResponse
     
     /**
+     * Map call participants by location
+     * 
+     */
+    @GET("/video/call_stats/{call_type}/{call_id}/{session}/map")
+    suspend fun getCallStatsMap(
+        @Path("call_type") callType: kotlin.String,
+        @Path("call_id") callId: kotlin.String,
+        @Path("session") session: kotlin.String,
+        @Query("start_time") startTime: org.threeten.bp.OffsetDateTime? = null,
+        @Query("end_time") endTime: org.threeten.bp.OffsetDateTime? = null,
+        @Query("exclude_publishers") excludePublishers: kotlin.Boolean? = null,
+        @Query("exclude_subscribers") excludeSubscribers: kotlin.Boolean? = null,
+        @Query("exclude_sfus") excludeSfus: kotlin.Boolean? = null
+    ): io.getstream.android.video.generated.models.QueryCallStatsMapResponse
+    
+    /**
      * Get call session participant stats details
      * 
      */
@@ -709,6 +758,9 @@ interface ProductvideoApi {
         @Path("call_type") callType: kotlin.String,
         @Path("call_id") callId: kotlin.String,
         @Path("session") session: kotlin.String,
+        @Query("limit") limit: kotlin.Int? = null,
+        @Query("prev") prev: kotlin.String? = null,
+        @Query("next") next: kotlin.String? = null,
         @Query("sort") sort: kotlin.collections.List<io.getstream.android.video.generated.models.SortParamRequest>? = null,
         @Query("filter_conditions") filterConditions: kotlin.collections.Map<kotlin.String, Any?>? = null
     ): io.getstream.android.video.generated.models.QueryCallSessionParticipantStatsResponse

@@ -207,20 +207,38 @@ internal open class CallService : Service() {
         startId: Int,
     ): Int {
         maybeHandleMediaIntent(intent, params.callId)
+        val notificationId = serviceNotificationRetriever.getNotificationId(
+            params.trigger,
+            params.streamVideo,
+            params.callId,
+        )
 
+        /**
+         * Mandatory, if not called then it will throw exception if we directly decide to stop the service.
+         * For example: it will stop the service if [verifyPermissions] is false
+         */
+        promoteToFgServiceIfNoActiveCall(params.streamVideo, notificationId, params.trigger)
         val call = params.streamVideo.call(params.callId.type, params.callId.id)
 
-        if (!verifyPermissions(params.streamVideo, call, params.callId, params.trigger)) {
-            stopServiceGracefully()
-            return START_NOT_STICKY
+        // Rendering incoming call does not need audio/video permissions
+        if (params.trigger != TRIGGER_INCOMING_CALL) {
+            if (!verifyPermissions(
+                    params.streamVideo,
+                    call,
+                    params.callId,
+                    params.trigger,
+                )
+            ) {
+                stopServiceGracefully()
+                return START_NOT_STICKY
+            }
         }
 
-        val (notification, notificationId) = getNotificationPair(
+        val (notification, _) = getNotificationPair(
             params.trigger,
             params.streamVideo,
             params.callId,
             params.displayName,
-
         )
 
         val handleNotificationResult = handleNotification(
@@ -252,8 +270,12 @@ internal open class CallService : Service() {
         call: Call,
         trigger: String,
     ) {
-        callServiceLifecycleManager.initializeCallAndSocket(serviceScope, streamVideo, call) {
-            stopServiceGracefully()
+        callServiceLifecycleManager.initializeCallAndSocket(
+            serviceScope,
+            streamVideo,
+            call,
+        ) { error ->
+            stopServiceGracefully(error?.message)
         }
 
         if (trigger == TRIGGER_INCOMING_CALL) {
@@ -283,7 +305,7 @@ internal open class CallService : Service() {
     ): CallServiceHandleNotificationResult {
         logHandleStart(trigger, call, notificationId)
 
-        if (notification == null) {
+        if (notification == null) { // TODO Rahul check if livestream guest/host will get stuck here
             return handleNullNotification(trigger, callId, call, notificationId)
         }
 
@@ -407,8 +429,13 @@ internal open class CallService : Service() {
         trigger: String,
     ): Boolean {
         val (hasPermissions, missingPermissions) =
-            streamVideo.permissionCheck.checkAndroidPermissionsGroup(applicationContext, call)
-
+            streamVideo.permissionCheck.checkAndroidPermissionsGroup(
+                applicationContext,
+                call,
+            )
+        logger.d {
+            "[verifyPermissions] hasPermissions: $hasPermissions, missingPermissions: ${missingPermissions.joinToString()}"
+        }
         if (!hasPermissions) {
             val exception = IllegalStateException(
                 """
@@ -585,6 +612,10 @@ internal open class CallService : Service() {
      * Else stopping service by an expired call can cancel current call's notification and the service itself
      */
     private fun stopServiceGracefully(source: String? = null) {
+        source?.let {
+            logger.w { "[stopServiceGracefully] source: $source" }
+        }
+
         serviceStateController.startTime?.let { startTime ->
 
             val currentTime = OffsetDateTime.now()
@@ -619,6 +650,30 @@ internal open class CallService : Service() {
         serviceStateController.soundPlayer?.stopCallSound() // TODO should check which call owns the sound
         serviceScope.cancel()
         stopSelf()
+    }
+
+    private fun promoteToFgServiceIfNoActiveCall(
+        videoClient: StreamVideoClient,
+        notificationId: Int,
+        trigger: String,
+    ) {
+        val hasActiveCall = videoClient.state.activeCall.value != null
+        val not = if (hasActiveCall) " not" else ""
+
+        logger.d {
+            "[promoteToFgServiceIfNoActiveCall] hasActiveCall: $hasActiveCall. Will$not call startForeground early."
+        }
+
+        if (!hasActiveCall) {
+            videoClient.getSettingUpCallNotification()?.let { notification ->
+                startForegroundWithServiceType(
+                    notificationId,
+                    notification,
+                    trigger,
+                    permissionManager.getServiceType(baseContext, trigger),
+                )
+            }
+        }
     }
 
     // This service does not return a Binder

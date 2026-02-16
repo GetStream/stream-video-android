@@ -104,6 +104,7 @@ import io.getstream.video.android.core.notifications.internal.service.StopServic
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
+import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
@@ -983,16 +984,17 @@ internal class StreamVideoClient internal constructor(
         type: String,
         id: String,
         externalStorage: String? = null,
+        recordingType: RecordingType = RecordingType.Composite,
     ): Result<Unit> {
         return apiCall {
             val req = StartRecordingRequest(externalStorage)
-            coordinatorConnectionModule.api.startRecording(type, id, req)
+            coordinatorConnectionModule.api.startRecording(type, id, recordingType.toString(), req)
         }
     }
 
-    suspend fun stopRecording(type: String, id: String): Result<Unit> {
+    suspend fun stopRecording(type: String, id: String, recordingType: RecordingType = RecordingType.Composite): Result<Unit> {
         return apiCall {
-            coordinatorConnectionModule.api.stopRecording(type, id)
+            coordinatorConnectionModule.api.stopRecording(type, id, recordingType.toString())
         }
     }
 

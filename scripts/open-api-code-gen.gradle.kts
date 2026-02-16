@@ -16,7 +16,7 @@ tasks.register<Exec>("generateOpenApiClient") {
     val moshiAdaptersDir = project.findProperty("moshiAdaptersDir") as? String ?: "infrastructure"
     val moshiAdapterPackage = project.findProperty("moshiAdapterPackageName") as? String ?: "io.getstream.android.video.generated.infrastructure"
 
-    val classesToSkip = project.findProperty("classesToSkip") as? String ?: "PrivacySettingsResponse,PrivacySettings,StopRTMPBroadcastsRequest"
+    val classesToSkip = project.findProperty("classesToSkip") as? String ?: "PrivacySettingsResponse,PrivacySettings,StopRTMPBroadcastsRequest,LocalCallAcceptedPostEvent,LocalCallRejectedPostEvent"
     val androidSdk = "video"
 
 //    val outputSpec = project.findProperty("outputSpec") as? String ?: "./releases/video-openapi-clientside"

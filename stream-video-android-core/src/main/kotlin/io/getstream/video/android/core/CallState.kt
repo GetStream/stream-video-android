@@ -465,6 +465,15 @@ public class CallState(
     private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val recording: StateFlow<Boolean> = _recording
 
+    private val _individualRecording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val individualRecording: StateFlow<Boolean> = _individualRecording
+
+    private val _rawRecording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val rawRecording: StateFlow<Boolean> = _rawRecording
+
+    private val _compositeRecording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val compositeRecording: StateFlow<Boolean> = _compositeRecording
+
     /** The list of users that are blocked from joining this call */
     private val _blockedUsers: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
     val blockedUsers: StateFlow<Set<String>> = _blockedUsers
@@ -707,7 +716,9 @@ public class CallState(
         AtomicReference<Notification?>(null)
 
     private var _notificationIdFlow = MutableStateFlow<Int?>(null)
-    internal val notificationIdFlow: StateFlow<Int?> = _notificationIdFlow
+
+    @InternalStreamVideoApi
+    public val notificationIdFlow: StateFlow<Int?> = _notificationIdFlow
 
     @InternalStreamVideoApi
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
@@ -932,10 +943,31 @@ public class CallState(
 
             is CallRecordingStartedEvent -> {
                 _recording.value = true
+                when (event.recordingType) {
+                    CallRecordingStartedEvent.RecordingType.Individual ->
+                        _individualRecording.value =
+                            true
+
+                    CallRecordingStartedEvent.RecordingType.Raw -> _rawRecording.value = true
+                    CallRecordingStartedEvent.RecordingType.Composite -> _compositeRecording.value = true
+                    else -> {}
+                }
             }
 
             is CallRecordingStoppedEvent -> {
-                _recording.value = false
+                when (event.recordingType) {
+                    CallRecordingStoppedEvent.RecordingType.Individual ->
+                        _individualRecording.value = false
+                    CallRecordingStoppedEvent.RecordingType.Raw ->
+                        _rawRecording.value = false
+                    CallRecordingStoppedEvent.RecordingType.Composite ->
+                        _compositeRecording.value = false
+                    else -> {}
+                }
+                // Only set recording=false when ALL recording types are inactive
+                _recording.value = _compositeRecording.value ||
+                    _individualRecording.value ||
+                    _rawRecording.value
             }
 
             is CallLiveStartedEvent -> {
@@ -1207,6 +1239,10 @@ public class CallState(
     }
 
     private fun updateRingingState(rejectReason: RejectReason? = null) {
+        if (ringingState.value == RingingState.RejectedByAll) {
+            return
+        }
+
         // this is only true when we are in the session (we have accepted/joined the call)
         val rejectedBy = _rejectedBy.value
         val isRejectedByMe = _rejectedBy.value.contains(client.userId)
@@ -1222,15 +1258,29 @@ public class CallState(
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
 
         Log.d("RingingState", "Current: ${_ringingState.value}, call_id: ${call.cid}")
+
+        val ringingStateLogs = arrayListOf(
+            ("acceptedByMe: $isAcceptedByMe"),
+            ("isRejectedByMe: $isRejectedByMe"),
+            ("rejectReason: $rejectReason"),
+            ("hasActiveCall: $hasActiveCall"),
+            ("hasRingingCall: $hasRingingCall"),
+            ("userIsParticipant: $userIsParticipant"),
+        ).joinToString("") { it + "\n" }
+
         Log.d(
             "RingingState",
-            "call_id: ${call.cid}, Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]",
+            "call_id: ${call.cid}, Flags: $ringingStateLogs",
         )
 
         // no members - call is empty, we can join
         val state: RingingState = if (hasActiveCall && !ringingStateUpdatesStopped) {
             cancelTimeout()
             RingingState.Active
+        } else if (isRejectedByMe) {
+            call.leave("updateRingingState-rejected-self")
+            cancelTimeout()
+            RingingState.RejectedByAll
         } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
             (rejectedBy.contains(createdBy?.id) && hasRingingCall)
         ) {

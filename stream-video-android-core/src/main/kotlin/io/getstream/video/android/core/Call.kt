@@ -86,6 +86,7 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
+import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
@@ -1247,11 +1248,18 @@ public class Call(
     }
 
     suspend fun startRecording(): Result<Any> {
-        return clientImpl.startRecording(type, id)
+        return startRecording(RecordingType.Composite)
+    }
+    suspend fun startRecording(recordingType: RecordingType): Result<Any> {
+        return clientImpl.startRecording(type, id, recordingType = recordingType)
     }
 
     suspend fun stopRecording(): Result<Any> {
-        return clientImpl.stopRecording(type, id)
+        return stopRecording(RecordingType.Composite)
+    }
+
+    suspend fun stopRecording(recordingType: RecordingType): Result<Any> {
+        return clientImpl.stopRecording(type, id, recordingType)
     }
 
     /**
