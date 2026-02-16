@@ -108,6 +108,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
 import org.webrtc.PeerConnection
@@ -615,11 +616,21 @@ public class Call(
         // Wait for any pending cleanup to complete before rejoining.
         // Use a loop to handle the edge case where resetScopes() clears cleanupJob
         // but a new leave() sets it again before we can proceed.
+        // Timeout after ~10 seconds to prevent hanging forever if cleanup is stuck.
+        var cleanupWaitAttempts = 0
         while (true) {
             val pendingCleanup = synchronized(lifecycleLock) { cleanupJob }
             if (pendingCleanup == null) break
-            logger.d { "[_join] Waiting for cleanup to complete before rejoining" }
-            pendingCleanup.join()
+
+            if (cleanupWaitAttempts++ >= 10) {
+                logger.e { "[_join] Cleanup taking too long after ${cleanupWaitAttempts}s, failing join" }
+                return Failure(Error.GenericError("Join failed: cleanup timed out"))
+            }
+
+            logger.d {
+                "[_join] Waiting for cleanup to complete before rejoining (attempt $cleanupWaitAttempts)"
+            }
+            withTimeoutOrNull(1000) { pendingCleanup.join() }
         }
 
         reconnectAttepmts = 0
