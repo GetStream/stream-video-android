@@ -611,11 +611,15 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
-        // Wait for any pending cleanup to complete before rejoining
-        // Read cleanupJob under lock to prevent race conditions
-        val pendingCleanup = synchronized(lifecycleLock) { cleanupJob }
-        pendingCleanup?.join()
-        // Note: cleanupJob is cleared by resetScopes() at the end of cleanup
+        // Wait for any pending cleanup to complete before rejoining.
+        // Use a loop to handle the edge case where resetScopes() clears cleanupJob
+        // but a new leave() sets it again before we can proceed.
+        while (true) {
+            val pendingCleanup = synchronized(lifecycleLock) { cleanupJob }
+            if (pendingCleanup == null) break
+            logger.d { "[_join] Waiting for cleanup to complete before rejoining" }
+            pendingCleanup.join()
+        }
 
         reconnectAttepmts = 0
         sfuEvents?.cancel()
@@ -961,7 +965,9 @@ public class Call(
         state._connection.value = RealtimeConnection.Disconnected
         logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = $id" }
 
-        // Synchronize access to isDestroyed and cleanupJob to prevent race conditions
+        // Synchronize access to isDestroyed, cleanupJob to prevent race conditions with join()
+        // IMPORTANT: cleanupJob must be set inside this synchronized block to eliminate the race
+        // window where join() could read cleanupJob as null before it's assigned.
         synchronized(lifecycleLock) {
             if (isDestroyed) {
                 logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
@@ -973,6 +979,21 @@ public class Call(
             if (cleanupJob?.isActive == true) {
                 logger.w { "[leave] Cleanup already in progress, skipping duplicate cleanup" }
                 return@atomicLeave
+            }
+
+            // Set cleanupJob INSIDE this synchronized block so join() will always see it
+            // and wait for cleanup to complete before proceeding
+            cleanupJob = clientImpl.scope.launch {
+                safeCall {
+                    session?.sfuTracer?.trace(
+                        "leave-call",
+                        "[reason=$reason, error=${disconnectionReason?.message}]",
+                    )
+                    val stats = collectStats()
+                    session?.sendCallStats(stats)
+                }
+                cleanup()
+                resetScopes()
             }
         }
 
@@ -997,21 +1018,6 @@ public class Call(
             .leaveCall(this)
 
         (client as StreamVideoClient).onCallCleanUp(this)
-
-        synchronized(lifecycleLock) {
-            cleanupJob = clientImpl.scope.launch {
-                safeCall {
-                    session?.sfuTracer?.trace(
-                        "leave-call",
-                        "[reason=$reason, error=${disconnectionReason?.message}]",
-                    )
-                    val stats = collectStats()
-                    session?.sendCallStats(stats)
-                }
-                cleanup()
-                resetScopes()
-            }
-        }
     }
 
     /** ends the call for yourself as well as other users */
