@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -54,11 +54,17 @@ data class CallSettingsRequest (
     @Json(name = "geofencing")
     val geofencing: io.getstream.android.video.generated.models.GeofenceSettingsRequest? = null,
 
+    @Json(name = "individual_recording")
+    val individualRecording: io.getstream.android.video.generated.models.IndividualRecordingSettingsRequest? = null,
+
     @Json(name = "ingress")
     val ingress: io.getstream.android.video.generated.models.IngressSettingsRequest? = null,
 
     @Json(name = "limits")
     val limits: io.getstream.android.video.generated.models.LimitsSettingsRequest? = null,
+
+    @Json(name = "raw_recording")
+    val rawRecording: io.getstream.android.video.generated.models.RawRecordingSettingsRequest? = null,
 
     @Json(name = "recording")
     val recording: io.getstream.android.video.generated.models.RecordSettingsRequest? = null,

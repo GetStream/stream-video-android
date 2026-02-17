@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -98,6 +98,9 @@ data class CallResponse (
 
     @Json(name = "join_ahead_time_seconds")
     val joinAheadTimeSeconds: kotlin.Int? = null,
+
+    @Json(name = "routing_number")
+    val routingNumber: kotlin.String? = null,
 
     @Json(name = "starts_at")
     val startsAt: org.threeten.bp.OffsetDateTime? = null,

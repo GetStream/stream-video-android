@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.notifications.internal.service.managers
 
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
@@ -27,17 +28,32 @@ import kotlinx.coroutines.launch
 
 internal class CallServiceLifecycleManager {
     private val logger by taggedLogger("CallServiceLifecycleManager")
+
+    /**
+     * TODO Rahul, check later
+     * Probably not needed when the trigger is either
+     * 1. [io.getstream.video.android.core.notifications.internal.service.CallService.TRIGGER_INCOMING_CALL]
+     * 2. [io.getstream.video.android.core.notifications.internal.service.CallService.TRIGGER_OUTGOING_CALL]
+     * Because when the device is sleeping and we get incoming call from PN, our n/w request might
+     * fail until the user has tap on the notification which opens the activity.
+     * After accepting the call we restart the service with trigger [io.getstream.video.android.core.notifications.internal.service.CallService.TRIGGER_ONGOING_CALL]
+     * So Should only be required in ongoing-call
+     */
     fun initializeCallAndSocket(
         scope: CoroutineScope,
         streamVideo: StreamVideo,
         call: Call,
-        onError: () -> Unit,
+        onError: (Error?) -> Unit,
     ) {
         scope.launch {
             val update = call.get()
 
             if (update.isFailure) {
-                onError()
+                onError(
+                    Error.GenericError(
+                        "Fail to perform initializeCallAndSocket with error: " + update.errorOrNull(),
+                    ),
+                )
                 return@launch
             }
         }

@@ -77,7 +77,7 @@ class CallServiceLifecycleManagerTest {
 
     @Test
     fun `initializeCallAndSocket calls onError when call get fails`() = testScope.runTest {
-        val onError = mockk<() -> Unit>(relaxed = true)
+        val onError = mockk<(Error?) -> Unit>(relaxed = true)
 
         coEvery { call.get() } returns Result.Failure(Error.GenericError("boom"))
 
@@ -90,13 +90,13 @@ class CallServiceLifecycleManagerTest {
 
         advanceUntilIdle()
 
-        verify { onError.invoke() }
+        verify { onError.invoke(any()) }
         coVerify { streamVideo.connectIfNotAlreadyConnected() }
     }
 
     @Test
     fun `initializeCallAndSocket does not call onError on success`() = testScope.runTest {
-        val onError = mockk<() -> Unit>(relaxed = true)
+        val onError = mockk<(Error?) -> Unit>(relaxed = true)
         val getCallResponseSuccess = mockk<Result.Success<GetCallResponse>>(relaxed = true)
         coEvery { call.get() } returns getCallResponseSuccess
 
@@ -104,7 +104,7 @@ class CallServiceLifecycleManagerTest {
 
         advanceUntilIdle()
 
-        verify(exactly = 0) { onError.invoke() }
+        verify(exactly = 0) { onError.invoke(any()) }
         coVerify { streamVideo.connectIfNotAlreadyConnected() }
     }
 
