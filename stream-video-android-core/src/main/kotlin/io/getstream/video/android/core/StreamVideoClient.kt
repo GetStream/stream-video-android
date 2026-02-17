@@ -535,7 +535,7 @@ internal class StreamVideoClient internal constructor(
      */
     internal fun fireEvent(event: VideoEvent, cid: String = "") {
         logger.d { "Event received $event" }
-        if (state.callBusyHandler.skipPropagateRingEvent(event)) return
+        if (!state.eventPropagationPolicy.shouldPropagate(event)) return
         // update state for the client
         state.handleEvent(event)
 

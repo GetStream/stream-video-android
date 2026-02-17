@@ -90,6 +90,7 @@ class ClientState(private val client: StreamVideo) {
     val rejectCallWhenBusy: Boolean = (client as StreamVideoClient).rejectCallWhenBusy
 
     internal val callBusyHandler = CallBusyHandler(this.client as StreamVideoClient)
+    internal val eventPropagationPolicy = EventPropagationPolicy(callBusyHandler)
 
     /**
      * Returns true if there is an active or ringing call

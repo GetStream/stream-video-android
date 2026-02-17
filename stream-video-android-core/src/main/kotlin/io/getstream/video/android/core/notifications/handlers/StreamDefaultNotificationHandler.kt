@@ -158,7 +158,7 @@ constructor(
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instance()
-        if (streamVideo.state.callBusyHandler.rejectIfBusy(callId, true)) return
+        if (streamVideo.state.callBusyHandler.shouldShowIncomingCallNotification(callId.cid)) return
 
         serviceLauncher.showIncomingCall(
             application,

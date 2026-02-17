@@ -17,50 +17,35 @@
 package io.getstream.video.android.core.call
 
 import io.getstream.android.video.generated.models.CallRingEvent
-import io.getstream.android.video.generated.models.VideoEvent
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.RejectReason
-import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
 internal class CallBusyHandler(private val streamVideo: StreamVideoClient) {
 
-    fun rejectIfBusy(callId: StreamCallId, skipApiCall: Boolean = false): Boolean {
-        val call = streamVideo.call(callId.type, callId.id)
-        return rejectIfBusy(call, skipApiCall)
+    fun shouldPropagateEvent(event: CallRingEvent): Boolean {
+        return !isBusyWithAnotherCall(event.callCid, true)
     }
 
-    fun rejectIfBusy(call: Call, skipApiCall: Boolean = false): Boolean {
+    fun shouldShowIncomingCallNotification(callCid: String): Boolean {
+        return !isBusyWithAnotherCall(callCid)
+    }
+    fun isBusyWithAnotherCall(callCid: String, rejectViaApi: Boolean = false): Boolean {
         val clientState = streamVideo.state
-
         if (!clientState.rejectCallWhenBusy) return false
 
-        val activeCallId = clientState.activeCall.value?.id
-        val ringingCallId = clientState.ringingCall.value?.id
+        val (type, id) = callCid.split(":")
 
-        val isBusyWithAnotherCall =
-            (activeCallId != null && activeCallId != call.id) ||
-                (ringingCallId != null && ringingCallId != call.id)
+        val isBusy =
+            clientState.activeCall.value?.id?.let { it != id } == true ||
+                clientState.ringingCall.value?.id?.let { it != id } == true
 
-        if (!isBusyWithAnotherCall) return false
-
-        if (!skipApiCall) {
-            //Actual Logic
+        if (isBusy && rejectViaApi) {
             streamVideo.scope.launch {
-                call.reject(RejectReason.Busy)
+                streamVideo.call(type, id).reject(RejectReason.Busy)
             }
         }
 
-        return true
-    }
-
-    fun skipPropagateRingEvent(event: VideoEvent): Boolean {
-        if (event is CallRingEvent) {
-            val (type, id) = event.callCid.split(":")
-            val call = streamVideo.call(type, id)
-            return rejectIfBusy(call)
-        }
-        return true
+        return isBusy
     }
 }

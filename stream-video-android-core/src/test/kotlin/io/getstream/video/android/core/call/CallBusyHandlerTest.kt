@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.call
 
+import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ClientState
 import io.getstream.video.android.core.StreamVideoClient
@@ -23,8 +24,10 @@ import io.getstream.video.android.core.model.RejectReason
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -44,20 +47,26 @@ class CallBusyHandlerTest {
     private val testScope = TestScope(testDispatcher)
 
     private lateinit var streamVideo: StreamVideoClient
-    private lateinit var state: ClientState
+    private lateinit var clientState: ClientState
     private lateinit var call: Call
 
     private lateinit var handler: CallBusyHandler
+    private val activeCallFlow = MutableStateFlow<Call?>(null)
+    private val ringingCallFlow = MutableStateFlow<Call?>(null)
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
         streamVideo = mockk(relaxed = true)
-        state = mockk(relaxed = true)
+        clientState = mockk(relaxed = true) {
+            every { rejectCallWhenBusy } returns true
+            every { activeCall } returns activeCallFlow
+            every { ringingCall } returns ringingCallFlow
+        }
         call = mockk(relaxed = true)
 
-        every { streamVideo.state } returns state
+        every { streamVideo.state } returns clientState
         every { streamVideo.scope } returns testScope
         every { streamVideo.call(any(), any()) } returns call
 
@@ -68,43 +77,84 @@ class CallBusyHandlerTest {
     fun tearDown() {
         Dispatchers.resetMain()
     }
-
-    @Test
-    fun `rejectIfBusy returns false when rejectCallWhenBusy is false`() = runTest {
-        every { state.rejectCallWhenBusy } returns false
-        every { state.hasActiveOrRingingCall() } returns true
-
-        val result = handler.rejectIfBusy(call)
-
-        assertFalse(result)
-        coVerify(exactly = 0) { call.reject(RejectReason.Busy) }
+    private fun mockCall(id: String): Call {
+        return mockk {
+            every { this@mockk.id } returns id
+        }
     }
 
     @Test
-    fun `rejectIfBusy returns false when no active or ringing call`() = runTest {
-        every { state.rejectCallWhenBusy } returns true
-        every { state.hasActiveOrRingingCall() } returns false
+    fun `returns false when rejectCallWhenBusy is disabled`() {
+        every { clientState.rejectCallWhenBusy } returns false
 
-        val result = handler.rejectIfBusy(call)
+        val result = handler.isBusyWithAnotherCall("video:123")
 
         assertFalse(result)
-        coVerify(exactly = 0) { call.reject(RejectReason.Busy) }
     }
 
     @Test
-    fun `rejectIfBusy returns true and calls reject when busy`() = runTest {
-        every { state.rejectCallWhenBusy } returns true
-        every { state.hasActiveOrRingingCall() } returns true
+    fun `returns false when same call is active`() {
+        every { clientState.rejectCallWhenBusy } returns true
+        every { clientState.activeCall } returns MutableStateFlow(mockCall("123"))
+        every { clientState.ringingCall } returns MutableStateFlow(null)
 
-        val result = handler.rejectIfBusy(call)
+        val result = handler.isBusyWithAnotherCall("video:123")
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `returns true when busy with another active call but does not reject if rejectViaApi false`() {
+        every { clientState.rejectCallWhenBusy } returns true
+        every { clientState.activeCall } returns MutableStateFlow(mockCall("999"))
+        every { clientState.ringingCall } returns MutableStateFlow(null)
+
+        val result = handler.isBusyWithAnotherCall("video:123", rejectViaApi = false)
 
         assertTrue(result)
+        verify(exactly = 0) { streamVideo.call(any(), any()) }
+    }
 
-        // advance coroutine launched inside scope
-        testScope.advanceUntilIdle()
+    @Test
+    fun `rejects call when busy and rejectViaApi true`() = runTest {
+        every { clientState.rejectCallWhenBusy } returns true
+        every { clientState.activeCall } returns MutableStateFlow(mockCall("999"))
+        every { clientState.ringingCall } returns MutableStateFlow(null)
 
-        coVerify(exactly = 1) {
-            call.reject(RejectReason.Busy)
+        val callMock = mockk<Call>(relaxed = true)
+        every { streamVideo.call("video", "123") } returns callMock
+
+        val result = handler.isBusyWithAnotherCall("video:123", rejectViaApi = true)
+
+        advanceUntilIdle()
+
+        assertTrue(result)
+        coVerify { callMock.reject(RejectReason.Busy) }
+    }
+
+    @Test
+    fun `shouldPropagateEvent returns false when busy`() {
+        every { clientState.rejectCallWhenBusy } returns true
+        every { clientState.activeCall } returns MutableStateFlow(mockCall("999"))
+        every { clientState.ringingCall } returns MutableStateFlow(null)
+
+        val event = mockk<CallRingEvent> {
+            every { callCid } returns "video:123"
         }
+
+        val result = handler.shouldPropagateEvent(event)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `shouldShowIncomingCallNotification returns false when busy`() {
+        every { clientState.rejectCallWhenBusy } returns true
+        every { clientState.activeCall } returns MutableStateFlow(mockCall("999"))
+        every { clientState.ringingCall } returns MutableStateFlow(null)
+
+        val result = handler.shouldShowIncomingCallNotification("video:123")
+
+        assertFalse(result)
     }
 }
