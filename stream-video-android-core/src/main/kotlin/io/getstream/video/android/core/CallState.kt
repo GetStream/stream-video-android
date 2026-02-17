@@ -83,7 +83,6 @@ import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
-import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
@@ -217,27 +216,13 @@ public sealed interface RealtimeConnection {
  *
  */
 @Stable
-public class CallState internal constructor(
+public class CallState(
     private val client: StreamVideo,
     private val call: Call,
     private val user: User,
     @InternalStreamVideoApi
     val scope: CoroutineScope,
-    internal val callBusyHandler: CallBusyHandler = CallBusyHandler(client as StreamVideoClient),
 ) {
-
-    public constructor(
-        client: StreamVideo,
-        call: Call,
-        user: User,
-        scope: CoroutineScope,
-    ) : this(
-        client,
-        call,
-        user,
-        scope,
-        CallBusyHandler(client as StreamVideoClient),
-    )
 
     private val logger by taggedLogger("CallState")
     private var participantsVisibilityMonitor: Job? = null
@@ -879,8 +864,6 @@ public class CallState internal constructor(
             }
 
             is CallRingEvent -> {
-                if (callBusyHandler.rejectIfBusy(call)) return
-
                 getOrCreateMembers(event.members)
                 updateFromResponse(event.call)
 

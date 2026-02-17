@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.call
 
+import io.getstream.android.video.generated.models.CallRingEvent
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.RejectReason
@@ -24,17 +26,41 @@ import kotlinx.coroutines.launch
 
 internal class CallBusyHandler(private val streamVideo: StreamVideoClient) {
 
-    fun rejectIfBusy(callId: StreamCallId): Boolean {
+    fun rejectIfBusy(callId: StreamCallId, skipApiCall: Boolean = false): Boolean {
         val call = streamVideo.call(callId.type, callId.id)
-        return rejectIfBusy(call)
+        return rejectIfBusy(call, skipApiCall)
     }
-    fun rejectIfBusy(call: Call): Boolean {
-        val state = streamVideo.state
 
-        if (!state.rejectCallWhenBusy) return false
-        if (!state.hasActiveOrRingingCall()) return false
+    fun rejectIfBusy(call: Call, skipApiCall: Boolean = false): Boolean {
+        val clientState = streamVideo.state
 
-        streamVideo.scope.launch { call.reject(RejectReason.Busy) }
+        if (!clientState.rejectCallWhenBusy) return false
+
+        val activeCallId = clientState.activeCall.value?.id
+        val ringingCallId = clientState.ringingCall.value?.id
+
+        val isBusyWithAnotherCall =
+            (activeCallId != null && activeCallId != call.id) ||
+                (ringingCallId != null && ringingCallId != call.id)
+
+        if (!isBusyWithAnotherCall) return false
+
+        if (!skipApiCall) {
+            //Actual Logic
+            streamVideo.scope.launch {
+                call.reject(RejectReason.Busy)
+            }
+        }
+
+        return true
+    }
+
+    fun skipPropagateRingEvent(event: VideoEvent): Boolean {
+        if (event is CallRingEvent) {
+            val (type, id) = event.callCid.split(":")
+            val call = streamVideo.call(type, id)
+            return rejectIfBusy(call)
+        }
         return true
     }
 }
