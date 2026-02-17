@@ -1439,7 +1439,7 @@ public class CallState internal constructor(
         } else {
             ParticipantState(
                 sessionId = sessionId,
-                restartableProducerScope = restartableProducerScope,
+                scope = restartableProducerScope,
                 callActions = callActions,
                 initialUserId = userId,
                 source = source,

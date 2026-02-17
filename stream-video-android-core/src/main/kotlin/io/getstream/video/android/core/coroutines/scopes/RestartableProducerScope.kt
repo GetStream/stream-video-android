@@ -35,26 +35,26 @@ import kotlin.coroutines.EmptyCoroutineContext
  * This parameter is intended for internal use only.
  */
 @InternalStreamVideoApi
-internal class RestartableProducerScope : CoroutineScope {
+public class RestartableProducerScope : CoroutineScope {
 
     @Volatile
     private var currentScope: CoroutineScope? = null
 
     private val onAttachCallbacks = mutableListOf<(CoroutineScope) -> Unit>()
 
-    fun attach(scope: CoroutineScope) {
+    internal fun attach(scope: CoroutineScope) {
         currentScope = scope
         onAttachCallbacks.forEach { it(scope) }
     }
 
-    fun detach() {
+    internal fun detach() {
         currentScope = null
     }
 
     override val coroutineContext: CoroutineContext
         get() = currentScope?.coroutineContext ?: EmptyCoroutineContext
 
-    fun onAttach(block: (CoroutineScope) -> Unit) {
+    internal fun onAttach(block: (CoroutineScope) -> Unit) {
         onAttachCallbacks += block
         currentScope?.let { block(it) } // start immediately if already attached
     }

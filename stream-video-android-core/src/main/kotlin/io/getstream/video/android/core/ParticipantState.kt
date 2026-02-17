@@ -54,35 +54,15 @@ import stream.video.sfu.models.TrackType
  * @param trackLookupPrefix
  */
 @Stable // TODO Rahul, need to fix its breaking change before merge
-public data class ParticipantState internal constructor(
+public data class ParticipantState(
     var sessionId: String = "",
-    private val restartableProducerScope: RestartableProducerScope,
+    private val scope: CoroutineScope,
     private val callActions: CallActions,
     private val initialUserId: String,
     val source: ParticipantSource = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
     @InternalStreamVideoApi
     var trackLookupPrefix: String = "",
 ) {
-
-    @Deprecated(
-        "Kept for binary compatibility.",
-        level = DeprecationLevel.ERROR,
-    )
-    public constructor(
-        sessionId: String = "",
-        scope: CoroutineScope,
-        callActions: CallActions,
-        initialUserId: String,
-        source: ParticipantSource = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
-        trackLookupPrefix: String = "",
-    ) : this(
-        sessionId,
-        RestartableProducerScope(),
-        callActions,
-        initialUserId,
-        source,
-        trackLookupPrefix,
-    )
     private val logger by taggedLogger("ParticipantState")
 
     val isLocal by lazy {
@@ -188,7 +168,7 @@ public data class ParticipantState internal constructor(
                 paused = paused,
             )
         },
-        restartableProducerScope,
+        scope as RestartableProducerScope,
         null,
     )
 
