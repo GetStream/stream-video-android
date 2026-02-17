@@ -146,15 +146,4 @@ class CallBusyHandlerTest {
 
         assertFalse(result)
     }
-
-    @Test
-    fun `shouldShowIncomingCallNotification returns false when busy`() {
-        every { clientState.rejectCallWhenBusy } returns true
-        every { clientState.activeCall } returns MutableStateFlow(mockCall("999"))
-        every { clientState.ringingCall } returns MutableStateFlow(null)
-
-        val result = handler.shouldShowIncomingCallNotification("video:123")
-
-        assertFalse(result)
-    }
 }

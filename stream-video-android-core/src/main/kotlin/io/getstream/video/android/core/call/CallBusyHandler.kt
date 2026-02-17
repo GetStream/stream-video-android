@@ -27,9 +27,6 @@ internal class CallBusyHandler(private val streamVideo: StreamVideoClient) {
         return !isBusyWithAnotherCall(event.callCid, true)
     }
 
-    fun shouldShowIncomingCallNotification(callCid: String): Boolean {
-        return !isBusyWithAnotherCall(callCid)
-    }
     fun isBusyWithAnotherCall(callCid: String, rejectViaApi: Boolean = false): Boolean {
         val clientState = streamVideo.state
         if (!clientState.rejectCallWhenBusy) return false

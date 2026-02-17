@@ -30,6 +30,7 @@ import io.getstream.video.android.core.ClientState
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
@@ -41,11 +42,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -97,6 +100,9 @@ class StreamDefaultNotificationHandlerTest {
     private lateinit var testCallId: StreamCallId
     private lateinit var testHandler: StreamDefaultNotificationHandler
 
+    @RelaxedMockK
+    internal lateinit var callBusyHandler: CallBusyHandler
+
     @Before
     fun setUp2() {
         MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
@@ -114,6 +120,7 @@ class StreamDefaultNotificationHandlerTest {
         every { mockStreamVideo.state } returns mockState
         every { mockState.callConfigRegistry } returns mockCallConfigRegistry
         every { mockCallConfigRegistry.get(any()) } returns mockCallServiceConfig
+        every { mockState.callBusyHandler } returns callBusyHandler
 
         // Mock NotificationCompat.Builder to avoid Android framework issues
         mockkConstructor(NotificationCompat.Builder::class)
@@ -180,12 +187,37 @@ class StreamDefaultNotificationHandlerTest {
     }
 
     @Test
-    fun `onRingingCall shows incoming call notification with comprehensive verification`() {
+    fun `onRingingCall does nothing when caller is busy`() {
         // Given
         val callDisplayName = "John Doe"
-        val mockkApp = mockk<Application>(relaxed = true)
-        val mockIncomingChannelInfo = mockk<StreamNotificationChannelInfo>(relaxed = true)
 
+        every { callBusyHandler.isBusyWithAnotherCall(testCallId.cid) } returns true
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockApplication,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+        )
+
+        // When
+        testHandler.onRingingCall(testCallId, callDisplayName, payload)
+
+        // Then — NOTHING downstream should execute
+        verify(exactly = 0) {
+            mockIntentResolver.searchIncomingCallPendingIntent(any(), any())
+        }
+        unmockkObject(StreamVideo)
+    }
+
+    @Test
+    fun `onRingingCall shows incoming call notification when caller is not busy with comprehensive verification`() {
+        // Given
+        val callDisplayName = "John Doe"
+        every { callBusyHandler.isBusyWithAnotherCall(testCallId.cid) } returns false
         // Mock intent resolver calls
         every {
             mockIntentResolver.searchIncomingCallPendingIntent(testCallId, payload = payload)
@@ -205,7 +237,7 @@ class StreamDefaultNotificationHandlerTest {
         } returns mockk<NotificationCompat.Builder>(relaxed = true)
 
         testHandler = StreamDefaultNotificationHandler(
-            application = mockkApp,
+            application = mockApplication,
             notificationManager = mockNotificationManager,
             notificationPermissionHandler = mockNotificationPermissionHandler,
             intentResolver = mockIntentResolver,

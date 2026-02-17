@@ -533,63 +533,84 @@ internal class StreamVideoClient internal constructor(
      * Internal function that fires the event. It starts by updating client state and call state
      * After that it loops over the subscriptions and calls their listener
      */
+
     internal fun fireEvent(event: VideoEvent, cid: String = "") {
         logger.d { "Event received $event" }
-        if (!state.eventPropagationPolicy.shouldPropagate(event)) return
-        // update state for the client
+
+        if (!shouldProcessEvent(event)) return
+
+        propagateEventToClientState(event)
+
+        val selectedCid = resolveSelectedCid(event, cid)
+
+        notifyClientSubscriptions(event)
+
+        if (selectedCid.isEmpty()) return
+
+        forwardToCallSubscriptions(selectedCid, event)
+
+        if (!shouldProcessCallAcceptedEvent(event)) return
+
+        propagateEventToCall(selectedCid, event)
+
+        deliverToDestroyedCalls(event)
+    }
+
+    internal fun shouldProcessEvent(event: VideoEvent): Boolean {
+        return state.eventPropagationPolicy.shouldPropagate(event)
+    }
+
+    internal fun propagateEventToClientState(event: VideoEvent) {
         state.handleEvent(event)
+    }
 
-        // update state for the calls. calls handle updating participants and members
-        val selectedCid = cid.ifEmpty {
-            val callEvent = event as? WSCallEvent
-            callEvent?.getCallCID()
-        } ?: ""
+    internal fun resolveSelectedCid(event: VideoEvent, cid: String): String {
+        if (cid.isNotEmpty()) return cid
 
-        // client level subscriptions
+        val callEvent = event as? WSCallEvent
+        return callEvent?.getCallCID().orEmpty()
+    }
+
+    internal fun notifyClientSubscriptions(event: VideoEvent) {
         subscriptions.forEach { sub ->
-            if (!sub.isDisposed) {
-                // subs without filters should always fire
-                if (sub.filter == null) {
-                    sub.listener.onEvent(event)
-                }
+            if (sub.isDisposed) return@forEach
 
-                // if there is a filter, check it and fire if it matches
-                sub.filter?.let {
-                    if (it.invoke(event)) {
-                        sub.listener.onEvent(event)
-                    }
-                }
+            if (sub.filter == null || sub.filter.invoke(event)) {
+                sub.listener.onEvent(event)
             }
         }
-        // call level subscriptions
-        if (selectedCid.isNotEmpty()) {
-            calls[selectedCid]?.fireEvent(event)
-            notifyDestroyedCalls(event)
-        }
+    }
 
-        if (selectedCid.isNotEmpty()) {
-            // Special handling  for accepted events
-            if (event is CallAcceptedEvent) {
-                // Skip accepted events not meant for the current outgoing call.
-                val currentRingingCall = state.ringingCall.value
-                val state = currentRingingCall?.state?.ringingState?.value
-                if (currentRingingCall != null &&
-                    (state is RingingState.Outgoing || state == RingingState.Idle) &&
-                    currentRingingCall.cid != event.callCid
-                ) {
-                    // Skip this event
-                    return
-                }
-            }
+    internal fun forwardToCallSubscriptions(cid: String, event: VideoEvent) {
+        calls[cid]?.fireEvent(event)
+        notifyDestroyedCalls(event)
+    }
 
-            // Update calls as usual
-            calls[selectedCid]?.let {
-                it.state.handleEvent(event)
-                it.session?.handleEvent(event)
-                it.handleEvent(event)
-            }
-            deliverIntentToDestroyedCalls(event)
+    internal fun shouldProcessCallAcceptedEvent(event: VideoEvent): Boolean {
+        if (event !is CallAcceptedEvent) return true
+
+        val currentRingingCall = state.ringingCall.value ?: return true
+        val ringingState = currentRingingCall.state.ringingState.value
+
+        val isOutgoingOrIdle =
+            ringingState is RingingState.Outgoing ||
+                ringingState == RingingState.Idle
+
+        val isDifferentCall = currentRingingCall.cid != event.callCid
+
+        return !(isOutgoingOrIdle && isDifferentCall)
+    }
+
+    internal fun propagateEventToCall(cid: String, event: VideoEvent) {
+        calls[cid]?.let { call ->
+            call.state.handleEvent(event)
+            call.session?.handleEvent(event)
+            call.handleEvent(event)
         }
+    }
+
+    internal fun deliverToDestroyedCalls(event: VideoEvent) {
+        deliverIntentToDestroyedCalls(event)
     }
 
     private fun shouldProcessDestroyedCall(event: VideoEvent, callCid: String): Boolean {

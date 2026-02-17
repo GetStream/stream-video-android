@@ -46,6 +46,7 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
@@ -150,6 +151,11 @@ constructor(
     private val logger by taggedLogger("Video:StreamNotificationHandler")
     private val serviceLauncher = ServiceLauncher(application)
 
+    internal fun shouldShowIncomingCallNotification(
+        callBusyHandler: CallBusyHandler,
+        callCid: String,
+    ) = !callBusyHandler.isBusyWithAnotherCall(callCid)
+
     // START REGION : On push arrived
     override fun onRingingCall(
         callId: StreamCallId,
@@ -158,7 +164,13 @@ constructor(
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instance()
-        if (streamVideo.state.callBusyHandler.shouldShowIncomingCallNotification(callId.cid)) return
+        if (!shouldShowIncomingCallNotification(
+                streamVideo.state.callBusyHandler,
+                callId.cid,
+            )
+        ) {
+            return
+        }
 
         serviceLauncher.showIncomingCall(
             application,
