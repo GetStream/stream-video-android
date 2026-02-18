@@ -52,8 +52,6 @@ import stream.video.sfu.models.TrackType
 public data class ParticipantState(
     /** The SFU returns a session id for each participant. This session id is unique */
     var sessionId: String = "",
-    /** The coroutine scope for this participant */
-    private val scope: CoroutineScope,
     /** The call actions interface for performing operations on this participant */
     private val callActions: CallActions,
     /** The current version of the user, this is the start for participant.user stateflow */
@@ -63,6 +61,9 @@ public data class ParticipantState(
     @InternalStreamVideoApi
     var trackLookupPrefix: String = "",
 ) {
+    /** The coroutine scope for StateFlows - accessed via callActions.stateScope */
+    private val scope: CoroutineScope
+        get() = callActions.stateScope
 
     private val logger by taggedLogger("ParticipantState")
 

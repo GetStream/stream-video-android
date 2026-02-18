@@ -59,7 +59,6 @@ public val previewCall: Call = Call(
         ParticipantState(
             initialUserId = user.id,
             sessionId = sessionId,
-            scope = this.state.scope,
             callActions = this.state.callActions,
         )
     }
@@ -129,7 +128,6 @@ public val previewParticipantsList: List<ParticipantState>
                 ParticipantState(
                     initialUserId = user.id,
                     sessionId = sessionId,
-                    scope = previewCall.state.scope,
                     callActions = previewCall.state.callActions,
                 ).also { previewCall.state.updateParticipant(it) },
             )

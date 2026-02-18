@@ -81,11 +81,11 @@ public data class LocalStats(
     val deviceModel: String,
 )
 
-public class CallStats(val call: Call, val callScope: CoroutineScope) {
+public class CallStats(val call: Call) {
     private val logger by taggedLogger("CallStats")
 
     private val supervisorJob = SupervisorJob()
-    private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)
+    private val scope = CoroutineScope(call.stateScope.coroutineContext + supervisorJob)
     // TODO: cleanup the scope
 
     val publisher = PeerConnectionStats(scope)

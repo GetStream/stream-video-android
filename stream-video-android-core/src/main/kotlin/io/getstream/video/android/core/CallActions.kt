@@ -19,12 +19,19 @@ package io.getstream.video.android.core
 import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.result.Result
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Interface for call actions that can be performed on a participant.
  */
 @InternalStreamVideoApi
 interface CallActions {
+    /**
+     * A long-lived scope for StateFlows that need to survive leave() and receive coordinator updates.
+     * This scope is NOT cancelled on leave() - it lives for the entire Call object lifetime.
+     */
+    val stateScope: CoroutineScope
+
     /**
      * Mute audio for a specific user
      */

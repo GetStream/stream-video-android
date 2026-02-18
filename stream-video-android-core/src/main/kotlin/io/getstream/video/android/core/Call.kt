@@ -172,7 +172,7 @@ public class Call(
     internal val stateScope = CoroutineScope(clientImpl.scope.coroutineContext + SupervisorJob())
 
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(client, this, user, scope, stateScope)
+    val state = CallState(client, this, user, scope)
 
     private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 

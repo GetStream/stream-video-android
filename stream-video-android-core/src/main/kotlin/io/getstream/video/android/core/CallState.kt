@@ -222,13 +222,14 @@ public class CallState(
     private val user: User,
     @InternalStreamVideoApi
     val scope: CoroutineScope,
+) {
     /**
      * A long-lived scope for StateFlows that need to survive leave() and receive coordinator updates.
      * This scope is NOT cancelled on leave() - it lives for the entire Call object lifetime.
+     * Accessed via call.stateScope.
      */
-    @InternalStreamVideoApi
-    val stateScope: CoroutineScope,
-) {
+    private val stateScope: CoroutineScope
+        get() = call.stateScope
 
     private val logger by taggedLogger("CallState")
     private var participantsVisibilityMonitor: Job? = null
@@ -236,6 +237,9 @@ public class CallState(
     // Create a CallActions implementation that delegates to the Call object
     @InternalStreamVideoApi
     val callActions = object : CallActions {
+        override val stateScope: CoroutineScope
+            get() = call.stateScope
+
         override suspend fun muteUserAudio(userId: String): Result<MuteUsersResponse> {
             return call.muteUser(userId, audio = true, video = false, screenShare = false)
         }
@@ -330,7 +334,7 @@ public class CallState(
      */
     val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
-    val stats = CallStats(call, stateScope)
+    val stats = CallStats(call)
 
     private val participantsUpdate = TaskSchedulerWithDebounce()
     private val participantsUpdateConfig = ScheduleConfig(
@@ -1477,7 +1481,6 @@ public class CallState(
         } else {
             ParticipantState(
                 sessionId = sessionId,
-                scope = stateScope,
                 callActions = callActions,
                 initialUserId = userId,
                 source = source,
