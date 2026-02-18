@@ -1239,6 +1239,10 @@ public class CallState(
     }
 
     private fun updateRingingState(rejectReason: RejectReason? = null) {
+        if (ringingState.value == RingingState.RejectedByAll) {
+            return
+        }
+
         // this is only true when we are in the session (we have accepted/joined the call)
         val rejectedBy = _rejectedBy.value
         val isRejectedByMe = _rejectedBy.value.contains(client.userId)
@@ -1254,15 +1258,29 @@ public class CallState(
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
 
         Log.d("RingingState", "Current: ${_ringingState.value}, call_id: ${call.cid}")
+
+        val ringingStateLogs = arrayListOf(
+            ("acceptedByMe: $isAcceptedByMe"),
+            ("isRejectedByMe: $isRejectedByMe"),
+            ("rejectReason: $rejectReason"),
+            ("hasActiveCall: $hasActiveCall"),
+            ("hasRingingCall: $hasRingingCall"),
+            ("userIsParticipant: $userIsParticipant"),
+        ).joinToString("") { it + "\n" }
+
         Log.d(
             "RingingState",
-            "call_id: ${call.cid}, Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]",
+            "call_id: ${call.cid}, Flags: $ringingStateLogs",
         )
 
         // no members - call is empty, we can join
         val state: RingingState = if (hasActiveCall && !ringingStateUpdatesStopped) {
             cancelTimeout()
             RingingState.Active
+        } else if (isRejectedByMe) {
+            call.leave("updateRingingState-rejected-self")
+            cancelTimeout()
+            RingingState.RejectedByAll
         } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
             (rejectedBy.contains(createdBy?.id) && hasRingingCall)
         ) {
