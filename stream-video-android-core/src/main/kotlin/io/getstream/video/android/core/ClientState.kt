@@ -87,7 +87,7 @@ class ClientState(private val client: StreamVideo) {
     public val callConfigRegistry = (client as StreamVideoClient).callServiceConfigRegistry
     private val serviceLauncher = ServiceLauncher(client.context)
 
-    val rejectCallWhenBusy: Boolean = (client as StreamVideoClient).rejectCallWhenBusy
+    public val rejectCallWhenBusy: Boolean = (client as StreamVideoClient).rejectCallWhenBusy
 
     internal val callBusyHandler = CallBusyHandler(this.client as StreamVideoClient)
     internal val eventPropagationPolicy = EventPropagationPolicy(callBusyHandler)
