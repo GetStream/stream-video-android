@@ -166,8 +166,15 @@ public class Call(
 
     internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
+    /**
+     * A long-lived scope for StateFlows that need to survive leave() and receive coordinator updates.
+     * This scope lives for the entire lifetime of the Call object and is NOT cancelled on leave().
+     * Used for stateIn() operators in CallState, CallStats, and ParticipantState.
+     */
+    internal val stateScope = CoroutineScope(clientImpl.scope.coroutineContext + SupervisorJob())
+
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(client, this, user, scope)
+    val state = CallState(client, this, user, scope, stateScope)
 
     private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 

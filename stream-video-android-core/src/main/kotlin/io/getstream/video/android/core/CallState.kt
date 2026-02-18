@@ -222,6 +222,12 @@ public class CallState(
     private val user: User,
     @InternalStreamVideoApi
     val scope: CoroutineScope,
+    /**
+     * A long-lived scope for StateFlows that need to survive leave() and receive coordinator updates.
+     * This scope is NOT cancelled on leave() - it lives for the entire Call object lifetime.
+     */
+    @InternalStreamVideoApi
+    val stateScope: CoroutineScope,
 ) {
 
     private val logger by taggedLogger("CallState")
@@ -317,14 +323,14 @@ public class CallState(
             combined.toMap().asIterable().associate {
                 Pair(it.key, it.value.at)
             }
-        }.stateIn(scope, SharingStarted.Eagerly, emptyMap())
+        }.stateIn(stateScope, SharingStarted.Eagerly, emptyMap())
 
     /**
      * Pinned participants, combined value both from server and local pins.
      */
     val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
 
-    val stats = CallStats(call, scope)
+    val stats = CallStats(call, stateScope)
 
     private val participantsUpdate = TaskSchedulerWithDebounce()
     private val participantsUpdateConfig = ScheduleConfig(
@@ -413,7 +419,9 @@ public class CallState(
         ),
     )
     val livestream: StateFlow<ParticipantState.Video?> =
-        livestreamFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
+        livestreamFlow.debounce(
+            1000,
+        ).stateIn(stateScope, SharingStarted.WhileSubscribed(10_000L), null)
 
     private var _sortedParticipantsState = SortedParticipantsState(
         scope,
@@ -503,11 +511,11 @@ public class CallState(
     /** how long the call has been running, rounded to seconds, null if the call didn't start yet */
     public val duration: StateFlow<Duration?> =
         _durationInMs.transform { emit(((it ?: 0L) / 1000L).toDuration(DurationUnit.SECONDS)) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+            .stateIn(stateScope, SharingStarted.WhileSubscribed(10000L), null)
 
     /** how many milliseconds the call has been running, null if the call didn't start yet */
     public val durationInMs: StateFlow<Long?> =
-        _durationInMs.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+        _durationInMs.stateIn(stateScope, SharingStarted.WhileSubscribed(10000L), null)
 
     /** how many milliseconds the call has been running in the simple date format. */
     public val durationInDateFormat: StateFlow<String?> = durationInMs.mapState { durationInMs ->
@@ -570,7 +578,7 @@ public class CallState(
                 emit(duration)
             }
         }
-    }.distinctUntilChanged().stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+    }.distinctUntilChanged().stateIn(stateScope, SharingStarted.WhileSubscribed(10000L), null)
 
     /**
      * How long the call has been live for, represented as [Duration], or null if the call hasn't been live yet.
@@ -1469,7 +1477,7 @@ public class CallState(
         } else {
             ParticipantState(
                 sessionId = sessionId,
-                scope = scope,
+                scope = stateScope,
                 callActions = callActions,
                 initialUserId = userId,
                 source = source,
