@@ -666,6 +666,9 @@ public class CallState(
         MutableStateFlow<Map<String, Boolean?>>(emptyMap())
     val participantVideoEnabledOverrides = _participantVideoEnabledOverrides.asStateFlow()
 
+    internal val _thumbnail = MutableStateFlow<String?>(null)
+    public val thumbnail = _thumbnail.asStateFlow()
+
     private var speakingWhileMutedResetJob: Job? = null
     private var autoJoiningCall: Job? = null
     private var ringingTimerJob: Job? = null
@@ -1532,6 +1535,7 @@ public class CallState(
         _settings.value = response.settings
         _transcribing.value = response.transcribing
         _team.value = response.team
+        _thumbnail.value = response.thumbnails?.imageUrl
         didUpdateSession(response.session)
 
         updateRingingState()
