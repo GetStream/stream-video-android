@@ -104,7 +104,7 @@ import java.net.ConnectException
  *          To start receiving WebSocket events, explicitly invoke `client.connect()`.
  * @property rejectCallWhenBusy Automatically rejects incoming calls when the user is already in another call.
  *          When enabled, the SDK suppresses incoming call notifications.
- *          CallRingEvent event will not be propagated if there is an active or ongoing ringing call.
+ *          CallRingEvent will not be propagated if there is an active or ongoing ringing call.
  *
  * @see build
  * @see ClientState.connection

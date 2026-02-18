@@ -112,7 +112,7 @@ class RingTest : IntegrationTestBase() {
         assertThat(call.state.acceptedBy.value).contains("tommaso")
     }
 
-//    @Test
+    @Test
     fun `Reject a call`() = runTest {
         val call = client.call("default")
         val createResponse = call.create(memberIds = listOf("tommaso", "thierry"), ring = true)
