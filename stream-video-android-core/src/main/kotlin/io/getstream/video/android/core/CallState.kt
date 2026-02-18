@@ -1547,7 +1547,7 @@ public class CallState(
         updateFromResponse(callResponse)
     }
 
-    internal fun updateFromResponse(members: List<MemberResponse>) {
+    private fun updateFromResponse(members: List<MemberResponse>) {
         getOrCreateMembers(members)
     }
 
