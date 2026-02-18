@@ -1281,8 +1281,7 @@ public class CallState(
         } else if (hasActiveCall && createdBySelf && acceptedBy.isNotEmpty() && !isAcceptedByMe) { // for joinAndRing
             cancelTimeout()
             RingingState.Active
-        }
-            else if (isRejectedByMe) {
+        } else if (isRejectedByMe) {
             call.leave("updateRingingState-rejected-self")
             cancelTimeout()
             RingingState.RejectedByAll
