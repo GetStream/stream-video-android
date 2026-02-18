@@ -64,7 +64,12 @@ import java.net.ConnectException
  *      geo = GEO.GlobalEdgeNetwork,
  *      user = user,
  *      token = token,
+ *      sounds = ringingConfig(
+ *                 defaultResourcesRingingConfig(context),
+ *                 defaultMutedRingingConfig(true, true)
+ *             ),
  *      loggingLevel = LoggingLevel.BODY,
+ *
  *      // ...
  * ).build()
  *```
@@ -97,6 +102,9 @@ import java.net.ConnectException
  *          When `false` and the socket is not connected, incoming calls will not be delivered via WebSocket events;
  *          the SDK will rely on push notifications instead.
  *          To start receiving WebSocket events, explicitly invoke `client.connect()`.
+ * @property rejectCallWhenBusy Automatically rejects incoming calls when the user is already in another call.
+ *          When enabled, the SDK suppresses incoming call notifications and prevents
+ *          ringing events from being propagated if there is an active or ongoing ringing call.
  *
  * @see build
  * @see ClientState.connection
