@@ -1281,7 +1281,6 @@ public class CallState(
             cancelTimeout()
             RingingState.RejectedByAll
         } else if (hasActiveCall && createdBySelf && acceptedBy.isNotEmpty() && !isAcceptedByMe) { // for joinAndRing
-            logger.d { "RingingState.Active source 4" }
             cancelTimeout()
             RingingState.Active
         } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
@@ -1317,6 +1316,7 @@ public class CallState(
                 // call is accepted and we are already in the call
                 ringingStateUpdatesStopped.set(false)
                 cancelTimeout()
+                logger.d { "RingingState.Active source 3" }
                 RingingState.Active
             }
         } else {
