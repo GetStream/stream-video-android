@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.video.generated.models.BlockedUserEvent
@@ -160,6 +159,7 @@ import java.util.Locale
 import java.util.SortedMap
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -1023,7 +1023,7 @@ public class CallState(
             is JoinCallResponseEvent -> {
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
-                if (!ringingStateUpdatesStopped) {
+                if (!ringingStateUpdatesStopped.get()) {
                     updateRingingState()
                 } else {
                     _ringingState.value = RingingState.Outgoing(acceptedByCallee = true)
@@ -1239,6 +1239,11 @@ public class CallState(
     }
 
     private fun updateRingingState(rejectReason: RejectReason? = null) {
+        val ringingStateLogger by taggedLogger("RingingState")
+        if (ringingState.value == RingingState.RejectedByAll) {
+            return
+        }
+
         // this is only true when we are in the session (we have accepted/joined the call)
         val rejectedBy = _rejectedBy.value
         val isRejectedByMe = _rejectedBy.value.contains(client.userId)
@@ -1254,12 +1259,9 @@ public class CallState(
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
         val createdBySelf = createdBy?.id == client.userId
 
-        Log.d("RingingState", "Current: ${_ringingState.value}, call_id: ${call.cid}")
+        ringingStateLogger.d { "Current: ${_ringingState.value}, call_id: ${call.cid}" }
 
         val ringingStateLogs = arrayListOf(
-            ("call.id: ${call.id}"),
-            ("acceptedBy: ${acceptedBy.joinToString()}"),
-            ("client.state.activeCall.id: ${client.state.activeCall.value?.id}"),
             ("acceptedByMe: $isAcceptedByMe"),
             ("isRejectedByMe: $isRejectedByMe"),
             ("rejectReason: $rejectReason"),
@@ -1268,16 +1270,16 @@ public class CallState(
             ("userIsParticipant: $userIsParticipant"),
         ).joinToString("") { it + "\n" }
 
-        Log.d(
-            "RingingState",
-            "call_id: ${call.cid}, Flags: $ringingStateLogs",
-        )
+        ringingStateLogger.d { "call_id: ${call.cid}, Flags: $ringingStateLogs" }
 
         // no members - call is empty, we can join
-        val state: RingingState = if (hasActiveCall && !ringingStateUpdatesStopped) {
-            logger.d { "RingingState.Active source 1" }
+        val state: RingingState = if (hasActiveCall && !ringingStateUpdatesStopped.get()) {
             cancelTimeout()
             RingingState.Active
+        } else if (isRejectedByMe) {
+            call.leave("updateRingingState-rejected-self")
+            cancelTimeout()
+            RingingState.RejectedByAll
         } else if (hasActiveCall && createdBySelf && acceptedBy.isNotEmpty() && !isAcceptedByMe) { // for joinAndRing
             logger.d { "RingingState.Active source 4" }
             cancelTimeout()
@@ -1298,14 +1300,13 @@ public class CallState(
             // If it's already accepted by me then we are in an Active call
             if (userIsParticipant) {
                 cancelTimeout()
-                logger.d { "RingingState.Active source 2" }
                 RingingState.Active
             } else {
                 RingingState.Incoming(acceptedByMe = isAcceptedByMe)
             }
         } else if (hasRingingCall && createdBy?.id == client.userId) {
             // The call is created by us
-            logger.d { "acceptedBy: $acceptedBy, userIsParticipant: $userIsParticipant" }
+            ringingStateLogger.d { "acceptedBy: $acceptedBy, userIsParticipant: $userIsParticipant" }
             if (acceptedBy.isEmpty()) {
                 // no one accepted the call
                 RingingState.Outgoing(acceptedByCallee = false)
@@ -1314,9 +1315,8 @@ public class CallState(
                 RingingState.Outgoing(acceptedByCallee = true)
             } else {
                 // call is accepted and we are already in the call
-                ringingStateUpdatesStopped = false
+                ringingStateUpdatesStopped.set(false)
                 cancelTimeout()
-                logger.d { "RingingState.Active source 3" }
                 RingingState.Active
             }
         } else {
@@ -1328,7 +1328,7 @@ public class CallState(
         }
 
         if (_ringingState.value != state) {
-            logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
+            ringingStateLogger.d { "Updating ringing state ${_ringingState.value} -> $state" }
 
             // handle the auto-cancel for outgoing ringing calls
             if (state is RingingState.Outgoing && !state.acceptedByCallee) {
@@ -1341,7 +1341,7 @@ public class CallState(
 
             // stop the call ringing timer if it's running
         }
-        Log.d("RingingState", "Update: $state")
+        ringingStateLogger.d { "Update: $state" }
 
         _ringingState.value = state
     }
@@ -1397,7 +1397,7 @@ public class CallState(
 
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
-                    ringingStateUpdatesStopped = false
+                    ringingStateUpdatesStopped.set(false)
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
                     call.leave("start-ringing-timeout")
                 }
@@ -1646,10 +1646,10 @@ public class CallState(
         _broadcasting.value = true
     }
 
-    private var ringingStateUpdatesStopped = false
+    private var ringingStateUpdatesStopped = AtomicBoolean(false)
 
     internal fun toggleRingingStateUpdates(stopped: Boolean) {
-        ringingStateUpdatesStopped = stopped
+        ringingStateUpdatesStopped.set(stopped)
     }
 
     /**
