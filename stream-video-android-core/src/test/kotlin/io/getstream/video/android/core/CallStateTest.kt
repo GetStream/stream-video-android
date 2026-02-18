@@ -230,7 +230,7 @@ class CallStateTest : IntegrationTestBase() {
         }
     }
 
-//    @Test
+    @Test
     fun `Query calls pagination works`() = runTest {
         // get first page with one result
         val queryResult = client.queryCalls(emptyMap(), limit = 1)

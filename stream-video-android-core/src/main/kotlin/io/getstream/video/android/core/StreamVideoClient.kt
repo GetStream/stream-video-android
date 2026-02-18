@@ -274,7 +274,6 @@ internal class StreamVideoClient internal constructor(
         try {
             apiCall()
         } catch (e: HttpException) {
-            println("API call:" + e.message.toString())
             // Retry once with a new token if the token is expired
             if (e.isAuthError()) {
                 val newToken = tokenProvider.loadToken()
