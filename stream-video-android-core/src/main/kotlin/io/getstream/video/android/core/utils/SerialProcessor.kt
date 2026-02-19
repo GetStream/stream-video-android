@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -67,10 +67,12 @@ internal class SerialProcessor(
         if (workerJob == null) {
             logger.d { "[submit] Starting SerialProcessor worker" }
             workerJob = scope.launch {
+                var currentJobName: String? = null
                 try {
                     logger.d { "[execute] SerialProcessor worker started" }
                     for (job in channel) {
-                        logger.d { "[execute] Job #${job.jobId} '${job.jobName}' starting execution" }
+                        currentJobName = job.jobName
+                        logger.d { "[execute] Job #${job.jobId} '$currentJobName' starting execution" }
                         val startTime = System.currentTimeMillis()
 
                         // run the block, capture success or failure
@@ -93,7 +95,7 @@ internal class SerialProcessor(
                     }
                     logger.d { "[execute] SerialProcessor worker finished processing all jobs in channel" }
                 } catch (e: Exception) {
-                    logger.e(e) { "[execute] SerialProcessor worker crashed: ${e.message}" }
+                    logger.e(e) { "[execute] SerialProcessor ($currentJobName) worker crashed: ${e.message}" }
                 } finally {
                     logger.d { "[execute] SerialProcessor worker ended (isActive: ${workerJob?.isActive})" }
                     workerJob = null

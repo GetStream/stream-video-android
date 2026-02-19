@@ -20,15 +20,12 @@ import com.android.build.api.variant.ResValue
 import com.github.triplet.gradle.androidpublisher.ResolutionStrategy
 import io.getstream.video.FlavorDimension
 import io.getstream.video.VideoDemoFlavor
-import io.getstream.video.android.Configuration
-import io.getstream.video.configureFlavors
 import java.io.FileInputStream
 import java.util.Properties
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     id("io.getstream.video.android.application.compose")
-    id("io.getstream.spotless")
+    id("io.getstream.video.android.demoflavor")
     id("com.google.gms.google-services")
     id(libs.plugins.firebase.crashlytics.get().pluginId)
     id(libs.plugins.kotlin.serialization.get().pluginId)
@@ -47,7 +44,7 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
-        versionName = Configuration.streamVideoCallGooglePlayVersion
+        versionName = rootProject.version.toString()
         testInstrumentationRunner = "io.qameta.allure.android.runners.AllureAndroidJUnitRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
         missingDimensionStrategy(FlavorDimension.contentType.name, VideoDemoFlavor.development.name)
@@ -93,8 +90,6 @@ android {
         }
     }
 
-    configureFlavors(this)
-
     buildTypes {
         getByName("debug") {
             versionNameSuffix = "-DEBUG"
@@ -109,7 +104,7 @@ android {
             baselineProfile.automaticGenerationDuringBuild = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             signingConfig = signingConfigs.getByName("release")
         }
@@ -144,7 +139,9 @@ android {
     }
 
     playConfigs {
-        val serviceAccountCredentialsFile: File = rootProject.file(".sign/service-account-credentials.json")
+        val serviceAccountCredentialsFile: File = rootProject.file(
+            ".sign/service-account-credentials.json",
+        )
         if (serviceAccountCredentialsFile.exists()) {
             register("productionRelease") {
                 enabled.set(true)
@@ -199,8 +196,8 @@ androidComponents {
             applicationVariant.outputs.forEach {
                 it.versionName.set(
                     it.versionCode.map { playVersionCode ->
-                        "${Configuration.streamVideoCallGooglePlayVersion} ($playVersionCode)"
-                    }
+                        "${rootProject.version} ($playVersionCode)"
+                    },
                 )
             }
 
@@ -218,9 +215,7 @@ dependencies {
     implementation(project(":stream-video-android-filters-video"))
     compileOnly(project(":stream-video-android-previewdata"))
 
-
     implementation(libs.androidx.media.media)
-
 
     implementation(libs.androidx.media.media)
 
@@ -282,7 +277,9 @@ dependencies {
     implementation(libs.moshi.kotlin)
 
     // Play
-    implementation(libs.play.install.referrer) // Used to extract the meeting link from demo flow after install
+    implementation(
+        libs.play.install.referrer,
+    ) // Used to extract the meeting link from demo flow after install
     implementation(libs.play.auth)
     implementation(libs.play.app.update.ktx)
 
@@ -293,6 +290,9 @@ dependencies {
     implementation(libs.okhttp)
 
     implementation(libs.audioswitch)
+
+    // Logging
+    implementation(libs.okhttp.logging)
 
     // Also Leak Canary added in the previous block
 

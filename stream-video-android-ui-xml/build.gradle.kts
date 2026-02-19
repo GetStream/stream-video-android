@@ -13,13 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
-import io.getstream.video.android.Configuration
 
 plugins {
-    alias(libs.plugins.maven.publish)
     id("io.getstream.video.android.library")
-    id("io.getstream.spotless")
 }
 
 android {
@@ -60,20 +56,4 @@ dependencies {
     implementation(libs.landscapist.coil)
 
     implementation(libs.stream.log)
-
-}
-
-mavenPublishing {
-    coordinates(
-        groupId = Configuration.artifactGroup,
-        artifactId = "stream-video-android-xml",
-        version = rootProject.version.toString(),
-    )
-    configure(
-        AndroidSingleVariantLibrary(
-            variant = "release",
-            sourcesJar = true,
-            publishJavadocJar = true,
-        ),
-    )
 }

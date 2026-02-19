@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,10 @@ abstract class LocalEvent : WSCallEvent, VideoEvent()
  * allowing the SDK to handle it as if a [io.getstream.android.video.generated.models.CallRejectedEvent] had
  * been received in real time (or to apply adjusted logic if needed).
  */
-data class LocalCallMissedEvent(val callCid: String) : LocalEvent() {
+data class LocalCallMissedEvent(
+    val callCid: String,
+    val createdById: String? = null,
+) : LocalEvent() {
     override fun getCallCID(): String {
         return callCid
     }

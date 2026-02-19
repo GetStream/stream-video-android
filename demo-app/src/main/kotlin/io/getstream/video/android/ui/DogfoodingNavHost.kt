@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ fun AppNavHost(
         composable(AppScreens.DirectCallJoin.route) {
             val context = LocalContext.current
             DirectCallJoinScreen(
-                navigateToDirectCall = { cid, members ->
+                navigateToDirectCall = { cid, members, joinAndRing ->
                     context.startActivity(
                         StreamCallActivity.callIntent(
                             action = NotificationHandler.ACTION_OUTGOING_CALL,
@@ -101,6 +101,7 @@ fun AppNavHost(
                             leaveWhenLastInCall = true,
                             context = context,
                             cid = cid,
+                            joinAndRing = joinAndRing,
                             members = members.split(","),
                             clazz = CallActivity::class.java,
                         ),

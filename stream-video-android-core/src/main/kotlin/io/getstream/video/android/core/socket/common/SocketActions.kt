@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ interface SocketActions<EventIn, EventOut, Error, State, Token, ConnectData> {
 
     /**
      * Send raw data to the socket. If you already have a parsed event that can be sent.
+     * Refactor later to return bool
      */
     fun sendData(data: String)
 
@@ -79,6 +80,7 @@ interface SocketActions<EventIn, EventOut, Error, State, Token, ConnectData> {
      */
     fun whenConnected(
         connectionTimeout: Long = DEFAULT_SOCKET_TIMEOUT,
+        connectionFailed: suspend (throwable: Throwable) -> Unit = {},
         connected: suspend (connectionId: String) -> Unit,
     )
 }

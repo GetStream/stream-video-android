@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,21 @@ package io.getstream.video.android
 import android.app.Application
 import android.content.Context
 import dagger.hilt.android.HiltAndroidApp
+import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.moderations.CallModerationConstants
+import io.getstream.video.android.data.model.PolicyViolationUiData
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.util.StreamVideoInitHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 @HiltAndroidApp
@@ -51,6 +63,33 @@ class App : Application() {
                 dataStore = StreamUserDataStore.instance(),
                 useRandomUserAsFallback = false,
             )
+        }
+
+        observePolicyViolation()
+    }
+
+    internal var policyViolationUiData: MutableStateFlow<PolicyViolationUiData?> =
+        MutableStateFlow(null)
+
+    private fun observePolicyViolation() {
+        CoroutineScope(Dispatchers.Default).launch {
+            StreamVideo.instanceState
+                .flatMapLatest { instance ->
+                    instance?.state?.activeCall ?: flowOf(null)
+                }.filterNotNull()
+                .collectLatest { call ->
+                    call.events.collectLatest { event ->
+                        if (event is CallEndedEvent) {
+                            if (event.reason == CallModerationConstants.POLICY_VIOLATION) {
+                                policyViolationUiData.value = PolicyViolationUiData(
+                                    getString(R.string.policy_violation_title),
+                                    getString(R.string.policy_violation_message),
+                                    getString(R.string.policy_violation_action_button),
+                                )
+                            }
+                        }
+                    }
+                }
         }
     }
 }

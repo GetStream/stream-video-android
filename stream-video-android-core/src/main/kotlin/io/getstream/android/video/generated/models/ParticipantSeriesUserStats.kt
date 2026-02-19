@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,15 @@ import com.squareup.moshi.ToJson
  */
 
 data class ParticipantSeriesUserStats (
+    @Json(name = "metrics_order")
+    val metricsOrder: kotlin.collections.List<kotlin.String>? = emptyList(),
+
     @Json(name = "metrics")
-    val metrics: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.collections.List<kotlin.Float>>>? = emptyMap()
+    val metrics: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.collections.List<kotlin.Float>>>? = emptyMap(),
+
+    @Json(name = "metrics_meta")
+    val metricsMeta: kotlin.collections.Map<kotlin.String, io.getstream.android.video.generated.models.MetricDescriptor>? = emptyMap(),
+
+    @Json(name = "thresholds")
+    val thresholds: kotlin.collections.Map<kotlin.String, kotlin.collections.List<io.getstream.android.video.generated.models.MetricThreshold>>? = emptyMap()
 )

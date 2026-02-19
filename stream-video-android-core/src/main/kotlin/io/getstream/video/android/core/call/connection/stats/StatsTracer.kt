@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -239,7 +239,9 @@ private fun deltaCompression(
         /* Members comparison mirrors the JS inner loop. */
         for ((name, value) in newReport.members) {
             val oldValue = oldReport?.members?.get(name)
-            if (value != oldValue) diff[name] = value
+            if (oldStats.isEmpty() || value != oldValue) {
+                diff[name] = value
+            }
         }
 
         /* Timestamp is handled after we know which report(s) are latest,

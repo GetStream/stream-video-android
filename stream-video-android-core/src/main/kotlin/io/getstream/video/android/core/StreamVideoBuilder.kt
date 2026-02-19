@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,9 @@ import io.getstream.video.android.core.permission.android.DefaultStreamPermissio
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
-import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
@@ -90,11 +91,18 @@ import java.net.ConnectException
  * @property callServiceConfigRegistry The audio processor used for custom modifications to audio data within WebRTC.
  * @property leaveAfterDisconnectSeconds The number of seconds to wait before leaving the call after the connection is disconnected.
  * @property callUpdatesAfterLeave Whether to update the call state after leaving the call.
+ * @property connectOnInit Determines whether the socket should automatically connect as soon as a user is set.
+ *          If `false`, the connection is established only when explicitly requested or when core SDK features
+ *          (such as audio or video calls) are used.
+ *          When `false` and the socket is not connected, incoming calls will not be delivered via WebSocket events;
+ *          the SDK will rely on push notifications instead.
+ *          To start receiving WebSocket events, explicitly invoke `client.connect()`.
  *
  * @see build
  * @see ClientState.connection
  *
  */
+
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
     private val apiKey: ApiKey,
@@ -106,7 +114,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         object : TokenProvider {
             override suspend fun loadToken(): String = legacy.invoke(null)
         }
-    } ?: ConstantTokenProvider(token),
+    } ?: RepositoryTokenProvider(tokenRepository),
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
@@ -144,6 +152,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     @InternalStreamVideoApi
     private val enableStereoForSubscriber: Boolean = true,
     private val telecomConfig: TelecomConfig? = null,
+    private val connectOnInit: Boolean = true,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -214,7 +223,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         // Android JSR-310 backport backport
         AndroidThreeTen.init(context)
-
+        tokenRepository.updateToken(token)
         // This connection module class exposes the connections to the various retrofit APIs.
         val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
@@ -225,9 +234,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             loggingLevel = loggingLevel,
             user = user,
             apiKey = apiKey,
-            userToken = token,
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
+            tokenRepository = tokenRepository,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)
@@ -272,6 +281,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             vibrationConfig = vibrationConfig,
             enableStereoForSubscriber = enableStereoForSubscriber,
             telecomConfig = telecomConfig,
+            tokenRepository = tokenRepository,
         )
 
         if (user.type == UserType.Guest) {
@@ -285,14 +295,16 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         if (user.type != UserType.Anonymous) {
             scope.launch {
                 try {
-                    val result = client.connectAsync().await()
                     if (notificationConfig.autoRegisterPushDevice) {
                         client.registerPushDevice()
                     }
-                    result.onSuccess {
-                        streamLog { "Connection succeeded! (duration: ${result.getOrNull()})" }
-                    }.onError {
-                        streamLog { it.message }
+                    if (connectOnInit) {
+                        val result = client.connectAsync().await()
+                        result.onSuccess {
+                            streamLog { "Connection succeeded! (duration: ${result.getOrNull()})" }
+                        }.onError {
+                            streamLog { it.message }
+                        }
                     }
                 } catch (e: Throwable) {
                     // If the connect continuation was resumed with an exception, we catch it here.
@@ -347,6 +359,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         }
     }
 }
+
+/**
+ * Refactor Later
+ */
+internal val tokenRepository = TokenRepository("")
 
 sealed class GEO {
     /** Run calls over our global edge network, this is the default and right for most applications */

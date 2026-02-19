@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,10 @@ import androidx.compose.material.icons.filled.SpeakerPhone
 import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,6 +64,7 @@ import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.core.model.PreferredVideoResolution
+import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.tooling.extensions.toPx
 import io.getstream.video.android.ui.call.ReactionsMenu
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
@@ -70,6 +73,7 @@ import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateManager
 import io.getstream.video.android.util.filters.SampleAudioFilter
+import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -94,6 +98,7 @@ internal fun SettingsMenu(
     onClosedCaptionsToggle: () -> Unit,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val availableDevices by call.microphone.devices.collectAsStateWithLifecycle()
     val currentAudioUsage by call.speaker.audioUsage.collectAsStateWithLifecycle()
 
@@ -245,6 +250,31 @@ internal fun SettingsMenu(
             }
         }
     }
+    val compositeRecording by call.state.compositeRecording.collectAsStateWithLifecycle()
+    val individualRecording by call.state.individualRecording.collectAsStateWithLifecycle()
+    val rawRecording by call.state.rawRecording.collectAsStateWithLifecycle()
+    val enabledRecordingTypes by remember {
+        derivedStateOf {
+            buildSet {
+                if (compositeRecording) add(RecordingType.Composite)
+                if (individualRecording) add(RecordingType.Individual)
+                if (rawRecording) add(RecordingType.Raw)
+            }
+        }
+    }
+    val onSelectRecordingType = { recordingType: RecordingType ->
+        scope.launch {
+            when (recordingType) {
+                RecordingType.Raw, RecordingType.Individual, RecordingType.Composite ->
+                    if (enabledRecordingTypes.contains(recordingType)) {
+                        call.stopRecording(recordingType)
+                    } else {
+                        call.startRecording(recordingType)
+                    }
+            }
+        }
+        Unit
+    }
 
     Popup(
         offset = IntOffset(
@@ -263,9 +293,11 @@ internal fun SettingsMenu(
                     tint = Color.White,
                     imageVector = Icons.Default.Close,
                     contentDescription = Icons.Default.Close.name,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp).clickable {
-                        onDismissed()
-                    },
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp, vertical = 10.dp)
+                        .clickable {
+                            onDismissed()
+                        },
                 )
                 ReactionsMenu(
                     call = call,
@@ -319,6 +351,8 @@ internal fun SettingsMenu(
                 audioDeviceUiStateList = audioDeviceUiStateList,
                 audioUsageUiState = audioUsageUiState,
                 onToggleAudioUsage = onToggleAudioUsage,
+                selectedRecordingTypes = enabledRecordingTypes,
+                onSelectRecordingType = onSelectRecordingType,
             ),
         )
     }

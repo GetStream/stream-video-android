@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.token
 
 import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
+import io.getstream.video.android.core.socket.common.token.PersistingTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenManager
 
 internal class FakeTokenManager(
@@ -31,6 +32,10 @@ internal class FakeTokenManager(
     }
 
     override fun setTokenProvider(provider: CacheableTokenProvider) {
+        // empty
+    }
+
+    override fun setTokenProvider(provider: PersistingTokenProvider) {
         // empty
     }
 

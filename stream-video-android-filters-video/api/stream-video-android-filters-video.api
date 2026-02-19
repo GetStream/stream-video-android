@@ -2,6 +2,7 @@ public final class io/getstream/video/android/filters/video/BlurIntensity : java
 	public static final field HEAVY Lio/getstream/video/android/filters/video/BlurIntensity;
 	public static final field LIGHT Lio/getstream/video/android/filters/video/BlurIntensity;
 	public static final field MEDIUM Lio/getstream/video/android/filters/video/BlurIntensity;
+	public static final field ULTRA Lio/getstream/video/android/filters/video/BlurIntensity;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getRadius ()I
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/filters/video/BlurIntensity;
@@ -12,6 +13,13 @@ public final class io/getstream/video/android/filters/video/BlurredBackgroundVid
 	public fun <init> ()V
 	public fun <init> (Lio/getstream/video/android/filters/video/BlurIntensity;D)V
 	public synthetic fun <init> (Lio/getstream/video/android/filters/video/BlurIntensity;DILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun applyFilter (Landroid/graphics/Bitmap;)V
+}
+
+public final class io/getstream/video/android/filters/video/SimpleBlurVideoFilter : io/getstream/video/android/core/call/video/BitmapVideoFilter {
+	public fun <init> ()V
+	public fun <init> (Lio/getstream/video/android/filters/video/BlurIntensity;)V
+	public synthetic fun <init> (Lio/getstream/video/android/filters/video/BlurIntensity;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun applyFilter (Landroid/graphics/Bitmap;)V
 }
 

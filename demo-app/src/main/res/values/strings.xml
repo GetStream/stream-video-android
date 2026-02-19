@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (c) 2024 Stream.io Inc. All rights reserved.
+    Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
 
-     Licensed under the Stream License;
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
+    Licensed under the Stream License;
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-          https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+      https://github.com/GetStream/stream-video-android/blob/main/LICENSE
 
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 -->
 <resources>
     <string name="deeplinking_host">getstream.io</string> <!-- for CI build -->
@@ -56,6 +56,11 @@
     <string name="in_app_update_canceled">Please consider installing the update.\nIt contains important features or bug fixes.</string>
     <string name="in_app_update_failed">App update failed. Try again later</string>
     <string name="you_are_offline">You are offline. Check your internet connection.</string>
+    <string name="policy_violation_title">Policy Violated</string>
+    <string name="policy_violation_message">We have to end your call as we have detected policy violation</string>
+    <string name="policy_violation_action_button">OK</string>
+    <string name="moderation_warning_title">Warning</string>
+
     <plurals name="chat_typing">
         <item quantity="one">%s is typing</item>
         <item quantity="other">%s and %d more are typing</item>

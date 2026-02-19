@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,18 @@ data class CallStatsParticipantCounts (
     @Json(name = "participants")
     val participants: kotlin.Int,
 
+    @Json(name = "peak_concurrent_sessions")
+    val peakConcurrentSessions: kotlin.Int,
+
+    @Json(name = "peak_concurrent_users")
+    val peakConcurrentUsers: kotlin.Int,
+
     @Json(name = "publishers")
     val publishers: kotlin.Int,
 
     @Json(name = "sessions")
-    val sessions: kotlin.Int
+    val sessions: kotlin.Int,
+
+    @Json(name = "total_participant_duration")
+    val totalParticipantDuration: kotlin.Int? = null
 )

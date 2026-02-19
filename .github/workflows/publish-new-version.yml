@@ -4,12 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       bump:
+        required: true
         type: choice
         description: "Type of version bump to perform"
         options:
           - patch
           - minor
           - major
+        default: minor
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   pre_release_check:
@@ -21,20 +27,16 @@ jobs:
         id: pre_release_check_step
         run: echo "Pre release check"
   publish:
+    permissions:
+      contents: write
     needs: pre_release_check
-    uses: GetStream/android-ci-actions/.github/workflows/release-new-version.yml@main
+    uses: GetStream/stream-build-conventions-android/.github/workflows/release.yml@v0.9.0
     with:
-      ref: "develop"
       bump: ${{ inputs.bump }}
-      file-path: ./buildSrc/src/main/kotlin/io/getstream/video/android/Configuration.kt
-      excluded-modules: "demo-app,tutorials:tutorial-video,tutorials:tutorial-audio"
-      use-official-plugin: false
-      # Disable explicit documentation tasks as they are already included while publishing
-      documentation-tasks: tasks
     secrets:
-      OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-      OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-      SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
-      SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-      SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-      STREAM_PUBLIC_BOT_TOKEN: ${{ secrets.STREAM_PUBLIC_BOT_TOKEN }}
+      github-token: ${{ secrets.STREAM_PUBLIC_BOT_TOKEN }}
+      maven-central-username: ${{ secrets.OSSRH_USERNAME }}
+      maven-central-password: ${{ secrets.OSSRH_PASSWORD }}
+      signing-key: ${{ secrets.SIGNING_KEY }}
+      signing-key-id: ${{ secrets.SIGNING_KEY_ID }}
+      signing-key-password: ${{ secrets.SIGNING_PASSWORD }}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -131,13 +131,22 @@ open class StreamPeerConnection(
     }
 
     fun isFailedOrClosed(): Boolean {
-        return when (state.value) {
+        val pcFailedOrClosed = when (state.value) {
             PeerConnection.PeerConnectionState.CLOSED,
             PeerConnection.PeerConnectionState.FAILED,
             -> true
 
             else -> false
         }
+        val iceFailedOrClosed = when (iceState.value) {
+            PeerConnection.IceConnectionState.FAILED,
+            PeerConnection.IceConnectionState.CLOSED,
+            -> true
+
+            else -> false
+        }
+
+        return pcFailedOrClosed || iceFailedOrClosed
     }
 
     init {
@@ -526,9 +535,6 @@ open class StreamPeerConnection(
         logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
         state.value = newState
         tracer.trace(PeerConnectionTraceKey.ON_CONNECTION_STATE_CHANGE.value, newState.name)
-        if (newState == PeerConnection.PeerConnectionState.FAILED) {
-            onFastReconnectNeeded()
-        }
     }
 
     // better to monitor onConnectionChange for the state

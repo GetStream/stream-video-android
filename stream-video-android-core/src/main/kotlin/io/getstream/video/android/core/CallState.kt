@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import android.app.Notification
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.runtime.Stable
+import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.video.generated.models.BlockedUserEvent
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallClosedCaption
@@ -33,6 +34,8 @@ import io.getstream.android.video.generated.models.CallMemberAddedEvent
 import io.getstream.android.video.generated.models.CallMemberRemovedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedEvent
 import io.getstream.android.video.generated.models.CallMemberUpdatedPermissionEvent
+import io.getstream.android.video.generated.models.CallMissedEvent
+import io.getstream.android.video.generated.models.CallModerationBlurEvent
 import io.getstream.android.video.generated.models.CallParticipantResponse
 import io.getstream.android.video.generated.models.CallReactionEvent
 import io.getstream.android.video.generated.models.CallRecordingStartedEvent
@@ -62,7 +65,9 @@ import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.LocalCallAcceptedPostEvent
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
+import io.getstream.android.video.generated.models.LocalCallRejectedPostEvent
 import io.getstream.android.video.generated.models.MemberResponse
 import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
@@ -106,7 +111,10 @@ import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.core.model.VisibilityOnScreenState
+import io.getstream.video.android.core.moderations.ModerationManager
 import io.getstream.video.android.core.notifications.IncomingNotificationData
+import io.getstream.video.android.core.notifications.NotificationType
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
@@ -119,6 +127,7 @@ import io.getstream.video.android.core.utils.TaskSchedulerWithDebounce
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.toUser
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -456,6 +465,15 @@ public class CallState(
     private val _recording: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val recording: StateFlow<Boolean> = _recording
 
+    private val _individualRecording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val individualRecording: StateFlow<Boolean> = _individualRecording
+
+    private val _rawRecording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val rawRecording: StateFlow<Boolean> = _rawRecording
+
+    private val _compositeRecording: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val compositeRecording: StateFlow<Boolean> = _compositeRecording
+
     /** The list of users that are blocked from joining this call */
     private val _blockedUsers: MutableStateFlow<Set<String>> = MutableStateFlow(emptySet())
     val blockedUsers: StateFlow<Set<String>> = _blockedUsers
@@ -660,6 +678,8 @@ public class CallState(
      */
     internal val closedCaptionManager = ClosedCaptionManager()
 
+    public val moderationManager = ModerationManager(call)
+
     /**
      * Tracks whether closed captioning is currently active for the call.
      * True if captioning is ongoing, false otherwise.
@@ -695,6 +715,11 @@ public class CallState(
     internal val atomicNotification: AtomicReference<Notification?> =
         AtomicReference<Notification?>(null)
 
+    private var _notificationIdFlow = MutableStateFlow<Int?>(null)
+
+    @InternalStreamVideoApi
+    public val notificationIdFlow: StateFlow<Int?> = _notificationIdFlow
+
     @InternalStreamVideoApi
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
 
@@ -702,6 +727,7 @@ public class CallState(
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
+
         when (event) {
             is BlockedUserEvent -> {
                 val newBlockedUsers = _blockedUsers.value.toMutableSet()
@@ -740,11 +766,25 @@ public class CallState(
                 } else if (callRingState is RingingState.Incoming && event.user.id == client.userId) {
                     // Call accepted by me + this device is Incoming => I accepted on another device
                     // Then leave the call on this device
-                    if (!acceptedOnThisDevice) call.leave()
+                    if (!acceptedOnThisDevice) call.leave("accepted-on-another-device")
                 }
+                call.fireEvent(
+                    LocalCallAcceptedPostEvent(
+                        event.callCid,
+                        event.createdAt,
+                        event.call,
+                        event.user,
+                        event.type,
+                    ),
+                )
+            }
+
+            is CallMissedEvent -> {
+                _createdBy.value = event.call.createdBy.toUser()
             }
 
             is CallRejectedEvent -> {
+                _createdBy.value = event.call.createdBy.toUser()
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
                 _rejectedBy.value = new.toSet()
@@ -758,6 +798,16 @@ public class CallState(
                         }
                     },
                 )
+                call.fireEvent(
+                    LocalCallRejectedPostEvent(
+                        event.callCid,
+                        event.createdAt,
+                        event.call,
+                        event.user,
+                        event.type,
+                        event.reason,
+                    ),
+                )
             }
 
             is LocalCallMissedEvent -> {
@@ -768,7 +818,18 @@ public class CallState(
                     }
                     _rejectedBy.value = newRejectedBySet.toSet()
                     _ringingState.value = RingingState.RejectedByAll
-                    call.leave()
+                    call.leave("LocalCallMissedEvent")
+
+                    val activeCallExists = client.state.activeCall.value != null
+                    if (activeCallExists) {
+                        // Another call is active - just remove incoming notification
+                        val streamCallId = StreamCallId(call.type, call.id)
+                        NotificationManagerCompat.from(client.context)
+                            .cancel(streamCallId.getNotificationId(NotificationType.Incoming))
+                    } else {
+                        // No other call - stop service
+                        client.state.maybeStopForegroundService(call)
+                    }
                 }
             }
 
@@ -777,12 +838,12 @@ public class CallState(
                 updateFromResponse(event.call)
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
-                call.leave()
+                call.leave("CallEndedEvent")
             }
 
             is CallEndedSfuEvent -> {
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
-                call.leave()
+                call.leave("CallEndedSfuEvent")
             }
 
             is CallMemberUpdatedEvent -> {
@@ -882,10 +943,31 @@ public class CallState(
 
             is CallRecordingStartedEvent -> {
                 _recording.value = true
+                when (event.recordingType) {
+                    CallRecordingStartedEvent.RecordingType.Individual ->
+                        _individualRecording.value =
+                            true
+
+                    CallRecordingStartedEvent.RecordingType.Raw -> _rawRecording.value = true
+                    CallRecordingStartedEvent.RecordingType.Composite -> _compositeRecording.value = true
+                    else -> {}
+                }
             }
 
             is CallRecordingStoppedEvent -> {
-                _recording.value = false
+                when (event.recordingType) {
+                    CallRecordingStoppedEvent.RecordingType.Individual ->
+                        _individualRecording.value = false
+                    CallRecordingStoppedEvent.RecordingType.Raw ->
+                        _rawRecording.value = false
+                    CallRecordingStoppedEvent.RecordingType.Composite ->
+                        _compositeRecording.value = false
+                    else -> {}
+                }
+                // Only set recording=false when ALL recording types are inactive
+                _recording.value = _compositeRecording.value ||
+                    _individualRecording.value ||
+                    _rawRecording.value
             }
 
             is CallLiveStartedEvent -> {
@@ -941,7 +1023,11 @@ public class CallState(
             is JoinCallResponseEvent -> {
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
-                updateRingingState()
+                if (!ringingStateUpdatesStopped) {
+                    updateRingingState()
+                } else {
+                    _ringingState.value = RingingState.Outgoing(acceptedByCallee = true)
+                }
                 updateServerSidePins(
                     event.callState.pins.map {
                         PinUpdate(it.user_id, it.session_id)
@@ -1125,6 +1211,17 @@ public class CallState(
             is ClosedCaptionEvent,
             is CallClosedCaptionsStoppedEvent,
             -> closedCaptionManager.handleEvent(event)
+
+            is CallModerationBlurEvent -> {
+                scope.launch {
+                    val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
+                    if (callServiceConfig.moderationConfig.videoModerationConfig.enable) {
+                        call.state.moderationManager.applyVideoModeration()
+                        delay(callServiceConfig.moderationConfig.videoModerationConfig.blurDuration)
+                        call.state.moderationManager.clearVideoModeration()
+                    }
+                }
+            }
         }
     }
 
@@ -1142,6 +1239,10 @@ public class CallState(
     }
 
     private fun updateRingingState(rejectReason: RejectReason? = null) {
+        if (ringingState.value == RingingState.RejectedByAll) {
+            return
+        }
+
         // this is only true when we are in the session (we have accepted/joined the call)
         val rejectedBy = _rejectedBy.value
         val isRejectedByMe = _rejectedBy.value.contains(client.userId)
@@ -1157,19 +1258,33 @@ public class CallState(
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
 
         Log.d("RingingState", "Current: ${_ringingState.value}, call_id: ${call.cid}")
+
+        val ringingStateLogs = arrayListOf(
+            ("acceptedByMe: $isAcceptedByMe"),
+            ("isRejectedByMe: $isRejectedByMe"),
+            ("rejectReason: $rejectReason"),
+            ("hasActiveCall: $hasActiveCall"),
+            ("hasRingingCall: $hasRingingCall"),
+            ("userIsParticipant: $userIsParticipant"),
+        ).joinToString("") { it + "\n" }
+
         Log.d(
             "RingingState",
-            "call_id: ${call.cid}, Flags: [\n" + "acceptedByMe: $isAcceptedByMe,\n" + "rejectedByMe: $isRejectedByMe,\n" + "rejectReason: $rejectReason,\n" + "hasActiveCall: $hasActiveCall\n" + "hasRingingCall: $hasRingingCall\n" + "userIsParticipant: $userIsParticipant,\n" + "]",
+            "call_id: ${call.cid}, Flags: $ringingStateLogs",
         )
 
         // no members - call is empty, we can join
-        val state: RingingState = if (hasActiveCall) {
+        val state: RingingState = if (hasActiveCall && !ringingStateUpdatesStopped) {
             cancelTimeout()
             RingingState.Active
+        } else if (isRejectedByMe) {
+            call.leave("updateRingingState-rejected-self")
+            cancelTimeout()
+            RingingState.RejectedByAll
         } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
             (rejectedBy.contains(createdBy?.id) && hasRingingCall)
         ) {
-            call.leave()
+            call.leave("updateRingingState-rejected")
             cancelTimeout()
 
             if (rejectReason?.alias == REJECT_REASON_TIMEOUT) {
@@ -1188,6 +1303,7 @@ public class CallState(
             }
         } else if (hasRingingCall && createdBy?.id == client.userId) {
             // The call is created by us
+            logger.d { "acceptedBy: $acceptedBy, userIsParticipant: $userIsParticipant" }
             if (acceptedBy.isEmpty()) {
                 // no one accepted the call
                 RingingState.Outgoing(acceptedByCallee = false)
@@ -1196,6 +1312,7 @@ public class CallState(
                 RingingState.Outgoing(acceptedByCallee = true)
             } else {
                 // call is accepted and we are already in the call
+                ringingStateUpdatesStopped = false
                 cancelTimeout()
                 RingingState.Active
             }
@@ -1277,8 +1394,9 @@ public class CallState(
 
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
+                    ringingStateUpdatesStopped = false
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
-                    call.leave()
+                    call.leave("start-ringing-timeout")
                 }
             } else {
                 logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }
@@ -1525,6 +1643,12 @@ public class CallState(
         _broadcasting.value = true
     }
 
+    private var ringingStateUpdatesStopped = false
+
+    internal fun toggleRingingStateUpdates(stopped: Boolean) {
+        ringingStateUpdatesStopped = stopped
+    }
+
     /**
      * Update participants visibility on the UI.
      *
@@ -1616,8 +1740,14 @@ public class CallState(
         _rejectActionBundle.value = bundle
     }
 
+    @Deprecated("Use updateNotification(Int, Notification) instead")
     fun updateNotification(notification: Notification) {
         atomicNotification.set(notification)
+    }
+
+    fun updateNotification(notificationId: Int, notification: Notification) {
+        this._notificationIdFlow.value = notificationId
+        this.atomicNotification.set(notification)
     }
 }
 

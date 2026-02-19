@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,17 @@ data class StopLiveRequest (
     @Json(name = "continue_closed_caption")
     val continueClosedCaption: kotlin.Boolean? = null,
 
+    @Json(name = "continue_composite_recording")
+    val continueCompositeRecording: kotlin.Boolean? = null,
+
     @Json(name = "continue_hls")
     val continueHls: kotlin.Boolean? = null,
+
+    @Json(name = "continue_individual_recording")
+    val continueIndividualRecording: kotlin.Boolean? = null,
+
+    @Json(name = "continue_raw_recording")
+    val continueRawRecording: kotlin.Boolean? = null,
 
     @Json(name = "continue_recording")
     val continueRecording: kotlin.Boolean? = null,

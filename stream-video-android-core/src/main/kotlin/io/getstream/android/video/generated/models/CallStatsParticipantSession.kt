@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -48,18 +48,48 @@ data class CallStatsParticipantSession (
     @Json(name = "published_tracks")
     val publishedTracks: io.getstream.android.video.generated.models.PublishedTrackFlags,
 
+    @Json(name = "browser")
+    val browser: kotlin.String? = null,
+
+    @Json(name = "browser_version")
+    val browserVersion: kotlin.String? = null,
+
     @Json(name = "cq_score")
     val cqScore: kotlin.Int? = null,
+
+    @Json(name = "current_ip")
+    val currentIp: kotlin.String? = null,
+
+    @Json(name = "current_sfu")
+    val currentSfu: kotlin.String? = null,
+
+    @Json(name = "distance_to_sfu_kilometers")
+    val distanceToSfuKilometers: kotlin.Float? = null,
 
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,
 
+    @Json(name = "os")
+    val os: kotlin.String? = null,
+
     @Json(name = "publisher_type")
     val publisherType: kotlin.String? = null,
+
+    @Json(name = "sdk")
+    val sdk: kotlin.String? = null,
+
+    @Json(name = "sdk_version")
+    val sdkVersion: kotlin.String? = null,
 
     @Json(name = "started_at")
     val startedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "unified_session_id")
-    val unifiedSessionId: kotlin.String? = null
+    val unifiedSessionId: kotlin.String? = null,
+
+    @Json(name = "webrtc_version")
+    val webrtcVersion: kotlin.String? = null,
+
+    @Json(name = "location")
+    val location: io.getstream.android.video.generated.models.CallStatsLocation? = null
 )

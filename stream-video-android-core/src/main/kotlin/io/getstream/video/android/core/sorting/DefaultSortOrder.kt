@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -74,8 +74,8 @@ private fun onlyIfInvisibleOrUnknown(
 private fun participantSourceRank(s: ParticipantSource): Int = when (s) {
     ParticipantSource.PARTICIPANT_SOURCE_RTMP -> 0
     ParticipantSource.PARTICIPANT_SOURCE_WHIP -> 1
+    ParticipantSource.PARTICIPANT_SOURCE_RTSP -> 2
+    ParticipantSource.PARTICIPANT_SOURCE_SRT -> 3
+    ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED -> 4
     ParticipantSource.PARTICIPANT_SOURCE_SIP -> 2
-    ParticipantSource.PARTICIPANT_SOURCE_RTSP -> 3
-    ParticipantSource.PARTICIPANT_SOURCE_SRT -> 4
-    ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED -> 5
 }

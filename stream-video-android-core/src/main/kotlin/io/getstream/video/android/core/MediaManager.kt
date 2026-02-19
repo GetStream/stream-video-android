@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,27 @@
 
 package io.getstream.video.android.core
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.AudioAttributes
+import android.media.AudioDeviceCallback
+import android.media.AudioDeviceInfo
+import android.media.AudioFormat
 import android.media.AudioManager
+import android.media.AudioPlaybackCaptureConfiguration
+import android.media.AudioRecord
+import android.media.AudioRecord.READ_BLOCKING
 import android.media.projection.MediaProjection
 import android.os.Build
 import android.os.IBinder
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import com.twilio.audioswitch.AudioDevice
@@ -38,6 +48,8 @@ import io.getstream.video.android.core.audio.AudioSwitchHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
+import io.getstream.video.android.core.audio.UsbAudioInputDevice
+import io.getstream.video.android.core.audio.UsbAudioInputDevice.Companion.isUsbInputDevice
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.camera.CameraCharacteristicsValidator
 import io.getstream.video.android.core.camera.DefaultCameraCharacteristicsValidator
@@ -66,6 +78,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.VideoDimension
+import java.nio.ByteBuffer
 import java.util.UUID
 import kotlin.coroutines.resumeWithException
 
@@ -257,6 +270,16 @@ class ScreenShareManager(
         internal val screenShareResolution = VideoDimension(1920, 1080)
         internal val screenShareBitrate = 1_000_000
         internal val screenShareFps = 15
+        private const val INPUT_NUM_OF_CHANNELS = 1 // 1 for mono, 2 for stereo output
+
+        // Requested size of each recorded buffer provided to the client.
+        private const val CALLBACK_BUFFER_SIZE_MS = 10
+
+        // Average number of callbacks per second.
+        private const val BUFFERS_PER_SECOND = 1000 / CALLBACK_BUFFER_SIZE_MS
+
+        // Bits per sample (16-bit PCM)
+        private const val INPUT_BITS_PER_SAMPLE = 16
     }
 
     private val logger by taggedLogger("Media:ScreenShareManager")
@@ -266,11 +289,22 @@ class ScreenShareManager(
 
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
 
+    private val _audioEnabled = MutableStateFlow<Boolean>(false)
+
+    /** Represents whether screen share audio is enabled */
+    public val audioEnabled: StateFlow<Boolean> = _audioEnabled
+
     private lateinit var screenCapturerAndroid: ScreenCapturerAndroid
     internal lateinit var surfaceTextureHelper: SurfaceTextureHelper
     private var setupCompleted = false
     private var isScreenSharing = false
     private var mediaProjectionPermissionResultData: Intent? = null
+    private var mediaProjection: MediaProjection? = null
+    private var screenAudioRecord: AudioRecord? = null
+    private val inputSampleRate = 48000 // Standard WebRTC sample rate
+
+    // ByteBuffer for reading screen audio on demand
+    private var screenAudioBuffer: ByteBuffer? = null
 
     /**
      * The [ServiceConnection.onServiceConnected] is called when our [StreamScreenShareService]
@@ -311,17 +345,26 @@ class ScreenShareManager(
                 0,
             )
 
+            // Get MediaProjection from ScreenCapturerAndroid
+            mediaProjection = screenCapturerAndroid.mediaProjection
+
+            // Start screen audio capture only if audio is enabled
+            if (_audioEnabled.value) {
+                startScreenAudioCapture()
+            }
+
             isScreenSharing = true
         }
 
         override fun onServiceDisconnected(name: ComponentName) {}
     }
 
-    fun enable(mediaProjectionPermissionResultData: Intent, fromUser: Boolean = true) {
+    fun enable(mediaProjectionPermissionResultData: Intent, fromUser: Boolean = true, includeAudio: Boolean = false) {
         mediaManager.screenShareTrack.setEnabled(true)
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
+        _audioEnabled.value = includeAudio
         setup()
         startScreenShare(mediaProjectionPermissionResultData)
     }
@@ -330,15 +373,122 @@ class ScreenShareManager(
         if (fromUser) {
             _status.value = DeviceStatus.Disabled
         }
+        _audioEnabled.value = false
 
         if (isScreenSharing) {
             mediaManager.screenShareTrack.setEnabled(false)
             screenCapturerAndroid.stopCapture()
+            stopScreenAudioCapture()
             mediaManager.context.stopService(
                 Intent(mediaManager.context, StreamScreenShareService::class.java),
             )
             isScreenSharing = false
         }
+    }
+
+    /**
+     * Gets the next set of screen audio bytes on demand by reading directly from AudioRecord.
+     * Returns null if screen audio capture is not active.
+     * This method is called from the AudioBufferCallback in StreamPeerConnectionFactory when mixing is needed.
+     *
+     * @param bytesRequested The number of bytes requested
+     * @return ByteBuffer containing the requested bytes (may have fewer bytes if not enough data is available), or null if no data
+     */
+    internal fun getScreenAudioBytes(bytesRequested: Int): ByteBuffer? {
+        val record = screenAudioRecord ?: return null
+
+        if (bytesRequested <= 0) return null
+
+        // Ensure buffer has enough capacity
+        val buffer = screenAudioBuffer?.takeIf { it.capacity() >= bytesRequested }
+            ?: ByteBuffer.allocateDirect(bytesRequested).also { screenAudioBuffer = it }
+
+        buffer.clear()
+        buffer.limit(bytesRequested)
+
+        // Read directly from AudioRecord using READ_BLOCKING mode
+        val bytesRead = record.read(buffer, bytesRequested, READ_BLOCKING)
+
+        if (bytesRead > 0) {
+            buffer.limit(bytesRead)
+            // Return a duplicate to avoid position/limit conflicts with concurrent access
+            return buffer
+        }
+
+        return null
+    }
+
+    /**
+     * Starts capturing screen audio using AudioRecord with AudioPlaybackCaptureConfiguration.
+     */
+    private fun startScreenAudioCapture() {
+        val mediaProj = mediaProjection ?: run {
+            logger.e { "MediaProjection is null, cannot start screen audio capture" }
+            return
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            logger.w { "Screen audio capture requires Android Q (API 29) or higher" }
+            return
+        }
+
+        if (ActivityCompat.checkSelfPermission(
+                mediaManager.context,
+                Manifest.permission.RECORD_AUDIO,
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            logger.w { "RECORD_AUDIO permission not granted, cannot capture screen audio" }
+            return
+        }
+
+        try {
+            // Calculate buffer size using the correct formula
+            val bytesPerFrame: Int = INPUT_NUM_OF_CHANNELS * (INPUT_BITS_PER_SAMPLE / 8)
+            val capacity = bytesPerFrame * (inputSampleRate / BUFFERS_PER_SECOND)
+
+            // Create ByteBuffer for reading audio on demand
+            screenAudioBuffer = ByteBuffer.allocateDirect(capacity)
+
+            val format = AudioFormat.Builder()
+                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                .setSampleRate(inputSampleRate)
+                .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                .build()
+
+            val playbackConfig = AudioPlaybackCaptureConfiguration.Builder(mediaProj)
+                .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
+                .build()
+
+            screenAudioRecord = AudioRecord.Builder()
+                .setAudioFormat(format)
+                .setAudioPlaybackCaptureConfig(playbackConfig)
+                .build()
+
+            screenAudioRecord?.startRecording()
+
+            logger.d { "Screen audio capture started" }
+        } catch (e: Exception) {
+            logger.e(e) { "Failed to start screen audio capture" }
+        }
+    }
+
+    /**
+     * Stops capturing screen audio and releases resources.
+     */
+    private fun stopScreenAudioCapture() {
+        try {
+            screenAudioRecord?.stop()
+            screenAudioRecord?.release()
+            screenAudioRecord = null
+            logger.d { "Screen audio capture stopped" }
+        } catch (e: Exception) {
+            logger.e(e) { "Error stopping screen audio capture" }
+        }
+
+        // Note: MediaProjection is managed by ScreenCapturerAndroid and will be stopped
+        // when screenCapturerAndroid.stopCapture() is called, so we don't need to stop it here
+        mediaProjection = null
+        screenAudioBuffer = null
     }
 
     private fun startScreenShare(mediaProjectionPermissionResultData: Intent) {
@@ -403,6 +553,28 @@ class MicrophoneManager(
     private var setupCompleted: Boolean = false
     internal var audioManager: AudioManager? = null
     internal var priorStatus: DeviceStatus? = null
+
+    // USB audio device detection (API 23+)
+    private var audioDeviceCallback: AudioDeviceCallback? = null
+    private val _usbInputDevices = MutableStateFlow<List<UsbAudioInputDevice>>(emptyList())
+
+    /**
+     * List of detected USB audio input devices.
+     *
+     * These devices are detected using Android's AudioDeviceCallback API and include
+     * USB microphones that may not appear in [devices] because AudioSwitch only
+     * detects devices with both input and output capabilities.
+     *
+     * Requires Android M (API 23) or higher.
+     */
+    val usbInputDevices: StateFlow<List<UsbAudioInputDevice>> = _usbInputDevices
+
+    private val _selectedUsbDevice = MutableStateFlow<UsbAudioInputDevice?>(null)
+
+    /**
+     * The currently selected USB input device, or null if using default routing.
+     */
+    val selectedUsbDevice: StateFlow<UsbAudioInputDevice?> = _selectedUsbDevice
 
     // Exposed state
     private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
@@ -514,6 +686,142 @@ class MicrophoneManager(
         return devices
     }
 
+    // ==================== USB Audio Input Device Support ====================
+
+    /**
+     * Sets up USB audio device detection using Android's AudioDeviceCallback.
+     *
+     * This detects USB input devices (microphones),
+     * such as the Rode Wireless Go II and other professional USB microphones.
+     *
+     * Requires Android M (API 23) or higher.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun setupUsbDeviceDetection() {
+        if (audioDeviceCallback != null) {
+            logger.d { "[setupUsbDeviceDetection] Already set up" }
+            return
+        }
+
+        val am = audioManager ?: mediaManager.context.getSystemService<AudioManager>()
+        audioManager = am
+
+        if (am == null) {
+            logger.e { "[setupUsbDeviceDetection] AudioManager not available" }
+            return
+        }
+
+        audioDeviceCallback = object : AudioDeviceCallback() {
+            override fun onAudioDevicesAdded(addedDevices: Array<out AudioDeviceInfo>) {
+                logger.i { "[onAudioDevicesAdded] ${addedDevices.size} devices added" }
+                updateUsbDeviceList()
+            }
+
+            override fun onAudioDevicesRemoved(removedDevices: Array<out AudioDeviceInfo>) {
+                logger.i { "[onAudioDevicesRemoved] ${removedDevices.size} devices removed" }
+                updateUsbDeviceList()
+
+                // If the selected USB device was removed, clear selection
+                val selectedId = _selectedUsbDevice.value?.id
+                if (selectedId != null && removedDevices.any { it.id == selectedId }) {
+                    logger.i { "[onAudioDevicesRemoved] Selected USB device was removed, clearing selection" }
+                    clearUsbDeviceSelection()
+                }
+            }
+        }
+
+        am.registerAudioDeviceCallback(audioDeviceCallback, null)
+        logger.i { "[setupUsbDeviceDetection] Registered AudioDeviceCallback" }
+
+        // Initial device scan
+        updateUsbDeviceList()
+    }
+
+    /**
+     * Updates the list of available USB input devices.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun updateUsbDeviceList() {
+        val am = audioManager ?: return
+
+        val usbDevices = am.getDevices(AudioManager.GET_DEVICES_INPUTS)
+            .filter { it.isUsbInputDevice() }
+            .map { UsbAudioInputDevice(it) }
+
+        logger.i {
+            "[updateUsbDeviceList] Found ${usbDevices.size} USB input devices: ${usbDevices.map { it.name }}"
+        }
+        _usbInputDevices.value = usbDevices
+
+        if (_selectedUsbDevice.value == null && usbDevices.isNotEmpty()) {
+            val defaultUsbDevice = usbDevices.first()
+            logger.i {
+                "[updateUsbDeviceList] Auto-selecting USB device: ${defaultUsbDevice.name}"
+            }
+            selectUsbDevice(defaultUsbDevice)
+        }
+    }
+
+    /**
+     * Selects a USB input device as the preferred audio input source.
+     *
+     * This routes audio recording to the specified USB device, bypassing AudioSwitch's
+     * default device selection. Use this for USB microphones that don't appear in [devices].
+     *
+     * @param device The USB device to use, or null to restore default routing.
+     * @return true if the device was selected successfully, false otherwise.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun selectUsbDevice(device: UsbAudioInputDevice?): Boolean {
+        logger.i { "[selectUsbDevice] Selecting USB device: ${device?.name}" }
+
+        val result = mediaManager.call.peerConnectionFactory.setPreferredAudioInputDevice(
+            device?.deviceInfo,
+        )
+
+        if (result) {
+            _selectedUsbDevice.value = device
+            logger.i { "[selectUsbDevice] Successfully selected USB device: ${device?.name}" }
+        } else {
+            logger.e { "[selectUsbDevice] Failed to select USB device: ${device?.name}" }
+        }
+
+        return result
+    }
+
+    /**
+     * Clears the USB device selection, restoring default audio routing.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun clearUsbDeviceSelection() {
+        selectUsbDevice(null)
+    }
+
+    /**
+     * Lists all detected USB input devices.
+     *
+     * @return StateFlow of available USB input devices.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun listUsbDevices(): StateFlow<List<UsbAudioInputDevice>> {
+        setupUsbDeviceDetection()
+        return usbInputDevices
+    }
+
+    /**
+     * Cleans up USB device detection callback.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun cleanupUsbDeviceDetection() {
+        audioDeviceCallback?.let { callback ->
+            audioManager?.unregisterAudioDeviceCallback(callback)
+            audioDeviceCallback = null
+            logger.i { "[cleanupUsbDeviceDetection] Unregistered AudioDeviceCallback" }
+        }
+    }
+
+    // ==================== End USB Audio Input Device Support ====================
+
     /**
      * Set the audio bitrate profile.
      * This can only be set before joining the call. Once the call is joined,
@@ -571,6 +879,9 @@ class MicrophoneManager(
 
     fun cleanup() {
         ifAudioHandlerInitialized { it.stop() }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            cleanupUsbDeviceDetection()
+        }
         setupCompleted = false
     }
 
@@ -591,6 +902,9 @@ class MicrophoneManager(
             audioManager = mediaManager.context.getSystemService()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                setupUsbDeviceDetection()
             }
 
             if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {

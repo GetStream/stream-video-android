@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -92,6 +92,7 @@ class LoginViewModel @Inject constructor(
                     val authData = StreamService.instance.getAuthData(
                         environment = it.env,
                         userId = userId,
+                        StreamService.TOKEN_EXPIRY_TIME,
                     )
                     val loggedInGoogleUser =
                         if (autoLogIn) null else googleAccountRepository.getCurrentUser()
@@ -128,6 +129,7 @@ class LoginViewModel @Inject constructor(
                     val authData = StreamService.instance.getAuthData(
                         environment = it.env,
                         userId = user.id,
+                        StreamService.TOKEN_EXPIRY_TIME,
                     )
                     // Store the data in the demo app
                     dataStore.updateUser(user)

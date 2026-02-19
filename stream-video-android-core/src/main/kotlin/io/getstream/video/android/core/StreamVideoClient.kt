@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,8 @@ import io.getstream.android.video.generated.models.QueryCallsRequest
 import io.getstream.android.video.generated.models.RejectCallRequest
 import io.getstream.android.video.generated.models.RejectCallResponse
 import io.getstream.android.video.generated.models.RequestPermissionRequest
+import io.getstream.android.video.generated.models.RingCallRequest
+import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.android.video.generated.models.SendCallEventRequest
 import io.getstream.android.video.generated.models.SendCallEventResponse
 import io.getstream.android.video.generated.models.SendReactionRequest
@@ -103,10 +105,12 @@ import io.getstream.video.android.core.notifications.internal.service.StopServic
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
+import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
@@ -159,7 +163,8 @@ internal class StreamVideoClient internal constructor(
     internal var token: String,
     private val lifecycle: Lifecycle,
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
-    internal val tokenProvider: TokenProvider = ConstantTokenProvider(token),
+    internal val tokenRepository: TokenRepository,
+    internal val tokenProvider: TokenProvider = RepositoryTokenProvider(tokenRepository),
     internal val streamNotificationManager: StreamNotificationManager,
     internal val enableCallNotificationUpdates: Boolean,
     internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
@@ -235,7 +240,7 @@ internal class StreamVideoClient internal constructor(
                 }
             }
         }
-        activeCall?.leave()
+        activeCall?.leave("client-cleanup")
     }
 
     /**
@@ -271,6 +276,7 @@ internal class StreamVideoClient internal constructor(
             // Retry once with a new token if the token is expired
             if (e.isAuthError()) {
                 val newToken = tokenProvider.loadToken()
+                tokenRepository.updateToken(newToken)
                 token = newToken
                 coordinatorConnectionModule.updateToken(newToken)
                 apiCall()
@@ -455,10 +461,16 @@ internal class StreamVideoClient internal constructor(
                     refreshToken(e)
                     Failure(Error.GenericError("Initialize error. Token expired."))
                 } else {
-                    throw e
+                    Failure(Error.ThrowableError("Error to connect user", e))
                 }
+            } catch (e: Throwable) {
+                Failure(Error.ThrowableError("Error to connect user", e))
             }
         }
+    }
+
+    override suspend fun connect(): Result<Long> {
+        return connectAsync().await()
     }
 
     private suspend fun refreshToken(error: Throwable) {
@@ -1005,16 +1017,17 @@ internal class StreamVideoClient internal constructor(
         type: String,
         id: String,
         externalStorage: String? = null,
+        recordingType: RecordingType = RecordingType.Composite,
     ): Result<Unit> {
         return apiCall {
             val req = StartRecordingRequest(externalStorage)
-            coordinatorConnectionModule.api.startRecording(type, id, req)
+            coordinatorConnectionModule.api.startRecording(type, id, recordingType.toString(), req)
         }
     }
 
-    suspend fun stopRecording(type: String, id: String): Result<Unit> {
+    suspend fun stopRecording(type: String, id: String, recordingType: RecordingType = RecordingType.Composite): Result<Unit> {
         return apiCall {
-            coordinatorConnectionModule.api.stopRecording(type, id)
+            coordinatorConnectionModule.api.stopRecording(type, id, recordingType.toString())
         }
     }
 
@@ -1170,6 +1183,12 @@ internal class StreamVideoClient internal constructor(
     internal suspend fun ring(type: String, id: String): Result<GetCallResponse> {
         return apiCall {
             coordinatorConnectionModule.api.getCall(type = type, id = id, ring = true)
+        }
+    }
+
+    internal suspend fun ring(type: String, id: String, ringCallRequest: RingCallRequest): Result<RingCallResponse> {
+        return apiCall {
+            coordinatorConnectionModule.api.ringCall(type = type, id = id, ringCallRequest)
         }
     }
 

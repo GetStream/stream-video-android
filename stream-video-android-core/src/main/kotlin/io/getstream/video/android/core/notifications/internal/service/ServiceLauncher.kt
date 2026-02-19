@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
+import io.getstream.video.android.core.notifications.internal.Throttler
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper
@@ -64,6 +65,7 @@ internal class ServiceLauncher(val context: Context) {
     private val telecomHelper = TelecomHelper()
     private val telecomPermissions = TelecomPermissions()
     private val jetpackTelecomRepositoryProvider = JetpackTelecomRepositoryProvider(context)
+    private val throttler = Throttler()
 
     @SuppressLint("MissingPermission", "NewApi")
     fun showIncomingCall(
@@ -201,8 +203,9 @@ internal class ServiceLauncher(val context: Context) {
         callId: StreamCallId,
     ) {
         notification?.let {
+            val notificationId = callId.getNotificationId(NotificationType.Incoming)
             streamVideo.call(callId.type, callId.id)
-                .state.updateNotification(notification)
+                .state.updateNotification(notificationId, notification)
         }
     }
 
@@ -223,16 +226,29 @@ internal class ServiceLauncher(val context: Context) {
                 ),
             )!!
         }.onError {
+            logger.d {
+                "[removeIncomingCall] notificationId: ${callId.getNotificationId(
+                    NotificationType.Incoming,
+                )}"
+            }
             NotificationManagerCompat.from(context)
                 .cancel(callId.getNotificationId(NotificationType.Incoming))
         }
     }
 
+    /**
+     * Throttling the service by [CallService.SERVICE_DESTROY_THROTTLE_TIME_MS] such that the stop
+     * service is invoked once (at least less frequently)
+     */
     fun stopService(call: Call) {
-        stopCallServiceInternal(call)
+        logger.d { "[stopService]" }
+        throttler.throttleFirst(CallService.SERVICE_DESTROY_THROTTLE_TIME_MS) {
+            stopCallServiceInternal(call)
+        }
     }
 
     private fun stopCallServiceInternal(call: Call) {
+        logger.d { "[stopCallServiceInternal]" }
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
         streamVideo?.let { streamVideoClient ->
             val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
@@ -243,11 +259,15 @@ internal class ServiceLauncher(val context: Context) {
                     context,
                     StopServiceParam(call, callConfig),
                 )
-                logger.d { "Building stop intent for call_id: ${call.cid}" }
-                serviceIntent.extras?.let {
-                    logBundle(it)
+                serviceIntent?.let {
+                    logger.d {
+                        "Building stop intent, class: ${serviceIntent.component?.className} for call_id: ${call.cid}"
+                    }
+                    serviceIntent.extras?.let {
+                        logBundle(it)
+                    }
+                    context.startService(serviceIntent)
                 }
-                context.startService(serviceIntent)
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,9 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.moderations.ModerationConfig
+import io.getstream.video.android.core.moderations.ModerationWarningConfig
+import io.getstream.video.android.core.moderations.VideoModerationConfig
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationConfig
@@ -49,6 +52,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.notification.LiveStreamMediaNotificationInterceptor
 import io.getstream.video.android.notification.PausePlayMediaSessionCallback
 import io.getstream.video.android.ui.common.StreamCallActivity
@@ -57,6 +61,7 @@ import io.getstream.video.android.util.config.AppConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
 
 public enum class InitializedState {
     NOT_STARTED, RUNNING, FINISHED, FAILED
@@ -120,6 +125,7 @@ object StreamVideoInitHelper {
                 authData = StreamService.instance.getAuthData(
                     environment = AppConfig.currentEnvironment.value!!.env,
                     userId = userId,
+                    StreamService.TOKEN_EXPIRY_TIME,
                 )
 
                 loggedInUser = User(id = authData.userId, role = "admin")
@@ -136,6 +142,7 @@ object StreamVideoInitHelper {
                     authData = StreamService.instance.getAuthData(
                         environment = AppConfig.currentEnvironment.value!!.env,
                         userId = loggedInUser.id,
+                        StreamService.TOKEN_EXPIRY_TIME,
                     )
                 }
 
@@ -154,6 +161,15 @@ object StreamVideoInitHelper {
                     loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
                 )
             }
+            /**
+             * The `connectOnInit` flag in `StreamVideoInitHelper` is set to `false` to give us
+             * manual control over the connection.
+             *
+             * We explicitly call `connect()` here to establish a WebSocket connection at startup.
+             * This is required for end-to-end (E2E) tests, which rely on WebSocket events
+             * to receive calls instead of Push Notifications (PN).
+             */
+            StreamVideo.instanceOrNull()?.connect()
             Log.i("StreamVideoInitHelper", "Init successful.")
             _initState.value = InitializedState.FINISHED
         } catch (e: Exception) {
@@ -193,7 +209,19 @@ object StreamVideoInitHelper {
 
         chatClient.connectUser(
             user = chatUser,
-            token = token,
+            tokenProvider = object : io.getstream.chat.android.client.token.TokenProvider {
+                override fun loadToken(): String {
+                    return runBlocking {
+                        val email = user.custom?.get("email")
+                        val authData = StreamService.instance.getAuthData(
+                            environment = AppConfig.currentEnvironment.value!!.env,
+                            userId = email,
+                            StreamService.TOKEN_EXPIRY_TIME,
+                        )
+                        authData.token
+                    }
+                }
+            },
         ).enqueue()
     }
 
@@ -209,7 +237,24 @@ object StreamVideoInitHelper {
         val callServiceConfigRegistry = CallServiceConfigRegistry()
         callServiceConfigRegistry.apply {
             register(DefaultCallConfigurations.getLivestreamGuestCallServiceConfig())
-            register(CallType.AudioCall.name) { enableTelecom(true) }
+            register(
+                CallType.AudioCall.name,
+                DefaultCallConfigurations.audioCall.copy(enableTelecom = true),
+            )
+            register(CallType.AnyMarker.name) {
+                setModerationConfig(
+                    ModerationConfig(
+                        moderationWarningConfig = ModerationWarningConfig(
+                            enable = true,
+                            displayTime = 5_000L,
+                        ),
+                        videoModerationConfig = VideoModerationConfig(
+                            enable = true,
+                            blurDuration = 25_000L,
+                        ),
+                    ),
+                )
+            }
         }
 
         return StreamVideoBuilder(
@@ -285,19 +330,22 @@ object StreamVideoInitHelper {
             ),
             tokenProvider = object : TokenProvider {
                 override suspend fun loadToken(): String {
-                    val email = user.custom?.get("email")
+                    val userEmail = user.custom?.get("email")
+                    val userId = user.id
+                    val userIdForTokenRenewal = if (userEmail.isNullOrEmpty()) userId else userEmail
                     val authData = StreamService.instance.getAuthData(
                         environment = AppConfig.currentEnvironment.value!!.env,
-                        userId = email,
+                        userId = userIdForTokenRenewal,
+                        StreamService.TOKEN_EXPIRY_TIME,
                     )
                     return authData.token
                 }
             },
             callUpdatesAfterLeave = true,
             appName = "Stream Video Demo App",
-            telecomConfig = TelecomConfig(
-                context.packageName,
-            ),
+            audioProcessing = NoiseCancellation(context),
+            telecomConfig = TelecomConfig(context.packageName),
+            connectOnInit = false,
         ).build()
     }
 }

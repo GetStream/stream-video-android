@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -43,5 +43,44 @@ data class SortParamRequest (
     val direction: kotlin.Int? = null,
 
     @Json(name = "field")
-    val field: kotlin.String? = null
+    val field: kotlin.String? = null,
+
+    @Json(name = "type")
+    val type: Type? = null
 )
+{
+    
+    /**
+    * Type Enum
+    */
+    sealed class Type(val value: kotlin.String) {
+            override fun toString(): String = value
+
+            companion object {
+                fun fromString(s: kotlin.String): Type = when (s) {
+                    "boolean" -> Boolean
+                    "" -> Empty
+                    "number" -> Number
+                    else -> Unknown(s)
+                }
+            }
+            object Boolean : Type("boolean")
+            object Empty : Type("")
+            object Number : Type("number")
+            data class Unknown(val unknownValue: kotlin.String) : Type(unknownValue)
+        
+
+        class TypeAdapter : JsonAdapter<Type>() {
+            @FromJson
+            override fun fromJson(reader: JsonReader): Type? {
+                val s = reader.nextString() ?: return null
+                return Type.fromString(s)
+            }
+
+            @ToJson
+            override fun toJson(writer: JsonWriter, value: Type?) {
+                writer.value(value?.value)
+            }
+        }
+    }    
+}

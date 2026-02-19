@@ -1,9 +1,3 @@
-import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import io.getstream.video.android.Configuration
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.TimeZone
-
 apply(from = "${rootDir}/scripts/open-api-code-gen.gradle.kts")
 
 buildscript {
@@ -22,10 +16,13 @@ buildscript {
   }
 }
 
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
+  alias(libs.plugins.stream.project)
   alias(libs.plugins.stream.android.application) apply false
   alias(libs.plugins.stream.android.library) apply false
+  alias(libs.plugins.stream.android.test) apply false
+  alias(libs.plugins.stream.java.library) apply false
+  alias(libs.plugins.stream.java.platform) apply false
   alias(libs.plugins.android.application) apply false
   alias(libs.plugins.kotlin.android) apply false
   // alias(libs.plugins.compose.compiler) apply false -> Enable with Kotlin 2.0+
@@ -33,18 +30,44 @@ plugins {
   alias(libs.plugins.kotlin.compatibility.validator) apply false
   alias(libs.plugins.ksp) apply false
   alias(libs.plugins.wire) apply false
-  alias(libs.plugins.maven.publish)
   alias(libs.plugins.google.gms) apply false
-  alias(libs.plugins.dokka) apply false
+  alias(libs.plugins.dokka)
   alias(libs.plugins.spotless) apply false
   alias(libs.plugins.paparazzi) apply false
   alias(libs.plugins.firebase.crashlytics) apply false
   alias(libs.plugins.hilt) apply false
   alias(libs.plugins.play.publisher) apply false
   alias(libs.plugins.baseline.profile) apply false
-  alias(libs.plugins.sonarqube) apply false
-  alias(libs.plugins.kover) apply false
-    alias(libs.plugins.android.library) apply false
+}
+
+streamProject {
+    spotless {
+        excludePatterns = setOf("**/generated/**")
+    }
+
+    coverage {
+        includedModules = setOf(
+            "stream-video-android-core",
+            "stream-video-android-ui-compose",
+        )
+        sonarCoverageExclusions = listOf(
+            "**/*.mp3",
+            "**/*.webp",
+            "**/generated/**",
+            "**/io/getstream/video/android/core/model/**"
+        )
+        koverClassExclusions = listOf(
+            "io.getstream.android.video.generated.*",
+            "io.getstream.video.android.core.model.*"
+        )
+    }
+
+    publishing {
+        description = "Stream Video official Android SDK"
+        moduleArtifactIdOverrides = mapOf(
+            "stream-video-android-ui-xml" to "stream-video-android-xml"
+        )
+    }
 }
 
 subprojects {
@@ -69,103 +92,12 @@ subprojects {
   }
 }
 
-private val isSnapshot = System.getenv("SNAPSHOT")?.toBoolean() == true
-
-version = if (isSnapshot) {
-    val timestamp = SimpleDateFormat("yyyyMMddHHmm").run {
-        timeZone = TimeZone.getTimeZone("UTC")
-        format(Date())
-    }
-    "${Configuration.snapshotBasedVersionName}-${timestamp}-SNAPSHOT"
-} else {
-    Configuration.versionName
-}
-
-subprojects {
-  plugins.withId("com.vanniktech.maven.publish") {
-    extensions.configure<MavenPublishBaseExtension> {
-      publishToMavenCentral(automaticRelease = true)
-
-      pom {
-        name.set(project.name)
-        description.set("Stream Video official Android SDK")
-        url.set("https://github.com/getstream/stream-video-android")
-
-        licenses {
-          license {
-            name.set("Stream License")
-            url.set("https://github.com/GetStream/stream-video-android/blob/main/LICENSE")
-          }
-        }
-
-        developers {
-          developer {
-            id = "aleksandar-apostolov"
-            name = "Aleksandar Apostolov"
-            email = "aleksandar.apostolov@getstream.io"
-          }
-          developer {
-            id = "VelikovPetar"
-            name = "Petar Velikov"
-            email = "petar.velikov@getstream.io"
-          }
-          developer {
-            id = "andremion"
-            name = "André Mion"
-            email = "andre.rego@getstream.io"
-          }
-          developer {
-            id = "rahul-lohra"
-            name = "Rahul Kumar Lohra"
-            email = "rahul.lohra@getstream.io"
-          }
-          developer {
-            id = "PratimMallick"
-            name = "Pratim Mallick"
-            email = "pratim.mallick@getstream.io"
-          }
-          developer {
-            id = "gpunto"
-            name = "Gianmarco David"
-            email = "gianmarco.david@getstream.io"
-          }
-        }
-
-        scm {
-          connection.set("scm:git:github.com/getstream/stream-video-android.git")
-          developerConnection.set("scm:git:ssh://github.com/getstream/stream-video-android.git")
-          url.set("https://github.com/getstream/stream-video-android/tree/main")
-        }
-      }
-    }
-  }
-}
-
-tasks.register("printAllArtifacts") {
-  group = "publishing"
-  description = "Prints all artifacts that will be published"
-
-  doLast {
-    subprojects.forEach { subproject ->
-      subproject.plugins.withId("com.vanniktech.maven.publish") {
-        subproject.extensions.findByType(PublishingExtension::class.java)
-          ?.publications
-          ?.filterIsInstance<MavenPublication>()
-          ?.forEach { println("${it.groupId}:${it.artifactId}:${it.version}") }
-      }
-    }
-  }
-}
-
 //apply(from = teamPropsFile("git-hooks.gradle.kts"))
 //
 //fun teamPropsFile(propsFile: String): File {
 //    val teamPropsDir = file("team-props")
 //    return File(teamPropsDir, propsFile)
 //}
-
-apply(from = "${rootDir}/scripts/sonar.gradle")
-apply(from = "${rootDir}/scripts/coverage.gradle")
 
 afterEvaluate {
     println("Running Add Pre Commit Git Hook Script on Build")

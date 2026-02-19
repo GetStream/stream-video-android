@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,17 @@ package io.getstream.video.android.core.call.connection
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioDeviceInfo
 import android.os.Build
+import androidx.annotation.RequiresApi
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.coding.SelectiveVideoDecoderFactory
+import io.getstream.video.android.core.call.utils.addAndConvertBuffers
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
+import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toPeerType
@@ -51,6 +55,7 @@ import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import kotlinx.coroutines.CoroutineScope
 import stream.video.sfu.models.PublishOption
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * Builds a factory that provides [PeerConnection]s when requested.
@@ -86,6 +91,12 @@ public class StreamPeerConnectionFactory(
         (audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) -> Unit
     )? = null
 
+    // Provider function to get screen audio bytes from MediaManager on demand
+    private var screenAudioBytesProvider: ((Int) -> ByteBuffer?)? = null
+
+    // Provider function to check if microphone is enabled
+    private var microphoneEnabledProvider: (() -> Boolean)? = null
+
     /**
      * Set to get callbacks when audio input from microphone is received.
      * This can be example used to detect whether a person is speaking
@@ -109,6 +120,24 @@ public class StreamPeerConnectionFactory(
         ) -> Unit,
     ) {
         audioRecordDataCallback = callback
+    }
+
+    /**
+     * Sets a provider function that returns screen audio bytes on demand.
+     * The provider will be called with the number of bytes requested and should return
+     * a ByteBuffer containing the requested bytes (may have fewer bytes if not enough data is available).
+     * This should return null when screen sharing is not active.
+     */
+    internal fun setScreenAudioBytesProvider(provider: ((Int) -> ByteBuffer?)?) {
+        screenAudioBytesProvider = provider
+    }
+
+    /**
+     * Sets a provider function that returns whether the microphone is enabled.
+     * This is used to determine if microphone audio should be included when mixing with screen audio.
+     */
+    internal fun setMicrophoneEnabledProvider(provider: (() -> Boolean)?) {
+        microphoneEnabledProvider = provider
     }
 
     /**
@@ -287,13 +316,18 @@ public class StreamPeerConnectionFactory(
             .setSamplesReadyCallback {
                 audioSampleCallback?.invoke(it)
             }
-            .setAudioBufferCallback { audioBuffer, audioFormat, channelCount, sampleRate, _, captureTimeNs ->
+            .setAudioBufferCallback { audioBuffer, audioFormat, channelCount, sampleRate, bytesRead, captureTimeNs ->
                 audioRecordDataCallback?.invoke(
                     audioFormat,
                     channelCount,
                     sampleRate,
                     audioBuffer,
                 )
+
+                if (bytesRead > 0) {
+                    mixAudioBuffers(bytesRead, audioBuffer)
+                }
+
                 captureTimeNs
             }
             .setUseStereoOutput(true)
@@ -303,6 +337,103 @@ public class StreamPeerConnectionFactory(
             }
 
         return adm
+    }
+
+    /**
+     * Sets the preferred audio input device for recording.
+     *
+     * This allows routing audio input to a specific device, such as a USB microphone
+     * that may not be detected by AudioSwitch (e.g., Rode Wireless Go II).
+     *
+     * Must be called on API 23+ (Android M). On older versions, this is a no-op.
+     *
+     * @param deviceInfo The AudioDeviceInfo to use for recording, or null to restore default routing.
+     * @return true if the preference was set successfully, false otherwise.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun setPreferredAudioInputDevice(deviceInfo: AudioDeviceInfo?): Boolean {
+        return try {
+            adm?.setPreferredInputDevice(deviceInfo)
+            audioLogger.i {
+                "[setPreferredAudioInputDevice] Set preferred input device: ${deviceInfo?.productName}"
+            }
+            true
+        } catch (e: Exception) {
+            audioLogger.e { "[setPreferredAudioInputDevice] Failed to set preferred device: ${e.message}" }
+            false
+        }
+    }
+
+    /**
+     * Clears the preferred audio input device, restoring default routing.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun clearPreferredAudioInputDevice() {
+        setPreferredAudioInputDevice(null)
+    }
+
+    /**
+     * Mixes screen share audio with microphone audio before sending to the peer connection.
+     *
+     *  When screen sharing with audio is active, it retrieves screen audio bytes and mixes
+     *  them with the microphone audio (or silence if the microphone is disabled) to create a
+     *  combined audio stream.
+     *
+     * The mixing process:
+     * 1. Retrieves screen audio bytes from the [screenAudioBytesProvider] if available
+     * 2. Converts both audio buffers from ByteBuffer to ShortArray (PCM 16-bit format)
+     * 3. If microphone is enabled: mixes microphone audio with screen audio, if any
+     * 4. If microphone is disabled: mixes silent microphone samples with screen audio, if any
+     * 5. Writes the mixed audio back into the [audioBuffer] for transmission
+     *
+     * @param bytesRead The number of bytes read from the microphone audio buffer
+     * @param audioBuffer The microphone audio buffer that will be modified in-place with the mixed audio.
+     *                    Expected to be in PCM 16-bit little-endian format.
+     */
+    internal fun mixAudioBuffers(bytesRead: Int, audioBuffer: ByteBuffer) {
+        // Request screen audio bytes from MediaManager on demand
+        // Returns null if screen share audio is not enabled
+        val screenAudioBuffer = screenAudioBytesProvider?.invoke(bytesRead)
+
+        if (screenAudioBuffer != null && screenAudioBuffer.remaining() > 0) {
+            screenAudioBuffer.position(0)
+            audioBuffer.position(0)
+
+            // Convert screen audio (ByteBuffer) to ShortArray
+            val screenSamples = ShortArray(screenAudioBuffer.limit() / 2)
+            screenAudioBuffer.order(ByteOrder.LITTLE_ENDIAN)
+            screenAudioBuffer.asShortBuffer()[screenSamples]
+
+            val isMicrophoneEnabled = microphoneEnabledProvider?.invoke() ?: true
+            val mixedAudio = if (isMicrophoneEnabled) {
+                // Convert microphone audio (ByteBuffer) to ShortArray
+                val micSamples = ShortArray(audioBuffer.limit() / 2)
+                audioBuffer.order(ByteOrder.LITTLE_ENDIAN)
+                audioBuffer.asShortBuffer()[micSamples]
+
+                // Mix the audio buffers
+                addAndConvertBuffers(
+                    micSamples,
+                    micSamples.size,
+                    screenSamples,
+                    screenSamples.size,
+                )
+            } else {
+                // Microphone is disabled, only send screen audio
+                // Create silent microphone samples (all zeros) and mix with screen audio
+                val silentMicSamples = ShortArray(audioBuffer.limit() / 2) { 0 }
+                addAndConvertBuffers(
+                    silentMicSamples,
+                    silentMicSamples.size,
+                    screenSamples,
+                    screenSamples.size,
+                )
+            }
+
+            // Put the mixed audio back into the buffer
+            audioBuffer.clear()
+            audioBuffer.put(mixedAudio)
+        }
     }
 
     /**
@@ -370,15 +501,17 @@ public class StreamPeerConnectionFactory(
         onIceCandidateRequest: (IceCandidate, StreamPeerType) -> Unit,
         rejoin: () -> Unit,
         fastReconnect: () -> Unit,
+        sfuConnectionModule: SfuConnectionModule,
     ): Subscriber {
         val peerConnection = Subscriber(
             sessionId = sessionId,
             sfuClient = sfuClient,
             coroutineScope = coroutineScope,
-            tracer = tracer,
             enableStereo = enableStereo,
+            tracer = tracer,
             rejoin = rejoin,
             fastReconnect = fastReconnect,
+            sfuConnectionModule = sfuConnectionModule,
             onIceCandidateRequest = onIceCandidateRequest,
         )
         val connection = makePeerConnectionInternal(

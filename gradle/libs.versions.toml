@@ -7,11 +7,8 @@ minSdk = "24"
 allureKotlin = "2.4.0"
 androidGradlePlugin = "8.5.2"
 cameraCamera2 = "1.3.4"
-kover = "0.8.3"
-sonarqube = "6.0.1.5171"
 spotless = "6.21.0"
-streamConventions = "0.2.0"
-mavenPublish = "0.34.0"
+streamConventions = "0.7.0"
 kotlin = "1.9.25"
 ksp = "1.9.25-1.0.20"
 kotlinSerialization = "1.6.3"
@@ -244,12 +241,13 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatabilityValidator" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover"}
-sonarqube = { id = "org.sonarqube", version.ref = "sonarqube"}
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+stream-project = { id = "io.getstream.project", version.ref = "streamConventions" }
 stream-android-application = { id = "io.getstream.android.application", version.ref = "streamConventions" }
 stream-android-library = { id = "io.getstream.android.library", version.ref = "streamConventions" }
-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish"}
+stream-android-test = { id = "io.getstream.android.test", version.ref = "streamConventions" }
+stream-java-library = { id = "io.getstream.java.library", version.ref = "streamConventions" }
+stream-java-platform = { id = "io.getstream.java.platform", version.ref = "streamConventions" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "kotlinDokka" }
 google-gms = { id = "com.google.gms.google-services", version.ref = "googleService" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }

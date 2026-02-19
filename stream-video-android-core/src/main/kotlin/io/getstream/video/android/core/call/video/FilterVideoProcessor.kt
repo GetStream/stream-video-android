@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.opengl.GLES20
 import android.opengl.GLUtils
+import androidx.core.graphics.get
 import io.getstream.webrtc.SurfaceTextureHelper
 import io.getstream.webrtc.TextureBufferImpl
 import io.getstream.webrtc.VideoFrame
 import io.getstream.webrtc.VideoProcessor
 import io.getstream.webrtc.VideoSink
 import io.getstream.webrtc.YuvConverter
+import kotlin.getValue
 
 internal class FilterVideoProcessor(
     val filter: () -> VideoFilter?,
@@ -58,7 +60,6 @@ internal class FilterVideoProcessor(
             sink?.onFrame(frame)
             return
         }
-
         if (currentFilter is RawVideoFilter) {
             val filteredFrame = currentFilter.applyFilter(frame, surfaceTextureHelper.invoke())
             sink?.onFrame(filteredFrame)
@@ -68,7 +69,7 @@ internal class FilterVideoProcessor(
 
             if (inputFrameBitmap != null && sink != null) {
                 // Prepare helpers (runs only once or if the dimensions change)
-                initialize(
+                initializeGLResources(
                     inputFrameBitmap!!.width,
                     inputFrameBitmap!!.height,
                     surfaceTextureHelper.invoke(),
@@ -94,6 +95,7 @@ internal class FilterVideoProcessor(
                 yuvBuffer = yuvConverter.convert(inputBuffer)
 
                 sink?.onFrame(VideoFrame(yuvBuffer, 0, frame.timestampNs))
+                inputFrameBitmap?.recycle()
             }
         } else {
             throw Error("Unsupported video filter type ${filter.invoke()}")
@@ -104,28 +106,22 @@ internal class FilterVideoProcessor(
         this@FilterVideoProcessor.sink = sink
     }
 
-    private fun initialize(width: Int, height: Int, textureHelper: SurfaceTextureHelper) {
+    private fun initializeGLResources(width: Int, height: Int, textureHelper: SurfaceTextureHelper) {
         yuvBuffer?.release()
 
         if (this.inputWidth != width || this.inputHeight != height) {
             this.inputWidth = width
             this.inputHeight = height
-            inputFrameBitmap?.recycle()
             inputBuffer?.release()
 
             val type = VideoFrame.TextureBuffer.Type.RGB
-
             val matrix = Matrix()
-            // This is vertical flip - we need to investigate why the image is flipped vertically and
-            // why we need to correct it here.
             matrix.preScale(1.0f, -1.0f)
-            val surfaceTextureHelper: SurfaceTextureHelper = textureHelper
+
             this.inputBuffer = TextureBufferImpl(
-                inputWidth, inputHeight, type, textures[0], matrix, surfaceTextureHelper.handler,
+                inputWidth, inputHeight, type, textures[0], matrix, textureHelper.handler,
                 yuvConverter, null as Runnable?,
             )
-            this.inputFrameBitmap =
-                Bitmap.createBitmap(this.inputWidth, this.inputHeight, Bitmap.Config.ARGB_8888)
         }
     }
 }

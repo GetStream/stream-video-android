@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,18 @@ data class EgressResponse (
     @Json(name = "rtmps")
     val rtmps: kotlin.collections.List<io.getstream.android.video.generated.models.EgressRTMPResponse> = emptyList(),
 
+    @Json(name = "composite_recording")
+    val compositeRecording: io.getstream.android.video.generated.models.CompositeRecordingResponse? = null,
+
     @Json(name = "frame_recording")
     val frameRecording: io.getstream.android.video.generated.models.FrameRecordingResponse? = null,
 
     @Json(name = "hls")
-    val hls: io.getstream.android.video.generated.models.EgressHLSResponse? = null
+    val hls: io.getstream.android.video.generated.models.EgressHLSResponse? = null,
+
+    @Json(name = "individual_recording")
+    val individualRecording: io.getstream.android.video.generated.models.IndividualRecordingResponse? = null,
+
+    @Json(name = "raw_recording")
+    val rawRecording: io.getstream.android.video.generated.models.RawRecordingResponse? = null
 )

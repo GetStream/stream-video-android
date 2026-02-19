@@ -3,9 +3,8 @@ name: PR cleanup
 
 on:
   schedule:
-    - cron: "0 7 * * 1"  # every Monday 09:00 CEST (UTC+2)
+    - cron: "0 7 * * 1"  # every Monday 07:00 UTC (08:00 CET / 09:00 CEST)
   workflow_dispatch:
-
 
 permissions:
   contents: write
@@ -13,6 +12,6 @@ permissions:
   issues: write
 
 jobs:
-  pr-checklist:
-    uses: GetStream/android-ci-actions/.github/workflows/pr-clean-stale.yaml@main
+  pr-clean-stale:
+    uses: GetStream/stream-build-conventions-android/.github/workflows/pr-clean-stale.yaml@v0.9.0
     secrets: inherit

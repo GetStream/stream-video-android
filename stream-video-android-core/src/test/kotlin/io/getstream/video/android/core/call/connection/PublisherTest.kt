@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -273,6 +273,15 @@ class PublisherTest {
 
         // Then
         coVerify { publisher.negotiate(any()) }
+    }
+
+    @Test
+    fun `negotiate skips setPublisher when no tracks are announced`() = runTest(coroutineContext) {
+        every { publisher.getAnnouncedTracks(any(), any()) } returns emptyList()
+
+        publisher.negotiate()
+
+        coVerify(exactly = 0) { mockSignalServerService.setPublisher(any()) }
     }
 
     @Test

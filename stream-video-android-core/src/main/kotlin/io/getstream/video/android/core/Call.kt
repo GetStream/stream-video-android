@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ import io.getstream.android.video.generated.models.MuteUsersResponse
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.PinResponse
 import io.getstream.android.video.generated.models.RejectCallResponse
+import io.getstream.android.video.generated.models.RingCallRequest
+import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.android.video.generated.models.SendCallEventResponse
 import io.getstream.android.video.generated.models.SendReactionResponse
 import io.getstream.android.video.generated.models.StartTranscriptionResponse
@@ -57,6 +59,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
@@ -83,11 +86,13 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
+import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
@@ -100,6 +105,7 @@ import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -358,12 +364,12 @@ public class Call(
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                fastReconnect()
+                fastReconnect("NetworkStateListener#onConnected")
             } else {
                 logger.d {
                     "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
                 }
-                rejoin()
+                rejoin("NetworkStateListener#onConnected")
             }
         }
 
@@ -458,6 +464,12 @@ public class Call(
         }
 
         response.onSuccess {
+            /**
+             * Because [CallState.updateFromResponse] reads the value of [ClientState.ringingCall]
+             */
+            if (ring) {
+                client.state._ringingCall.value = this
+            }
             state.updateFromResponse(it)
             if (ring) {
                 client.state.addRingingCall(this, RingingState.Outgoing())
@@ -556,6 +568,27 @@ public class Call(
         return Failure(value = Error.GenericError(errorMessage))
     }
 
+    suspend fun joinAndRing(
+        members: List<String>,
+        createOptions: CreateCallOptions? = CreateCallOptions(members),
+        video: Boolean = isVideoEnabled(),
+    ): Result<RtcSession> {
+        logger.d { "[joinAndRing] #ringing; #track; members: $members, video: $video" }
+        state.toggleRingingStateUpdates(true)
+        return join(ring = false, createOptions = createOptions).flatMap { rtcSession ->
+            logger.d { "[joinAndRing] Joined #ringing; #track; ring: $members" }
+            ring(RingCallRequest(isVideoEnabled(), members)).map {
+                logger.d { "[joinAndRing] Ringed #ringing; #track; ring: $members" }
+                clientImpl.state._ringingCall.value = this
+                rtcSession
+            }.onError {
+                logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
+                state.toggleRingingStateUpdates(false)
+                leave("ring-failed (${it.message})")
+            }
+        }
+    }
+
     internal fun isPermanentError(error: Any): Boolean {
         if (error is Error.ThrowableError) {
             if (error.message.contains("Unable to resolve host")) {
@@ -606,29 +639,28 @@ public class Call(
         val sfuUrl = result.value.credentials.server.url
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
-
-        session = if (testInstanceProvider.rtcSessionCreator != null) {
-            testInstanceProvider.rtcSessionCreator!!.invoke()
-        } else {
-            RtcSession(
-                sessionId = this.sessionId,
-                apiKey = clientImpl.apiKey,
-                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                client = client,
-                call = this,
-                sfuUrl = sfuUrl,
-                sfuWsUrl = sfuWsUrl,
-                sfuToken = sfuToken,
-                remoteIceServers = iceServers,
-                powerManager = powerManager,
-            )
-        }
-
-        session?.let {
-            state._connection.value = RealtimeConnection.Joined(it)
-        }
-
         try {
+            session = if (testInstanceProvider.rtcSessionCreator != null) {
+                testInstanceProvider.rtcSessionCreator!!.invoke()
+            } else {
+                RtcSession(
+                    sessionId = this.sessionId,
+                    apiKey = clientImpl.apiKey,
+                    lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
+                    client = client,
+                    call = this,
+                    sfuUrl = sfuUrl,
+                    sfuWsUrl = sfuWsUrl,
+                    sfuToken = sfuToken,
+                    remoteIceServers = iceServers,
+                    powerManager = powerManager,
+                )
+            }
+
+            session?.let {
+                state._connection.value = RealtimeConnection.Joined(it)
+            }
+
             session?.connect()
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
@@ -654,6 +686,19 @@ public class Call(
             }
         }
         monitorPublisherPCStateJob?.cancel()
+        monitorPublisherPCStateJob = scope.launch {
+            session?.publisher?.iceState?.collect {
+                when (it) {
+                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
+                        session?.publisher?.connection?.restartIce()
+                    }
+
+                    else -> {
+                        logger.d { "[monitorPubConnectionState] Ice connection state is $it" }
+                    }
+                }
+            }
+        }
 
         monitorSubscriberPCStateJob?.cancel()
         monitorSubscriberPCStateJob = scope.launch {
@@ -664,7 +709,7 @@ public class Call(
                     }
 
                     else -> {
-                        logger.d { "[monitorConnectionState] Ice connection state is $it" }
+                        logger.d { "[monitorSubConnectionState] Ice connection state is $it" }
                     }
                 }
             }
@@ -714,7 +759,7 @@ public class Call(
     /**
      * Fast reconnect to the same SFU with the same participant session.
      */
-    suspend fun fastReconnect() = schedule("fast") {
+    suspend fun fastReconnect(reason: String = "unknown") = schedule("fast") {
         logger.d { "[fastReconnect] Reconnecting, reconnectAttepmts:$reconnectAttepmts" }
         session?.prepareReconnect()
         this@Call.state._connection.value = RealtimeConnection.Reconnecting
@@ -729,8 +774,11 @@ public class Call(
                 announced_tracks = publishingInfo,
                 subscriptions = subscriptionsInfo,
                 reconnect_attempt = reconnectAttepmts,
+                reason = reason,
             )
             session.fastReconnect(reconnectDetails)
+            val oldSessionStats = collectStats()
+            session.sendCallStats(oldSessionStats)
         } else {
             logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
             this@Call.state._connection.value = RealtimeConnection.Disconnected
@@ -740,7 +788,7 @@ public class Call(
     /**
      * Rejoin a call. Creates a new session and joins as a new participant.
      */
-    suspend fun rejoin() = schedule("rejoin") {
+    suspend fun rejoin(reason: String = "unknown") = schedule("rejoin") {
         logger.d { "[rejoin] Rejoining" }
         reconnectAttepmts++
         state._connection.value = RealtimeConnection.Reconnecting
@@ -751,39 +799,51 @@ public class Call(
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
-                val session = this.session!!
+                val oldSession = this.session!!
+                val oldSessionStats = collectStats()
                 val currentOptions = this.session?.publisher?.currentOptions()
-                logger.i { "Rejoin SFU ${session?.sfuUrl} to ${cred.server.url}" }
+                logger.i { "Rejoin SFU ${oldSession?.sfuUrl} to ${cred.server.url}" }
 
                 this.sessionId = UUID.randomUUID().toString()
-                val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
+                val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
                 val reconnectDetails = ReconnectDetails(
                     previous_session_id = prevSessionId,
                     strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
                     announced_tracks = publishingInfo,
                     subscriptions = subscriptionsInfo,
                     reconnect_attempt = reconnectAttepmts,
+                    reason = reason,
                 )
                 this.state.removeParticipant(prevSessionId)
-                session.prepareRejoin()
-                this.session = RtcSession(
-                    clientImpl,
-                    reconnectAttepmts,
-                    powerManager,
-                    this,
-                    sessionId,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
-                )
-                this.session?.connect(reconnectDetails, currentOptions)
-                session.cleanup()
-                monitorSession(joinResponse.value)
+                oldSession.prepareRejoin()
+                try {
+                    this.session = RtcSession(
+                        clientImpl,
+                        reconnectAttepmts,
+                        powerManager,
+                        this,
+                        sessionId,
+                        clientImpl.apiKey,
+                        clientImpl.coordinatorConnectionModule.lifecycle,
+                        cred.server.url,
+                        cred.server.wsEndpoint,
+                        cred.token,
+                        cred.iceServers.map { ice ->
+                            ice.toIceServer()
+                        },
+                    )
+                    this.session?.connect(reconnectDetails, currentOptions)
+                    this.session?.sfuTracer?.trace("rejoin", reason)
+                    oldSession.sendCallStats(oldSessionStats)
+                    oldSession.leaveWithReason("Rejoin :: $reason")
+                    oldSession.cleanup()
+                    monitorSession(joinResponse.value)
+                } catch (ex: Exception) {
+                    logger.e(ex) {
+                        "[rejoin] Failed to join response with ex: ${ex.message}"
+                    }
+                    state._connection.value = RealtimeConnection.Failed(ex)
+                }
             } else {
                 logger.e {
                     "[rejoin] Failed to get a join response ${joinResponse.errorOrNull()}"
@@ -822,27 +882,35 @@ public class Call(
                     reconnect_attempt = reconnectAttepmts,
                 )
                 session.prepareRejoin()
-                val newSession = RtcSession(
-                    clientImpl,
-                    reconnectAttepmts,
-                    powerManager,
-                    this,
-                    sessionId,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.iceServers.map { ice ->
-                        ice.toIceServer()
-                    },
-                )
-                val oldSession = this.session
-                this.session = newSession
-                this.session?.connect(reconnectDetails, currentOptions)
-                monitorSession(joinResponse.value)
-                oldSession?.leaveWithReason("migrating")
-                oldSession?.cleanup()
+                try {
+                    val newSession = RtcSession(
+                        clientImpl,
+                        reconnectAttepmts,
+                        powerManager,
+                        this,
+                        sessionId,
+                        clientImpl.apiKey,
+                        clientImpl.coordinatorConnectionModule.lifecycle,
+                        cred.server.url,
+                        cred.server.wsEndpoint,
+                        cred.token,
+                        cred.iceServers.map { ice ->
+                            ice.toIceServer()
+                        },
+                    )
+                    val oldSession = this.session
+                    this.session = newSession
+                    this.session?.connect(reconnectDetails, currentOptions)
+                    monitorSession(joinResponse.value)
+                    oldSession?.leaveWithReason("migrating")
+                    oldSession?.cleanup()
+                } catch (ex: Exception) {
+                    logger.e(ex) {
+                        "[switchSfu] Failed to join during " +
+                            "migration - Error ${ex.message}"
+                    }
+                    state._connection.value = RealtimeConnection.Failed(ex)
+                }
             } else {
                 logger.e {
                     "[switchSfu] Failed to get a join response during " +
@@ -862,14 +930,17 @@ public class Call(
     }
 
     /** Leave the call, but don't end it for other users */
-    fun leave() {
+    fun leave(reason: String = "user") {
         logger.d { "[leave] #ringing; no args, call_cid:$cid" }
-        leave(disconnectionReason = null)
+        internalLeave(null, reason)
     }
 
-    private fun leave(disconnectionReason: Throwable?) = atomicLeave {
-        val callId = id
-        session?.leaveWithReason(disconnectionReason?.message ?: "user")
+    private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
+        monitorSubscriberPCStateJob?.cancel()
+        monitorPublisherPCStateJob?.cancel()
+        monitorPublisherPCStateJob = null
+        monitorSubscriberPCStateJob = null
+        session?.leaveWithReason("[reason=$reason, error=${disconnectionReason?.message}]")
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
@@ -903,7 +974,18 @@ public class Call(
             .leaveCall(this)
 
         (client as StreamVideoClient).onCallCleanUp(this)
-        cleanup()
+
+        clientImpl.scope.launch {
+            safeCall {
+                session?.sfuTracer?.trace(
+                    "leave-call",
+                    "[reason=$reason, error=${disconnectionReason?.message}]",
+                )
+                val stats = collectStats()
+                session?.sendCallStats(stats)
+            }
+            cleanup()
+        }
     }
 
     /** ends the call for yourself as well as other users */
@@ -911,7 +993,7 @@ public class Call(
         // end the call for everyone
         val result = clientImpl.endCall(type, id)
         // cleanup
-        leave()
+        leave("call-ended")
         return result
     }
 
@@ -1133,11 +1215,18 @@ public class Call(
     }
 
     suspend fun startRecording(): Result<Any> {
-        return clientImpl.startRecording(type, id)
+        return startRecording(RecordingType.Composite)
+    }
+    suspend fun startRecording(recordingType: RecordingType): Result<Any> {
+        return clientImpl.startRecording(type, id, recordingType = recordingType)
     }
 
     suspend fun stopRecording(): Result<Any> {
-        return clientImpl.stopRecording(type, id)
+        return stopRecording(RecordingType.Composite)
+    }
+
+    suspend fun stopRecording(recordingType: RecordingType): Result<Any> {
+        return clientImpl.stopRecording(type, id, recordingType)
     }
 
     /**
@@ -1149,10 +1238,13 @@ public class Call(
      * MediaProjectionManager.createScreenCaptureIntent().
      * See https://developer.android.com/guide/topics/large-screens/media-projection#recommended_approach
      */
-    fun startScreenSharing(mediaProjectionPermissionResultData: Intent) {
+    fun startScreenSharing(
+        mediaProjectionPermissionResultData: Intent,
+        includeAudio: Boolean = false,
+    ) {
         if (state.ownCapabilities.value.contains(OwnCapability.Screenshare)) {
             session?.setScreenShareTrack()
-            screenShare.enable(mediaProjectionPermissionResultData)
+            screenShare.enable(mediaProjectionPermissionResultData, includeAudio = includeAudio)
         } else {
             logger.w { "Can't start screen sharing - user doesn't have wnCapability.Screenshare permission" }
         }
@@ -1434,11 +1526,17 @@ public class Call(
             supervisorJob.children.forEach { it.join() }
             supervisorJob.cancel()
         }
+        scope.cancel()
     }
 
     suspend fun ring(): Result<GetCallResponse> {
         logger.d { "[ring] #ringing; no args" }
         return clientImpl.ring(type, id)
+    }
+
+    suspend fun ring(ringCallRequest: RingCallRequest): Result<RingCallResponse> {
+        logger.d { "[ring] #ringing ringCallRequest: $ringCallRequest" }
+        return clientImpl.ring(type, id, ringCallRequest)
     }
 
     suspend fun notify(): Result<GetCallResponse> {
@@ -1450,11 +1548,15 @@ public class Call(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall(this)
-        clientImpl.state.maybeStopForegroundService(call = this)
+        clientImpl.state.transitionToAcceptCall(this)
         return clientImpl.accept(type, id)
     }
 
+    /**
+     * Should outlive both the call scope and the service scope and needs to be executed in the client-level scope.
+     * Because the call scope or service scope may be cancelled or finished while the network request is still in flight
+     * TODO: Run this in clientImpl.scope internally
+     */
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
         logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
         return clientImpl.reject(type, id, reason)
@@ -1655,9 +1757,9 @@ public class Call(
             }
         }
 
-        fun fastReconnect() {
+        fun fastReconnect(reason: String = "Debug") {
             call.scope.launch {
-                call.fastReconnect()
+                call.fastReconnect(reason)
             }
         }
     }

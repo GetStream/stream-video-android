@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @Deprecated(
-    message = "This class is deprecated. Use the notification interceptors instead.",
+    message = "This class is deprecated. Use CompatibilityStreamNotificationHandler instead.",
 )
 public open class DefaultNotificationHandler(
     private val application: Application,

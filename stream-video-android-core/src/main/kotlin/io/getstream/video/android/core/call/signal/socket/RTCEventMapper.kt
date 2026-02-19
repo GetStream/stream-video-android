@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,7 @@ public object RTCEventMapper {
                     user_id,
                     session_id,
                     type,
+                    participant, // Include optional participant for large call optimization
                 )
             }
 
@@ -89,6 +90,7 @@ public object RTCEventMapper {
                     user_id,
                     session_id,
                     type,
+                    participant, // Include optional participant for large call optimization
                 )
             }
 

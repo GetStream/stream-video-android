@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -75,11 +75,6 @@ internal interface ConnectionModuleDeclaration<Api, SocketConnection, Http : OkH
      * Logging levels.
      */
     val loggingLevel: LoggingLevel get() = LoggingLevel()
-
-    /**
-     * The user token.
-     */
-    val userToken: Token
 
     /**
      * The lifecycle of the application.

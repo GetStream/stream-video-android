@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.utils.SignalLostSignalingServiceDecorator
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trace.tracedWith
@@ -37,11 +38,11 @@ import java.util.concurrent.TimeUnit
 
 internal class SfuConnectionModule(
     context: Context,
+    val tokenRepository: TokenRepository,
     override val apiKey: ApiKey,
     override val apiUrl: String,
     override val wssUrl: String,
     override val connectionTimeoutInMs: Long,
-    override val userToken: SfuToken,
     override val lifecycle: Lifecycle,
     override val tracer: Tracer,
     val onSignalingLost: (Error) -> Unit,
@@ -57,7 +58,7 @@ internal class SfuConnectionModule(
     private fun buildSfuOkHttpClient(): OkHttpClient {
         val connectionTimeoutInMs = 10000L
         // create a new OkHTTP client and set timeouts
-        val authInterceptor = CoordinatorAuthInterceptor(apiKey, userToken)
+        val authInterceptor = CoordinatorAuthInterceptor(apiKey, tokenRepository)
         return OkHttpClient.Builder().addInterceptor(authInterceptor).addInterceptor(
             HttpLoggingInterceptor().apply {
                 level = loggingLevel.httpLoggingLevel.level
@@ -93,13 +94,15 @@ internal class SfuConnectionModule(
         apiKey = apiKey,
         scope = scope,
         httpClient = http,
-        tokenProvider = ConstantTokenProvider(userToken),
+        tokenProvider = ConstantTokenProvider(tokenRepository.getToken()),
         lifecycle = lifecycle,
         networkStateProvider = networkStateProvider,
+        tokenRepository = tokenRepository,
     )
     override val socketConnection: SfuSocketConnection = _internalSocketConnection
 
     override fun updateToken(token: SfuToken) {
+        tokenRepository.updateToken(token)
         _internalSocketConnection.updateToken(token)
     }
 

@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import io.getstream.video.android.Configuration
 import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.maven.publish)
     id("io.getstream.video.android.library")
     id("io.getstream.video.generateServices")
-    id("io.getstream.spotless")
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.kotlin.parcelize.get().pluginId)
     id(libs.plugins.wire.get().pluginId)
@@ -63,11 +60,22 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-proguard-rules.pro")
-        buildConfigField("String", "STREAM_VIDEO_VERSION", "\"${Configuration.versionName}\"")
-        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MAJOR", "${Configuration.majorVersion}")
-        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MINOR", "${Configuration.minorVersion}")
-        buildConfigField("Integer", "STREAM_VIDEO_VERSION_PATCH", "${Configuration.patchVersion}")
-        buildConfigField("String", "STREAM_WEBRTC_VERSION", "\"${Configuration.streamWebRtcVersionName}\"")
+
+        val versionParts =
+            version.toString()
+                .takeWhile { it.isDigit() || it == '.' }
+                .split(".")
+                .mapNotNull(String::toIntOrNull)
+                .also { require(it.size == 3) { "Unexpected version format: $version" } }
+        buildConfigField("String", "STREAM_VIDEO_VERSION", "\"$version\"")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MAJOR", "${versionParts[0]}")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_MINOR", "${versionParts[1]}")
+        buildConfigField("Integer", "STREAM_VIDEO_VERSION_PATCH", "${versionParts[2]}")
+        buildConfigField(
+            "String",
+            "STREAM_WEBRTC_VERSION",
+            "\"${Configuration.streamWebRtcVersionName}\"",
+        )
     }
 
     buildFeatures {
@@ -178,9 +186,8 @@ dependencies {
     implementation(libs.stream.push.delegate)
     api(libs.stream.push.permissions)
 
-    //jetpack telecom
+    // jetpack telecom
     implementation(libs.androidx.telecom)
-
 
     // datastore
     api(libs.androidx.datastore)
@@ -225,17 +232,26 @@ dependencies {
     androidTestImplementation(libs.turbine)
 }
 
-mavenPublishing {
-    coordinates(
-        groupId = Configuration.artifactGroup,
-        artifactId = "stream-video-android-core",
-        version = rootProject.version.toString(),
-    )
-    configure(
-        AndroidSingleVariantLibrary(
-            variant = "release",
-            sourcesJar = true,
-            publishJavadocJar = true,
-        ),
-    )
+afterEvaluate {
+    tasks.named("testDebugUnitTest") {
+        dependsOn("isolatedTest")
+    }
+}
+
+tasks.register<Test>("isolatedTest") {
+
+    description = "Runs StreamVideoBuilderTest in an isolation"
+    group = "verification"
+
+    // Only this class
+    include("**/StreamVideoBuilderTest.class")
+
+    // Force new JVM
+    forkEvery = 1
+
+    // Reuse Android's debug unit test configuration
+    val androidTestTask = tasks.named<Test>("testDebugUnitTest").get()
+
+    testClassesDirs = androidTestTask.testClassesDirs
+    classpath = androidTestTask.classpath
 }
