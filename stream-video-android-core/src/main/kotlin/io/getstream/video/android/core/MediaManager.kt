@@ -45,8 +45,6 @@ import io.getstream.result.extractCause
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioSwitchHandler
-import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
-import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
 import io.getstream.video.android.core.audio.UsbAudioInputDevice
 import io.getstream.video.android.core.audio.UsbAudioInputDevice.Companion.isUsbInputDevice
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
