@@ -61,7 +61,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.webrtc.SessionDescription
 import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.PublishOption

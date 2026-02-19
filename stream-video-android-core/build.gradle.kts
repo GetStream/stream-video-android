@@ -137,9 +137,7 @@ baselineProfile {
 
 dependencies {
     // webrtc
-//    api(libs.stream.webrtc)
-      api(project(":stream-video-android-repackaged-webrtc"))
-
+    api(libs.stream.webrtc)
     implementation(libs.audioswitch)
 
     // video filter dependencies

@@ -403,7 +403,7 @@ class SubscriberTest {
     fun `onRemoveStream removes tracks from internal tracking maps`() = runTest {
         val sessionId = "session-id"
         val trackId = "audio-track-id"
-        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true) {
+        val audioTrack = mockk<io.getstream.webrtc.AudioTrack>(relaxed = true) {
             every { id() } returns trackId
         }
 

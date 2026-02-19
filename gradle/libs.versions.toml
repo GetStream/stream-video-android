@@ -50,7 +50,7 @@ turbine = "0.13.0"
 itu = "1.7.3"
 
 streamWebRTC = "137.1.1"
-streamNoiseCancellation = "1.0.4"
+streamNoiseCancellation = "2.0.0"
 streamResult = "1.3.0"
 streamChat = "6.10.0"
 streamLog = "1.3.2"
@@ -157,7 +157,7 @@ tink = { group = "com.google.crypto.tink", name = "tink-android", version.ref = 
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 ituDate = { group = "com.ethlo.time", name = "itu", version.ref = "itu" }
 
- stream-webrtc = { group = "io.getstream", name = "stream-video-webrtc-android", version.ref = "streamWebRTC" }
+ stream-webrtc = { group = "io.getstream", name = "stream-video-webrtc-android-repackaged", version.ref = "streamWebRTC" }
 stream-result = { group = "io.getstream", name = "stream-result", version.ref = "streamResult" }
 stream-result-call = { group = "io.getstream", name = "stream-result-call", version.ref = "streamResult" }
 stream-renderscript = { group = "io.getstream", name = "stream-video-renderscript-android", version.ref = "streamRenderscript" }

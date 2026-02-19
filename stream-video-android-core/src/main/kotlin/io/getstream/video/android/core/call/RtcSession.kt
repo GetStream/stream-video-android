@@ -463,7 +463,7 @@ public class RtcSession internal constructor(
             TrackType.TRACK_TYPE_AUDIO,
             AudioTrack(
                 streamId = streamId,
-                audio = track as org.webrtc.AudioTrack,
+                audio = track as io.getstream.webrtc.AudioTrack,
             ),
         )
     }
