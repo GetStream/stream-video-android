@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -161,6 +161,15 @@ object StreamVideoInitHelper {
                     loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
                 )
             }
+            /**
+             * The `connectOnInit` flag in `StreamVideoInitHelper` is set to `false` to give us
+             * manual control over the connection.
+             *
+             * We explicitly call `connect()` here to establish a WebSocket connection at startup.
+             * This is required for end-to-end (E2E) tests, which rely on WebSocket events
+             * to receive calls instead of Push Notifications (PN).
+             */
+            StreamVideo.instanceOrNull()?.connect()
             Log.i("StreamVideoInitHelper", "Init successful.")
             _initState.value = InitializedState.FINISHED
         } catch (e: Exception) {
@@ -228,7 +237,10 @@ object StreamVideoInitHelper {
         val callServiceConfigRegistry = CallServiceConfigRegistry()
         callServiceConfigRegistry.apply {
             register(DefaultCallConfigurations.getLivestreamGuestCallServiceConfig())
-            register(CallType.AudioCall.name) { enableTelecom(true) }
+            register(
+                CallType.AudioCall.name,
+                DefaultCallConfigurations.audioCall.copy(enableTelecom = true),
+            )
             register(CallType.AnyMarker.name) {
                 setModerationConfig(
                     ModerationConfig(
@@ -332,9 +344,8 @@ object StreamVideoInitHelper {
             callUpdatesAfterLeave = true,
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
-            telecomConfig = TelecomConfig(
-                context.packageName,
-            ),
+            telecomConfig = TelecomConfig(context.packageName),
+            connectOnInit = false,
         ).build()
     }
 }

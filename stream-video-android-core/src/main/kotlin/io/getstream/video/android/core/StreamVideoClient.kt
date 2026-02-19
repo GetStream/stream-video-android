@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -105,6 +105,7 @@ import io.getstream.video.android.core.notifications.internal.service.StopServic
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
+import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
@@ -460,10 +461,16 @@ internal class StreamVideoClient internal constructor(
                     refreshToken(e)
                     Failure(Error.GenericError("Initialize error. Token expired."))
                 } else {
-                    throw e
+                    Failure(Error.ThrowableError("Error to connect user", e))
                 }
+            } catch (e: Throwable) {
+                Failure(Error.ThrowableError("Error to connect user", e))
             }
         }
+    }
+
+    override suspend fun connect(): Result<Long> {
+        return connectAsync().await()
     }
 
     private suspend fun refreshToken(error: Throwable) {
@@ -1010,16 +1017,17 @@ internal class StreamVideoClient internal constructor(
         type: String,
         id: String,
         externalStorage: String? = null,
+        recordingType: RecordingType = RecordingType.Composite,
     ): Result<Unit> {
         return apiCall {
             val req = StartRecordingRequest(externalStorage)
-            coordinatorConnectionModule.api.startRecording(type, id, req)
+            coordinatorConnectionModule.api.startRecording(type, id, recordingType.toString(), req)
         }
     }
 
-    suspend fun stopRecording(type: String, id: String): Result<Unit> {
+    suspend fun stopRecording(type: String, id: String, recordingType: RecordingType = RecordingType.Composite): Result<Unit> {
         return apiCall {
-            coordinatorConnectionModule.api.stopRecording(type, id)
+            coordinatorConnectionModule.api.stopRecording(type, id, recordingType.toString())
         }
     }
 

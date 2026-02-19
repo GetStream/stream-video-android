@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.ui.common
 
+import android.annotation.SuppressLint
 import android.app.PictureInPictureParams
 import android.content.Context
 import android.content.Intent
@@ -28,6 +29,7 @@ import android.util.Rational
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.annotation.CallSuper
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.android.video.generated.models.CallEndedEvent
 import io.getstream.android.video.generated.models.CallSessionEndedEvent
@@ -59,10 +61,13 @@ import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
+import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
+import io.getstream.video.android.ui.common.StreamCallActivity.Companion.callIntent
 import io.getstream.video.android.ui.common.models.StreamCallActivityException
+import io.getstream.video.android.ui.common.permission.PermissionManager
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -503,7 +508,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         when (action) {
             NotificationHandler.ACTION_ACCEPT_CALL -> {
                 logger.v { "[onIntentAction] #ringing; Action ACCEPT_CALL, ${call.cid}" }
-                accept(call, onError = onError, onSuccess = onSuccess)
+                handleAcceptCallIntent(call, onError, onSuccess)
             }
 
             NotificationHandler.ACTION_REJECT_CALL -> {
@@ -560,6 +565,37 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                     onError = onError,
                 )
             }
+        }
+    }
+
+    internal fun handleAcceptCallIntent(
+        call: Call,
+        onError: (suspend (Exception) -> Unit)?,
+        onSuccess: (suspend (Call) -> Unit)? = null,
+    ) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            if (PermissionManager.hasRequiredCallPermissions(this@StreamCallActivity, call)) {
+                accept(call, onError = onError, onSuccess = onSuccess)
+            } else {
+                // To respect notification UX when the application is in foreground
+                if (PermissionManager.hasNotificationPermission(this@StreamCallActivity)) {
+                    updateNotificationWhenAppComesToForeground(call)
+                }
+                get(call, onError = onError, onSuccess = onSuccess)
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    internal suspend fun updateNotificationWhenAppComesToForeground(call: Call) {
+        val notification = StreamVideo.instanceOrNull()?.onCallNotificationUpdate(call)
+        val notificationId = call.state.notificationIdFlow.value
+        if (notification != null && notificationId != null) {
+            val streamCallId = StreamCallId(call.type, call.id)
+            DefaultNotificationDispatcher(
+                NotificationManagerCompat.from(this@StreamCallActivity),
+            )
+                .notify(streamCallId, notificationId, notification)
         }
     }
 

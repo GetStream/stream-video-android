@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import io.getstream.video.android.core.ClientState
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
@@ -278,10 +279,11 @@ class StreamDefaultNotificationHandlerTest {
         testHandler.onMissedCall(testCallId, callDisplayName, payload)
 
         // Then - Verify intent resolver call with correct notification ID
+        val notificationId = testCallId.getNotificationId(NotificationType.Missed)
         verify {
             mockIntentResolver.searchMissedCallPendingIntent(
                 testCallId,
-                testCallId.hashCode(),
+                notificationId,
                 payload,
             )
         }
@@ -296,7 +298,7 @@ class StreamDefaultNotificationHandlerTest {
         }
 
         // Verify notification manager is called to show notification
-        verify { mockNotificationManager.notify(testCallId.hashCode(), any()) }
+        verify { mockNotificationManager.notify(notificationId, any()) }
     }
 
     @Test
@@ -331,12 +333,13 @@ class StreamDefaultNotificationHandlerTest {
 
         // When
         testHandler.onMissedCall(testCallId, callDisplayName, payload)
+        val notificationId = testCallId.getNotificationId(NotificationType.Missed)
 
         // Then - Verify fallback to default intent
         verify {
             mockIntentResolver.searchMissedCallPendingIntent(
                 testCallId,
-                testCallId.hashCode(),
+                notificationId,
                 payload,
             )
         }
@@ -352,7 +355,7 @@ class StreamDefaultNotificationHandlerTest {
         }
 
         // Verify notification manager is called
-        verify { mockNotificationManager.notify(testCallId.hashCode(), any()) }
+        verify { mockNotificationManager.notify(notificationId, any()) }
     }
 
     @Test

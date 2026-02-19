@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -161,15 +161,35 @@ class ClientState(private val client: StreamVideo) {
         _connection.value = ConnectionState.Failed(error)
     }
 
+    /**
+     * Transition incoming/outgoing call to active on the same service
+     */
     fun setActiveCall(call: Call) {
         this._activeCall.value = call
-        removeRingingCall(call)
-        call.scope.launch {
-            /**
-             * Temporary fix: `maybeStartForegroundService` is called just before this code, which can stop the service
-             */
-            delay(500L)
-            maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+        val serviceTransitionDelayMs = 500L
+        val ringingState = call.state.ringingState.value
+        when (ringingState) {
+            is RingingState.Incoming -> {
+                call.scope.launch {
+                    transitionToAcceptCall(call)
+                    delay(serviceTransitionDelayMs)
+                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                }
+            }
+            is RingingState.Outgoing -> {
+                call.scope.launch {
+                    transitionToAcceptCall(call)
+                    delay(serviceTransitionDelayMs)
+                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                }
+            }
+            else -> {
+                removeRingingCall(call)
+                call.scope.launch {
+                    delay(serviceTransitionDelayMs)
+                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                }
+            }
         }
     }
 
@@ -185,6 +205,9 @@ class ClientState(private val client: StreamVideo) {
     }
 
     internal fun removeActiveCall(call: Call) {
+        logger.d {
+            "[removeActiveCall] call.id == activeCall.value?.id :${call.id == activeCall.value?.id}"
+        }
         if (call.id == activeCall.value?.id) {
             _activeCall.value?.let {
                 maybeStopForegroundService(it)
@@ -214,6 +237,9 @@ class ClientState(private val client: StreamVideo) {
     }
 
     fun removeRingingCall(call: Call) {
+        logger.d {
+            "[removeRingingCall] call.id == ringingCall.value?.id: ${call.id == ringingCall.value?.id}"
+        }
         if (call.id == ringingCall.value?.id) {
             (client as StreamVideoClient).callSoundAndVibrationPlayer.stopCallSound()
             ringingCall.value?.let {
@@ -223,11 +249,19 @@ class ClientState(private val client: StreamVideo) {
         }
     }
 
+    internal fun transitionToAcceptCall(call: Call) {
+        if (call.id == ringingCall.value?.id) {
+            (client as StreamVideoClient).callSoundAndVibrationPlayer.stopCallSound()
+            _ringingCall.value = null
+        }
+    }
+
     /**
      * Start a foreground service that manages the call even when the UI is gone.
      * This depends on the flag in [StreamVideoBuilder] called `runForegroundServiceForCalls`
      */
     internal fun maybeStartForegroundService(call: Call, trigger: String) {
+        logger.d { "[maybeStartForegroundService], trigger: $trigger" }
         when (trigger) {
             CallService.TRIGGER_ONGOING_CALL -> serviceLauncher.showOnGoingCall(
                 call,

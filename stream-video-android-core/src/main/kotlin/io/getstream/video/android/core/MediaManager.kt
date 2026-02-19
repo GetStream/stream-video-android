@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import android.content.pm.PackageManager
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.AudioAttributes
+import android.media.AudioDeviceCallback
+import android.media.AudioDeviceInfo
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioPlaybackCaptureConfiguration
@@ -33,6 +35,7 @@ import android.media.AudioRecord.READ_BLOCKING
 import android.media.projection.MediaProjection
 import android.os.Build
 import android.os.IBinder
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
@@ -42,6 +45,10 @@ import io.getstream.result.extractCause
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioSwitchHandler
+import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
+import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
+import io.getstream.video.android.core.audio.UsbAudioInputDevice
+import io.getstream.video.android.core.audio.UsbAudioInputDevice.Companion.isUsbInputDevice
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.camera.CameraCharacteristicsValidator
 import io.getstream.video.android.core.camera.DefaultCameraCharacteristicsValidator
@@ -546,6 +553,28 @@ class MicrophoneManager(
     internal var audioManager: AudioManager? = null
     internal var priorStatus: DeviceStatus? = null
 
+    // USB audio device detection (API 23+)
+    private var audioDeviceCallback: AudioDeviceCallback? = null
+    private val _usbInputDevices = MutableStateFlow<List<UsbAudioInputDevice>>(emptyList())
+
+    /**
+     * List of detected USB audio input devices.
+     *
+     * These devices are detected using Android's AudioDeviceCallback API and include
+     * USB microphones that may not appear in [devices] because AudioSwitch only
+     * detects devices with both input and output capabilities.
+     *
+     * Requires Android M (API 23) or higher.
+     */
+    val usbInputDevices: StateFlow<List<UsbAudioInputDevice>> = _usbInputDevices
+
+    private val _selectedUsbDevice = MutableStateFlow<UsbAudioInputDevice?>(null)
+
+    /**
+     * The currently selected USB input device, or null if using default routing.
+     */
+    val selectedUsbDevice: StateFlow<UsbAudioInputDevice?> = _selectedUsbDevice
+
     // Exposed state
     private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
 
@@ -656,6 +685,142 @@ class MicrophoneManager(
         return devices
     }
 
+    // ==================== USB Audio Input Device Support ====================
+
+    /**
+     * Sets up USB audio device detection using Android's AudioDeviceCallback.
+     *
+     * This detects USB input devices (microphones),
+     * such as the Rode Wireless Go II and other professional USB microphones.
+     *
+     * Requires Android M (API 23) or higher.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun setupUsbDeviceDetection() {
+        if (audioDeviceCallback != null) {
+            logger.d { "[setupUsbDeviceDetection] Already set up" }
+            return
+        }
+
+        val am = audioManager ?: mediaManager.context.getSystemService<AudioManager>()
+        audioManager = am
+
+        if (am == null) {
+            logger.e { "[setupUsbDeviceDetection] AudioManager not available" }
+            return
+        }
+
+        audioDeviceCallback = object : AudioDeviceCallback() {
+            override fun onAudioDevicesAdded(addedDevices: Array<out AudioDeviceInfo>) {
+                logger.i { "[onAudioDevicesAdded] ${addedDevices.size} devices added" }
+                updateUsbDeviceList()
+            }
+
+            override fun onAudioDevicesRemoved(removedDevices: Array<out AudioDeviceInfo>) {
+                logger.i { "[onAudioDevicesRemoved] ${removedDevices.size} devices removed" }
+                updateUsbDeviceList()
+
+                // If the selected USB device was removed, clear selection
+                val selectedId = _selectedUsbDevice.value?.id
+                if (selectedId != null && removedDevices.any { it.id == selectedId }) {
+                    logger.i { "[onAudioDevicesRemoved] Selected USB device was removed, clearing selection" }
+                    clearUsbDeviceSelection()
+                }
+            }
+        }
+
+        am.registerAudioDeviceCallback(audioDeviceCallback, null)
+        logger.i { "[setupUsbDeviceDetection] Registered AudioDeviceCallback" }
+
+        // Initial device scan
+        updateUsbDeviceList()
+    }
+
+    /**
+     * Updates the list of available USB input devices.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun updateUsbDeviceList() {
+        val am = audioManager ?: return
+
+        val usbDevices = am.getDevices(AudioManager.GET_DEVICES_INPUTS)
+            .filter { it.isUsbInputDevice() }
+            .map { UsbAudioInputDevice(it) }
+
+        logger.i {
+            "[updateUsbDeviceList] Found ${usbDevices.size} USB input devices: ${usbDevices.map { it.name }}"
+        }
+        _usbInputDevices.value = usbDevices
+
+        if (_selectedUsbDevice.value == null && usbDevices.isNotEmpty()) {
+            val defaultUsbDevice = usbDevices.first()
+            logger.i {
+                "[updateUsbDeviceList] Auto-selecting USB device: ${defaultUsbDevice.name}"
+            }
+            selectUsbDevice(defaultUsbDevice)
+        }
+    }
+
+    /**
+     * Selects a USB input device as the preferred audio input source.
+     *
+     * This routes audio recording to the specified USB device, bypassing AudioSwitch's
+     * default device selection. Use this for USB microphones that don't appear in [devices].
+     *
+     * @param device The USB device to use, or null to restore default routing.
+     * @return true if the device was selected successfully, false otherwise.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun selectUsbDevice(device: UsbAudioInputDevice?): Boolean {
+        logger.i { "[selectUsbDevice] Selecting USB device: ${device?.name}" }
+
+        val result = mediaManager.call.peerConnectionFactory.setPreferredAudioInputDevice(
+            device?.deviceInfo,
+        )
+
+        if (result) {
+            _selectedUsbDevice.value = device
+            logger.i { "[selectUsbDevice] Successfully selected USB device: ${device?.name}" }
+        } else {
+            logger.e { "[selectUsbDevice] Failed to select USB device: ${device?.name}" }
+        }
+
+        return result
+    }
+
+    /**
+     * Clears the USB device selection, restoring default audio routing.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun clearUsbDeviceSelection() {
+        selectUsbDevice(null)
+    }
+
+    /**
+     * Lists all detected USB input devices.
+     *
+     * @return StateFlow of available USB input devices.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun listUsbDevices(): StateFlow<List<UsbAudioInputDevice>> {
+        setupUsbDeviceDetection()
+        return usbInputDevices
+    }
+
+    /**
+     * Cleans up USB device detection callback.
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun cleanupUsbDeviceDetection() {
+        audioDeviceCallback?.let { callback ->
+            audioManager?.unregisterAudioDeviceCallback(callback)
+            audioDeviceCallback = null
+            logger.i { "[cleanupUsbDeviceDetection] Unregistered AudioDeviceCallback" }
+        }
+    }
+
+    // ==================== End USB Audio Input Device Support ====================
+
     /**
      * Set the audio bitrate profile.
      * This can only be set before joining the call. Once the call is joined,
@@ -713,6 +878,9 @@ class MicrophoneManager(
 
     fun cleanup() {
         ifAudioHandlerInitialized { it.stop() }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            cleanupUsbDeviceDetection()
+        }
         setupCompleted = false
     }
 
@@ -733,6 +901,9 @@ class MicrophoneManager(
             audioManager = mediaManager.context.getSystemService()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 audioManager?.allowedCapturePolicy = AudioAttributes.ALLOW_CAPTURE_BY_ALL
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                setupUsbDeviceDetection()
             }
 
             if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {

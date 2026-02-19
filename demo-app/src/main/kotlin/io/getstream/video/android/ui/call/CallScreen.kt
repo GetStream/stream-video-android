@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -118,6 +119,7 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.call.state.ChooseLayout
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
+import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.utils.isEnabled
 import io.getstream.video.android.filters.video.BlurredBackgroundVideoFilter
 import io.getstream.video.android.filters.video.VirtualBackgroundVideoFilter
@@ -174,7 +176,9 @@ fun CallScreen(
     val orientation = LocalConfiguration.current.orientation
     var showEndRecordingDialog by remember { mutableStateOf(false) }
     var acceptedCallRecording by remember { mutableStateOf(false) }
-    val isRecording by call.state.recording.collectAsStateWithLifecycle()
+    val compositeRecording by call.state.recording.collectAsStateWithLifecycle()
+    val rawRecording by call.state.rawRecording.collectAsStateWithLifecycle()
+    val individualRecording by call.state.individualRecording.collectAsStateWithLifecycle()
     val participantsSize by call.state.participants.collectAsStateWithLifecycle()
     val messages: MutableList<MessageItemState> = remember { mutableStateListOf() }
     var messagesVisibility by remember { mutableStateOf(false) }
@@ -789,7 +793,15 @@ fun CallScreen(
                 onDismissed = { isShowingAvailableDeviceMenu = false },
             )
         }
-
+        val isRecording by remember {
+            derivedStateOf {
+                buildSet {
+                    if (compositeRecording) add(RecordingType.Composite)
+                    if (individualRecording) add(RecordingType.Individual)
+                    if (rawRecording) add(RecordingType.Raw)
+                }.isNotEmpty()
+            }
+        }
         // TODO: AAP, move recording and actions in separate composables.
         if (isRecording && !showRecordingWarning) {
             StreamDialogPositiveNegative(

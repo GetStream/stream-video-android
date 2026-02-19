@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class DefaultNotificationDispatcher(
     override fun notify(streamCallId: StreamCallId, id: Int, notification: Notification) {
         logger.d { "[notify] callId: ${streamCallId.id}, notificationId: $id" }
         StreamVideo.instanceOrNull()?.call(streamCallId.type, streamCallId.id)
-            ?.state?.updateNotification(notification)
+            ?.state?.updateNotification(id, notification)
 
         notificationManager.notify(id, notification)
     }

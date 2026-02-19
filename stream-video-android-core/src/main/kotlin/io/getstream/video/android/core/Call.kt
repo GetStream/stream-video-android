@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,7 @@ import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
+import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
@@ -464,6 +465,12 @@ public class Call(
         }
 
         response.onSuccess {
+            /**
+             * Because [CallState.updateFromResponse] reads the value of [ClientState.ringingCall]
+             */
+            if (ring) {
+                client.state._ringingCall.value = this
+            }
             state.updateFromResponse(it)
             if (ring) {
                 client.state.addRingingCall(this, RingingState.Outgoing())
@@ -930,7 +937,6 @@ public class Call(
     }
 
     private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
-        val callId = id
         monitorSubscriberPCStateJob?.cancel()
         monitorPublisherPCStateJob?.cancel()
         monitorPublisherPCStateJob = null
@@ -1210,11 +1216,18 @@ public class Call(
     }
 
     suspend fun startRecording(): Result<Any> {
-        return clientImpl.startRecording(type, id)
+        return startRecording(RecordingType.Composite)
+    }
+    suspend fun startRecording(recordingType: RecordingType): Result<Any> {
+        return clientImpl.startRecording(type, id, recordingType = recordingType)
     }
 
     suspend fun stopRecording(): Result<Any> {
-        return clientImpl.stopRecording(type, id)
+        return stopRecording(RecordingType.Composite)
+    }
+
+    suspend fun stopRecording(recordingType: RecordingType): Result<Any> {
+        return clientImpl.stopRecording(type, id, recordingType)
     }
 
     /**
@@ -1538,11 +1551,15 @@ public class Call(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.removeRingingCall(this)
-        clientImpl.state.maybeStopForegroundService(call = this)
+        clientImpl.state.transitionToAcceptCall(this)
         return clientImpl.accept(type, id)
     }
 
+    /**
+     * Should outlive both the call scope and the service scope and needs to be executed in the client-level scope.
+     * Because the call scope or service scope may be cancelled or finished while the network request is still in flight
+     * TODO: Run this in clientImpl.scope internally
+     */
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> {
         logger.d { "[reject] #ringing; rejectReason: $reason, call_id:$id" }
         return clientImpl.reject(type, id, reason)

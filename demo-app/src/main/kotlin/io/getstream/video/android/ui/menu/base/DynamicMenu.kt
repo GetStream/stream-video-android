@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -68,9 +66,9 @@ import io.getstream.video.android.ui.menu.reconnectMenu
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun DynamicMenu(header: (@Composable LazyItemScope.() -> Unit)? = null, items: List<MenuItem>) {
-    val history = remember { mutableStateListOf<Pair<String, SubMenuItem>>() }
-    val dynamicItems = remember { mutableStateListOf<MenuItem>() }
-    var loadedItems by remember { mutableStateOf(false) }
+    val historyTitles = remember { mutableStateListOf<String>() }
+    // Map of title -> (DynamicSubMenuItem, loaded items) for each dynamic submenu visited
+    val dynamicMenuCache = remember { mutableStateMapOf<String, DynamicMenuEntry>() }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -89,71 +87,121 @@ fun DynamicMenu(header: (@Composable LazyItemScope.() -> Unit)? = null, items: L
                 )
                 .padding(12.dp),
         ) {
-            if (history.isEmpty()) {
+            if (historyTitles.isEmpty()) {
+                // First Level Menu
                 header?.let {
                     item(content = header)
                 }
-                menuItems(items) {
-                    history.add(Pair(it.title, it))
+                menuItems(items) { subMenuItem ->
+                    onNavigateToSubmenu(subMenuItem, historyTitles, dynamicMenuCache)
                 }
             } else {
-                val lastContent = history.last()
-                stickyHeader {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .background(VideoTheme.colors.baseSheetPrimary)
-                            .fillMaxWidth(),
-                    ) {
-                        IconButton(onClick = { history.removeLastOrNull() }) {
-                            Icon(
-                                tint = VideoTheme.colors.basePrimary,
-                                imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                                contentDescription = "Back",
-                            )
-                        }
-                        Text(
-                            text = lastContent.first,
-                            style = VideoTheme.typography.subtitleS,
-                            color = VideoTheme.colors.basePrimary,
-                        )
+                // Nested Level Menu
+                val currentTitle = historyTitles.last()
+                submenuStickyHeader(currentTitle) {
+                    // Remove menu's reference from cache because it will be fetched freshly from source
+                    val removed = historyTitles.removeLastOrNull()
+                    if (removed != null) {
+                        dynamicMenuCache.remove(removed)
                     }
                 }
 
-                val subMenu = lastContent.second
-                val dynamicMenu = subMenu as? DynamicSubMenuItem
+                val dynamicEntry = dynamicMenuCache[currentTitle]
 
-                if (dynamicMenu != null) {
-                    if (!loadedItems) {
-                        dynamicItems.clear()
-                        loadingItems(dynamicMenu) {
-                            loadedItems = true
-                            dynamicItems.addAll(it)
-                        }
-                    }
-                    if (dynamicItems.isNotEmpty()) {
-                        menuItems(dynamicItems) {
-                            history.add(Pair(it.title, it))
-                        }
-                    } else if (loadedItems) {
-                        noItems()
+                if (dynamicEntry != null) {
+                    dynamicSubmenuItems(dynamicEntry) { subMenuItem ->
+                        onNavigateToSubmenu(subMenuItem, historyTitles, dynamicMenuCache)
                     }
                 } else {
-                    val currentSubMenu = items.firstOrNull {
-                        it is SubMenuItem && it.title == subMenu.title
-                    } as? SubMenuItem ?: subMenu
-
-                    if (currentSubMenu.items.isEmpty()) {
-                        noItems()
-                    } else {
-                        menuItems(currentSubMenu.items) {
-                            history.add(Pair(it.title, it))
-                        }
+                    staticSubmenuItems(items, currentTitle) { subMenuItem ->
+                        onNavigateToSubmenu(subMenuItem, historyTitles, dynamicMenuCache)
                     }
                 }
             }
         }
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyListScope.submenuStickyHeader(currentTitle: String, onBackClick: () -> Unit) {
+    stickyHeader {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .background(VideoTheme.colors.baseSheetPrimary)
+                .fillMaxWidth(),
+        ) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    tint = VideoTheme.colors.basePrimary,
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                    contentDescription = "Back",
+                )
+            }
+            Text(
+                text = currentTitle,
+                style = VideoTheme.typography.subtitleS,
+                color = VideoTheme.colors.basePrimary,
+            )
+        }
+    }
+}
+private fun onNavigateToSubmenu(
+    subMenuItem: SubMenuItem,
+    historyTitles: MutableList<String>,
+    dynamicMenuCache: MutableMap<String, DynamicMenuEntry>,
+) {
+    if (subMenuItem is DynamicSubMenuItem) {
+        dynamicMenuCache[subMenuItem.title] = DynamicMenuEntry(subMenuItem)
+    }
+    historyTitles.add(subMenuItem.title)
+}
+
+private class DynamicMenuEntry(
+    val menu: DynamicSubMenuItem,
+    val items: MutableList<MenuItem> = mutableStateListOf(),
+    var loaded: Boolean = false,
+)
+
+private fun LazyListScope.dynamicSubmenuItems(
+    dynamicEntry: DynamicMenuEntry,
+    onNewSubmenu: (SubMenuItem) -> Unit,
+) {
+    if (!dynamicEntry.loaded) {
+        loadingItems(dynamicEntry.menu) { loadedItems ->
+            dynamicEntry.items.addAll(loadedItems)
+            dynamicEntry.loaded = true
+        }
+    }
+    if (dynamicEntry.items.isNotEmpty()) {
+        menuItems(dynamicEntry.items, onNewSubmenu)
+    } else if (dynamicEntry.loaded) {
+        noItems()
+    }
+}
+
+private fun LazyListScope.staticSubmenuItems(
+    items: List<MenuItem>,
+    currentTitle: String,
+    onNewSubmenu: (SubMenuItem) -> Unit,
+) {
+    val currentSubMenu = findSubMenuItem(items, currentTitle)
+
+    if (currentSubMenu == null || currentSubMenu.items.isEmpty()) {
+        noItems()
+    } else {
+        menuItems(currentSubMenu.items, onNewSubmenu)
+    }
+}
+
+private fun findSubMenuItem(items: List<MenuItem>, title: String): SubMenuItem? {
+    for (item in items) {
+        if (item is SubMenuItem && item.title == title) return item
+        if (item is SubMenuItem) {
+            findSubMenuItem(item.items, title)?.let { return it }
+        }
+    }
+    return null
 }
 
 private fun LazyListScope.loadingItems(
@@ -314,6 +362,8 @@ private fun DynamicMenuDebugPreview() {
                 loadTranscriptions = { emptyList() },
                 audioUsageUiState = AudioUsageVoiceCommunicationUiState,
                 onToggleAudioUsage = {},
+                selectedRecordingTypes = emptySet(),
+                onSelectRecordingType = { },
             ),
         )
     }
