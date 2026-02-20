@@ -19,7 +19,6 @@ package io.getstream.video.android.core.notifications.internal.service.models
 import io.getstream.video.android.core.notifications.internal.receivers.ToggleCameraBroadcastReceiver
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.model.StreamCallId
-import org.threeten.bp.OffsetDateTime
 
 internal data class ServiceStateSnapshot(
     val currentCallId: StreamCallId? = null,
@@ -27,5 +26,5 @@ internal data class ServiceStateSnapshot(
     val soundPlayer: CallSoundAndVibrationPlayer? = null,
     val toggleCameraBroadcastReceiver: ToggleCameraBroadcastReceiver? = null,
     val isReceiverRegistered: Boolean = false,
-    val startTime: OffsetDateTime? = null,
+    val startTimeElapsedRealtime: Long? = null,
 )
