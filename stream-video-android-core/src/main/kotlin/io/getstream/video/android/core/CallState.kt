@@ -116,6 +116,7 @@ import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
+import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
@@ -130,6 +131,7 @@ import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.currentCoroutineContext
@@ -145,6 +147,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
@@ -720,8 +723,19 @@ public class CallState(
     @InternalStreamVideoApi
     public val notificationIdFlow: StateFlow<Int?> = _notificationIdFlow
 
+    private var telecomHoldObserverJob: Job? = null
+
     @InternalStreamVideoApi
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
+        set(value) {
+            field = value
+            if (value != null) {
+                observeTelecomHold(value)
+            } else {
+                telecomHoldObserverJob?.cancel()
+                telecomHoldObserverJob = null
+            }
+        }
 
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
 
@@ -1748,6 +1762,28 @@ public class CallState(
     fun updateNotification(notificationId: Int, notification: Notification) {
         this._notificationIdFlow.value = notificationId
         this.atomicNotification.set(notification)
+    }
+
+    /**
+     * [RingingState.Incoming] and [RingingState.Outgoing] are intentionally not observed.
+     * In Android Telecom, hold states are only applicable once a call is active (answered).
+     */
+    private fun observeTelecomHold(repo: JetpackTelecomRepository) {
+        telecomHoldObserverJob?.cancel()
+
+        telecomHoldObserverJob = scope.launch(Dispatchers.Default) {
+            repo.currentCall
+                .map { (it as? TelecomCall.Registered)?.isOnHold == true }
+                .distinctUntilChanged()
+                .collect { telecomCall ->
+                    when (ringingState.value) {
+                        is RingingState.Active -> {
+                            call.leave("call-on-hold")
+                        }
+                        else -> {}
+                    }
+                }
+        }
     }
 }
 
