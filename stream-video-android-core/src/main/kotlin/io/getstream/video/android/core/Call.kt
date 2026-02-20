@@ -343,12 +343,13 @@ public class Call(
             testInstanceProvider.mediaManagerCreator!!.invoke()
         } else {
             MediaManagerImpl(
-                clientImpl.context,
-                this,
-                scope,
-                eglBase.eglBaseContext,
-                clientImpl.callServiceConfigRegistry.get(type).audioUsage,
-            ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }
+                context = clientImpl.context,
+                call = this,
+                scope = scope,
+                eglBaseContext = eglBase.eglBaseContext,
+                audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+                audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
+            )
         }
     }
 
@@ -1364,7 +1365,9 @@ public class Call(
     private fun monitorHeadset() {
         microphone.devices.onEach { availableDevices ->
             logger.d {
-                "[monitorHeadset] new available devices, prev selected: ${microphone.nonHeadsetFallbackDevice}"
+                "[monitorHeadset] new available devices, prev selected: ${
+                    microphone.nonHeadsetFallbackDevice
+                }"
             }
 
             val bluetoothHeadset =

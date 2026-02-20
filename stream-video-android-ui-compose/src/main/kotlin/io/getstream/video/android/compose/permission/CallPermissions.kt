@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.permission
 
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -107,13 +106,6 @@ private fun getPermissions(): List<String> {
         ),
     )
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        permissionsList.addAll(
-            mutableListOf(
-                android.Manifest.permission.BLUETOOTH_CONNECT,
-            ),
-        )
-    }
     return permissionsList
 }
 

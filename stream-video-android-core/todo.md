@@ -27,7 +27,6 @@
 - [X] StreamVideoBuilder should raise an error if another client is still active. Call.join should raise an error if you already joined
 - [X] Audio volume was too low (probably a bug related to speakerphone vs earpiece)
 - [X] Video calling tutorial & Feedback cycle with team
-- [X] Bluetooth gives a permissions error on AndroidDeviceTest. We shouldn't require BLUETOOTH_CONNECT by default
 - [X] Retry: Default coordinator/sfu retry policy needs work
 - [X] Retry: onNegotiationNeeded
 - [X] updateParticipantSubscriptions is called twice with the same resolution. Default resolution is wrong

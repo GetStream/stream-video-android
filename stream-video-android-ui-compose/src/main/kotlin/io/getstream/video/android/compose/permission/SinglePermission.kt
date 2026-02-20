@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.compose.permission
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import io.getstream.video.android.core.Call
@@ -98,23 +96,4 @@ public fun LaunchMicrophonePermissions(
     val callPermissionsState =
         rememberMicrophonePermissionState(call = call, onPermissionsResult = onPermissionsResult)
     LaunchedEffect(key1 = call) { callPermissionsState.launchPermissionRequest() }
-}
-
-/**
- * Remember [VideoPermissionsState] about the bluetooth permission.
- */
-@Composable
-@RequiresApi(Build.VERSION_CODES.S)
-public fun rememberBluetoothPermissionState(
-    call: Call,
-    onPermissionsResult: (Boolean) -> Unit,
-): VideoPermissionsState {
-    return rememberCallPermissionsState(
-        call = call,
-        permissions = listOf(android.Manifest.permission.BLUETOOTH_CONNECT),
-        onPermissionsResult = {
-            val isGranted = it[android.Manifest.permission.BLUETOOTH_CONNECT] == true
-            onPermissionsResult.invoke(isGranted)
-        },
-    )
 }

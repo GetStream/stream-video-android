@@ -18,7 +18,6 @@ package io.getstream.video.android.tests
 
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.Manifest.permission.BLUETOOTH_ADVERTISE
-import android.Manifest.permission.BLUETOOTH_CONNECT
 import android.Manifest.permission.BLUETOOTH_SCAN
 import android.Manifest.permission.CAMERA
 import android.Manifest.permission.POST_NOTIFICATIONS
@@ -80,7 +79,6 @@ abstract class StreamTestCase {
             ACCESS_FINE_LOCATION,
             BLUETOOTH_ADVERTISE,
             BLUETOOTH_SCAN,
-            BLUETOOTH_CONNECT,
         )
         for (permission in permissions) {
             device.grantPermission(permission)

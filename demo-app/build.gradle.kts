@@ -289,8 +289,6 @@ dependencies {
     // Http
     implementation(libs.okhttp)
 
-    implementation(libs.audioswitch)
-
     // Logging
     implementation(libs.okhttp.logging)
 

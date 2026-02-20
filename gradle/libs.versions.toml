@@ -37,7 +37,6 @@ coil = "2.6.0"
 landscapist = "2.4.2"
 accompanist = "0.34.0"
 telephoto = "0.3.0"
-audioswitch = "1.2.0"
 libyuv = "0.36.0"
 
 wire = "4.7.0"
@@ -137,8 +136,6 @@ accompanist-permission = { group = "com.google.accompanist", name = "accompanist
 
 stream-video-android-noise-cancellation = { module = "io.getstream:stream-video-android-noise-cancellation", version.ref = "streamNoiseCancellation" }
 telephoto = { group = "me.saket.telephoto", name = "zoomable", version.ref = "telephoto"  }
-
-audioswitch = { group = "com.twilio", name = "audioswitch", version.ref = "audioswitch"}
 
 libyuv = { group = "io.github.crow-misia.libyuv", name = "libyuv-android", version.ref = "libyuv"}
 

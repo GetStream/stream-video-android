@@ -16,53 +16,161 @@
 
 package io.getstream.video.android.core.audio
 
-import com.twilio.audioswitch.AudioDevice
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
+import android.os.Build
+import androidx.annotation.RequiresApi
 
+/**
+ * Represents an audio device for audio switching.
+ *
+ * @see AudioDeviceInfo
+ */
 sealed class StreamAudioDevice {
 
     /** The friendly name of the device.*/
     abstract val name: String
 
-    abstract val audio: AudioDevice
+    /**
+     * The Android AudioDeviceInfo instance.
+     * This provides device identification and capabilities when using native Android audio management.
+     * @see android.media.AudioDeviceInfo
+     */
+    abstract val audioDeviceInfo: AudioDeviceInfo?
 
-    /** An [StreamAudioDevice] representing a Bluetooth Headset.*/
+    /** A [StreamAudioDevice] representing a Bluetooth Headset.*/
     data class BluetoothHeadset constructor(
         override val name: String = "Bluetooth",
-        override val audio: AudioDevice,
+        override val audioDeviceInfo: AudioDeviceInfo? = null,
     ) : StreamAudioDevice()
 
-    /** An [StreamAudioDevice] representing a Wired Headset.*/
+    /** A [StreamAudioDevice] representing a Wired Headset.*/
     data class WiredHeadset constructor(
         override val name: String = "Wired Headset",
-        override val audio: AudioDevice,
+        override val audioDeviceInfo: AudioDeviceInfo? = null,
     ) : StreamAudioDevice()
 
-    /** An [StreamAudioDevice] representing the Earpiece.*/
+    /** A [StreamAudioDevice] representing the Earpiece.*/
     data class Earpiece constructor(
         override val name: String = "Earpiece",
-        override val audio: AudioDevice,
+        override val audioDeviceInfo: AudioDeviceInfo? = null,
     ) : StreamAudioDevice()
 
-    /** An [StreamAudioDevice] representing the Speakerphone.*/
+    /** A [StreamAudioDevice] representing the Speakerphone.*/
     data class Speakerphone constructor(
         override val name: String = "Speakerphone",
-        override val audio: AudioDevice,
+        override val audioDeviceInfo: AudioDeviceInfo? = null,
     ) : StreamAudioDevice()
 
     companion object {
 
+        /**
+         * Converts an Android AudioDeviceInfo to a StreamAudioDevice.
+         * Returns null if the device type is not supported.
+         * Available from API 23+ (always available since minSdk is 24).
+         */
         @JvmStatic
-        fun StreamAudioDevice.toAudioDevice(): AudioDevice {
-            return this.audio
+        fun fromAudioDeviceInfo(deviceInfo: AudioDeviceInfo): StreamAudioDevice? {
+            return when (deviceInfo.type) {
+                AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
+                AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+                -> {
+                    BluetoothHeadset(
+                        audioDeviceInfo = deviceInfo,
+                    )
+                }
+                AudioDeviceInfo.TYPE_WIRED_HEADSET,
+                AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
+                AudioDeviceInfo.TYPE_USB_HEADSET,
+                -> {
+                    WiredHeadset(
+                        audioDeviceInfo = deviceInfo,
+                    )
+                }
+                AudioDeviceInfo.TYPE_BUILTIN_EARPIECE -> {
+                    Earpiece(
+                        audioDeviceInfo = deviceInfo,
+                    )
+                }
+                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER -> {
+                    Speakerphone(
+                        audioDeviceInfo = deviceInfo,
+                    )
+                }
+                else -> null
+            }
         }
 
+        /**
+         * Converts a StreamAudioDevice to an AudioDeviceInfo by finding a matching device
+         * from the available communication devices.
+         * Returns null if no matching device is found.
+         */
+        @RequiresApi(Build.VERSION_CODES.S)
         @JvmStatic
-        fun AudioDevice.fromAudio(): StreamAudioDevice {
-            return when (this) {
-                is AudioDevice.BluetoothHeadset -> BluetoothHeadset(audio = this)
-                is AudioDevice.WiredHeadset -> WiredHeadset(audio = this)
-                is AudioDevice.Earpiece -> Earpiece(audio = this)
-                is AudioDevice.Speakerphone -> Speakerphone(audio = this)
+        public fun toAudioDeviceInfo(
+            streamDevice: StreamAudioDevice,
+            audioManager: AudioManager,
+        ): AudioDeviceInfo? {
+            // If the device already has an AudioDeviceInfo, use it
+            val existingInfo = streamDevice.audioDeviceInfo?.id
+
+            // Otherwise, try to find a matching device from available devices
+            // For API 31+: use communication devices, for API 24-30: use all output devices
+            val availableDevices = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val commDevices = StreamAudioManager.getAvailableCommunicationDevices(audioManager)
+                if (existingInfo != null) {
+                    return commDevices.find { it.id == existingInfo }
+                }
+                commDevices
+            } else {
+                // For API < 31, use getDevices() to get all output devices
+                try {
+                    audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).toList()
+                } catch (e: Exception) {
+                    emptyList()
+                }
+            }
+
+            return when (streamDevice) {
+                is BluetoothHeadset -> {
+                    availableDevices.firstOrNull {
+                        it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO ||
+                            it.type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
+                    }
+                }
+                is WiredHeadset -> {
+                    availableDevices.firstOrNull {
+                        it.type == AudioDeviceInfo.TYPE_WIRED_HEADSET ||
+                            it.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES ||
+                            it.type == AudioDeviceInfo.TYPE_USB_HEADSET
+                    }
+                }
+                is Earpiece -> {
+                    availableDevices.firstOrNull {
+                        it.type == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
+                    }
+                }
+                is Speakerphone -> {
+                    // For speakerphone, also check all devices if not found in communication devices
+                    // Speakerphone might not always be in availableCommunicationDevices
+                    availableDevices.firstOrNull {
+                        it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+                    } ?: run {
+                        // Fallback: try to get from all devices if not in communication devices
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            try {
+                                audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).firstOrNull {
+                                    it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+                                }
+                            } catch (e: Exception) {
+                                null
+                            }
+                        } else {
+                            null
+                        }
+                    }
+                }
             }
         }
     }

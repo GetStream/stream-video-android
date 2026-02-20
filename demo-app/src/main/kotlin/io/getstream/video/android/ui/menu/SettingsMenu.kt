@@ -221,11 +221,45 @@ internal fun SettingsMenu(
             is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
             is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
         }
+        // Compare devices by type and audioDeviceInfo ID (if available) since audio can be null when using custom audio switch
+        val selected = selectedMicroPhoneDevice
+        val isSelected = when {
+            selected == null -> false
+            else -> {
+                // First try to compare by audioDeviceInfo ID if both have it
+                val itInfoId = when (it) {
+                    is StreamAudioDevice.BluetoothHeadset -> it.audioDeviceInfo?.id
+                    is StreamAudioDevice.WiredHeadset -> it.audioDeviceInfo?.id
+                    is StreamAudioDevice.Earpiece -> it.audioDeviceInfo?.id
+                    is StreamAudioDevice.Speakerphone -> it.audioDeviceInfo?.id
+                }
+                val selectedInfoId = when (selected) {
+                    is StreamAudioDevice.BluetoothHeadset -> selected.audioDeviceInfo?.id
+                    is StreamAudioDevice.WiredHeadset -> selected.audioDeviceInfo?.id
+                    is StreamAudioDevice.Earpiece -> selected.audioDeviceInfo?.id
+                    is StreamAudioDevice.Speakerphone -> selected.audioDeviceInfo?.id
+                }
+
+                if (itInfoId != null && selectedInfoId != null) {
+                    // Both have audioDeviceInfo, compare by ID
+                    itInfoId == selectedInfoId
+                } else {
+                    // Fall back to type comparison
+                    when {
+                        it is StreamAudioDevice.BluetoothHeadset && selected is StreamAudioDevice.BluetoothHeadset -> true
+                        it is StreamAudioDevice.WiredHeadset && selected is StreamAudioDevice.WiredHeadset -> true
+                        it is StreamAudioDevice.Earpiece && selected is StreamAudioDevice.Earpiece -> true
+                        it is StreamAudioDevice.Speakerphone && selected is StreamAudioDevice.Speakerphone -> true
+                        else -> false
+                    }
+                }
+            }
+        }
         AudioDeviceUiState(
             it,
             it.name,
             icon,
-            it.audio.name == selectedMicroPhoneDevice?.audio?.name,
+            isSelected,
         )
     }
 
