@@ -1277,7 +1277,7 @@ public class CallState(
         val state: RingingState = if (hasActiveCall && !ringingStateUpdatesStopped) {
             cancelTimeout()
             RingingState.Active
-        } else if (isCallEnded) {
+        } else if (hasRingingCall && isCallEnded) {
             cancelTimeout()
             RingingState.RejectedByAll
         } else if (isRejectedByMe) {
