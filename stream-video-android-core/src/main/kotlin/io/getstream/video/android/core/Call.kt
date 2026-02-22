@@ -87,8 +87,6 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.recording.RecordingType
-import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
@@ -110,6 +108,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
 import org.webrtc.PeerConnection
@@ -154,17 +153,18 @@ public class Call(
 
     internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
-    internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
+    internal var scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
     // Atomic controls
     private var atomicLeave = AtomicUnitCall()
 
     private val logger by taggedLogger("Call:$type:$id")
-    private val supervisorJob = SupervisorJob()
+    private var supervisorJob = SupervisorJob()
     private var callStatsReportingJob: Job? = null
+    private var cleanupJob: Job? = null
     private var powerManager: PowerManager? = null
 
-    internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+    internal var scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(client, this, user, scope)
@@ -227,14 +227,21 @@ public class Call(
     private var sfuSocketReconnectionTime: Long? = null
 
     /**
+     * Lock for synchronizing join/leave lifecycle operations.
+     * Protects access to isDestroyed, cleanupJob, and scope re-initialization.
+     */
+    private val lifecycleLock = Any()
+
+    /**
      * Call has been left and the object is cleaned up and destroyed.
+     * Must be accessed under [lifecycleLock].
      */
     private var isDestroyed = false
 
     /** Session handles all real time communication for video and audio */
     internal var session: RtcSession? = null
     var sessionId = UUID.randomUUID().toString()
-    internal val unifiedSessionId = UUID.randomUUID().toString()
+    internal var unifiedSessionId = UUID.randomUUID().toString()
 
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
@@ -343,11 +350,10 @@ public class Call(
             testInstanceProvider.mediaManagerCreator!!.invoke()
         } else {
             MediaManagerImpl(
-                clientImpl.context,
-                this,
-                scope,
-                eglBase.eglBaseContext,
-                clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+                context = clientImpl.context,
+                call = this,
+                eglBaseContext = eglBase.eglBaseContext,
+                audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
             ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }
         }
     }
@@ -532,10 +538,13 @@ public class Call(
 
         var result: Result<RtcSession>
 
-        atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
             result = _join(create, createOptions, ring, notify)
             if (result is Success) {
+                // Reset atomicLeave AFTER successful join (after cleanup is complete)
+                // This prevents race conditions where leave() is called during the join process
+                atomicLeave = AtomicUnitCall()
+
                 // we initialise the camera, mic and other according to local + backend settings
                 // only when the call is joined to make sure we don't switch and override
                 // the settings during a call.
@@ -604,6 +613,26 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
+        // Wait for any pending cleanup to complete before rejoining.
+        // Use a loop to handle the edge case where resetScopes() clears cleanupJob
+        // but a new leave() sets it again before we can proceed.
+        // Timeout after ~10 seconds to prevent hanging forever if cleanup is stuck.
+        var cleanupWaitAttempts = 0
+        while (true) {
+            val pendingCleanup = synchronized(lifecycleLock) { cleanupJob }
+            if (pendingCleanup == null) break
+
+            if (cleanupWaitAttempts++ >= 10) {
+                logger.e { "[_join] Cleanup taking too long after ${cleanupWaitAttempts}s, failing join" }
+                return Failure(Error.GenericError("Join failed: cleanup timed out"))
+            }
+
+            logger.d {
+                "[_join] Waiting for cleanup to complete before rejoining (attempt $cleanupWaitAttempts)"
+            }
+            withTimeoutOrNull(1000) { pendingCleanup.join() }
+        }
+
         reconnectAttepmts = 0
         sfuEvents?.cancel()
         sfuListener?.cancel()
@@ -947,11 +976,38 @@ public class Call(
         sfuEvents?.cancel()
         state._connection.value = RealtimeConnection.Disconnected
         logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = $id" }
-        if (isDestroyed) {
-            logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
-            return@atomicLeave
+
+        // Synchronize access to isDestroyed, cleanupJob to prevent race conditions with join()
+        // IMPORTANT: cleanupJob must be set inside this synchronized block to eliminate the race
+        // window where join() could read cleanupJob as null before it's assigned.
+        synchronized(lifecycleLock) {
+            if (isDestroyed) {
+                logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
+                return@atomicLeave
+            }
+            isDestroyed = true
+
+            // Guard against overwriting cleanupJob if cleanup is already in progress
+            if (cleanupJob?.isActive == true) {
+                logger.w { "[leave] Cleanup already in progress, skipping duplicate cleanup" }
+                return@atomicLeave
+            }
+
+            // Set cleanupJob INSIDE this synchronized block so join() will always see it
+            // and wait for cleanup to complete before proceeding
+            cleanupJob = clientImpl.scope.launch {
+                safeCall {
+                    session?.sfuTracer?.trace(
+                        "leave-call",
+                        "[reason=$reason, error=${disconnectionReason?.message}]",
+                    )
+                    val stats = collectStats()
+                    session?.sendCallStats(stats)
+                }
+                cleanup()
+                resetScopes()
+            }
         }
-        isDestroyed = true
 
         sfuSocketReconnectionTime = null
 
@@ -974,18 +1030,6 @@ public class Call(
             .leaveCall(this)
 
         (client as StreamVideoClient).onCallCleanUp(this)
-
-        clientImpl.scope.launch {
-            safeCall {
-                session?.sfuTracer?.trace(
-                    "leave-call",
-                    "[reason=$reason, error=${disconnectionReason?.message}]",
-                )
-                val stats = collectStats()
-                session?.sendCallStats(stats)
-            }
-            cleanup()
-        }
     }
 
     /** ends the call for yourself as well as other users */
@@ -1512,7 +1556,6 @@ public class Call(
     fun cleanup() {
         // monitor.stop()
         session?.cleanup()
-        shutDownJobsGracefully()
         callStatsReportingJob?.cancel()
         mediaManager.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
         session = null
@@ -1520,13 +1563,43 @@ public class Call(
         scopeProvider.cleanup()
     }
 
-    // This will allow the Rest APIs to be executed which are in queue before leave
-    private fun shutDownJobsGracefully() {
-        UserScope(ClientScope()).launch {
-            supervisorJob.children.forEach { it.join() }
-            supervisorJob.cancel()
+    /**
+     * Resets state to allow the Call to be reusable after leave().
+     * Generates new session IDs, resets the scopeProvider, clears participants, and resets device statuses.
+     *
+     * IMPORTANT: We do NOT recreate [scope] or [supervisorJob] because [CallState] and its
+     * StateFlows depend on the original scope. The scope lives for the entire lifetime of
+     * the Call object.
+     */
+    private fun resetScopes() {
+        logger.d { "[resetScopes] Resetting state to make Call reusable" }
+
+        // Reset the destroyed flag and clear cleanupJob under lock to prevent race conditions
+        synchronized(lifecycleLock) {
+            isDestroyed = false
+            cleanupJob = null
         }
-        scope.cancel()
+
+        // Generate new session IDs for fresh connection
+        sessionId = UUID.randomUUID().toString()
+        unifiedSessionId = UUID.randomUUID().toString()
+        logger.d { "[resetScopes] New sessionId: $sessionId, unifiedSessionId: $unifiedSessionId" }
+
+        // Clear participants to remove stale video/audio tracks from previous session
+        state.clearParticipants()
+
+        // Reset device statuses to NotSelected so they get re-initialized on next join
+        mediaManager.reset()
+
+        // Reset the scope provider to allow reuse
+        scopeProvider.reset()
+
+        // NOTE: We intentionally do NOT recreate supervisorJob or scope here.
+        // CallState's StateFlows (duration, participants, etc.) use stateIn(scope, ...)
+        // which captures the scope at initialization. If we recreated scope, those
+        // StateFlows would become dead and never emit again.
+
+        logger.d { "[resetScopes] State reset successfully" }
     }
 
     suspend fun ring(): Result<GetCallResponse> {
