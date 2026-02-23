@@ -46,7 +46,6 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.Throttler
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomPermissions
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
@@ -117,7 +116,7 @@ internal class ServiceLauncher(val context: Context) {
         }
     }
 
-    fun showOnGoingCall(call: Call, trigger: String, streamVideo: StreamVideo) {
+    fun showOnGoingCall(call: Call, trigger: CallService.Companion.Trigger, streamVideo: StreamVideo) {
         val client = streamVideo as StreamVideoClient
         val callConfig = client.callServiceConfigRegistry.get(call.type)
         if (!callConfig.runCallServiceInForeground) {
@@ -137,7 +136,11 @@ internal class ServiceLauncher(val context: Context) {
     }
 
     @SuppressLint("NewApi")
-    fun showOutgoingCall(call: Call, trigger: String, streamVideo: StreamVideo) {
+    fun showOutgoingCall(
+        call: Call,
+        trigger: CallService.Companion.Trigger,
+        streamVideo: StreamVideo,
+    ) {
         val callConfig = (streamVideo as StreamVideoClient).callServiceConfigRegistry.get(call.type)
         if (!callConfig.runCallServiceInForeground) {
             return
@@ -220,7 +223,7 @@ internal class ServiceLauncher(val context: Context) {
                     context,
                     StartServiceParam(
                         callId,
-                        TRIGGER_REMOVE_INCOMING_CALL,
+                        CallService.Companion.Trigger.IncomingCall,
                         callServiceConfiguration = config,
                     ),
                 ),
