@@ -97,4 +97,10 @@ internal class ScopeProviderImpl(
         executor?.shutdown()
         executor = null
     }
+
+    override fun reset() {
+        logger.d { "Resetting ScopeProvider to allow reuse" }
+        isCleanedUp = false
+        // executor is already null after cleanup, will be recreated on next use
+    }
 }

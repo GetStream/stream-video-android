@@ -214,7 +214,7 @@ internal class StreamVideoClient internal constructor(
             destroyedCalls.put(call.hashCode(), call)
         }
         logger.d { "[cleanup] Removing call from cache: ${call.cid}" }
-        calls.remove(call.cid)
+//        calls.remove(call.cid) TODO Rahul, uncomment before merge
     }
 
     override fun cleanup() {

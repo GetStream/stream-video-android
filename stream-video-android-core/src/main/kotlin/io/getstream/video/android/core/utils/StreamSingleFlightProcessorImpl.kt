@@ -107,4 +107,8 @@ internal class StreamSingleFlightProcessorImpl(
             clear(cancelRunning = true).getOrThrow()
         }
     }
+
+    fun reset() {
+        closed.set(false)
+    }
 }

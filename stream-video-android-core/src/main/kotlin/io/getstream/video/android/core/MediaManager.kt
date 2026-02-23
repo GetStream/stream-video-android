@@ -80,6 +80,8 @@ import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.VideoDimension
 import java.nio.ByteBuffer
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.resumeWithException
 
 sealed class DeviceStatus {
@@ -284,7 +286,7 @@ class ScreenShareManager(
 
     private val logger by taggedLogger("Media:ScreenShareManager")
 
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    internal val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     val status: StateFlow<DeviceStatus> = _status
 
     public val isEnabled: StateFlow<Boolean> = _status.mapState { it is DeviceStatus.Enabled }
@@ -549,8 +551,9 @@ class MicrophoneManager(
     // Internal data
     private val logger by taggedLogger("Media:MicrophoneManager")
 
-    private lateinit var audioHandler: AudioHandler
-    private var setupCompleted: Boolean = false
+    private var audioHandler: AudioHandler? = null
+    private var setupCompleted: AtomicBoolean = AtomicBoolean(false)
+    private var mediaManagerSetupState = AtomicReference(MediaManagerSetupState.NONE)
     internal var audioManager: AudioManager? = null
     internal var priorStatus: DeviceStatus? = null
 
@@ -577,7 +580,7 @@ class MicrophoneManager(
     val selectedUsbDevice: StateFlow<UsbAudioInputDevice?> = _selectedUsbDevice
 
     // Exposed state
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    internal val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
 
     /** The status of the audio */
     val status: StateFlow<DeviceStatus> = _status
@@ -882,7 +885,16 @@ class MicrophoneManager(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             cleanupUsbDeviceDetection()
         }
-        setupCompleted = false
+        setupCompleted.set(false)
+        audioHandler = null
+    }
+
+    /**
+     * Resets the microphone status to NotSelected to allow re-initialization on next join.
+     */
+    internal fun reset() {
+        _status.value = DeviceStatus.NotSelected
+        mediaManagerSetupState.set(MediaManagerSetupState.NONE)
     }
 
     fun canHandleDeviceSwitch() = audioUsageProvider.invoke() != AudioAttributes.USAGE_MEDIA
@@ -890,12 +902,26 @@ class MicrophoneManager(
     // Internal logic
     internal fun setup(preferSpeaker: Boolean = false, onAudioDevicesUpdate: (() -> Unit)? = null) {
         synchronized(this) {
+            logger.d {
+                "[setup] setupCompleted = ${setupCompleted.get()}, mediaManagerSetupState = ${mediaManagerSetupState.get()}"
+            }
+            val localMediaManagerSetupState = mediaManagerSetupState.get()
+            when (localMediaManagerSetupState) {
+                MediaManagerSetupState.FINISHED -> {
+                    onAudioDevicesUpdate?.invoke()
+                    return@synchronized
+                }
+                MediaManagerSetupState.STARTED -> return@synchronized // TODO Rahul, ideally the method call should be queued. Test this before merge
+                else -> {}
+            }
+
+            mediaManagerSetupState.set(MediaManagerSetupState.STARTED)
+
             var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
 
-            if (setupCompleted) {
+            if (setupCompleted.get()) {
                 capturedOnAudioDevicesUpdate?.invoke()
                 capturedOnAudioDevicesUpdate = null
-
                 return
             }
 
@@ -907,41 +933,50 @@ class MicrophoneManager(
                 setupUsbDeviceDetection()
             }
 
-            if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {
-                audioHandler = AudioSwitchHandler(
-                    context = mediaManager.context,
-                    preferredDeviceList = listOf(
-                        AudioDevice.BluetoothHeadset::class.java,
-                        AudioDevice.WiredHeadset::class.java,
-                    ) + if (preferSpeaker) {
-                        listOf(
-                            AudioDevice.Speakerphone::class.java,
-                            AudioDevice.Earpiece::class.java,
-                        )
-                    } else {
-                        listOf(
-                            AudioDevice.Earpiece::class.java,
-                            AudioDevice.Speakerphone::class.java,
-                        )
-                    },
-                    audioDeviceChangeListener = { devices, selected ->
-                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
+            if (canHandleDeviceSwitch()) {
+                if (audioHandler == null) {
+                    // First time initialization
+                    audioHandler = AudioSwitchHandler(
+                        context = mediaManager.context,
+                        preferredDeviceList = listOf(
+                            AudioDevice.BluetoothHeadset::class.java,
+                            AudioDevice.WiredHeadset::class.java,
+                        ) + if (preferSpeaker) {
+                            listOf(
+                                AudioDevice.Speakerphone::class.java,
+                                AudioDevice.Earpiece::class.java,
+                            )
+                        } else {
+                            listOf(
+                                AudioDevice.Earpiece::class.java,
+                                AudioDevice.Speakerphone::class.java,
+                            )
+                        },
+                        audioDeviceChangeListener = { devices, selected ->
+                            logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
 
-                        _devices.value = devices.map { it.fromAudio() }
-                        _selectedDevice.value = selected?.fromAudio()
+                            _devices.value = devices.map { it.fromAudio() }
+                            _selectedDevice.value = selected?.fromAudio()
 
-                        setupCompleted = true
+                            setupCompleted.set(true)
+                            mediaManagerSetupState.set(MediaManagerSetupState.FINISHED)
+                            capturedOnAudioDevicesUpdate?.invoke()
+                            capturedOnAudioDevicesUpdate = null
+                        },
+                    )
 
-                        capturedOnAudioDevicesUpdate?.invoke()
-                        capturedOnAudioDevicesUpdate = null
-                    },
-                )
-
-                logger.d { "[setup] Calling start on instance $audioHandler" }
-                audioHandler.start()
+                    logger.d { "[setup] Calling start on instance $audioHandler" }
+                    audioHandler?.start()
+                } else {
+                    // audioHandler exists but was stopped (cleanup was called), restart it
+                    logger.d { "[setup] Restarting audioHandler after cleanup" }
+                    audioHandler?.start()
+                    mediaManagerSetupState.set(MediaManagerSetupState.FINISHED)
+                }
             } else {
-                logger.d { "[MediaManager#setup] Usage is MEDIA or audioHandle is already initialized" }
+                logger.d { "[MediaManager#setup] Usage is MEDIA" }
                 capturedOnAudioDevicesUpdate?.invoke()
+                mediaManagerSetupState.set(MediaManagerSetupState.FINISHED)
             }
         }
     }
@@ -952,7 +987,7 @@ class MicrophoneManager(
     )
 
     private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
-        if (this::audioHandler.isInitialized) {
+        if (audioHandler != null) {
             then(this.audioHandler as AudioSwitchHandler)
         } else {
             logger.e { "Audio handler not initialized. Ensure calling setup(), before using the handler." }
@@ -998,7 +1033,7 @@ class CameraManager(
     private val logger by taggedLogger("Media:CameraManager")
 
     /** The status of the camera. enabled or disabled */
-    private val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
+    internal val _status = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
     public val status: StateFlow<DeviceStatus> = _status
 
     /** Represents whether the camera is enabled */
@@ -1343,6 +1378,13 @@ class CameraManager(
         setupCompleted = false
     }
 
+    /**
+     * Resets the camera status to NotSelected to allow re-initialization on next join.
+     */
+    internal fun reset() {
+        _status.value = DeviceStatus.NotSelected
+    }
+
     private fun createCameraDeviceWrapper(
         id: String,
         cameraManager: CameraManager?,
@@ -1424,6 +1466,7 @@ class MediaManagerImpl(
     val audioUsage: Int = defaultAudioUsage,
     val audioUsageProvider: (() -> Int) = { audioUsage },
 ) {
+    private val logger by taggedLogger("MediaManagerImpl")
     internal val camera =
         CameraManager(this, eglBaseContext, DefaultCameraCharacteristicsValidator())
     internal val microphone = MicrophoneManager(this, audioUsage, audioUsageProvider)
@@ -1545,6 +1588,20 @@ class MediaManagerImpl(
         // Cleanup camera and microphone infrastructure
         camera.cleanup()
         microphone.cleanup()
+        reset()
+    }
+
+    /**
+     * Resets device statuses to NotSelected to allow re-initialization on next join.
+     * Should be called after cleanup when preparing for rejoin.
+     */
+    internal fun reset() {
+        logger.d { "[reset]" }
+        camera.reset()
+        microphone.reset()
+
+        speaker._status.value = DeviceStatus.NotSelected
+        screenShare._status.value = DeviceStatus.NotSelected
     }
 }
 

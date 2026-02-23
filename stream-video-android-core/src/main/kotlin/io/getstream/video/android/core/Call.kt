@@ -23,7 +23,6 @@ import android.os.PowerManager
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.AcceptCallResponse
-import io.getstream.android.video.generated.models.AudioSettingsResponse
 import io.getstream.android.video.generated.models.BlockUserResponse
 import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.CallSettingsResponse
@@ -49,18 +48,21 @@ import io.getstream.android.video.generated.models.StopTranscriptionResponse
 import io.getstream.android.video.generated.models.UnpinResponse
 import io.getstream.android.video.generated.models.UpdateCallMembersRequest
 import io.getstream.android.video.generated.models.UpdateCallMembersResponse
-import io.getstream.android.video.generated.models.UpdateCallRequest
 import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
 import io.getstream.android.video.generated.models.VideoEvent
-import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
-import io.getstream.result.Error
 import io.getstream.result.Result
-import io.getstream.result.Result.Failure
-import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
-import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.CallApiDelegate
+import io.getstream.video.android.core.call.CallCleanupManager
+import io.getstream.video.android.core.call.CallEventManager
+import io.getstream.video.android.core.call.CallJoinCoordinator
+import io.getstream.video.android.core.call.CallMediaManager
+import io.getstream.video.android.core.call.CallReInitializer
+import io.getstream.video.android.core.call.CallRenderer
+import io.getstream.video.android.core.call.CallSessionManager
+import io.getstream.video.android.core.call.CallStatsReporter
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -69,62 +71,40 @@ import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.call.video.VideoFilter
-import io.getstream.video.android.core.call.video.YuvFrame
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
-import io.getstream.video.android.core.events.GoAwayEvent
-import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.coroutines.scopes.RestartableProducerScope
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
-import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.model.AudioTrack
-import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.core.model.toIceServer
-import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.recording.RecordingType
-import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
-import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
-import org.webrtc.PeerConnection
-import org.webrtc.RendererCommon
-import org.webrtc.VideoSink
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
-import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.ClientCapability
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
-import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.resume
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * How long do we keep trying to make a full-reconnect (once the SFU signalling WS went down)
@@ -152,30 +132,47 @@ public class Call(
     internal var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
-    internal var reconnectAttepmts = 0
     internal val clientImpl = client as StreamVideoClient
     internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
     // Atomic controls
-    private var atomicLeave = AtomicUnitCall()
+    internal var atomicLeave = AtomicUnitCall()
 
     private val logger by taggedLogger("Call:$type:$id")
-    private val supervisorJob = SupervisorJob()
+
     private var callStatsReportingJob: Job? = null
     private var powerManager: PowerManager? = null
 
-    internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+    internal val restartableProducerScope = RestartableProducerScope()
+
+    private val callReInitializer = CallReInitializer(clientImpl.scope) {
+        reInitialise()
+    }
+
+    internal val scope: CoroutineScope
+        get() = callReInitializer.currentScope
 
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(client, this, user, scope)
+    val state = CallState(client, this, user, restartableProducerScope, { sessionManager })
 
-    private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
+//    private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 
     /** Camera gives you access to the local camera */
     val camera by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.camera }
     val microphone by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.microphone }
     val speaker by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.speaker }
     val screenShare by lazy(LazyThreadSafetyMode.PUBLICATION) { mediaManager.screenShare }
+
+    private val callMediaManager = CallMediaManager(
+        this,
+        { mediaManager },
+        { camera },
+        { microphone },
+        { speaker },
+        { screenShare },
+        { _peerConnectionFactory },
+        { _peerConnectionFactory = null },
+    )
 
     /** The cid is type:id */
     val cid = "$type:$id"
@@ -189,8 +186,6 @@ public class Call(
      * Set a custom [InputAudioFilter] that will be applied to the audio stream recorded on your device.
      */
     var audioFilter: InputAudioFilter? = null
-
-    // val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
 
     private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
         if (!microphone.isEnabled.value) {
@@ -229,15 +224,15 @@ public class Call(
     /**
      * Call has been left and the object is cleaned up and destroyed.
      */
-    private var isDestroyed = false
+    internal var isDestroyed = AtomicBoolean(false)
 
     /** Session handles all real time communication for video and audio */
-    internal var session: RtcSession? = null
-    var sessionId = UUID.randomUUID().toString()
     internal val unifiedSessionId = UUID.randomUUID().toString()
 
-    internal var connectStartTime = 0L
-    internal var reconnectStartTime = 0L
+    internal val connectStartTime: Long
+        get() = sessionManager.connectStartTime
+    internal val reconnectStartTime: Long
+        get() = sessionManager.reconnectStartTime
 
     /**
      * EGL base context shared between peerConnectionFactory and mediaManager
@@ -268,6 +263,73 @@ public class Call(
             _peerConnectionFactory = value
         }
 
+    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
+    internal val streamSingleFlightProcessorImpl =
+        StreamSingleFlightProcessorImpl(restartableProducerScope)
+    private val callRenderer = CallRenderer()
+    internal val sessionManager = CallSessionManager(
+        call = this,
+        clientImpl = clientImpl,
+        testInstanceProvider = testInstanceProvider,
+        streamSingleFlightProcessorImpl,
+    )
+
+    internal val session: RtcSession?
+        get() = sessionManager.session.get()
+
+    var sessionId: String
+        get() = sessionManager.sessionId.get()
+
+        @Deprecated(
+            message = "Setter kept for binary compatibility. Do not use.", // TODO Rahul ask in Pr Review, whether to mark it deprecated or not
+            level = DeprecationLevel.ERROR,
+        )
+        set(value) = sessionManager.sessionId.set(value)
+
+    internal val reconnectAttempts: Int
+        get() = sessionManager.reconnectAttempts
+
+    private val apiDelegate = CallApiDelegate(
+        clientImpl = clientImpl,
+        type = type,
+        id = id,
+        call = this,
+        screenShareProvider = { screenShare },
+        setScreenTrackCallBack = { sessionManager.session.get()?.setScreenShareTrack() },
+    )
+    internal val callEventManager =
+        CallEventManager(events, sessionManager, restartableProducerScope, { subscriptions })
+
+    internal val callJoinCoordinator = CallJoinCoordinator(
+        call = this,
+        client = clientImpl,
+        callReInitializer = callReInitializer,
+        streamSingleFlightProcessorImpl = streamSingleFlightProcessorImpl,
+        onJoinFail = {
+            sessionManager.session.set(null)
+        },
+        createJoinSession = { create, createOptions, ring, notify ->
+            sessionManager._join(create, createOptions, ring, notify)
+        },
+        onRejoin = { reason -> sessionManager.rejoin(reason) },
+    )
+
+    private fun reInitialise() {
+        logger.d { "[reInitialise]" }
+        sessionManager.reset()
+        state._connection.value = RealtimeConnection.Disconnected
+        atomicLeave = AtomicUnitCall()
+        scopeProvider.reset()
+
+        // Clear stale video tracks from participants Claude
+        state.clearSessionState()
+
+        with(restartableProducerScope) {
+            detach()
+            attach(scope)
+        }
+    }
+
     /**
      * Checks if the audioBitrateProfile has changed since the factory was created,
      * and recreates the factory if needed. This should only be called before joining.
@@ -275,51 +337,8 @@ public class Call(
      * If the factory hasn't been created yet, it will be created with the current profile
      * when first accessed, so no recreation is needed.
      */
-    internal fun ensureFactoryMatchesAudioProfile() {
-        val factory = _peerConnectionFactory
-
-        // If factory hasn't been created yet, it will be created with current profile automatically
-        if (factory == null) {
-            return
-        }
-
-        // Check if current profile differs from the profile used to create the factory
-        val factoryProfile = factory.audioBitrateProfile
-        val currentProfile = mediaManager.microphone.audioBitrateProfile.value
-
-        if (factoryProfile != null && currentProfile != factoryProfile) {
-            logger.i {
-                "Audio bitrate profile changed from $factoryProfile to $currentProfile. " +
-                    "Recreating factory before joining."
-            }
-            recreateFactoryAndAudioTracks()
-        }
-    }
-
-    /**
-     * Recreates peerConnectionFactory, audioSource, audioTrack, videoSource and videoTrack
-     * with the current audioBitrateProfile. This should only be called before the call is joined.
-     */
-    internal fun recreateFactoryAndAudioTracks() {
-        val wasMicrophoneEnabled = microphone.status.value is DeviceStatus.Enabled
-        val wasCameraEnabled = camera.status.value is DeviceStatus.Enabled
-
-        // Dispose all tracks and sources first
-        mediaManager.disposeTracksAndSources()
-
-        // Recreate the factory (which will use the new audioBitrateProfile)
-        recreatePeerConnectionFactory()
-
-        // Re-enable tracks if they were enabled
-        if (wasMicrophoneEnabled) {
-            // audioTrack will be recreated on next access, then we enable it
-            microphone.enable(fromUser = false)
-        }
-        if (wasCameraEnabled) {
-            // videoTrack will be recreated on next access, then we enable it
-            camera.enable(fromUser = false)
-        }
-    }
+    internal fun ensureFactoryMatchesAudioProfile() =
+        callMediaManager.ensureFactoryMatchesAudioProfile()
 
     /**
      * Recreates peerConnectionFactory with the current audioBitrateProfile.
@@ -345,64 +364,22 @@ public class Call(
             MediaManagerImpl(
                 clientImpl.context,
                 this,
-                scope,
+                restartableProducerScope,
                 eglBase.eglBaseContext,
                 clientImpl.callServiceConfigRegistry.get(type).audioUsage,
             ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }
         }
     }
-
-    private val listener = object : NetworkStateProvider.NetworkStateListener {
-        override suspend fun onConnected() {
-            leaveTimeoutAfterDisconnect?.cancel()
-
-            val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
-            logger.d {
-                "[NetworkStateListener#onConnected] #network; no args, elapsedTimeMils:$elapsedTimeMils, lastDisconnect:$lastDisconnect, reconnectDeadlineMils:$reconnectDeadlineMils"
-            }
-            if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
-                logger.d {
-                    "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
-                }
-                fastReconnect("NetworkStateListener#onConnected")
-            } else {
-                logger.d {
-                    "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
-                }
-                rejoin("NetworkStateListener#onConnected")
-            }
-        }
-
-        override suspend fun onDisconnected() {
-            state._connection.value = RealtimeConnection.Reconnecting
-            logger.d {
-                "[NetworkStateListener#onDisconnected] #network; old lastDisconnect:$lastDisconnect, clientImpl.leaveAfterDisconnectSeconds:${clientImpl.leaveAfterDisconnectSeconds}"
-            }
-            lastDisconnect = System.currentTimeMillis()
-            logger.d {
-                "[NetworkStateListener#onDisconnected] #network; new lastDisconnect:$lastDisconnect"
-            }
-            leaveTimeoutAfterDisconnect = scope.launch {
-                delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
-                logger.d {
-                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
-                }
-                leave()
-            }
-            logger.d { "[NetworkStateListener#onDisconnected] #network; at $lastDisconnect" }
-        }
-    }
-
-    private var leaveTimeoutAfterDisconnect: Job? = null
-    private var lastDisconnect = 0L
-    private var reconnectDeadlineMils: Int = 10_000
-
-    private var monitorPublisherPCStateJob: Job? = null
-    private var monitorSubscriberPCStateJob: Job? = null
-    private var sfuListener: Job? = null
-    private var sfuEvents: Job? = null
-    private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(scope)
-
+    private val callStatsReporter: CallStatsReporter = CallStatsReporter(this)
+    private val callCleanupManager = CallCleanupManager(
+        call = this,
+        sessionManager = sessionManager,
+        callApiDelegate = apiDelegate,
+        client = clientImpl,
+        mediaManagerProvider = { mediaManager },
+        callReInitializer = callReInitializer,
+        callStatsReporter = callStatsReporter,
+    )
     init {
         scope.launch {
             soundInputProcessor.currentAudioLevel.collect {
@@ -412,6 +389,7 @@ public class Call(
         powerManager = safeCallWithDefault(null) {
             clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
+        restartableProducerScope.attach(scope)
     }
 
     /** Basic crud operations */
@@ -435,47 +413,17 @@ public class Call(
         notify: Boolean = false,
         video: Boolean? = null,
     ): Result<GetOrCreateCallResponse> {
-        val response = if (members != null) {
-            clientImpl.getOrCreateCallFullMembers(
-                type = type,
-                id = id,
-                members = members,
-                custom = custom,
-                settingsOverride = settings,
-                startsAt = startsAt,
-                team = team,
-                ring = ring,
-                notify = notify,
-                video = video,
-            )
-        } else {
-            clientImpl.getOrCreateCall(
-                type = type,
-                id = id,
-                memberIds = memberIds,
-                custom = custom,
-                settingsOverride = settings,
-                startsAt = startsAt,
-                team = team,
-                ring = ring,
-                notify = notify,
-                video = video,
-            )
-        }
-
-        response.onSuccess {
-            /**
-             * Because [CallState.updateFromResponse] reads the value of [ClientState.ringingCall]
-             */
-            if (ring) {
-                client.state._ringingCall.value = this
-            }
-            state.updateFromResponse(it)
-            if (ring) {
-                client.state.addRingingCall(this, RingingState.Outgoing())
-            }
-        }
-        return response
+        return apiDelegate.create(
+            memberIds,
+            members,
+            custom,
+            settings,
+            startsAt,
+            team,
+            ring,
+            notify,
+            video,
+        )
     }
 
     /** Update a call */
@@ -484,16 +432,7 @@ public class Call(
         settingsOverride: CallSettingsRequest? = null,
         startsAt: OffsetDateTime? = null,
     ): Result<UpdateCallResponse> {
-        val request = UpdateCallRequest(
-            custom = custom,
-            settingsOverride = settingsOverride,
-            startsAt = startsAt,
-        )
-        val response = clientImpl.updateCall(type, id, request)
-        response.onSuccess {
-            state.updateFromResponse(it)
-        }
-        return response
+        return apiDelegate.update(custom, settingsOverride, startsAt)
     }
 
     suspend fun join(
@@ -501,72 +440,7 @@ public class Call(
         createOptions: CreateCallOptions? = null,
         ring: Boolean = false,
         notify: Boolean = false,
-    ): Result<RtcSession> {
-        logger.d {
-            "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
-        }
-        val permissionPass =
-            clientImpl.permissionCheck.checkAndroidPermissionsGroup(clientImpl.context, this)
-        // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
-        if (!permissionPass.first) {
-            logger.w {
-                "\n[Call.join()] called without having the required permissions.\n" +
-                    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
-                    "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
-                    "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
-                    "otherwise the service will fail to start, resulting in a crash.\n" +
-                    "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
-            }
-        }
-        // if we are a guest user, make sure we wait for the token before running the join flow
-        clientImpl.guestUserJob?.await()
-
-        // Ensure factory is created with the current audioBitrateProfile before joining
-        ensureFactoryMatchesAudioProfile()
-
-        // the join flow should retry up to 3 times
-        // if the error is not permanent
-        // and fail immediately on permanent errors
-        state._connection.value = RealtimeConnection.InProgress
-        var retryCount = 0
-
-        var result: Result<RtcSession>
-
-        atomicLeave = AtomicUnitCall()
-        while (retryCount < 3) {
-            result = _join(create, createOptions, ring, notify)
-            if (result is Success) {
-                // we initialise the camera, mic and other according to local + backend settings
-                // only when the call is joined to make sure we don't switch and override
-                // the settings during a call.
-                val settings = state.settings.value
-                if (settings != null) {
-                    updateMediaManagerFromSettings(settings)
-                } else {
-                    logger.w {
-                        "[join] Call settings were null - this should never happen after a call" +
-                            "is joined. MediaManager will not be initialised with server settings."
-                    }
-                }
-                return result
-            }
-            if (result is Failure) {
-                session = null
-                logger.e { "Join failed with error $result" }
-                if (isPermanentError(result.value)) {
-                    state._connection.value = RealtimeConnection.Failed(result.value)
-                    return result
-                } else {
-                    retryCount += 1
-                }
-            }
-            delay(retryCount - 1 * 1000L)
-        }
-        session = null
-        val errorMessage = "Join failed after 3 retries"
-        state._connection.value = RealtimeConnection.Failed(errorMessage)
-        return Failure(value = Error.GenericError(errorMessage))
-    }
+    ): Result<RtcSession> = callJoinCoordinator.join(create, createOptions, ring, notify)
 
     suspend fun joinAndRing(
         members: List<String>,
@@ -589,150 +463,8 @@ public class Call(
         }
     }
 
-    internal fun isPermanentError(error: Any): Boolean {
-        if (error is Error.ThrowableError) {
-            if (error.message.contains("Unable to resolve host")) {
-                return false
-            }
-        }
-        return true
-    }
-
-    internal suspend fun _join(
-        create: Boolean = false,
-        createOptions: CreateCallOptions? = null,
-        ring: Boolean = false,
-        notify: Boolean = false,
-    ): Result<RtcSession> {
-        reconnectAttepmts = 0
-        sfuEvents?.cancel()
-        sfuListener?.cancel()
-
-        if (session != null) {
-            return Failure(Error.GenericError("Call $cid has already been joined"))
-        }
-        logger.d {
-            "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
-        }
-
-        connectStartTime = System.currentTimeMillis()
-
-        // step 1. call the join endpoint to get a list of SFUs
-        val locationResult = clientImpl.getCachedLocation()
-        if (locationResult !is Success) {
-            return locationResult as Failure
-        }
-        location = locationResult.value
-
-        val options = createOptions
-            ?: if (create) {
-                CreateCallOptions()
-            } else {
-                null
-            }
-        val result = joinRequest(options, locationResult.value, ring = ring, notify = notify)
-
-        if (result !is Success) {
-            return result as Failure
-        }
-        val sfuToken = result.value.credentials.token
-        val sfuUrl = result.value.credentials.server.url
-        val sfuWsUrl = result.value.credentials.server.wsEndpoint
-        val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
-        try {
-            session = if (testInstanceProvider.rtcSessionCreator != null) {
-                testInstanceProvider.rtcSessionCreator!!.invoke()
-            } else {
-                RtcSession(
-                    sessionId = this.sessionId,
-                    apiKey = clientImpl.apiKey,
-                    lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                    client = client,
-                    call = this,
-                    sfuUrl = sfuUrl,
-                    sfuWsUrl = sfuWsUrl,
-                    sfuToken = sfuToken,
-                    remoteIceServers = iceServers,
-                    powerManager = powerManager,
-                )
-            }
-
-            session?.let {
-                state._connection.value = RealtimeConnection.Joined(it)
-            }
-
-            session?.connect()
-        } catch (e: Exception) {
-            return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
-        }
-        client.state.setActiveCall(this)
-        monitorSession(result.value)
-        return Success(value = session!!)
-    }
-
-    private fun Call.monitorSession(result: JoinCallResponse) {
-        sfuEvents?.cancel()
-        sfuListener?.cancel()
-        startCallStatsReporting(result.statsOptions.reportingIntervalMs.toLong())
-        // listen to Signal WS
-        sfuEvents = scope.launch {
-            session?.let {
-                it.socket.events().collect { event ->
-                    if (event is JoinCallResponseEvent) {
-                        reconnectDeadlineMils = event.fastReconnectDeadlineSeconds * 1000
-                        logger.d { "[join] #deadline for reconnect is ${reconnectDeadlineMils / 1000} seconds" }
-                    }
-                }
-            }
-        }
-        monitorPublisherPCStateJob?.cancel()
-        monitorPublisherPCStateJob = scope.launch {
-            session?.publisher?.iceState?.collect {
-                when (it) {
-                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session?.publisher?.connection?.restartIce()
-                    }
-
-                    else -> {
-                        logger.d { "[monitorPubConnectionState] Ice connection state is $it" }
-                    }
-                }
-            }
-        }
-
-        monitorSubscriberPCStateJob?.cancel()
-        monitorSubscriberPCStateJob = scope.launch {
-            session?.subscriber?.iceState?.collect {
-                when (it) {
-                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session?.requestSubscriberIceRestart()
-                    }
-
-                    else -> {
-                        logger.d { "[monitorSubConnectionState] Ice connection state is $it" }
-                    }
-                }
-            }
-        }
-        network.subscribe(listener)
-    }
-
-    private fun startCallStatsReporting(reportingIntervalMs: Long = 10_000) {
-        callStatsReportingJob?.cancel()
-        callStatsReportingJob = scope.launch {
-            // Wait a bit before we start capturing stats
-            delay(reportingIntervalMs)
-
-            while (isActive) {
-                delay(reportingIntervalMs)
-                session?.sendCallStats(
-                    report = collectStats(),
-                )
-            }
-        }
-    }
-
     internal suspend fun collectStats(): CallStatsReport {
+        val session = sessionManager.session.get()
         val publisherStats = session?.getPublisherStats()
         val subscriberStats = session?.getSubscriberStats()
         state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
@@ -759,233 +491,21 @@ public class Call(
     /**
      * Fast reconnect to the same SFU with the same participant session.
      */
-    suspend fun fastReconnect(reason: String = "unknown") = schedule("fast") {
-        logger.d { "[fastReconnect] Reconnecting, reconnectAttepmts:$reconnectAttepmts" }
-        session?.prepareReconnect()
-        this@Call.state._connection.value = RealtimeConnection.Reconnecting
-        if (session != null) {
-            reconnectStartTime = System.currentTimeMillis()
-
-            val session = session!!
-            val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
-            val reconnectDetails = ReconnectDetails(
-                previous_session_id = prevSessionId,
-                strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
-                announced_tracks = publishingInfo,
-                subscriptions = subscriptionsInfo,
-                reconnect_attempt = reconnectAttepmts,
-                reason = reason,
-            )
-            session.fastReconnect(reconnectDetails)
-            val oldSessionStats = collectStats()
-            session.sendCallStats(oldSessionStats)
-        } else {
-            logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
-            this@Call.state._connection.value = RealtimeConnection.Disconnected
-        }
-    }
+    suspend fun fastReconnect(reason: String = "unknown") = sessionManager.fastReconnect(reason)
 
     /**
      * Rejoin a call. Creates a new session and joins as a new participant.
      */
-    suspend fun rejoin(reason: String = "unknown") = schedule("rejoin") {
-        logger.d { "[rejoin] Rejoining" }
-        reconnectAttepmts++
-        state._connection.value = RealtimeConnection.Reconnecting
-        location?.let {
-            reconnectStartTime = System.currentTimeMillis()
-
-            val joinResponse = joinRequest(location = it)
-            if (joinResponse is Success) {
-                // switch to the new SFU
-                val cred = joinResponse.value.credentials
-                val oldSession = this.session!!
-                val oldSessionStats = collectStats()
-                val currentOptions = this.session?.publisher?.currentOptions()
-                logger.i { "Rejoin SFU ${oldSession?.sfuUrl} to ${cred.server.url}" }
-
-                this.sessionId = UUID.randomUUID().toString()
-                val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
-                val reconnectDetails = ReconnectDetails(
-                    previous_session_id = prevSessionId,
-                    strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-                    announced_tracks = publishingInfo,
-                    subscriptions = subscriptionsInfo,
-                    reconnect_attempt = reconnectAttepmts,
-                    reason = reason,
-                )
-                this.state.removeParticipant(prevSessionId)
-                oldSession.prepareRejoin()
-                try {
-                    this.session = RtcSession(
-                        clientImpl,
-                        reconnectAttepmts,
-                        powerManager,
-                        this,
-                        sessionId,
-                        clientImpl.apiKey,
-                        clientImpl.coordinatorConnectionModule.lifecycle,
-                        cred.server.url,
-                        cred.server.wsEndpoint,
-                        cred.token,
-                        cred.iceServers.map { ice ->
-                            ice.toIceServer()
-                        },
-                    )
-                    this.session?.connect(reconnectDetails, currentOptions)
-                    this.session?.sfuTracer?.trace("rejoin", reason)
-                    oldSession.sendCallStats(oldSessionStats)
-                    oldSession.leaveWithReason("Rejoin :: $reason")
-                    oldSession.cleanup()
-                    monitorSession(joinResponse.value)
-                } catch (ex: Exception) {
-                    logger.e(ex) {
-                        "[rejoin] Failed to join response with ex: ${ex.message}"
-                    }
-                    state._connection.value = RealtimeConnection.Failed(ex)
-                }
-            } else {
-                logger.e {
-                    "[rejoin] Failed to get a join response ${joinResponse.errorOrNull()}"
-                }
-                state._connection.value = RealtimeConnection.Reconnecting
-            }
-        }
-    }
+    suspend fun rejoin(reason: String = "unknown") = sessionManager.rejoin(reason)
 
     /**
      * Migrate to another SFU.
      */
-    suspend fun migrate() = schedule("migrate") {
-        logger.d { "[migrate] Migrating" }
-        state._connection.value = RealtimeConnection.Migrating
-        location?.let {
-            reconnectStartTime = System.currentTimeMillis()
-
-            val joinResponse = joinRequest(location = it)
-            if (joinResponse is Success) {
-                // switch to the new SFU
-                val cred = joinResponse.value.credentials
-                val session = this.session!!
-                val currentOptions = this.session?.publisher?.currentOptions()
-                val oldSfuUrl = session.sfuUrl
-                logger.i { "Rejoin SFU $oldSfuUrl to ${cred.server.url}" }
-
-                this.sessionId = UUID.randomUUID().toString()
-                val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
-                val reconnectDetails = ReconnectDetails(
-                    previous_session_id = prevSessionId,
-                    strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
-                    announced_tracks = publishingInfo,
-                    subscriptions = subscriptionsInfo,
-                    from_sfu_id = oldSfuUrl,
-                    reconnect_attempt = reconnectAttepmts,
-                )
-                session.prepareRejoin()
-                try {
-                    val newSession = RtcSession(
-                        clientImpl,
-                        reconnectAttepmts,
-                        powerManager,
-                        this,
-                        sessionId,
-                        clientImpl.apiKey,
-                        clientImpl.coordinatorConnectionModule.lifecycle,
-                        cred.server.url,
-                        cred.server.wsEndpoint,
-                        cred.token,
-                        cred.iceServers.map { ice ->
-                            ice.toIceServer()
-                        },
-                    )
-                    val oldSession = this.session
-                    this.session = newSession
-                    this.session?.connect(reconnectDetails, currentOptions)
-                    monitorSession(joinResponse.value)
-                    oldSession?.leaveWithReason("migrating")
-                    oldSession?.cleanup()
-                } catch (ex: Exception) {
-                    logger.e(ex) {
-                        "[switchSfu] Failed to join during " +
-                            "migration - Error ${ex.message}"
-                    }
-                    state._connection.value = RealtimeConnection.Failed(ex)
-                }
-            } else {
-                logger.e {
-                    "[switchSfu] Failed to get a join response during " +
-                        "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
-                }
-                state._connection.value = RealtimeConnection.Reconnecting
-            }
-        }
-    }
-
-    private var reconnectJob: Job? = null
-
-    private suspend fun schedule(key: String, block: suspend () -> Unit) {
-        logger.d { "[schedule] #reconnect; no args" }
-
-        streamSingleFlightProcessorImpl.run(key, block)
-    }
+    suspend fun migrate() = sessionManager.migrate()
 
     /** Leave the call, but don't end it for other users */
     fun leave(reason: String = "user") {
-        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
-        internalLeave(null, reason)
-    }
-
-    private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
-        monitorSubscriberPCStateJob?.cancel()
-        monitorPublisherPCStateJob?.cancel()
-        monitorPublisherPCStateJob = null
-        monitorSubscriberPCStateJob = null
-        session?.leaveWithReason("[reason=$reason, error=${disconnectionReason?.message}]")
-        leaveTimeoutAfterDisconnect?.cancel()
-        network.unsubscribe(listener)
-        sfuListener?.cancel()
-        sfuEvents?.cancel()
-        state._connection.value = RealtimeConnection.Disconnected
-        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = $id" }
-        if (isDestroyed) {
-            logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
-            return@atomicLeave
-        }
-        isDestroyed = true
-
-        sfuSocketReconnectionTime = null
-
-        /**
-         * TODO Rahul, need to check which call has owned the media at the moment(probably use active call)
-         */
-        stopScreenSharing()
-        camera.disable()
-        microphone.disable()
-
-        if (id == client.state.activeCall.value?.id) {
-            client.state.removeActiveCall(this) // Will also stop CallService
-        }
-
-        if (id == client.state.ringingCall.value?.id) {
-            client.state.removeRingingCall(this)
-        }
-
-        TelecomCallController(client.context)
-            .leaveCall(this)
-
-        (client as StreamVideoClient).onCallCleanUp(this)
-
-        clientImpl.scope.launch {
-            safeCall {
-                session?.sfuTracer?.trace(
-                    "leave-call",
-                    "[reason=$reason, error=${disconnectionReason?.message}]",
-                )
-                val stats = collectStats()
-                session?.sendCallStats(stats)
-            }
-            cleanup()
-        }
+        callCleanupManager.leave(reason)
     }
 
     /** ends the call for yourself as well as other users */
@@ -1019,31 +539,13 @@ public class Call(
         limit: Int = 25,
         prev: String? = null,
         next: String? = null,
-    ): Result<QueriedMembers> {
-        return clientImpl.queryMembersInternal(
-            type = type,
-            id = id,
-            filter = filter,
-            sort = sort,
-            prev = prev,
-            next = next,
-            limit = limit,
-        ).onSuccess { state.updateFromResponse(it) }.map { it.toQueriedMembers() }
-    }
+    ): Result<QueriedMembers> = apiDelegate.queryMembers(filter, sort, limit, prev, next)
 
     suspend fun muteAllUsers(
         audio: Boolean = true,
         video: Boolean = false,
         screenShare: Boolean = false,
-    ): Result<MuteUsersResponse> {
-        val request = MuteUsersData(
-            muteAllUsers = true,
-            audio = audio,
-            video = video,
-            screenShare = screenShare,
-        )
-        return clientImpl.muteUsers(type, id, request)
-    }
+    ): Result<MuteUsersResponse> = apiDelegate.muteAllUsers(audio, video, screenShare)
 
     fun setVisibility(
         sessionId: String,
@@ -1054,6 +556,7 @@ public class Call(
         logger.i {
             "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
+        val session = sessionManager.session.get()
         session?.updateTrackDimensions(
             sessionId,
             trackType,
@@ -1074,6 +577,7 @@ public class Call(
         logger.i {
             "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
+        val session = sessionManager.session.get()
         session?.updateTrackDimensions(
             sessionId,
             trackType,
@@ -1084,14 +588,7 @@ public class Call(
     }
 
     fun handleEvent(event: VideoEvent) {
-        logger.v { "[call handleEvent] #sfu; event.type: ${event.getEventType()}" }
-
-        when (event) {
-            is GoAwayEvent ->
-                scope.launch {
-                    migrate()
-                }
-        }
+        callEventManager.handleEvent(event)
     }
 
     // TODO: review this
@@ -1108,61 +605,15 @@ public class Call(
         trackType: TrackType,
         onRendered: (VideoTextureViewRenderer) -> Unit = {},
         viewportId: String = sessionId,
-    ) {
-        logger.d { "[initRenderer] #sfu; #track; sessionId: $sessionId" }
-
-        // Note this comes from the shared eglBase
-        videoRenderer.init(
-            eglBase.eglBaseContext,
-            object : RendererCommon.RendererEvents {
-                override fun onFirstFrameRendered() {
-                    val width = videoRenderer.measuredWidth
-                    val height = videoRenderer.measuredHeight
-                    logger.i {
-                        "[initRenderer.onFirstFrameRendered] #sfu; #track; " +
-                            "trackType: $trackType, dimension: ($width - $height), " +
-                            "sessionId: $sessionId"
-                    }
-                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session?.updateTrackDimensions(
-                            sessionId,
-                            trackType,
-                            true,
-                            VideoDimension(width, height),
-                            viewportId,
-                        )
-                    }
-                    onRendered(videoRenderer)
-                }
-
-                override fun onFrameResolutionChanged(
-                    videoWidth: Int,
-                    videoHeight: Int,
-                    rotation: Int,
-                ) {
-                    val width = videoRenderer.measuredWidth
-                    val height = videoRenderer.measuredHeight
-                    logger.v {
-                        "[initRenderer.onFrameResolutionChanged] #sfu; #track; " +
-                            "trackType: $trackType, " +
-                            "viewport size: ($width - $height), " +
-                            "video size: ($videoWidth - $videoHeight), " +
-                            "sessionId: $sessionId"
-                    }
-
-                    if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session?.updateTrackDimensions(
-                            sessionId,
-                            trackType,
-                            true,
-                            VideoDimension(width, height),
-                            viewportId,
-                        )
-                    }
-                }
-            },
-        )
-    }
+    ) = callRenderer.initRenderer(
+        videoRenderer,
+        sessionId,
+        trackType,
+        eglBase,
+        sessionManager.session.get(),
+        onRendered,
+        viewportId,
+    )
 
     /**
      * Enables the provided client capabilities.
@@ -1186,24 +637,9 @@ public class Call(
         startHls: Boolean = false,
         startRecording: Boolean = false,
         startTranscription: Boolean = false,
-    ): Result<GoLiveResponse> {
-        val result = clientImpl.goLive(
-            type = type,
-            id = id,
-            startHls = startHls,
-            startRecording = startRecording,
-            startTranscription = startTranscription,
-        )
-        result.onSuccess { state.updateFromResponse(it) }
+    ): Result<GoLiveResponse> = apiDelegate.goLive(startHls, startRecording, startTranscription)
 
-        return result
-    }
-
-    suspend fun stopLive(): Result<StopLiveResponse> {
-        val result = clientImpl.stopLive(type, id)
-        result.onSuccess { state.updateFromResponse(it) }
-        return result
-    }
+    suspend fun stopLive(): Result<StopLiveResponse> = apiDelegate.stopLive()
 
     suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendCallEventResponse> {
         return clientImpl.sendCustomEvent(this.type, this.id, data)
@@ -1241,29 +677,13 @@ public class Call(
     fun startScreenSharing(
         mediaProjectionPermissionResultData: Intent,
         includeAudio: Boolean = false,
-    ) {
-        if (state.ownCapabilities.value.contains(OwnCapability.Screenshare)) {
-            session?.setScreenShareTrack()
-            screenShare.enable(mediaProjectionPermissionResultData, includeAudio = includeAudio)
-        } else {
-            logger.w { "Can't start screen sharing - user doesn't have wnCapability.Screenshare permission" }
-        }
-    }
+    ): Unit = apiDelegate.startScreenSharing(mediaProjectionPermissionResultData, includeAudio)
 
-    fun stopScreenSharing() {
-        screenShare.disable(fromUser = true)
-    }
+    fun stopScreenSharing(): Unit = apiDelegate.stopScreenSharing()
 
-    suspend fun startHLS(): Result<Any> {
-        return clientImpl.startBroadcasting(type, id)
-            .onSuccess {
-                state.updateFromResponse(it)
-            }
-    }
+    suspend fun startHLS(): Result<Any> = apiDelegate.startHLS()
 
-    suspend fun stopHLS(): Result<Any> {
-        return clientImpl.stopBroadcasting(type, id)
-    }
+    suspend fun stopHLS(): Result<Any> = apiDelegate.stopHLS()
 
     public fun subscribeFor(
         vararg eventTypes: Class<out VideoEvent>,
@@ -1337,8 +757,6 @@ public class Call(
         return clientImpl.updateMembers(type, id, request)
     }
 
-    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
-
     fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
         subscriptions.forEach { sub ->
             if (!sub.isDisposed) {
@@ -1361,68 +779,8 @@ public class Call(
         }
     }
 
-    private fun monitorHeadset() {
-        microphone.devices.onEach { availableDevices ->
-            logger.d {
-                "[monitorHeadset] new available devices, prev selected: ${microphone.nonHeadsetFallbackDevice}"
-            }
-
-            val bluetoothHeadset =
-                availableDevices.find { it is StreamAudioDevice.BluetoothHeadset }
-            val wiredHeadset = availableDevices.find { it is StreamAudioDevice.WiredHeadset }
-
-            if (bluetoothHeadset != null) {
-                logger.d { "[monitorHeadset] BT headset selected" }
-                microphone.select(bluetoothHeadset)
-            } else if (wiredHeadset != null) {
-                logger.d { "[monitorHeadset] wired headset found" }
-                microphone.select(wiredHeadset)
-            } else {
-                logger.d { "[monitorHeadset] no headset found" }
-
-                microphone.nonHeadsetFallbackDevice?.let { deviceBeforeHeadset ->
-                    logger.d { "[monitorHeadset] before device selected" }
-                    microphone.select(deviceBeforeHeadset)
-                }
-            }
-        }.launchIn(scope)
-    }
-
-    private fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
-        // Speaker
-        if (speaker.status.value is DeviceStatus.NotSelected) {
-            val enableSpeaker =
-                if (callSettings.video.cameraDefaultOn || camera.status.value is DeviceStatus.Enabled) {
-                    // if camera is enabled then enable speaker. Eventually this should
-                    // be a new audio.defaultDevice setting returned from backend
-                    true
-                } else {
-                    callSettings.audio.defaultDevice == AudioSettingsResponse.DefaultDevice.Speaker ||
-                        callSettings.audio.speakerDefaultOn
-                }
-
-            speaker.setEnabled(enabled = enableSpeaker)
-        }
-
-        monitorHeadset()
-
-        // Camera
-        if (camera.status.value is DeviceStatus.NotSelected) {
-            val defaultDirection =
-                if (callSettings.video.cameraFacing == VideoSettingsResponse.CameraFacing.Front) {
-                    CameraDirection.Front
-                } else {
-                    CameraDirection.Back
-                }
-            camera.setDirection(defaultDirection)
-            camera.setEnabled(callSettings.video.cameraDefaultOn)
-        }
-
-        // Mic
-        if (microphone.status.value == DeviceStatus.NotSelected) {
-            val enabled = callSettings.audio.micDefaultOn
-            microphone.setEnabled(enabled)
-        }
+    internal fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
+        callMediaManager.updateMediaManagerFromSettings(callSettings)
     }
 
     /**
@@ -1455,32 +813,14 @@ public class Call(
         audio: Boolean = true,
         video: Boolean = false,
         screenShare: Boolean = false,
-    ): Result<MuteUsersResponse> {
-        val request = MuteUsersData(
-            users = listOf(userId),
-            muteAllUsers = false,
-            audio = audio,
-            video = video,
-            screenShare = screenShare,
-        )
-        return clientImpl.muteUsers(type, id, request)
-    }
+    ): Result<MuteUsersResponse> = apiDelegate.muteUser(userId, audio, video, screenShare)
 
     suspend fun muteUsers(
         userIds: List<String>,
         audio: Boolean = true,
         video: Boolean = false,
         screenShare: Boolean = false,
-    ): Result<MuteUsersResponse> {
-        val request = MuteUsersData(
-            users = userIds,
-            muteAllUsers = false,
-            audio = audio,
-            video = video,
-            screenShare = screenShare,
-        )
-        return clientImpl.muteUsers(type, id, request)
-    }
+    ): Result<MuteUsersResponse> = apiDelegate.muteUsers(userIds, audio, video, screenShare)
 
     @VisibleForTesting
     internal suspend fun joinRequest(
@@ -1489,44 +829,29 @@ public class Call(
         migratingFrom: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
-    ): Result<JoinCallResponse> {
-        val result = clientImpl.joinCall(
-            type, id,
-            create = create != null,
-            members = create?.memberRequestsFromIds(),
-            custom = create?.custom,
-            settingsOverride = create?.settings,
-            startsAt = create?.startsAt,
-            team = create?.team,
-            ring = ring,
-            notify = notify,
-            location = location,
-            migratingFrom = migratingFrom,
-        )
-        result.onSuccess {
-            state.updateFromResponse(it)
-        }
-        return result
-    }
+    ): Result<JoinCallResponse> = apiDelegate.joinRequest(
+        create,
+        location,
+        migratingFrom,
+        ring,
+        notify,
+    )
 
     fun cleanup() {
+        val session = sessionManager.session.get()
         // monitor.stop()
         session?.cleanup()
         shutDownJobsGracefully()
         callStatsReportingJob?.cancel()
         mediaManager.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
-        session = null
+        sessionManager.session.set(null)
         // Cleanup the call's scope provider
         scopeProvider.cleanup()
     }
 
     // This will allow the Rest APIs to be executed which are in queue before leave
     private fun shutDownJobsGracefully() {
-        UserScope(ClientScope()).launch {
-            supervisorJob.children.forEach { it.join() }
-            supervisorJob.cancel()
-        }
-        scope.cancel()
+        callCleanupManager.shutDownJobsGracefully()
     }
 
     suspend fun ring(): Result<GetCallResponse> {
@@ -1544,13 +869,7 @@ public class Call(
         return clientImpl.notify(type, id)
     }
 
-    suspend fun accept(): Result<AcceptCallResponse> {
-        logger.d { "[accept] #ringing; no args, call_id:$id" }
-        state.acceptedOnThisDevice = true
-
-        clientImpl.state.transitionToAcceptCall(this)
-        return clientImpl.accept(type, id)
-    }
+    suspend fun accept(): Result<AcceptCallResponse> = apiDelegate.accept()
 
     /**
      * Should outlive both the call scope and the service scope and needs to be executed in the client-level scope.
@@ -1579,43 +898,9 @@ public class Call(
         rating: Int,
         reason: String? = null,
         custom: Map<String, Any>? = null,
-    ) {
-        scope.launch {
-            clientImpl.collectFeedback(
-                callType = type,
-                id = id,
-                sessionId = sessionId,
-                rating = rating,
-                reason = reason,
-                custom = custom,
-            )
-        }
-    }
+    ): Unit = apiDelegate.collectUserFeedback(rating, reason, custom)
 
-    suspend fun takeScreenshot(track: VideoTrack): Bitmap? {
-        return suspendCancellableCoroutine { continuation ->
-            var screenshotSink: VideoSink? = null
-            screenshotSink = VideoSink {
-                // make sure we stop after first frame is delivered
-                if (!continuation.isActive) {
-                    return@VideoSink
-                }
-                it.retain()
-                val bitmap = YuvFrame.bitmapFromVideoFrame(it)
-                it.release()
-
-                // This has to be launched asynchronously - removing the sink on the
-                // same thread as the videoframe is delivered will lead to a deadlock
-                // (needs investigation why)
-                scope.launch {
-                    track.video.removeSink(screenshotSink)
-                }
-                continuation.resume(bitmap)
-            }
-
-            track.video.addSink(screenshotSink)
-        }
-    }
+    suspend fun takeScreenshot(track: VideoTrack): Bitmap? = apiDelegate.takeScreenshot(track)
 
     fun isPinnedParticipant(sessionId: String): Boolean =
         state.pinnedParticipants.value.containsKey(
@@ -1681,6 +966,7 @@ public class Call(
         resolution: PreferredVideoResolution?,
         sessionIds: List<String>? = null,
     ) {
+        val session = sessionManager.session.get()
         session?.let { session ->
             session.trackOverridesHandler.updateOverrides(
                 sessionIds = sessionIds,
@@ -1696,7 +982,10 @@ public class Call(
      * @param sessionIds The participant session IDs to enable/disable the video feed for. If `null`, the setting will be applied to all participants.
      */
     fun setIncomingVideoEnabled(enabled: Boolean?, sessionIds: List<String>? = null) {
-        session?.trackOverridesHandler?.updateOverrides(sessionIds, visible = enabled)
+        sessionManager.session.get()?.trackOverridesHandler?.updateOverrides(
+            sessionIds,
+            visible = enabled,
+        )
     }
 
     /**
@@ -1710,18 +999,8 @@ public class Call(
      * @param sessionIds Optional list of participant session IDs for which to toggle incoming audio.
      * If `null`, the audio setting is applied to all participants currently in the session.
      */
-    fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) {
-        val participantTrackMap = session?.subscriber?.tracks ?: return
-
-        val targetTracks = when {
-            sessionIds != null -> sessionIds.mapNotNull { participantTrackMap[it] }
-            else -> participantTrackMap.values.toList()
-        }
-
-        targetTracks
-            .mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as? AudioTrack }
-            .forEach { it.enableAudio(enabled) }
-    }
+    fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) =
+        callMediaManager.setIncomingAudioEnabled(sessionManager.session.get(), enabled, sessionIds)
 
     @InternalStreamVideoApi
     public val debug = Debug(this)
@@ -1730,11 +1009,11 @@ public class Call(
     public class Debug(val call: Call) {
 
         public fun pause() {
-            call.session?.subscriber?.disable()
+            call.sessionManager.session.get()?.subscriber?.disable()
         }
 
         public fun resume() {
-            call.session?.subscriber?.enable()
+            call.sessionManager.session.get()?.subscriber?.enable()
         }
 
         public fun rejoin() {
@@ -1744,11 +1023,11 @@ public class Call(
         }
 
         public fun restartSubscriberIce() {
-            call.session?.subscriber?.connection?.restartIce()
+            call.sessionManager.session.get()?.subscriber?.connection?.restartIce()
         }
 
         public fun restartPublisherIce() {
-            call.session?.publisher?.connection?.restartIce()
+            call.sessionManager.session.get()?.publisher?.connection?.restartIce()
         }
 
         fun migrate() {
