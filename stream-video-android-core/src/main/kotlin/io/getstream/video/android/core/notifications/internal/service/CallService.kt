@@ -54,6 +54,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 /**
@@ -232,7 +234,7 @@ internal open class CallService : Service() {
     ): Int {
         maybeHandleMediaIntent(intent, params.callId)
         val notificationId = serviceNotificationRetriever.getNotificationId(
-            CallService.Companion.Trigger.toTrigger(params.trigger),
+            params.trigger,
             params.streamVideo,
             params.callId,
         )
@@ -244,12 +246,12 @@ internal open class CallService : Service() {
         promoteToFgServiceIfNoActiveCall(
             params.streamVideo,
             notificationId,
-            Trigger.toTrigger(params.trigger),
+            params.trigger,
         )
         val call = params.streamVideo.call(params.callId.type, params.callId.id)
 
         // Rendering incoming call does not need audio/video permissions
-        if (params.trigger != TRIGGER_INCOMING_CALL) {
+        if (params.trigger != Trigger.IncomingCall) {
             if (!verifyPermissions(
                     params.streamVideo,
                     call,
@@ -263,7 +265,7 @@ internal open class CallService : Service() {
         }
 
         val (notification, _) = getNotificationPair(
-            CallService.Companion.Trigger.toTrigger(params.trigger),
+            params.trigger,
             params.streamVideo,
             params.callId,
             params.displayName,
@@ -273,7 +275,7 @@ internal open class CallService : Service() {
             notification,
             notificationId,
             params.callId,
-            CallService.Companion.Trigger.toTrigger(params.trigger),
+            params.trigger,
             call,
         )
 
@@ -296,7 +298,7 @@ internal open class CallService : Service() {
     private fun initializeService(
         streamVideo: StreamVideoClient,
         call: Call,
-        trigger: String,
+        trigger: Trigger,
     ) {
         callServiceLifecycleManager.initializeCallAndSocket(
             serviceScope,
@@ -306,7 +308,7 @@ internal open class CallService : Service() {
             stopServiceGracefully(error?.message)
         }
 
-        if (trigger == TRIGGER_INCOMING_CALL) {
+        if (trigger == Trigger.IncomingCall) {
             callServiceLifecycleManager.updateRingingCall(
                 serviceScope,
                 streamVideo,
@@ -454,7 +456,7 @@ internal open class CallService : Service() {
         streamVideo: StreamVideoClient,
         call: Call,
         callId: StreamCallId,
-        trigger: String,
+        trigger: Trigger,
     ): Boolean {
         val (hasPermissions, missingPermissions) =
             streamVideo.permissionCheck.checkAndroidPermissionsGroup(
@@ -489,7 +491,7 @@ internal open class CallService : Service() {
         val streamVideo = (StreamVideo.instanceOrNull() as? StreamVideoClient) ?: return null
         val displayName = intent.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME)
 
-        return CallIntentParams(streamVideo, callId, trigger, displayName)
+        return CallIntentParams(streamVideo, callId, Trigger.toTrigger(trigger), displayName)
     }
 
     private fun maybeHandleMediaIntent(intent: Intent?, callId: StreamCallId?) = safeCall {
