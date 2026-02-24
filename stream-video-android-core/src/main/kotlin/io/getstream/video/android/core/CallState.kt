@@ -146,6 +146,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -1775,7 +1776,8 @@ public class CallState(
             repo.currentCall
                 .map { (it as? TelecomCall.Registered)?.isOnHold == true }
                 .distinctUntilChanged()
-                .collect { telecomCall ->
+                .filter { it }
+                .collect { isOnHold ->
                     when (ringingState.value) {
                         is RingingState.Active -> {
                             call.leave("call-on-hold")
