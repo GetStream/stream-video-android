@@ -666,8 +666,8 @@ public class CallState(
         MutableStateFlow<Map<String, Boolean?>>(emptyMap())
     val participantVideoEnabledOverrides = _participantVideoEnabledOverrides.asStateFlow()
 
-    internal val _thumbnail = MutableStateFlow<String?>(null)
-    public val thumbnail = _thumbnail.asStateFlow()
+    private val _thumbnail = MutableStateFlow<String?>(null)
+    public val thumbnail: StateFlow<String?> = _thumbnail
 
     private var speakingWhileMutedResetJob: Job? = null
     private var autoJoiningCall: Job? = null
