@@ -723,6 +723,7 @@ public class CallState(
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
 
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
+    private val ringingLogger by taggedLogger("RingingState")
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
@@ -1258,7 +1259,6 @@ public class CallState(
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
         val isCallEnded: Boolean = _endedAt.value != null
 
-        val ringingLogger by taggedLogger("RingingState")
         ringingLogger.d { "Current: ${_ringingState.value}, call_id: ${call.cid}" }
 
         val ringingStateLogs = arrayListOf(
