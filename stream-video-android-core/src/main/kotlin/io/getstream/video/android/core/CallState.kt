@@ -724,6 +724,7 @@ public class CallState(
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
 
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
+    private val ringingLogger by taggedLogger("RingingState")
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
@@ -1239,7 +1240,6 @@ public class CallState(
     }
 
     private fun updateRingingState(rejectReason: RejectReason? = null) {
-        val ringingStateLogger by taggedLogger("RingingState")
         if (ringingState.value == RingingState.RejectedByAll) {
             return
         }
@@ -1259,7 +1259,7 @@ public class CallState(
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
         val createdBySelf = createdBy?.id == client.userId
 
-        ringingStateLogger.d { "Current: ${_ringingState.value}, call_id: ${call.cid}" }
+        ringingLogger.d { "Current: ${_ringingState.value}, call_id: ${call.cid}" }
 
         val ringingStateLogs = arrayListOf(
             ("acceptedByMe: $isAcceptedByMe"),
@@ -1270,7 +1270,7 @@ public class CallState(
             ("userIsParticipant: $userIsParticipant"),
         ).joinToString("") { it + "\n" }
 
-        ringingStateLogger.d { "call_id: ${call.cid}, Flags: $ringingStateLogs" }
+        ringingLogger.d { "call_id: ${call.cid}, Flags: $ringingStateLogs" }
 
         // no members - call is empty, we can join
         val state: RingingState = if (hasActiveCall && !ringingStateUpdatesStopped.get()) {
@@ -1305,7 +1305,7 @@ public class CallState(
             }
         } else if (hasRingingCall && createdBy?.id == client.userId) {
             // The call is created by us
-            ringingStateLogger.d { "acceptedBy: $acceptedBy, userIsParticipant: $userIsParticipant" }
+            ringingLogger.d { "acceptedBy: $acceptedBy, userIsParticipant: $userIsParticipant" }
             if (acceptedBy.isEmpty()) {
                 // no one accepted the call
                 RingingState.Outgoing(acceptedByCallee = false)
@@ -1328,7 +1328,7 @@ public class CallState(
         }
 
         if (_ringingState.value != state) {
-            ringingStateLogger.d { "Updating ringing state ${_ringingState.value} -> $state" }
+            ringingLogger.d { "Updating ringing state ${_ringingState.value} -> $state" }
 
             // handle the auto-cancel for outgoing ringing calls
             if (state is RingingState.Outgoing && !state.acceptedByCallee) {
@@ -1341,7 +1341,7 @@ public class CallState(
 
             // stop the call ringing timer if it's running
         }
-        ringingStateLogger.d { "Update: $state" }
+        ringingLogger.d { "Update: $state" }
 
         _ringingState.value = state
     }
