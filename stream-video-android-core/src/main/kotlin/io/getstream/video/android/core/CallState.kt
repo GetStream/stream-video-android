@@ -114,6 +114,7 @@ import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.moderations.ModerationManager
 import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.NotificationType
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.permission.PermissionRequest
@@ -722,6 +723,10 @@ public class CallState(
 
     @InternalStreamVideoApi
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
+
+    private val _serviceTrigger =
+        MutableStateFlow<CallService.Companion.Trigger>(CallService.Companion.Trigger.None)
+    internal val serviceTrigger = _serviceTrigger.asStateFlow()
 
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
 
@@ -1748,6 +1753,10 @@ public class CallState(
     fun updateNotification(notificationId: Int, notification: Notification) {
         this._notificationIdFlow.value = notificationId
         this.atomicNotification.set(notification)
+    }
+
+    internal fun updateServiceTriggers(trigger: CallService.Companion.Trigger) {
+        _serviceTrigger.value = trigger
     }
 }
 

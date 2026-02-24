@@ -42,6 +42,7 @@ import androidx.core.content.ContextCompat
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.RingingState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.getValue
@@ -97,8 +98,23 @@ public interface PermissionManager {
          * Checks if the required Android permissions for this call are granted.
          * For audio calls: RECORD_AUDIO. For video calls: RECORD_AUDIO + CAMERA.
          */
-        internal suspend fun hasRequiredCallPermissions(context: Context, call: Call): Boolean {
+        internal suspend fun hasRequiredCallPermissions(
+            context: Context,
+            call: Call,
+            outgoingCallCapabilities: List<OwnCapability> = emptyList(),
+        ): Boolean {
+            /**
+             * 1. Check own-capabilities
+             * 2. If empty then check if it is an outgoing-call
+             * 2.1. If outgoing-call then use local own-capabilities
+             * 3. If call capabilities is empty then get it from call.get()
+             */
             var capabilities = call.state.ownCapabilities.value
+            if (capabilities.isEmpty()) {
+                if (call.state.ringingState.value is RingingState.Outgoing) {
+                    capabilities = outgoingCallCapabilities
+                }
+            }
             if (capabilities.isEmpty()) {
                 val result = call.get()
                 if (result.isFailure) {

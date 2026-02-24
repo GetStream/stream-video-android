@@ -42,12 +42,7 @@ internal class ServiceIntentBuilder {
             CallService.Companion.Trigger.IncomingCall -> {
                 serviceIntent.putExtra(INTENT_EXTRA_CALL_DISPLAY_NAME, startService.callDisplayName)
             }
-
-            else -> {
-                throw IllegalArgumentException(
-                    "Unknown ${startService.trigger}, must be one of triggers from [CallService.Companion.Trigger]",
-                )
-            }
+            else -> {}
         }
         return serviceIntent
     }

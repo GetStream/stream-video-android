@@ -179,8 +179,13 @@ class ClientState(private val client: StreamVideo) {
             is RingingState.Outgoing -> {
                 call.scope.launch {
                     transitionToAcceptCall(call)
-                    delay(serviceTransitionDelayMs)
-                    maybeStartForegroundService(call, CallService.Companion.Trigger.OnGoingCall)
+                    /**
+                     * Since CallService is already started when outgoing call was made,
+                     * so this time we just need to update the service trigger to inform the call-service
+                     * that we are in on-going call. This is kept here intentionally to maintain backward compatible code-flow
+                     * We can revisit this in future to either improve or delete this
+                     */
+                    call.state.updateServiceTriggers(CallService.Companion.Trigger.OnGoingCall)
                 }
             }
             else -> {

@@ -62,12 +62,18 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import io.getstream.video.android.ui.common.StreamCallActivity
 import java.util.UUID
 
 @Composable
 fun DirectCallJoinScreen(
     viewModel: DirectCallJoinViewModel = hiltViewModel(),
-    navigateToDirectCall: (cid: StreamCallId, memberList: String, joinAndRing: Boolean) -> Unit,
+    navigateToDirectCall: (
+        cid: StreamCallId,
+        memberList: String,
+        joinAndRing: Boolean,
+        outgoingCallType: StreamCallActivity.Companion.OutgoingCallType,
+    ) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -133,7 +139,12 @@ private fun Header(user: User?) {
 private fun Body(
     uiState: DirectCallUiState,
     toggleUserSelection: (Int) -> Unit,
-    onStartCallClick: (cid: StreamCallId, membersList: String, joinAndRing: Boolean) -> Unit,
+    onStartCallClick: (
+        cid: StreamCallId,
+        membersList: String,
+        joinAndRing: Boolean,
+        isVideo: StreamCallActivity.Companion.OutgoingCallType,
+    ) -> Unit,
 ) {
     var callerJoinsFirst by rememberSaveable { mutableStateOf(false) }
 
@@ -198,6 +209,7 @@ private fun Body(
                                     .filter { it.isSelected }
                                     .joinToString(separator = ",") { it.user.id ?: "" },
                                 callerJoinsFirst,
+                                StreamCallActivity.Companion.OutgoingCallType.Audio,
                             )
                         },
                     )
@@ -219,6 +231,7 @@ private fun Body(
                                     .filter { it.isSelected }
                                     .joinToString(separator = ",") { it.user.id ?: "" },
                                 callerJoinsFirst,
+                                StreamCallActivity.Companion.OutgoingCallType.Video,
                             )
                         },
                     )
@@ -315,7 +328,7 @@ private fun HeaderPreview() {
                 },
             ),
             toggleUserSelection = {},
-        ) { _, _, _ ->
+        ) { _, _, _, _ ->
         }
     }
 }

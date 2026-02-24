@@ -46,6 +46,7 @@ import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.state.AcceptCall
@@ -90,6 +91,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         private const val EXTRA_LEAVE_WHEN_LAST: String = "leave_when_last"
         private const val EXTRA_MEMBERS_ARRAY: String = "members_extra"
         private const val EXTRA_JOIN_AND_RING: String = "join_and_ring"
+        private const val EXTRA_OUTGOING_CALL_TYPE: String = "io.getstream.video.extra_outgoing_call_type"
 
         // Extra default values
         private const val DEFAULT_LEAVE_WHEN_LAST: Boolean = false
@@ -117,6 +119,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             configuration: StreamCallActivityConfiguration = StreamCallActivityConfiguration(),
             joinAndRing: Boolean = false,
             extraData: Bundle? = null,
+            outgoingCallType: OutgoingCallType = OutgoingCallType.Unknown,
         ): Intent {
             return Intent(context, clazz).apply {
                 // Setup the outgoing call action
@@ -130,6 +133,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 putExtra(NotificationHandler.INTENT_EXTRA_CALL_CID, cid)
                 putExtra(EXTRA_LEAVE_WHEN_LAST, leaveWhenLastInCall)
                 putExtra(EXTRA_JOIN_AND_RING, joinAndRing)
+                putExtra(EXTRA_OUTGOING_CALL_TYPE, outgoingCallType.name)
                 // Setup the members to transfer to the new activity
                 val membersArrayList = ArrayList<String>()
                 members.forEach { membersArrayList.add(it) }
@@ -140,6 +144,24 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 logger.d { "Created [${clazz.simpleName}] intent. -> $this" }
             }
+        }
+
+        public sealed class OutgoingCallType private constructor(public val name: String) {
+            public companion object {
+                public fun toOutgoingCallType(name: String): OutgoingCallType {
+                    return when (name) {
+                        Video.name -> Video
+                        Audio.name -> Audio
+                        else -> Unknown
+                    }
+                }
+            }
+            override fun toString(): String {
+                return name
+            }
+            public object Video : OutgoingCallType("video")
+            public object Audio : OutgoingCallType("audio")
+            public object Unknown : OutgoingCallType("unknown")
         }
 
         public fun callIntentBundle(
@@ -526,6 +548,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // Extract the members and the call ID and place the outgoing call
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
                 val joinAndRing = intent.getBooleanExtra(EXTRA_JOIN_AND_RING, false)
+
                 if (joinAndRing) {
                     create(
                         call,
@@ -832,15 +855,61 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
     ) {
+        /**
+         * Todo Rahul we need to check call-related permission here - as this is going to start the callservice
+         * Is this the right place
+         */
+
         lifecycleScope.launch(Dispatchers.IO) {
-            val instance = StreamVideo.instance()
-            val result = call.create(
-                // List of all users, containing the caller also
-                memberIds = members + instance.userId,
-                // If other users will get push notification.
-                ring = ring,
+            val outgoingCallType = intent.getStringExtra(EXTRA_OUTGOING_CALL_TYPE)?.let {
+                OutgoingCallType.toOutgoingCallType(it)
+            } ?: OutgoingCallType.Unknown
+
+            val outgoingCallCapabilities = ArrayList<OwnCapability>()
+            if (call.state.ringingState.value is RingingState.Outgoing) {
+                when (outgoingCallType) {
+                    OutgoingCallType.Video -> {
+                        outgoingCallCapabilities.addAll(
+                            arrayListOf(
+                                OwnCapability.SendAudio,
+                                OwnCapability.SendVideo,
+                            ),
+                        )
+                    }
+
+                    OutgoingCallType.Audio -> {
+                        outgoingCallCapabilities.addAll(
+                            arrayListOf(
+                                OwnCapability.SendAudio,
+                            ),
+                        )
+                    }
+
+                    else -> {}
+                }
+            }
+
+            val hasCallPermission = PermissionManager.hasRequiredCallPermissions(
+                this@StreamCallActivity,
+                call,
+                outgoingCallCapabilities,
             )
-            result.onOutcome(call, onSuccess, onError)
+            if (hasCallPermission) {
+                val instance = StreamVideo.instance()
+                val result = call.create(
+                    // List of all users, containing the caller also
+                    memberIds = members + instance.userId,
+                    // If other users will get push notification.
+                    ring = ring,
+                )
+                result.onOutcome(call, onSuccess, onError)
+            } else {
+                /**
+                 * TODO Rahul, maybe just do nothing, at this moment we should render get permission from setting
+                 * Once we have the permission from setting, we re-open the our active - restarts the processing of
+                 * last intent.
+                 */
+            }
         }
     }
 

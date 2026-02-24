@@ -232,6 +232,7 @@ internal open class CallService : Service() {
         flags: Int,
         startId: Int,
     ): Int {
+        updateCallState(params)
         maybeHandleMediaIntent(intent, params.callId)
         val notificationId = serviceNotificationRetriever.getNotificationId(
             params.trigger,
@@ -598,6 +599,15 @@ internal open class CallService : Service() {
             }
                 .observe(baseContext)
         }
+
+        call.scope.launch {
+            call.state.serviceTrigger.collectLatest {
+                /**
+                 * TODO Rahul, what to write
+                 * Notifications are already updated via notification update-triggers
+                 */
+            }
+        }
     }
 
     override fun onTimeout(startId: Int) {
@@ -703,6 +713,12 @@ internal open class CallService : Service() {
                 )
             }
         }
+    }
+
+    internal fun updateCallState(intentParams: CallIntentParams) {
+        val streamCallId = intentParams.callId
+        val call = intentParams.streamVideo.call(streamCallId.type, streamCallId.id)
+        call.state.updateServiceTriggers(intentParams.trigger)
     }
 
     // This service does not return a Binder
