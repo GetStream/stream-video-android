@@ -27,7 +27,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import org.threeten.bp.OffsetDateTime
 
 internal class ServiceStateController {
     private val _state = MutableStateFlow(ServiceStateSnapshot())
@@ -42,8 +41,8 @@ internal class ServiceStateController {
     val soundPlayer: CallSoundAndVibrationPlayer?
         get() = state.value.soundPlayer
 
-    val startTime: OffsetDateTime?
-        get() = state.value.startTime
+    val startTimeElapsedRealtime: Long?
+        get() = state.value.startTimeElapsedRealtime
 
     fun setCurrentCallId(callId: StreamCallId) {
         _state.update { it.copy(currentCallId = callId) }
@@ -57,8 +56,8 @@ internal class ServiceStateController {
         _state.update { it.copy(soundPlayer = player) }
     }
 
-    fun setStartTime(time: OffsetDateTime) {
-        _state.update { it.copy(startTime = time) }
+    fun setStartTime(elapsedRealtime: Long) {
+        _state.update { it.copy(startTimeElapsedRealtime = elapsedRealtime) }
     }
 
     fun registerToggleCameraBroadcastReceiver(
