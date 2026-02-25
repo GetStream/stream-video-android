@@ -163,6 +163,7 @@ import java.util.Locale
 import java.util.SortedMap
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -1042,7 +1043,7 @@ public class CallState(
             is JoinCallResponseEvent -> {
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
-                if (!ringingStateUpdatesStopped) {
+                if (!isJoinAndRingInProgress.get()) {
                     updateRingingState()
                 } else {
                     _ringingState.value = RingingState.Outgoing(acceptedByCallee = true)
@@ -1276,6 +1277,7 @@ public class CallState(
             _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
         val isCallEnded: Boolean = _endedAt.value != null
+        val createdBySelf = createdBy?.id == client.userId
 
         ringingLogger.d { "Current: ${_ringingState.value}, call_id: ${call.cid}" }
 
@@ -1292,7 +1294,10 @@ public class CallState(
         ringingLogger.d { "call_id: ${call.cid}, Flags: $ringingStateLogs" }
 
         // no members - call is empty, we can join
-        val state: RingingState = if (hasActiveCall && !ringingStateUpdatesStopped) {
+        val state: RingingState = if (hasActiveCall && !isJoinAndRingInProgress.get()) {
+            /**
+             * Normal join, not joinAndRing
+             */
             cancelTimeout()
             RingingState.Active
         } else if (hasRingingCall && isCallEnded) {
@@ -1332,8 +1337,11 @@ public class CallState(
                 // someone already accepted the call, but it's not us (client needs to do call.join)
                 RingingState.Outgoing(acceptedByCallee = true)
             } else {
-                // call is accepted and we are already in the call
-                ringingStateUpdatesStopped = false
+                /**
+                 * Executed when the callee accepts a join-and-ring call.
+                 * Call is accepted and we are already in the call
+                 */
+                isJoinAndRingInProgress.set(false)
                 cancelTimeout()
                 RingingState.Active
             }
@@ -1415,7 +1423,7 @@ public class CallState(
 
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
-                    ringingStateUpdatesStopped = false
+                    isJoinAndRingInProgress.set(false)
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
                     call.leave("start-ringing-timeout")
                 }
@@ -1541,7 +1549,8 @@ public class CallState(
         _broadcasting.value = response.egress.broadcasting
         _session.value = response.session
         _rejectedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
-        _acceptedBy.value = response.session?.acceptedBy?.keys?.toSet() ?: emptySet()
+        val serverAcceptedBy = response.session?.acceptedBy?.keys?.toSet() ?: emptySet()
+        _acceptedBy.value = acceptedBy.value + serverAcceptedBy
         _createdAt.value = response.createdAt
         _updatedAt.value = response.updatedAt
         _endedAt.value = response.endedAt
@@ -1665,10 +1674,10 @@ public class CallState(
         _broadcasting.value = true
     }
 
-    private var ringingStateUpdatesStopped = false
+    internal var isJoinAndRingInProgress = AtomicBoolean(false)
 
-    internal fun toggleRingingStateUpdates(stopped: Boolean) {
-        ringingStateUpdatesStopped = stopped
+    internal fun toggleJoinAndRingProgress(stopped: Boolean) {
+        isJoinAndRingInProgress.set(stopped)
     }
 
     /**

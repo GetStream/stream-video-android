@@ -174,15 +174,17 @@ class ClientState(private val client: StreamVideo) {
         val ringingState = call.state.ringingState.value
         when (ringingState) {
             is RingingState.Incoming -> {
+                transitionToAcceptCall(call)
                 call.scope.launch {
-                    transitionToAcceptCall(call)
                     delay(serviceTransitionDelayMs)
                     maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
                 }
             }
             is RingingState.Outgoing -> {
-                call.scope.launch {
+                if (!call.state.isJoinAndRingInProgress.get()) {
                     transitionToAcceptCall(call)
+                }
+                call.scope.launch {
                     delay(serviceTransitionDelayMs)
                     maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
                 }
