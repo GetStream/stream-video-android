@@ -32,8 +32,10 @@ import io.getstream.video.android.core.sounds.Sounds
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
+import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.After
 import org.junit.Before
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -55,6 +57,11 @@ class StreamVideoClientTest {
             isAccessible = true
             set(client, state)
         }
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
     }
 
     private fun prepareClient(): StreamVideoClient {
@@ -228,6 +235,7 @@ class StreamVideoClientTest {
         client.fireEvent(event)
 
         verify(exactly = 0) { clientState.handleEvent(event) }
+        unmockkAll()
     }
 
     @Test
@@ -251,5 +259,6 @@ class StreamVideoClientTest {
         client.fireEvent(event)
 
         verify(exactly = 1) { clientState.handleEvent(event) }
+        unmockkAll()
     }
 }
