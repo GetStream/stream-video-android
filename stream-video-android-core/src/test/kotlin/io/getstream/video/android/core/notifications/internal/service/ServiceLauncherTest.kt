@@ -204,7 +204,11 @@ class ServiceLauncherTest {
         every { call.cid } returns "default:cid-123"
         every { call.isVideoEnabled() } returns true
 
-        serviceLauncher.showOutgoingCall(call, "outgoing_call", streamVideo)
+        serviceLauncher.showOutgoingCall(
+            call,
+            CallService.Companion.Trigger.OutgoingCall,
+            streamVideo,
+        )
 
         verify { ContextCompat.startForegroundService(context, any<Intent>()) }
 
@@ -229,7 +233,11 @@ class ServiceLauncherTest {
         every { call.isVideoEnabled() } returns true
         every { anyConstructed<TelecomPermissions>().canUseTelecom(any(), any()) } returns false
 
-        serviceLauncher.showOutgoingCall(call, "outgoing_call", streamVideo)
+        serviceLauncher.showOutgoingCall(
+            call,
+            CallService.Companion.Trigger.OutgoingCall,
+            streamVideo,
+        )
 
         coVerify(exactly = 0) { jetpackTelecomRepository.registerCall(any(), any(), any(), any()) }
     }

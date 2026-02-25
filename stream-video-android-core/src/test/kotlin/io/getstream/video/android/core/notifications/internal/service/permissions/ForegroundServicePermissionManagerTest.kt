@@ -54,7 +54,7 @@ class ForegroundServicePermissionManagerTest {
 
         val type = manager.getServiceType(
             context,
-            CallService.TRIGGER_ONGOING_CALL,
+            CallService.Companion.Trigger.OnGoingCall,
         )
 
         val expected =
@@ -72,7 +72,7 @@ class ForegroundServicePermissionManagerTest {
 
         val type = manager.getServiceType(
             context,
-            CallService.TRIGGER_ONGOING_CALL,
+            CallService.Companion.Trigger.OnGoingCall,
         )
 
         assertEquals(

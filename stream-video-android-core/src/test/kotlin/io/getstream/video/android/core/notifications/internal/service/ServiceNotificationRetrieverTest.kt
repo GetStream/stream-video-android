@@ -19,17 +19,17 @@ package io.getstream.video.android.core.notifications.internal.service
 import android.app.Notification
 import android.content.Context
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.ClientState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import kotlinx.coroutines.test.TestScope
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -44,6 +44,8 @@ class ServiceNotificationRetrieverTest {
     @MockK
     private lateinit var mockStreamVideoClient: StreamVideoClient
 
+    private lateinit var state: ClientState
+
     @MockK
     lateinit var mockNotification: Notification
 
@@ -55,6 +57,7 @@ class ServiceNotificationRetrieverTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
+        state = mockk(relaxed = true)
         context = RuntimeEnvironment.getApplication()
         serviceNotificationRetriever = ServiceNotificationRetriever()
         testCallId = StreamCallId(type = "default", id = "test-call-123")
@@ -62,6 +65,16 @@ class ServiceNotificationRetrieverTest {
 
         call = Call(mockStreamVideoClient, "default", "test-call-123", mockk())
         every { mockStreamVideoClient.call(testCallId.type, testCallId.id) } returns call
+        mockStreamVideoClient::class.java.getDeclaredField("state").apply {
+            isAccessible = true
+            set(mockStreamVideoClient, state)
+        }
+        every { mockStreamVideoClient.state } returns state
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
     }
 
     // Test notification generation logic
@@ -75,7 +88,7 @@ class ServiceNotificationRetrieverTest {
         // When
         val result = serviceNotificationRetriever.getNotificationPair(
             context = context,
-            trigger = TRIGGER_ONGOING_CALL,
+            trigger = CallService.Companion.Trigger.OnGoingCall,
             streamVideo = mockStreamVideoClient,
             streamCallId = testCallId,
             intentCallDisplayName = "John Doe",
@@ -101,7 +114,7 @@ class ServiceNotificationRetrieverTest {
         // When
         val result = serviceNotificationRetriever.getNotificationPair(
             context = context,
-            trigger = TRIGGER_INCOMING_CALL,
+            trigger = CallService.Companion.Trigger.IncomingCall,
             streamVideo = mockStreamVideoClient,
             streamCallId = testCallId,
             intentCallDisplayName = "John Doe",
@@ -117,7 +130,7 @@ class ServiceNotificationRetrieverTest {
         // When
         val result = serviceNotificationRetriever.getNotificationPair(
             context = context,
-            trigger = TRIGGER_REMOVE_INCOMING_CALL,
+            trigger = CallService.Companion.Trigger.RemoveIncomingCall,
             streamVideo = mockStreamVideoClient,
             streamCallId = testCallId,
             intentCallDisplayName = null,
@@ -129,11 +142,36 @@ class ServiceNotificationRetrieverTest {
     }
 
     @Test
+    fun `getNotificationPair returns correct notification for outgoing call`() {
+        val mockState = mockk<io.getstream.video.android.core.ClientState>()
+        every { mockStreamVideoClient.state } returns mockState
+        every { mockState.activeCall } returns mockk {
+            every { value } returns null
+        }
+        every {
+            mockStreamVideoClient.getRingingCallNotification(any(), any(), any(), any(), any())
+        } returns mockNotification
+
+        // When
+        val result = serviceNotificationRetriever.getNotificationPair(
+            context = context,
+            trigger = CallService.Companion.Trigger.OutgoingCall,
+            streamVideo = mockStreamVideoClient,
+            streamCallId = testCallId,
+            intentCallDisplayName = "John Doe",
+        )
+
+        // Then
+        assertEquals(mockNotification, result.first)
+        assertEquals(testCallId.getNotificationId(NotificationType.Outgoing), result.second)
+    }
+
+    @Test
     fun `getNotificationPair returns null notification for unknown trigger`() {
         // When
         val result = serviceNotificationRetriever.getNotificationPair(
             context = context,
-            trigger = "unknown_trigger",
+            trigger = CallService.Companion.Trigger.None,
             streamVideo = mockStreamVideoClient,
             streamCallId = testCallId,
             intentCallDisplayName = null,
@@ -142,23 +180,5 @@ class ServiceNotificationRetrieverTest {
         // Then
         assertNull(result.first)
         assertEquals(testCallId.hashCode(), result.second)
-    }
-
-    @Test
-    fun `service handles missing StreamVideo instance gracefully in notification generation`() {
-        // Given - Using a real CallService instance but with mocked dependencies
-
-        // When - Call getNotificationPair with minimal valid parameters
-        val result = serviceNotificationRetriever.getNotificationPair(
-            context,
-            trigger = TRIGGER_REMOVE_INCOMING_CALL, // This trigger doesn't need StreamVideo methods
-            streamVideo = mockStreamVideoClient,
-            streamCallId = testCallId,
-            intentCallDisplayName = null,
-        )
-
-        // Then - Should handle gracefully and return expected result
-        assertNull(result.first) // No notification for remove trigger
-        assertEquals(testCallId.getNotificationId(NotificationType.Incoming), result.second)
     }
 }

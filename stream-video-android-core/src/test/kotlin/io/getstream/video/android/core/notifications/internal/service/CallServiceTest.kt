@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.Manifest
-import android.app.Notification
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -25,22 +24,16 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.core.content.ContextCompat
-import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_KEY
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.Trigger.Companion.TRIGGER_KEY
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import org.junit.After
@@ -55,18 +48,6 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 class CallServiceTest {
-
-    @MockK
-    lateinit var mockContext: Context
-
-    @MockK
-    private lateinit var mockStreamVideoClient: StreamVideoClient
-
-    @MockK
-    lateinit var mockNotification: Notification
-
-    @MockK
-    lateinit var payload: Map<String, Any?>
 
     private lateinit var context: Context
     private lateinit var callService: CallService
@@ -90,10 +71,10 @@ class CallServiceTest {
     // Test companion object constants
     @Test
     fun `service constants have expected values`() {
-        assertEquals("incoming_call", TRIGGER_INCOMING_CALL)
-        assertEquals("outgoing_call", TRIGGER_OUTGOING_CALL)
-        assertEquals("ongoing_call", TRIGGER_ONGOING_CALL)
-        assertEquals("remove_call", TRIGGER_REMOVE_INCOMING_CALL)
+        assertEquals("incoming_call", CallService.Companion.Trigger.IncomingCall.name)
+        assertEquals("outgoing_call", CallService.Companion.Trigger.OutgoingCall.name)
+        assertEquals("ongoing_call", CallService.Companion.Trigger.OnGoingCall.name)
+        assertEquals("remove_call", CallService.Companion.Trigger.RemoveIncomingCall.name)
         assertEquals(
             "io.getstream.video.android.core.notifications.internal.service.CallService.call_trigger",
             TRIGGER_KEY,
@@ -175,12 +156,15 @@ class CallServiceTest {
         // When
         intent.putExtra(INTENT_EXTRA_CALL_CID, testCallId)
         intent.putExtra(INTENT_EXTRA_CALL_DISPLAY_NAME, callDisplayName)
-        intent.putExtra(TRIGGER_KEY, TRIGGER_INCOMING_CALL)
+        intent.putExtra(TRIGGER_KEY, CallService.Companion.Trigger.IncomingCall.name)
 
         // Then
         assertEquals(testCallId, intent.streamCallId(INTENT_EXTRA_CALL_CID))
         assertEquals(callDisplayName, intent.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME))
-        assertEquals(TRIGGER_INCOMING_CALL, intent.getStringExtra(TRIGGER_KEY))
+        assertEquals(
+            CallService.Companion.Trigger.IncomingCall.name,
+            intent.getStringExtra(TRIGGER_KEY),
+        )
     }
 
     @Test
