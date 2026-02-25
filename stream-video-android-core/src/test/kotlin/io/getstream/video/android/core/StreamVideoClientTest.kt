@@ -22,6 +22,7 @@ import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSessionStartedEvent
 import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
@@ -82,16 +83,6 @@ class StreamVideoClientTest {
             recordPrivateCalls = true,
         )
     }
-
-//    @Test
-//    fun `shouldProcessEvent delegates to policy`() {
-//        val event = mockk<VideoEvent>()
-//        every { policy.shouldPropagate(event) } returns false
-//
-//        val result = client.shouldProcessEvent(event)
-//
-//        assertFalse(result)
-//    }
 
     @Test
     fun `resolveSelectedCid returns explicit cid when provided`() {
@@ -227,7 +218,12 @@ class StreamVideoClientTest {
             isAccessible = true
             set(client, clientState)
         }
-        every { client.callBusyHandler.shouldPropagateEvent(event) } returns false
+        val mockCallBusyHandler = mockk<CallBusyHandler>(relaxed = true)
+        every { mockCallBusyHandler.shouldPropagateEvent(event) } returns false
+        client::class.java.getDeclaredField("callBusyHandler").apply {
+            isAccessible = true
+            set(client, mockCallBusyHandler)
+        }
 
         client.fireEvent(event)
 
@@ -245,10 +241,15 @@ class StreamVideoClientTest {
             isAccessible = true
             set(client, clientState)
         }
-        every { client.callBusyHandler.shouldPropagateEvent(event) } returns true
+        val mockCallBusyHandler = mockk<CallBusyHandler>(relaxed = true)
+        every { mockCallBusyHandler.shouldPropagateEvent(event) } returns true
+        client::class.java.getDeclaredField("callBusyHandler").apply {
+            isAccessible = true
+            set(client, mockCallBusyHandler)
+        }
 
         client.fireEvent(event)
 
-        verify(exactly = 1) { client.state.handleEvent(event) }
+        verify(exactly = 1) { clientState.handleEvent(event) }
     }
 }
