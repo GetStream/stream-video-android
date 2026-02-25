@@ -46,6 +46,7 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
@@ -150,6 +151,14 @@ constructor(
     private val logger by taggedLogger("Video:StreamNotificationHandler")
     private val serviceLauncher = ServiceLauncher(application)
 
+    internal fun shouldShowIncomingCallNotification(
+        callBusyHandler: CallBusyHandler,
+        callCid: String,
+    ) = !callBusyHandler.isBusyWithAnotherCall(
+        callCid,
+        CallBusyHandler.CallBusyHandlerCheckerSource.NOTIFICATION,
+    )
+
     // START REGION : On push arrived
     override fun onRingingCall(
         callId: StreamCallId,
@@ -158,22 +167,28 @@ constructor(
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instance()
-        serviceLauncher.showIncomingCall(
-            application,
-            callId,
-            callDisplayName,
-            streamVideo.state.callConfigRegistry.get(callId.type),
-            isVideo = isVideoCall(callId, payload),
-            payload = payload,
-            streamVideo,
-            notification = getRingingCallNotification(
-                RingingState.Incoming(),
+        if (shouldShowIncomingCallNotification(
+                (streamVideo as StreamVideoClient).callBusyHandler,
+                callId.cid,
+            )
+        ) {
+            serviceLauncher.showIncomingCall(
+                application,
                 callId,
                 callDisplayName,
-                shouldHaveContentIntent = true,
-                payload,
-            ),
-        )
+                streamVideo.state.callConfigRegistry.get(callId.type),
+                isVideo = isVideoCall(callId, payload),
+                payload = payload,
+                streamVideo,
+                notification = getRingingCallNotification(
+                    RingingState.Incoming(),
+                    callId,
+                    callDisplayName,
+                    shouldHaveContentIntent = true,
+                    payload,
+                ),
+            )
+        }
     }
 
     override fun onLiveCall(

@@ -294,7 +294,15 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
     // Default implementation that rejects new calls when there's an ongoing call
     private val defaultCallHandler = object : IncomingCallHandlerDelegate {
-        override fun shouldAcceptNewCall(activeCall: Call, intent: Intent) = true
+        override fun shouldAcceptNewCall(activeCall: Call, intent: Intent): Boolean {
+            val streamVideo = StreamVideo.instanceOrNull()
+            return if (streamVideo == null) {
+                // existing behaviour
+                true
+            } else {
+                !streamVideo.state.rejectCallWhenBusy
+            }
+        }
 
         override fun onAcceptCall(intent: Intent) {
             finish()
