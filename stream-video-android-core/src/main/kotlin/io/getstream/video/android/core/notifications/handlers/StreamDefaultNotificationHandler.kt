@@ -167,30 +167,28 @@ constructor(
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instance()
-        if (!shouldShowIncomingCallNotification(
+        if (shouldShowIncomingCallNotification(
                 (streamVideo as StreamVideoClient).callBusyHandler,
                 callId.cid,
             )
         ) {
-            return
-        }
-
-        serviceLauncher.showIncomingCall(
-            application,
-            callId,
-            callDisplayName,
-            streamVideo.state.callConfigRegistry.get(callId.type),
-            isVideo = isVideoCall(callId, payload),
-            payload = payload,
-            streamVideo,
-            notification = getRingingCallNotification(
-                RingingState.Incoming(),
+            serviceLauncher.showIncomingCall(
+                application,
                 callId,
                 callDisplayName,
-                shouldHaveContentIntent = true,
-                payload,
-            ),
-        )
+                streamVideo.state.callConfigRegistry.get(callId.type),
+                isVideo = isVideoCall(callId, payload),
+                payload = payload,
+                streamVideo,
+                notification = getRingingCallNotification(
+                    RingingState.Incoming(),
+                    callId,
+                    callDisplayName,
+                    shouldHaveContentIntent = true,
+                    payload,
+                ),
+            )
+        }
     }
 
     override fun onLiveCall(
