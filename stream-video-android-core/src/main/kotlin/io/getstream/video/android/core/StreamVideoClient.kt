@@ -26,9 +26,9 @@ import io.getstream.android.video.generated.models.BlockUserRequest
 import io.getstream.android.video.generated.models.BlockUserResponse
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallRequest
+import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.CollectUserFeedbackRequest
-import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.android.video.generated.models.CreateGuestRequest
 import io.getstream.android.video.generated.models.CreateGuestResponse
 import io.getstream.android.video.generated.models.GetCallResponse
@@ -83,6 +83,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
@@ -135,7 +136,10 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -147,7 +151,6 @@ import okhttp3.Response
 import org.webrtc.ManagedAudioProcessingFactory
 import retrofit2.HttpException
 import java.util.*
-import kotlin.coroutines.Continuation
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
@@ -188,6 +191,8 @@ internal class StreamVideoClient internal constructor(
 
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
+    internal val callBusyHandler =
+        CallBusyHandler(rejectCallWhenBusy, state.activeCall, state.ringingCall)
 
     /**
      * Can be set from tests to be returned as a session id for the coordinator.
@@ -197,7 +202,6 @@ internal class StreamVideoClient internal constructor(
     /** if true we fail fast on errors instead of logging them */
 
     internal var guestUserJob: Deferred<Unit>? = null
-    private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     public override val userId = user.id
 
@@ -410,6 +414,20 @@ internal class StreamVideoClient internal constructor(
                 }
             }
         }
+
+        scope.launch {
+            /**
+             * Invoke the reject API only when the busy check is triggered from the video client.
+             *
+             * Network calls initiated from background notification flows may be suspended
+             * by the OS, so API calls are intentionally avoided in those cases.
+             */
+            callBusyHandler.callBusyHandlerState.filterNotNull()
+                .filter { it.source == CallBusyHandler.CallBusyHandlerCheckerSource.VIDEO_CLIENT }
+                .map { it.streamCallId }.collect { streamCallId ->
+                    call(streamCallId.type, streamCallId.id).reject(RejectReason.Busy)
+                }
+        }
     }
 
     var location: String? = null
@@ -556,7 +574,10 @@ internal class StreamVideoClient internal constructor(
     }
 
     internal fun shouldProcessEvent(event: VideoEvent): Boolean {
-        return state.eventPropagationPolicy.shouldPropagate(event)
+        return when (event) {
+            is CallRingEvent -> callBusyHandler.shouldPropagateEvent(event)
+            else -> true
+        }
     }
 
     internal fun propagateEventToClientState(event: VideoEvent) {

@@ -154,7 +154,10 @@ constructor(
     internal fun shouldShowIncomingCallNotification(
         callBusyHandler: CallBusyHandler,
         callCid: String,
-    ) = !callBusyHandler.isBusyWithAnotherCall(callCid)
+    ) = !callBusyHandler.isBusyWithAnotherCall(
+        callCid,
+        CallBusyHandler.CallBusyHandlerCheckerSource.NOTIFICATION,
+    )
 
     // START REGION : On push arrived
     override fun onRingingCall(
@@ -165,7 +168,7 @@ constructor(
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instance()
         if (!shouldShowIncomingCallNotification(
-                streamVideo.state.callBusyHandler,
+                (streamVideo as StreamVideoClient).callBusyHandler,
                 callId.cid,
             )
         ) {

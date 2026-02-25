@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.models.CallAcceptedEvent
+import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSessionStartedEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.video.android.core.events.VideoEventListener
@@ -41,10 +42,21 @@ import kotlin.test.assertTrue
 class StreamVideoClientTest {
     private lateinit var client: StreamVideoClient
     private lateinit var state: ClientState
-    private lateinit var policy: EventPropagationPolicy
 
     @Before
     fun setup() {
+        client = prepareClient()
+
+        state = mockk(relaxed = true)
+
+        // Inject mocked state via reflection
+        client::class.java.getDeclaredField("state").apply {
+            isAccessible = true
+            set(client, state)
+        }
+    }
+
+    private fun prepareClient(): StreamVideoClient {
         val context = mockk<Context>(relaxed = true)
         val lifecycle = mockk<Lifecycle>(relaxed = true)
         val coordinator = mockk<CoordinatorConnectionModule>(relaxed = true)
@@ -53,7 +65,7 @@ class StreamVideoClientTest {
         val sounds = mockk<Sounds>(relaxed = true)
         val vibration = mockk<RingingCallVibrationConfig>(relaxed = true)
 
-        client = spyk(
+        return spyk(
             StreamVideoClient(
                 context = context,
                 user = mockk(relaxed = true),
@@ -69,28 +81,17 @@ class StreamVideoClientTest {
             ),
             recordPrivateCalls = true,
         )
-
-        state = mockk(relaxed = true)
-        policy = mockk(relaxed = true)
-
-        every { state.eventPropagationPolicy } returns policy
-
-        // Inject mocked state via reflection
-        client::class.java.getDeclaredField("state").apply {
-            isAccessible = true
-            set(client, state)
-        }
     }
 
-    @Test
-    fun `shouldProcessEvent delegates to policy`() {
-        val event = mockk<VideoEvent>()
-        every { policy.shouldPropagate(event) } returns false
-
-        val result = client.shouldProcessEvent(event)
-
-        assertFalse(result)
-    }
+//    @Test
+//    fun `shouldProcessEvent delegates to policy`() {
+//        val event = mockk<VideoEvent>()
+//        every { policy.shouldPropagate(event) } returns false
+//
+//        val result = client.shouldProcessEvent(event)
+//
+//        assertFalse(result)
+//    }
 
     @Test
     fun `resolveSelectedCid returns explicit cid when provided`() {
@@ -204,13 +205,50 @@ class StreamVideoClientTest {
     }
 
     @Test
-    fun `fireEvent full flow executes in order when allowed`() {
-        val event = mockk<VideoEvent>()
+    fun `fireEvent full flow executes in order when callBusyHandler allows`() {
+        val event = mockk<CallRingEvent>(relaxed = true)
 
-        every { policy.shouldPropagate(event) } returns true
+        every { event.callCid } returns "video:999"
+        every { client.callBusyHandler.shouldPropagateEvent(event) } returns true
 
         client.fireEvent(event)
 
         verify { state.handleEvent(event) }
+    }
+
+    @Test
+    fun `fireEvent won't fully flow executes in when callBusyHandler returns false`() {
+        val event = mockk<CallRingEvent>(relaxed = true)
+
+        every { event.callCid } returns "video:999"
+        val client = prepareClient()
+        val clientState = mockk<ClientState>(relaxed = true)
+        client::class.java.getDeclaredField("state").apply {
+            isAccessible = true
+            set(client, clientState)
+        }
+        every { client.callBusyHandler.shouldPropagateEvent(event) } returns false
+
+        client.fireEvent(event)
+
+        verify(exactly = 0) { clientState.handleEvent(event) }
+    }
+
+    @Test
+    fun `fireEvent won't fully flow executes in when callBusyHandler returns true`() {
+        val event = mockk<CallRingEvent>(relaxed = true)
+
+        every { event.callCid } returns "video:999"
+        val client = prepareClient()
+        val clientState = mockk<ClientState>(relaxed = true)
+        client::class.java.getDeclaredField("state").apply {
+            isAccessible = true
+            set(client, clientState)
+        }
+        every { client.callBusyHandler.shouldPropagateEvent(event) } returns true
+
+        client.fireEvent(event)
+
+        verify(exactly = 1) { client.state.handleEvent(event) }
     }
 }

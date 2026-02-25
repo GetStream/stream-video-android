@@ -17,32 +17,51 @@
 package io.getstream.video.android.core.call
 
 import io.getstream.android.video.generated.models.CallRingEvent
-import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.model.RejectReason
-import kotlinx.coroutines.launch
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.model.StreamCallId
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-internal class CallBusyHandler(private val streamVideo: StreamVideoClient) {
+internal class CallBusyHandler(
+    private val rejectCallWhenBusy: Boolean,
+    private val activeCall: StateFlow<Call?>,
+    private val ringingCall: StateFlow<Call?>,
+) {
 
+    private val _callBusyHandlerState: MutableStateFlow<CallBusyHandlerState?> =
+        MutableStateFlow(null)
+    internal val callBusyHandlerState: StateFlow<CallBusyHandlerState?> = _callBusyHandlerState
     fun shouldPropagateEvent(event: CallRingEvent): Boolean {
-        return !isBusyWithAnotherCall(event.callCid, true)
+        return !isBusyWithAnotherCall(event.callCid, CallBusyHandlerCheckerSource.VIDEO_CLIENT)
     }
 
-    fun isBusyWithAnotherCall(callCid: String, rejectViaApi: Boolean = false): Boolean {
-        val clientState = streamVideo.state
-        if (!clientState.rejectCallWhenBusy) return false
+    fun isBusyWithAnotherCall(callCid: String, source: CallBusyHandlerCheckerSource = CallBusyHandlerCheckerSource.VIDEO_CLIENT): Boolean {
+        if (!rejectCallWhenBusy) return false
 
-        val (type, id) = callCid.split(":")
-
-        val isBusy =
-            clientState.activeCall.value?.id?.let { it != id } == true ||
-                clientState.ringingCall.value?.id?.let { it != id } == true
-
-        if (isBusy && rejectViaApi) {
-            streamVideo.scope.launch {
-                streamVideo.call(type, id).reject(RejectReason.Busy)
-            }
+        val streamCallId = StreamCallId.fromCallCid(callCid)
+        val isDifferentFromActiveCall = if (activeCall.value != null) {
+            activeCall.value?.cid != streamCallId.cid
+        } else {
+            false
         }
 
-        return isBusy
+        val isDifferentFromRingingCall = if (ringingCall.value != null) {
+            ringingCall.value?.cid != streamCallId.cid
+        } else {
+            false
+        }
+        val isBusyWithAnotherCall = isDifferentFromActiveCall || isDifferentFromRingingCall
+
+        if (isBusyWithAnotherCall) {
+            _callBusyHandlerState.value = CallBusyHandlerState(streamCallId, source)
+        }
+
+        return isBusyWithAnotherCall
     }
+
+    internal enum class CallBusyHandlerCheckerSource {
+        NOTIFICATION, VIDEO_CLIENT
+    }
+
+    internal data class CallBusyHandlerState(val streamCallId: StreamCallId, val source: CallBusyHandlerCheckerSource)
 }
