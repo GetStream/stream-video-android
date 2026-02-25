@@ -853,10 +853,11 @@ public class CallState(
             }
 
             is CallEndedEvent -> {
-                call.state.cancelTimeout()
+                cancelTimeout()
                 updateFromResponse(event.call)
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
+                updateRingingState()
                 call.leave("CallEndedEvent")
             }
 
@@ -1275,6 +1276,7 @@ public class CallState(
         val userIsParticipant =
             _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
+        val isCallEnded: Boolean = _endedAt.value != null
         val createdBySelf = createdBy?.id == client.userId
 
         ringingLogger.d { "Current: ${_ringingState.value}, call_id: ${call.cid}" }
@@ -1286,6 +1288,7 @@ public class CallState(
             ("hasActiveCall: $hasActiveCall"),
             ("hasRingingCall: $hasRingingCall"),
             ("userIsParticipant: $userIsParticipant"),
+            ("isCallEnded: $isCallEnded"),
         ).joinToString("") { it + "\n" }
 
         ringingLogger.d { "call_id: ${call.cid}, Flags: $ringingStateLogs" }
@@ -1297,6 +1300,9 @@ public class CallState(
              */
             cancelTimeout()
             RingingState.Active
+        } else if (hasRingingCall && isCallEnded) {
+            cancelTimeout()
+            RingingState.RejectedByAll
         } else if (isRejectedByMe) {
             call.leave("updateRingingState-rejected-self")
             cancelTimeout()
