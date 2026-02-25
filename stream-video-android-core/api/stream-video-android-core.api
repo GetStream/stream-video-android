@@ -8867,7 +8867,6 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun getActiveCall ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getCallConfigRegistry ()Lio/getstream/video/android/core/notifications/internal/service/CallServiceConfigRegistry;
 	public final fun getConnection ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getRejectCallWhenBusy ()Z
 	public final fun getRingingCall ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTelecomIntegrationType ()Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
 	public final fun getUser ()Lkotlinx/coroutines/flow/StateFlow;
