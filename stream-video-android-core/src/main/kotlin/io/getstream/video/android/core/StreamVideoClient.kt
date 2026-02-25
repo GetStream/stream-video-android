@@ -126,6 +126,7 @@ import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import io.getstream.webrtc.ManagedAudioProcessingFactory
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -144,7 +145,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.Callback
 import okhttp3.Request
 import okhttp3.Response
-import org.webrtc.ManagedAudioProcessingFactory
 import retrofit2.HttpException
 import java.util.*
 import kotlin.coroutines.Continuation

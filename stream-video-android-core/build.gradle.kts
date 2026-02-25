@@ -131,7 +131,7 @@ baselineProfile {
         include("io.getstream.video.android.datastore.**")
         include("io.getstream.video.android.model.**")
         include("io.getstream.android.video.generated.**")
-        include("org.webrtc.**")
+        include("io.getstream.webrtc.**")
     }
 }
 

@@ -18,6 +18,13 @@ package io.getstream.video.android.core.call.connection
 
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.webrtc.MediaConstraints
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RtpParameters.Encoding
+import io.getstream.webrtc.RtpTransceiver.RtpTransceiverDirection
+import io.getstream.webrtc.RtpTransceiver.RtpTransceiverInit
+import io.getstream.webrtc.SdpObserver
+import io.getstream.webrtc.SessionDescription
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.clearAllMocks
@@ -34,13 +41,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
-import org.webrtc.MediaConstraints
-import org.webrtc.PeerConnection
-import org.webrtc.RtpParameters.Encoding
-import org.webrtc.RtpTransceiver.RtpTransceiverDirection
-import org.webrtc.RtpTransceiver.RtpTransceiverInit
-import org.webrtc.SdpObserver
-import org.webrtc.SessionDescription
 import kotlin.test.Test
 
 class StreamPeerConnectionTest {
@@ -160,7 +160,7 @@ class StreamPeerConnectionTest {
         // We'll create a StreamPeerConnection with a known maxBitRate
         val peerConnection = object : StreamPeerConnection(
             type = io.getstream.video.android.core.model.StreamPeerType.PUBLISHER,
-            mediaConstraints = org.webrtc.MediaConstraints(),
+            mediaConstraints = io.getstream.webrtc.MediaConstraints(),
             onStreamAdded = null,
             onNegotiationNeeded = null,
             onIceCandidate = null,
@@ -215,7 +215,7 @@ class StreamPeerConnectionTest {
     fun `buildVideoTransceiverInit screenshare has one encoding q`() = runTest {
         val peerConnection = object : StreamPeerConnection(
             type = io.getstream.video.android.core.model.StreamPeerType.SUBSCRIBER,
-            mediaConstraints = org.webrtc.MediaConstraints(),
+            mediaConstraints = io.getstream.webrtc.MediaConstraints(),
             onStreamAdded = null,
             onNegotiationNeeded = null,
             onIceCandidate = null,

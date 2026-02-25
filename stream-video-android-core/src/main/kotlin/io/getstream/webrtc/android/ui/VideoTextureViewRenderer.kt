@@ -24,13 +24,13 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.view.TextureView
-import org.webrtc.EglBase
-import org.webrtc.EglRenderer
-import org.webrtc.GlRectDrawer
-import org.webrtc.RendererCommon
-import org.webrtc.ThreadUtils
-import org.webrtc.VideoFrame
-import org.webrtc.VideoSink
+import io.getstream.webrtc.EglBase
+import io.getstream.webrtc.EglRenderer
+import io.getstream.webrtc.GlRectDrawer
+import io.getstream.webrtc.RendererCommon
+import io.getstream.webrtc.ThreadUtils
+import io.getstream.webrtc.VideoFrame
+import io.getstream.webrtc.VideoSink
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -72,17 +72,17 @@ public open class VideoTextureViewRenderer @JvmOverloads constructor(
     private var isFirstFrameRendered = false
 
     /**
-     * The rotated [org.webrtc.VideoFrame] width.
+     * The rotated [io.getstream.webrtc.VideoFrame] width.
      */
     private var rotatedFrameWidth = 0
 
     /**
-     * The rotated [org.webrtc.VideoFrame] height.
+     * The rotated [io.getstream.webrtc.VideoFrame] height.
      */
     private var rotatedFrameHeight = 0
 
     /**
-     * The rotated [org.webrtc.VideoFrame] rotation.
+     * The rotated [io.getstream.webrtc.VideoFrame] rotation.
      */
     private var frameRotation = 0
 
@@ -126,7 +126,7 @@ public open class VideoTextureViewRenderer @JvmOverloads constructor(
     /**
      * Called when a new frame is received. Sends the frame to be rendered.
      *
-     * @param videoFrame The [org.webrtc.VideoFrame] received from WebRTC connection to draw on the screen.
+     * @param videoFrame The [io.getstream.webrtc.VideoFrame] received from WebRTC connection to draw on the screen.
      */
     override fun onFrame(videoFrame: VideoFrame) {
         eglRenderer.onFrame(videoFrame)
@@ -181,7 +181,7 @@ public open class VideoTextureViewRenderer @JvmOverloads constructor(
     /**
      * Initialise the renderer. Should be called from the main thread.
      *
-     * @param sharedContext [org.webrtc.EglBase.Context]
+     * @param sharedContext [io.getstream.webrtc.EglBase.Context]
      * @param rendererEvents Sets the render event listener.
      */
     public fun init(

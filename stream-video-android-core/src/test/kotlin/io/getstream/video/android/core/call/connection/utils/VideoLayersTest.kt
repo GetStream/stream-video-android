@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.call.connection.utils
 
+import io.getstream.webrtc.CameraEnumerationAndroid
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -25,7 +26,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.webrtc.CameraEnumerationAndroid
 import stream.video.sfu.models.Codec
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType

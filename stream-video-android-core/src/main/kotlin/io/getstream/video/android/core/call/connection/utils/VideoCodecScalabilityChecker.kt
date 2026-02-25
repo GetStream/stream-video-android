@@ -17,14 +17,14 @@
 package io.getstream.video.android.core.call.connection.utils
 
 import android.util.Log
-import org.webrtc.DefaultVideoEncoderFactory
-import org.webrtc.EglBase
-import org.webrtc.HardwareVideoEncoderFactory
-import org.webrtc.ResolutionAdjustment
-import org.webrtc.SimulcastAlignedVideoEncoderFactory
-import org.webrtc.SoftwareVideoEncoderFactory
-import org.webrtc.VideoCodecInfo
-import org.webrtc.VideoEncoderFactory
+import io.getstream.webrtc.DefaultVideoEncoderFactory
+import io.getstream.webrtc.EglBase
+import io.getstream.webrtc.HardwareVideoEncoderFactory
+import io.getstream.webrtc.ResolutionAdjustment
+import io.getstream.webrtc.SimulcastAlignedVideoEncoderFactory
+import io.getstream.webrtc.SoftwareVideoEncoderFactory
+import io.getstream.webrtc.VideoCodecInfo
+import io.getstream.webrtc.VideoEncoderFactory
 
 /**
  * Utility class to check video codec scalability modes on Android devices

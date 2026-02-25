@@ -260,7 +260,7 @@ public final class io/getstream/video/android/ui/common/view/ParticipantContentV
 public final class io/getstream/video/android/ui/common/view/ParticipantItemView : io/getstream/webrtc/android/ui/VideoTextureViewRenderer {
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
-	public final fun bindTrack (Lorg/webrtc/VideoTrack;)V
+	public final fun bindTrack (Lio/getstream/webrtc/VideoTrack;)V
 	public final fun cleanUp ()V
 	public final fun initialize (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun initialize$default (Lio/getstream/video/android/ui/common/view/ParticipantItemView;Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V

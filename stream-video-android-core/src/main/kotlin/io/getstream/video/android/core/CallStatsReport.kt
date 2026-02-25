@@ -20,10 +20,10 @@ import android.util.Log
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.webrtc.RTCStats
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import org.webrtc.RTCStats
 
 @InternalStreamVideoApi
 data class CallStatsReport(

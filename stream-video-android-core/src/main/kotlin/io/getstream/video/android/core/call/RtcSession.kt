@@ -97,6 +97,11 @@ import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
+import io.getstream.webrtc.MediaStreamTrack
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.RTCStatsReport
+import io.getstream.webrtc.RtpTransceiver.RtpTransceiverDirection
+import io.getstream.webrtc.SessionDescription
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -126,11 +131,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
 import org.json.JSONArray
-import org.webrtc.MediaStreamTrack
-import org.webrtc.PeerConnection
-import org.webrtc.RTCStatsReport
-import org.webrtc.RtpTransceiver.RtpTransceiverDirection
-import org.webrtc.SessionDescription
 import retrofit2.HttpException
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.LeaveCallRequest
@@ -463,7 +463,7 @@ public class RtcSession internal constructor(
             TrackType.TRACK_TYPE_AUDIO,
             AudioTrack(
                 streamId = streamId,
-                audio = track as org.webrtc.AudioTrack,
+                audio = track as io.getstream.webrtc.AudioTrack,
             ),
         )
     }
@@ -843,7 +843,7 @@ public class RtcSession internal constructor(
                             TrackType.TRACK_TYPE_VIDEO,
                             VideoTrack(
                                 streamId = streamId,
-                                video = track as org.webrtc.VideoTrack,
+                                video = track as io.getstream.webrtc.VideoTrack,
                             ),
                         )
                     } else {
@@ -886,7 +886,7 @@ public class RtcSession internal constructor(
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
                             VideoTrack(
                                 streamId = streamId,
-                                video = track as org.webrtc.VideoTrack,
+                                video = track as io.getstream.webrtc.VideoTrack,
                             ),
                         )
                     }

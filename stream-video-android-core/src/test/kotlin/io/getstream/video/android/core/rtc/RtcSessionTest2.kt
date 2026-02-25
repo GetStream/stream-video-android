@@ -35,6 +35,7 @@ import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.webrtc.SessionDescription
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -60,7 +61,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.webrtc.SessionDescription
 import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.PublishOption

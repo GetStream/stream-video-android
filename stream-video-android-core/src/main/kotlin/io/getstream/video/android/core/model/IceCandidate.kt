@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
-import org.webrtc.IceCandidate as RtcIceCandidate
+import io.getstream.webrtc.IceCandidate as RtcIceCandidate
 
 @Stable
 @kotlinx.serialization.Serializable
@@ -38,7 +38,7 @@ internal fun RtcIceCandidate.toDomainCandidate(): IceCandidate {
 }
 
 internal fun IceCandidate.toRtcCandidate(): RtcIceCandidate {
-    return org.webrtc.IceCandidate(
+    return io.getstream.webrtc.IceCandidate(
         sdpMid,
         sdpMLineIndex,
         candidate,
