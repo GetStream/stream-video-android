@@ -26,9 +26,9 @@ import io.getstream.android.video.generated.models.BlockUserRequest
 import io.getstream.android.video.generated.models.BlockUserResponse
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallRequest
+import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.CollectUserFeedbackRequest
-import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.android.video.generated.models.CreateGuestRequest
 import io.getstream.android.video.generated.models.CreateGuestResponse
 import io.getstream.android.video.generated.models.GetCallResponse
@@ -83,6 +83,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
@@ -135,7 +136,10 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -147,7 +151,6 @@ import okhttp3.Response
 import org.webrtc.ManagedAudioProcessingFactory
 import retrofit2.HttpException
 import java.util.*
-import kotlin.coroutines.Continuation
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
@@ -181,12 +184,15 @@ internal class StreamVideoClient internal constructor(
     internal val enableStatsCollection: Boolean = true,
     internal val enableStereoForSubscriber: Boolean = true,
     internal val telecomConfig: TelecomConfig? = null,
+    internal val rejectCallWhenBusy: Boolean = false,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
 
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
+    internal val callBusyHandler =
+        CallBusyHandler(rejectCallWhenBusy, state.activeCall, state.ringingCall)
 
     /**
      * Can be set from tests to be returned as a session id for the coordinator.
@@ -196,7 +202,6 @@ internal class StreamVideoClient internal constructor(
     /** if true we fail fast on errors instead of logging them */
 
     internal var guestUserJob: Deferred<Unit>? = null
-    private lateinit var connectContinuation: Continuation<Result<ConnectedEvent>>
 
     public override val userId = user.id
 
@@ -409,6 +414,20 @@ internal class StreamVideoClient internal constructor(
                 }
             }
         }
+
+        scope.launch {
+            /**
+             * Invoke the reject API only when the busy check is triggered from the video client.
+             *
+             * Network calls initiated from background notification flows may be suspended
+             * by the OS, so API calls are intentionally avoided in those cases.
+             */
+            callBusyHandler.callBusyHandlerState.filterNotNull()
+                .filter { it.source == CallBusyHandler.CallBusyHandlerCheckerSource.VIDEO_CLIENT }
+                .map { it.streamCallId }.collect { streamCallId ->
+                    call(streamCallId.type, streamCallId.id).reject(RejectReason.Busy)
+                }
+        }
     }
 
     var location: String? = null
@@ -531,62 +550,87 @@ internal class StreamVideoClient internal constructor(
      * Internal function that fires the event. It starts by updating client state and call state
      * After that it loops over the subscriptions and calls their listener
      */
+
     internal fun fireEvent(event: VideoEvent, cid: String = "") {
         logger.d { "Event received $event" }
-        // update state for the client
+
+        if (!shouldProcessEvent(event)) return
+
+        propagateEventToClientState(event)
+
+        val selectedCid = resolveSelectedCid(event, cid)
+
+        notifyClientSubscriptions(event)
+
+        if (selectedCid.isEmpty()) return
+
+        forwardToCallSubscriptions(selectedCid, event)
+
+        if (!shouldProcessCallAcceptedEvent(event)) return
+
+        propagateEventToCall(selectedCid, event)
+
+        deliverToDestroyedCalls(event)
+    }
+
+    internal fun shouldProcessEvent(event: VideoEvent): Boolean {
+        return when (event) {
+            is CallRingEvent -> callBusyHandler.shouldPropagateEvent(event)
+            else -> true
+        }
+    }
+
+    internal fun propagateEventToClientState(event: VideoEvent) {
         state.handleEvent(event)
+    }
 
-        // update state for the calls. calls handle updating participants and members
-        val selectedCid = cid.ifEmpty {
-            val callEvent = event as? WSCallEvent
-            callEvent?.getCallCID()
-        } ?: ""
+    internal fun resolveSelectedCid(event: VideoEvent, cid: String): String {
+        if (cid.isNotEmpty()) return cid
 
-        // client level subscriptions
+        val callEvent = event as? WSCallEvent
+        return callEvent?.getCallCID().orEmpty()
+    }
+
+    internal fun notifyClientSubscriptions(event: VideoEvent) {
         subscriptions.forEach { sub ->
-            if (!sub.isDisposed) {
-                // subs without filters should always fire
-                if (sub.filter == null) {
-                    sub.listener.onEvent(event)
-                }
+            if (sub.isDisposed) return@forEach
 
-                // if there is a filter, check it and fire if it matches
-                sub.filter?.let {
-                    if (it.invoke(event)) {
-                        sub.listener.onEvent(event)
-                    }
-                }
+            if (sub.filter == null || sub.filter.invoke(event)) {
+                sub.listener.onEvent(event)
             }
         }
-        // call level subscriptions
-        if (selectedCid.isNotEmpty()) {
-            calls[selectedCid]?.fireEvent(event)
-            notifyDestroyedCalls(event)
-        }
+    }
 
-        if (selectedCid.isNotEmpty()) {
-            // Special handling  for accepted events
-            if (event is CallAcceptedEvent) {
-                // Skip accepted events not meant for the current outgoing call.
-                val currentRingingCall = state.ringingCall.value
-                val state = currentRingingCall?.state?.ringingState?.value
-                if (currentRingingCall != null &&
-                    (state is RingingState.Outgoing || state == RingingState.Idle) &&
-                    currentRingingCall.cid != event.callCid
-                ) {
-                    // Skip this event
-                    return
-                }
-            }
+    internal fun forwardToCallSubscriptions(cid: String, event: VideoEvent) {
+        calls[cid]?.fireEvent(event)
+        notifyDestroyedCalls(event)
+    }
 
-            // Update calls as usual
-            calls[selectedCid]?.let {
-                it.state.handleEvent(event)
-                it.session?.handleEvent(event)
-                it.handleEvent(event)
-            }
-            deliverIntentToDestroyedCalls(event)
+    internal fun shouldProcessCallAcceptedEvent(event: VideoEvent): Boolean {
+        if (event !is CallAcceptedEvent) return true
+
+        val currentRingingCall = state.ringingCall.value ?: return true
+        val ringingState = currentRingingCall.state.ringingState.value
+
+        val isOutgoingOrIdle =
+            ringingState is RingingState.Outgoing ||
+                ringingState == RingingState.Idle
+
+        val isDifferentCall = currentRingingCall.cid != event.callCid
+
+        return !(isOutgoingOrIdle && isDifferentCall)
+    }
+
+    internal fun propagateEventToCall(cid: String, event: VideoEvent) {
+        calls[cid]?.let { call ->
+            call.state.handleEvent(event)
+            call.session?.handleEvent(event)
+            call.handleEvent(event)
         }
+    }
+
+    internal fun deliverToDestroyedCalls(event: VideoEvent) {
+        deliverIntentToDestroyedCalls(event)
     }
 
     private fun shouldProcessDestroyedCall(event: VideoEvent, callCid: String): Boolean {
