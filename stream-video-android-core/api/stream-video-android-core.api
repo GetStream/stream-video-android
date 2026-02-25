@@ -8748,6 +8748,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStats ()Lio/getstream/video/android/core/CallStats;
 	public final fun getTeam ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getThumbnail ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTotalParticipants ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTranscribing ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUpdatedAt ()Lkotlinx/coroutines/flow/StateFlow;
