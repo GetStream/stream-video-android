@@ -51,9 +51,9 @@ internal open class ForegroundServicePermissionManager {
         ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL to null,
     )
 
-    fun getServiceType(context: Context, trigger: String): Int {
+    fun getServiceType(context: Context, trigger: CallService.Companion.Trigger): Int {
         return when (trigger) {
-            CallService.Companion.TRIGGER_ONGOING_CALL -> calculateServiceType(context)
+            CallService.Companion.Trigger.OnGoingCall -> calculateServiceType(context)
             else -> noPermissionServiceType()
         }
     }

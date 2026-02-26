@@ -24,7 +24,6 @@ import androidx.core.content.ContextCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationType
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 
@@ -42,7 +41,7 @@ internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIn
 
         val startParams = StartServiceParam(
             callId = callId,
-            trigger = TRIGGER_INCOMING_CALL,
+            trigger = CallService.Companion.Trigger.IncomingCall,
             callDisplayName = callDisplayName,
             callServiceConfiguration = callServiceConfiguration,
         )

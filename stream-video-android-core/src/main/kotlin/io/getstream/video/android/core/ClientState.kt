@@ -177,23 +177,26 @@ class ClientState(private val client: StreamVideo) {
                 transitionToAcceptCall(call)
                 call.scope.launch {
                     delay(serviceTransitionDelayMs)
-                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                    maybeStartForegroundService(call, CallService.Companion.Trigger.OnGoingCall)
                 }
             }
             is RingingState.Outgoing -> {
                 if (!call.state.isJoinAndRingInProgress.get()) {
                     transitionToAcceptCall(call)
                 }
-                call.scope.launch {
-                    delay(serviceTransitionDelayMs)
-                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
-                }
+                /**
+                 * Since CallService is already started when outgoing call was made,
+                 * so this time we just need to update the service trigger to inform the call-service
+                 * that we are in on-going call. This is kept here intentionally to maintain backward compatible code-flow
+                 * We can revisit this in future to either improve or delete this
+                 */
+                call.state.updateServiceTriggers(CallService.Companion.Trigger.OnGoingCall)
             }
             else -> {
                 removeRingingCall(call)
                 call.scope.launch {
                     delay(serviceTransitionDelayMs)
-                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                    maybeStartForegroundService(call, CallService.Companion.Trigger.OnGoingCall)
                 }
             }
         }
@@ -226,7 +229,7 @@ class ClientState(private val client: StreamVideo) {
     fun addRingingCall(call: Call, ringingState: RingingState) {
         _ringingCall.value = call
         if (ringingState is RingingState.Outgoing) {
-            maybeStartForegroundService(call, CallService.TRIGGER_OUTGOING_CALL)
+            maybeStartForegroundService(call, CallService.Companion.Trigger.OutgoingCall)
         }
 
         // TODO: behaviour if you are already in a call
@@ -266,16 +269,16 @@ class ClientState(private val client: StreamVideo) {
      * Start a foreground service that manages the call even when the UI is gone.
      * This depends on the flag in [StreamVideoBuilder] called `runForegroundServiceForCalls`
      */
-    internal fun maybeStartForegroundService(call: Call, trigger: String) {
+    internal fun maybeStartForegroundService(call: Call, trigger: CallService.Companion.Trigger) {
         logger.d { "[maybeStartForegroundService], trigger: $trigger" }
         when (trigger) {
-            CallService.TRIGGER_ONGOING_CALL -> serviceLauncher.showOnGoingCall(
+            CallService.Companion.Trigger.OnGoingCall -> serviceLauncher.showOnGoingCall(
                 call,
                 trigger,
                 streamVideoClient,
             )
 
-            CallService.TRIGGER_OUTGOING_CALL -> serviceLauncher.showOutgoingCall(
+            CallService.Companion.Trigger.OutgoingCall -> serviceLauncher.showOutgoingCall(
                 call,
                 trigger,
                 streamVideoClient,

@@ -25,10 +25,6 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.NotificationType
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.model.StreamCallId
 
 internal class ServiceNotificationRetriever {
@@ -55,7 +51,7 @@ internal class ServiceNotificationRetriever {
      */
     fun getNotificationPair(
         context: Context,
-        trigger: String,
+        trigger: CallService.Companion.Trigger,
         streamVideo: StreamVideoClient,
         streamCallId: StreamCallId,
         intentCallDisplayName: String?,
@@ -65,7 +61,7 @@ internal class ServiceNotificationRetriever {
         }
         val call = streamVideo.call(streamCallId.type, streamCallId.id)
         val notificationData: Pair<Notification?, Int> = when (trigger) {
-            TRIGGER_ONGOING_CALL -> {
+            CallService.Companion.Trigger.OnGoingCall -> {
                 logger.d { "[getNotificationPair] Creating ongoing call notification" }
                 val notificationId = call.state.notificationIdFlow.value
                     ?: streamCallId.getNotificationId(NotificationType.Ongoing)
@@ -80,7 +76,7 @@ internal class ServiceNotificationRetriever {
                 )
             }
 
-            TRIGGER_INCOMING_CALL -> {
+            CallService.Companion.Trigger.IncomingCall -> {
                 val shouldHaveContentIntent = streamVideo.state.activeCall.value == null
                 logger.d { "[getNotificationPair] Creating incoming call notification" }
                 val notificationId = call.state.notificationIdFlow.value
@@ -98,7 +94,7 @@ internal class ServiceNotificationRetriever {
                 )
             }
 
-            TRIGGER_OUTGOING_CALL -> {
+            CallService.Companion.Trigger.OutgoingCall -> {
                 logger.d { "[getNotificationPair] Creating outgoing call notification" }
                 val notificationId = call.state.notificationIdFlow.value
                     ?: streamCallId.getNotificationId(NotificationType.Outgoing)
@@ -116,7 +112,7 @@ internal class ServiceNotificationRetriever {
                 )
             }
 
-            TRIGGER_REMOVE_INCOMING_CALL -> {
+            CallService.Companion.Trigger.RemoveIncomingCall -> {
                 logger.d { "[getNotificationPair] Removing incoming call notification" }
                 Pair(null, streamCallId.getNotificationId(NotificationType.Incoming))
             }
@@ -133,25 +129,25 @@ internal class ServiceNotificationRetriever {
     }
 
     internal fun getNotificationId(
-        trigger: String,
+        trigger: CallService.Companion.Trigger,
         streamVideo: StreamVideo,
         streamCallId: StreamCallId,
     ): Int {
         val call = streamVideo.call(streamCallId.type, streamCallId.id)
         return when (trigger) {
-            TRIGGER_ONGOING_CALL ->
+            CallService.Companion.Trigger.OnGoingCall ->
                 call.state.notificationIdFlow.value
                     ?: streamCallId.getNotificationId(NotificationType.Ongoing)
 
-            TRIGGER_INCOMING_CALL ->
+            CallService.Companion.Trigger.IncomingCall ->
                 call.state.notificationIdFlow.value
                     ?: streamCallId.getNotificationId(NotificationType.Incoming)
 
-            TRIGGER_OUTGOING_CALL ->
+            CallService.Companion.Trigger.OutgoingCall ->
                 call.state.notificationIdFlow.value
                     ?: streamCallId.getNotificationId(NotificationType.Outgoing)
 
-            TRIGGER_REMOVE_INCOMING_CALL -> streamCallId.getNotificationId(
+            CallService.Companion.Trigger.RemoveIncomingCall -> streamCallId.getNotificationId(
                 NotificationType.Incoming,
             )
             else -> streamCallId.hashCode()

@@ -17,11 +17,12 @@
 package io.getstream.video.android.core.notifications.internal.service.models
 
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.StreamCallId
 
 internal data class CallIntentParams(
     val streamVideo: StreamVideoClient,
     val callId: StreamCallId,
-    val trigger: String,
+    val trigger: CallService.Companion.Trigger,
     val displayName: String?,
 )

@@ -21,7 +21,7 @@ import io.getstream.video.android.model.StreamCallId
 
 internal data class StartServiceParam(
     val callId: StreamCallId,
-    val trigger: String,
+    val trigger: CallService.Companion.Trigger,
     val callDisplayName: String? = null,
     val callServiceConfiguration: CallServiceConfig = DefaultCallConfigurations.default,
 )

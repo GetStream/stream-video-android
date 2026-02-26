@@ -39,10 +39,7 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import io.getstream.log.StreamLog
 import io.getstream.result.Error
 import io.getstream.result.Result
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
-import io.getstream.video.android.core.screenshare.StreamScreenShareService.Companion.TRIGGER_SHARE_SCREEN
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
@@ -190,7 +187,7 @@ internal inline fun <T> safeCallWithDefault(default: T, block: () -> T): T {
 internal fun Service.startForegroundWithServiceType(
     notificationId: Int,
     notification: Notification,
-    trigger: String,
+    trigger: CallService.Companion.Trigger,
     foregroundServiceType: Int = ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
 ) = safeCallWithResult {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -205,9 +202,9 @@ internal fun Service.startForegroundWithServiceType(
             notificationId,
             notification,
             when (trigger) {
-                TRIGGER_ONGOING_CALL -> foregroundServiceType
-                TRIGGER_OUTGOING_CALL, TRIGGER_INCOMING_CALL -> foregroundServiceType
-                TRIGGER_SHARE_SCREEN -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+                CallService.Companion.Trigger.OnGoingCall -> foregroundServiceType
+                CallService.Companion.Trigger.OutgoingCall, CallService.Companion.Trigger.IncomingCall -> foregroundServiceType
+                CallService.Companion.Trigger.ShareScreen -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
                 else -> foregroundServiceType
             },
         )

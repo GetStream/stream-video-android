@@ -24,7 +24,7 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.NotificationType
-import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.Trigger
 import io.getstream.video.android.core.notifications.internal.service.permissions.ForegroundServicePermissionManager
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
@@ -42,7 +42,7 @@ internal class CallServiceNotificationUpdateObserver(
     val onStartService: (
         notificationId: Int,
         notification: Notification,
-        trigger: String,
+        trigger: Trigger,
         foregroundServiceType: Int,
     ) -> Unit,
 ) {
@@ -143,8 +143,8 @@ internal class CallServiceNotificationUpdateObserver(
         startForegroundWithServiceType(
             notificationId,
             notification,
-            CallService.Companion.TRIGGER_ONGOING_CALL,
-            permissionManager.getServiceType(context, CallService.Companion.TRIGGER_ONGOING_CALL),
+            Trigger.OnGoingCall,
+            permissionManager.getServiceType(context, Trigger.OnGoingCall),
         )
     }
 
@@ -159,8 +159,8 @@ internal class CallServiceNotificationUpdateObserver(
         startForegroundWithServiceType(
             notificationId,
             notification,
-            CallService.Companion.TRIGGER_OUTGOING_CALL,
-            permissionManager.getServiceType(context, CallService.Companion.TRIGGER_OUTGOING_CALL),
+            Trigger.OutgoingCall,
+            permissionManager.getServiceType(context, Trigger.OutgoingCall),
         )
     }
 
@@ -175,15 +175,15 @@ internal class CallServiceNotificationUpdateObserver(
         startForegroundWithServiceType(
             notificationId,
             notification,
-            CallService.Companion.TRIGGER_INCOMING_CALL,
-            permissionManager.getServiceType(context, CallService.Companion.TRIGGER_INCOMING_CALL),
+            Trigger.IncomingCall,
+            permissionManager.getServiceType(context, Trigger.IncomingCall),
         )
     }
 
     fun startForegroundWithServiceType(
         notificationId: Int,
         notification: Notification,
-        trigger: String,
+        trigger: Trigger,
         foregroundServiceType: Int,
     ) {
         onStartService(notificationId, notification, trigger, foregroundServiceType)

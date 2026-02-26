@@ -113,6 +113,7 @@ import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.moderations.ModerationManager
 import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.NotificationType
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
@@ -740,6 +741,10 @@ public class CallState(
                 telecomHoldObserverJob = null
             }
         }
+
+    private val _serviceTrigger =
+        MutableStateFlow<CallService.Companion.Trigger>(CallService.Companion.Trigger.None)
+    internal val serviceTrigger: StateFlow<CallService.Companion.Trigger> = _serviceTrigger
 
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
     private val ringingLogger by taggedLogger("RingingState")
@@ -1802,6 +1807,10 @@ public class CallState(
                     }
                 }
         }
+    }
+
+    internal fun updateServiceTriggers(trigger: CallService.Companion.Trigger) {
+        _serviceTrigger.value = trigger
     }
 }
 

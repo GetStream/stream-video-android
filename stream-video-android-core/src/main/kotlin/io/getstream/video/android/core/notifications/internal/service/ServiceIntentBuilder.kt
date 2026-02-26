@@ -23,11 +23,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.EXTRA_STOP_SERVICE
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_KEY
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.Trigger
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.StreamCallId
 
@@ -41,29 +37,12 @@ internal class ServiceIntentBuilder {
         val serviceIntent = Intent(context, serviceClass)
         serviceIntent.putExtra(INTENT_EXTRA_CALL_CID, startService.callId)
 
+        serviceIntent.putExtra(Trigger.TRIGGER_KEY, startService.trigger.name)
         when (startService.trigger) {
-            TRIGGER_INCOMING_CALL -> {
-                serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_INCOMING_CALL)
+            CallService.Companion.Trigger.IncomingCall -> {
                 serviceIntent.putExtra(INTENT_EXTRA_CALL_DISPLAY_NAME, startService.callDisplayName)
             }
-
-            TRIGGER_OUTGOING_CALL -> {
-                serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_OUTGOING_CALL)
-            }
-
-            TRIGGER_ONGOING_CALL -> {
-                serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_ONGOING_CALL)
-            }
-
-            TRIGGER_REMOVE_INCOMING_CALL -> {
-                serviceIntent.putExtra(TRIGGER_KEY, TRIGGER_REMOVE_INCOMING_CALL)
-            }
-
-            else -> {
-                throw IllegalArgumentException(
-                    "Unknown ${startService.trigger}, must be one of: $TRIGGER_INCOMING_CALL, $TRIGGER_OUTGOING_CALL, $TRIGGER_ONGOING_CALL",
-                )
-            }
+            else -> {}
         }
         return serviceIntent
     }

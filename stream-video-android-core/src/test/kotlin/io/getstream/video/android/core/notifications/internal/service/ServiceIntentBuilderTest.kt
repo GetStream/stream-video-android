@@ -20,11 +20,7 @@ import android.content.Context
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_KEY
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.Trigger.Companion.TRIGGER_KEY
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
@@ -35,7 +31,6 @@ import io.mockk.spyk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,13 +59,16 @@ class ServiceIntentBuilderTest {
             context,
             StartServiceParam(
                 callId = testCallId,
-                trigger = TRIGGER_OUTGOING_CALL,
+                trigger = CallService.Companion.Trigger.OutgoingCall,
             ),
         )
 
         assertEquals(CallService::class.java.name, intent.component?.className)
         assertEquals(testCallId, intent.streamCallId(INTENT_EXTRA_CALL_CID))
-        assertEquals(TRIGGER_OUTGOING_CALL, intent.getStringExtra(TRIGGER_KEY))
+        assertEquals(
+            CallService.Companion.Trigger.OutgoingCall.name,
+            intent.getStringExtra(TRIGGER_KEY),
+        )
         assertNull(intent.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME))
     }
 
@@ -80,36 +78,31 @@ class ServiceIntentBuilderTest {
             context,
             StartServiceParam(
                 callId = testCallId,
-                trigger = TRIGGER_ONGOING_CALL,
+                trigger = CallService.Companion.Trigger.OnGoingCall,
             ),
         )
 
         assertEquals(CallService::class.java.name, intent.component?.className)
         assertEquals(testCallId, intent.streamCallId(INTENT_EXTRA_CALL_CID))
-        assertEquals(TRIGGER_ONGOING_CALL, intent.getStringExtra(TRIGGER_KEY))
+        assertEquals(
+            CallService.Companion.Trigger.OnGoingCall.name,
+            intent.getStringExtra(TRIGGER_KEY),
+        )
     }
 
     @Test
     fun `buildStartIntent creates correct intent for remove incoming call`() {
         val intent = ServiceIntentBuilder().buildStartIntent(
             context = context,
-            StartServiceParam(testCallId, TRIGGER_REMOVE_INCOMING_CALL),
+            StartServiceParam(testCallId, CallService.Companion.Trigger.RemoveIncomingCall),
         )
 
         assertEquals(CallService::class.java.name, intent.component?.className)
         assertEquals(testCallId, intent.streamCallId(INTENT_EXTRA_CALL_CID))
-        assertEquals(TRIGGER_REMOVE_INCOMING_CALL, intent.getStringExtra(TRIGGER_KEY))
-    }
-
-    @Test
-    fun `buildStartIntent throws exception for invalid trigger`() {
-        // When & Then
-        assertThrows(IllegalArgumentException::class.java) {
-            ServiceIntentBuilder().buildStartIntent(
-                context,
-                StartServiceParam(testCallId, "invalid_trigger"),
-            )
-        }
+        assertEquals(
+            CallService.Companion.Trigger.RemoveIncomingCall.name,
+            intent.getStringExtra(TRIGGER_KEY),
+        )
     }
 
     @Test
@@ -122,7 +115,7 @@ class ServiceIntentBuilderTest {
             context,
             StartServiceParam(
                 callId = testCallId,
-                trigger = TRIGGER_INCOMING_CALL,
+                trigger = CallService.Companion.Trigger.IncomingCall,
                 callServiceConfiguration = customConfig,
             ),
         )
@@ -220,7 +213,7 @@ class ServiceIntentBuilderTest {
             context,
             StartServiceParam(
                 callId = StreamCallId(type = "livestream", id = "test-123"),
-                trigger = TRIGGER_INCOMING_CALL,
+                trigger = CallService.Companion.Trigger.IncomingCall,
                 callServiceConfiguration = livestreamConfig,
             ),
         )

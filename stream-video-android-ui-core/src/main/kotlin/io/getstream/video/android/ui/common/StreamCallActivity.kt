@@ -22,6 +22,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
 import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -46,6 +48,7 @@ import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.state.AcceptCall
@@ -62,6 +65,7 @@ import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
+import io.getstream.video.android.core.notifications.internal.service.permissions.StreamForegroundPermissionUtil
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
@@ -534,6 +538,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 // Extract the members and the call ID and place the outgoing call
                 val members = intent.getStringArrayListExtra(EXTRA_MEMBERS_ARRAY) ?: emptyList()
                 val joinAndRing = intent.getBooleanExtra(EXTRA_JOIN_AND_RING, false)
+
                 if (joinAndRing) {
                     create(
                         call,
@@ -840,15 +845,48 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
     ) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val instance = StreamVideo.instance()
-            val result = call.create(
-                // List of all users, containing the caller also
-                memberIds = members + instance.userId,
-                // If other users will get push notification.
-                ring = ring,
+        /**
+         * We need to check call-related permission here - as this is going to start the callservice
+         */
+        val outgoingCallCapabilities = ArrayList<OwnCapability>()
+        if (call.state.ringingState.value is RingingState.Outgoing) {
+            val permissionTypes = StreamForegroundPermissionUtil.getForegroundPermissionsForCallType(
+                call.type,
             )
-            result.onOutcome(call, onSuccess, onError)
+            for (permission in permissionTypes) {
+                when (permission) {
+                    FOREGROUND_SERVICE_TYPE_CAMERA -> outgoingCallCapabilities.add(
+                        OwnCapability.SendVideo,
+                    )
+                    FOREGROUND_SERVICE_TYPE_MICROPHONE -> outgoingCallCapabilities.add(
+                        OwnCapability.SendAudio,
+                    )
+                }
+            }
+        }
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val hasCallPermission = PermissionManager.hasRequiredCallPermissions(
+                this@StreamCallActivity,
+                call,
+                outgoingCallCapabilities,
+            )
+            if (hasCallPermission) {
+                val instance = StreamVideo.instance()
+                val result = call.create(
+                    // List of all users, containing the caller also
+                    memberIds = members + instance.userId,
+                    // If other users will get push notification.
+                    ring = ring,
+                )
+                result.onOutcome(call, onSuccess, onError)
+            } else {
+                /**
+                 * TODO Rahul, maybe just do nothing, at this moment we should render get permission from setting
+                 * Once we have the permission from setting, we re-open the our active - restarts the processing of
+                 * last intent.
+                 */
+            }
         }
     }
 

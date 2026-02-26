@@ -72,7 +72,7 @@ class CallServiceNotificationUpdateObserverTest {
     private val backstageFlow = MutableStateFlow(false)
 
     // Captured callback
-    private var startArgs: Quadruple<Int, Notification, String, Int>? = null
+    private var startArgs: Quadruple<Int, Notification, CallService.Companion.Trigger, Int>? = null
 
     @Before
     fun setup() {
@@ -148,7 +148,7 @@ class CallServiceNotificationUpdateObserverTest {
             args.first,
         )
         assertEquals(notification, args.second)
-        assertEquals(CallService.TRIGGER_INCOMING_CALL, args.third)
+        assertEquals(CallService.Companion.Trigger.IncomingCall, args.third)
         assertEquals(42, args.fourth)
     }
 
@@ -167,7 +167,7 @@ class CallServiceNotificationUpdateObserverTest {
                 .getNotificationId(NotificationType.Outgoing),
             args.first,
         )
-        assertEquals(CallService.TRIGGER_OUTGOING_CALL, args.third)
+        assertEquals(CallService.Companion.Trigger.OutgoingCall, args.third)
     }
 
     @Test
@@ -185,7 +185,7 @@ class CallServiceNotificationUpdateObserverTest {
                 .getNotificationId(NotificationType.Ongoing),
             args.first,
         )
-        assertEquals(CallService.TRIGGER_ONGOING_CALL, args.third)
+        assertEquals(CallService.Companion.Trigger.OnGoingCall, args.third)
     }
 
     @Test
