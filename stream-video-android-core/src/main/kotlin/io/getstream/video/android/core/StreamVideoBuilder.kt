@@ -64,7 +64,12 @@ import java.net.ConnectException
  *      geo = GEO.GlobalEdgeNetwork,
  *      user = user,
  *      token = token,
+ *      sounds = ringingConfig(
+ *                 defaultResourcesRingingConfig(context),
+ *                 defaultMutedRingingConfig(true, true)
+ *             ),
  *      loggingLevel = LoggingLevel.BODY,
+ *
  *      // ...
  * ).build()
  *```
@@ -97,6 +102,9 @@ import java.net.ConnectException
  *          When `false` and the socket is not connected, incoming calls will not be delivered via WebSocket events;
  *          the SDK will rely on push notifications instead.
  *          To start receiving WebSocket events, explicitly invoke `client.connect()`.
+ * @property rejectCallWhenBusy Automatically rejects incoming calls when the user is already in another call.
+ *          When enabled, the SDK suppresses incoming call notifications.
+ *          CallRingEvent will not be propagated if there is an active or ongoing ringing call.
  *
  * @see build
  * @see ClientState.connection
@@ -118,7 +126,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
-    private val connectionTimeoutInMs: Long = 10000,
+    private val connectionTimeoutInMs: Long = 10_000,
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
     @Deprecated(
@@ -153,6 +161,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val enableStereoForSubscriber: Boolean = true,
     private val telecomConfig: TelecomConfig? = null,
     private val connectOnInit: Boolean = true,
+    private val rejectCallWhenBusy: Boolean = false,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -282,6 +291,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableStereoForSubscriber = enableStereoForSubscriber,
             telecomConfig = telecomConfig,
             tokenRepository = tokenRepository,
+            rejectCallWhenBusy = rejectCallWhenBusy,
         )
 
         if (user.type == UserType.Guest) {

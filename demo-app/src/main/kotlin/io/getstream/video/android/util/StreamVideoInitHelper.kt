@@ -346,6 +346,7 @@ object StreamVideoInitHelper {
             audioProcessing = NoiseCancellation(context),
             telecomConfig = TelecomConfig(context.packageName),
             connectOnInit = false,
+            rejectCallWhenBusy = false,
         ).build()
     }
 }

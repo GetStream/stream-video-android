@@ -23,6 +23,7 @@ import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomIntegrationType
@@ -85,6 +86,9 @@ class ClientState(private val client: StreamVideo) {
 
     public val callConfigRegistry = (client as StreamVideoClient).callServiceConfigRegistry
     private val serviceLauncher = ServiceLauncher(client.context)
+
+    @InternalStreamVideoApi
+    public val rejectCallWhenBusy: Boolean = (client as StreamVideoClient).rejectCallWhenBusy
 
     /**
      * Returns true if there is an active or ringing call
@@ -170,23 +174,23 @@ class ClientState(private val client: StreamVideo) {
         val ringingState = call.state.ringingState.value
         when (ringingState) {
             is RingingState.Incoming -> {
+                transitionToAcceptCall(call)
                 call.scope.launch {
-                    transitionToAcceptCall(call)
                     delay(serviceTransitionDelayMs)
                     maybeStartForegroundService(call, CallService.Companion.Trigger.OnGoingCall)
                 }
             }
             is RingingState.Outgoing -> {
-                call.scope.launch {
+                if (!call.state.isJoinAndRingInProgress.get()) {
                     transitionToAcceptCall(call)
-                    /**
-                     * Since CallService is already started when outgoing call was made,
-                     * so this time we just need to update the service trigger to inform the call-service
-                     * that we are in on-going call. This is kept here intentionally to maintain backward compatible code-flow
-                     * We can revisit this in future to either improve or delete this
-                     */
-                    call.state.updateServiceTriggers(CallService.Companion.Trigger.OnGoingCall)
                 }
+                /**
+                 * Since CallService is already started when outgoing call was made,
+                 * so this time we just need to update the service trigger to inform the call-service
+                 * that we are in on-going call. This is kept here intentionally to maintain backward compatible code-flow
+                 * We can revisit this in future to either improve or delete this
+                 */
+                call.state.updateServiceTriggers(CallService.Companion.Trigger.OnGoingCall)
             }
             else -> {
                 removeRingingCall(call)

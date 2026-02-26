@@ -574,7 +574,7 @@ public class Call(
         video: Boolean = isVideoEnabled(),
     ): Result<RtcSession> {
         logger.d { "[joinAndRing] #ringing; #track; members: $members, video: $video" }
-        state.toggleRingingStateUpdates(true)
+        state.toggleJoinAndRingProgress(true)
         return join(ring = false, createOptions = createOptions).flatMap { rtcSession ->
             logger.d { "[joinAndRing] Joined #ringing; #track; ring: $members" }
             ring(RingCallRequest(isVideoEnabled(), members)).map {
@@ -583,7 +583,7 @@ public class Call(
                 rtcSession
             }.onError {
                 logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
-                state.toggleRingingStateUpdates(false)
+                state.toggleJoinAndRingProgress(false)
                 leave("ring-failed (${it.message})")
             }
         }
