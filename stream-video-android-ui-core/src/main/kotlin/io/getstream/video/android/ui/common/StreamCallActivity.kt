@@ -22,6 +22,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
 import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -63,6 +65,7 @@ import io.getstream.video.android.core.events.ParticipantLeftEvent
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
+import io.getstream.video.android.core.notifications.internal.service.permissions.StreamForegroundPermissionUtil
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
@@ -91,7 +94,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         private const val EXTRA_LEAVE_WHEN_LAST: String = "leave_when_last"
         private const val EXTRA_MEMBERS_ARRAY: String = "members_extra"
         private const val EXTRA_JOIN_AND_RING: String = "join_and_ring"
-        private const val EXTRA_OUTGOING_CALL_TYPE: String = "io.getstream.video.extra_outgoing_call_type"
 
         // Extra default values
         private const val DEFAULT_LEAVE_WHEN_LAST: Boolean = false
@@ -119,7 +121,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             configuration: StreamCallActivityConfiguration = StreamCallActivityConfiguration(),
             joinAndRing: Boolean = false,
             extraData: Bundle? = null,
-            outgoingCallType: OutgoingCallType = OutgoingCallType.Unknown,
         ): Intent {
             return Intent(context, clazz).apply {
                 // Setup the outgoing call action
@@ -133,7 +134,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 putExtra(NotificationHandler.INTENT_EXTRA_CALL_CID, cid)
                 putExtra(EXTRA_LEAVE_WHEN_LAST, leaveWhenLastInCall)
                 putExtra(EXTRA_JOIN_AND_RING, joinAndRing)
-                putExtra(EXTRA_OUTGOING_CALL_TYPE, outgoingCallType.name)
                 // Setup the members to transfer to the new activity
                 val membersArrayList = ArrayList<String>()
                 members.forEach { membersArrayList.add(it) }
@@ -144,24 +144,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 logger.d { "Created [${clazz.simpleName}] intent. -> $this" }
             }
-        }
-
-        public sealed class OutgoingCallType private constructor(public val name: String) {
-            public companion object {
-                public fun toOutgoingCallType(name: String): OutgoingCallType {
-                    return when (name) {
-                        Video.name -> Video
-                        Audio.name -> Audio
-                        else -> Unknown
-                    }
-                }
-            }
-            override fun toString(): String {
-                return name
-            }
-            public object Video : OutgoingCallType("video")
-            public object Audio : OutgoingCallType("audio")
-            public object Unknown : OutgoingCallType("unknown")
         }
 
         public fun callIntentBundle(
@@ -864,39 +846,26 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onError: (suspend (Exception) -> Unit)?,
     ) {
         /**
-         * Todo Rahul we need to check call-related permission here - as this is going to start the callservice
-         * Is this the right place
+         * We need to check call-related permission here - as this is going to start the callservice
          */
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            val outgoingCallType = intent.getStringExtra(EXTRA_OUTGOING_CALL_TYPE)?.let {
-                OutgoingCallType.toOutgoingCallType(it)
-            } ?: OutgoingCallType.Unknown
-
-            val outgoingCallCapabilities = ArrayList<OwnCapability>()
-            if (call.state.ringingState.value is RingingState.Outgoing) {
-                when (outgoingCallType) {
-                    OutgoingCallType.Video -> {
-                        outgoingCallCapabilities.addAll(
-                            arrayListOf(
-                                OwnCapability.SendAudio,
-                                OwnCapability.SendVideo,
-                            ),
-                        )
-                    }
-
-                    OutgoingCallType.Audio -> {
-                        outgoingCallCapabilities.addAll(
-                            arrayListOf(
-                                OwnCapability.SendAudio,
-                            ),
-                        )
-                    }
-
-                    else -> {}
+        val outgoingCallCapabilities = ArrayList<OwnCapability>()
+        if (call.state.ringingState.value is RingingState.Outgoing) {
+            val permissionTypes = StreamForegroundPermissionUtil.getForegroundPermissionsForCallType(
+                call.type,
+            )
+            for (permission in permissionTypes) {
+                when (permission) {
+                    FOREGROUND_SERVICE_TYPE_CAMERA -> outgoingCallCapabilities.add(
+                        OwnCapability.SendVideo,
+                    )
+                    FOREGROUND_SERVICE_TYPE_MICROPHONE -> outgoingCallCapabilities.add(
+                        OwnCapability.SendAudio,
+                    )
                 }
             }
+        }
 
+        lifecycleScope.launch(Dispatchers.IO) {
             val hasCallPermission = PermissionManager.hasRequiredCallPermissions(
                 this@StreamCallActivity,
                 call,

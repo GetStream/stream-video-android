@@ -91,7 +91,7 @@ fun AppNavHost(
         composable(AppScreens.DirectCallJoin.route) {
             val context = LocalContext.current
             DirectCallJoinScreen(
-                navigateToDirectCall = { cid, members, joinAndRing, outgoingCallType ->
+                navigateToDirectCall = { cid, members, joinAndRing ->
                     context.startActivity(
                         StreamCallActivity.callIntent(
                             action = NotificationHandler.ACTION_OUTGOING_CALL,
@@ -104,7 +104,6 @@ fun AppNavHost(
                             joinAndRing = joinAndRing,
                             members = members.split(","),
                             clazz = CallActivity::class.java,
-                            outgoingCallType = outgoingCallType,
                         ),
                     )
                 },
