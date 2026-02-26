@@ -744,7 +744,7 @@ public class CallState(
 
     private val _serviceTrigger =
         MutableStateFlow<CallService.Companion.Trigger>(CallService.Companion.Trigger.None)
-    internal val serviceTrigger = _serviceTrigger.asStateFlow()
+    internal val serviceTrigger: StateFlow<CallService.Companion.Trigger> = _serviceTrigger
 
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
     private val ringingLogger by taggedLogger("RingingState")
