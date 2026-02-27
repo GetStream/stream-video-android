@@ -1,0 +1,77 @@
+name: API Compatibility Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    branches:
+      - develop
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-compatibility:
+    name: Metalava API Compatibility
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: GetStream/android-ci-actions/actions/setup-java@main
+
+      - name: Check API compatibility
+        id: api-check
+        run: |
+          ./gradlew \
+            :stream-video-android-core:metalavaCheckCompatibilityRelease \
+            :stream-video-android-ui-core:metalavaCheckCompatibilityRelease \
+            --no-configuration-cache --stacktrace
+        continue-on-error: true
+
+      - name: Generate current API signature
+        if: steps.api-check.outcome == 'failure'
+        run: |
+          ./gradlew \
+            :stream-video-android-core:metalavaGenerateSignatureRelease \
+            :stream-video-android-ui-core:metalavaGenerateSignatureRelease \
+            --no-configuration-cache
+
+      - name: Diff API changes
+        if: steps.api-check.outcome == 'failure'
+        run: |
+          echo "## API Changes Detected" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          for module in stream-video-android-core stream-video-android-ui-core; do
+            if [ -f "$module/api/current.txt" ]; then
+              DIFF=$(git diff --no-color -- "$module/api/current.txt" || true)
+              if [ -n "$DIFF" ]; then
+                echo "### $module" >> $GITHUB_STEP_SUMMARY
+                echo '```diff' >> $GITHUB_STEP_SUMMARY
+                echo "$DIFF" >> $GITHUB_STEP_SUMMARY
+                echo '```' >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+              fi
+            fi
+          done
+
+          echo "> **Action required:** This PR contains breaking API changes." >> $GITHUB_STEP_SUMMARY
+          echo "> Add the \`approved-api-change\` label to acknowledge and proceed." >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for approval label
+        if: steps.api-check.outcome == 'failure'
+        run: |
+          if echo '${{ toJson(github.event.pull_request.labels.*.name) }}' | grep -q 'approved-api-change'; then
+            echo "✅ API breaking change approved via label"
+            echo "## ✅ Breaking API change approved" >> $GITHUB_STEP_SUMMARY
+            echo "The \`approved-api-change\` label is present. This change has been explicitly approved." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Breaking API changes detected without approval"
+            echo ""
+            echo "To approve this change:"
+            echo "  1. Review the API diff in the job summary above"
+            echo "  2. Add the 'approved-api-change' label to this PR"
+            echo "  3. Re-run this workflow"
+            exit 1
+          fi

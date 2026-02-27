@@ -14,6 +14,7 @@ dependencies {
   compileOnly(libs.kotlin.gradlePlugin)
   // compileOnly(libs.compose.compiler.gradlePlugin) -> Enable with Kotlin 2.0+
   compileOnly(libs.spotless.gradlePlugin)
+  runtimeOnly(libs.metalava.gradlePlugin)
 }
 
 gradlePlugin {
@@ -37,6 +38,10 @@ gradlePlugin {
     register("demoFlavorConvention") {
       id = "io.getstream.video.android.demoflavor"
       implementationClass = "DemoFlavorConventionPlugin"
+    }
+    register("metalavaConvention") {
+      id = "io.getstream.video.android.metalava"
+      implementationClass = "MetalavaConventionPlugin"
     }
   }
 }

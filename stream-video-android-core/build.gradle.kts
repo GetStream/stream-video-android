@@ -23,6 +23,7 @@ plugins {
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.kotlin.parcelize.get().pluginId)
     id(libs.plugins.wire.get().pluginId)
+    id("io.getstream.video.android.metalava")
 }
 
 wire {
@@ -50,6 +51,12 @@ apiValidation {
      * effectively private API that cannot be actually private for technical reasons.
      */
     nonPublicMarkers.add("io.getstream.video.android.core.internal.InternalStreamVideoApi")
+}
+
+metalava {
+    hiddenAnnotations.set(
+        setOf("io.getstream.video.android.core.internal.InternalStreamVideoApi"),
+    )
 }
 
 android {
