@@ -26,7 +26,39 @@ import io.getstream.video.android.core.utils.safeCallWithDefault
 
 // Interface & API
 /**
- * Interface representing a ringing configuration.
+ * Interface representing a ringing configuration that customizes the ringing sounds used by the Stream Video SDK.
+ *
+ * The SDK allows overriding the default incoming and outgoing call sounds
+ * in two ways:
+ *
+ * 1. **Via Android raw resources**
+ *    Provide custom audio files from your app's `res/raw` directory.
+ *
+ * 2. **Via URI**
+ *    Provide any valid [Uri], such as a file URI, content URI, or media URI.
+ *
+ * After creating the configuration, pass it to [StreamVideoBuilder] using the
+ * `sounds` parameter.
+ *
+ * Example using resources:
+ * ```
+ * val customSoundsViaResource = ringingConfig(
+ *     resRingingConfig(context, R.raw.my_incoming_sound, R.raw.my_outgoing_sound),
+ *     defaultMutedRingingConfig()
+ * )
+ *
+ * StreamVideoBuilder(sounds = customSoundsViaResource)
+ * ```
+ *
+ * Example using URIs:
+ * ```
+ * val customSoundsViaUri = ringingConfig(
+ *     uriRingingConfig(incomingUri, outgoingUri),
+ *     defaultMutedRingingConfig()
+ * )
+ *
+ * StreamVideoBuilder(sounds = customSoundsViaUri)
+ * ```
  *
  * @see defaultResourcesRingingConfig
  * @see deviceRingtoneRingingConfig
