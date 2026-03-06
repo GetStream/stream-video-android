@@ -24,21 +24,63 @@ import io.getstream.log.StreamLog
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.utils.safeCallWithDefault
 
-// Interface & API
 /**
- * Interface representing a ringing configuration.
+ * Configuration describing the sounds played for incoming and outgoing calls
+ * in the Stream Video SDK.
  *
- * @see defaultResourcesRingingConfig
- * @see deviceRingtoneRingingConfig
- * @see emptyRingingConfig
- * @see resRingingConfig
- * @see uriRingingConfig
+ * The SDK allows customizing ringing behavior using either Android resources
+ * or external audio URIs.
+ *
+ * Example using raw resources:
+ * ```kotlin
+ * val sounds = ringingConfig(
+ *     resRingingConfig(context, R.raw.my_incoming_sound, R.raw.my_outgoing_sound),
+ *     defaultMutedRingingConfig()
+ * )
+ *
+ * StreamVideoBuilder(sounds = sounds)
+ * ```
+ *
+ * Example using URIs:
+ * ```kotlin
+ * val sounds = ringingConfig(
+ *     uriRingingConfig(incomingUri, outgoingUri),
+ *     defaultMutedRingingConfig()
+ * )
+ *
+ * StreamVideoBuilder(sounds = sounds)
+ * ```
+ *
+ * If a sound URI is `null`, no sound will be played.
+ *
+ * Instances are typically created using one of the provided factory methods:
+ * [defaultResourcesRingingConfig], [deviceRingtoneRingingConfig],
+ * [resRingingConfig], [uriRingingConfig], or [emptyRingingConfig].
+ *
+ *
+ * Creates a [RingingConfig] using externally provided audio URIs.
+ *
+ * @param incomingCallSoundUri URI of the sound played for incoming calls.
+ * @param outgoingCallSoundUri URI of the sound played while the caller waits
+ * for the callee to answer.
+ *
  */
 public interface RingingConfig {
     val incomingCallSoundUri: Uri?
     val outgoingCallSoundUri: Uri?
 }
 
+/**
+ * Configuration that controls whether ringing sounds should play when
+ * the device is in silent or muted mode.
+ *
+ * By default, ringing sounds are suppressed when the device is muted.
+ * This configuration allows overriding that behavior for incoming
+ * and outgoing call sounds.
+ *
+ * @param playIncomingSoundIfMuted Whether the incoming call sound should play even if the device is muted.
+ * @param playOutgoingSoundIfMuted Whether the outgoing ringing sound should play even if the device is muted.
+ */
 public interface MutedRingingConfig {
     val playIncomingSoundIfMuted: Boolean
     val playOutgoingSoundIfMuted: Boolean
@@ -73,9 +115,10 @@ public fun ringingConfig(
 }
 
 /**
- * Returns a ringing config that uses the SDK default sounds for incoming and outgoing calls.
+ * Returns a [RingingConfig] that uses the SDK's default bundled sounds
+ * for both incoming and outgoing calls.
  *
- * @param context Context used for retrieving the sounds.
+ * @param context Used to resolve the internal audio resources.
  */
 public fun defaultResourcesRingingConfig(
     context: Context,
@@ -84,6 +127,14 @@ public fun defaultResourcesRingingConfig(
     override val outgoingCallSoundUri: Uri? = R.raw.call_outgoing_sound.toUriOrNull(context)
 }
 
+/**
+ * Creates a default [MutedRingingConfig].
+ *
+ * @param playIncomingSoundIfMuted Whether the incoming call sound should
+ * still play when the device is muted.
+ * @param playOutgoingSoundIfMuted Whether the outgoing ringing sound should
+ * still play when the device is muted.
+ */
 public fun defaultMutedRingingConfig(
     playIncomingSoundIfMuted: Boolean = false,
     playOutgoingSoundIfMuted: Boolean = false,
@@ -93,7 +144,7 @@ public fun defaultMutedRingingConfig(
 }
 
 /**
- * Returns a ringing config that uses the device ringtone for incoming calls and the SDK default ringing tone for outgoing calls.
+ * Returns a [RingingConfig] that uses the device ringtone for incoming calls and the SDK default ringing tone for outgoing calls.
  *
  * @param context Context used for retrieving the sounds.
  */
@@ -112,12 +163,13 @@ public fun deviceRingtoneRingingConfig(
 }
 
 /**
- * Returns a ringing config that uses custom resources for incoming and outgoing call sounds.
+ * Returns a [RingingConfig] that uses custom resources for incoming and outgoing call sounds.
  *
  * @param context Context used for retrieving the sounds.
  * @param incomingCallSoundResId The resource ID for the incoming call sound.
  * @param outgoingCallSoundResId The resource ID for the outgoing call sound.
  */
+
 public fun resRingingConfig(
     context: Context,
     @RawRes incomingCallSoundResId: Int,
@@ -128,7 +180,7 @@ public fun resRingingConfig(
 }
 
 /**
- * Returns a ringing config that uses custom URIs for incoming and outgoing call sounds.
+ * Returns a [RingingConfig] that uses custom URIs for incoming and outgoing call sounds.
  *
  * @param incomingCallSoundUri The URI for the incoming call sound.
  * @param outgoingCallSoundUri The URI for the outgoing call sound.
@@ -142,7 +194,9 @@ public fun uriRingingConfig(
 }
 
 /**
- * Returns a ringing config that mutes (disables) incoming and outgoing call sounds.
+ * Returns a [RingingConfig] that disables all ringing sounds.
+ *
+ * Both incoming and outgoing call sounds will be muted.
  */
 public fun emptyRingingConfig(): RingingConfig = object : RingingConfig {
     override val incomingCallSoundUri: Uri? = null
