@@ -35,6 +35,7 @@ import android.media.AudioRecord.READ_BLOCKING
 import android.media.projection.MediaProjection
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -56,6 +57,7 @@ import io.getstream.video.android.core.camera.DefaultCameraCharacteristicsValida
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.mediaSafeCall
 import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -170,7 +172,7 @@ class SpeakerManager(
      * @param defaultFallback when [enable] is false this is used to select the next device after the speaker.
      * */
     fun setSpeakerPhone(enable: Boolean, defaultFallback: StreamAudioDevice? = null) {
-        microphoneManager.enforceSetup(preferSpeaker = enable) {
+        microphoneManager.enforceSetup(preferSpeaker = enable, PendingAudioOp.Generic({
             val devices = devices.value
             if (enable) {
                 val speaker =
@@ -197,29 +199,29 @@ class SpeakerManager(
                 val fallback: StreamAudioDevice? = when {
                     defaultFallbackFromType != null -> defaultFallbackFromType
                     selectedBeforeSpeaker != null &&
-                        selectedBeforeSpeaker !is StreamAudioDevice.Speakerphone &&
-                        devices.contains(selectedBeforeSpeaker) -> selectedBeforeSpeaker
+                            selectedBeforeSpeaker !is StreamAudioDevice.Speakerphone &&
+                            devices.contains(selectedBeforeSpeaker) -> selectedBeforeSpeaker
 
                     else -> firstNonSpeaker
                 }
 
                 microphoneManager.select(fallback)
             }
-        }
+        }))
     }
 
     /**
      * Set the volume as a percentage, 0-100
      */
     fun setVolume(volumePercentage: Int) {
-        microphoneManager.enforceSetup {
+        microphoneManager.enforceSetup(op = PendingAudioOp.Generic {
             microphoneManager.audioManager?.let {
                 val max = it.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL)
                 val level = max / 100 * volumePercentage
                 _volume.value = volumePercentage
                 it.setStreamVolume(AudioManager.STREAM_VOICE_CALL, level, 0)
             }
-        }
+        })
     }
 
     fun pause() {
@@ -607,53 +609,45 @@ class MicrophoneManager(
     // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     internal fun enable(fromUser: Boolean = true) {
-        enforceSetup {
-            if (fromUser) {
-                _status.value = DeviceStatus.Enabled
-            }
-            mediaManager.audioTrack.trySetEnabled(true)
-        }
+        enforceSetup(op = PendingAudioOp.SetMicEnabled(true, fromUser))
     }
 
     fun pause(fromUser: Boolean = true) {
-        enforceSetup {
-            // pause the microphone, and when resuming switched back to the previous state
-            priorStatus = _status.value
-            disable(fromUser = fromUser)
-        }
+        enforceSetup(op = PendingAudioOp.Generic({
+            {
+                // pause the microphone, and when resuming switched back to the previous state
+                priorStatus = _status.value
+                disable(fromUser = fromUser)
+            }
+        }))
     }
 
     fun resume(fromUser: Boolean = true) {
-        enforceSetup {
+        enforceSetup(op = PendingAudioOp.Generic({
             priorStatus?.let {
                 if (it == DeviceStatus.Enabled) {
                     enable(fromUser = fromUser)
                 }
             }
-        }
+        }))
     }
 
     /** Disable the audio track. Audio is still captured, but not send.
      * This allows for the "you are muted" toast to indicate you are talking while muted */
     fun disable(fromUser: Boolean = true) {
-        enforceSetup {
-            if (fromUser) {
-                _status.value = DeviceStatus.Disabled
-            }
-            mediaManager.audioTrack.trySetEnabled(false)
-        }
+        logger.d { "disable, fromUser: $fromUser" }
+        enforceSetup(op = PendingAudioOp.SetMicEnabled(false, fromUser = fromUser))
     }
 
     /**
      * Enable or disable the microphone
      */
     fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
-        enforceSetup {
-            if (enabled) {
-                enable(fromUser = fromUser)
-            } else {
-                disable(fromUser = fromUser)
-            }
+        logger.d { "setEnabled, enabled: $enabled, fromUser: $fromUser" }
+        if (enabled) {
+            enable(fromUser = fromUser)
+        } else {
+            disable(fromUser = fromUser)
         }
     }
 
@@ -852,7 +846,7 @@ class MicrophoneManager(
         if (!hifiAudioEnabled) {
             logger.w {
                 "[setAudioBitrateProfile] called but HiFi audio is not enabled " +
-                    "in dashboard settings. ."
+                        "in dashboard settings. ."
             }
             return Result.failure(
                 IllegalArgumentException("Hi-fi audio is not enabled on dashboard settings"),
@@ -862,8 +856,8 @@ class MicrophoneManager(
         if (isJoined) {
             logger.w {
                 "[setAudioBitrateProfile] called after call is joined. " +
-                    "Audio bitrate profile can only be set before joining the call. " +
-                    "Ignoring the change."
+                        "Audio bitrate profile can only be set before joining the call. " +
+                        "Ignoring the change."
             }
             return Result.failure(
                 IllegalStateException(
@@ -887,15 +881,51 @@ class MicrophoneManager(
 
     fun canHandleDeviceSwitch() = audioUsageProvider.invoke() != AudioAttributes.USAGE_MEDIA
 
-    // Internal logic
-    internal fun setup(preferSpeaker: Boolean = false, onAudioDevicesUpdate: (() -> Unit)? = null) {
+    private val pendingOps = ArrayDeque<PendingAudioOp>()
+
+    private fun enqueue(op: PendingAudioOp) {
         synchronized(this) {
-            var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
+            when (op) {
+                is PendingAudioOp.SetMicEnabled -> {
+                    // ✂️ Cancel all previous mic ops — only the latest intent matters
+                    // enable → disable  becomes  [disable]
+                    // disable → enable  becomes  [enable]
+                    // disable → enable → disable  becomes  [disable]
+                    pendingOps.removeAll { it is PendingAudioOp.SetMicEnabled }
+                    pendingOps.addLast(op)
+                }
+                is PendingAudioOp.Generic -> {
+                    // Generic ops (speaker switch, volume) run in order, no cancellation
+                    pendingOps.addLast(op)
+                }
+            }
+        }
+    }
+
+    private fun drainQueue() {
+        // Called only after setupCompleted = true, inside synchronized block
+        while (pendingOps.isNotEmpty()) {
+            when (val op = pendingOps.removeFirst()) {
+                is PendingAudioOp.SetMicEnabled -> {
+                    if (op.fromUser) {
+                        _status.value = if (op.enabled) DeviceStatus.Enabled else DeviceStatus.Disabled
+                    }
+                    mediaManager.audioTrack.trySetMicEnabled(op.enabled)
+                }
+                is PendingAudioOp.Generic ->
+                    op.action()
+            }
+        }
+    }
+
+    // Internal logic
+    internal fun setup(preferSpeaker: Boolean = false, op: PendingAudioOp? = null) {
+        logger.d { "setup, preferSpeaker: $preferSpeaker" }
+        synchronized(this) {
+            if (op != null) enqueue(op)          // always queue first
 
             if (setupCompleted) {
-                capturedOnAudioDevicesUpdate?.invoke()
-                capturedOnAudioDevicesUpdate = null
-
+                drainQueue()                      // already ready → run immediately
                 return
             }
 
@@ -908,6 +938,7 @@ class MicrophoneManager(
             }
 
             if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {
+                logger.d { "setup, inside canHandleDeviceSwitch()" }
                 audioHandler = AudioSwitchHandler(
                     context = mediaManager.context,
                     preferredDeviceList = listOf(
@@ -930,25 +961,29 @@ class MicrophoneManager(
                         _devices.value = devices.map { it.fromAudio() }
                         _selectedDevice.value = selected?.fromAudio()
 
-                        setupCompleted = true
-
-                        capturedOnAudioDevicesUpdate?.invoke()
-                        capturedOnAudioDevicesUpdate = null
+                        synchronized(this@MicrophoneManager) {
+                            setupCompleted = true
+                            drainQueue()      // ← drain ALL queued ops at once
+                        }
+                        logger.d { "setup, return 4" }
                     },
                 )
 
                 logger.d { "[setup] Calling start on instance $audioHandler" }
                 audioHandler.start()
+                logger.d { "setup, return 2" }
             } else {
                 logger.d { "[MediaManager#setup] Usage is MEDIA or audioHandle is already initialized" }
-                capturedOnAudioDevicesUpdate?.invoke()
+                setupCompleted = true
+                drainQueue()
+                logger.d { "setup, return 3" }
             }
         }
     }
 
-    internal fun enforceSetup(preferSpeaker: Boolean = false, actual: () -> Unit) = setup(
+    internal fun enforceSetup(preferSpeaker: Boolean = false, op: PendingAudioOp) = setup(
         preferSpeaker,
-        onAudioDevicesUpdate = actual,
+        op = op,
     )
 
     private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
@@ -958,6 +993,14 @@ class MicrophoneManager(
             logger.e { "Audio handler not initialized. Ensure calling setup(), before using the handler." }
         }
     }
+}
+
+// Sealed class to represent queued audio operations
+internal sealed class PendingAudioOp {
+    // Mic track mute/unmute — negatable
+    data class SetMicEnabled(val enabled: Boolean, val fromUser: Boolean) : PendingAudioOp()
+    // Speaker routing, volume, device select — generic, run in order
+    data class Generic(val action: () -> Unit) : PendingAudioOp()
 }
 
 public sealed class CameraDirection {
@@ -1015,7 +1058,7 @@ class CameraManager(
     public val resolution: StateFlow<CameraEnumerationAndroid.CaptureFormat?> = _resolution
 
     private val _availableResolutions:
-        MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
+            MutableStateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         MutableStateFlow(emptyList())
     public val availableResolutions: StateFlow<List<CameraEnumerationAndroid.CaptureFormat>> =
         _availableResolutions
@@ -1549,3 +1592,8 @@ class MediaManagerImpl(
 }
 
 fun MediaStreamTrack.trySetEnabled(enabled: Boolean) = safeCall { setEnabled(enabled) }
+fun MediaStreamTrack.trySetEnabled2(enabled: Boolean) = setEnabled(enabled)
+fun MediaStreamTrack.trySetMicEnabled(enabled: Boolean) = mediaSafeCall {
+    setEnabled(enabled)
+    Log.d("Noob", "Mic trySetMicEnabled: $enabled")
+}

@@ -35,6 +35,7 @@ import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
+import io.getstream.video.android.core.trySetEnabled2
 import io.getstream.video.android.core.utils.SdpSession
 import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
@@ -282,8 +283,8 @@ internal class Publisher(
                     val senderTrack = sender.track()
                     if (senderTrack != null && !senderTrack.isDisposed) {
                         logger.d { "[trackPublishing] Track already exists." }
-                        senderTrack.trySetEnabled(true)
-                        logTrack(senderTrack)
+                        val result = senderTrack.trySetEnabled(true)
+                        logTrack("publishStreamInternal",senderTrack, trackType)
                         traceTrack(trackType, senderTrack.id())
                         return senderTrack
                     } else {
@@ -320,9 +321,9 @@ internal class Publisher(
         }
         return null
     }
-    private fun logTrack(senderTrack: MediaStreamTrack?) {
+    private fun logTrack(source: String, senderTrack: MediaStreamTrack?, trackType: TrackType) {
         logger.d {
-            "[trackPublishing] Track: ${senderTrack?.enabled()}:${senderTrack?.state()}:${senderTrack?.id()}"
+            "[trackPublishing] Track: type:${trackType}, source:$source, enabled: ${senderTrack?.enabled()}, state:${senderTrack?.state()}, id: ${senderTrack?.id()}"
         }
     }
 
@@ -419,13 +420,14 @@ internal class Publisher(
 
     suspend fun unpublishStream(trackType: TrackType) {
         transceiverCache.getByTrackType(trackType).forEach { transceiver ->
-            logger.d { "[trackPublishing] Unpublishing track: $trackType" }
+            logger.d { "[trackPublishing] Unpublishing track: $trackType 1" }
             val sender = transceiver.sender
             val senderTrack = sender.track()
             senderTrack?.let { track ->
-                val result = track.trySetEnabled(false)
+                val result = track.trySetEnabled2(false)
+                logger.d { "[trackPublishing] Unpublishing track: $trackType 2, result:$result" }
                 tracer().trace("unpublishtrack", "$trackType:${track.id()}:$result")
-                logTrack(track)
+                logTrack("unpublishStream", track, trackType)
             }
         }
     }

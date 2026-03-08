@@ -138,6 +138,19 @@ internal inline fun safeCall(block: () -> Unit) {
     }
 }
 
+internal inline fun mediaSafeCall(block: () -> Unit) {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    try {
+        block()
+    } catch (e: Exception) {
+        // Handle or log the exception here
+        e.printStackTrace()
+        StreamLog.e("MediaSafeCall", e) { "Exception occurred: ${e.message}" }
+    }
+}
+
 /**
  * Safely call a suspending function and handle exceptions.
  *

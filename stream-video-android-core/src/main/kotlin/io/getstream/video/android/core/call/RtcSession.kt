@@ -25,6 +25,7 @@ import android.os.PowerManager.THERMAL_STATUS_MODERATE
 import android.os.PowerManager.THERMAL_STATUS_NONE
 import android.os.PowerManager.THERMAL_STATUS_SEVERE
 import android.os.PowerManager.THERMAL_STATUS_SHUTDOWN
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -863,6 +864,7 @@ public class RtcSession internal constructor(
                 } else {
                     setMuteState(isEnabled = false, TrackType.TRACK_TYPE_AUDIO)
                     publisher?.unpublishStream(TrackType.TRACK_TYPE_AUDIO)
+                    Log.d("Noob", "unpublishStream TrackType.TRACK_TYPE_AUDIO, publisher:$publisher")
                 }
             }
         }

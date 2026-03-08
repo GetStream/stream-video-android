@@ -96,7 +96,7 @@ class CallLobbyViewModel @Inject constructor(
     init {
         // for demo we set the default state for mic and camera to be on
         // and then we wait for call settings and we update the default state accordingly
-        call.microphone.setEnabled(true)
+        call.microphone.setEnabled(true) //noob setEnabled 1
         call.camera.setEnabled(true)
 
         viewModelScope.launch {
@@ -118,7 +118,7 @@ class CallLobbyViewModel @Inject constructor(
             }
 
             // enable/disable audi capture (audio indicator will not work otherwise)
-            call.microphone.setEnabled(enabled)
+            call.microphone.setEnabled(enabled) //noob setEnabled 2
         }
 
         viewModelScope.launch {
