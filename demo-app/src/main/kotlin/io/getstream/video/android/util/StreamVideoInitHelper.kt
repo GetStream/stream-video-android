@@ -298,6 +298,20 @@ object StreamVideoInitHelper {
                                 )
                             }
 
+                            override fun getOngoingCallBundle(
+                                callId: StreamCallId,
+                                notificationId: Int,
+                                payload: Map<String, Any?>,
+                            ): Bundle {
+                                return StreamCallActivity.callIntentBundle(
+                                    callId,
+                                    configuration = StreamCallActivityConfiguration(
+                                        closeScreenOnCallEnded = true,
+                                    ),
+                                    leaveWhenLastInCall = true,
+                                )
+                            }
+
                             override fun getAcceptCallBundle(
                                 callId: StreamCallId,
                                 notificationId: Int,

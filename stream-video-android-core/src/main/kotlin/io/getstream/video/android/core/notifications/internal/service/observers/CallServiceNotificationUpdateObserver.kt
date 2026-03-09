@@ -21,6 +21,7 @@ import android.content.Context
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.NotificationType
@@ -140,12 +141,14 @@ internal class CallServiceNotificationUpdateObserver(
         logger.d { "[showActiveCallNotification] Showing active call notification" }
         val notificationId =
             call.state.notificationIdFlow.value ?: callId.getNotificationId(NotificationType.Ongoing)
-        startForegroundWithServiceType(
-            notificationId,
-            notification,
-            CallService.Companion.TRIGGER_ONGOING_CALL,
-            permissionManager.getServiceType(context, CallService.Companion.TRIGGER_ONGOING_CALL),
-        )
+
+        StreamVideo.instanceOrNull()
+            ?.getStreamNotificationDispatcher()
+            ?.notify(
+                callId,
+                notificationId,
+                notification,
+            )
     }
 
     private fun showOutgoingCallNotification(
