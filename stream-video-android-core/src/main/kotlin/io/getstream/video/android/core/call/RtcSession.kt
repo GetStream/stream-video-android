@@ -1297,8 +1297,8 @@ public class RtcSession internal constructor(
 
                             if (event.trackType == TrackType.TRACK_TYPE_AUDIO) {
                                 if (event.sessionId == sessionId) {
-                                    val isMicEnabled = call.mediaManager.microphone.isEnabled.value
-                                    if (isMicEnabled) {
+                                    val isMicDisabled = !call.mediaManager.microphone.isEnabled.value
+                                    if (isMicDisabled) {
                                         setMuteState(isEnabled = false, event.trackType)
                                         publisher?.unpublishStream(event.trackType)
                                     }
