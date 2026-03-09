@@ -1285,7 +1285,7 @@ public class RtcSession internal constructor(
                                 // Reconcile any orphaned tracks that arrived before this event
                                 reconcileOrphanedTracks(event.sessionId)
                             }
-
+                            val isMicEnabled = call.mediaManager.microphone.isEnabled.value
                             updatePublishState(
                                 userId = event.userId,
                                 sessionId = event.sessionId,
@@ -1294,6 +1294,13 @@ public class RtcSession internal constructor(
                                 audioEnabled = true,
                                 paused = false,
                             )
+
+                            if (event.trackType == TrackType.TRACK_TYPE_AUDIO) {
+                                if (!isMicEnabled) {
+                                    setMuteState(isEnabled = false, event.trackType)
+                                    publisher?.unpublishStream(event.trackType)
+                                }
+                            }
 
                             // Reconcile orphaned tracks for this participant
                             // The track might have arrived before the participant was created
