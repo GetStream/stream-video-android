@@ -655,22 +655,13 @@ internal open class CallService : Service() {
         notificationId: Int,
         trigger: String,
     ) {
-        val hasActiveCall = videoClient.state.activeCall.value != null
-        val not = if (hasActiveCall) " not" else ""
-
-        logger.d {
-            "[promoteToFgServiceIfNoActiveCall] hasActiveCall: $hasActiveCall. Will$not call startForeground early."
-        }
-
-        if (!hasActiveCall) {
-            videoClient.getSettingUpCallNotification()?.let { notification ->
-                startForegroundWithServiceType(
-                    notificationId,
-                    notification,
-                    trigger,
-                    permissionManager.getServiceType(baseContext, trigger),
-                )
-            }
+        videoClient.getSettingUpCallNotification()?.let { notification ->
+            startForegroundWithServiceType(
+                notificationId,
+                notification,
+                trigger,
+                permissionManager.getServiceType(baseContext, trigger),
+            )
         }
     }
 
