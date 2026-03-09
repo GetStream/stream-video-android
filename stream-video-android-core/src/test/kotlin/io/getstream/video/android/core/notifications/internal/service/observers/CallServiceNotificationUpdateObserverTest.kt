@@ -26,12 +26,14 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
+import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.permissions.ForegroundServicePermissionManager
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -135,7 +137,6 @@ class CallServiceNotificationUpdateObserverTest {
     @Test
     fun `incoming ringing state starts incoming foreground notification`() = runTest {
         observer.observe(context)
-//        advanceUntilIdle()
 
         ringingStateFlow.value = RingingState.Incoming()
         advanceUntilIdle()
@@ -171,21 +172,31 @@ class CallServiceNotificationUpdateObserverTest {
     }
 
     @Test
-    fun `active ringing state starts ongoing foreground notification`() = runTest {
+    fun `active ringing state dispatches ongoing call notification`() = runTest {
+        val notificationDispatcher = mockk<DefaultNotificationDispatcher>(relaxed = true)
+        val mockNotification = mockk<Notification>()
+
+        every { streamVideo.getStreamNotificationDispatcher() } returns notificationDispatcher
+        coEvery { streamVideo.onCallNotificationUpdate(call) } returns mockNotification
+
         observer.observe(context)
+
         advanceUntilIdle()
 
         ringingStateFlow.value = RingingState.Active
-        advanceUntilIdle()
-        advanceTimeBy(100L)
 
-        val args = startArgs!!
-        assertEquals(
-            StreamCallId("default", "call-1")
-                .getNotificationId(NotificationType.Ongoing),
-            args.first,
-        )
-        assertEquals(CallService.TRIGGER_ONGOING_CALL, args.third)
+        advanceUntilIdle()
+        advanceTimeBy(100)
+
+        val streamCallId = StreamCallId("default", "call-1")
+
+        verify {
+            notificationDispatcher.notify(
+                streamCallId,
+                streamCallId.getNotificationId(NotificationType.Ongoing),
+                mockNotification,
+            )
+        }
     }
 
     @Test

@@ -21,7 +21,6 @@ import android.content.Context
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.NotificationType
@@ -119,7 +118,7 @@ internal class CallServiceNotificationUpdateObserver(
 
         when (ringingState) {
             is RingingState.Active -> {
-                showActiveCallNotification(context, callId, notification)
+                showActiveCallNotification(callId, notification)
             }
             is RingingState.Outgoing -> {
                 showOutgoingCallNotification(context, callId, notification)
@@ -134,7 +133,6 @@ internal class CallServiceNotificationUpdateObserver(
     }
 
     private fun showActiveCallNotification(
-        context: Context,
         callId: StreamCallId,
         notification: Notification,
     ) {
@@ -142,9 +140,9 @@ internal class CallServiceNotificationUpdateObserver(
         val notificationId =
             call.state.notificationIdFlow.value ?: callId.getNotificationId(NotificationType.Ongoing)
 
-        StreamVideo.instanceOrNull()
-            ?.getStreamNotificationDispatcher()
-            ?.notify(
+        streamVideo
+            .getStreamNotificationDispatcher()
+            .notify(
                 callId,
                 notificationId,
                 notification,
