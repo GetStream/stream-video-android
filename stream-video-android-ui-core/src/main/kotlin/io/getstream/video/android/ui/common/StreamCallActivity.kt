@@ -22,6 +22,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
 import android.os.Build
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -59,9 +61,11 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
+import io.getstream.video.android.core.notifications.internal.service.StreamForegroundPermissionUtil
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
@@ -76,8 +80,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -174,6 +181,16 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     // Internal state
     private var callSocketConnectionMonitor: Job? = null
     private lateinit var cachedCall: Call
+
+    private val _renderPermissionUi = MutableStateFlow(false)
+
+    @InternalStreamVideoApi
+    public var renderPermissionUi: StateFlow<Boolean> = _renderPermissionUi
+
+    @InternalStreamVideoApi
+    public fun updateRenderPermissionUi(render: Boolean) {
+        _renderPermissionUi.value = render
+    }
 
     @Deprecated(
         "Use configurationMap instead",
@@ -840,16 +857,50 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
     ) {
+        setCallCapabilitiesIfNotPresent(call)
         lifecycleScope.launch(Dispatchers.IO) {
-            val instance = StreamVideo.instance()
-            val result = call.create(
-                // List of all users, containing the caller also
-                memberIds = members + instance.userId,
-                // If other users will get push notification.
-                ring = ring,
+            val hasCallPermission = PermissionManager.hasRequiredCallPermissions(
+                this@StreamCallActivity,
+                call,
             )
-            result.onOutcome(call, onSuccess, onError)
+            if (hasCallPermission) {
+                val instance = StreamVideo.instance()
+                val result = call.create(
+                    // List of all users, containing the caller also
+                    memberIds = members + instance.userId,
+                    // If other users will get push notification.
+                    ring = ring,
+                )
+                result.onOutcome(call, onSuccess, onError)
+            } else {
+                _renderPermissionUi.value = true
+                uiDelegate.setContent(activity = this@StreamCallActivity, call)
+                renderPermissionUi.first { !it }
+                create(call, ring, members, onSuccess, onError)
+            }
         }
+    }
+
+    private fun setCallCapabilitiesIfNotPresent(call: Call) {
+        if (call.state.ownCapabilities.value.isNotEmpty()) return
+
+        val outgoingCallCapabilities = ArrayList<OwnCapability>()
+        if (intent.action == NotificationHandler.ACTION_OUTGOING_CALL) {
+            val permissionTypes = StreamForegroundPermissionUtil.getForegroundPermissionsForCallType(
+                call.type,
+            )
+            for (permission in permissionTypes) {
+                when (permission) {
+                    FOREGROUND_SERVICE_TYPE_CAMERA -> outgoingCallCapabilities.add(
+                        OwnCapability.SendVideo,
+                    )
+                    FOREGROUND_SERVICE_TYPE_MICROPHONE -> outgoingCallCapabilities.add(
+                        OwnCapability.SendAudio,
+                    )
+                }
+            }
+        }
+        call.state.setOwnCapabilities(outgoingCallCapabilities)
     }
 
     /**

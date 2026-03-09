@@ -124,9 +124,38 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                             .systemBarsPadding(),
                     ) {
                         logger.d { "[setContent] with RootContent" }
-                        activity.RootContent(call = call)
+
+                        val renderPermissionUi by activity.renderPermissionUi.collectAsStateWithLifecycle()
+                        if (renderPermissionUi) {
+                            NoPermissionUi(activity, call) {
+                                activity.updateRenderPermissionUi(false)
+                            }
+                        } else {
+                            activity.RootContent(call = call)
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun NoPermissionUi(
+        activity: StreamCallActivity,
+        call: Call,
+        onAllPermissionGranted: () -> Unit,
+    ) {
+        LaunchPermissionRequest(getRequiredPermissions(call)) {
+            AllPermissionsGranted {
+                onAllPermissionGranted()
+            }
+
+            SomeGranted { granted, notGranted, showRationale ->
+                activity.InternalPermissionContent(showRationale, call, granted, notGranted)
+            }
+
+            NoneGranted {
+                activity.InternalPermissionContent(it, call, emptyList(), emptyList())
             }
         }
     }

@@ -99,6 +99,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	protected final fun getOnErrorFinish ()Lkotlin/jvm/functions/Function2;
 	protected final fun getOnSuccessFinish ()Lkotlin/jvm/functions/Function2;
 	public fun getParticipantUpdateDebounce (Lio/getstream/video/android/core/Call;)J
+	public final fun getRenderPermissionUi ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getUiDelegate ()Lio/getstream/video/android/ui/common/StreamActivityUiDelegate;
 	protected fun handleOnNewIncomingCallAcceptAction ()V
 	protected fun handleOnNewIncomingCallAction ()V
@@ -134,6 +135,8 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public fun reject (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/model/RejectReason;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	public final fun safeFinish ()V
 	protected fun setCallHandlerDelegate (Lio/getstream/video/android/ui/common/IncomingCallHandlerDelegate;)V
+	public final fun setRenderPermissionUi (Lkotlinx/coroutines/flow/StateFlow;)V
+	public final fun updateRenderPermissionUi (Z)V
 }
 
 public final class io/getstream/video/android/ui/common/StreamCallActivity$Companion {
