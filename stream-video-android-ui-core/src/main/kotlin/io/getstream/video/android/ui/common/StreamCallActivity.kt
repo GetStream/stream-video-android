@@ -874,7 +874,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 result.onOutcome(call, onSuccess, onError)
             } else {
                 _renderPermissionUi.value = true
-                uiDelegate.setContent(activity = this@StreamCallActivity, call)
+                withContext(Dispatchers.Main) {
+                    uiDelegate.setContent(activity = this@StreamCallActivity, call)
+                }
                 renderPermissionUi.first { !it }
                 create(call, ring, members, onSuccess, onError)
             }
