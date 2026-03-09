@@ -190,7 +190,7 @@ class ClientState(private val client: StreamVideo) {
                 val callServiceConfig = callConfigRegistry.get(call.type)
                 val serviceClass = callServiceConfig.serviceClass
                 val isServiceRunning = ServiceIntentBuilder()
-                    .isServiceRunning(this.client.context, serviceClass::class.java)
+                    .isServiceRunning(this.client.context, serviceClass)
                 if (callServiceConfig.runCallServiceInForeground) {
                     if (!isServiceRunning) {
                         logger.e { "Outgoing call service should already be running" }
