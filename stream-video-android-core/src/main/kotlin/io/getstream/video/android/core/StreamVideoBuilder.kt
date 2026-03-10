@@ -88,7 +88,7 @@ import java.net.ConnectException
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig]. (Deprecated) Use `callServiceConfigRegistry` instead.
  * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
- * @property sounds Overwrite the default SDK sounds. See [Sounds].
+ * @property sounds Overwrite the default SDK sounds. See [io.getstream.video.android.core.sounds.RingingConfig].
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
  * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
