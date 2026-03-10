@@ -25,6 +25,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomIntegrationType
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
@@ -184,9 +185,16 @@ class ClientState(private val client: StreamVideo) {
                 if (!call.state.isJoinAndRingInProgress.get()) {
                     transitionToAcceptCall(call)
                 }
-                call.scope.launch {
-                    delay(serviceTransitionDelayMs)
-                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                // Intentionally skipping maybeStartForegroundService because service should already be started
+                // when initiating outgoing-call
+                val callServiceConfig = callConfigRegistry.get(call.type)
+                val serviceClass = callServiceConfig.serviceClass
+                val isServiceRunning = ServiceIntentBuilder()
+                    .isServiceRunning(this.client.context, serviceClass)
+                if (callServiceConfig.runCallServiceInForeground) {
+                    if (!isServiceRunning) {
+                        logger.e { "Outgoing call service should already be running" }
+                    }
                 }
             }
             else -> {

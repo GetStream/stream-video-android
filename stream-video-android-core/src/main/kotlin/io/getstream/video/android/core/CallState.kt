@@ -1781,6 +1781,11 @@ public class CallState(
         this.atomicNotification.set(notification)
     }
 
+    @InternalStreamVideoApi
+    fun setOwnCapabilities(ownCapability: List<OwnCapability>) {
+        this._ownCapabilities.value = ownCapability
+    }
+
     /**
      * [RingingState.Incoming] and [RingingState.Outgoing] are intentionally not observed.
      * In Android Telecom, hold states are only applicable once a call is active (answered).
