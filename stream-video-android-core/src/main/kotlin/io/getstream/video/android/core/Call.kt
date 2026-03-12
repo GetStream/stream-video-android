@@ -42,7 +42,7 @@ import io.getstream.android.video.generated.models.RejectCallResponse
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.android.video.generated.models.SendCallEventResponse
-import io.getstream.android.video.generated.models.SendVideoReactionResponse
+import io.getstream.android.video.generated.models.SendReactionResponse
 import io.getstream.android.video.generated.models.StartTranscriptionResponse
 import io.getstream.android.video.generated.models.StopLiveResponse
 import io.getstream.android.video.generated.models.StopTranscriptionResponse
@@ -1009,7 +1009,7 @@ public class Call(
         type: String,
         emoji: String? = null,
         custom: Map<String, Any>? = null,
-    ): Result<SendVideoReactionResponse> {
+    ): Result<SendReactionResponse> {
         return clientImpl.sendReaction(this.type, id, type, emoji, custom)
     }
 

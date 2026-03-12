@@ -1124,19 +1124,19 @@ public final class io/getstream/android/video/generated/models/CallParticipantTi
 }
 
 public final class io/getstream/android/video/generated/models/CallReactionEvent : io/getstream/android/video/generated/models/VideoEvent, io/getstream/android/video/generated/models/WSCallEvent {
-	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/generated/models/VideoReactionResponse;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/generated/models/ReactionResponse;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun component3 ()Lio/getstream/android/video/generated/models/VideoReactionResponse;
+	public final fun component3 ()Lio/getstream/android/video/generated/models/ReactionResponse;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/generated/models/VideoReactionResponse;Ljava/lang/String;)Lio/getstream/android/video/generated/models/CallReactionEvent;
-	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/CallReactionEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/generated/models/VideoReactionResponse;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/CallReactionEvent;
+	public final fun copy (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/generated/models/ReactionResponse;Ljava/lang/String;)Lio/getstream/android/video/generated/models/CallReactionEvent;
+	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/CallReactionEvent;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/generated/models/ReactionResponse;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/CallReactionEvent;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getCallCID ()Ljava/lang/String;
 	public final fun getCallCid ()Ljava/lang/String;
 	public final fun getCreatedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public fun getEventType ()Ljava/lang/String;
-	public final fun getReaction ()Lio/getstream/android/video/generated/models/VideoReactionResponse;
+	public final fun getReaction ()Lio/getstream/android/video/generated/models/ReactionResponse;
 	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -5620,6 +5620,24 @@ public final class io/getstream/android/video/generated/models/RawRecordingSetti
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/android/video/generated/models/ReactionResponse {
+	public fun <init> (Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/lang/String;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lio/getstream/android/video/generated/models/UserResponse;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/lang/String;Ljava/util/Map;)Lio/getstream/android/video/generated/models/ReactionResponse;
+	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/ReactionResponse;Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/ReactionResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCustom ()Ljava/util/Map;
+	public final fun getEmojiCode ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public final fun getUser ()Lio/getstream/android/video/generated/models/UserResponse;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/android/video/generated/models/RecordSettingsRequest {
 	public fun <init> (Lio/getstream/android/video/generated/models/RecordSettingsRequest$Mode;Ljava/lang/Boolean;Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality;)V
 	public synthetic fun <init> (Lio/getstream/android/video/generated/models/RecordSettingsRequest$Mode;Ljava/lang/Boolean;Lio/getstream/android/video/generated/models/RecordSettingsRequest$Quality;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -6318,6 +6336,19 @@ public final class io/getstream/android/video/generated/models/SendCallEventResp
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/android/video/generated/models/SendReactionResponse {
+	public fun <init> (Ljava/lang/String;Lio/getstream/android/video/generated/models/ReactionResponse;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lio/getstream/android/video/generated/models/ReactionResponse;
+	public final fun copy (Ljava/lang/String;Lio/getstream/android/video/generated/models/ReactionResponse;)Lio/getstream/android/video/generated/models/SendReactionResponse;
+	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/SendReactionResponse;Ljava/lang/String;Lio/getstream/android/video/generated/models/ReactionResponse;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/SendReactionResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuration ()Ljava/lang/String;
+	public final fun getReaction ()Lio/getstream/android/video/generated/models/ReactionResponse;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/android/video/generated/models/SendVideoReactionRequest {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -6330,19 +6361,6 @@ public final class io/getstream/android/video/generated/models/SendVideoReaction
 	public final fun getCustom ()Ljava/util/Map;
 	public final fun getEmojiCode ()Ljava/lang/String;
 	public final fun getType ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/android/video/generated/models/SendVideoReactionResponse {
-	public fun <init> (Ljava/lang/String;Lio/getstream/android/video/generated/models/VideoReactionResponse;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lio/getstream/android/video/generated/models/VideoReactionResponse;
-	public final fun copy (Ljava/lang/String;Lio/getstream/android/video/generated/models/VideoReactionResponse;)Lio/getstream/android/video/generated/models/SendVideoReactionResponse;
-	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/SendVideoReactionResponse;Ljava/lang/String;Lio/getstream/android/video/generated/models/VideoReactionResponse;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/SendVideoReactionResponse;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDuration ()Ljava/lang/String;
-	public final fun getReaction ()Lio/getstream/android/video/generated/models/VideoReactionResponse;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -8384,24 +8402,6 @@ public final class io/getstream/android/video/generated/models/VideoReactionOver
 	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/VideoReactionOverTimeResponse;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/VideoReactionOverTimeResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getByMinute ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/android/video/generated/models/VideoReactionResponse {
-	public fun <init> (Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/lang/String;Ljava/util/Map;)V
-	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lio/getstream/android/video/generated/models/UserResponse;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/util/Map;
-	public final fun copy (Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/lang/String;Ljava/util/Map;)Lio/getstream/android/video/generated/models/VideoReactionResponse;
-	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/VideoReactionResponse;Ljava/lang/String;Lio/getstream/android/video/generated/models/UserResponse;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/VideoReactionResponse;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCustom ()Ljava/util/Map;
-	public final fun getEmojiCode ()Ljava/lang/String;
-	public final fun getType ()Ljava/lang/String;
-	public final fun getUser ()Lio/getstream/android/video/generated/models/UserResponse;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -12942,18 +12942,18 @@ public final class io/getstream/video/android/core/model/RTMP {
 }
 
 public final class io/getstream/video/android/core/model/Reaction {
-	public fun <init> (Ljava/lang/String;Lio/getstream/android/video/generated/models/VideoReactionResponse;JZ)V
-	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/android/video/generated/models/VideoReactionResponse;JZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lio/getstream/android/video/generated/models/ReactionResponse;JZ)V
+	public synthetic fun <init> (Ljava/lang/String;Lio/getstream/android/video/generated/models/ReactionResponse;JZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lio/getstream/android/video/generated/models/VideoReactionResponse;
+	public final fun component2 ()Lio/getstream/android/video/generated/models/ReactionResponse;
 	public final fun component3 ()J
 	public final fun component4 ()Z
-	public final fun copy (Ljava/lang/String;Lio/getstream/android/video/generated/models/VideoReactionResponse;JZ)Lio/getstream/video/android/core/model/Reaction;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/Reaction;Ljava/lang/String;Lio/getstream/android/video/generated/models/VideoReactionResponse;JZILjava/lang/Object;)Lio/getstream/video/android/core/model/Reaction;
+	public final fun copy (Ljava/lang/String;Lio/getstream/android/video/generated/models/ReactionResponse;JZ)Lio/getstream/video/android/core/model/Reaction;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/Reaction;Ljava/lang/String;Lio/getstream/android/video/generated/models/ReactionResponse;JZILjava/lang/Object;)Lio/getstream/video/android/core/model/Reaction;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCreatedAt ()J
 	public final fun getId ()Ljava/lang/String;
-	public final fun getResponse ()Lio/getstream/android/video/generated/models/VideoReactionResponse;
+	public final fun getResponse ()Lio/getstream/android/video/generated/models/ReactionResponse;
 	public fun hashCode ()I
 	public final fun isConsumed ()Z
 	public final fun setConsumed (Z)V

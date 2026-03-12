@@ -38,7 +38,7 @@ import com.squareup.moshi.ToJson
  * 
  */
 
-data class VideoReactionResponse (
+data class ReactionResponse (
     @Json(name = "type")
     val type: kotlin.String,
 

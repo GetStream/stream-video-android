@@ -46,7 +46,7 @@ data class CallReactionEvent (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "reaction")
-    val reaction: io.getstream.android.video.generated.models.VideoReactionResponse,
+    val reaction: io.getstream.android.video.generated.models.ReactionResponse,
 
     @Json(name = "type")
     val type: kotlin.String

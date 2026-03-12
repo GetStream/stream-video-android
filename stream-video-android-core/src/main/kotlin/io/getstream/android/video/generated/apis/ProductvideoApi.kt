@@ -31,7 +31,6 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import retrofit2.http.PUT
 
 interface ProductvideoApi {
     
@@ -333,7 +332,7 @@ interface ProductvideoApi {
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String ,
         @Body sendVideoReactionRequest: io.getstream.android.video.generated.models.SendVideoReactionRequest
-    ): io.getstream.android.video.generated.models.SendVideoReactionResponse
+    ): io.getstream.android.video.generated.models.SendReactionResponse
     
     /**
      * List recordings
