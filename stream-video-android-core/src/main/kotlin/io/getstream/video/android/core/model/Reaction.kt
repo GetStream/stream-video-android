@@ -17,12 +17,12 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
-import io.getstream.android.video.generated.models.ReactionResponse
+import io.getstream.android.video.generated.models.VideoReactionResponse
 
 @Stable
 public data class Reaction(
     val id: String,
-    val response: ReactionResponse,
+    val response: VideoReactionResponse,
     val createdAt: Long,
     var isConsumed: Boolean = false,
 )

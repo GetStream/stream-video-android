@@ -35,13 +35,13 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * Basic response information
+ * Geographic coordinates
  */
 
-data class SendReactionResponse (
-    @Json(name = "duration")
-    val duration: kotlin.String,
+data class CoordinatesResponse (
+    @Json(name = "latitude")
+    val latitude: kotlin.Float,
 
-    @Json(name = "reaction")
-    val reaction: io.getstream.android.video.generated.models.ReactionResponse
+    @Json(name = "longitude")
+    val longitude: kotlin.Float
 )

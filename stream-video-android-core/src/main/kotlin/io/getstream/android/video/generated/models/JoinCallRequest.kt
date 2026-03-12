@@ -60,6 +60,9 @@ data class JoinCallRequest (
     @Json(name = "video")
     val video: kotlin.Boolean? = null,
 
+    @Json(name = "migrating_from_list")
+    val migratingFromList: kotlin.collections.List<kotlin.String>? = emptyList(),
+
     @Json(name = "data")
     val data: io.getstream.android.video.generated.models.CallRequest? = null
 )

@@ -35,21 +35,27 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * This event is sent when a user gets deactivated. The event contains information about the user that was deactivated.
  */
 
 data class UserDeactivatedEvent (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "created_by")
-    val createdBy: io.getstream.android.video.generated.models.User,
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+
+    @Json(name = "user")
+    val user: io.getstream.android.video.generated.models.UserResponseCommonFields,
 
     @Json(name = "type")
     val type: kotlin.String,
 
-    @Json(name = "user")
-    val user: io.getstream.android.video.generated.models.User? = null
+    @Json(name = "received_at")
+    val receivedAt: org.threeten.bp.OffsetDateTime? = null,
+
+    @Json(name = "created_by")
+    val createdBy: io.getstream.android.video.generated.models.UserResponseCommonFields? = null
 )
 : io.getstream.android.video.generated.models.VideoEvent()
 {

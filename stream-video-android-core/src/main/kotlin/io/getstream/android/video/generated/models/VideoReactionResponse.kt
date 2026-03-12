@@ -38,13 +38,16 @@ import com.squareup.moshi.ToJson
  * 
  */
 
-data class PrivacySettings (
-    @Json(name = "delivery_receipts")
-    val deliveryReceipts: io.getstream.android.video.generated.models.DeliveryReceipts? = null,
+data class VideoReactionResponse (
+    @Json(name = "type")
+    val type: kotlin.String,
 
-    @Json(name = "read_receipts")
-    val readReceipts: io.getstream.android.video.generated.models.ReadReceipts? = null,
+    @Json(name = "user")
+    val user: io.getstream.android.video.generated.models.UserResponse,
 
-    @Json(name = "typing_indicators")
-    val typingIndicators: io.getstream.android.video.generated.models.TypingIndicators? = null
+    @Json(name = "emoji_code")
+    val emojiCode: kotlin.String? = null,
+
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
 )

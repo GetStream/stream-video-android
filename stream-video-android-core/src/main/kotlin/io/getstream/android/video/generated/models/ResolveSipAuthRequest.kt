@@ -35,10 +35,13 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Request to determine SIP trunk authentication requirements
  */
 
-data class TypingIndicators (
-    @Json(name = "enabled")
-    val enabled: kotlin.Boolean
+data class ResolveSipAuthRequest (
+    @Json(name = "sip_caller_number")
+    val sipCallerNumber: kotlin.String,
+
+    @Json(name = "sip_trunk_number")
+    val sipTrunkNumber: kotlin.String
 )

@@ -35,10 +35,10 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * This event is sent when a user gets banned. The event contains information about the user that was banned.
+ * This event is sent when a user gets unbanned. The event contains information about the user that was unbanned.
  */
 
-data class UserBannedEvent (
+data class UserUnbannedEvent (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
@@ -66,12 +66,6 @@ data class UserBannedEvent (
     @Json(name = "cid")
     val cid: kotlin.String? = null,
 
-    @Json(name = "expiration")
-    val expiration: org.threeten.bp.OffsetDateTime? = null,
-
-    @Json(name = "reason")
-    val reason: kotlin.String? = null,
-
     @Json(name = "received_at")
     val receivedAt: org.threeten.bp.OffsetDateTime? = null,
 
@@ -80,9 +74,6 @@ data class UserBannedEvent (
 
     @Json(name = "team")
     val team: kotlin.String? = null,
-
-    @Json(name = "total_bans")
-    val totalBans: kotlin.Int? = null,
 
     @Json(name = "channel_custom")
     val channelCustom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap(),

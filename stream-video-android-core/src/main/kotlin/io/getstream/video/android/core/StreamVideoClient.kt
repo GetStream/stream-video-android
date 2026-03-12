@@ -54,8 +54,8 @@ import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.android.video.generated.models.SendCallEventRequest
 import io.getstream.android.video.generated.models.SendCallEventResponse
-import io.getstream.android.video.generated.models.SendReactionRequest
-import io.getstream.android.video.generated.models.SendReactionResponse
+import io.getstream.android.video.generated.models.SendVideoReactionRequest
+import io.getstream.android.video.generated.models.SendVideoReactionResponse
 import io.getstream.android.video.generated.models.StartClosedCaptionsRequest
 import io.getstream.android.video.generated.models.StartClosedCaptionsResponse
 import io.getstream.android.video.generated.models.StartHLSBroadcastingResponse
@@ -150,7 +150,7 @@ import okhttp3.Request
 import okhttp3.Response
 import org.webrtc.ManagedAudioProcessingFactory
 import retrofit2.HttpException
-import java.util.*
+import java.util.UUID
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
@@ -1105,8 +1105,8 @@ internal class StreamVideoClient internal constructor(
         type: String,
         emoji: String? = null,
         custom: Map<String, Any>? = null,
-    ): Result<SendReactionResponse> {
-        val request = SendReactionRequest(type, custom = custom, emojiCode = emoji)
+    ): Result<SendVideoReactionResponse> {
+        val request = SendVideoReactionRequest(type, custom = custom, emojiCode = emoji)
 
         logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $request" }
 

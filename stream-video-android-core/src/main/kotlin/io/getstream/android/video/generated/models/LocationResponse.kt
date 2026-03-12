@@ -35,10 +35,10 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Geographic location metadata
  */
 
-data class Location (
+data class LocationResponse (
     @Json(name = "continent_code")
     val continentCode: kotlin.String,
 

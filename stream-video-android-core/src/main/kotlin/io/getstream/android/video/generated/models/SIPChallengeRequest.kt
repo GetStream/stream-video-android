@@ -35,10 +35,10 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * SIP digest challenge authentication data
  */
 
-data class SIPChallenge (
+data class SIPChallengeRequest (
     @Json(name = "a1")
     val a1: kotlin.String? = null,
 

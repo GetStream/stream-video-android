@@ -52,7 +52,6 @@ object Serializer {
         .add(io.getstream.android.video.generated.models.RawRecordingSettingsResponse.Mode.ModeAdapter())
         .add(io.getstream.android.video.generated.models.RecordSettingsRequest.Mode.ModeAdapter())
         .add(io.getstream.android.video.generated.models.RecordSettingsRequest.Quality.QualityAdapter())
-        .add(io.getstream.android.video.generated.models.SortParamRequest.Type.TypeAdapter())
         .add(io.getstream.android.video.generated.models.StartClosedCaptionsRequest.Language.LanguageAdapter())
         .add(io.getstream.android.video.generated.models.StartTranscriptionRequest.Language.LanguageAdapter())
         .add(io.getstream.android.video.generated.models.TranscriptionSettingsRequest.ClosedCaptionMode.ClosedCaptionModeAdapter())
