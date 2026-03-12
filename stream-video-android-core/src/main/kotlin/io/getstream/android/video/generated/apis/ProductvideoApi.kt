@@ -331,7 +331,7 @@ interface ProductvideoApi {
     suspend fun sendVideoReaction(
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String ,
-        @Body sendVideoReactionRequest: io.getstream.android.video.generated.models.SendVideoReactionRequest
+        @Body sendReactionRequest: io.getstream.android.video.generated.models.SendReactionRequest
     ): io.getstream.android.video.generated.models.SendReactionResponse
     
     /**

@@ -55,7 +55,7 @@ import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.android.video.generated.models.SendCallEventRequest
 import io.getstream.android.video.generated.models.SendCallEventResponse
 import io.getstream.android.video.generated.models.SendReactionResponse
-import io.getstream.android.video.generated.models.SendVideoReactionRequest
+import io.getstream.android.video.generated.models.SendReactionRequest
 import io.getstream.android.video.generated.models.StartClosedCaptionsRequest
 import io.getstream.android.video.generated.models.StartClosedCaptionsResponse
 import io.getstream.android.video.generated.models.StartHLSBroadcastingResponse
@@ -1106,7 +1106,7 @@ internal class StreamVideoClient internal constructor(
         emoji: String? = null,
         custom: Map<String, Any>? = null,
     ): Result<SendReactionResponse> {
-        val request = SendVideoReactionRequest(type, custom = custom, emojiCode = emoji)
+        val request = SendReactionRequest(type, custom = custom, emojiCode = emoji)
 
         logger.d { "[sendVideoReaction] callCid: $type:$id, sendReactionData: $request" }
 
