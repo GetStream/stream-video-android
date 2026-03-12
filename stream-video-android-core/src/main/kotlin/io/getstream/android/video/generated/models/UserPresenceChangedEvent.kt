@@ -35,10 +35,29 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * This event is sent when the presence of a user changes. The event contains information about the user whose presence changed.
  */
 
-data class TypingIndicators (
-    @Json(name = "enabled")
-    val enabled: kotlin.Boolean
+data class UserPresenceChangedEvent (
+    @Json(name = "created_at")
+    val createdAt: org.threeten.bp.OffsetDateTime,
+
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+
+    @Json(name = "user")
+    val user: io.getstream.android.video.generated.models.UserResponseCommonFields,
+
+    @Json(name = "type")
+    val type: kotlin.String,
+
+    @Json(name = "received_at")
+    val receivedAt: org.threeten.bp.OffsetDateTime? = null
 )
+: io.getstream.android.video.generated.models.VideoEvent()
+{
+    
+    override fun getEventType(): kotlin.String {
+        return type
+    }    
+}

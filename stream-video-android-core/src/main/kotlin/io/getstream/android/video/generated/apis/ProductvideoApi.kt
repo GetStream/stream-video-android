@@ -31,7 +31,6 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import retrofit2.http.PUT
 
 interface ProductvideoApi {
     
@@ -850,7 +849,7 @@ interface ProductvideoApi {
     @GET("/video/longpoll")
     suspend fun videoConnect(
     )
-    
+
     /**
      * Resolve SIP Inbound Routing
      * Resolve SIP inbound routing based on trunk number, caller number, and challenge authentication

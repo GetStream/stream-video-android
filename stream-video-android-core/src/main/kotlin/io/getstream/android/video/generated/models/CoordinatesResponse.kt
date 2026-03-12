@@ -35,10 +35,10 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Geographic coordinates
  */
 
-data class Coordinates (
+data class CoordinatesResponse (
     @Json(name = "latitude")
     val latitude: kotlin.Float,
 

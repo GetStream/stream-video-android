@@ -40,7 +40,10 @@ import com.squareup.moshi.ToJson
 
 data class IndividualRecordingSettingsResponse (
     @Json(name = "mode")
-    val mode: Mode
+    val mode: Mode,
+
+    @Json(name = "output_types")
+    val outputTypes: kotlin.collections.List<kotlin.String>? = emptyList()
 )
 {
     

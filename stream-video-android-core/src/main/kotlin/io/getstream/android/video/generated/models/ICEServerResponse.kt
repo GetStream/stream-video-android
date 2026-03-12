@@ -35,10 +35,16 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * ICE server configuration for WebRTC connections
  */
 
-data class DeliveryReceipts (
-    @Json(name = "enabled")
-    val enabled: kotlin.Boolean
+data class ICEServerResponse (
+    @Json(name = "password")
+    val password: kotlin.String,
+
+    @Json(name = "username")
+    val username: kotlin.String,
+
+    @Json(name = "urls")
+    val urls: kotlin.collections.List<kotlin.String> = emptyList()
 )

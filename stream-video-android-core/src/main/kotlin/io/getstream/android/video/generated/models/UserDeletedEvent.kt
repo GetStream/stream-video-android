@@ -35,24 +35,42 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * This event is sent when a user gets deleted. The event contains information about the user that was deleted and the deletion options that were used.
  */
 
-data class UserMutedEvent (
+data class UserDeletedEvent (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
+
+    @Json(name = "delete_conversation")
+    val deleteConversation: kotlin.String,
+
+    @Json(name = "delete_conversation_channels")
+    val deleteConversationChannels: kotlin.Boolean,
+
+    @Json(name = "delete_messages")
+    val deleteMessages: kotlin.String,
+
+    @Json(name = "delete_user")
+    val deleteUser: kotlin.String,
+
+    @Json(name = "hard_delete")
+    val hardDelete: kotlin.Boolean,
+
+    @Json(name = "mark_messages_deleted")
+    val markMessagesDeleted: kotlin.Boolean,
+
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+
+    @Json(name = "user")
+    val user: io.getstream.android.video.generated.models.UserResponseCommonFields,
 
     @Json(name = "type")
     val type: kotlin.String,
 
-    @Json(name = "target_user")
-    val targetUser: kotlin.String? = null,
-
-    @Json(name = "target_users")
-    val targetUsers: kotlin.collections.List<kotlin.String>? = emptyList(),
-
-    @Json(name = "user")
-    val user: io.getstream.android.video.generated.models.User? = null
+    @Json(name = "received_at")
+    val receivedAt: org.threeten.bp.OffsetDateTime? = null
 )
 : io.getstream.android.video.generated.models.VideoEvent()
 {

@@ -150,7 +150,7 @@ import okhttp3.Request
 import okhttp3.Response
 import org.webrtc.ManagedAudioProcessingFactory
 import retrofit2.HttpException
-import java.util.*
+import java.util.UUID
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
