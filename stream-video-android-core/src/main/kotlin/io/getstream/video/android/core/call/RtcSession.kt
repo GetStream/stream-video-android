@@ -649,14 +649,12 @@ public class RtcSession internal constructor(
                         call.state._connection.value =
                             RealtimeConnection.InProgress
 
-                    is SfuSocketState.Disconnected.DisconnectedTemporarily,
-                    is SfuSocketState.Disconnected.WebSocketEventLost,
-                    -> {
+                    is SfuSocketState.Disconnected.DisconnectedTemporarily -> {
                         sfuConnectionRetryCount++
                         logger.w {
-                            "[stateJob] SFU connection retry $sfuConnectionRetryCount/$MAX_SFU_CONNECTION_RETRIES for $sfuName"
+                            "[stateJob] SFU connection failure $sfuConnectionRetryCount/$MAX_SFU_CONNECTION_RETRIES for $sfuName"
                         }
-                        if (sfuConnectionRetryCount >= MAX_SFU_CONNECTION_RETRIES) {
+                        if (sfuConnectionRetryCount > MAX_SFU_CONNECTION_RETRIES) {
                             logger.w {
                                 "[stateJob] Max retries reached for $sfuName, requesting new SFU via migrate()"
                             }
@@ -664,6 +662,11 @@ public class RtcSession internal constructor(
                             sfuConnectionModule.socketConnection.disconnect()
                             call.migrate()
                         }
+                    }
+
+                    is SfuSocketState.Disconnected.WebSocketEventLost -> {
+                        // Intermediate state in HealthMonitor retry cycle — not a new
+                        // connection failure, so don't increment the retry counter.
                     }
 
                     else -> {
