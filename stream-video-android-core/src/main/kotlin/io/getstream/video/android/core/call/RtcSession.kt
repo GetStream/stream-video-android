@@ -207,6 +207,8 @@ data class TrackDimensions(
  *
  * For developers: RtcSession throws [IllegalStateException] because its [coroutineScope] & [rtcSessionScope] throws it
  */
+private const val MAX_SFU_CONNECTION_RETRIES = 2
+
 public class RtcSession internal constructor(
     client: StreamVideo,
     private val sessionCounter: Int = 0,
@@ -218,6 +220,7 @@ public class RtcSession internal constructor(
     internal var sfuUrl: String,
     internal var sfuWsUrl: String,
     internal var sfuToken: String,
+    internal var sfuName: String,
     internal var remoteIceServers: List<IceServer>,
     internal val clientImpl: StreamVideoClient = client as StreamVideoClient,
     private val supervisorJob: CompletableJob = SupervisorJob(),
@@ -255,6 +258,13 @@ public class RtcSession internal constructor(
 ) {
     private var muteStateSyncJob: Job? = null
     private val oneBasedSessionCounter = sessionCounter + 1
+
+    /**
+     * Tracks consecutive SFU connection failures for the current SFU. After
+     * [MAX_SFU_CONNECTION_RETRIES] the session triggers a migration to request a new SFU
+     * from the coordinator instead of retrying the same one indefinitely.
+     */
+    private var sfuConnectionRetryCount = 0
 
     private var stateJob: Job? = null
     private var errorJob: Job? = null
@@ -623,8 +633,10 @@ public class RtcSession internal constructor(
                 _sfuSfuSocketState.value = sfuSocketState
                 when (sfuSocketState) {
                     is SfuSocketState.Connected -> {
+                        sfuConnectionRetryCount = 0
                         call.state._connection.value =
                             RealtimeConnection.Connected
+                        call.onSfuConnectionEstablished()
 
                         val pendingTrickleEvents = iceTricklePendingEvents.toList()
                         iceTricklePendingEvents.clear()
@@ -637,8 +649,25 @@ public class RtcSession internal constructor(
                         call.state._connection.value =
                             RealtimeConnection.InProgress
 
+                    is SfuSocketState.Disconnected.DisconnectedTemporarily,
+                    is SfuSocketState.Disconnected.WebSocketEventLost,
+                    -> {
+                        sfuConnectionRetryCount++
+                        logger.w {
+                            "[stateJob] SFU connection retry $sfuConnectionRetryCount/$MAX_SFU_CONNECTION_RETRIES for $sfuName"
+                        }
+                        if (sfuConnectionRetryCount >= MAX_SFU_CONNECTION_RETRIES) {
+                            logger.w {
+                                "[stateJob] Max retries reached for $sfuName, requesting new SFU via migrate()"
+                            }
+                            sfuConnectionRetryCount = 0
+                            sfuConnectionModule.socketConnection.disconnect()
+                            call.migrate()
+                        }
+                    }
+
                     else -> {
-                        // Ignore it
+                        // Ignore other states
                     }
                 }
             }
