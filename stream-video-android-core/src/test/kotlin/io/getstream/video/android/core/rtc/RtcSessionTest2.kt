@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.rtc
 
-import android.graphics.ColorSpace.match
 import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.models.OwnCapability
@@ -61,12 +60,10 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.webrtc.SessionDescription
-import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
-import stream.video.sfu.signal.SendAnswerResponse
 
 class RtcSessionTest2 {
 
@@ -154,6 +151,7 @@ class RtcSessionTest2 {
                 sfuUrl = sfuUrl,
                 sfuWsUrl = sfuWsUrl,
                 sfuToken = sfuToken,
+                sfuName = "test-sfu-edge",
                 remoteIceServers = remoteIceServers,
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
@@ -191,6 +189,7 @@ class RtcSessionTest2 {
                 sfuUrl = sfuUrl,
                 sfuWsUrl = sfuWsUrl,
                 sfuToken = sfuToken,
+                sfuName = "test-sfu-edge",
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
                 remoteIceServers = remoteIceServers,
@@ -235,6 +234,7 @@ class RtcSessionTest2 {
                     sfuUrl = sfuUrl,
                     sfuWsUrl = sfuWsUrl,
                     sfuToken = sfuToken,
+                    sfuName = "test-sfu-edge",
                     clientImpl = mockVideoClient,
                     coroutineScope = testScope,
                     remoteIceServers = remoteIceServers,
@@ -257,11 +257,6 @@ class RtcSessionTest2 {
             coEvery { subscriber!!.setLocalDescription(any()) } returns io.getstream.result.Result.Success(
                 Unit,
             )
-            val mockApi = rtcSession.sfuConnectionModule.api
-            coEvery { mockApi.sendAnswer(any()) } returns SendAnswerResponse(
-                error = null,
-            )
-
             rtcSession.handleSubscriberOffer(offerEvent)
 
             coVerify {
@@ -295,6 +290,7 @@ class RtcSessionTest2 {
             sfuUrl = "https://test-sfu.stream.com",
             sfuWsUrl = "wss://test-sfu.stream.com",
             sfuToken = "fake-sfu-token",
+            sfuName = "test-sfu-edge",
             clientImpl = mockVideoClient,
             coroutineScope = testScope,
             rtcSessionScope = testScope,
@@ -343,6 +339,7 @@ class RtcSessionTest2 {
                 sfuUrl = "https://test-sfu.stream.com",
                 sfuWsUrl = "wss://test-sfu.stream.com",
                 sfuToken = "fake-sfu-token",
+                sfuName = "test-sfu-edge",
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
                 remoteIceServers = emptyList(),
@@ -389,6 +386,7 @@ class RtcSessionTest2 {
             sfuUrl = "https://test-sfu.stream.com",
             sfuWsUrl = "wss://test-sfu.stream.com",
             sfuToken = "fake-sfu-token",
+            sfuName = "test-sfu-edge",
             clientImpl = mockVideoClient,
             coroutineScope = testScope,
             remoteIceServers = emptyList(),
@@ -473,7 +471,6 @@ class RtcSessionTest2 {
         }
         val mockModule = mockk<SfuConnectionModule>(relaxed = true) {
             every { socketConnection } returns mockSocket
-            every { api } returns mockk(relaxed = true)
         }
         val rtcSession = spyk(
             RtcSession(
@@ -486,6 +483,7 @@ class RtcSessionTest2 {
                 sfuUrl = "https://test-sfu.stream.com",
                 sfuWsUrl = "wss://test-sfu.stream.com",
                 sfuToken = "fake-sfu-token",
+                sfuName = "test-sfu-edge",
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
                 rtcSessionScope = testScope,
