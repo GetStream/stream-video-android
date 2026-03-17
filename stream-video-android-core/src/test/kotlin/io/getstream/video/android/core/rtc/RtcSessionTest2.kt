@@ -248,13 +248,17 @@ class RtcSessionTest2 {
             val offerEvent = SubscriberOfferEvent(
                 sdp = fakeSdpOffer,
             )
-            coEvery { subscriber!!.setRemoteDescription(any()) } returns io.getstream.result.Result.Success(
+            coEvery {
+                subscriber.value!!.setRemoteDescription(any())
+            } returns io.getstream.result.Result.Success(
                 Unit,
             )
-            coEvery { subscriber!!.createAnswer() } returns io.getstream.result.Result.Success(
+            coEvery { subscriber.value!!.createAnswer() } returns io.getstream.result.Result.Success(
                 SessionDescription(SessionDescription.Type.ANSWER, "fake-answer-sdp"),
             )
-            coEvery { subscriber!!.setLocalDescription(any()) } returns io.getstream.result.Result.Success(
+            coEvery {
+                subscriber.value!!.setLocalDescription(any())
+            } returns io.getstream.result.Result.Success(
                 Unit,
             )
             val mockApi = rtcSession.sfuConnectionModule.api
@@ -265,7 +269,7 @@ class RtcSessionTest2 {
             rtcSession.handleSubscriberOffer(offerEvent)
 
             coVerify {
-                subscriber!!.negotiate(
+                subscriber.value!!.negotiate(
                     match {
                         it.contains("fake-offer-sdp")
                     },
@@ -349,7 +353,7 @@ class RtcSessionTest2 {
                 sfuConnectionModuleProvider = { mockk(relaxed = true) },
             )
             val mockPublisher = mockk<Publisher>(relaxed = true)
-            rtcSession.publisher = mockPublisher
+            rtcSession.publisher.value = mockPublisher
             val event = ICETrickleEvent(
                 candidate = """{
             "sdpMid": "0",
@@ -397,7 +401,7 @@ class RtcSessionTest2 {
         val subscriber = rtcSession.subscriber
         assertNotNull(subscriber)
         val publisher = mockk<Publisher>(relaxed = true)
-        rtcSession.publisher = publisher
+        rtcSession.publisher.value = publisher
         val mockSocketConnection = rtcSession.sfuConnectionModule.socketConnection
         coJustRun { mockSocketConnection.disconnect() }
 

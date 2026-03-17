@@ -19,6 +19,7 @@ package io.getstream.video.android.core.reconnect
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,7 +32,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
     @Test
     fun `Rejoin attempts are correctly updated`() = runTest {
         // create the call
-        val sessionMock = mockk<RtcSession>(relaxed = true)
+        val sessionMock: MutableStateFlow<RtcSession?> = MutableStateFlow(mockk(relaxed = true))
         val call = client.call("default", randomUUID())
         call.session = sessionMock
 
@@ -43,7 +44,8 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
     @Test
     fun `Fast reconnect does not update the reconnect attempts`() = runTest {
         // create the call
-        val sessionMock = mockk<RtcSession>(relaxed = true)
+
+        val sessionMock: MutableStateFlow<RtcSession?> = MutableStateFlow(mockk(relaxed = true))
         val call = client.call("default", randomUUID())
         call.session = sessionMock
 
@@ -55,7 +57,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
     @Test
     fun `Multiple rejoin calls will increase the reconnect attempts correctly`() = runTest {
         // create the call
-        val sessionMock = mockk<RtcSession>(relaxed = true)
+        val sessionMock: MutableStateFlow<RtcSession?> = MutableStateFlow(mockk(relaxed = true))
         val call = client.call("default", randomUUID())
         call.session = sessionMock
 

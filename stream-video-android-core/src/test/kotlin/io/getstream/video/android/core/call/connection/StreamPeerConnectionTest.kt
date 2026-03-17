@@ -29,6 +29,7 @@ import io.mockk.spyk
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -61,6 +62,7 @@ class StreamPeerConnectionTest {
         // We'll create a real or spy StreamPeerConnection
         streamPeerConnection = spyk(
             object : StreamPeerConnection(
+                coroutineScope = testScope,
                 type = StreamPeerType.PUBLISHER,
                 mediaConstraints = MediaConstraints(),
                 onStreamAdded = null,
@@ -159,6 +161,7 @@ class StreamPeerConnectionTest {
     fun `buildVideoTransceiverInit camera has three encodings q,h,f`() = runTest {
         // We'll create a StreamPeerConnection with a known maxBitRate
         val peerConnection = object : StreamPeerConnection(
+            coroutineScope = testScope,
             type = io.getstream.video.android.core.model.StreamPeerType.PUBLISHER,
             mediaConstraints = org.webrtc.MediaConstraints(),
             onStreamAdded = null,
@@ -214,6 +217,7 @@ class StreamPeerConnectionTest {
     @Test
     fun `buildVideoTransceiverInit screenshare has one encoding q`() = runTest {
         val peerConnection = object : StreamPeerConnection(
+            coroutineScope = testScope,
             type = io.getstream.video.android.core.model.StreamPeerType.SUBSCRIBER,
             mediaConstraints = org.webrtc.MediaConstraints(),
             onStreamAdded = null,
