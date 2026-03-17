@@ -234,7 +234,11 @@ public class Call(
     private var isDestroyed = false
 
     /** Session handles all real time communication for video and audio */
-    public var session: MutableStateFlow<RtcSession?> = MutableStateFlow(null)
+    internal val _session: MutableStateFlow<RtcSession?> = MutableStateFlow(null)
+
+    @InternalStreamVideoApi
+    public val session: StateFlow<RtcSession?> = _session
+
     var sessionId = UUID.randomUUID().toString()
     internal val unifiedSessionId = UUID.randomUUID().toString()
 
@@ -556,7 +560,7 @@ public class Call(
                 return result
             }
             if (result is Failure) {
-                session.value = null
+                _session.value = null
                 logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
@@ -567,7 +571,7 @@ public class Call(
             }
             delay(retryCount - 1 * 1000L)
         }
-        session.value = null
+        _session.value = null
         val errorMessage = "Join failed after 3 retries"
         state._connection.value = RealtimeConnection.Failed(errorMessage)
         return Failure(value = Error.GenericError(errorMessage))
@@ -661,7 +665,7 @@ public class Call(
                     powerManager = powerManager,
                 )
             }
-            session.value = localSession
+            _session.value = localSession
 
             session.value?.let {
                 state._connection.value = RealtimeConnection.Joined(it)
@@ -843,7 +847,7 @@ public class Call(
                 this.state.removeParticipant(prevSessionId)
                 oldSession.prepareRejoin()
                 try {
-                    this.session.value = (
+                    this._session.value = (
                         RtcSession(
                             clientImpl,
                             reconnectAttepmts,
@@ -927,7 +931,7 @@ public class Call(
                         },
                     )
                     val oldSession = this.session.value
-                    this.session.value = newSession
+                    this._session.value = newSession
                     this.session.value?.connect(reconnectDetails, currentOptions)
                     monitorSession(joinResponse.value)
                     oldSession?.leaveWithReason("migrating")
@@ -1544,7 +1548,7 @@ public class Call(
         shutDownJobsGracefully()
         callStatsReportingJob?.cancel()
         mediaManager.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
-        session.value = null
+        _session.value = null
         // Cleanup the call's scope provider
         scopeProvider.cleanup()
     }

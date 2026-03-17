@@ -151,7 +151,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
@@ -752,16 +751,24 @@ public class CallState(
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
 
     @InternalStreamVideoApi
-    public val debugPublisherConnectionState: Flow<PeerConnection.PeerConnectionState?> =
-        call.session
+    public fun getDebugPublisherConnectionState(): Flow<PeerConnection.PeerConnectionState?> {
+        return call.session
             .filterNotNull()
-            .flatMapLatest { session ->
-                session.publisher ?: MutableStateFlow(null)
-            }
+            .flatMapLatest { session -> session.publisher }
             .filterNotNull()
-            .flatMapLatest { publisher ->
-                publisher.state ?: flowOf(PeerConnection.PeerConnectionState.NEW)
-            }
+            .flatMapLatest { publisher -> publisher.state }
+            .distinctUntilChanged()
+    }
+
+    @InternalStreamVideoApi
+    public fun getDebugSubscriberConnectionState(): Flow<PeerConnection.PeerConnectionState?> {
+        return call.session
+            .filterNotNull()
+            .flatMapLatest { session -> session.subscriber }
+            .filterNotNull()
+            .flatMapLatest { subscriber -> subscriber.state }
+            .distinctUntilChanged()
+    }
 
     private val ringingLogger by taggedLogger("RingingState")
 

@@ -20,6 +20,7 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -212,6 +214,9 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                 }
 
                 else -> {
+                    call.speaker.setSpeakerPhone(true)
+                    Log.d("Noob", "StreamCallActivityComposeDelegate")
+
                     LaunchPermissionRequest(getRequiredPermissions(call)) {
                         AllPermissionsGranted {
                             // All permissions granted
@@ -312,7 +317,6 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                             InternalPermissionContent(it, call, emptyList(), emptyList())
                         }
                     }
-                    call.state.session
                 }
             }
 
@@ -610,13 +614,26 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
 
 @Composable
 private fun PeerConnectionStateView(call: Call) {
-//    val connectionState by call.state.debugPublisherConnectionState.collectAsStateWithLifecycle(
-//        PeerConnection.PeerConnectionState.NEW,
-//    )
-//
-//    Text(
-//        text = connectionState?.name ?: "Empty",
-//        fontSize = 20.sp,
-//
-//    )
+    val publisherConnectionState by call.state.getDebugPublisherConnectionState().collectAsStateWithLifecycle(
+        null,
+    )
+    val publisherConnectionStateText = "Publisher: ${publisherConnectionState?.name}"
+
+    val subscriberConnectionState by call.state.getDebugSubscriberConnectionState().collectAsStateWithLifecycle(
+        null,
+    )
+    val subscriberConnectionStateText = "Subscriber: ${subscriberConnectionState?.name}"
+
+    Column {
+        Text(
+            text = publisherConnectionStateText,
+            color = Color.White,
+            fontSize = 20.sp,
+        )
+        Text(
+            text = subscriberConnectionStateText,
+            color = Color.White,
+            fontSize = 20.sp,
+        )
+    }
 }

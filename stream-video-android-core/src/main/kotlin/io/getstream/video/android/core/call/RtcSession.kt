@@ -477,8 +477,8 @@ public class RtcSession internal constructor(
     private val connectionConfiguration: PeerConnection.RTCConfiguration
         get() = buildConnectionConfiguration(iceServers)
 
-    internal var subscriber: MutableStateFlow<Subscriber?> = MutableStateFlow(null)
-    internal var publisher: MutableStateFlow<Publisher?> = MutableStateFlow(null)
+    internal val subscriber: MutableStateFlow<Subscriber?> = MutableStateFlow(null)
+    internal val publisher: MutableStateFlow<Publisher?> = MutableStateFlow(null)
 
     internal lateinit var sfuConnectionModule: SfuConnectionModule
 
