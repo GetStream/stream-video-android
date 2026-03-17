@@ -454,7 +454,7 @@ public class RtcSession internal constructor(
 
         setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
         val streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
-        val track = publisher?.publishStream(
+        val track = publisher.value?.publishStream(
             streamId,
             TrackType.TRACK_TYPE_AUDIO,
         )
@@ -478,7 +478,7 @@ public class RtcSession internal constructor(
         get() = buildConnectionConfiguration(iceServers)
 
     internal var subscriber: Subscriber? = null
-    internal var publisher: Publisher? = null
+    internal var publisher: MutableStateFlow<Publisher?> = MutableStateFlow(null)
 
     internal lateinit var sfuConnectionModule: SfuConnectionModule
 
@@ -741,7 +741,7 @@ public class RtcSession internal constructor(
         }
 
         val publisherAsync = rtcSessionScope.async {
-            publisher?.let {
+            publisher.value?.let {
                 if (!it.isHealthy() || forceRestart) {
                     logger.i { "ice restarting publisher peer connection (force restart = $forceRestart)" }
                     it.restartIce("it.isHealthy() = ${it.isHealthy()}, forceRestart=$forceRestart")
@@ -833,7 +833,7 @@ public class RtcSession internal constructor(
                         setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
                         val streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
 
-                        val track = publisher?.publishStream(
+                        val track = publisher.value?.publishStream(
                             streamId,
                             TrackType.TRACK_TYPE_VIDEO,
                             call.mediaManager.camera.resolution.value,
@@ -851,7 +851,7 @@ public class RtcSession internal constructor(
                     }
                 } else {
                     setMuteState(isEnabled = false, TrackType.TRACK_TYPE_VIDEO)
-                    publisher?.unpublishStream(TrackType.TRACK_TYPE_VIDEO)
+                    publisher.value?.unpublishStream(TrackType.TRACK_TYPE_VIDEO)
                 }
             }
         }
@@ -862,7 +862,7 @@ public class RtcSession internal constructor(
                     createAndPublishAudioTrack()
                 } else {
                     setMuteState(isEnabled = false, TrackType.TRACK_TYPE_AUDIO)
-                    publisher?.unpublishStream(TrackType.TRACK_TYPE_AUDIO)
+                    publisher.value?.unpublishStream(TrackType.TRACK_TYPE_AUDIO)
                 }
             }
         }
@@ -877,7 +877,7 @@ public class RtcSession internal constructor(
                     if (canUserShareScreen) {
                         setMuteState(true, TrackType.TRACK_TYPE_SCREEN_SHARE)
                         val streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE)
-                        val track = publisher?.publishStream(
+                        val track = publisher.value?.publishStream(
                             streamId,
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
                         )
@@ -892,7 +892,7 @@ public class RtcSession internal constructor(
                     }
                 } else {
                     setMuteState(false, TrackType.TRACK_TYPE_SCREEN_SHARE)
-                    publisher?.unpublishStream(TrackType.TRACK_TYPE_SCREEN_SHARE)
+                    publisher.value?.unpublishStream(TrackType.TRACK_TYPE_SCREEN_SHARE)
                 }
             }
         }
@@ -901,7 +901,7 @@ public class RtcSession internal constructor(
     private suspend fun connectRtc() {
         logger.d { "[connectRtc] #sfu; #track; no args" }
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
-        publisher?.let {
+        publisher.value?.let {
             listenToMediaChanges()
         }
         // subscribe to the tracks of other participants
@@ -966,11 +966,11 @@ public class RtcSession internal constructor(
         // cleanup the publisher and subcriber peer connections
         safeCall {
             subscriber?.close()
-            publisher?.close(true)
+            publisher.value?.close(true)
         }
 
         subscriber = null
-        publisher = null
+        publisher.value = null
 
         // cleanup orphaned tracks to prevent memory leaks
         // Thread-safe: ConcurrentHashMap.clear() is atomic
@@ -1242,12 +1242,12 @@ public class RtcSession internal constructor(
 
                             sfuConnectionModule.socketConnection.whenConnected {
                                 logger.d { "JoinCallResponseEvent sfuConnectionModule.socketConnection.whenConnected" }
-                                if (publisher == null && hasPublishCapability()) {
-                                    publisher = createPublisher(event.publishOptions)
+                                if (publisher.value == null && hasPublishCapability()) {
+                                    publisher.value = createPublisher(event.publishOptions)
                                 }
                                 connectRtc()
                                 processPendingSubscriberEvents()
-                                publisher?.let {
+                                publisher.value?.let {
                                     processPendingPublisherEvents()
                                 }
                             }
@@ -1255,7 +1255,7 @@ public class RtcSession internal constructor(
 
                         is ChangePublishOptionsEvent -> {
                             logger.v { "[changePublishOptions] ChangePublishOptionsEvent: $event, publisher: $publisher" }
-                            publisher?.syncPublishOptions(
+                            publisher.value?.syncPublishOptions(
                                 call.mediaManager.camera.resolution.value,
                                 event.change.publish_options,
                             ) ?: let {
@@ -1267,7 +1267,7 @@ public class RtcSession internal constructor(
                         // this dynascale event tells the SDK to change the quality of the video it's uploading
                         is ChangePublishQualityEvent -> {
                             event.changePublishQuality.video_senders.forEach {
-                                publisher?.changePublishQuality(it)
+                                publisher.value?.changePublishQuality(it)
                             }
                         }
 
@@ -1300,7 +1300,7 @@ public class RtcSession internal constructor(
                                     val isMicDisabled = !call.mediaManager.microphone.isEnabled.value
                                     if (isMicDisabled) {
                                         setMuteState(isEnabled = false, event.trackType)
-                                        publisher?.unpublishStream(event.trackType)
+                                        publisher.value?.unpublishStream(event.trackType)
                                     }
                                 }
                             }
@@ -1358,7 +1358,7 @@ public class RtcSession internal constructor(
                             val peerType = event.peerType
                             when (peerType) {
                                 PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED -> {
-                                    publisher?.restartIce("ICERestartEvent, peerType: PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED")
+                                    publisher.value?.restartIce("ICERestartEvent, peerType: PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED")
                                         ?: let {
                                             publisherPendingEvents.add(event)
                                         }
@@ -1394,11 +1394,11 @@ public class RtcSession internal constructor(
                     }
 
                     is ICERestartEvent -> {
-                        publisher?.restartIce("ICERestartEvent")
+                        publisher.value?.restartIce("ICERestartEvent")
                     }
 
                     is ChangePublishOptionsEvent -> {
-                        publisher?.syncPublishOptions(
+                        publisher.value?.syncPublishOptions(
                             call.mediaManager.camera.resolution.value,
                             pendingEvent.change.publish_options,
                         )
@@ -1499,7 +1499,7 @@ public class RtcSession internal constructor(
         }
         val iceCandidate: IceCandidate = Json.decodeFromString(event.candidate)
         val result = if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
-            publisher?.handleNewIceCandidate(iceCandidate)
+            publisher.value?.handleNewIceCandidate(iceCandidate)
         } else {
             subscriber?.handleNewIceCandidate(iceCandidate)
         }
@@ -1526,14 +1526,14 @@ public class RtcSession internal constructor(
     }
 
     internal fun getPublisherTracksForReconnect(): List<TrackInfo> {
-        return publisher?.getAnnouncedTracksForReconnect() ?: emptyList()
+        return publisher.value?.getAnnouncedTracksForReconnect() ?: emptyList()
     }
 
     /**
      * @return [StateFlow] that holds [RtcStatsReport] that the publisher exposes.
      */
     suspend fun getPublisherStats(): RtcStatsReport? {
-        return publisher?.getStats()
+        return publisher.value?.getStats()
     }
 
     /**
@@ -1582,7 +1582,7 @@ public class RtcSession internal constructor(
                 powerSaveMode ?: false
             }
 
-            val publisherRtcStats = publisher?.stats()
+            val publisherRtcStats = publisher.value?.stats()
             val subscriberRtcStats = subscriber?.stats()
             publisherTracer.trace("getstats", publisherRtcStats?.delta)
             subscriberTracer.trace("getstats", subscriberRtcStats?.delta)
@@ -1788,7 +1788,7 @@ public class RtcSession internal constructor(
             session_id = sessionId,
             token = sfuToken,
             client_details = clientDetails,
-            preferred_publish_options = publisher?.currentOptions() ?: emptyList(),
+            preferred_publish_options = publisher.value?.currentOptions() ?: emptyList(),
             reconnect_details = reconnectDetails,
             capabilities = call.clientCapabilities.values.toList(),
             source = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
@@ -1807,13 +1807,13 @@ public class RtcSession internal constructor(
                     },
                 ) {
                     val peerConnectionNotUsable =
-                        subscriber?.isFailedOrClosed() == true || publisher?.isFailedOrClosed() == true
+                        subscriber?.isFailedOrClosed() == true || publisher.value?.isFailedOrClosed() == true
                     if (peerConnectionNotUsable) {
                         logger.w { "[fastReconnect] Peer connections are not usable, rejoining." }
                         // We could not reuse the peer connections.
                         call.rejoin("fastReconnect:peerConnectionNotUsable")
                     } else {
-                        publisher?.restartIce("peerConnection is usable")
+                        publisher.value?.restartIce("peerConnection is usable")
                         sendCallStats(
                             report = call.collectStats(),
                             reconnectionTimeSeconds = Pair(
@@ -1836,7 +1836,7 @@ public class RtcSession internal constructor(
         runBlocking {
             sfuConnectionModule.socketConnection.disconnect()
         }
-        publisher?.close(true)
+        publisher.value?.close(true)
         subscriber?.close()
     }
 

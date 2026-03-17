@@ -36,7 +36,11 @@ import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.stringify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.webrtc.CandidatePairChangeEvent
@@ -168,6 +172,7 @@ open class StreamPeerConnection(
         this.statsTracer = StatsTracer(connection, type.toPeerType())
         this.state.value = this.connection.connectionState()
         this.iceState.value = this.connection.iceConnectionState()
+        pollFirstPacket()
     }
 
     /**
@@ -550,6 +555,49 @@ open class StreamPeerConnection(
         logger.i { "[close] #sfu; #$typeTag; no args, debugText: $tag" }
         tracer.trace(PeerConnectionTraceKey.CLOSE.value, null)
         connection.close()
+    }
+
+    private var firstInboundPacketLogged = false
+    private var firstOutboundPacketLogged = false
+
+    private fun pollFirstPacket() {
+        logger.d { "[pollFirstPacket]" }
+        GlobalScope.launch(Dispatchers.Default) {
+            while (!firstInboundPacketLogged && !firstOutboundPacketLogged) {
+                checkStats()
+                delay(500)
+            }
+        }
+    }
+
+    private fun checkStats() {
+        connection.getStats { report ->
+            report.statsMap.values.forEach { stat ->
+                when (stat.type) {
+                    "inbound-rtp" -> {
+                        val bytes = stat.members["bytesReceived"] as? Number ?: return@forEach
+                        if (bytes.toLong() > 0 && !firstInboundPacketLogged) {
+                            firstInboundPacketLogged = true
+                            logger.d { "[checkStats] FIRST_INBOUND_RTP_PACKET, id:${stat.id}" }
+                            with(PeerConnectionTraceKey.FIRST_INBOUND_RTP.value) {
+                                tracer.trace(this, this)
+                            }
+                        }
+                    }
+
+                    "outbound-rtp" -> {
+                        val bytes = stat.members["bytesSent"] as? Number ?: return@forEach
+                        if (bytes.toLong() > 0 && !firstOutboundPacketLogged) {
+                            firstOutboundPacketLogged = true
+                            logger.d { "[checkStats] FIRST_OUTBOUND_RTP_PACKET, id:${stat.id}" }
+                            with(PeerConnectionTraceKey.FIRST_OUTBOUND_RTP.value) {
+                                tracer.trace(this, this)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**

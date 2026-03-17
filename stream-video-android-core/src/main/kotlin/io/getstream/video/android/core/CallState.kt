@@ -140,20 +140,27 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.cancel
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
+import org.webrtc.PeerConnection
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.ParticipantSource
 import stream.video.sfu.models.TrackType
@@ -676,7 +683,7 @@ public class CallState(
     private var speakingWhileMutedResetJob: Job? = null
     private var autoJoiningCall: Job? = null
     private var ringingTimerJob: Job? = null
-
+    private var publisherObserverJob: Job? = null
     internal var acceptedOnThisDevice: Boolean = false
 
     /**
@@ -742,10 +749,34 @@ public class CallState(
         }
 
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
+
+    @InternalStreamVideoApi
+    public val debugPublisherConnectionState: Flow<PeerConnection.PeerConnectionState?> =
+        call.session
+            .filterNotNull()
+            .flatMapLatest { session ->
+                session.publisher ?: MutableStateFlow(null)
+            }
+            .filterNotNull()
+            .flatMapLatest { publisher ->
+                publisher.state ?: flowOf(PeerConnection.PeerConnectionState.NEW)
+            }
+
     private val ringingLogger by taggedLogger("RingingState")
 
     fun handleEvent(event: VideoEvent) {
-        logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
+        val eventName = event::class.java.name.split(".").last()
+        when (event) {
+            is ParticipantJoinedEvent -> {
+                val isSelf = event.participant.user_id == StreamVideo.instanceOrNull()?.userId
+                logger.d { "[handleEvent] $eventName, isSelf:$isSelf" }
+            }
+            is TrackPublishedEvent -> {
+                val isSelf = event.userId == StreamVideo.instanceOrNull()?.userId
+                logger.d { "[handleEvent] $eventName, isSelf:$isSelf, trackType:${event.trackType}" }
+            }
+            else -> logger.d { "[handleEvent] $eventName" }
+        }
 
         when (event) {
             is BlockedUserEvent -> {
@@ -1025,7 +1056,7 @@ public class CallState(
             }
 
             is ChangePublishQualityEvent -> {
-                call.session?.handleEvent(event)
+                call.session.value?.handleEvent(event)
             }
 
             is ErrorEvent -> {
@@ -1368,8 +1399,50 @@ public class CallState(
             // stop the call ringing timer if it's running
         }
         ringingLogger.d { "Update: $state" }
+        if (state is RingingState.Active) {
+            transitionToActiveState()
+        } else {
+            _ringingState.value = state
+            publisherObserverJob?.cancel()
+        }
+    }
 
-        _ringingState.value = state
+    private fun transitionToActiveState() {
+        logger.d { "[transitionToActiveState]" }
+        val oldState = ringingState.value
+        if (oldState !is RingingState.Active) {
+            observePublisherConnection()
+        }
+    }
+
+    private fun observePublisherConnection() {
+        if (publisherObserverJob?.isActive == true) return
+
+        val PUBLISHER_CONNECT_TIMEOUT = 10_000L
+
+        publisherObserverJob = scope.launch {
+            val start = System.currentTimeMillis()
+
+            val connected = withTimeoutOrNull(PUBLISHER_CONNECT_TIMEOUT) {
+                call.session
+                    .filterNotNull()
+                    .flatMapLatest { it.publisher }
+                    .filterNotNull()
+                    .flatMapLatest { it.state }
+                    .first { it == PeerConnection.PeerConnectionState.CONNECTED }
+                true
+            } ?: false
+
+            val duration = System.currentTimeMillis() - start
+
+            if (connected) {
+                logger.d { "[observePublisherConnection] Publisher connected in ${duration}ms" }
+            } else {
+                logger.w { "[observePublisherConnection] Publisher connection timed out after ${duration}ms" }
+            }
+
+            _ringingState.value = RingingState.Active
+        }
     }
 
     @InternalStreamVideoApi
@@ -1802,6 +1875,12 @@ public class CallState(
                     }
                 }
         }
+    }
+
+    internal fun cleanup() {
+        publisherObserverJob?.cancel()
+        publisherObserverJob = null
+        cancelTimeout()
     }
 }
 

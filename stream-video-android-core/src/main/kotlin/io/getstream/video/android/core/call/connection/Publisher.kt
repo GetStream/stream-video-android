@@ -355,6 +355,9 @@ internal class Publisher(
         track: MediaStreamTrack,
         publishOption: PublishOption,
     ) {
+        if (publishOption.track_type == TrackType.TRACK_TYPE_AUDIO) {
+            logger.d { "[addTransceiver] TrackType.TRACK_TYPE_AUDIO" }
+        }
         val rtpParametersEncodings = computeTransceiverEncodings(
             captureFormat,
             publishOption,

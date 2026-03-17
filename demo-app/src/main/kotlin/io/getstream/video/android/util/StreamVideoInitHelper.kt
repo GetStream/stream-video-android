@@ -341,7 +341,7 @@ object StreamVideoInitHelper {
                     return authData.token
                 }
             },
-            callUpdatesAfterLeave = true,
+            callUpdatesAfterLeave = false,
             appName = "Stream Video Demo App",
             audioProcessing = NoiseCancellation(context),
             telecomConfig = TelecomConfig(context.packageName),

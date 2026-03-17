@@ -312,10 +312,12 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                             InternalPermissionContent(it, call, emptyList(), emptyList())
                         }
                     }
+                    call.state.session
                 }
             }
 
             HandleCallRejectionFromNotification(call)
+            PeerConnectionStateView(call)
         }
     }
 
@@ -604,4 +606,17 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             )
         }
     }
+}
+
+@Composable
+private fun PeerConnectionStateView(call: Call) {
+//    val connectionState by call.state.debugPublisherConnectionState.collectAsStateWithLifecycle(
+//        PeerConnection.PeerConnectionState.NEW,
+//    )
+//
+//    Text(
+//        text = connectionState?.name ?: "Empty",
+//        fontSize = 20.sp,
+//
+//    )
 }

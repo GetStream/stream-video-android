@@ -20,7 +20,6 @@ import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.android.video.generated.models.ConnectionErrorEvent
 import io.getstream.android.video.generated.models.HealthCheckEvent
 import io.getstream.android.video.generated.models.VideoEvent
-import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -67,7 +66,8 @@ internal open class CoordinatorSocket(
     private val networkStateProvider: NetworkStateProvider,
 ) {
     private var streamWebSocket: StreamWebSocket<VideoEvent, VideoParser>? = null
-    open val logger by taggedLogger(TAG)
+
+//    open val logger by taggedLogger(TAG)
     private var connectionConf: ConnectionConf? = null
     private val listeners = mutableSetOf<SocketListener<VideoEvent, ConnectedEvent>>()
     private val coordinatorSocketStateService = CoordinatorSocketStateService()
@@ -103,7 +103,7 @@ internal open class CoordinatorSocket(
         var socketListenerJob: Job? = null
 
         suspend fun connectUser(connectionConf: ConnectionConf) {
-            logger.d { "[connectUser] connectionConf: $connectionConf" }
+//            logger.d { "[connectUser] connectionConf: $connectionConf" }
             userScope.launch { startObservers() }
             this.connectionConf = connectionConf
             socketListenerJob?.cancel()
@@ -123,7 +123,7 @@ internal open class CoordinatorSocket(
                                     else -> handleEvent(event)
                                 }
                                 is StreamWebSocketEvent.SfuMessage -> {
-                                    logger.v { "Received [SFUMessage] in coordinator socket. Ignoring" }
+//                                    logger.v { "Received [SFUMessage] in coordinator socket. Ignoring" }
                                 }
                             }
                         }.launchIn(userScope)
@@ -135,18 +135,18 @@ internal open class CoordinatorSocket(
         }
 
         suspend fun reconnect(connectionConf: ConnectionConf) {
-            logger.d { "[reconnect] connectionConf: $connectionConf" }
+//            logger.d { "[reconnect] connectionConf: $connectionConf" }
             connectUser(connectionConf.asReconnectionConf())
         }
 
         return userScope.launch {
             coordinatorSocketStateService.observer { state ->
-                logger.i { "[onSocketStateChanged] state: $state" }
+//                logger.i { "[onSocketStateChanged] state: $state" }
                 when (state) {
                     is VideoSocketState.RestartConnection -> {
                         connectionConf?.let { coordinatorSocketStateService.onReconnect(it, false) }
                             ?: run {
-                                logger.e { "[onSocketStateChanged] #reconnect; connectionConf is null" }
+//                                logger.e { "[onSocketStateChanged] #reconnect; connectionConf is null" }
                             }
                     }
 
@@ -226,7 +226,7 @@ internal open class CoordinatorSocket(
     }
 
     suspend fun connectUser(user: User, isAnonymous: Boolean) {
-        logger.d { "[connectUser] user.id: ${user.id}, isAnonymous: $isAnonymous" }
+//        logger.d { "[connectUser] user.id: ${user.id}, isAnonymous: $isAnonymous" }
         socketStateObserverJob?.cancel()
         socketStateObserverJob = observeSocketStateService()
         coordinatorSocketStateService.onConnect(
@@ -238,7 +238,7 @@ internal open class CoordinatorSocket(
     }
 
     suspend fun disconnect() {
-        logger.d { "[disconnect] no args" }
+//        logger.d { "[disconnect] no args" }
         connectionConf = null
         coordinatorSocketStateService.onRequiredDisconnect()
     }
@@ -266,7 +266,7 @@ internal open class CoordinatorSocket(
     }
 
     private suspend fun handleError(error: StreamWebSocketEvent.Error) {
-        logger.e { "[handleError] error: $error" }
+//        logger.e { "[handleError] error: $error" }
         when (error.streamError) {
             is Error.NetworkError -> onVideoNetworkError(error.streamError, error.reconnectStrategy)
             else -> callListeners { it.onError(error) }
@@ -293,9 +293,9 @@ internal open class CoordinatorSocket(
             VideoErrorCode.INVALID_TOKEN.code,
             VideoErrorCode.API_KEY_NOT_FOUND.code,
             -> {
-                logger.d {
-                    "One unrecoverable error happened. Error: $error. Error code: ${error.serverErrorCode}"
-                }
+//                logger.d {
+//                    "One unrecoverable error happened. Error: $error. Error code: ${error.serverErrorCode}"
+//                }
                 coordinatorSocketStateService.onUnrecoverableError(error)
             }
 
@@ -366,9 +366,9 @@ internal open class CoordinatorSocket(
         }
 
     suspend fun reconnectUser(user: User, isAnonymous: Boolean, forceReconnection: Boolean) {
-        logger.d {
-            "[reconnectUser] user.id: ${user.id}, isAnonymous: $isAnonymous, forceReconnection: $forceReconnection"
-        }
+//        logger.d {
+//            "[reconnectUser] user.id: ${user.id}, isAnonymous: $isAnonymous, forceReconnection: $forceReconnection"
+//        }
         coordinatorSocketStateService.onReconnect(
             when (isAnonymous) {
                 true -> ConnectionConf.AnonymousConnectionConf(wssUrl, apiKey, user)

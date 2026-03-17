@@ -20,6 +20,7 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioDeviceInfo
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
@@ -83,7 +84,7 @@ public class StreamPeerConnectionFactory(
      */
     internal var audioBitrateProfile: stream.video.sfu.models.AudioBitrateProfile? = null
 
-    private val webRtcLogger by taggedLogger("Call:WebRTC")
+//    private val webRtcLogger by taggedLogger("Call:WebRTC")
     private val audioLogger by taggedLogger("Call:AudioTrackCallback")
 
     private var audioSampleCallback: ((AudioSamples) -> Unit)? = null
@@ -185,19 +186,19 @@ public class StreamPeerConnectionFactory(
                         }
 
                         Logging.Severity.LS_INFO -> {
-                            webRtcLogger.i { "[onLogMessage] label: $label, message: $message" }
+//                            webRtcLogger.i { "[onLogMessage] label: $label, message: $message" }
                         }
 
                         Logging.Severity.LS_WARNING -> {
-                            webRtcLogger.w { "[onLogMessage] label: $label, message: $message" }
+//                            webRtcLogger.w { "[onLogMessage] label: $label, message: $message" }
                         }
 
                         Logging.Severity.LS_ERROR -> {
-                            webRtcLogger.e { "[onLogMessage] label: $label, message: $message" }
+//                            webRtcLogger.e { "[onLogMessage] label: $label, message: $message" }
                         }
 
                         Logging.Severity.LS_NONE -> {
-                            webRtcLogger.d { "[onLogMessage] label: $label, message: $message" }
+//                            webRtcLogger.d { "[onLogMessage] label: $label, message: $message" }
                         }
 
                         else -> {}
@@ -485,7 +486,7 @@ public class StreamPeerConnectionFactory(
             configuration = configuration,
             observer = peerConnection,
         )
-        webRtcLogger.d { "type $type $peerConnection is now monitoring $connection" }
+//        webRtcLogger.d { "type $type $peerConnection is now monitoring $connection" }
         peerConnection.initialize(connection)
 
         return peerConnection
@@ -503,6 +504,7 @@ public class StreamPeerConnectionFactory(
         fastReconnect: () -> Unit,
         sfuConnectionModule: SfuConnectionModule,
     ): Subscriber {
+        Log.d("Noob", "[makeSubscriber]")
         val peerConnection = Subscriber(
             sessionId = sessionId,
             sfuClient = sfuClient,
@@ -518,7 +520,7 @@ public class StreamPeerConnectionFactory(
             configuration = configuration,
             observer = peerConnection,
         )
-        webRtcLogger.d { "type $peerConnection is now monitoring $connection" }
+//        webRtcLogger.d { "type $peerConnection is now monitoring $connection" }
         peerConnection.initialize(connection)
         peerConnection.addTransceivers()
 
@@ -550,6 +552,7 @@ public class StreamPeerConnectionFactory(
         fastReconnect: () -> Unit = {},
         isHifiAudioEnabled: Boolean = false,
     ): Publisher {
+        Log.d("Noob", "[makePublisher]")
         val peerConnection = Publisher(
             sessionId = sessionId,
             sfuClient = sfuClient,
@@ -572,7 +575,7 @@ public class StreamPeerConnectionFactory(
             configuration = configuration,
             observer = peerConnection,
         )
-        webRtcLogger.d { "type ${StreamPeerType.PUBLISHER} $peerConnection is now monitoring $connection" }
+//        webRtcLogger.d { "type ${StreamPeerType.PUBLISHER} $peerConnection is now monitoring $connection" }
         peerConnection.initialize(connection)
         val traceData = safeCallWithDefault(null) {
             "iceServers=${
@@ -700,7 +703,7 @@ public class StreamPeerConnectionFactory(
         try {
             factory.dispose()
         } catch (e: Exception) {
-            webRtcLogger.w { "Error disposing factory: ${e.message}" }
+//            webRtcLogger.w { "Error disposing factory: ${e.message}" }
         }
         adm?.release()
         adm = null
