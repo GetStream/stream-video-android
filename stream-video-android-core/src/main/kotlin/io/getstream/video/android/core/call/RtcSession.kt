@@ -303,7 +303,7 @@ public class RtcSession internal constructor(
     )
 
     private fun getTrack(sessionId: String, type: TrackType): MediaTrack? {
-        val track = subscriber?.getTrack(
+        val track = subscriber.value?.getTrack(
             sessionId,
             type,
         )
@@ -436,7 +436,7 @@ public class RtcSession internal constructor(
     }
 
     private fun setLocalTrack(type: TrackType, track: MediaTrack) {
-        subscriber?.setTrack(sessionId, type, track)
+        subscriber.value?.setTrack(sessionId, type, track)
         return setTrack(sessionId, type, track)
     }
 
@@ -477,7 +477,7 @@ public class RtcSession internal constructor(
     private val connectionConfiguration: PeerConnection.RTCConfiguration
         get() = buildConnectionConfiguration(iceServers)
 
-    internal var subscriber: Subscriber? = null
+    internal var subscriber: MutableStateFlow<Subscriber?> = MutableStateFlow(null)
     internal var publisher: MutableStateFlow<Publisher?> = MutableStateFlow(null)
 
     internal lateinit var sfuConnectionModule: SfuConnectionModule
@@ -529,10 +529,10 @@ public class RtcSession internal constructor(
         val sfuConnectionModule: SfuConnectionModule = sfuConnectionModuleProvider.invoke()
         setSfuConnectionModule(sfuConnectionModule)
 
-        subscriber = createSubscriber()
+        subscriber.value = createSubscriber()
 
         coroutineScope.launch {
-            subscriber?.streams()?.collect {
+            subscriber.value?.streams()?.collect {
                 val (sessionId, trackType, track) = it
                 logger.d {
                     "[streams] #sfu; #track; sessionId: $sessionId, trackType: $trackType, mediaStream: $track"
@@ -565,7 +565,7 @@ public class RtcSession internal constructor(
 
         // Listen for removed streams to cleanup orphaned tracks
         coroutineScope.launch {
-            subscriber?.removedStreams()?.collect { removed ->
+            subscriber.value?.removedStreams()?.collect { removed ->
                 val (sessionId, trackType) = removed
                 logger.i {
                     "[removedStreams] #sfu; #track; #orphaned-track; Cleaning up orphaned tracks for " +
@@ -612,7 +612,7 @@ public class RtcSession internal constructor(
 
         participantsMonitoringJob = coroutineScope.launch {
             call.state.participants.collect {
-                subscriber?.setTrackLookupPrefixes(it.associate { it.trackLookupPrefix to it.sessionId })
+                subscriber.value?.setTrackLookupPrefixes(it.associate { it.trackLookupPrefix to it.sessionId })
             }
         }
 
@@ -732,7 +732,7 @@ public class RtcSession internal constructor(
     suspend fun reconnect(forceRestart: Boolean) {
         // ice restart
         val subscriberAsync = rtcSessionScope.async {
-            subscriber?.let {
+            subscriber.value?.let {
                 if (!it.isHealthy()) {
                     logger.i { "ice restarting subscriber peer connection" }
                     requestSubscriberIceRestart()
@@ -961,15 +961,15 @@ public class RtcSession internal constructor(
             }
         }
         sfuConnectionMigrationModule = null
-        subscriber?.clear()
+        subscriber.value?.clear()
 
         // cleanup the publisher and subcriber peer connections
         safeCall {
-            subscriber?.close()
+            subscriber.value?.close()
             publisher.value?.close(true)
         }
 
-        subscriber = null
+        subscriber.value = null
         publisher.value = null
 
         // cleanup orphaned tracks to prevent memory leaks
@@ -1205,7 +1205,7 @@ public class RtcSession internal constructor(
         val remoteParticipants = call.state.remoteParticipants.value
         coroutineScope.launch {
             serialProcessor.submit("setVideoSubscriptions") {
-                subscriber?.setVideoSubscriptions(
+                subscriber.value?.setVideoSubscriptions(
                     trackOverridesHandler,
                     participants,
                     remoteParticipants,
@@ -1342,8 +1342,8 @@ public class RtcSession internal constructor(
                         }
 
                         is ParticipantLeftEvent -> {
-                            subscriber?.participantLeft(event.participant)
-                            subscriber?.setVideoSubscriptions(
+                            subscriber.value?.participantLeft(event.participant)
+                            subscriber.value?.setVideoSubscriptions(
                                 trackOverridesHandler,
                                 call.state.participants.value,
                                 call.state.remoteParticipants.value,
@@ -1501,7 +1501,7 @@ public class RtcSession internal constructor(
         val result = if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED) {
             publisher.value?.handleNewIceCandidate(iceCandidate)
         } else {
-            subscriber?.handleNewIceCandidate(iceCandidate)
+            subscriber.value?.handleNewIceCandidate(iceCandidate)
         }
         logger.v { "[handleTrickle] #sfu; #${event.peerType.stringify()}; result: $result" }
     }
@@ -1522,7 +1522,7 @@ public class RtcSession internal constructor(
             subscriberPendingEvents.add(offerEvent)
             return
         }
-        subscriber?.negotiate(offerEvent.sdp)
+        subscriber.value?.negotiate(offerEvent.sdp)
     }
 
     internal fun getPublisherTracksForReconnect(): List<TrackInfo> {
@@ -1540,7 +1540,7 @@ public class RtcSession internal constructor(
      * @return [StateFlow] that holds [RTCStatsReport] that the subscriber exposes.
      */
     suspend fun getSubscriberStats(): RtcStatsReport? {
-        return subscriber?.getStats()
+        return subscriber.value?.getStats()
     }
 
     private fun List<Array<Any?>>.toJson(): String {
@@ -1583,7 +1583,7 @@ public class RtcSession internal constructor(
             }
 
             val publisherRtcStats = publisher.value?.stats()
-            val subscriberRtcStats = subscriber?.stats()
+            val subscriberRtcStats = subscriber.value?.stats()
             publisherTracer.trace("getstats", publisherRtcStats?.delta)
             subscriberTracer.trace("getstats", subscriberRtcStats?.delta)
 
@@ -1714,7 +1714,7 @@ public class RtcSession internal constructor(
 
     // share what size and which participants we're looking at
     suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> =
-        subscriber?.restartIce() ?: Failure(
+        subscriber.value?.restartIce() ?: Failure(
             io.getstream.result.Error.ThrowableError(
                 "Subscriber is null",
                 Exception("Subscriber is null"),
@@ -1750,12 +1750,12 @@ public class RtcSession internal constructor(
         logger.v {
             "[updateTrackDimensions] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions"
         }
-        subscriber?.setTrackDimension(viewportId, sessionId, trackType, visible, dimensions)
+        subscriber.value?.setTrackDimension(viewportId, sessionId, trackType, visible, dimensions)
         coroutineScope.launch {
             serialProcessor.submit("updateTrackDimensions") {
                 if (sessionId != call.sessionId) {
                     // dimension updated for another participant
-                    subscriber?.setVideoSubscriptions(
+                    subscriber.value?.setVideoSubscriptions(
                         trackOverridesHandler,
                         call.state.participants.value,
                         call.state.remoteParticipants.value,
@@ -1768,7 +1768,7 @@ public class RtcSession internal constructor(
 
     internal fun currentSfuInfo(): Triple<String, List<TrackSubscriptionDetails>, List<TrackInfo>> {
         val previousSessionId = sessionId
-        val currentSubscriptions = subscriber?.subscriptions() ?: emptyList()
+        val currentSubscriptions = subscriber.value?.subscriptions() ?: emptyList()
         val publisherTracks = getPublisherTracksForReconnect()
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
@@ -1807,7 +1807,7 @@ public class RtcSession internal constructor(
                     },
                 ) {
                     val peerConnectionNotUsable =
-                        subscriber?.isFailedOrClosed() == true || publisher.value?.isFailedOrClosed() == true
+                        subscriber.value?.isFailedOrClosed() == true || publisher.value?.isFailedOrClosed() == true
                     if (peerConnectionNotUsable) {
                         logger.w { "[fastReconnect] Peer connections are not usable, rejoining." }
                         // We could not reuse the peer connections.
@@ -1837,7 +1837,7 @@ public class RtcSession internal constructor(
             sfuConnectionModule.socketConnection.disconnect()
         }
         publisher.value?.close(true)
-        subscriber?.close()
+        subscriber.value?.close()
     }
 
     internal fun prepareReconnect() {

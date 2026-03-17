@@ -728,7 +728,7 @@ public class Call(
 
         monitorSubscriberPCStateJob?.cancel()
         monitorSubscriberPCStateJob = scope.launch {
-            session.value?.subscriber?.iceState?.collect {
+            session.value?.subscriber?.value?.iceState?.collect {
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
                         session.value?.requestSubscriberIceRestart()
@@ -1740,7 +1740,7 @@ public class Call(
      * If `null`, the audio setting is applied to all participants currently in the session.
      */
     fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) {
-        val participantTrackMap = session.value?.subscriber?.tracks ?: return
+        val participantTrackMap = session.value?.subscriber?.value?.tracks ?: return
 
         val targetTracks = when {
             sessionIds != null -> sessionIds.mapNotNull { participantTrackMap[it] }
@@ -1759,11 +1759,11 @@ public class Call(
     public class Debug(val call: Call) {
 
         public fun pause() {
-            call.session.value?.subscriber?.disable()
+            call.session.value?.subscriber?.value?.disable()
         }
 
         public fun resume() {
-            call.session.value?.subscriber?.enable()
+            call.session.value?.subscriber?.value?.enable()
         }
 
         public fun rejoin() {
@@ -1773,7 +1773,7 @@ public class Call(
         }
 
         public fun restartSubscriberIce() {
-            call.session.value?.subscriber?.connection?.restartIce()
+            call.session.value?.subscriber?.value?.connection?.restartIce()
         }
 
         public fun restartPublisherIce() {
