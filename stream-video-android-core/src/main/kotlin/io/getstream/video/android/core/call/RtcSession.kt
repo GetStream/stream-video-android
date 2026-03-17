@@ -1129,6 +1129,7 @@ public class RtcSession internal constructor(
         }
 
         return call.peerConnectionFactory.makePeerConnection(
+            coroutineScope = coroutineScope,
             configuration = PeerConnection.RTCConfiguration(emptyList()),
             type = if (direction == RtpTransceiverDirection.SEND_ONLY) {
                 StreamPeerType.PUBLISHER

@@ -86,6 +86,7 @@ internal class Publisher(
     private val restartIceJobDelegate: RestartIceJobDelegate =
         RestartIceJobDelegate(coroutineScope),
 ) : StreamPeerConnection(
+    coroutineScope = coroutineScope,
     type,
     mediaConstraints,
     onStreamAdded,

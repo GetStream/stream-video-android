@@ -1416,36 +1416,6 @@ public class CallState(
         }
     }
 
-    private fun observePublisherConnection() {
-        if (peerConnectionObserverJob?.isActive == true) return
-
-        val PUBLISHER_CONNECT_TIMEOUT = 10_000L
-
-        peerConnectionObserverJob = scope.launch {
-            val start = System.currentTimeMillis()
-
-            val connected = withTimeoutOrNull(PUBLISHER_CONNECT_TIMEOUT) {
-                call.session
-                    .filterNotNull()
-                    .flatMapLatest { it.publisher }
-                    .filterNotNull()
-                    .flatMapLatest { it.state }
-                    .first { it == PeerConnection.PeerConnectionState.CONNECTED }
-                true
-            } ?: false
-
-            val duration = System.currentTimeMillis() - start
-
-            if (connected) {
-                logger.d { "[observePublisherConnection] Publisher connected in ${duration}ms" }
-            } else {
-                logger.w { "[observePublisherConnection] Publisher connection timed out after ${duration}ms" }
-            }
-
-            _ringingState.value = RingingState.Active
-        }
-    }
-
     private fun observePeerConnection() {
         if (peerConnectionObserverJob?.isActive == true) return
 

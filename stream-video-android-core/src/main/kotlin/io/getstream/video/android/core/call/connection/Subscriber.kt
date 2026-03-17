@@ -79,6 +79,7 @@ internal class Subscriber(
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
     private val sfuConnectionModule: SfuConnectionModule,
 ) : StreamPeerConnection(
+    coroutineScope = coroutineScope,
     type = StreamPeerType.SUBSCRIBER,
     mediaConstraints = MediaConstraints(),
     onStreamAdded = { _ -> },

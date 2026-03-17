@@ -36,8 +36,9 @@ import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.stringify
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -74,6 +75,7 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param tracer The tracer used to trace the connection.
  */
 open class StreamPeerConnection(
+    private val coroutineScope: CoroutineScope,
     private val type: StreamPeerType,
     private val mediaConstraints: MediaConstraints,
     private val onStreamAdded: ((MediaStream) -> Unit)?,
@@ -100,6 +102,7 @@ open class StreamPeerConnection(
     // see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
+    internal var pollFirstPacketJob: Job? = null
 
     open suspend fun stats(): ComputedStats? = null
 
@@ -562,7 +565,8 @@ open class StreamPeerConnection(
 
     private fun pollFirstPacket() {
         logger.d { "[pollFirstPacket]" }
-        GlobalScope.launch(Dispatchers.Default) {
+        pollFirstPacketJob?.cancel()
+        pollFirstPacketJob = coroutineScope.launch(Dispatchers.Default) {
             while (!firstInboundPacketLogged && !firstOutboundPacketLogged) {
                 checkStats()
                 delay(500)
