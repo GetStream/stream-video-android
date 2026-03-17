@@ -140,12 +140,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.cancel
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -153,6 +153,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
@@ -683,7 +684,7 @@ public class CallState(
     private var speakingWhileMutedResetJob: Job? = null
     private var autoJoiningCall: Job? = null
     private var ringingTimerJob: Job? = null
-    private var publisherObserverJob: Job? = null
+    private var peerConnectionObserverJob: Job? = null
     internal var acceptedOnThisDevice: Boolean = false
 
     /**
@@ -1403,7 +1404,7 @@ public class CallState(
             transitionToActiveState()
         } else {
             _ringingState.value = state
-            publisherObserverJob?.cancel()
+            peerConnectionObserverJob?.cancel()
         }
     }
 
@@ -1411,16 +1412,16 @@ public class CallState(
         logger.d { "[transitionToActiveState]" }
         val oldState = ringingState.value
         if (oldState !is RingingState.Active) {
-            observePublisherConnection()
+            observePeerConnection()
         }
     }
 
     private fun observePublisherConnection() {
-        if (publisherObserverJob?.isActive == true) return
+        if (peerConnectionObserverJob?.isActive == true) return
 
         val PUBLISHER_CONNECT_TIMEOUT = 10_000L
 
-        publisherObserverJob = scope.launch {
+        peerConnectionObserverJob = scope.launch {
             val start = System.currentTimeMillis()
 
             val connected = withTimeoutOrNull(PUBLISHER_CONNECT_TIMEOUT) {
@@ -1439,6 +1440,53 @@ public class CallState(
                 logger.d { "[observePublisherConnection] Publisher connected in ${duration}ms" }
             } else {
                 logger.w { "[observePublisherConnection] Publisher connection timed out after ${duration}ms" }
+            }
+
+            _ringingState.value = RingingState.Active
+        }
+    }
+
+    private fun observePeerConnection() {
+        if (peerConnectionObserverJob?.isActive == true) return
+
+        val PEER_CONNECTION_OBSERVER_TIMEOUT = 10_000L
+
+        peerConnectionObserverJob = scope.launch {
+            val start = System.currentTimeMillis()
+
+            val result = withTimeoutOrNull(PEER_CONNECTION_OBSERVER_TIMEOUT) {
+                call.session
+                    .filterNotNull()
+                    .flatMapLatest { session ->
+
+                        val publisherFlow = session.publisher
+                            ?.flatMapLatest { it?.state ?: emptyFlow() }
+                            ?.map { "publisher" to it }
+                            ?: emptyFlow()
+
+                        val subscriberFlow = session.subscriber
+                            ?.flatMapLatest { it?.state ?: emptyFlow() }
+                            ?.map { "subscriber" to it }
+                            ?: emptyFlow()
+
+                        merge(publisherFlow, subscriberFlow)
+                    }
+                    .first { (_, state) ->
+                        state == PeerConnection.PeerConnectionState.CONNECTED
+                    }
+            }
+
+            val duration = System.currentTimeMillis() - start
+
+            if (result != null) {
+                val (source, _) = result
+                logger.d {
+                    "[observeConnectionRace] $source connected first in ${duration}ms"
+                }
+            } else {
+                logger.w {
+                    "[observeConnectionRace] Connection timed out after ${duration}ms"
+                }
             }
 
             _ringingState.value = RingingState.Active
@@ -1878,8 +1926,8 @@ public class CallState(
     }
 
     internal fun cleanup() {
-        publisherObserverJob?.cancel()
-        publisherObserverJob = null
+        peerConnectionObserverJob?.cancel()
+        peerConnectionObserverJob = null
         cancelTimeout()
     }
 }
