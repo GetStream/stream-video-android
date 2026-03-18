@@ -364,6 +364,14 @@ internal open class SfuSocket(
     internal fun isConnected(): Boolean =
         sfuSocketStateService.currentState is SfuSocketState.Connected
 
+    internal suspend fun simulateNetworkError(
+        error: Error.NetworkError,
+        reconnectStrategy: WebsocketReconnectStrategy,
+    ) {
+        logger.w { "[simulateNetworkError] Injecting error: $error, strategy: $reconnectStrategy" }
+        sfuSocketStateService.onNetworkError(error, reconnectStrategy)
+    }
+
     /**
      * Awaits until [VideoSocketState.Connected] is set.
      *

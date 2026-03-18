@@ -36,7 +36,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.result.extractCause
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.Call
@@ -267,7 +266,6 @@ public class RtcSession internal constructor(
     private var sfuConnectionRetryCount = 0
 
     private var stateJob: Job? = null
-    private var errorJob: Job? = null
     private var eventJob: Job? = null
     internal val socket
         get() = sfuConnectionModule.socketConnection
@@ -616,7 +614,6 @@ public class RtcSession internal constructor(
     private fun listenToSfuSocket() {
         // cancel any old socket monitoring if needed
         eventJob?.cancel()
-        errorJob?.cancel()
         stateJob?.cancel()
         participantsMonitoringJob?.cancel()
 
@@ -650,17 +647,51 @@ public class RtcSession internal constructor(
                             RealtimeConnection.InProgress
 
                     is SfuSocketState.Disconnected.DisconnectedTemporarily -> {
-                        sfuConnectionRetryCount++
-                        logger.w {
-                            "[stateJob] SFU connection failure $sfuConnectionRetryCount/$MAX_SFU_CONNECTION_RETRIES for $sfuName"
-                        }
-                        if (sfuConnectionRetryCount > MAX_SFU_CONNECTION_RETRIES) {
-                            logger.w {
-                                "[stateJob] Max retries reached for $sfuName, requesting new SFU via migrate()"
+                        when (sfuSocketState.reconnectStrategy) {
+                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
+                                logger.w {
+                                    "[stateJob] SFU sent MIGRATE strategy for $sfuName, migrating immediately"
+                                }
+                                sfuConnectionRetryCount = 0
+                                sfuConnectionModule.socketConnection.disconnect()
+                                call.migrate()
                             }
-                            sfuConnectionRetryCount = 0
-                            sfuConnectionModule.socketConnection.disconnect()
-                            call.migrate()
+
+                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+                                logger.w {
+                                    "[stateJob] SFU sent REJOIN strategy for $sfuName, rejoining immediately"
+                                }
+                                sfuConnectionRetryCount = 0
+                                sfuConnectionModule.socketConnection.disconnect()
+                                call.rejoin("SFU:${sfuSocketState.error.message}:REJOIN")
+                            }
+
+                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
+                                logger.w {
+                                    "[stateJob] SFU sent DISCONNECT strategy for $sfuName"
+                                }
+                                sfuConnectionRetryCount = 0
+                                sfuConnectionModule.socketConnection.disconnect()
+                                call.state._connection.value = RealtimeConnection.Disconnected
+                            }
+
+                            else -> {
+                                // FAST or UNSPECIFIED: HealthMonitor handles the retry
+                                // automatically. We only track failures and escalate to
+                                // migrate after MAX_SFU_CONNECTION_RETRIES.
+                                sfuConnectionRetryCount++
+                                logger.w {
+                                    "[stateJob] SFU connection failure $sfuConnectionRetryCount/$MAX_SFU_CONNECTION_RETRIES for $sfuName"
+                                }
+                                if (sfuConnectionRetryCount > MAX_SFU_CONNECTION_RETRIES) {
+                                    logger.w {
+                                        "[stateJob] Max retries reached for $sfuName, requesting new SFU via migrate()"
+                                    }
+                                    sfuConnectionRetryCount = 0
+                                    sfuConnectionModule.socketConnection.disconnect()
+                                    call.migrate()
+                                }
+                            }
                         }
                     }
 
@@ -684,43 +715,10 @@ public class RtcSession internal constructor(
             }
         }
 
-        // Errors
-        errorJob = coroutineScope.launch {
-            sfuConnectionModule.socketConnection.errors().collect {
-                val reconnectStrategy = it.reconnectStrategy
-                logger.d { "[RtcSession#error] reconnectStrategy: $reconnectStrategy" }
-                when (reconnectStrategy) {
-                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
-                        call.fastReconnect("Error:${it.streamError.message}:WEBSOCKET_RECONNECT_STRATEGY_FAST")
-                    }
-
-                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
-                        call.rejoin("Error:${it.streamError.message}:WEBSOCKET_RECONNECT_STRATEGY_REJOIN")
-                    }
-
-                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
-                        call.migrate()
-                    }
-
-                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT -> {
-                        // We are told to disconnect.
-                        sfuConnectionModule.socketConnection.disconnect()
-                        logger.d {
-                            "[WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT], call_id = ${call.id}"
-                        }
-                        call.state._connection.value = RealtimeConnection.Disconnected
-                    }
-
-                    else -> {
-                        // Either null or UNSPECIFIED, do not reconnect
-                    }
-                }
-                logger.e(
-                    it.streamError.extractCause()
-                        ?: IllegalStateException("Error emitted without a cause on SFU connection."),
-                ) { "permanent failure on socket connection" }
-            }
-        }
+        // NOTE: Reconnect strategies (MIGRATE, REJOIN, FAST, DISCONNECT) are handled
+        // in the stateJob above via DisconnectedTemporarily.reconnectStrategy. All SFU
+        // errors are Error.NetworkError which routes through onVideoNetworkError → state
+        // machine → DisconnectedTemporarily, never through the errors() flow.
     }
 
     private fun traceEvent(it: SfuDataEvent) = safeCall {
@@ -1864,7 +1862,6 @@ public class RtcSession internal constructor(
         // We are rejoining from the start, we don't want to know.
         stateJob?.cancel()
         eventJob?.cancel()
-        errorJob?.cancel()
         runBlocking {
             sfuConnectionModule.socketConnection.disconnect()
         }
@@ -1872,11 +1869,28 @@ public class RtcSession internal constructor(
         subscriber?.close()
     }
 
+    /**
+     * Simulates an SFU_FULL error for debugging. Injects a network error with code 700
+     * and MIGRATE strategy, which triggers immediate migration to a new SFU.
+     */
+    internal fun simulateSfuFull() {
+        logger.w { "[simulateSfuFull] Simulating SFU_FULL for $sfuName" }
+        coroutineScope.launch {
+            sfuConnectionModule.socketConnection.simulateNetworkError(
+                error = io.getstream.result.Error.NetworkError(
+                    message = "Simulated SFU_FULL (code 700)",
+                    serverErrorCode = 700,
+                    statusCode = 700,
+                ),
+                reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+            )
+        }
+    }
+
     internal fun prepareReconnect() {
         // We are reconnecting from the start, we don't want to know.
         stateJob?.cancel()
         eventJob?.cancel()
-        errorJob?.cancel()
     }
 
     internal fun leaveWithReason(reason: String) {

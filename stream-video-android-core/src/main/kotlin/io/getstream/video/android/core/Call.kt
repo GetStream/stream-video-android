@@ -1798,6 +1798,10 @@ public class Call(
             }
         }
 
+        fun simulateSfuFull() {
+            call.session?.simulateSfuFull()
+        }
+
         fun fastReconnect(reason: String = "Debug") {
             call.scope.launch {
                 call.fastReconnect(reason)

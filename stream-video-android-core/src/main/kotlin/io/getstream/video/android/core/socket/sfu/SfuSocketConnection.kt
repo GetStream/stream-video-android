@@ -173,6 +173,13 @@ class SfuSocketConnection(
         internalSocket.disconnect()
     }
 
+    internal suspend fun simulateNetworkError(
+        error: io.getstream.result.Error.NetworkError,
+        reconnectStrategy: stream.video.sfu.models.WebsocketReconnectStrategy,
+    ) {
+        internalSocket.simulateNetworkError(error, reconnectStrategy)
+    }
+
     override fun updateToken(token: SfuToken) {
         throw UnsupportedOperationException(
             "Update token is not supported for SFU. Create a new socket instead.",

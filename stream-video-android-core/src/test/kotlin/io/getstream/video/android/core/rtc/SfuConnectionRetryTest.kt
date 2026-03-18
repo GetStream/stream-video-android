@@ -272,4 +272,146 @@ class SfuConnectionRetryTest {
         val session = createRtcSession(sfuName = "edge-eu-west-1")
         assert(session.sfuName == "edge-eu-west-1")
     }
+
+    @Test
+    fun `MIGRATE strategy triggers immediate migration without retries`() = runTest {
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
+            error = Error.NetworkError(
+                message = "SFU_FULL",
+                serverErrorCode = 700,
+                statusCode = 700,
+            ),
+            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+        )
+        advance()
+
+        coVerify(exactly = 1) { mockCall.migrate() }
+        coVerify(exactly = 1) { mockSocket.disconnect() }
+    }
+
+    @Test
+    fun `MIGRATE strategy on first error migrates immediately`() = runTest {
+        createRtcSession()
+        advance()
+
+        // Even on the very first failure, MIGRATE strategy should trigger immediate migration
+        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
+            error = Error.NetworkError(
+                message = "SFU_FULL first time",
+                serverErrorCode = 700,
+                statusCode = 700,
+            ),
+            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+        )
+        advance()
+
+        coVerify(exactly = 1) { mockCall.migrate() }
+    }
+
+    @Test
+    fun `non-MIGRATE strategy still requires retries before migration`() = runTest {
+        createRtcSession()
+        advance()
+
+        // First failure with UNSPECIFIED strategy — should not migrate
+        socketStateFlow.value = disconnectedTemporarily()
+        advance()
+        coVerify(exactly = 0) { mockCall.migrate() }
+
+        // Second failure — should not migrate
+        socketStateFlow.value = disconnectedTemporarily()
+        advance()
+        coVerify(exactly = 0) { mockCall.migrate() }
+
+        // Third failure — now migrate
+        socketStateFlow.value = disconnectedTemporarily()
+        advance()
+        coVerify(exactly = 1) { mockCall.migrate() }
+    }
+
+    @Test
+    fun `REJOIN strategy triggers immediate rejoin without retries`() = runTest {
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
+            error = Error.NetworkError(
+                message = "SFU wants rejoin",
+                serverErrorCode = 500,
+                statusCode = 500,
+            ),
+            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+        )
+        advance()
+
+        coVerify(exactly = 1) { mockCall.rejoin(any()) }
+        coVerify(exactly = 1) { mockSocket.disconnect() }
+        coVerify(exactly = 0) { mockCall.migrate() }
+    }
+
+    @Test
+    fun `DISCONNECT strategy disconnects immediately without retries`() = runTest {
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
+            error = Error.NetworkError(
+                message = "SFU wants disconnect",
+                serverErrorCode = 500,
+                statusCode = 500,
+            ),
+            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT,
+        )
+        advance()
+
+        coVerify(exactly = 1) { mockSocket.disconnect() }
+        coVerify(exactly = 0) { mockCall.migrate() }
+        coVerify(exactly = 0) { mockCall.rejoin(any()) }
+    }
+
+    @Test
+    fun `FAST strategy goes through retry counter like UNSPECIFIED`() = runTest {
+        createRtcSession()
+        advance()
+
+        // First FAST failure — should not trigger any reconnect action
+        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
+            error = Error.NetworkError(
+                message = "Fast retry #1",
+                serverErrorCode = 1003,
+                statusCode = 1003,
+            ),
+            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+        )
+        advance()
+        coVerify(exactly = 0) { mockCall.migrate() }
+        coVerify(exactly = 0) { mockCall.fastReconnect(any()) }
+
+        // Second FAST failure
+        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
+            error = Error.NetworkError(
+                message = "Fast retry #2",
+                serverErrorCode = 1003,
+                statusCode = 1003,
+            ),
+            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+        )
+        advance()
+        coVerify(exactly = 0) { mockCall.migrate() }
+
+        // Third FAST failure — exceeds MAX, triggers migrate
+        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
+            error = Error.NetworkError(
+                message = "Fast retry #3",
+                serverErrorCode = 1003,
+                statusCode = 1003,
+            ),
+            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+        )
+        advance()
+        coVerify(exactly = 1) { mockCall.migrate() }
+    }
 }
