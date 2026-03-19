@@ -130,6 +130,7 @@ class SpeakerManager(
     internal var selectedBeforeSpeaker: StreamAudioDevice? = null
 
     internal fun enable(fromUser: Boolean = true) {
+        logger.d { "enable" }
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
@@ -137,6 +138,7 @@ class SpeakerManager(
     }
 
     fun disable(fromUser: Boolean = true) {
+        logger.d { "disable" }
         if (fromUser) {
             _status.value = DeviceStatus.Disabled
         }
@@ -147,7 +149,6 @@ class SpeakerManager(
      * Enable or disable the speakerphone.
      */
     fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
-        logger.i { "setEnabled $enabled" }
         // TODO: what is fromUser?
         if (enabled) {
             enable(fromUser = fromUser)

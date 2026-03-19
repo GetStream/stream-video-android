@@ -20,6 +20,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.stats.StatsTracer
+import io.getstream.video.android.core.call.connection.trackers.PeerConnectionStateTracker
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.stats.toRtcStats
 import io.getstream.video.android.core.call.utils.addRtcIceCandidate
@@ -41,6 +42,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -87,6 +89,7 @@ open class StreamPeerConnection(
     private val traceCreateAnswer: Boolean = true,
     private val tracer: Tracer,
     private val tag: String,
+    private val peerConnectionStateTracker: PeerConnectionStateTracker,
 ) : PeerConnection.Observer {
 
     private val localDescriptionMutex = Mutex()
@@ -101,6 +104,7 @@ open class StreamPeerConnection(
 
     // see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
+
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
     internal var pollFirstPacketJob: Job? = null
 
@@ -125,6 +129,12 @@ open class StreamPeerConnection(
      */
     public var audioTransceiver: RtpTransceiver? = null
         private set
+
+    private val _onSubscriberTrackAddedFlow = MutableStateFlow(false)
+    internal val onSubscriberTrackAddedFlow: StateFlow<Boolean> = _onSubscriberTrackAddedFlow
+
+    private val _onPublisherAddTracksFlow = MutableStateFlow(false)
+    internal val onPublisherAddTracksFlow: StateFlow<Boolean> = _onPublisherAddTracksFlow
 
     fun isHealthy(): Boolean {
         return when (state.value) {
@@ -513,6 +523,9 @@ open class StreamPeerConnection(
             }
             onStreamAdded?.invoke(mediaStream)
         }
+        if (!_onPublisherAddTracksFlow.value) {
+            _onPublisherAddTracksFlow.value = mediaStreams != null
+        }
     }
 
     /**
@@ -542,6 +555,7 @@ open class StreamPeerConnection(
     override fun onConnectionChange(newState: PeerConnection.PeerConnectionState) {
         logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
         state.value = newState
+        peerConnectionStateTracker.onStateChanged(newState)
         tracer.trace(PeerConnectionTraceKey.ON_CONNECTION_STATE_CHANGE.value, newState.name)
     }
 
@@ -668,6 +682,9 @@ open class StreamPeerConnection(
 
     override fun onTrack(transceiver: RtpTransceiver?) {
         logger.i { "[onTrack] #sfu; #$typeTag; transceiver: $transceiver" }
+        if (!_onSubscriberTrackAddedFlow.value) {
+            _onSubscriberTrackAddedFlow.value = transceiver != null
+        }
     }
 
     internal fun traceTrack(type: TrackType, trackId: String, streamIds: List<String> = emptyList()) = safeCall {

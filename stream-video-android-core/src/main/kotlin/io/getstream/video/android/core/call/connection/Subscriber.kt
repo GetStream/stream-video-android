@@ -24,6 +24,8 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.TrackDimensions
 import io.getstream.video.android.core.call.connection.job.RestartIceJobDelegate
 import io.getstream.video.android.core.call.connection.stats.ComputedStats
+import io.getstream.video.android.core.call.connection.trackers.DebugSubscriberTimelineTracker
+import io.getstream.video.android.core.call.connection.trackers.PeerConnectionStateTracker
 import io.getstream.video.android.core.call.connection.utils.wrapAPICall
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
@@ -78,6 +80,7 @@ internal class Subscriber(
         RestartIceJobDelegate(coroutineScope),
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
     private val sfuConnectionModule: SfuConnectionModule,
+    peerConnectionStateTracker: PeerConnectionStateTracker,
 ) : StreamPeerConnection(
     coroutineScope = coroutineScope,
     type = StreamPeerType.SUBSCRIBER,
@@ -96,6 +99,7 @@ internal class Subscriber(
     tracer = tracer,
     maxBitRate = 0, // Set as needed,
     tag = "Subscriber",
+    peerConnectionStateTracker = peerConnectionStateTracker,
 ) {
 
     /**
@@ -278,14 +282,17 @@ internal class Subscriber(
      *
      * @param offerSdp The offer SDP from the SFU.
      */
+    private val subscriberTimelineTracker = DebugSubscriberTimelineTracker()
     suspend fun negotiate(offerSdp: String) = sdpProcessor.submit("subscriberNegotiate") {
         val offerDescription = SessionDescription(SessionDescription.Type.OFFER, offerSdp)
+        subscriberTimelineTracker.onSetRemoteDescriptionStart()
         val result = setRemoteDescription(offerDescription)
             .onErrorSuspend {
                 tracer.trace("negotiate-error-setremotedescription", it.message ?: "unknown")
                 rejoin()
             }
             .flatMap {
+                subscriberTimelineTracker.onSetRemoteDescriptionEnd()
                 createAnswer()
             }.map { answerSdp ->
                 if (enableStereo) {

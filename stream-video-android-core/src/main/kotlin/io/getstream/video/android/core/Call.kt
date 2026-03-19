@@ -508,6 +508,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
+        state.callStateTimeLine.value = state.callStateTimeLine.value.copy(joinStartTime = System.currentTimeMillis())
         Log.d("Noob", "join start")
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -557,6 +558,8 @@ public class Call(
                     }
                 }
                 Log.d("Noob", "join start success 2")
+                state.callStateTimeLine.value =
+                    state.callStateTimeLine.value.copy(joinFinishTime = System.currentTimeMillis())
                 return result
             }
             if (result is Failure) {
@@ -1582,7 +1585,10 @@ public class Call(
         state.acceptedOnThisDevice = true
 
         clientImpl.state.transitionToAcceptCall(this)
-        return clientImpl.accept(type, id)
+        state.callStateTimeLine.value = state.callStateTimeLine.value.copy(acceptStartTime = System.currentTimeMillis())
+        val result = clientImpl.accept(type, id)
+        state.callStateTimeLine.value = state.callStateTimeLine.value.copy(acceptFinishTime = System.currentTimeMillis())
+        return result
     }
 
     /**

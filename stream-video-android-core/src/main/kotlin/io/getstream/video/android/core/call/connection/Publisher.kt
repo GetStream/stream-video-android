@@ -22,6 +22,7 @@ import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.job.RestartIceJobDelegate
 import io.getstream.video.android.core.call.connection.stats.ComputedStats
+import io.getstream.video.android.core.call.connection.trackers.PeerConnectionStateTracker
 import io.getstream.video.android.core.call.connection.transceivers.TransceiverCache
 import io.getstream.video.android.core.call.connection.utils.OptimalVideoLayer
 import io.getstream.video.android.core.call.connection.utils.computeTransceiverEncodings
@@ -85,6 +86,7 @@ internal class Publisher(
     private val tracer: Tracer,
     private val restartIceJobDelegate: RestartIceJobDelegate =
         RestartIceJobDelegate(coroutineScope),
+    peerConnectionStateTracker: PeerConnectionStateTracker,
 ) : StreamPeerConnection(
     coroutineScope = coroutineScope,
     type,
@@ -98,6 +100,7 @@ internal class Publisher(
     true,
     tracer,
     "Publisher",
+    peerConnectionStateTracker,
 ) {
     private val defaultScreenShareFormat = CaptureFormat(1280, 720, 24, 30)
     private val defaultFormat = CaptureFormat(1280, 720, 24, 30)

@@ -48,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -60,6 +59,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.debug.RtcDebugUi
 import io.getstream.video.android.compose.permission.LaunchPermissionRequest
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
@@ -321,7 +321,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             }
 
             HandleCallRejectionFromNotification(call)
-            PeerConnectionStateView(call)
+            RtcDebugUi(call)
         }
     }
 
@@ -609,31 +609,5 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                 },
             )
         }
-    }
-}
-
-@Composable
-private fun PeerConnectionStateView(call: Call) {
-    val publisherConnectionState by call.state.getDebugPublisherConnectionState().collectAsStateWithLifecycle(
-        null,
-    )
-    val publisherConnectionStateText = "Publisher: ${publisherConnectionState?.name}"
-
-    val subscriberConnectionState by call.state.getDebugSubscriberConnectionState().collectAsStateWithLifecycle(
-        null,
-    )
-    val subscriberConnectionStateText = "Subscriber: ${subscriberConnectionState?.name}"
-
-    Column {
-        Text(
-            text = publisherConnectionStateText,
-            color = Color.White,
-            fontSize = 20.sp,
-        )
-        Text(
-            text = subscriberConnectionStateText,
-            color = Color.White,
-            fontSize = 20.sp,
-        )
     }
 }

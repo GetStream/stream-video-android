@@ -83,6 +83,7 @@ import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.connection.trackers.DebugPeerConnectionStateTracker
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
@@ -145,7 +146,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -493,9 +493,15 @@ public class CallState(
     private val _ringingState: MutableStateFlow<RingingState> = MutableStateFlow(RingingState.Idle)
     public val ringingState: StateFlow<RingingState> = _ringingState
 
+    public val previousRingingStates = ConcurrentHashMap.newKeySet<RingingState>()
+
     /** The settings for the call */
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
     public val settings: StateFlow<CallSettingsResponse?> = _settings
+
+    private val _startRingingStateActiveTransitionTime: MutableStateFlow<Long?> =
+        MutableStateFlow(null)
+    public val startRingingStateActiveTransitionTime: StateFlow<Long?> = _startRingingStateActiveTransitionTime
 
     private val _durationInMs = flow {
         while (currentCoroutineContext().isActive) {
@@ -751,24 +757,12 @@ public class CallState(
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
 
     @InternalStreamVideoApi
-    public fun getDebugPublisherConnectionState(): Flow<PeerConnection.PeerConnectionState?> {
-        return call.session
-            .filterNotNull()
-            .flatMapLatest { session -> session.publisher }
-            .filterNotNull()
-            .flatMapLatest { publisher -> publisher.state }
-            .distinctUntilChanged()
-    }
+    public val rtcDebugger = RtcDebugger(call, call.scope)
+    public val publisherConnectionStateTracker = DebugPeerConnectionStateTracker()
+    public val subscriberConnectionStateTracker = DebugPeerConnectionStateTracker()
 
-    @InternalStreamVideoApi
-    public fun getDebugSubscriberConnectionState(): Flow<PeerConnection.PeerConnectionState?> {
-        return call.session
-            .filterNotNull()
-            .flatMapLatest { session -> session.subscriber }
-            .filterNotNull()
-            .flatMapLatest { subscriber -> subscriber.state }
-            .distinctUntilChanged()
-    }
+    public val callStateTimeLine =
+        MutableStateFlow<CallStateTimelineTracker>(CallStateTimelineTracker())
 
     private val ringingLogger by taggedLogger("RingingState")
 
@@ -804,6 +798,8 @@ public class CallState(
             }
 
             is CallAcceptedEvent -> {
+                callStateTimeLine.value =
+                    callStateTimeLine.value.copy(acceptedEventTime = System.currentTimeMillis())
                 val newAcceptedBy = _acceptedBy.value.toMutableSet()
                 newAcceptedBy.add(event.user.id)
                 _acceptedBy.value = newAcceptedBy.toSet()
@@ -1406,6 +1402,7 @@ public class CallState(
 
             // stop the call ringing timer if it's running
         }
+
         ringingLogger.d { "Update: $state" }
         if (state is RingingState.Active) {
             transitionToActiveState()
@@ -1413,56 +1410,87 @@ public class CallState(
             _ringingState.value = state
             peerConnectionObserverJob?.cancel()
         }
+        previousRingingStates.add(state)
     }
 
     private fun transitionToActiveState() {
-        logger.d { "[transitionToActiveState]" }
-        val oldState = ringingState.value
-        if (oldState !is RingingState.Active) {
-            observePeerConnection()
+        logger.d { "[transitionToActiveState], ringingState: ${ringingState.value}" }
+        val isIncomingOrOutgoingCall =
+            previousRingingStates.any { it is RingingState.Incoming || it is RingingState.Outgoing }
+        if (isIncomingOrOutgoingCall) {
+            _startRingingStateActiveTransitionTime.value = System.currentTimeMillis()
+            val oldState = ringingState.value
+            if (oldState !is RingingState.Active) {
+                observePeerConnection(ConnectionStrategy.BOTH_CONNECTED)
+            }
+        } else {
+            _ringingState.value = RingingState.Active
         }
     }
 
-    private fun observePeerConnection() {
+    enum class ConnectionStrategy {
+        FIRST_CONNECTED,
+        BOTH_CONNECTED,
+    }
+
+    private fun observePeerConnection(strategy: ConnectionStrategy) {
         if (peerConnectionObserverJob?.isActive == true) return
 
-        val PEER_CONNECTION_OBSERVER_TIMEOUT = 10_000L
+        val TIMEOUT = 5_000L
 
         peerConnectionObserverJob = scope.launch {
             val start = System.currentTimeMillis()
 
-            val result = withTimeoutOrNull(PEER_CONNECTION_OBSERVER_TIMEOUT) {
+            val result = withTimeoutOrNull(TIMEOUT) {
                 call.session
                     .filterNotNull()
                     .flatMapLatest { session ->
 
                         val publisherFlow = session.publisher
-                            ?.flatMapLatest { it?.state ?: emptyFlow() }
-                            ?.map { "publisher" to it }
-                            ?: emptyFlow()
+                            .filterNotNull()
+                            .flatMapLatest { it.state }
 
                         val subscriberFlow = session.subscriber
-                            ?.flatMapLatest { it?.state ?: emptyFlow() }
-                            ?.map { "subscriber" to it }
-                            ?: emptyFlow()
+                            .filterNotNull()
+                            .flatMapLatest { it.state }
 
-                        merge(publisherFlow, subscriberFlow)
+                        when (strategy) {
+                            ConnectionStrategy.FIRST_CONNECTED -> {
+                                merge(
+                                    publisherFlow.map { "publisher" to it },
+                                    subscriberFlow.map { "subscriber" to it },
+                                ).filter { (_, state) ->
+                                    state == PeerConnection.PeerConnectionState.CONNECTED
+                                }
+                            }
+
+                            ConnectionStrategy.BOTH_CONNECTED -> {
+                                combine(publisherFlow, subscriberFlow) { pub, sub ->
+                                    if (
+                                        pub == PeerConnection.PeerConnectionState.CONNECTED &&
+                                        sub == PeerConnection.PeerConnectionState.CONNECTED
+                                    ) {
+                                        "both" to PeerConnection.PeerConnectionState.CONNECTED
+                                    } else {
+                                        null
+                                    }
+                                }.filterNotNull()
+                            }
+                        }
                     }
-                    .first { (_, state) ->
-                        state == PeerConnection.PeerConnectionState.CONNECTED
-                    }
+                    .first()
             }
 
             val duration = System.currentTimeMillis() - start
 
             if (result != null) {
-                val (source, _) = result
+                val (source, state) = result
                 logger.d {
-                    "[observeConnectionRace] $source connected first in ${duration}ms"
+                    "[observeConnection-$strategy] $source reached $state in ${duration}ms"
                 }
             } else {
                 logger.w {
-                    "[observeConnectionRace] Connection timed out after ${duration}ms"
+                    "[observeConnection-$strategy] Timeout after ${duration}ms"
                 }
             }
 
