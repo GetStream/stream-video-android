@@ -679,7 +679,6 @@ public class CallState(
     private var speakingWhileMutedResetJob: Job? = null
     private var autoJoiningCall: Job? = null
     private var ringingTimerJob: Job? = null
-    private var peerConnectionObserverJob: Job? = null
     internal var acceptedOnThisDevice: Boolean = false
 
     /**
@@ -1379,7 +1378,7 @@ public class CallState(
             }
         } else {
             _ringingState.value = state
-            peerConnectionObserverJob?.cancel()
+            activeStateTransition.cleanup()
         }
         previousRingingStates.add(state)
     }
