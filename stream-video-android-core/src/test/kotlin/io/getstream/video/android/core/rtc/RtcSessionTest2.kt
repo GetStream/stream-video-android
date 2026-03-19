@@ -162,7 +162,10 @@ class RtcSessionTest2 {
         )
 
         // Then
-        assertNotNull("Subscriber StreamPeerConnection should not be null", rtcSession.subscriber)
+        assertNotNull(
+            "Subscriber StreamPeerConnection should not be null",
+            rtcSession.subscriber.value,
+        )
         assertEquals("Wrong sessionId", sessionId, rtcSession.fieldValue("sessionId"))
     }
 
@@ -242,7 +245,7 @@ class RtcSessionTest2 {
                 ),
             )
             val subscriber = rtcSession.subscriber
-            assertNotNull("Subscriber must not be null", subscriber)
+            assertNotNull("Subscriber must not be null", subscriber.value)
 
             val fakeSdpOffer = "fake-offer-sdp"
             val offerEvent = SubscriberOfferEvent(
@@ -306,7 +309,7 @@ class RtcSessionTest2 {
             sfuConnectionModuleProvider = { mockModule },
         )
         // Confirm publisher is null
-        assertNull(rtcSession.publisher)
+        assertNull(rtcSession.publisher.value)
 
         // A typical ICETrickleEvent with peerType = PUBLISHER_UNSPECIFIED
         val event = ICETrickleEvent(
@@ -398,7 +401,7 @@ class RtcSessionTest2 {
             remoteIceServers = emptyList(),
             sfuConnectionModuleProvider = { mockk(relaxed = true) },
         )
-        val subscriber = rtcSession.subscriber
+        val subscriber = rtcSession.subscriber.value
         assertNotNull(subscriber)
         val publisher = mockk<Publisher>(relaxed = true)
         rtcSession.publisher.value = publisher
@@ -421,7 +424,7 @@ class RtcSessionTest2 {
         rtcSession.handleEvent(event)
         testScope.testScheduler.advanceUntilIdle()
 
-        assertNull(rtcSession.publisher)
+        assertNull(rtcSession.publisher.value)
         verify(exactly = 0) { rtcSession["createPublisher"](any<List<PublishOption>>()) }
     }
 
