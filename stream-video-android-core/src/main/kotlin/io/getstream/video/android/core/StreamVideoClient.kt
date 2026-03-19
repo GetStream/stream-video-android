@@ -624,7 +624,7 @@ internal class StreamVideoClient internal constructor(
     internal fun propagateEventToCall(cid: String, event: VideoEvent) {
         calls[cid]?.let { call ->
             call.state.handleEvent(event)
-            call.session?.handleEvent(event)
+            call.session.value?.handleEvent(event)
             call.handleEvent(event)
         }
     }
