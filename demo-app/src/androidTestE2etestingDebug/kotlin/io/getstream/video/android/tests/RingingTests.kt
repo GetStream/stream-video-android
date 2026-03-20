@@ -18,10 +18,13 @@ package io.getstream.video.android.tests
 
 import io.getstream.video.android.robots.UserControls.DISABLE
 import io.getstream.video.android.robots.assertAudioCallControls
+import io.getstream.video.android.robots.assertConnectingView
 import io.getstream.video.android.robots.assertIncomingCall
 import io.getstream.video.android.robots.assertOutgoingCall
 import io.getstream.video.android.robots.assertThatCallIsEnded
 import io.getstream.video.android.robots.assertVideoCallControls
+import io.getstream.video.android.uiautomator.device
+import io.getstream.video.android.uiautomator.dumpWindowHierarchy
 import io.getstream.video.android.uiautomator.sleep
 import io.qameta.allure.kotlin.Allure.step
 import io.qameta.allure.kotlin.AllureId
@@ -138,8 +141,10 @@ class RingingTests : StreamTestCase() {
                 .assertIncomingCall(isDisplayed = true)
                 .acceptIncomingCall()
         }
-        step("THEN the call starts") {
-            sleep(5_000L) // PEER_CONNECTION_OBSERVER_TIMEOUT
+        step("THEN the user is connecting") {
+            userRobot.assertConnectingView()
+        }
+        step("AND the call starts") {
             userRobot
                 .assertAudioCallControls(microphone = true)
                 .assertIncomingCall(isDisplayed = false)
@@ -173,8 +178,10 @@ class RingingTests : StreamTestCase() {
                 .microphone(DISABLE)
                 .acceptIncomingCall()
         }
-        step("THEN the call starts") {
-            sleep(5_000L) // PEER_CONNECTION_OBSERVER_TIMEOUT
+        step("THEN the user is connecting") {
+            userRobot.assertConnectingView()
+        }
+        step("AND the call starts") {
             userRobot
                 .assertAudioCallControls(microphone = false)
                 .assertIncomingCall(isDisplayed = false)
@@ -204,8 +211,10 @@ class RingingTests : StreamTestCase() {
         step("WHEN user accepts the incoming video call with camera and mic") {
             userRobot.acceptIncomingCall()
         }
+        step("THEN the user is connecting") {
+            userRobot.assertConnectingView()
+        }
         step("THEN the call starts and user has camera and mic enabled") {
-            sleep(5_000L) // PEER_CONNECTION_OBSERVER_TIMEOUT
             userRobot
                 .assertVideoCallControls(camera = true, microphone = true)
                 .assertIncomingCall(isDisplayed = false)
@@ -233,8 +242,10 @@ class RingingTests : StreamTestCase() {
                 .microphone(DISABLE)
                 .acceptIncomingCall()
         }
+        step("THEN the user is connecting") {
+            userRobot.assertConnectingView()
+        }
         step("THEN the call starts and user has camera and mic disabled") {
-            sleep(5_000L) // PEER_CONNECTION_OBSERVER_TIMEOUT
             userRobot
                 .assertVideoCallControls(camera = false, microphone = false)
                 .assertIncomingCall(isDisplayed = false)
