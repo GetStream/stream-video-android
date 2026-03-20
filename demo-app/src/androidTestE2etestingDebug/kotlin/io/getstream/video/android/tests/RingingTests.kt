@@ -22,6 +22,7 @@ import io.getstream.video.android.robots.assertIncomingCall
 import io.getstream.video.android.robots.assertOutgoingCall
 import io.getstream.video.android.robots.assertThatCallIsEnded
 import io.getstream.video.android.robots.assertVideoCallControls
+import io.getstream.video.android.uiautomator.sleep
 import io.qameta.allure.kotlin.Allure.step
 import io.qameta.allure.kotlin.AllureId
 import org.junit.Test
@@ -132,6 +133,7 @@ class RingingTests : StreamTestCase() {
             participantRobot.ringUser(userRobot.getUsername(), audioOnly = true)
         }
         step("WHEN user accepts the incoming audio call") {
+            sleep(5_000L) // PEER_CONNECTION_OBSERVER_TIMEOUT
             userRobot
                 .waitForIncomingCall()
                 .assertIncomingCall(isDisplayed = true)
@@ -230,6 +232,7 @@ class RingingTests : StreamTestCase() {
                 .acceptIncomingCall()
         }
         step("THEN the call starts and user has camera and mic disabled") {
+            sleep(5_000L) // PEER_CONNECTION_OBSERVER_TIMEOUT
             userRobot
                 .assertVideoCallControls(camera = false, microphone = false)
                 .assertIncomingCall(isDisplayed = false)
