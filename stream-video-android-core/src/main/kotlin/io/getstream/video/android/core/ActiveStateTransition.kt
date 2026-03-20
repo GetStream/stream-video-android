@@ -60,6 +60,9 @@ internal class ActiveStateTransition(
     private enum class TransitionToRingingStateStrategy {
         ANY_PEER_CONNECTED,
         BOTH_PEER_CONNECTED,
+        PUBLISHER_CONNECTED,
+        SUBSCRIBER_CONNECTED,
+        FIST_PACKET_RECEIVED,
     }
 
     private fun observePeerConnection(call: Call, transitionToActiveState: () -> Unit, strategy: TransitionToRingingStateStrategy) {
@@ -82,6 +85,19 @@ internal class ActiveStateTransition(
                             .flatMapLatest { it.state }
 
                         when (strategy) {
+                            TransitionToRingingStateStrategy.PUBLISHER_CONNECTED -> {
+                                publisherFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
+                                    .map { "publisher" to it }
+                            }
+                            TransitionToRingingStateStrategy.SUBSCRIBER_CONNECTED -> {
+                                subscriberFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
+                                    .map { "subscriber" to it }
+                            }
+
+                            TransitionToRingingStateStrategy.FIST_PACKET_RECEIVED ->
+                                subscriberFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
+                                    .map { "first_packet" to it }
+
                             TransitionToRingingStateStrategy.ANY_PEER_CONNECTED -> {
                                 merge(
                                     publisherFlow.map { "publisher" to it },

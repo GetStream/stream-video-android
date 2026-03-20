@@ -1254,7 +1254,9 @@ public class RtcSession internal constructor(
                         }
 
                         is ChangePublishOptionsEvent -> {
-                            logger.v { "[changePublishOptions] ChangePublishOptionsEvent: $event, publisher: $publisher" }
+                            logger.v {
+                                "[changePublishOptions] ChangePublishOptionsEvent: $event, publisher: ${publisher.value}"
+                            }
                             publisher.value?.syncPublishOptions(
                                 call.mediaManager.camera.resolution.value,
                                 event.change.publish_options,
@@ -1479,7 +1481,7 @@ public class RtcSession internal constructor(
      * Triggered whenever we receive new ice candidate from the SFU
      */
     suspend fun handleIceTrickle(event: ICETrickleEvent) {
-        if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED && publisher == null && sfuConnectionModule.socketConnection.state().value is SfuSocketState.Connected) {
+        if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED && publisher.value == null && sfuConnectionModule.socketConnection.state().value is SfuSocketState.Connected) {
             logger.v {
                 "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; publisher is null, adding to pending"
             }
@@ -1487,7 +1489,7 @@ public class RtcSession internal constructor(
             return
         }
 
-        if (event.peerType == PeerType.PEER_TYPE_SUBSCRIBER && subscriber == null && sfuConnectionModule.socketConnection.state().value is SfuSocketState.Connected) {
+        if (event.peerType == PeerType.PEER_TYPE_SUBSCRIBER && subscriber.value == null && sfuConnectionModule.socketConnection.state().value is SfuSocketState.Connected) {
             logger.v {
                 "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; subscriber is null, adding to pending"
             }
@@ -1518,7 +1520,7 @@ public class RtcSession internal constructor(
      */
     suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
         logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
-        if (subscriber == null) {
+        if (subscriber.value == null) {
             subscriberPendingEvents.add(offerEvent)
             return
         }
