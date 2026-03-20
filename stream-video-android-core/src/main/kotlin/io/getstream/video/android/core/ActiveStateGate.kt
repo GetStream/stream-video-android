@@ -91,7 +91,10 @@ internal class ActiveStateGate(
                             }
 
                             TransitionToRingingStateStrategy.FIST_PACKET_RECEIVED ->
-                                subscriberFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
+                                session.subscriber
+                                    .filterNotNull()
+                                    .flatMapLatest { it.firstRtpPacketArrivedWithinTimeout }
+                                    .filter { it }
                                     .map { "first_packet" to it }
 
                             TransitionToRingingStateStrategy.ANY_PEER_CONNECTED -> {

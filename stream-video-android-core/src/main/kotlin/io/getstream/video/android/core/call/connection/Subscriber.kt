@@ -43,6 +43,7 @@ import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.safeSuspendingCall
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -50,6 +51,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -156,6 +158,9 @@ internal class Subscriber(
     override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {
         return statsTracer?.get(trackIdToTrackType)
     }
+
+    internal val firstRtpPacketArrivedWithinTimeout = MutableStateFlow<Boolean>(false)
+    private var firstRtpPacketPollingJob: Job? = null
 
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         super.onIceConnectionChange(newState)
@@ -673,4 +678,35 @@ internal class Subscriber(
     fun trackIdToParticipant(): Map<String, String> = trackIdToParticipant.toMap()
 
     fun isEnabled() = enabled
+
+    internal fun pollFirstPacket() {
+        logger.d { "[pollFirstPacket]" }
+        firstRtpPacketPollingJob?.cancel()
+        firstRtpPacketPollingJob = coroutineScope.launch(Dispatchers.Default) {
+            // We intentionally don't need to poll it indefinitely
+            withTimeout(7_000L) {
+                while (!firstRtpPacketArrivedWithinTimeout.value) {
+                    checkStats()
+                    delay(500)
+                }
+            }
+            firstRtpPacketPollingJob?.cancel()
+        }
+    }
+
+    private fun checkStats() {
+        connection.getStats { report ->
+            report.statsMap.values.forEach { stat ->
+                when (stat.type) {
+                    "inbound-rtp" -> {
+                        val bytes = stat.members["bytesReceived"] as? Number ?: return@forEach
+                        if (bytes.toLong() > 0 && !firstRtpPacketArrivedWithinTimeout.value) {
+                            firstRtpPacketArrivedWithinTimeout.value = true
+                            logger.d { "[checkStats] FIRST_INBOUND_RTP_PACKET, id:${stat.id}" }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
