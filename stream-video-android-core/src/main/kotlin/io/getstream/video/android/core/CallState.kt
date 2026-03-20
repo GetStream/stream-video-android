@@ -148,7 +148,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
@@ -730,7 +729,11 @@ public class CallState(
     public val notificationIdFlow: StateFlow<Int?> = _notificationIdFlow
 
     private var telecomHoldObserverJob: Job? = null
-    private val activeStateTransition = ActiveStateTransition(scope, previousRingingStates)
+    private val activeStateGate = ActiveStateGate(
+        scope,
+        previousRingingStates,
+        TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
+    )
 
     @InternalStreamVideoApi
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
@@ -1373,12 +1376,12 @@ public class CallState(
         ringingLogger.d { "Update: $state" }
 
         if (state is RingingState.Active) {
-            activeStateTransition.transitionToActiveState(ringingState.value, call) {
+            activeStateGate.awaitAndTransition(ringingState.value, call) {
                 _ringingState.value = state
             }
         } else {
             _ringingState.value = state
-            activeStateTransition.cleanup()
+            activeStateGate.cleanup()
         }
         previousRingingStates.add(state)
     }
@@ -1816,7 +1819,7 @@ public class CallState(
     }
 
     internal fun cleanup() {
-        activeStateTransition.cleanup()
+        activeStateGate.cleanup()
         cancelTimeout()
     }
 }

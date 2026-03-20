@@ -20,6 +20,7 @@ import io.getstream.log.taggedLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -32,46 +33,37 @@ import org.webrtc.PeerConnection
 
 private const val PEER_CONNECTION_OBSERVER_TIMEOUT = 5_000L
 
-internal class ActiveStateTransition(
+internal class ActiveStateGate(
     private val coroutineScope: CoroutineScope,
     private val previousRingingStates: Set<RingingState>,
+    private val strategy: TransitionToRingingStateStrategy = TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
+    private val timeoutMs: Long = PEER_CONNECTION_OBSERVER_TIMEOUT,
 ) {
-    private val logger by taggedLogger("ActiveStateTransition")
+    private val logger by taggedLogger("ActiveStateGate")
     private var peerConnectionObserverJob: Job? = null
 
-    internal fun transitionToActiveState(currentRingingState: RingingState, call: Call, transitionToActiveState: () -> Unit) {
-        logger.d { "[transitionToActiveState], ringingState: $currentRingingState" }
-        val isIncomingOrOutgoingCall =
+    internal fun awaitAndTransition(currentRingingState: RingingState, call: Call, onReady: () -> Unit) {
+        logger.d { "[awaitAndTransition], ringingState: $currentRingingState" }
+        val isIncomingOrOutgoing =
             previousRingingStates.any { it is RingingState.Incoming || it is RingingState.Outgoing }
-        if (isIncomingOrOutgoingCall) {
-            val oldState = currentRingingState
-            if (oldState !is RingingState.Active) {
-                observePeerConnection(
-                    call,
-                    transitionToActiveState,
-                    TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
-                )
-            }
-        } else {
-            transitionToActiveState()
+        if (isIncomingOrOutgoing && currentRingingState !is RingingState.Active) {
+            observePeerConnection(
+                call,
+                onReady,
+                strategy,
+            )
+        } else if (!isIncomingOrOutgoing) {
+            onReady()
         }
     }
 
-    private enum class TransitionToRingingStateStrategy {
-        ANY_PEER_CONNECTED,
-        BOTH_PEER_CONNECTED,
-        PUBLISHER_CONNECTED,
-        SUBSCRIBER_CONNECTED,
-        FIST_PACKET_RECEIVED,
-    }
-
-    private fun observePeerConnection(call: Call, transitionToActiveState: () -> Unit, strategy: TransitionToRingingStateStrategy) {
+    private fun observePeerConnection(call: Call, onReady: () -> Unit, strategy: TransitionToRingingStateStrategy) {
         if (peerConnectionObserverJob?.isActive == true) return
 
         peerConnectionObserverJob = coroutineScope.launch {
             val start = System.currentTimeMillis()
 
-            val result = withTimeoutOrNull(PEER_CONNECTION_OBSERVER_TIMEOUT) {
+            val result = withTimeoutOrNull(timeoutMs) {
                 call.session
                     .filterNotNull()
                     .flatMapLatest { session ->
@@ -85,6 +77,10 @@ internal class ActiveStateTransition(
                             .flatMapLatest { it.state }
 
                         when (strategy) {
+                            TransitionToRingingStateStrategy.NONE -> {
+                                emptyFlow<Int>()
+                                    .map { "none" to it }
+                            }
                             TransitionToRingingStateStrategy.PUBLISHER_CONNECTED -> {
                                 publisherFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
                                     .map { "publisher" to it }
@@ -136,7 +132,7 @@ internal class ActiveStateTransition(
                     "[observeConnection-$strategy] Timeout after ${duration}ms"
                 }
             }
-            transitionToActiveState()
+            onReady()
         }
     }
 
