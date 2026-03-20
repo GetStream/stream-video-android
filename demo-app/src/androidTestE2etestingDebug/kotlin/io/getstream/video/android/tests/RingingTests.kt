@@ -23,9 +23,6 @@ import io.getstream.video.android.robots.assertIncomingCall
 import io.getstream.video.android.robots.assertOutgoingCall
 import io.getstream.video.android.robots.assertThatCallIsEnded
 import io.getstream.video.android.robots.assertVideoCallControls
-import io.getstream.video.android.uiautomator.device
-import io.getstream.video.android.uiautomator.dumpWindowHierarchy
-import io.getstream.video.android.uiautomator.sleep
 import io.qameta.allure.kotlin.Allure.step
 import io.qameta.allure.kotlin.AllureId
 import org.junit.Test

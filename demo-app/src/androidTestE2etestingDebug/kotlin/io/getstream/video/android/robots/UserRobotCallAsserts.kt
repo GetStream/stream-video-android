@@ -279,7 +279,7 @@ fun UserRobot.assertConnectingView(): UserRobot {
     assertEquals("Connecting...", RingPage.callProgressBar.waitToAppear().text)
     assertFalse(
         "Connecting screen should disappear",
-        RingPage.callProgressBar.waitToDisappear(timeOutMillis = 10000).isDisplayed()
+        RingPage.callProgressBar.waitToDisappear(timeOutMillis = 10000).isDisplayed(),
     )
     return this
 }
