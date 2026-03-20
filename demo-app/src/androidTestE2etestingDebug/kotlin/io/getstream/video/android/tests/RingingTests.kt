@@ -133,13 +133,13 @@ class RingingTests : StreamTestCase() {
             participantRobot.ringUser(userRobot.getUsername(), audioOnly = true)
         }
         step("WHEN user accepts the incoming audio call") {
-            sleep(5_000L) // PEER_CONNECTION_OBSERVER_TIMEOUT
             userRobot
                 .waitForIncomingCall()
                 .assertIncomingCall(isDisplayed = true)
                 .acceptIncomingCall()
         }
         step("THEN the call starts") {
+            sleep(5_000L) // PEER_CONNECTION_OBSERVER_TIMEOUT
             userRobot
                 .assertAudioCallControls(microphone = true)
                 .assertIncomingCall(isDisplayed = false)
@@ -174,6 +174,7 @@ class RingingTests : StreamTestCase() {
                 .acceptIncomingCall()
         }
         step("THEN the call starts") {
+            sleep(5_000L) // PEER_CONNECTION_OBSERVER_TIMEOUT
             userRobot
                 .assertAudioCallControls(microphone = false)
                 .assertIncomingCall(isDisplayed = false)
@@ -204,6 +205,7 @@ class RingingTests : StreamTestCase() {
             userRobot.acceptIncomingCall()
         }
         step("THEN the call starts and user has camera and mic enabled") {
+            sleep(5_000L) // PEER_CONNECTION_OBSERVER_TIMEOUT
             userRobot
                 .assertVideoCallControls(camera = true, microphone = true)
                 .assertIncomingCall(isDisplayed = false)
