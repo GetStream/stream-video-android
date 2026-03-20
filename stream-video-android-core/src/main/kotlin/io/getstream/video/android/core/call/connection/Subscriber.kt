@@ -159,6 +159,10 @@ internal class Subscriber(
         return statsTracer?.get(trackIdToTrackType)
     }
 
+    /**
+     *  Keeping it for observing time difference between both publisher & subscriber
+     *  and first packet received
+     */
     internal val firstRtpPacketArrivedWithinTimeout = MutableStateFlow<Boolean>(false)
     private var firstRtpPacketPollingJob: Job? = null
 
@@ -683,11 +687,15 @@ internal class Subscriber(
         logger.d { "[pollFirstPacket]" }
         firstRtpPacketPollingJob?.cancel()
         firstRtpPacketPollingJob = coroutineScope.launch(Dispatchers.Default) {
-            // We intentionally don't need to poll it indefinitely
-            withTimeout(7_000L) {
+            /**
+             * For caller in joinAndRing we need a longer timeout because call will join the call
+             * and wait for callee to accept -> join -> its publish to setup + ice_connected
+             * otherwise shorter timeout is acceptable
+             */
+            withTimeout(60_000L) {
                 while (!firstRtpPacketArrivedWithinTimeout.value) {
                     checkStats()
-                    delay(500)
+                    delay(700)
                 }
             }
             firstRtpPacketPollingJob?.cancel()

@@ -146,8 +146,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -751,15 +749,6 @@ public class CallState(
 
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
     private val ringingLogger by taggedLogger("RingingState")
-
-    @InternalStreamVideoApi
-    public fun getFirstRtpPacketArrivedWithinTimeoutFlow(): Flow<Boolean> {
-        return call.session
-            .filterNotNull()
-            .flatMapLatest { session -> session.subscriber }
-            .filterNotNull()
-            .flatMapLatest { subscriber -> subscriber.firstRtpPacketArrivedWithinTimeout }
-    }
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }

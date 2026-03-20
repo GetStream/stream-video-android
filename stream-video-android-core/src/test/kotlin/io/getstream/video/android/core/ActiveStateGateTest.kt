@@ -23,9 +23,11 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -35,7 +37,7 @@ import org.webrtc.PeerConnection
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-class ActiveStateTransitionTest {
+class ActiveStateGateTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
@@ -48,21 +50,28 @@ class ActiveStateTransitionTest {
         Dispatchers.resetMain()
     }
 
-    /**
-     * Builds a [Call] fake whose session/publisher/subscriber are backed by
-     * [MutableStateFlow]s so tests can push state changes imperatively.
-     */
+    // ── TestData now exposes firstRtpPacketArrived ────────────────────────────
+
+    private data class TestData(
+        val call: Call,
+        val publisherState: MutableStateFlow<PeerConnection.PeerConnectionState?>,
+        val subscriberState: MutableStateFlow<PeerConnection.PeerConnectionState?>,
+        val firstRtpPacketArrived: MutableStateFlow<Boolean>,
+    )
+
     private fun fakeCall(
         publisherState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
             MutableStateFlow(PeerConnection.PeerConnectionState.NEW),
         subscriberState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
             MutableStateFlow(PeerConnection.PeerConnectionState.NEW),
+        firstRtpPacketArrived: MutableStateFlow<Boolean> = MutableStateFlow(false),
     ): TestData {
-        val publisher = mockk<Publisher> {
+        val publisher = mockk<Publisher>(relaxed = true) {
             every { state } returns publisherState
         }
-        val subscriber = mockk<Subscriber> {
+        val subscriber = mockk<Subscriber>(relaxed = true) {
             every { state } returns subscriberState
+            every { firstRtpPacketArrivedWithinTimeout } returns firstRtpPacketArrived
         }
         val session = mockk<RtcSession> {
             every { this@mockk.publisher } returns MutableStateFlow(publisher)
@@ -71,14 +80,8 @@ class ActiveStateTransitionTest {
         val call = mockk<Call> {
             every { this@mockk.session } returns MutableStateFlow(session)
         }
-        return TestData(call, publisherState, subscriberState)
+        return TestData(call, publisherState, subscriberState, firstRtpPacketArrived)
     }
-
-    private data class TestData(
-        val call: Call,
-        val publisherState: MutableStateFlow<PeerConnection.PeerConnectionState?>,
-        val subscriberState: MutableStateFlow<PeerConnection.PeerConnectionState?>,
-    )
 
     // ── 1. Non-ringing previous states ────────────────────────────────────────
 
@@ -87,9 +90,9 @@ class ActiveStateTransitionTest {
         runTest(testDispatcher) {
             val sut = ActiveStateGate(
                 coroutineScope = this,
-                previousRingingStates = emptySet(), // no Incoming / Outgoing
+                previousRingingStates = emptySet(),
             )
-            val (call, _, _) = fakeCall()
+            val (call, _, _, _) = fakeCall()
             val transitioned = mutableListOf<Unit>()
 
             sut.awaitAndTransition(
@@ -110,16 +113,15 @@ class ActiveStateTransitionTest {
                 coroutineScope = this,
                 previousRingingStates = setOf(RingingState.Incoming(false)),
             )
-            val (call, _, _) = fakeCall()
+            val (call, _, _, _) = fakeCall()
             val transitioned = mutableListOf<Unit>()
 
             sut.awaitAndTransition(
-                currentRingingState = RingingState.Active, // already active
+                currentRingingState = RingingState.Active,
                 call = call,
                 onReady = { transitioned += Unit },
             )
 
-            // callback must NOT fire at all (peer connection logic is skipped)
             assertTrue(transitioned.isEmpty())
         }
 
@@ -132,7 +134,7 @@ class ActiveStateTransitionTest {
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val (call, _, _) = fakeCall(pubState, subState)
+            val (call, _, _, _) = fakeCall(pubState, subState)
 
             val incomingRingingState = RingingState.Incoming(false)
             val sut = ActiveStateGate(
@@ -148,11 +150,10 @@ class ActiveStateTransitionTest {
                 onReady = { transitioned += Unit },
             )
 
-            // Neither connected yet → no transition
             assertTrue(transitioned.isEmpty())
 
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.isEmpty()) // subscriber still not connected
+            assertTrue(transitioned.isEmpty())
 
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.size == 1)
@@ -165,7 +166,7 @@ class ActiveStateTransitionTest {
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val (call, _, _) = fakeCall(pubState, subState)
+            val (call, _, _, _) = fakeCall(pubState, subState)
 
             val outgoingRingingState = RingingState.Outgoing(false)
             val sut = ActiveStateGate(
@@ -189,15 +190,15 @@ class ActiveStateTransitionTest {
     // ── 4. Timeout ────────────────────────────────────────────────────────────
 
     @Test
-    fun `still calls transitionToActiveState after timeout even if peers never connect`() =
+    fun `still calls onReady after timeout even if peers never connect`() =
         runTest(testDispatcher) {
-            val (call, _, _) = fakeCall() // peers stay in NEW state forever
+            val (call, _, _, _) = fakeCall()
 
             val incomingRingingState = RingingState.Incoming(false)
             val sut = ActiveStateGate(
                 coroutineScope = this,
                 previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 100L, // short timeout to keep test fast
+                timeoutMs = 100L,
             )
             val transitioned = mutableListOf<Unit>()
 
@@ -208,23 +209,20 @@ class ActiveStateTransitionTest {
             )
 
             assertTrue(transitioned.isEmpty())
-
-            // Advance virtual time past the timeout
             advanceTimeBy(200L)
-
             assertTrue(transitioned.size == 1)
         }
 
     // ── 5. Duplicate observer guard ───────────────────────────────────────────
 
     @Test
-    fun `calling transitionToActiveState twice does not start a second observer`() =
+    fun `calling awaitAndTransition twice does not start a second observer`() =
         runTest(testDispatcher) {
             val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val (call, _, _) = fakeCall(pubState, subState)
+            val (call, _, _, _) = fakeCall(pubState, subState)
 
             val incomingRingingState = RingingState.Incoming(false)
             val sut = ActiveStateGate(
@@ -236,21 +234,20 @@ class ActiveStateTransitionTest {
             val action = { transitioned += Unit }
 
             sut.awaitAndTransition(incomingRingingState, call, action)
-            sut.awaitAndTransition(incomingRingingState, call, action) // second call
+            sut.awaitAndTransition(incomingRingingState, call, action)
 
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
 
-            // Must fire exactly once, not twice
             assertTrue(transitioned.size == 1)
         }
 
     // ── 6. cleanup() ─────────────────────────────────────────────────────────
 
     @Test
-    fun `cleanup cancels the observer job and transition is never called`() =
+    fun `cleanup cancels the observer job and onReady is never called`() =
         runTest(testDispatcher) {
-            val (call, pubState, subState) = fakeCall()
+            val (call, pubState, subState, _) = fakeCall()
 
             val incomingRingingState = RingingState.Incoming(false)
             val sut = ActiveStateGate(
@@ -268,7 +265,6 @@ class ActiveStateTransitionTest {
 
             sut.cleanup()
 
-            // Connect both peers after cleanup
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
 
@@ -282,7 +278,7 @@ class ActiveStateTransitionTest {
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val (call, _, _) = fakeCall(pubState, subState)
+            val (call, _, _, _) = fakeCall(pubState, subState)
 
             val incomingRingingState = RingingState.Incoming(false)
             val sut = ActiveStateGate(
@@ -294,8 +290,6 @@ class ActiveStateTransitionTest {
 
             sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
             sut.cleanup()
-
-            // Start a fresh observation after cleanup
             sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
 
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
@@ -309,14 +303,14 @@ class ActiveStateTransitionTest {
     @Test
     fun `waits for non-null session before observing peer connections`() =
         runTest(testDispatcher) {
-            val sessionFlow = MutableStateFlow<RtcSession?>(null) // null initially
+            val sessionFlow = MutableStateFlow<RtcSession?>(null)
             val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
 
             val publisher = mockk<Publisher> { every { state } returns pubState }
-            val subscriber = mockk<Subscriber> { every { state } returns subState }
+            val subscriber = mockk<Subscriber>(relaxed = true) { every { state } returns subState }
             val session = mockk<RtcSession> {
                 every { this@mockk.publisher } returns MutableStateFlow(publisher)
                 every { this@mockk.subscriber } returns MutableStateFlow(subscriber)
@@ -333,18 +327,71 @@ class ActiveStateTransitionTest {
 
             sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
 
-            // Connect peers while session is still null → nothing should happen
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.isEmpty())
 
-            // Now the session arrives
             sessionFlow.value = session
             assertTrue(transitioned.size == 1)
         }
 
+    // ── isActive guard tests ──────────────────────────────────────────────────
+
+    @Test
+    fun `onReady is NOT called if cleanup happens while waiting for peer connection`() =
+        runTest(StandardTestDispatcher()) {
+            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
+                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
+            val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
+                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
+            val (call, _, _, _) = fakeCall(pubState, subState)
+
+            val incomingRingingState = RingingState.Incoming(false)
+            val sut = ActiveStateGate(
+                coroutineScope = this,
+                previousRingingStates = setOf(incomingRingingState),
+                timeoutMs = 5_000L,
+            )
+            val transitioned = mutableListOf<Unit>()
+
+            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
+
+            // Peers connect but cleanup cancels before the coroutine resumes
+            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
+            subState.value = PeerConnection.PeerConnectionState.CONNECTED
+            sut.cleanup() // cancels before isActive check runs
+
+            // Now let any pending coroutine work drain — onReady must not fire
+            advanceUntilIdle()
+
+            assertTrue(transitioned.isEmpty())
+        }
+
+    @Test
+    fun `onReady is NOT called if cleanup happens while waiting for timeout`() =
+        runTest(testDispatcher) {
+            // NONE strategy uses emptyFlow — it will always wait for the full timeout
+            val (call, _, _, _) = fakeCall()
+
+            val incomingRingingState = RingingState.Incoming(false)
+            val sut = ActiveStateGate(
+                coroutineScope = this,
+                previousRingingStates = setOf(incomingRingingState),
+                strategy = TransitionToRingingStateStrategy.NONE,
+                timeoutMs = 5_000L,
+            )
+            val transitioned = mutableListOf<Unit>()
+
+            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
+
+            // Cancel mid-timeout — onReady must not fire when timeout eventually elapses
+            sut.cleanup()
+            advanceTimeBy(6_000L)
+
+            assertTrue(transitioned.isEmpty())
+        }
+
     // ── Strategy tests ────────────────────────────────────────────────────────
-    // These call observePeerConnection() directly to test each strategy in isolation.
 
     private fun runStrategyTest(
         strategy: TransitionToRingingStateStrategy,
@@ -352,14 +399,17 @@ class ActiveStateTransitionTest {
             MutableStateFlow(PeerConnection.PeerConnectionState.NEW),
         subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
             MutableStateFlow(PeerConnection.PeerConnectionState.NEW),
+        firstRtpPacketArrived: MutableStateFlow<Boolean> = MutableStateFlow(false),
         block: suspend TestScope.(
+            call: Call,
             sut: ActiveStateGate,
             transitioned: MutableList<Unit>,
             pubState: MutableStateFlow<PeerConnection.PeerConnectionState?>,
             subState: MutableStateFlow<PeerConnection.PeerConnectionState?>,
+            firstRtpPacketArrived: MutableStateFlow<Boolean>,
         ) -> Unit,
     ) = runTest(testDispatcher) {
-        val (call, _, _) = fakeCall(pubState, subState)
+        val testData = fakeCall(pubState, subState, firstRtpPacketArrived)
         val incoming = RingingState.Incoming(false)
         val sut = ActiveStateGate(
             coroutineScope = this,
@@ -368,14 +418,13 @@ class ActiveStateTransitionTest {
             timeoutMs = 5_000L,
         )
         val transitioned = mutableListOf<Unit>()
-        // RingingState.Ringing ensures the observer branch is always entered
-        sut.awaitAndTransition(incoming, call) { transitioned += Unit }
-        block(sut, transitioned, pubState, subState)
+        sut.awaitAndTransition(incoming, testData.call) { transitioned += Unit }
+        block(testData.call, sut, transitioned, pubState, subState, firstRtpPacketArrived)
     }
 
     @Test
     fun `NONE – emptyFlow times out, transition still fires via timeout fallback`() =
-        runStrategyTest(TransitionToRingingStateStrategy.NONE) { _, transitioned, _, _ ->
+        runStrategyTest(TransitionToRingingStateStrategy.NONE) { _, _, transitioned, _, _, _ ->
             assertTrue(transitioned.isEmpty())
             advanceTimeBy(6_000L)
             assertTrue(transitioned.size == 1)
@@ -385,7 +434,7 @@ class ActiveStateTransitionTest {
     fun `PUBLISHER_CONNECTED – subscriber alone is not enough`() =
         runStrategyTest(
             TransitionToRingingStateStrategy.PUBLISHER_CONNECTED,
-        ) { _, transitioned, pubState, subState ->
+        ) { _, _, transitioned, pubState, subState, _ ->
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.isEmpty())
 
@@ -397,7 +446,7 @@ class ActiveStateTransitionTest {
     fun `SUBSCRIBER_CONNECTED – publisher alone is not enough`() =
         runStrategyTest(
             TransitionToRingingStateStrategy.SUBSCRIBER_CONNECTED,
-        ) { _, transitioned, pubState, subState ->
+        ) { _, _, transitioned, pubState, subState, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.isEmpty())
 
@@ -409,7 +458,7 @@ class ActiveStateTransitionTest {
     fun `ANY_PEER_CONNECTED – publisher alone is sufficient`() =
         runStrategyTest(
             TransitionToRingingStateStrategy.ANY_PEER_CONNECTED,
-        ) { _, transitioned, pubState, _ ->
+        ) { _, _, transitioned, pubState, _, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.size == 1)
         }
@@ -418,7 +467,7 @@ class ActiveStateTransitionTest {
     fun `ANY_PEER_CONNECTED – subscriber alone is sufficient`() =
         runStrategyTest(
             TransitionToRingingStateStrategy.ANY_PEER_CONNECTED,
-        ) { _, transitioned, _, subState ->
+        ) { _, _, transitioned, _, subState, _ ->
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.size == 1)
         }
@@ -427,7 +476,7 @@ class ActiveStateTransitionTest {
     fun `BOTH_PEER_CONNECTED – one peer alone is not enough`() =
         runStrategyTest(
             TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
-        ) { _, transitioned, pubState, subState ->
+        ) { _, _, transitioned, pubState, subState, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.isEmpty())
 
@@ -439,26 +488,56 @@ class ActiveStateTransitionTest {
     fun `BOTH_PEER_CONNECTED – fires exactly once, reconnection does not re-trigger`() =
         runStrategyTest(
             TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
-        ) { _, transitioned, pubState, subState ->
+        ) { _, _, transitioned, pubState, subState, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.size == 1)
 
-            // Simulate drop + reconnect after first() already completed
             pubState.value = PeerConnection.PeerConnectionState.DISCONNECTED
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.size == 1) // still exactly 1
+            assertTrue(transitioned.size == 1)
         }
 
     @Test
-    fun `FIST_PACKET_RECEIVED – publisher alone is not enough (mirrors SUBSCRIBER_CONNECTED)`() =
+    fun `FIST_PACKET_RECEIVED – peer connection state alone does not trigger transition`() =
         runStrategyTest(
             TransitionToRingingStateStrategy.FIST_PACKET_RECEIVED,
-        ) { _, transitioned, pubState, subState ->
+        ) { _, _, transitioned, pubState, subState, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
+            subState.value = PeerConnection.PeerConnectionState.CONNECTED
+            assertTrue(transitioned.isEmpty())
+        }
+
+    @Test
+    fun `FIST_PACKET_RECEIVED – transitions as soon as firstRtpPacketArrivedWithinTimeout emits true`() =
+        runStrategyTest(
+            TransitionToRingingStateStrategy.FIST_PACKET_RECEIVED,
+        ) { _, _, transitioned, _, _, firstRtpPacketArrived ->
             assertTrue(transitioned.isEmpty())
 
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
+            firstRtpPacketArrived.value = true
+            assertTrue(transitioned.size == 1)
+        }
+
+    @Test
+    fun `FIST_PACKET_RECEIVED – times out and still calls onReady if no RTP packet ever arrives`() =
+        runStrategyTest(
+            strategy = TransitionToRingingStateStrategy.FIST_PACKET_RECEIVED,
+            firstRtpPacketArrived = MutableStateFlow(false),
+        ) { _, _, transitioned, _, _, _ ->
+            assertTrue(transitioned.isEmpty())
+            advanceTimeBy(6_000L)
+            assertTrue(transitioned.size == 1)
+        }
+
+    @Test
+    fun `FIST_PACKET_RECEIVED – fires exactly once even if flow emits true multiple times`() =
+        runStrategyTest(
+            TransitionToRingingStateStrategy.FIST_PACKET_RECEIVED,
+        ) { _, _, transitioned, _, _, firstRtpPacketArrived ->
+            firstRtpPacketArrived.value = true
+            firstRtpPacketArrived.value = false
+            firstRtpPacketArrived.value = true
             assertTrue(transitioned.size == 1)
         }
 }

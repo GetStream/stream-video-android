@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.webrtc.PeerConnection
@@ -135,7 +136,9 @@ internal class ActiveStateGate(
                     "[observeConnection-$strategy] Timeout after ${duration}ms"
                 }
             }
-            onReady()
+            if (isActive) {
+                onReady()
+            }
         }
     }
 
