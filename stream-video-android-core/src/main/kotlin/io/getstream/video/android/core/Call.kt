@@ -241,7 +241,7 @@ public class Call(
      * SFU IDs (edge names) we failed to connect to (e.g. SFU_FULL). Sent in migrating_from_list
      * when requesting new credentials so the coordinator can exclude them.
      */
-    private val failedSfuIds = Collections.synchronizedList(mutableListOf<String>())
+    private val failedSfuIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
@@ -1494,19 +1494,14 @@ public class Call(
         return clientImpl.muteUsers(type, id, request)
     }
 
-    /** Adds the given SFU ID (edge name) to the failed list (for migrating_from_list). */
+    /** Adds the given SFU ID (edge name) to the failed set (for migrating_from_list). */
     private fun addFailedSfuId(sfuId: String) {
         if (sfuId.isBlank()) return
-        synchronized(failedSfuIds) {
-            if (!failedSfuIds.contains(sfuId)) {
-                failedSfuIds.add(sfuId)
-            }
-        }
+        failedSfuIds.add(sfuId)
     }
 
     /** Returns a snapshot of failed SFU IDs to send as migrating_from_list. */
-    private fun getFailedSfuIdsSnapshot(): List<String> =
-        synchronized(failedSfuIds) { failedSfuIds.toList() }
+    private fun getFailedSfuIdsSnapshot(): List<String> = failedSfuIds.toList()
 
     /** Clears the failed SFU list (e.g. after a successful join). */
     private fun clearFailedSfuIds() {
