@@ -170,7 +170,7 @@ open class StreamPeerConnection(
         this.iceState.value = this.connection.iceConnectionState()
 
         if (this is Subscriber) {
-            this.pollFirstPacket()
+            this.debugPollFirstPacket()
         }
     }
 

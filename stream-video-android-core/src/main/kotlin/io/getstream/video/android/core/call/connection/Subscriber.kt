@@ -161,10 +161,11 @@ internal class Subscriber(
 
     /**
      *  Keeping it for observing time difference between both publisher & subscriber
-     *  and first packet received
+     *  and first packet received.
+     *  Will be removed after testing is done
      */
-    internal val firstRtpPacketArrivedWithinTimeout = MutableStateFlow<Boolean>(false)
-    private var firstRtpPacketPollingJob: Job? = null
+    internal val debugFirstRtpPacketArrivedWithinTimeout = MutableStateFlow<Boolean>(false)
+    private var debugFirstRtpPacketPollingJob: Job? = null
 
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         super.onIceConnectionChange(newState)
@@ -683,33 +684,36 @@ internal class Subscriber(
 
     fun isEnabled() = enabled
 
-    internal fun pollFirstPacket() {
-        logger.d { "[pollFirstPacket]" }
-        firstRtpPacketPollingJob?.cancel()
-        firstRtpPacketPollingJob = coroutineScope.launch(Dispatchers.Default) {
+    /**
+     * Will be removed after testing is done
+     */
+    internal fun debugPollFirstPacket() {
+        logger.d { "[debugPollFirstPacket]" }
+        debugFirstRtpPacketPollingJob?.cancel()
+        debugFirstRtpPacketPollingJob = coroutineScope.launch(Dispatchers.Default) {
             /**
              * For caller in joinAndRing we need a longer timeout because call will join the call
              * and wait for callee to accept -> join -> its publish to setup + ice_connected
              * otherwise shorter timeout is acceptable
              */
             withTimeout(60_000L) {
-                while (!firstRtpPacketArrivedWithinTimeout.value) {
-                    checkStats()
+                while (!debugFirstRtpPacketArrivedWithinTimeout.value) {
+                    debugCheckStats()
                     delay(700)
                 }
             }
-            firstRtpPacketPollingJob?.cancel()
+            debugFirstRtpPacketPollingJob?.cancel()
         }
     }
 
-    private fun checkStats() {
+    private fun debugCheckStats() {
         connection.getStats { report ->
             report.statsMap.values.forEach { stat ->
                 when (stat.type) {
                     "inbound-rtp" -> {
                         val bytes = stat.members["bytesReceived"] as? Number ?: return@forEach
-                        if (bytes.toLong() > 0 && !firstRtpPacketArrivedWithinTimeout.value) {
-                            firstRtpPacketArrivedWithinTimeout.value = true
+                        if (bytes.toLong() > 0 && !debugFirstRtpPacketArrivedWithinTimeout.value) {
+                            debugFirstRtpPacketArrivedWithinTimeout.value = true
                             logger.d { "[checkStats] FIRST_INBOUND_RTP_PACKET, id:${stat.id}" }
                         }
                     }

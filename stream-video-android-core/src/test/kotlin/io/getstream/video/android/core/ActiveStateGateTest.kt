@@ -71,7 +71,7 @@ class ActiveStateGateTest {
         }
         val subscriber = mockk<Subscriber>(relaxed = true) {
             every { state } returns subscriberState
-            every { firstRtpPacketArrivedWithinTimeout } returns firstRtpPacketArrived
+            every { debugFirstRtpPacketArrivedWithinTimeout } returns firstRtpPacketArrived
         }
         val session = mockk<RtcSession> {
             every { this@mockk.publisher } returns MutableStateFlow(publisher)
@@ -433,7 +433,7 @@ class ActiveStateGateTest {
     @Test
     fun `PUBLISHER_CONNECTED – subscriber alone is not enough`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.PUBLISHER_CONNECTED,
+            TransitionToRingingStateStrategy.DEBUG_PUBLISHER_CONNECTED,
         ) { _, _, transitioned, pubState, subState, _ ->
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.isEmpty())
@@ -445,7 +445,7 @@ class ActiveStateGateTest {
     @Test
     fun `SUBSCRIBER_CONNECTED – publisher alone is not enough`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.SUBSCRIBER_CONNECTED,
+            TransitionToRingingStateStrategy.DEBUG_SUBSCRIBER_CONNECTED,
         ) { _, _, transitioned, pubState, subState, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.isEmpty())
@@ -457,7 +457,7 @@ class ActiveStateGateTest {
     @Test
     fun `ANY_PEER_CONNECTED – publisher alone is sufficient`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.ANY_PEER_CONNECTED,
+            TransitionToRingingStateStrategy.DEBUG_ANY_PEER_CONNECTED,
         ) { _, _, transitioned, pubState, _, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.size == 1)
@@ -466,7 +466,7 @@ class ActiveStateGateTest {
     @Test
     fun `ANY_PEER_CONNECTED – subscriber alone is sufficient`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.ANY_PEER_CONNECTED,
+            TransitionToRingingStateStrategy.DEBUG_ANY_PEER_CONNECTED,
         ) { _, _, transitioned, _, subState, _ ->
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.size == 1)
@@ -501,7 +501,7 @@ class ActiveStateGateTest {
     @Test
     fun `FIST_PACKET_RECEIVED – peer connection state alone does not trigger transition`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.FIST_PACKET_RECEIVED,
+            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
         ) { _, _, transitioned, pubState, subState, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
@@ -511,7 +511,7 @@ class ActiveStateGateTest {
     @Test
     fun `FIST_PACKET_RECEIVED – transitions as soon as firstRtpPacketArrivedWithinTimeout emits true`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.FIST_PACKET_RECEIVED,
+            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
         ) { _, _, transitioned, _, _, firstRtpPacketArrived ->
             assertTrue(transitioned.isEmpty())
 
@@ -522,7 +522,7 @@ class ActiveStateGateTest {
     @Test
     fun `FIST_PACKET_RECEIVED – times out and still calls onReady if no RTP packet ever arrives`() =
         runStrategyTest(
-            strategy = TransitionToRingingStateStrategy.FIST_PACKET_RECEIVED,
+            strategy = TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
             firstRtpPacketArrived = MutableStateFlow(false),
         ) { _, _, transitioned, _, _, _ ->
             assertTrue(transitioned.isEmpty())
@@ -533,7 +533,7 @@ class ActiveStateGateTest {
     @Test
     fun `FIST_PACKET_RECEIVED – fires exactly once even if flow emits true multiple times`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.FIST_PACKET_RECEIVED,
+            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
         ) { _, _, transitioned, _, _, firstRtpPacketArrived ->
             firstRtpPacketArrived.value = true
             firstRtpPacketArrived.value = false

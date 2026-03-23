@@ -82,23 +82,23 @@ internal class ActiveStateGate(
                                 emptyFlow<Int>()
                                     .map { "none" to it }
                             }
-                            TransitionToRingingStateStrategy.PUBLISHER_CONNECTED -> {
+                            TransitionToRingingStateStrategy.DEBUG_PUBLISHER_CONNECTED -> {
                                 publisherFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
                                     .map { "publisher" to it }
                             }
-                            TransitionToRingingStateStrategy.SUBSCRIBER_CONNECTED -> {
+                            TransitionToRingingStateStrategy.DEBUG_SUBSCRIBER_CONNECTED -> {
                                 subscriberFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
                                     .map { "subscriber" to it }
                             }
 
-                            TransitionToRingingStateStrategy.FIST_PACKET_RECEIVED ->
+                            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED ->
                                 session.subscriber
                                     .filterNotNull()
-                                    .flatMapLatest { it.firstRtpPacketArrivedWithinTimeout }
+                                    .flatMapLatest { it.debugFirstRtpPacketArrivedWithinTimeout }
                                     .filter { it }
                                     .map { "first_packet" to it }
 
-                            TransitionToRingingStateStrategy.ANY_PEER_CONNECTED -> {
+                            TransitionToRingingStateStrategy.DEBUG_ANY_PEER_CONNECTED -> {
                                 merge(
                                     publisherFlow.map { "publisher" to it },
                                     subscriberFlow.map { "subscriber" to it },
