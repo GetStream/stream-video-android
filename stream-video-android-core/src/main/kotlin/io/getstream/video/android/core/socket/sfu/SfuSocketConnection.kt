@@ -37,6 +37,7 @@ import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.mapState
+import io.getstream.video.android.core.utils.suspendDebugOnly
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.SfuToken
 import kotlinx.coroutines.CoroutineScope
@@ -176,7 +177,7 @@ class SfuSocketConnection(
     internal suspend fun simulateNetworkError(
         error: io.getstream.result.Error.NetworkError,
         reconnectStrategy: stream.video.sfu.models.WebsocketReconnectStrategy,
-    ) {
+    ) = suspendDebugOnly {
         internalSocket.simulateNetworkError(error, reconnectStrategy)
     }
 

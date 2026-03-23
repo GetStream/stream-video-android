@@ -92,6 +92,7 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
+import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
@@ -1798,7 +1799,7 @@ public class Call(
             }
         }
 
-        fun simulateSfuFull() {
+        fun simulateSfuFull() = debugOnly {
             call.session?.simulateSfuFull()
         }
 

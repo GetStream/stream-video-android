@@ -45,6 +45,7 @@ import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.safeCallWithResult
+import io.getstream.video.android.core.utils.suspendDebugOnly
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Job
@@ -367,7 +368,7 @@ internal open class SfuSocket(
     internal suspend fun simulateNetworkError(
         error: Error.NetworkError,
         reconnectStrategy: WebsocketReconnectStrategy,
-    ) {
+    ) = suspendDebugOnly {
         logger.w { "[simulateNetworkError] Injecting error: $error, strategy: $reconnectStrategy" }
         sfuSocketStateService.onNetworkError(error, reconnectStrategy)
     }

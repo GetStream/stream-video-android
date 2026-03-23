@@ -92,6 +92,7 @@ import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.buildConnectionConfiguration
 import io.getstream.video.android.core.utils.buildRemoteIceServers
+import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -623,8 +624,28 @@ public class RtcSession internal constructor(
             }
         }
 
-        // State
-        // Start listening to connection state on new SFU connection
+        /**
+         * Monitors [SfuSocketState] transitions and applies the appropriate reconnection
+         * strategy.
+         *
+         * **Connected** — resets the retry counter, promotes the call to
+         * [RealtimeConnection.Connected], and flushes any pending ICE trickle candidates.
+         *
+         * **DisconnectedTemporarily** — inspects the [WebsocketReconnectStrategy] carried
+         * by the state:
+         * - *MIGRATE / REJOIN / DISCONNECT* — executed **immediately** (server-initiated).
+         * - *FAST / UNSPECIFIED* — increments [sfuConnectionRetryCount]; after
+         *   [MAX_SFU_CONNECTION_RETRIES] consecutive failures the session escalates to
+         *   [Call.migrate] to obtain a new SFU.
+         *
+         * **WebSocketEventLost** — intermediate HealthMonitor state; the retry counter is
+         * intentionally **not** incremented because the HealthMonitor will re-attempt
+         * the connection on its own.
+         *
+         * All SFU errors are [io.getstream.result.Error.NetworkError] and route through
+         * the state machine (onVideoNetworkError → DisconnectedTemporarily), so they are
+         * handled here rather than through a separate error-collection flow.
+         */
         stateJob = coroutineScope.launch {
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 _sfuSfuSocketState.value = sfuSocketState
@@ -714,11 +735,6 @@ public class RtcSession internal constructor(
                 clientImpl.fireEvent(it, call.cid)
             }
         }
-
-        // NOTE: Reconnect strategies (MIGRATE, REJOIN, FAST, DISCONNECT) are handled
-        // in the stateJob above via DisconnectedTemporarily.reconnectStrategy. All SFU
-        // errors are Error.NetworkError which routes through onVideoNetworkError → state
-        // machine → DisconnectedTemporarily, never through the errors() flow.
     }
 
     private fun traceEvent(it: SfuDataEvent) = safeCall {
@@ -1872,8 +1888,10 @@ public class RtcSession internal constructor(
     /**
      * Simulates an SFU_FULL error for debugging. Injects a network error with code 700
      * and MIGRATE strategy, which triggers immediate migration to a new SFU.
+     *
+     * Only available in debug builds ([BuildConfig.DEBUG_TOOLS_ENABLED]).
      */
-    internal fun simulateSfuFull() {
+    internal fun simulateSfuFull() = debugOnly {
         logger.w { "[simulateSfuFull] Simulating SFU_FULL for $sfuName" }
         coroutineScope.launch {
             sfuConnectionModule.socketConnection.simulateNetworkError(
