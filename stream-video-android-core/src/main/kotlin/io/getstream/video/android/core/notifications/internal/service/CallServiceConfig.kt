@@ -18,6 +18,7 @@ package io.getstream.video.android.core.notifications.internal.service
 
 import android.media.AudioAttributes
 import io.getstream.video.android.core.moderations.ModerationConfig
+import io.getstream.video.android.core.notifications.RingingCallActivationConfig
 import io.getstream.video.android.model.StreamCallId
 
 // Constants
@@ -34,6 +35,7 @@ internal const val ANY_MARKER = "ALL_CALL_TYPES"
  * @see livestreamAudioCallServiceConfig
  * @see livestreamGuestCallServiceConfig
  * @see audioCallServiceConfig
+ * @see ringingCallActivationConfig
  *
  */
 public data class CallServiceConfig(
@@ -49,6 +51,7 @@ public data class CallServiceConfig(
     val serviceClass: Class<*> = CallService::class.java,
     val enableTelecom: Boolean = false,
     val moderationConfig: ModerationConfig = ModerationConfig(),
+    val ringingCallActivationConfig: RingingCallActivationConfig = RingingCallActivationConfig(),
 )
 
 /**

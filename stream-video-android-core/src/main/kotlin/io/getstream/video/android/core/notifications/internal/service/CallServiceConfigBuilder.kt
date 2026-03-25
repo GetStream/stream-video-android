@@ -18,6 +18,7 @@ package io.getstream.video.android.core.notifications.internal.service
 
 import android.media.AudioAttributes
 import io.getstream.video.android.core.moderations.ModerationConfig
+import io.getstream.video.android.core.notifications.RingingCallActivationConfig
 
 class CallServiceConfigBuilder {
     private var serviceClass: Class<*> = CallService::class.java
@@ -25,6 +26,8 @@ class CallServiceConfigBuilder {
     private var audioUsage: Int = AudioAttributes.USAGE_VOICE_COMMUNICATION
     private var enableTelecom: Boolean = false
     private var moderationConfig: ModerationConfig = ModerationConfig()
+    private var ringingCallActivationConfig: RingingCallActivationConfig =
+        RingingCallActivationConfig()
 
     fun setServiceClass(serviceClass: Class<*>): CallServiceConfigBuilder = apply {
         this.serviceClass = serviceClass
@@ -46,6 +49,10 @@ class CallServiceConfigBuilder {
         this.moderationConfig = moderationConfig
     }
 
+    fun setRingingCallActivationConfig(ringingCallActivationConfig: RingingCallActivationConfig): CallServiceConfigBuilder = apply {
+        this.ringingCallActivationConfig = ringingCallActivationConfig
+    }
+
     fun build(): CallServiceConfig {
         return CallServiceConfig(
             serviceClass = serviceClass,
@@ -53,6 +60,7 @@ class CallServiceConfigBuilder {
             audioUsage = audioUsage,
             enableTelecom = enableTelecom,
             moderationConfig = moderationConfig,
+            ringingCallActivationConfig = ringingCallActivationConfig,
         )
     }
 }

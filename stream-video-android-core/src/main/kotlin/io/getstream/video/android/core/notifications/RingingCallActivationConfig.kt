@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+package io.getstream.video.android.core.notifications
 
-internal enum class TransitionToRingingStateStrategy {
-    NONE,
-    DEBUG_ANY_PEER_CONNECTED,
-    BOTH_PEER_CONNECTED,
-    DEBUG_PUBLISHER_CONNECTED,
-    DEBUG_SUBSCRIBER_CONNECTED,
-    DEBUG_FIST_PACKET_RECEIVED,
-}
+import io.getstream.video.android.core.RingingCallActivationCriteria
+
+data class RingingCallActivationConfig(
+    val criteria: RingingCallActivationCriteria =
+        RingingCallActivationCriteria.LEGACY_BEHAVIOR,
+
+    /**
+     * Maximum time to wait for [criteria] before activating anyway.
+     * If null, waits indefinitely.
+     */
+    val timeoutMillis: Long = 5_000L,
+)

@@ -732,7 +732,6 @@ public class CallState(
     private val activeStateGate = ActiveStateGate(
         scope,
         previousRingingStates,
-        TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
     )
 
     @InternalStreamVideoApi
@@ -1376,7 +1375,13 @@ public class CallState(
         ringingLogger.d { "Update: $state" }
 
         if (state is RingingState.Active) {
-            activeStateGate.awaitAndTransition(ringingState.value, call) {
+            val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
+
+            activeStateGate.awaitAndTransition(
+                ringingState.value,
+                call,
+                callServiceConfig.ringingCallActivationConfig,
+            ) {
                 _ringingState.value = state
             }
         } else {

@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.video.android.core.notifications.RingingCallActivationConfig
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -98,6 +99,7 @@ class ActiveStateGateTest {
             sut.awaitAndTransition(
                 currentRingingState = RingingState.Idle,
                 call = call,
+                RingingCallActivationConfig(),
                 onReady = { transitioned += Unit },
             )
 
@@ -119,6 +121,7 @@ class ActiveStateGateTest {
             sut.awaitAndTransition(
                 currentRingingState = RingingState.Active,
                 call = call,
+                RingingCallActivationConfig(),
                 onReady = { transitioned += Unit },
             )
 
@@ -140,13 +143,15 @@ class ActiveStateGateTest {
             val sut = ActiveStateGate(
                 coroutineScope = this,
                 previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
             )
             val transitioned = mutableListOf<Unit>()
 
             sut.awaitAndTransition(
                 currentRingingState = incomingRingingState,
                 call = call,
+                RingingCallActivationConfig(
+                    criteria = RingingCallActivationCriteria.BOTH_PEER_CONNECTED,
+                ),
                 onReady = { transitioned += Unit },
             )
 
@@ -172,13 +177,15 @@ class ActiveStateGateTest {
             val sut = ActiveStateGate(
                 coroutineScope = this,
                 previousRingingStates = setOf(outgoingRingingState),
-                timeoutMs = 5_000L,
             )
             val transitioned = mutableListOf<Unit>()
 
             sut.awaitAndTransition(
                 currentRingingState = outgoingRingingState,
                 call = call,
+                RingingCallActivationConfig(
+                    criteria = RingingCallActivationCriteria.BOTH_PEER_CONNECTED,
+                ),
                 onReady = { transitioned += Unit },
             )
 
@@ -198,13 +205,13 @@ class ActiveStateGateTest {
             val sut = ActiveStateGate(
                 coroutineScope = this,
                 previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 100L,
             )
             val transitioned = mutableListOf<Unit>()
 
             sut.awaitAndTransition(
                 currentRingingState = incomingRingingState,
                 call = call,
+                RingingCallActivationConfig(timeoutMillis = 100L),
                 onReady = { transitioned += Unit },
             )
 
@@ -228,13 +235,16 @@ class ActiveStateGateTest {
             val sut = ActiveStateGate(
                 coroutineScope = this,
                 previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
             )
             val transitioned = mutableListOf<Unit>()
             val action = { transitioned += Unit }
 
-            sut.awaitAndTransition(incomingRingingState, call, action)
-            sut.awaitAndTransition(incomingRingingState, call, action)
+            val ringingCallActivationConfig =
+                RingingCallActivationConfig(
+                    criteria = RingingCallActivationCriteria.BOTH_PEER_CONNECTED,
+                )
+            sut.awaitAndTransition(incomingRingingState, call, ringingCallActivationConfig, action)
+            sut.awaitAndTransition(incomingRingingState, call, ringingCallActivationConfig, action)
 
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
@@ -253,13 +263,13 @@ class ActiveStateGateTest {
             val sut = ActiveStateGate(
                 coroutineScope = this,
                 previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
             )
             val transitioned = mutableListOf<Unit>()
 
             sut.awaitAndTransition(
                 currentRingingState = incomingRingingState,
                 call = call,
+                RingingCallActivationConfig(),
                 onReady = { transitioned += Unit },
             )
 
@@ -284,13 +294,19 @@ class ActiveStateGateTest {
             val sut = ActiveStateGate(
                 coroutineScope = this,
                 previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
             )
             val transitioned = mutableListOf<Unit>()
-
-            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
+            val ringingCallActivationConfig =
+                RingingCallActivationConfig(
+                    criteria = RingingCallActivationCriteria.BOTH_PEER_CONNECTED,
+                )
+            sut.awaitAndTransition(incomingRingingState, call, ringingCallActivationConfig) {
+                transitioned += Unit
+            }
             sut.cleanup()
-            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
+            sut.awaitAndTransition(incomingRingingState, call, ringingCallActivationConfig) {
+                transitioned += Unit
+            }
 
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
@@ -321,11 +337,18 @@ class ActiveStateGateTest {
             val sut = ActiveStateGate(
                 coroutineScope = this,
                 previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
             )
             val transitioned = mutableListOf<Unit>()
 
-            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
+            sut.awaitAndTransition(
+                incomingRingingState,
+                call,
+                RingingCallActivationConfig(
+                    criteria = RingingCallActivationCriteria.BOTH_PEER_CONNECTED,
+                ),
+            ) {
+                transitioned += Unit
+            }
 
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
@@ -350,11 +373,12 @@ class ActiveStateGateTest {
             val sut = ActiveStateGate(
                 coroutineScope = this,
                 previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
             )
             val transitioned = mutableListOf<Unit>()
 
-            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
+            sut.awaitAndTransition(incomingRingingState, call, RingingCallActivationConfig()) {
+                transitioned += Unit
+            }
 
             // Peers connect but cleanup cancels before the coroutine resumes
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
@@ -377,12 +401,12 @@ class ActiveStateGateTest {
             val sut = ActiveStateGate(
                 coroutineScope = this,
                 previousRingingStates = setOf(incomingRingingState),
-                strategy = TransitionToRingingStateStrategy.NONE,
-                timeoutMs = 5_000L,
             )
             val transitioned = mutableListOf<Unit>()
 
-            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
+            sut.awaitAndTransition(incomingRingingState, call, RingingCallActivationConfig()) {
+                transitioned += Unit
+            }
 
             // Cancel mid-timeout — onReady must not fire when timeout eventually elapses
             sut.cleanup()
@@ -394,7 +418,7 @@ class ActiveStateGateTest {
     // ── Strategy tests ────────────────────────────────────────────────────────
 
     private fun runStrategyTest(
-        strategy: TransitionToRingingStateStrategy,
+        strategy: RingingCallActivationCriteria,
         pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
             MutableStateFlow(PeerConnection.PeerConnectionState.NEW),
         subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
@@ -414,17 +438,23 @@ class ActiveStateGateTest {
         val sut = ActiveStateGate(
             coroutineScope = this,
             previousRingingStates = setOf(incoming),
-            strategy = strategy,
-            timeoutMs = 5_000L,
         )
         val transitioned = mutableListOf<Unit>()
-        sut.awaitAndTransition(incoming, testData.call) { transitioned += Unit }
+        sut.awaitAndTransition(
+            incoming,
+            testData.call,
+            RingingCallActivationConfig(criteria = strategy),
+        ) {
+            transitioned += Unit
+        }
         block(testData.call, sut, transitioned, pubState, subState, firstRtpPacketArrived)
     }
 
     @Test
     fun `NONE – emptyFlow times out, transition still fires via timeout fallback`() =
-        runStrategyTest(TransitionToRingingStateStrategy.NONE) { _, _, transitioned, _, _, _ ->
+        runStrategyTest(
+            RingingCallActivationCriteria.LEGACY_BEHAVIOR,
+        ) { _, _, transitioned, _, _, _ ->
             assertTrue(transitioned.isEmpty())
             advanceTimeBy(6_000L)
             assertTrue(transitioned.size == 1)
@@ -433,7 +463,7 @@ class ActiveStateGateTest {
     @Test
     fun `PUBLISHER_CONNECTED – subscriber alone is not enough`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_PUBLISHER_CONNECTED,
+            RingingCallActivationCriteria.PUBLISHER_CONNECTED,
         ) { _, _, transitioned, pubState, subState, _ ->
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.isEmpty())
@@ -445,7 +475,7 @@ class ActiveStateGateTest {
     @Test
     fun `SUBSCRIBER_CONNECTED – publisher alone is not enough`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_SUBSCRIBER_CONNECTED,
+            RingingCallActivationCriteria.SUBSCRIBER_CONNECTED,
         ) { _, _, transitioned, pubState, subState, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.isEmpty())
@@ -457,7 +487,7 @@ class ActiveStateGateTest {
     @Test
     fun `ANY_PEER_CONNECTED – publisher alone is sufficient`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_ANY_PEER_CONNECTED,
+            RingingCallActivationCriteria.ANY_PEER_CONNECTED,
         ) { _, _, transitioned, pubState, _, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.size == 1)
@@ -466,7 +496,7 @@ class ActiveStateGateTest {
     @Test
     fun `ANY_PEER_CONNECTED – subscriber alone is sufficient`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_ANY_PEER_CONNECTED,
+            RingingCallActivationCriteria.ANY_PEER_CONNECTED,
         ) { _, _, transitioned, _, subState, _ ->
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.size == 1)
@@ -475,7 +505,7 @@ class ActiveStateGateTest {
     @Test
     fun `BOTH_PEER_CONNECTED – one peer alone is not enough`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
+            RingingCallActivationCriteria.BOTH_PEER_CONNECTED,
         ) { _, _, transitioned, pubState, subState, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.isEmpty())
@@ -487,7 +517,7 @@ class ActiveStateGateTest {
     @Test
     fun `BOTH_PEER_CONNECTED – fires exactly once, reconnection does not re-trigger`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
+            RingingCallActivationCriteria.BOTH_PEER_CONNECTED,
         ) { _, _, transitioned, pubState, subState, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
@@ -501,7 +531,7 @@ class ActiveStateGateTest {
     @Test
     fun `FIST_PACKET_RECEIVED – peer connection state alone does not trigger transition`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
+            RingingCallActivationCriteria.FIRST_PACKET_RECEIVED,
         ) { _, _, transitioned, pubState, subState, _ ->
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
@@ -511,7 +541,7 @@ class ActiveStateGateTest {
     @Test
     fun `FIST_PACKET_RECEIVED – transitions as soon as firstRtpPacketArrivedWithinTimeout emits true`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
+            RingingCallActivationCriteria.FIRST_PACKET_RECEIVED,
         ) { _, _, transitioned, _, _, firstRtpPacketArrived ->
             assertTrue(transitioned.isEmpty())
 
@@ -522,7 +552,7 @@ class ActiveStateGateTest {
     @Test
     fun `FIST_PACKET_RECEIVED – times out and still calls onReady if no RTP packet ever arrives`() =
         runStrategyTest(
-            strategy = TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
+            strategy = RingingCallActivationCriteria.FIRST_PACKET_RECEIVED,
             firstRtpPacketArrived = MutableStateFlow(false),
         ) { _, _, transitioned, _, _, _ ->
             assertTrue(transitioned.isEmpty())
@@ -533,7 +563,7 @@ class ActiveStateGateTest {
     @Test
     fun `FIST_PACKET_RECEIVED – fires exactly once even if flow emits true multiple times`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
+            RingingCallActivationCriteria.FIRST_PACKET_RECEIVED,
         ) { _, _, transitioned, _, _, firstRtpPacketArrived ->
             firstRtpPacketArrived.value = true
             firstRtpPacketArrived.value = false

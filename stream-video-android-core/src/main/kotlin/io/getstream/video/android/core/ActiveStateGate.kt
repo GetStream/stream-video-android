@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.notifications.RingingCallActivationConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
@@ -32,18 +33,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.webrtc.PeerConnection
 
-private const val PEER_CONNECTION_OBSERVER_TIMEOUT = 5_000L
-
 internal class ActiveStateGate(
     private val coroutineScope: CoroutineScope,
     private val previousRingingStates: Set<RingingState>,
-    private val strategy: TransitionToRingingStateStrategy = TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
-    private val timeoutMs: Long = PEER_CONNECTION_OBSERVER_TIMEOUT,
 ) {
     private val logger by taggedLogger("ActiveStateGate")
     private var peerConnectionObserverJob: Job? = null
 
-    internal fun awaitAndTransition(currentRingingState: RingingState, call: Call, onReady: () -> Unit) {
+    internal fun awaitAndTransition(currentRingingState: RingingState, call: Call, ringingCallActivationConfig: RingingCallActivationConfig, onReady: () -> Unit) {
         logger.d { "[awaitAndTransition], ringingState: $currentRingingState" }
         val isIncomingOrOutgoing =
             previousRingingStates.any { it is RingingState.Incoming || it is RingingState.Outgoing }
@@ -51,20 +48,20 @@ internal class ActiveStateGate(
             observePeerConnection(
                 call,
                 onReady,
-                strategy,
+                ringingCallActivationConfig,
             )
         } else if (!isIncomingOrOutgoing) {
             onReady()
         }
     }
 
-    private fun observePeerConnection(call: Call, onReady: () -> Unit, strategy: TransitionToRingingStateStrategy) {
+    private fun observePeerConnection(call: Call, onReady: () -> Unit, ringingCallActivationConfig: RingingCallActivationConfig) {
         if (peerConnectionObserverJob?.isActive == true) return
 
         peerConnectionObserverJob = coroutineScope.launch {
             val start = System.currentTimeMillis()
 
-            val result = withTimeoutOrNull(timeoutMs) {
+            val result = withTimeoutOrNull(ringingCallActivationConfig.timeoutMillis) {
                 call.session
                     .filterNotNull()
                     .flatMapLatest { session ->
@@ -77,28 +74,28 @@ internal class ActiveStateGate(
                             .filterNotNull()
                             .flatMapLatest { it.state }
 
-                        when (strategy) {
-                            TransitionToRingingStateStrategy.NONE -> {
+                        when (ringingCallActivationConfig.criteria) {
+                            RingingCallActivationCriteria.LEGACY_BEHAVIOR -> {
                                 emptyFlow<Int>()
                                     .map { "none" to it }
                             }
-                            TransitionToRingingStateStrategy.DEBUG_PUBLISHER_CONNECTED -> {
+                            RingingCallActivationCriteria.PUBLISHER_CONNECTED -> {
                                 publisherFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
                                     .map { "publisher" to it }
                             }
-                            TransitionToRingingStateStrategy.DEBUG_SUBSCRIBER_CONNECTED -> {
+                            RingingCallActivationCriteria.SUBSCRIBER_CONNECTED -> {
                                 subscriberFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
                                     .map { "subscriber" to it }
                             }
 
-                            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED ->
+                            RingingCallActivationCriteria.FIRST_PACKET_RECEIVED ->
                                 session.subscriber
                                     .filterNotNull()
                                     .flatMapLatest { it.debugFirstRtpPacketArrivedWithinTimeout }
                                     .filter { it }
                                     .map { "first_packet" to it }
 
-                            TransitionToRingingStateStrategy.DEBUG_ANY_PEER_CONNECTED -> {
+                            RingingCallActivationCriteria.ANY_PEER_CONNECTED -> {
                                 merge(
                                     publisherFlow.map { "publisher" to it },
                                     subscriberFlow.map { "subscriber" to it },
@@ -107,7 +104,7 @@ internal class ActiveStateGate(
                                 }
                             }
 
-                            TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED -> {
+                            RingingCallActivationCriteria.BOTH_PEER_CONNECTED -> {
                                 combine(publisherFlow, subscriberFlow) { pub, sub ->
                                     if (
                                         pub == PeerConnection.PeerConnectionState.CONNECTED &&
@@ -129,11 +126,11 @@ internal class ActiveStateGate(
             if (result != null) {
                 val (source, state) = result
                 logger.d {
-                    "[observeConnection-$strategy] $source reached $state in ${duration}ms"
+                    "[observeConnection-${ringingCallActivationConfig.criteria}] $source reached $state in ${duration}ms"
                 }
             } else {
                 logger.w {
-                    "[observeConnection-$strategy] Timeout after ${duration}ms"
+                    "[observeConnection-${ringingCallActivationConfig.criteria}] Timeout after ${duration}ms"
                 }
             }
             if (isActive) {
