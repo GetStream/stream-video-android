@@ -15,11 +15,3 @@
  */
 
 package io.getstream.video.android.core
-
-data class CallStateTimelineTracker(
-    val acceptedEventTime: Long = 0L,
-    val acceptStartTime: Long = 0L,
-    val acceptFinishTime: Long = 0L,
-    val joinStartTime: Long = 0L,
-    val joinFinishTime: Long = 0L,
-)

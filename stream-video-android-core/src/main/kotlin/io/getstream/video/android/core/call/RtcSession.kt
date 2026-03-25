@@ -1085,7 +1085,7 @@ public class RtcSession internal constructor(
                 // Empty, handled differently
             },
             onIceCandidateRequest = ::sendIceCandidate,
-            peerConnectionStateTracker = call.state.subscriberConnectionStateTracker,
+            eventTracker = call.state.eventTracker,
         )
         return peerConnection
     }
@@ -1129,7 +1129,7 @@ public class RtcSession internal constructor(
             spc.connection.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO)
         }
 
-        return call.peerConnectionFactory.makePeerConnection(
+        return call.peerConnectionFactory.makePeerConnectionInternal(
             coroutineScope = coroutineScope,
             configuration = PeerConnection.RTCConfiguration(emptyList()),
             type = if (direction == RtpTransceiverDirection.SEND_ONLY) {
@@ -1139,11 +1139,7 @@ public class RtcSession internal constructor(
             },
             mediaConstraints = defaultConstraints,
             debugText = "DummyPeerConnection",
-            peerConnectionStateTracker = if (direction == RtpTransceiverDirection.SEND_ONLY) {
-                call.state.publisherConnectionStateTracker
-            } else {
-                call.state.subscriberConnectionStateTracker
-            },
+            eventTracker = call.state.eventTracker,
         ).apply {
             addTempTransceivers(this)
         }
@@ -1186,7 +1182,7 @@ public class RtcSession internal constructor(
                 // Empty on purpose
             },
             isHifiAudioEnabled = call.state.settings.value?.audio?.hifiAudioEnabled ?: false,
-            peerConnectionStateTracker = call.state.publisherConnectionStateTracker,
+            eventTracker = call.state.eventTracker,
         )
     }
 

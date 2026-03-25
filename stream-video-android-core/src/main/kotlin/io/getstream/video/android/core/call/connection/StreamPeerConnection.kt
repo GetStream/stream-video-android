@@ -20,7 +20,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.stats.StatsTracer
-import io.getstream.video.android.core.call.connection.trackers.PeerConnectionStateTracker
+import io.getstream.video.android.core.call.connection.trackers.EventTracker
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.stats.toRtcStats
 import io.getstream.video.android.core.call.utils.addRtcIceCandidate
@@ -76,7 +76,9 @@ import org.webrtc.IceCandidate as RtcIceCandidate
  * @param traceCreateAnswer Whether to trace the create answer event or not.
  * @param tracer The tracer used to trace the connection.
  */
-open class StreamPeerConnection(
+
+private const val ENABLE_TRACKING = false
+open class StreamPeerConnection internal constructor(
     private val coroutineScope: CoroutineScope,
     private val type: StreamPeerType,
     private val mediaConstraints: MediaConstraints,
@@ -89,8 +91,37 @@ open class StreamPeerConnection(
     private val traceCreateAnswer: Boolean = true,
     private val tracer: Tracer,
     private val tag: String,
-    private val peerConnectionStateTracker: PeerConnectionStateTracker,
+    private val eventTracker: EventTracker? = null,
 ) : PeerConnection.Observer {
+
+    constructor(
+        coroutineScope: CoroutineScope,
+        type: StreamPeerType,
+        mediaConstraints: MediaConstraints,
+        onStreamAdded: ((MediaStream) -> Unit)?,
+        onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)?,
+        onIceCandidate: ((IceCandidate, StreamPeerType) -> Unit)?,
+        onRejoinNeeded: () -> Unit,
+        onFastReconnectNeeded: () -> Unit,
+        maxBitRate: Int,
+        traceCreateAnswer: Boolean = true,
+        tracer: Tracer,
+        tag: String,
+    ) : this(
+        coroutineScope,
+        type,
+        mediaConstraints,
+        onStreamAdded,
+        onNegotiationNeeded,
+        onIceCandidate,
+        onRejoinNeeded,
+        onFastReconnectNeeded,
+        maxBitRate,
+        traceCreateAnswer,
+        tracer,
+        tag,
+        eventTracker = null, // 👈 default
+    )
 
     private val localDescriptionMutex = Mutex()
     private val remoteDescriptionMutex = Mutex()
@@ -185,7 +216,10 @@ open class StreamPeerConnection(
         this.statsTracer = StatsTracer(connection, type.toPeerType())
         this.state.value = this.connection.connectionState()
         this.iceState.value = this.connection.iceConnectionState()
-        pollFirstPacket()
+
+        if (this is Subscriber && ENABLE_TRACKING) {
+            pollFirstPacket()
+        }
     }
 
     /**
@@ -555,7 +589,17 @@ open class StreamPeerConnection(
     override fun onConnectionChange(newState: PeerConnection.PeerConnectionState) {
         logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
         state.value = newState
-        peerConnectionStateTracker.onStateChanged(newState)
+        if (newState == PeerConnection.PeerConnectionState.CONNECTED) {
+            val time = System.currentTimeMillis()
+            eventTracker?.let { eventTracker ->
+                if (this is Publisher) {
+                    eventTracker.publisherConnectedEvent.value = eventTracker.publisherConnectedEvent.value.copy(time = time)
+                } else {
+                    eventTracker.subscriberConnectedEvent.value = eventTracker.subscriberConnectedEvent.value.copy(time = time)
+                }
+            }
+        }
+
         tracer.trace(PeerConnectionTraceKey.ON_CONNECTION_STATE_CHANGE.value, newState.name)
     }
 

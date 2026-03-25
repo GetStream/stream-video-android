@@ -26,7 +26,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.connection.coding.SelectiveVideoDecoderFactory
-import io.getstream.video.android.core.call.connection.trackers.PeerConnectionStateTracker
+import io.getstream.video.android.core.call.connection.trackers.EventTracker
 import io.getstream.video.android.core.call.utils.addAndConvertBuffers
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
@@ -471,7 +471,26 @@ public class StreamPeerConnectionFactory(
         onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
         maxPublishingBitrate: Int = 1_200_000,
         debugText: String = "",
-        peerConnectionStateTracker: PeerConnectionStateTracker,
+    ): StreamPeerConnection {
+        return makePeerConnectionInternal(
+            coroutineScope,
+            configuration, type,
+            mediaConstraints,
+            onStreamAdded, onNegotiationNeeded, onIceCandidateRequest, maxPublishingBitrate, debugText,
+        )
+    }
+
+    internal fun makePeerConnectionInternal(
+        coroutineScope: CoroutineScope,
+        configuration: PeerConnection.RTCConfiguration,
+        type: StreamPeerType,
+        mediaConstraints: MediaConstraints,
+        onStreamAdded: ((MediaStream) -> Unit)? = null,
+        onNegotiationNeeded: ((StreamPeerConnection, StreamPeerType) -> Unit)? = null,
+        onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)? = null,
+        maxPublishingBitrate: Int = 1_200_000,
+        debugText: String = "",
+        eventTracker: EventTracker? = null,
     ): StreamPeerConnection {
         val peerConnection = StreamPeerConnection(
             coroutineScope = coroutineScope,
@@ -485,7 +504,7 @@ public class StreamPeerConnectionFactory(
             tracer = Tracer(type.toPeerType().name),
             tag = debugText,
             onFastReconnectNeeded = {},
-            peerConnectionStateTracker = peerConnectionStateTracker,
+            eventTracker = eventTracker,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,
@@ -507,7 +526,7 @@ public class StreamPeerConnectionFactory(
         rejoin: () -> Unit,
         fastReconnect: () -> Unit,
         sfuConnectionModule: SfuConnectionModule,
-        peerConnectionStateTracker: PeerConnectionStateTracker,
+        eventTracker: EventTracker,
     ): Subscriber {
         Log.d("Noob", "[makeSubscriber]")
         val peerConnection = Subscriber(
@@ -520,7 +539,7 @@ public class StreamPeerConnectionFactory(
             fastReconnect = fastReconnect,
             sfuConnectionModule = sfuConnectionModule,
             onIceCandidateRequest = onIceCandidateRequest,
-            peerConnectionStateTracker = peerConnectionStateTracker,
+            eventTracker = eventTracker,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,
@@ -557,7 +576,7 @@ public class StreamPeerConnectionFactory(
         rejoin: () -> Unit = {},
         fastReconnect: () -> Unit = {},
         isHifiAudioEnabled: Boolean = false,
-        peerConnectionStateTracker: PeerConnectionStateTracker,
+        eventTracker: EventTracker,
     ): Publisher {
         Log.d("Noob", "[makePublisher]")
         val peerConnection = Publisher(
@@ -577,7 +596,7 @@ public class StreamPeerConnectionFactory(
             rejoin = rejoin,
             fastReconnect = fastReconnect,
             isHifiAudioEnabled = isHifiAudioEnabled,
-            peerConnectionStateTracker = peerConnectionStateTracker,
+            eventTracker = eventTracker,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,

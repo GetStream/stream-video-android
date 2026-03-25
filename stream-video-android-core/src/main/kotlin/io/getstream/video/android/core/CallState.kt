@@ -83,7 +83,7 @@ import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.call.connection.trackers.DebugPeerConnectionStateTracker
+import io.getstream.video.android.core.call.connection.trackers.EventTracker
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
@@ -757,12 +757,7 @@ public class CallState(
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
 
     @InternalStreamVideoApi
-    public val rtcDebugger = RtcDebugger(call, call.scope)
-    public val publisherConnectionStateTracker = DebugPeerConnectionStateTracker()
-    public val subscriberConnectionStateTracker = DebugPeerConnectionStateTracker()
-
-    public val callStateTimeLine =
-        MutableStateFlow<CallStateTimelineTracker>(CallStateTimelineTracker())
+    public val eventTracker = EventTracker()
 
     private val ringingLogger by taggedLogger("RingingState")
 
@@ -798,8 +793,6 @@ public class CallState(
             }
 
             is CallAcceptedEvent -> {
-                callStateTimeLine.value =
-                    callStateTimeLine.value.copy(acceptedEventTime = System.currentTimeMillis())
                 val newAcceptedBy = _acceptedBy.value.toMutableSet()
                 newAcceptedBy.add(event.user.id)
                 _acceptedBy.value = newAcceptedBy.toSet()

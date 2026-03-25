@@ -508,7 +508,8 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<RtcSession> {
-        state.callStateTimeLine.value = state.callStateTimeLine.value.copy(joinStartTime = System.currentTimeMillis())
+        val oldEvent = state.eventTracker.joinStartEvent.value
+        state.eventTracker.joinStartEvent.value = oldEvent.copy(time = System.currentTimeMillis())
         Log.d("Noob", "join start")
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -558,8 +559,10 @@ public class Call(
                     }
                 }
                 Log.d("Noob", "join start success 2")
-                state.callStateTimeLine.value =
-                    state.callStateTimeLine.value.copy(joinFinishTime = System.currentTimeMillis())
+
+                val oldEvent = state.eventTracker.joinEndEvent.value
+                state.eventTracker.joinEndEvent.value = oldEvent.copy(time = System.currentTimeMillis())
+
                 return result
             }
             if (result is Failure) {
@@ -1584,10 +1587,10 @@ public class Call(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
+        state.eventTracker.acceptedStartEvent.value = state.eventTracker.acceptedStartEvent.value.copy(time = System.currentTimeMillis())
         clientImpl.state.transitionToAcceptCall(this)
-        state.callStateTimeLine.value = state.callStateTimeLine.value.copy(acceptStartTime = System.currentTimeMillis())
         val result = clientImpl.accept(type, id)
-        state.callStateTimeLine.value = state.callStateTimeLine.value.copy(acceptFinishTime = System.currentTimeMillis())
+        state.eventTracker.acceptedEndEvent.value = state.eventTracker.acceptedEndEvent.value.copy(time = System.currentTimeMillis())
         return result
     }
 
