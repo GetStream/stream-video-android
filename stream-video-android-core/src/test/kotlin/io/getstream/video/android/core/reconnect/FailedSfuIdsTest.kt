@@ -33,10 +33,10 @@ import kotlin.test.assertTrue
 class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Suppress("UNCHECKED_CAST")
-    private fun Call.getFailedSfuIds(): MutableList<String> {
+    private fun Call.getFailedSfuIds(): MutableSet<String> {
         val field = Call::class.java.getDeclaredField("failedSfuIds")
         field.isAccessible = true
-        return field.get(this) as MutableList<String>
+        return field.get(this) as MutableSet<String>
     }
 
     private fun Call.invokeAddFailedSfuId(sfuId: String) {
