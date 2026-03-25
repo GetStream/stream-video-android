@@ -58,6 +58,10 @@ internal class ActiveStateGate(
     private fun observePeerConnection(call: Call, onReady: () -> Unit, ringingCallActivationConfig: RingingCallActivationConfig) {
         if (peerConnectionObserverJob?.isActive == true) return
 
+        if (ringingCallActivationConfig.criteria == RingingCallActivationCriteria.FIRST_PACKET_RECEIVED) {
+            call.session.value?.subscriber?.value?.debugPollFirstPacket()
+        }
+
         peerConnectionObserverJob = coroutineScope.launch {
             val start = System.currentTimeMillis()
 
