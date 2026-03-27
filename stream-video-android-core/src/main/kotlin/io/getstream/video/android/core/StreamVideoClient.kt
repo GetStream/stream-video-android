@@ -511,6 +511,7 @@ internal class StreamVideoClient internal constructor(
     }
 
     fun setupGuestUser(user: User) {
+        coordinatorConnectionModule.updateToken("")
         guestUserJob = scope.async {
             val response = createGuestUser(
                 userRequest = UserRequest(

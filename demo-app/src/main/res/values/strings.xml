@@ -25,6 +25,7 @@
     <string name="sign_in_email">Sign In with Email</string>
     <string name="random_user_sign_in">Random User Sign In</string>
     <string name="builtin_user_sign_in">Built-in User Sign In</string>
+    <string name="guest_user_sign_in">Sign in as Guest</string>
     <string name="sign_in_contact">Having problems logging in?&#160;</string>
     <string name="sign_in_contact_us">Contact us</string>
     <string name="sign_out">Sign out</string>

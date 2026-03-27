@@ -25,8 +25,12 @@ import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
+import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,10 +57,10 @@ class ClientAndAuthTest : TestBase() {
 
     @Test
     fun anonymousUser() = runTest {
+        // Anonymous users do not require a token — no server-side credential is needed.
         val builder = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            token = authData!!.token,
             geo = GEO.GlobalEdgeNetwork,
             user = User(
                 type = UserType.Anonymous,
@@ -69,22 +73,116 @@ class ClientAndAuthTest : TestBase() {
 
     @Test
     fun guestUser() = runTest {
-        // we get the token from Stream's server in this case
-        // the ID is generated, client side...
-        // verify that we get the token
-        // API call is getGuestUser or something like that
+        // Guest users do not need an initial token.
+        // The SDK automatically calls POST /video/guest to obtain a short-lived JWT.
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            token = authData!!.token,
             geo = GEO.GlobalEdgeNetwork,
             user = User(
-                id = "guest",
+                id = "guest-${System.currentTimeMillis()}",
                 type = UserType.Guest,
             ),
             ensureSingleInstance = false,
+            connectOnInit = false,
         ).build()
         client.cleanup()
+    }
+
+    /**
+     * Verifies the core guest authentication flow:
+     * 1. SDK calls POST /video/guest to obtain a JWT (no initial token needed)
+     * 2. Guest user can establish a WebSocket connection
+     *
+     * Note: guest users on the test environment do not have permission to create
+     * new calls — that is expected backend behaviour, not a bug.
+     */
+    @Test
+    fun `guest user can connect`() = runTest {
+        val client = StreamVideoBuilder(
+            context = context,
+            apiKey = authData!!.apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            user = User(
+                id = "guest-${System.currentTimeMillis()}",
+                type = UserType.Guest,
+            ),
+            ensureSingleInstance = false,
+            connectOnInit = false,
+        ).build()
+
+        // connect() internally awaits guestUserJob (which fetches the JWT from POST /video/guest)
+        // and then establishes the WebSocket connection with that token.
+        val connectResult = withContext(Dispatchers.Default) {
+            withTimeout(15_000) {
+                client.connect()
+            }
+        }
+        assertSuccess(connectResult)
+
+        client.cleanup()
+    }
+
+    /**
+     * Verifies that a guest user can join a call created by an authenticated user.
+     * WebRTC peer connection components are mocked because real WebRTC cannot run in unit tests.
+     *
+     * Ignored: Call.join() triggers protobuf classloading inside Robolectric's sandbox
+     * (ClassCastException in ensureFactoryMatchesAudioProfile) — a known limitation for
+     * WebRTC join tests, tracked in JoinCallTest.kt.
+     */
+    @Test
+    @Ignore("Robolectric classloader incompatibility with protobuf in Call.join()")
+    fun `guest user can join a call`() = runTest {
+        // Mock WebRTC components — real peer connections cannot run in Robolectric/unit tests.
+        Call.testInstanceProvider.mediaManagerCreator = { mockk(relaxed = true) }
+        Call.testInstanceProvider.rtcSessionCreator = { mockk(relaxed = true) }
+
+        // Step 1: create the call as an authenticated user.
+        val authClient = StreamVideoBuilder(
+            context = context,
+            apiKey = authData!!.apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            user = testData.users["thierry"]!!,
+            token = authData!!.token,
+            ensureSingleInstance = false,
+            connectOnInit = false,
+        ).build()
+        val callId = randomUUID()
+        val authCall = authClient.call("default", callId)
+        val createResult = withContext(Dispatchers.Default) {
+            authCall.create()
+        }
+        assertSuccess(createResult)
+        authClient.cleanup()
+
+        // Step 2: connect as a guest and join the existing call.
+        val guestClient = StreamVideoBuilder(
+            context = context,
+            apiKey = authData!!.apiKey,
+            geo = GEO.GlobalEdgeNetwork,
+            user = User(
+                id = "guest-${System.currentTimeMillis()}",
+                type = UserType.Guest,
+            ),
+            ensureSingleInstance = false,
+            connectOnInit = false,
+        ).build()
+
+        val connectResult = withContext(Dispatchers.Default) {
+            withTimeout(15_000) {
+                guestClient.connect()
+            }
+        }
+        assertSuccess(connectResult)
+
+        val guestCall = guestClient.call("default", callId)
+        guestCall.peerConnectionFactory = mockedPCFactory
+
+        val joinResult = guestCall.join()
+        assertSuccess(joinResult)
+
+        guestClient.cleanup()
     }
 
     @Test
