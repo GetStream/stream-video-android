@@ -31,6 +31,8 @@ internal data class CalleeTimelineState(
     val subscriber: StateFlow<UiEvent?>,
     val publisher: StateFlow<UiEvent?>,
     val firstInboundRtp: StateFlow<UiEvent?>,
+    val ringingStateTransitionTimerStarted: StateFlow<UiEvent?>,
+    val ringingStateTransitionTimerFinished: StateFlow<UiEvent?>,
 )
 
 internal data class CallerTimelineState(
@@ -39,6 +41,8 @@ internal data class CallerTimelineState(
     val subscriber: StateFlow<UiEvent?>,
     val publisher: StateFlow<UiEvent?>,
     val firstInboundRtp: StateFlow<UiEvent?>,
+    val ringingStateTransitionTimerStarted: StateFlow<UiEvent?>,
+    val ringingStateTransitionTimerFinished: StateFlow<UiEvent?>,
 )
 
 internal fun createCalleeTimelineState(scope: CoroutineScope, eventTracker: EventTracker): CalleeTimelineState {
@@ -92,7 +96,7 @@ internal fun createCalleeTimelineState(scope: CoroutineScope, eventTracker: Even
             name = "Subscriber Connected",
             category = Categories.RTP,
             durationSince = DurationSince(
-                end.time!! - start.time!!,
+                start.time!! - end.time!!,
                 "since join finish",
                 JoinFinishColor,
             ),
@@ -114,7 +118,7 @@ internal fun createCalleeTimelineState(scope: CoroutineScope, eventTracker: Even
             name = "Publisher Connected",
             category = Categories.RTP,
             durationSince = DurationSince(
-                end.time!! - start.time!!,
+                start.time!! - end.time!!,
                 "since join finish",
                 JoinFinishColor,
             ),
@@ -128,7 +132,7 @@ internal fun createCalleeTimelineState(scope: CoroutineScope, eventTracker: Even
     )
 
     val firstInboundRtpReceived = combine(
-        eventTracker.subscriberConnectedEvent,
+        eventTracker.firstInboundRtpArrived,
         eventTracker.joinEndEvent,
     ) { start, end ->
         if (start.time == null || end.time == null) return@combine null
@@ -136,7 +140,51 @@ internal fun createCalleeTimelineState(scope: CoroutineScope, eventTracker: Even
             name = "First RTP Arrived",
             category = Categories.RTP,
             durationSince = DurationSince(
-                end.time!! - start.time!!,
+                start.time!! - end.time!!,
+                "since join finish",
+                JoinFinishColor,
+            ),
+            timeStamp = start.time!!,
+            timestampLabel = formatTimestamp(start.time!!),
+        )
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = null,
+    )
+
+    val ringingStateTimerStarted = combine(
+        eventTracker.ringingStateTimerStarted,
+        eventTracker.joinEndEvent,
+    ) { start, end ->
+        if (start.time == null || end.time == null) return@combine null
+        UiEvent(
+            name = "Ringing Timer Started",
+            category = Categories.UI,
+            durationSince = DurationSince(
+                start.time!! - end.time!!,
+                "since join finish",
+                JoinFinishColor,
+            ),
+            timeStamp = start.time!!,
+            timestampLabel = formatTimestamp(start.time!!),
+        )
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = null,
+    )
+
+    val ringingStateTimerFinished = combine(
+        eventTracker.ringingStateTimerFinished,
+        eventTracker.joinEndEvent,
+    ) { start, end ->
+        if (start.time == null || end.time == null) return@combine null
+        UiEvent(
+            name = "Ringing Timer Finished",
+            category = Categories.UI,
+            durationSince = DurationSince(
+                start.time!! - end.time!!,
                 "since join finish",
                 JoinFinishColor,
             ),
@@ -156,6 +204,8 @@ internal fun createCalleeTimelineState(scope: CoroutineScope, eventTracker: Even
         subscriberConnected,
         publisherConnected,
         firstInboundRtpReceived,
+        ringingStateTimerStarted,
+        ringingStateTimerFinished
     )
 }
 
@@ -188,7 +238,7 @@ internal fun createCallerTimelineState(scope: CoroutineScope, eventTracker: Even
             name = "Subscriber Connected",
             category = Categories.RTP,
             durationSince = DurationSince(
-                end.time!! - start.time!!,
+                start.time!! - end.time!!,
                 "since join finish",
                 JoinFinishColor,
             ),
@@ -210,7 +260,7 @@ internal fun createCallerTimelineState(scope: CoroutineScope, eventTracker: Even
             name = "Publisher Connected",
             category = Categories.RTP,
             durationSince = DurationSince(
-                end.time!! - start.time!!,
+                start.time!! - end.time!!,
                 "since join finish",
                 JoinFinishColor,
             ),
@@ -232,7 +282,52 @@ internal fun createCallerTimelineState(scope: CoroutineScope, eventTracker: Even
             name = "First RTP Arrived",
             category = Categories.RTP,
             durationSince = DurationSince(
-                end.time!! - start.time!!,
+                start.time!! - end.time!!,
+                "since join finish",
+                JoinFinishColor,
+            ),
+            timeStamp = start.time!!,
+            timestampLabel = formatTimestamp(start.time!!),
+        )
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = null,
+    )
+
+
+    val ringingStateTimerStarted = combine(
+        eventTracker.ringingStateTimerStarted,
+        eventTracker.joinEndEvent,
+    ) { start, end ->
+        if (start.time == null || end.time == null) return@combine null
+        UiEvent(
+            name = "Ringing Timer Started",
+            category = Categories.UI,
+            durationSince = DurationSince(
+                start.time!! - end.time!!,
+                "since join finish",
+                JoinFinishColor,
+            ),
+            timeStamp = start.time!!,
+            timestampLabel = formatTimestamp(start.time!!),
+        )
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = null,
+    )
+
+    val ringingStateTimerFinished = combine(
+        eventTracker.ringingStateTimerFinished,
+        eventTracker.joinEndEvent,
+    ) { start, end ->
+        if (start.time == null || end.time == null) return@combine null
+        UiEvent(
+            name = "Ringing Timer Finished",
+            category = Categories.UI,
+            durationSince = DurationSince(
+                start.time!! - end.time!!,
                 "since join finish",
                 JoinFinishColor,
             ),
@@ -251,6 +346,8 @@ internal fun createCallerTimelineState(scope: CoroutineScope, eventTracker: Even
         subscriberConnected,
         publisherConnected,
         firstInboundRtpReceived,
+        ringingStateTimerStarted,
+        ringingStateTimerFinished,
     )
 }
 
@@ -284,6 +381,12 @@ internal object Categories {
     val RTP = TimelineCategory(
         id = "rtp",
         label = "First inbound RTP",
+        color = Color(0xFF888780),
+    )
+
+    val UI = TimelineCategory(
+        id = "ui",
+        label = "UI",
         color = Color(0xFF888780),
     )
 }

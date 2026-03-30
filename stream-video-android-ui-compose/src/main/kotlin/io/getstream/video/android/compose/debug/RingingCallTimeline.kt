@@ -47,7 +47,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.RingingState
 import kotlin.math.abs
 
 private const val ENABLE_DEBUG_UI = true
@@ -61,10 +60,8 @@ internal fun RtcDebugUi(call: Call) {
 
 @Composable
 private fun RingingCallTimeline(call: Call) {
-    val isOutgoing =
-        call.state.previousRingingStates.any { it is RingingState.Outgoing }
+    val isCaller by call.state.debugIsCaller.collectAsStateWithLifecycle()
 
-    val isCaller = isOutgoing
     Column {
         if (isCaller) {
             CallerUi(
@@ -177,9 +174,15 @@ private fun EventRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                if (event.category.id == "http") {
-                    Spacer(Modifier.width(6.dp))
-                    HTTPBadgeUi()
+                when(event.category.id) {
+                    "http" ->{
+                        Spacer(Modifier.width(6.dp))
+                        HTTPBadgeUi()
+                    }
+                    "ui" ->{
+                        Spacer(Modifier.width(6.dp))
+                        UiBadgeUi()
+                    }
                 }
             }
 
@@ -262,10 +265,16 @@ private fun buildDurString(event: UiEvent): String {
 
 private data class Badge(val label: String, val badgeBg: Color, val badgeFg: Color)
 private val HttpBadge = Badge("HTTP", badgeBg = Color(0xFFE6F1FB), badgeFg = Color(0xFF185FA5))
+private val UiBadge = Badge("UI", badgeBg = Color(0xFFE6F1FB), badgeFg = Color(0xFF185FA5))
 
 @Composable
 private fun HTTPBadgeUi() {
     CategoryBadge(HttpBadge)
+}
+
+@Composable
+private fun UiBadgeUi() {
+    CategoryBadge(UiBadge)
 }
 
 @Composable
@@ -292,6 +301,8 @@ private fun CallerUi(
     val subscriber by state.subscriber.collectAsStateWithLifecycle()
     val publisher by state.publisher.collectAsStateWithLifecycle()
     val firstInboundRtp by state.firstInboundRtp.collectAsStateWithLifecycle()
+    val ringingStateTimerStarted by state.ringingStateTransitionTimerStarted.collectAsStateWithLifecycle()
+    val ringingStateTimerFinished by state.ringingStateTransitionTimerFinished.collectAsStateWithLifecycle()
 
     val visibleEvents by remember {
         derivedStateOf {
@@ -300,6 +311,8 @@ private fun CallerUi(
                 subscriber,
                 publisher,
                 firstInboundRtp,
+                ringingStateTimerStarted,
+                ringingStateTimerFinished,
             ).sortedBy { it.timeStamp }
         }
     }
@@ -317,6 +330,8 @@ private fun CalleeUi(
     val subscriber by state.subscriber.collectAsStateWithLifecycle()
     val publisher by state.publisher.collectAsStateWithLifecycle()
     val firstInboundRtp by state.firstInboundRtp.collectAsStateWithLifecycle()
+    val ringingStateTimerStarted by state.ringingStateTransitionTimerStarted.collectAsStateWithLifecycle()
+    val ringingStateTimerFinished by state.ringingStateTransitionTimerFinished.collectAsStateWithLifecycle()
 
     val visibleEvents by remember {
         derivedStateOf {
@@ -326,6 +341,8 @@ private fun CalleeUi(
                 subscriber,
                 publisher,
                 firstInboundRtp,
+                ringingStateTimerStarted,
+                ringingStateTimerFinished,
             ).sortedBy { it.timeStamp }
         }
     }

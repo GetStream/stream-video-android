@@ -28,6 +28,8 @@ enum class Tracker {
     PUBLISHER_CONNECTED,
     SUBSCRIBER_CONNECTED,
     FIRST_INBOUND_RTP,
+    RINGING_STATE_TIMER_START,
+    RINGING_STATE_TIMER_FINISH,
 }
 
 @InternalStreamVideoApi
@@ -47,4 +49,6 @@ public class EventTracker {
     val publisherConnectedEvent = MutableStateFlow(CollectedEvent(Tracker.PUBLISHER_CONNECTED))
     val subscriberConnectedEvent = MutableStateFlow(CollectedEvent(Tracker.SUBSCRIBER_CONNECTED))
     val firstInboundRtpArrived = MutableStateFlow(CollectedEvent(Tracker.FIRST_INBOUND_RTP))
+    val ringingStateTimerStarted = MutableStateFlow(CollectedEvent(Tracker.RINGING_STATE_TIMER_START))
+    val ringingStateTimerFinished = MutableStateFlow(CollectedEvent(Tracker.RINGING_STATE_TIMER_FINISH))
 }

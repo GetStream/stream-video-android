@@ -494,6 +494,7 @@ public class CallState(
     public val ringingState: StateFlow<RingingState> = _ringingState
 
     public val previousRingingStates = ConcurrentHashMap.newKeySet<RingingState>()
+    val debugIsCaller = MutableStateFlow<Boolean>(false)
 
     /** The settings for the call */
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
@@ -1403,6 +1404,9 @@ public class CallState(
             _ringingState.value = state
             peerConnectionObserverJob?.cancel()
         }
+        if (state is RingingState.Outgoing){
+            debugIsCaller.value = true
+        }
         previousRingingStates.add(state)
     }
 
@@ -1431,8 +1435,17 @@ public class CallState(
 
         val TIMEOUT = 5_000L
 
-        peerConnectionObserverJob = scope.launch {
+
+        peerConnectionObserverJob = scope.launch(Dispatchers.Default) {
             val start = System.currentTimeMillis()
+
+            scope.launch {
+                eventTracker.ringingStateTimerStarted.value =
+                    eventTracker.ringingStateTimerStarted.value.copy(time = start)
+                delay(TIMEOUT)
+                eventTracker.ringingStateTimerFinished.value =
+                    eventTracker.ringingStateTimerFinished.value.copy(time = System.currentTimeMillis())
+            }
 
             val result = withTimeoutOrNull(TIMEOUT) {
                 call.session
