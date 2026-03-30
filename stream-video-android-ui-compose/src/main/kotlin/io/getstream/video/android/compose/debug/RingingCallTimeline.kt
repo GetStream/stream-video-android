@@ -174,12 +174,12 @@ private fun EventRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                when(event.category.id) {
-                    "http" ->{
+                when (event.category.id) {
+                    "http" -> {
                         Spacer(Modifier.width(6.dp))
                         HTTPBadgeUi()
                     }
-                    "ui" ->{
+                    "ui" -> {
                         Spacer(Modifier.width(6.dp))
                         UiBadgeUi()
                     }

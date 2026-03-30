@@ -205,7 +205,7 @@ internal fun createCalleeTimelineState(scope: CoroutineScope, eventTracker: Even
         publisherConnected,
         firstInboundRtpReceived,
         ringingStateTimerStarted,
-        ringingStateTimerFinished
+        ringingStateTimerFinished,
     )
 }
 
@@ -294,7 +294,6 @@ internal fun createCallerTimelineState(scope: CoroutineScope, eventTracker: Even
         started = SharingStarted.Eagerly,
         initialValue = null,
     )
-
 
     val ringingStateTimerStarted = combine(
         eventTracker.ringingStateTimerStarted,

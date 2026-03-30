@@ -1404,7 +1404,7 @@ public class CallState(
             _ringingState.value = state
             peerConnectionObserverJob?.cancel()
         }
-        if (state is RingingState.Outgoing){
+        if (state is RingingState.Outgoing) {
             debugIsCaller.value = true
         }
         previousRingingStates.add(state)
@@ -1434,7 +1434,6 @@ public class CallState(
         if (peerConnectionObserverJob?.isActive == true) return
 
         val TIMEOUT = 5_000L
-
 
         peerConnectionObserverJob = scope.launch(Dispatchers.Default) {
             val start = System.currentTimeMillis()
