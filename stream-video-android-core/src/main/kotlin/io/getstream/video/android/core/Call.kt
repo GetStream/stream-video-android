@@ -768,8 +768,8 @@ public class Call(
         if (session.value != null) {
             reconnectStartTime = System.currentTimeMillis()
 
-            val session = session.value!!
-            val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
+            val currentSession = session.value!!
+            val (prevSessionId, subscriptionsInfo, publishingInfo) = currentSession.currentSfuInfo()
             val reconnectDetails = ReconnectDetails(
                 previous_session_id = prevSessionId,
                 strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
@@ -778,9 +778,9 @@ public class Call(
                 reconnect_attempt = reconnectAttepmts,
                 reason = reason,
             )
-            session.fastReconnect(reconnectDetails)
+            currentSession.fastReconnect(reconnectDetails)
             val oldSessionStats = collectStats()
-            session.sendCallStats(oldSessionStats)
+            currentSession.sendCallStats(oldSessionStats)
         } else {
             logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
             this@Call.state._connection.value = RealtimeConnection.Disconnected

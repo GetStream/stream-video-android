@@ -71,7 +71,6 @@ class ActiveStateGateTest {
         }
         val subscriber = mockk<Subscriber>(relaxed = true) {
             every { state } returns subscriberState
-            every { debugFirstRtpPacketArrivedWithinTimeout } returns firstRtpPacketArrived
         }
         val session = mockk<RtcSession> {
             every { this@mockk.publisher } returns MutableStateFlow(publisher)
@@ -333,30 +332,6 @@ class ActiveStateGateTest {
             assertTrue(transitioned.isEmpty())
         }
 
-    @Test
-    fun `onReady is NOT called if cleanup happens while waiting for timeout`() =
-        runTest(testDispatcher) {
-            // LEGACY_BEHAVIOUR strategy uses emptyFlow — it will always wait for the full timeout
-            val (call, _, _, _) = fakeCall()
-
-            val incomingRingingState = RingingState.Incoming(false)
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = setOf(incomingRingingState),
-                strategy = TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR,
-                timeoutMs = 5_000L,
-            )
-            val transitioned = mutableListOf<Unit>()
-
-            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
-
-            // Cancel mid-timeout — onReady must not fire when timeout eventually elapses
-            sut.cleanup()
-            advanceTimeBy(6_000L)
-
-            assertTrue(transitioned.isEmpty())
-        }
-
     // ── Strategy tests ────────────────────────────────────────────────────────
 
     private fun runStrategyTest(
@@ -389,12 +364,10 @@ class ActiveStateGateTest {
     }
 
     @Test
-    fun `LEGACY_BEHAVIOUR – emptyFlow times out, transition still fires via timeout fallback`() =
+    fun `LEGACY_BEHAVIOUR – transition still fires without timeout fallback`() =
         runStrategyTest(
             TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR,
         ) { _, _, transitioned, _, _, _ ->
-            assertTrue(transitioned.isEmpty())
-            advanceTimeBy(6_000L)
             assertTrue(transitioned.size == 1)
         }
 

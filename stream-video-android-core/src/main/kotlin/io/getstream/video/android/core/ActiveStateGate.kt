@@ -41,18 +41,31 @@ internal class ActiveStateGate(
     private val logger by taggedLogger("ActiveStateGate")
     private var peerConnectionObserverJob: Job? = null
 
-    internal fun awaitAndTransition(currentRingingState: RingingState, call: Call, onReady: () -> Unit) {
+    internal fun awaitAndTransition(
+        currentRingingState: RingingState,
+        call: Call,
+        onReady: () -> Unit,
+    ) {
         logger.d { "[awaitAndTransition], ringingState: $currentRingingState" }
-        val isIncomingOrOutgoing =
-            previousRingingStates.any { it is RingingState.Incoming || it is RingingState.Outgoing }
-        if (isIncomingOrOutgoing && currentRingingState !is RingingState.Active) {
-            observePeerConnection(
-                call,
-                onReady,
-                strategy,
-            )
-        } else if (!isIncomingOrOutgoing) {
-            onReady()
+        when (strategy) {
+            TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR -> {
+                onReady()
+            }
+
+            else -> {
+                val isIncomingOrOutgoing =
+                    previousRingingStates.any { it is RingingState.Incoming || it is RingingState.Outgoing }
+
+                if (isIncomingOrOutgoing && currentRingingState !is RingingState.Active) {
+                    observePeerConnection(
+                        call,
+                        onReady,
+                        strategy,
+                    )
+                } else if (!isIncomingOrOutgoing) {
+                    onReady()
+                }
+            }
         }
     }
 

@@ -1819,6 +1819,7 @@ public class CallState(
     }
 
     internal fun cleanup() {
+        previousRingingStates.clear()
         activeStateGate.cleanup()
         cancelTimeout()
     }

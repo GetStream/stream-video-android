@@ -168,10 +168,6 @@ open class StreamPeerConnection(
         this.statsTracer = StatsTracer(connection, type.toPeerType())
         this.state.value = this.connection.connectionState()
         this.iceState.value = this.connection.iceConnectionState()
-
-        if (this is Subscriber) {
-            this.debugPollFirstPacket()
-        }
     }
 
     /**

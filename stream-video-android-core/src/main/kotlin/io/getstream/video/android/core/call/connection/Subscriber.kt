@@ -43,7 +43,6 @@ import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.safeSuspendingCall
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
@@ -51,7 +50,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -158,14 +156,6 @@ internal class Subscriber(
     override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {
         return statsTracer?.get(trackIdToTrackType)
     }
-
-    /**
-     *  Keeping it for observing time difference between both publisher & subscriber
-     *  and first packet received.
-     *  Will be removed after testing is done
-     */
-    internal val debugFirstRtpPacketArrivedWithinTimeout = MutableStateFlow<Boolean>(false)
-    private var debugFirstRtpPacketPollingJob: Job? = null
 
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState?) {
         super.onIceConnectionChange(newState)
@@ -683,42 +673,4 @@ internal class Subscriber(
     fun trackIdToParticipant(): Map<String, String> = trackIdToParticipant.toMap()
 
     fun isEnabled() = enabled
-
-    /**
-     * Will be removed after testing is done
-     */
-    internal fun debugPollFirstPacket() {
-        logger.d { "[debugPollFirstPacket]" }
-        debugFirstRtpPacketPollingJob?.cancel()
-        debugFirstRtpPacketPollingJob = coroutineScope.launch(Dispatchers.Default) {
-            /**
-             * For caller in joinAndRing we need a longer timeout because call will join the call
-             * and wait for callee to accept -> join -> its publish to setup + ice_connected
-             * otherwise shorter timeout is acceptable
-             */
-            withTimeout(60_000L) {
-                while (!debugFirstRtpPacketArrivedWithinTimeout.value) {
-                    debugCheckStats()
-                    delay(700)
-                }
-            }
-            debugFirstRtpPacketPollingJob?.cancel()
-        }
-    }
-
-    private fun debugCheckStats() {
-        connection.getStats { report ->
-            report.statsMap.values.forEach { stat ->
-                when (stat.type) {
-                    "inbound-rtp" -> {
-                        val bytes = stat.members["bytesReceived"] as? Number ?: return@forEach
-                        if (bytes.toLong() > 0 && !debugFirstRtpPacketArrivedWithinTimeout.value) {
-                            debugFirstRtpPacketArrivedWithinTimeout.value = true
-                            logger.d { "[checkStats] FIRST_INBOUND_RTP_PACKET, id:${stat.id}" }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
