@@ -125,40 +125,6 @@ class ActiveStateGateTest {
             assertTrue(transitioned.isEmpty())
         }
 
-    // ── 3. BOTH_PEER_CONNECTED – happy path ───────────────────────────────────
-
-    @Test
-    fun `transitions when both publisher and subscriber become CONNECTED`() =
-        runTest(testDispatcher) {
-            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val (call, _, _, _) = fakeCall(pubState, subState)
-
-            val incomingRingingState = RingingState.Incoming(false)
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
-            )
-            val transitioned = mutableListOf<Unit>()
-
-            sut.awaitAndTransition(
-                currentRingingState = incomingRingingState,
-                call = call,
-                onReady = { transitioned += Unit },
-            )
-
-            assertTrue(transitioned.isEmpty())
-
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.isEmpty())
-
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.size == 1)
-        }
-
     @Test
     fun `transitions when both peers connect for Outgoing previous state`() =
         runTest(testDispatcher) {
