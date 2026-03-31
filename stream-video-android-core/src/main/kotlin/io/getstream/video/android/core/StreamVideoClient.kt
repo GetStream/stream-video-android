@@ -171,7 +171,6 @@ internal class StreamVideoClient internal constructor(
     internal val streamNotificationManager: StreamNotificationManager,
     internal val enableCallNotificationUpdates: Boolean,
     internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
-    internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
     internal val vibrationConfig: RingingCallVibrationConfig,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
