@@ -1265,8 +1265,12 @@ public class CallState(
     }
 
     private fun updateRingingState(rejectReason: RejectReason? = null) {
-        if (ringingState.value == RingingState.RejectedByAll) {
-            return
+        when (ringingState.value) {
+            RingingState.TimeoutNoAnswer, RingingState.RejectedByAll -> {
+                return
+            }
+
+            else -> {}
         }
 
         // this is only true when we are in the session (we have accepted/joined the call)
