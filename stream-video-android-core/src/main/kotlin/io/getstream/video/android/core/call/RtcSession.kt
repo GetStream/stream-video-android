@@ -634,7 +634,8 @@ public class RtcSession internal constructor(
          * **DisconnectedTemporarily** — inspects the [WebsocketReconnectStrategy] carried
          * by the state:
          * - *MIGRATE / REJOIN / DISCONNECT* — executed **immediately** (server-initiated).
-         * - *FAST / UNSPECIFIED* — increments [sfuConnectionRetryCount]; after
+         * - *FAST* — triggers [Call.fastReconnect] (re-sends JoinRequest + restarts ICE).
+         * - *UNSPECIFIED* — increments [sfuConnectionRetryCount]; after
          *   [MAX_SFU_CONNECTION_RETRIES] consecutive failures the session escalates to
          *   [Call.migrate] to obtain a new SFU.
          *
@@ -696,8 +697,17 @@ public class RtcSession internal constructor(
                                 call.state._connection.value = RealtimeConnection.Disconnected
                             }
 
+                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST -> {
+                                logger.w {
+                                    "[stateJob] SFU sent FAST strategy for $sfuName, fast-reconnecting"
+                                }
+                                sfuConnectionRetryCount = 0
+                                sfuConnectionModule.socketConnection.disconnect()
+                                call.fastReconnect("SFU:${sfuSocketState.error.message}:FAST")
+                            }
+
                             else -> {
-                                // FAST or UNSPECIFIED: HealthMonitor handles the retry
+                                // UNSPECIFIED: HealthMonitor handles the retry
                                 // automatically. We only track failures and escalate to
                                 // migrate after MAX_SFU_CONNECTION_RETRIES.
                                 sfuConnectionRetryCount++
