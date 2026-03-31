@@ -19,14 +19,12 @@ package io.getstream.video.android.core
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -37,7 +35,7 @@ private const val PEER_CONNECTION_OBSERVER_TIMEOUT = 5_000L
 internal class ActiveStateGate(
     private val coroutineScope: CoroutineScope,
     private val previousRingingStates: Set<RingingState>,
-    private val strategy: TransitionToRingingStateStrategy = TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
+    private val strategy: TransitionToRingingStateStrategy = TransitionToRingingStateStrategy.PUBLISHER_CONNECTED,
     private val timeoutMs: Long = PEER_CONNECTION_OBSERVER_TIMEOUT,
 ) {
     private val logger by taggedLogger("ActiveStateGate")
@@ -73,51 +71,14 @@ internal class ActiveStateGate(
                             .filterNotNull()
                             .flatMapLatest { it.state }
 
-                        val subscriberFlow = session.subscriber
-                            .filterNotNull()
-                            .flatMapLatest { it.state }
-
                         when (strategy) {
-                            TransitionToRingingStateStrategy.NONE -> {
+                            TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR -> {
                                 emptyFlow<Int>()
                                     .map { "none" to it }
                             }
-                            TransitionToRingingStateStrategy.DEBUG_PUBLISHER_CONNECTED -> {
+                            TransitionToRingingStateStrategy.PUBLISHER_CONNECTED -> {
                                 publisherFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
                                     .map { "publisher" to it }
-                            }
-                            TransitionToRingingStateStrategy.DEBUG_SUBSCRIBER_CONNECTED -> {
-                                subscriberFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
-                                    .map { "subscriber" to it }
-                            }
-
-                            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED ->
-                                session.subscriber
-                                    .filterNotNull()
-                                    .flatMapLatest { it.debugFirstRtpPacketArrivedWithinTimeout }
-                                    .filter { it }
-                                    .map { "first_packet" to it }
-
-                            TransitionToRingingStateStrategy.DEBUG_ANY_PEER_CONNECTED -> {
-                                merge(
-                                    publisherFlow.map { "publisher" to it },
-                                    subscriberFlow.map { "subscriber" to it },
-                                ).filter { (_, state) ->
-                                    state == PeerConnection.PeerConnectionState.CONNECTED
-                                }
-                            }
-
-                            TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED -> {
-                                combine(publisherFlow, subscriberFlow) { pub, sub ->
-                                    if (
-                                        pub == PeerConnection.PeerConnectionState.CONNECTED &&
-                                        sub == PeerConnection.PeerConnectionState.CONNECTED
-                                    ) {
-                                        "both" to PeerConnection.PeerConnectionState.CONNECTED
-                                    } else {
-                                        null
-                                    }
-                                }.filterNotNull()
                             }
                         }
                     }

@@ -732,7 +732,7 @@ public class CallState(
     private val activeStateGate = ActiveStateGate(
         scope,
         previousRingingStates,
-        TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
+        TransitionToRingingStateStrategy.PUBLISHER_CONNECTED,
     )
 
     @InternalStreamVideoApi

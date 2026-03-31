@@ -17,10 +17,6 @@
 package io.getstream.video.android.core
 
 internal enum class TransitionToRingingStateStrategy {
-    NONE,
-    DEBUG_ANY_PEER_CONNECTED,
-    BOTH_PEER_CONNECTED,
-    DEBUG_PUBLISHER_CONNECTED,
-    DEBUG_SUBSCRIBER_CONNECTED,
-    DEBUG_FIST_PACKET_RECEIVED,
+    LEGACY_BEHAVIOUR,
+    PUBLISHER_CONNECTED,
 }

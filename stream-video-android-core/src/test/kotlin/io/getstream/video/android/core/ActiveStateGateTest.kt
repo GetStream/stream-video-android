@@ -370,14 +370,14 @@ class ActiveStateGateTest {
     @Test
     fun `onReady is NOT called if cleanup happens while waiting for timeout`() =
         runTest(testDispatcher) {
-            // NONE strategy uses emptyFlow — it will always wait for the full timeout
+            // LEGACY_BEHAVIOUR strategy uses emptyFlow — it will always wait for the full timeout
             val (call, _, _, _) = fakeCall()
 
             val incomingRingingState = RingingState.Incoming(false)
             val sut = ActiveStateGate(
                 coroutineScope = this,
                 previousRingingStates = setOf(incomingRingingState),
-                strategy = TransitionToRingingStateStrategy.NONE,
+                strategy = TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR,
                 timeoutMs = 5_000L,
             )
             val transitioned = mutableListOf<Unit>()
@@ -423,8 +423,10 @@ class ActiveStateGateTest {
     }
 
     @Test
-    fun `NONE – emptyFlow times out, transition still fires via timeout fallback`() =
-        runStrategyTest(TransitionToRingingStateStrategy.NONE) { _, _, transitioned, _, _, _ ->
+    fun `LEGACY_BEHAVIOUR – emptyFlow times out, transition still fires via timeout fallback`() =
+        runStrategyTest(
+            TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR,
+        ) { _, _, transitioned, _, _, _ ->
             assertTrue(transitioned.isEmpty())
             advanceTimeBy(6_000L)
             assertTrue(transitioned.size == 1)
@@ -433,111 +435,12 @@ class ActiveStateGateTest {
     @Test
     fun `PUBLISHER_CONNECTED – subscriber alone is not enough`() =
         runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_PUBLISHER_CONNECTED,
+            TransitionToRingingStateStrategy.PUBLISHER_CONNECTED,
         ) { _, _, transitioned, pubState, subState, _ ->
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.isEmpty())
 
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.size == 1)
-        }
-
-    @Test
-    fun `SUBSCRIBER_CONNECTED – publisher alone is not enough`() =
-        runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_SUBSCRIBER_CONNECTED,
-        ) { _, _, transitioned, pubState, subState, _ ->
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.isEmpty())
-
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.size == 1)
-        }
-
-    @Test
-    fun `ANY_PEER_CONNECTED – publisher alone is sufficient`() =
-        runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_ANY_PEER_CONNECTED,
-        ) { _, _, transitioned, pubState, _, _ ->
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.size == 1)
-        }
-
-    @Test
-    fun `ANY_PEER_CONNECTED – subscriber alone is sufficient`() =
-        runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_ANY_PEER_CONNECTED,
-        ) { _, _, transitioned, _, subState, _ ->
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.size == 1)
-        }
-
-    @Test
-    fun `BOTH_PEER_CONNECTED – one peer alone is not enough`() =
-        runStrategyTest(
-            TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
-        ) { _, _, transitioned, pubState, subState, _ ->
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.isEmpty())
-
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.size == 1)
-        }
-
-    @Test
-    fun `BOTH_PEER_CONNECTED – fires exactly once, reconnection does not re-trigger`() =
-        runStrategyTest(
-            TransitionToRingingStateStrategy.BOTH_PEER_CONNECTED,
-        ) { _, _, transitioned, pubState, subState, _ ->
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.size == 1)
-
-            pubState.value = PeerConnection.PeerConnectionState.DISCONNECTED
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.size == 1)
-        }
-
-    @Test
-    fun `FIST_PACKET_RECEIVED – peer connection state alone does not trigger transition`() =
-        runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
-        ) { _, _, transitioned, pubState, subState, _ ->
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.isEmpty())
-        }
-
-    @Test
-    fun `FIST_PACKET_RECEIVED – transitions as soon as firstRtpPacketArrivedWithinTimeout emits true`() =
-        runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
-        ) { _, _, transitioned, _, _, firstRtpPacketArrived ->
-            assertTrue(transitioned.isEmpty())
-
-            firstRtpPacketArrived.value = true
-            assertTrue(transitioned.size == 1)
-        }
-
-    @Test
-    fun `FIST_PACKET_RECEIVED – times out and still calls onReady if no RTP packet ever arrives`() =
-        runStrategyTest(
-            strategy = TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
-            firstRtpPacketArrived = MutableStateFlow(false),
-        ) { _, _, transitioned, _, _, _ ->
-            assertTrue(transitioned.isEmpty())
-            advanceTimeBy(6_000L)
-            assertTrue(transitioned.size == 1)
-        }
-
-    @Test
-    fun `FIST_PACKET_RECEIVED – fires exactly once even if flow emits true multiple times`() =
-        runStrategyTest(
-            TransitionToRingingStateStrategy.DEBUG_FIST_PACKET_RECEIVED,
-        ) { _, _, transitioned, _, _, firstRtpPacketArrived ->
-            firstRtpPacketArrived.value = true
-            firstRtpPacketArrived.value = false
-            firstRtpPacketArrived.value = true
             assertTrue(transitioned.size == 1)
         }
 }
