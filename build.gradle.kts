@@ -1,43 +1,43 @@
 apply(from = "${rootDir}/scripts/open-api-code-gen.gradle.kts")
 
 buildscript {
-    repositories {
-        google()
-        mavenCentral()
-        maven("https://plugins.gradle.org/m2/")
-    }
+  repositories {
+    google()
+    mavenCentral()
+    maven("https://plugins.gradle.org/m2/")
+  }
 
-    dependencies {
-        // TODO: Remove this workaround after AGP 8.9.0 is released
-        // Workaround for integrate sonarqube plugin with AGP
-        // It looks like will be fixed after AGP 8.9.0-alpha04 is released
-        // https://issuetracker.google.com/issues/380600747?pli=1
-        classpath("org.bouncycastle:bcutil-jdk18on:1.79")
-    }
+  dependencies {
+    // TODO: Remove this workaround after AGP 8.9.0 is released
+    // Workaround for integrate sonarqube plugin with AGP
+    // It looks like will be fixed after AGP 8.9.0-alpha04 is released
+    // https://issuetracker.google.com/issues/380600747?pli=1
+    classpath("org.bouncycastle:bcutil-jdk18on:1.79")
+  }
 }
 
 plugins {
-    alias(libs.plugins.stream.project)
-    alias(libs.plugins.stream.android.application) apply false
-    alias(libs.plugins.stream.android.library) apply false
-    alias(libs.plugins.stream.android.test) apply false
-    alias(libs.plugins.stream.java.library) apply false
-    alias(libs.plugins.stream.java.platform) apply false
-    alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.kotlin.android) apply false
-    // alias(libs.plugins.compose.compiler) apply false -> Enable with Kotlin 2.0+
-    alias(libs.plugins.kotlin.serialization) apply false
-    alias(libs.plugins.kotlin.compatibility.validator) apply false
-    alias(libs.plugins.ksp) apply false
-    alias(libs.plugins.wire) apply false
-    alias(libs.plugins.google.gms) apply false
-    alias(libs.plugins.dokka)
-    alias(libs.plugins.spotless) apply false
-    alias(libs.plugins.paparazzi) apply false
-    alias(libs.plugins.firebase.crashlytics) apply false
-    alias(libs.plugins.hilt) apply false
-    alias(libs.plugins.play.publisher) apply false
-    alias(libs.plugins.baseline.profile) apply false
+  alias(libs.plugins.stream.project)
+  alias(libs.plugins.stream.android.application) apply false
+  alias(libs.plugins.stream.android.library) apply false
+  alias(libs.plugins.stream.android.test) apply false
+  alias(libs.plugins.stream.java.library) apply false
+  alias(libs.plugins.stream.java.platform) apply false
+  alias(libs.plugins.android.application) apply false
+  alias(libs.plugins.kotlin.android) apply false
+  // alias(libs.plugins.compose.compiler) apply false -> Enable with Kotlin 2.0+
+  alias(libs.plugins.kotlin.serialization) apply false
+  alias(libs.plugins.kotlin.compatibility.validator) apply false
+  alias(libs.plugins.ksp) apply false
+  alias(libs.plugins.wire) apply false
+  alias(libs.plugins.google.gms) apply false
+  alias(libs.plugins.dokka)
+  alias(libs.plugins.spotless) apply false
+  alias(libs.plugins.paparazzi) apply false
+  alias(libs.plugins.firebase.crashlytics) apply false
+  alias(libs.plugins.hilt) apply false
+  alias(libs.plugins.play.publisher) apply false
+  alias(libs.plugins.baseline.profile) apply false
 }
 
 streamProject {
@@ -71,25 +71,25 @@ streamProject {
 }
 
 subprojects {
-    if (name.startsWith("stream-video-android")) {
-        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-            kotlinOptions.freeCompilerArgs += listOf(
-                "-Xjvm-default=enable",
-                "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi"
-            )
-        }
+  if (name.startsWith("stream-video-android")) {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+      kotlinOptions.freeCompilerArgs += listOf(
+        "-Xjvm-default=enable",
+        "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi"
+      )
     }
+  }
 
-    // TODO - re-enable the core module once coordinator is stable
-    if (name.startsWith("stream-video-android")
-        && !name.startsWith("stream-video-android-core")
-        && !name.contains("metrics")) {
-        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-            kotlinOptions.freeCompilerArgs += listOf(
-                "-Xexplicit-api=strict"
-            )
-        }
+  // TODO - re-enable the core module once coordinator is stable
+  if (name.startsWith("stream-video-android")
+      && !name.startsWith("stream-video-android-core")
+      && !name.contains("metrics")) {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+      kotlinOptions.freeCompilerArgs += listOf(
+        "-Xexplicit-api=strict"
+      )
     }
+  }
 }
 
 //apply(from = teamPropsFile("git-hooks.gradle.kts"))
@@ -100,19 +100,15 @@ subprojects {
 //}
 
 afterEvaluate {
-    // Skip hook installation in git worktrees where .git is a file, not a directory.
-    val gitHooksDir = file(".git/hooks")
-    if (gitHooksDir.isDirectory) {
-        println("Running Add Pre Commit Git Hook Script on Build")
-        exec {
-            if (System.getProperty("os.name").toLowerCase().contains("win")) {
-                // Windows-specific command
-                commandLine("cmd", "/c", "copy", ".\\scripts\\git-hooks\\pre-push", ".\\.git\\hooks")
-            } else {
-                // Unix-based systems
-                commandLine("cp", "./scripts/git-hooks/pre-push", "./.git/hooks")
-            }
+    println("Running Add Pre Commit Git Hook Script on Build")
+    exec {
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            // Windows-specific command
+            commandLine("cmd", "/c", "copy", ".\\scripts\\git-hooks\\pre-push", ".\\.git\\hooks")
+        } else {
+            // Unix-based systems
+            commandLine("cp", "./scripts/git-hooks/pre-push", "./.git/hooks")
         }
-        println("Added pre-push Git Hook Script.")
     }
+    println("Added pre-push Git Hook Script.")
 }

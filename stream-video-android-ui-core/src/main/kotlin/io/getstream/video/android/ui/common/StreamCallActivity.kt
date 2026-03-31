@@ -886,7 +886,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     ) {
         acceptOrJoinNewCall(call, onSuccess, onError) { availableCall ->
             logger.d { "Join call, ${call.cid}" }
-            val joinAndRing = intent.getBooleanExtra(EXTRA_JOIN_AND_RING, false) // noob
+            val joinAndRing = intent.getBooleanExtra(EXTRA_JOIN_AND_RING, false)
             if (joinAndRing) {
                 logger.d { "[joinAndRing] Join and ring call, ${call.cid}" }
                 availableCall.joinAndRing(call.state.members.value.map { it.user.id })
@@ -1270,7 +1270,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 }
             } else {
                 // No active call, safe to join
-                val result = what(call) // noob
+                val result = what(call)
                 result.onOutcome(call, onSuccess, onError)
             }
         }
