@@ -39,7 +39,7 @@ class ReconnectSessionIdTest : IntegrationTestBase() {
 
         // Rejoin
         call.rejoin()
-        assertNotEquals(sessionMock, call.session)
+        assertNotEquals(sessionMock, call.session.value)
     }
 
     @Test
@@ -47,10 +47,10 @@ class ReconnectSessionIdTest : IntegrationTestBase() {
         // create the call
         val sessionMock = mockk<RtcSession>(relaxed = true)
         val call = client.call("default", randomUUID())
-        call.session = sessionMock
+        call.session.value = sessionMock
 
         // Rejoin
         call.fastReconnect()
-        assertEquals(sessionMock, call.session)
+        assertEquals(sessionMock, call.session.value)
     }
 }

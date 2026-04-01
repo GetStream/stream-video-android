@@ -156,10 +156,10 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // cleanup the media manager
         call.mediaManager.cleanup()
         // cleanup rtc
-        call.session?.cleanup()
+        call.session.value?.cleanup()
         // cleanup the call
         call.cleanup()
-        assertNull(call.session)
+        assertNull(call.session.value)
     }
 
     @Test
@@ -349,7 +349,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             connectionState.awaitItem()
         }
 
-        val iceState = call.session?.publisher?.iceState?.testIn(backgroundScope)
+        val iceState = call.session.value?.publisher?.value?.iceState?.testIn(backgroundScope)
         assertThat(iceState?.awaitItem()).isEqualTo(PeerConnection.IceConnectionState.NEW)
         assertThat(iceState?.awaitItem()).isEqualTo(PeerConnection.IceConnectionState.CHECKING)
         assertThat(iceState?.awaitItem()).isEqualTo(PeerConnection.IceConnectionState.CONNECTED)
@@ -383,16 +383,16 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // verify the stats are being tracked
         val session = call.session
-        assertThat(session!!).isNotNull()
-        val report = call.session?.publisher?.getStats()
+        assertThat(session.value!!).isNotNull()
+        val report = call.session.value?.publisher?.value?.getStats()
         assertThat(report).isNotNull()
 
         // verify we are sending data to the SFU
         // it is RTCOutboundRtpStreamStats && it.bytesSent > 0
         val allStats = report?.origin?.statsMap?.values
         val networkOut = allStats?.filter { it.type == "outbound-rtp" }?.map { it as RTCStats }
-        val localSdp = call.session?.publisher?.localSdp
-        val remoteSdp = call.session?.publisher?.remoteSdp
+        val localSdp = call.session.value?.publisher?.value?.localSdp
+        val remoteSdp = call.session.value?.publisher?.value?.remoteSdp
         println(localSdp)
         println(remoteSdp)
         println(networkOut)
@@ -420,7 +420,7 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             connectionState.awaitItem()
         }
 
-        val publisher = call.session?.publisher?.state?.testIn(backgroundScope)
+        val publisher = call.session.value?.publisher?.value?.state?.testIn(backgroundScope)
 
         // assert ice connection state flows
         assertThat(publisher?.awaitItem()).isEqualTo(PeerConnection.PeerConnectionState.NEW)
@@ -449,9 +449,9 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         }
 
         // verify the stats are being tracked
-        val session = call.session
+        val session = call.session.value
         assertThat(session!!).isNotNull()
-        val report = call.session?.publisher?.getStats()
+        val report = call.session.value?.publisher?.value?.getStats()
         assertThat(report).isNotNull()
 
         // verify we are sending data to the SFU

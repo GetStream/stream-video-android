@@ -162,7 +162,10 @@ class RtcSessionTest2 {
         )
 
         // Then
-        assertNotNull("Subscriber StreamPeerConnection should not be null", rtcSession.subscriber)
+        assertNotNull(
+            "Subscriber StreamPeerConnection should not be null",
+            rtcSession.subscriber.value,
+        )
         assertEquals("Wrong sessionId", sessionId, rtcSession.fieldValue("sessionId"))
     }
 
@@ -242,19 +245,23 @@ class RtcSessionTest2 {
                 ),
             )
             val subscriber = rtcSession.subscriber
-            assertNotNull("Subscriber must not be null", subscriber)
+            assertNotNull("Subscriber must not be null", subscriber.value)
 
             val fakeSdpOffer = "fake-offer-sdp"
             val offerEvent = SubscriberOfferEvent(
                 sdp = fakeSdpOffer,
             )
-            coEvery { subscriber!!.setRemoteDescription(any()) } returns io.getstream.result.Result.Success(
+            coEvery {
+                subscriber.value!!.setRemoteDescription(any())
+            } returns io.getstream.result.Result.Success(
                 Unit,
             )
-            coEvery { subscriber!!.createAnswer() } returns io.getstream.result.Result.Success(
+            coEvery { subscriber.value!!.createAnswer() } returns io.getstream.result.Result.Success(
                 SessionDescription(SessionDescription.Type.ANSWER, "fake-answer-sdp"),
             )
-            coEvery { subscriber!!.setLocalDescription(any()) } returns io.getstream.result.Result.Success(
+            coEvery {
+                subscriber.value!!.setLocalDescription(any())
+            } returns io.getstream.result.Result.Success(
                 Unit,
             )
             val mockApi = rtcSession.sfuConnectionModule.api
@@ -265,7 +272,7 @@ class RtcSessionTest2 {
             rtcSession.handleSubscriberOffer(offerEvent)
 
             coVerify {
-                subscriber!!.negotiate(
+                subscriber.value!!.negotiate(
                     match {
                         it.contains("fake-offer-sdp")
                     },
@@ -302,7 +309,7 @@ class RtcSessionTest2 {
             sfuConnectionModuleProvider = { mockModule },
         )
         // Confirm publisher is null
-        assertNull(rtcSession.publisher)
+        assertNull(rtcSession.publisher.value)
 
         // A typical ICETrickleEvent with peerType = PUBLISHER_UNSPECIFIED
         val event = ICETrickleEvent(
@@ -349,7 +356,7 @@ class RtcSessionTest2 {
                 sfuConnectionModuleProvider = { mockk(relaxed = true) },
             )
             val mockPublisher = mockk<Publisher>(relaxed = true)
-            rtcSession.publisher = mockPublisher
+            rtcSession.publisher.value = mockPublisher
             val event = ICETrickleEvent(
                 candidate = """{
             "sdpMid": "0",
@@ -394,10 +401,10 @@ class RtcSessionTest2 {
             remoteIceServers = emptyList(),
             sfuConnectionModuleProvider = { mockk(relaxed = true) },
         )
-        val subscriber = rtcSession.subscriber
+        val subscriber = rtcSession.subscriber.value
         assertNotNull(subscriber)
         val publisher = mockk<Publisher>(relaxed = true)
-        rtcSession.publisher = publisher
+        rtcSession.publisher.value = publisher
         val mockSocketConnection = rtcSession.sfuConnectionModule.socketConnection
         coJustRun { mockSocketConnection.disconnect() }
 
@@ -417,7 +424,7 @@ class RtcSessionTest2 {
         rtcSession.handleEvent(event)
         testScope.testScheduler.advanceUntilIdle()
 
-        assertNull(rtcSession.publisher)
+        assertNull(rtcSession.publisher.value)
         verify(exactly = 0) { rtcSession["createPublisher"](any<List<PublishOption>>()) }
     }
 

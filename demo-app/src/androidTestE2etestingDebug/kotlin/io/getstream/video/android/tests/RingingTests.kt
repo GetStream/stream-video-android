@@ -18,6 +18,7 @@ package io.getstream.video.android.tests
 
 import io.getstream.video.android.robots.UserControls.DISABLE
 import io.getstream.video.android.robots.assertAudioCallControls
+import io.getstream.video.android.robots.assertConnectingView
 import io.getstream.video.android.robots.assertIncomingCall
 import io.getstream.video.android.robots.assertOutgoingCall
 import io.getstream.video.android.robots.assertThatCallIsEnded
@@ -137,7 +138,10 @@ class RingingTests : StreamTestCase() {
                 .assertIncomingCall(isDisplayed = true)
                 .acceptIncomingCall()
         }
-        step("THEN the call starts") {
+        step("THEN the user is connecting") {
+            userRobot.assertConnectingView()
+        }
+        step("AND the call starts") {
             userRobot
                 .assertAudioCallControls(microphone = true)
                 .assertIncomingCall(isDisplayed = false)
@@ -171,7 +175,10 @@ class RingingTests : StreamTestCase() {
                 .microphone(DISABLE)
                 .acceptIncomingCall()
         }
-        step("THEN the call starts") {
+        step("THEN the user is connecting") {
+            userRobot.assertConnectingView()
+        }
+        step("AND the call starts") {
             userRobot
                 .assertAudioCallControls(microphone = false)
                 .assertIncomingCall(isDisplayed = false)
@@ -201,6 +208,9 @@ class RingingTests : StreamTestCase() {
         step("WHEN user accepts the incoming video call with camera and mic") {
             userRobot.acceptIncomingCall()
         }
+        step("THEN the user is connecting") {
+            userRobot.assertConnectingView()
+        }
         step("THEN the call starts and user has camera and mic enabled") {
             userRobot
                 .assertVideoCallControls(camera = true, microphone = true)
@@ -228,6 +238,9 @@ class RingingTests : StreamTestCase() {
                 .camera(DISABLE)
                 .microphone(DISABLE)
                 .acceptIncomingCall()
+        }
+        step("THEN the user is connecting") {
+            userRobot.assertConnectingView()
         }
         step("THEN the call starts and user has camera and mic disabled") {
             userRobot

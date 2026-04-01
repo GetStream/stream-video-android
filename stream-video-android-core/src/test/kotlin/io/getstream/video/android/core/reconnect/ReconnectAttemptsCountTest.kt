@@ -33,7 +33,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
         // create the call
         val sessionMock = mockk<RtcSession>(relaxed = true)
         val call = client.call("default", randomUUID())
-        call.session = sessionMock
+        call.session.value = sessionMock
 
         // Rejoin
         call.rejoin()
@@ -45,7 +45,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
         // create the call
         val sessionMock = mockk<RtcSession>(relaxed = true)
         val call = client.call("default", randomUUID())
-        call.session = sessionMock
+        call.session.value = sessionMock
 
         // Rejoin
         call.fastReconnect()
@@ -57,7 +57,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
         // create the call
         val sessionMock = mockk<RtcSession>(relaxed = true)
         val call = client.call("default", randomUUID())
-        call.session = sessionMock
+        call.session.value = sessionMock
 
         // Rejoin
         call.rejoin()
