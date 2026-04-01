@@ -576,6 +576,12 @@ constructor(
                     payload = emptyMap(),
                 )
 
+                if (fullScreenPendingIntent == null) {
+                    logger.w {
+                        "[getSettingUpCallNotification] fullScreenPendingIntent is null; lock-screen wake-up may not work."
+                    }
+                    return getSettingUpCallNotification()
+                }
                 return ensureChannelAndBuildNotification(notificationChannel) {
                     priority = if (hideRingingNotificationInForeground) {
                         NotificationCompat.PRIORITY_LOW
