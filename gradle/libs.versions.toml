@@ -54,7 +54,7 @@ streamNoiseCancellation = "1.0.4"
 streamResult = "1.3.0"
 streamChat = "6.10.0"
 streamLog = "1.3.2"
-streamPush = "1.3.1"
+streamPush = "1.3.4"
 streamRenderscript = "0.0.1"
 
 androidxTestRunner = "1.6.2"
