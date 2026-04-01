@@ -105,7 +105,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -688,18 +691,26 @@ public class Call(
             }
         }
         monitorPublisherPCStateJob?.cancel()
-        monitorPublisherPCStateJob = scope.launch {
-            session.value?.publisher?.value?.iceState?.collect {
-                when (it) {
-                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session.value?.publisher?.value?.connection?.restartIce()
-                    }
 
-                    else -> {
-                        logger.d { "[monitorPubConnectionState] Ice connection state is $it" }
+        monitorPublisherPCStateJob = scope.launch {
+            session
+                .filterNotNull()
+                .flatMapLatest { it.publisher.filterNotNull() }
+                .flatMapLatest { publisher ->
+                    publisher.iceState.map { publisher to it }
+                }
+                .collect { (publisher, state) ->
+                    when (state) {
+                        PeerConnection.IceConnectionState.FAILED,
+                        PeerConnection.IceConnectionState.DISCONNECTED,
+                        -> {
+                            publisher.connection.restartIce()
+                        }
+                        else -> {
+                            logger.d { "[monitorPubConnectionState] Ice connection state is $state" }
+                        }
                     }
                 }
-            }
         }
 
         monitorSubscriberPCStateJob?.cancel()
