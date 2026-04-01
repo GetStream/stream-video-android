@@ -36,6 +36,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@Ignore(
+    "Because it installs a anonymous user StreamVideo Client. However we will run it via isolatedTest (check build.gradle.kts)",
+)
 @RunWith(RobolectricTestRunner::class)
 class ClientAndAuthTest : TestBase() {
 
