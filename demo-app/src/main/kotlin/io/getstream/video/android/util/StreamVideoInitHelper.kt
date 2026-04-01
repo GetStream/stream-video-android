@@ -33,7 +33,6 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
-import io.getstream.video.android.core.logging.HttpLoggingLevel
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.moderations.ModerationConfig
 import io.getstream.video.android.core.moderations.ModerationWarningConfig
@@ -229,51 +228,6 @@ object StreamVideoInitHelper {
         isInitialising = false
     }
 
-    /**
-     * Initialises the [StreamVideo] SDK for a [UserType.Anonymous] user.
-     * Anonymous users do not establish a WebSocket connection and receive no real-time events.
-     * They are suitable for passive viewing of livestreams.
-     */
-    suspend fun loadSdkForAnonymous(
-        dataStore: StreamUserDataStore,
-    ) = AppConfig.load(context) {
-        if (StreamVideo.isInstalled) {
-            _initState.value = InitializedState.FINISHED
-            return@load
-        }
-
-        isInitialising = true
-        _initState.value = InitializedState.RUNNING
-
-        try {
-            // Fetch the apiKey; token is not needed for anonymous users.
-            val authData = StreamService.instance.getAuthData(
-                environment = AppConfig.currentEnvironment.value!!.env,
-                userId = "anonymous",
-                StreamService.TOKEN_EXPIRY_TIME,
-            )
-            val anonymousUser = User(type = UserType.Anonymous)
-            dataStore.updateUser(anonymousUser)
-
-            initializeStreamVideo(
-                context = context,
-                apiKey = authData.apiKey,
-                user = anonymousUser,
-                token = "",
-                loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
-            )
-
-            // Anonymous users do not connect via WebSocket — skip connect().
-            _initState.value = InitializedState.FINISHED
-        } catch (e: Exception) {
-            _initState.value = InitializedState.FAILED
-            Log.e("StreamVideoInitHelper", "Anonymous init failed.", e)
-            throw e
-        }
-
-        isInitialising = false
-    }
-
     private fun initializeStreamChat(
         context: Context,
         apiKey: String,
@@ -357,7 +311,7 @@ object StreamVideoInitHelper {
             user = user,
             token = token,
             connectionTimeoutInMs = 12_000L,
-            loggingLevel = loggingLevel.copy(httpLoggingLevel = HttpLoggingLevel.BODY),
+            loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             callServiceConfigRegistry = callServiceConfigRegistry,
             vibrationConfig = enableRingingCallVibrationConfig(),
