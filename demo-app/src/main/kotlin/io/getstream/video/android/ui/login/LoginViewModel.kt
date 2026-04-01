@@ -29,6 +29,7 @@ import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.UserHelper
 import io.getstream.video.android.util.config.AppConfig
@@ -69,6 +70,7 @@ class LoginViewModel @Inject constructor(
                     LoginUiState.SignInFailure(event.errorMessage),
                 )
                 is LoginEvent.SignIn -> signIn(event.user)
+                is LoginEvent.SignInAsGuest -> signInAsGuest()
                 else -> flowOf(LoginUiState.Nothing)
             }
         }.shareIn(viewModelScope, SharingStarted.Lazily, 0)
@@ -147,6 +149,32 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    private fun signInAsGuest(): Flow<LoginUiState> = AppConfig.currentEnvironment.flatMapLatest {
+        if (it != null) {
+            if (StreamVideo.isInstalled) {
+                flowOf(LoginUiState.AlreadyLoggedIn)
+            } else {
+                try {
+                    val guestId = UserHelper.generateRandomString()
+                    val guestUser = User(
+                        id = guestId,
+                        type = UserType.Guest,
+                        name = "Guest $guestId",
+                    )
+                    dataStore.updateUser(guestUser)
+                    StreamVideoInitHelper.loadSdkForGuest(dataStore, guestUser)
+                    flowOf(LoginUiState.GuestSignInComplete)
+                } catch (exception: Throwable) {
+                    val message = "Guest sign in failed: ${exception.message ?: "Generic error"}"
+                    streamLog { "Failed to sign in as guest - cause: $exception" }
+                    flowOf(LoginUiState.SignInFailure(message))
+                }
+            }
+        } else {
+            flowOf(LoginUiState.Loading)
+        }
+    }
+
     fun signInIfValidUserExist() {
         viewModelScope.launch {
             val user = dataStore.user.firstOrNull()
@@ -184,6 +212,8 @@ sealed interface LoginUiState {
         val authData: GetAuthDataResponse,
     ) : LoginUiState
 
+    object GuestSignInComplete : LoginUiState
+
     data class SignInFailure(val errorMessage: String) : LoginUiState
 }
 
@@ -199,4 +229,6 @@ sealed interface LoginEvent {
     data class SignInFailure(val errorMessage: String) : LoginEvent
 
     data class SignIn(val user: User) : LoginEvent
+
+    data object SignInAsGuest : LoginEvent
 }

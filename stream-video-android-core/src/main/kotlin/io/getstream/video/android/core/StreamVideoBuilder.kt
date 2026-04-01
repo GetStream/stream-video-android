@@ -214,8 +214,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             throw IllegalArgumentException("The API key cannot be blank")
         }
 
-        if (token.isBlank()) {
-            throw IllegalArgumentException("The token cannot be blank")
+        if (user.type == UserType.Authenticated && token.isBlank()) {
+            throw IllegalArgumentException("The token cannot be blank for authenticated users")
         }
 
         if (user.type == UserType.Authenticated && user.id.isBlank()) {
@@ -267,7 +267,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         )
 
         // Set call configuration
-        var callConfigRegistry = createCallConfigurationRegistry(
+        val callConfigRegistry = createCallConfigurationRegistry(
             callServiceConfigRegistry,
             callServiceConfig,
         )
@@ -308,7 +308,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         }
 
         // Establish a WS connection with the coordinator (we don't support this for anonymous users)
-        if (user.type != UserType.Anonymous) {
+        if (user.type == UserType.Authenticated) {
             scope.launch {
                 try {
                     if (notificationConfig.autoRegisterPushDevice) {

@@ -50,6 +50,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Adb
 import androidx.compose.material.icons.outlined.GroupAdd
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -128,8 +129,8 @@ fun LoginScreen(
         val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
         val availableEnvs by remember { mutableStateOf(AppConfig.availableEnvironments) }
         val availableLogins = when (StreamBuildFlavorUtil.isDevelopment) {
-            true -> listOf("built-in", "google", "email", "guest")
-            else -> listOf("google", "email", "guest")
+            true -> listOf("built-in", "google", "email", "anonymous", "guest_user")
+            else -> listOf("google", "email", "anonymous", "guest_user")
         }
 
         var isShowingEmailLoginDialog by remember { mutableStateOf(false) }
@@ -432,7 +433,7 @@ private fun LoginButtons(
                             )
                         }
 
-                        "guest" -> {
+                        "anonymous" -> {
                             StreamButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -443,6 +444,21 @@ private fun LoginButtons(
                                 style = ButtonStyles.tertiaryButtonStyle(),
                                 onClick = {
                                     login(true, null)
+                                },
+                            )
+                        }
+
+                        "guest_user" -> {
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_GuestSignIn"),
+                                icon = Icons.Outlined.Person,
+                                enabled = !isLoading,
+                                text = stringResource(id = R.string.guest_user_sign_in),
+                                style = ButtonStyles.secondaryButtonStyle(),
+                                onClick = {
+                                    login(false, LoginEvent.SignInAsGuest)
                                 },
                             )
                         }
@@ -701,6 +717,10 @@ private fun HandleLoginUiStates(
             }
 
             is LoginUiState.SignInComplete -> {
+                navigateToCallJoin.invoke()
+            }
+
+            is LoginUiState.GuestSignInComplete -> {
                 navigateToCallJoin.invoke()
             }
 

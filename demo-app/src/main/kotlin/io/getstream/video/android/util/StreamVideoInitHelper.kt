@@ -52,6 +52,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
 import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.notification.LiveStreamMediaNotificationInterceptor
 import io.getstream.video.android.notification.PausePlayMediaSessionCallback
@@ -252,6 +253,53 @@ object StreamVideoInitHelper {
         } catch (e: Exception) {
             _initState.value = InitializedState.FAILED
             Log.e("StreamVideoInitHelper", "Init failed.", e)
+        }
+
+        isInitialising = false
+    }
+
+    /**
+     * Initialises the [StreamVideo] SDK for a [UserType.Guest] user.
+     * No server-side token is required — the SDK automatically calls the `/video/guest`
+     * endpoint to obtain a short-lived JWT token.
+     */
+    suspend fun loadSdkForGuest(
+        dataStore: StreamUserDataStore,
+        guestUser: User,
+    ) = AppConfig.load(context) {
+        if (StreamVideo.isInstalled) {
+            _initState.value = InitializedState.FINISHED
+            return@load
+        }
+
+        isInitialising = true
+        _initState.value = InitializedState.RUNNING
+
+        try {
+            // Fetch the apiKey from the backend; the returned token is intentionally discarded.
+            val authData = StreamService.instance.getAuthData(
+                environment = AppConfig.currentEnvironment.value!!.env,
+                userId = guestUser.id,
+                StreamService.TOKEN_EXPIRY_TIME,
+            )
+            dataStore.updateUser(guestUser)
+
+            // Pass an empty token — the fixed StreamVideoBuilder will call /video/guest
+            // automatically because user.type == UserType.Guest.
+            initializeStreamVideo(
+                context = context,
+                apiKey = authData.apiKey,
+                user = guestUser,
+                token = "",
+                loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+            )
+
+            StreamVideo.instanceOrNull()?.connect()
+            _initState.value = InitializedState.FINISHED
+        } catch (e: Exception) {
+            _initState.value = InitializedState.FAILED
+            Log.e("StreamVideoInitHelper", "Guest init failed.", e)
+            throw e
         }
 
         isInitialising = false

@@ -248,11 +248,14 @@ afterEvaluate {
 
 tasks.register<Test>("isolatedTest") {
 
-    description = "Runs StreamVideoBuilderTest in an isolation"
+    description = "Runs Tests in an isolation"
     group = "verification"
 
     // Only this class
-    include("**/StreamVideoBuilderTest.class")
+    include(
+        "**/StreamVideoBuilderTest.class",
+        "**/ClientAndAuthTest.class",
+    )
 
     // Force new JVM
     forkEvery = 1
