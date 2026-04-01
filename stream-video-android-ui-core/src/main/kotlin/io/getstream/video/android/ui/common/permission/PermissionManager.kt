@@ -128,6 +128,27 @@ public interface PermissionManager {
             return true
         }
 
+        internal fun getMissingPermission(context: Context, call: Call): List<String> {
+            val list = ArrayList<String>()
+            val capabilities = call.state.ownCapabilities.value
+            if (capabilities.isEmpty()) return list
+            if (capabilities.contains(OwnCapability.SendAudio)) {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    list.add(Manifest.permission.RECORD_AUDIO)
+                }
+            }
+            if (capabilities.contains(OwnCapability.SendVideo)) {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    list.add(Manifest.permission.CAMERA)
+                }
+            }
+            return list
+        }
+
         internal fun hasNotificationPermission(context: Context): Boolean =
             ContextCompat.checkSelfPermission(
                 context,

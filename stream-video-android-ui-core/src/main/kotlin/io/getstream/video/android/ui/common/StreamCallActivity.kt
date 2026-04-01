@@ -88,6 +88,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 @OptIn(StreamCallActivityDelicateApi::class)
 public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOperations {
@@ -885,6 +886,20 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                     call,
                 )
                 if (!permissionsNowGranted) {
+                    val missingPermissions = PermissionManager.getMissingPermission(
+                        this@StreamCallActivity,
+                        call,
+                    )
+                    val exceptionText =
+                        missingPermissions.map { it.capitalize(Locale.getDefault()) }
+                            .joinToString(separator = ",") { it }
+                    onError?.invoke(
+                        StreamCallActivityException(
+                            call,
+                            "$exceptionText Permission(s) not granted.",
+                            null,
+                        ),
+                    )
                     return@launch
                 }
                 create(call, ring, members, onSuccess, onError)
