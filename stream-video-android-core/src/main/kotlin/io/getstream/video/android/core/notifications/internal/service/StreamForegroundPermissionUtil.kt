@@ -33,9 +33,9 @@ public object StreamForegroundPermissionUtil {
             return when (config.serviceClass) {
                 CallService::class.java -> ForegroundServicePermissionManager().requiredForegroundTypes
                 AudioCallService::class.java -> AudioCallPermissionManager().requiredForegroundTypes
-                else -> setOf(-1)
+                else -> emptySet()
             }
         }
-        return setOf(-1)
+        return emptySet()
     }
 }
