@@ -990,7 +990,6 @@ public class Call(
             }
             cleanup()
         }
-        state.cleanup()
     }
 
     /** ends the call for yourself as well as other users */
@@ -1516,6 +1515,7 @@ public class Call(
 
     fun cleanup() {
         // monitor.stop()
+        state.cleanup()
         session.value?.cleanup()
         shutDownJobsGracefully()
         callStatsReportingJob?.cancel()

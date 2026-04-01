@@ -1382,6 +1382,7 @@ public class CallState(
         if (state is RingingState.Active) {
             activeStateGate.awaitAndTransition(ringingState.value, call) {
                 _ringingState.value = state
+                activeStateGate.cleanup()
             }
         } else {
             _ringingState.value = state

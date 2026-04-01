@@ -112,6 +112,7 @@ internal class ActiveStateGate(
             }
             if (isActive) {
                 onReady()
+                cleanup()
             }
         }
     }
