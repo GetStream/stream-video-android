@@ -13554,7 +13554,8 @@ public abstract interface class io/getstream/video/android/core/notifications/ha
 	public static synthetic fun getOngoingCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationProvider;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZIILjava/lang/Object;)Landroid/app/Notification;
 	public fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
 	public static synthetic fun getRingingCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationProvider;Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/lang/Object;)Landroid/app/Notification;
-	public abstract fun getSettingUpCallNotification ()Landroid/app/Notification;
+	public fun getSettingUpCallNotification ()Landroid/app/Notification;
+	public fun getSettingUpCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 }
 
 public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload {

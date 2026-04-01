@@ -359,7 +359,15 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload, St
         ),
         level = DeprecationLevel.WARNING,
     )
-    fun getSettingUpCallNotification(): Notification?
+    fun getSettingUpCallNotification(): Notification? = null
+
+    // Inside StreamNotificationProvider interface, add:
+    override fun getSettingUpCallNotification(
+        trigger: String,
+        callId: StreamCallId,
+    ): Notification? {
+        return getSettingUpCallNotification()
+    }
 }
 
 /**

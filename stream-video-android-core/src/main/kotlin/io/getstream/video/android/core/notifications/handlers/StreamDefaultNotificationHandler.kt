@@ -575,7 +575,6 @@ constructor(
                     callId,
                     payload = emptyMap(),
                 )
-                val shouldHaveContentIntent = true
 
                 return ensureChannelAndBuildNotification(notificationChannel) {
                     priority = if (hideRingingNotificationInForeground) {
@@ -590,18 +589,7 @@ constructor(
                     setOngoing(true)
                     setCategory(NotificationCompat.CATEGORY_CALL)
                     setFullScreenIntent(fullScreenPendingIntent, true)
-                    if (shouldHaveContentIntent) {
-                        setContentIntent(fullScreenPendingIntent)
-                    } else {
-                        val emptyIntent = PendingIntent.getActivity(
-                            application,
-                            0,
-                            Intent(),
-                            PendingIntent.FLAG_IMMUTABLE,
-                        )
-                        setContentIntent(emptyIntent)
-                        setAutoCancel(false)
-                    }
+                    setContentIntent(fullScreenPendingIntent)
                 }
             }
 
