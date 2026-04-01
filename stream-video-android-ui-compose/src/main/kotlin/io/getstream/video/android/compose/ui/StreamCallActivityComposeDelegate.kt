@@ -398,6 +398,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     ) {
         if (!showRationale && configurationMap[call.id]?.canSkipPermissionRationale == true) {
             logger.w { "Permissions were not granted, but rationale is required to be skipped." }
+            updateRenderPermissionUi(false)
             safeFinish()
         } else {
             PermissionsRationaleContent(call, granted, notGranted)
@@ -628,6 +629,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     ButtonStyles.tertiaryButtonStyle(StyleSize.S),
                 ) {
                     // No permissions, leave the call
+                    updateRenderPermissionUi(false)
                     onCallAction(call, LeaveCall)
                 },
             )

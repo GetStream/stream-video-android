@@ -878,6 +878,15 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                     uiDelegate.setContent(activity = this@StreamCallActivity, call)
                 }
                 renderPermissionUi.first { !it }
+
+                // check if permissions were actually granted or denied
+                val permissionsNowGranted = PermissionManager.hasRequiredCallPermissions(
+                    this@StreamCallActivity,
+                    call,
+                )
+                if (!permissionsNowGranted) {
+                    return@launch
+                }
                 create(call, ring, members, onSuccess, onError)
             }
         }
