@@ -1811,7 +1811,7 @@ public class Call(
         }
 
         fun simulateSfuFull() = debugOnly {
-            call.session?.simulateSfuFull()
+            call.session.value?.simulateSfuFull()
         }
 
         fun fastReconnect(reason: String = "Debug") {

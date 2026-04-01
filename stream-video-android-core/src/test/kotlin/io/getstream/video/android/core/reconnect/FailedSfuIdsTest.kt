@@ -117,7 +117,7 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val call = client.call("default", randomUUID())
         val sessionMock = mockk<RtcSession>(relaxed = true)
         every { sessionMock.sfuName } returns "sfu-edge-old"
-        call.session = sessionMock
+        call.session.value = sessionMock
         call.location = "test-location"
 
         call.migrate()
@@ -131,13 +131,13 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         val session1 = mockk<RtcSession>(relaxed = true)
         every { session1.sfuName } returns "sfu-edge-1"
-        call.session = session1
+        call.session.value = session1
         call.location = "test-location"
         call.migrate()
 
         val session2 = mockk<RtcSession>(relaxed = true)
         every { session2.sfuName } returns "sfu-edge-2"
-        call.session = session2
+        call.session.value = session2
         call.migrate()
 
         val ids = call.getFailedSfuIds()

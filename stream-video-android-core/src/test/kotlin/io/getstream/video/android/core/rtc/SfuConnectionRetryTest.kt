@@ -373,45 +373,23 @@ class SfuConnectionRetryTest {
     }
 
     @Test
-    fun `FAST strategy goes through retry counter like UNSPECIFIED`() = runTest {
+    fun `FAST strategy disconnects and triggers fastReconnect immediately`() = runTest {
         createRtcSession()
         advance()
 
-        // First FAST failure — should not trigger any reconnect action
         socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
             error = Error.NetworkError(
-                message = "Fast retry #1",
+                message = "Fast reconnect requested",
                 serverErrorCode = 1003,
                 statusCode = 1003,
             ),
             reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
         )
         advance()
-        coVerify(exactly = 0) { mockCall.migrate() }
-        coVerify(exactly = 0) { mockCall.fastReconnect(any()) }
 
-        // Second FAST failure
-        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
-            error = Error.NetworkError(
-                message = "Fast retry #2",
-                serverErrorCode = 1003,
-                statusCode = 1003,
-            ),
-            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
-        )
-        advance()
+        coVerify(exactly = 1) { mockSocket.disconnect() }
+        coVerify(exactly = 1) { mockCall.fastReconnect(any()) }
         coVerify(exactly = 0) { mockCall.migrate() }
-
-        // Third FAST failure — exceeds MAX, triggers migrate
-        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
-            error = Error.NetworkError(
-                message = "Fast retry #3",
-                serverErrorCode = 1003,
-                statusCode = 1003,
-            ),
-            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
-        )
-        advance()
-        coVerify(exactly = 1) { mockCall.migrate() }
+        coVerify(exactly = 0) { mockCall.rejoin(any()) }
     }
 }
