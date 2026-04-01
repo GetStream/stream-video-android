@@ -486,6 +486,8 @@ public class CallState(
     private val _ringingState: MutableStateFlow<RingingState> = MutableStateFlow(RingingState.Idle)
     public val ringingState: StateFlow<RingingState> = _ringingState
 
+    private val previousRingingStates = ConcurrentHashMap.newKeySet<RingingState>()
+
     /** The settings for the call */
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
     public val settings: StateFlow<CallSettingsResponse?> = _settings
@@ -676,7 +678,6 @@ public class CallState(
     private var speakingWhileMutedResetJob: Job? = null
     private var autoJoiningCall: Job? = null
     private var ringingTimerJob: Job? = null
-
     internal var acceptedOnThisDevice: Boolean = false
 
     /**
@@ -728,6 +729,11 @@ public class CallState(
     public val notificationIdFlow: StateFlow<Int?> = _notificationIdFlow
 
     private var telecomHoldObserverJob: Job? = null
+    private val activeStateGate = ActiveStateGate(
+        scope,
+        previousRingingStates,
+        TransitionToRingingStateStrategy.PUBLISHER_CONNECTED,
+    )
 
     @InternalStreamVideoApi
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
@@ -1025,7 +1031,7 @@ public class CallState(
             }
 
             is ChangePublishQualityEvent -> {
-                call.session?.handleEvent(event)
+                call.session.value?.handleEvent(event)
             }
 
             is ErrorEvent -> {
@@ -1373,7 +1379,16 @@ public class CallState(
         }
         ringingLogger.d { "Update: $state" }
 
-        _ringingState.value = state
+        if (state is RingingState.Active) {
+            activeStateGate.awaitAndTransition(ringingState.value, call) {
+                _ringingState.value = state
+                activeStateGate.cleanup()
+            }
+        } else {
+            _ringingState.value = state
+            activeStateGate.cleanup()
+        }
+        previousRingingStates.add(state)
     }
 
     @InternalStreamVideoApi
@@ -1785,6 +1800,11 @@ public class CallState(
         this.atomicNotification.set(notification)
     }
 
+    @InternalStreamVideoApi
+    fun setOwnCapabilities(ownCapability: List<OwnCapability>) {
+        this._ownCapabilities.value = ownCapability
+    }
+
     /**
      * [RingingState.Incoming] and [RingingState.Outgoing] are intentionally not observed.
      * In Android Telecom, hold states are only applicable once a call is active (answered).
@@ -1806,6 +1826,12 @@ public class CallState(
                     }
                 }
         }
+    }
+
+    internal fun cleanup() {
+        previousRingingStates.clear()
+        activeStateGate.cleanup()
+        cancelTimeout()
     }
 }
 

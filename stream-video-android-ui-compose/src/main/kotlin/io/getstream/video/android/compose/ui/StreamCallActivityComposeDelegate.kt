@@ -124,9 +124,38 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                             .systemBarsPadding(),
                     ) {
                         logger.d { "[setContent] with RootContent" }
-                        activity.RootContent(call = call)
+
+                        val renderPermissionUi by activity.renderPermissionUi.collectAsStateWithLifecycle()
+                        if (renderPermissionUi) {
+                            NoPermissionUi(activity, call) {
+                                activity.updateRenderPermissionUi(false)
+                            }
+                        } else {
+                            activity.RootContent(call = call)
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun NoPermissionUi(
+        activity: StreamCallActivity,
+        call: Call,
+        onAllPermissionGranted: () -> Unit,
+    ) {
+        LaunchPermissionRequest(getRequiredPermissions(call)) {
+            AllPermissionsGranted {
+                onAllPermissionGranted()
+            }
+
+            SomeGranted { granted, notGranted, showRationale ->
+                activity.InternalPermissionContent(showRationale, call, granted, notGranted)
+            }
+
+            NoneGranted {
+                activity.InternalPermissionContent(it, call, emptyList(), emptyList())
             }
         }
     }
@@ -369,6 +398,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     ) {
         if (!showRationale && configurationMap[call.id]?.canSkipPermissionRationale == true) {
             logger.w { "Permissions were not granted, but rationale is required to be skipped." }
+            updateRenderPermissionUi(false)
             safeFinish()
         } else {
             PermissionsRationaleContent(call, granted, notGranted)
@@ -599,6 +629,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     ButtonStyles.tertiaryButtonStyle(StyleSize.S),
                 ) {
                     // No permissions, leave the call
+                    updateRenderPermissionUi(false)
                     onCallAction(call, LeaveCall)
                 },
             )

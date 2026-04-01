@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.rtc
 
-import android.graphics.ColorSpace.match
 import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.models.OwnCapability
@@ -61,12 +60,10 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.webrtc.SessionDescription
-import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
-import stream.video.sfu.signal.SendAnswerResponse
 
 class RtcSessionTest2 {
 
@@ -154,6 +151,7 @@ class RtcSessionTest2 {
                 sfuUrl = sfuUrl,
                 sfuWsUrl = sfuWsUrl,
                 sfuToken = sfuToken,
+                sfuName = "test-sfu-edge",
                 remoteIceServers = remoteIceServers,
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
@@ -162,7 +160,10 @@ class RtcSessionTest2 {
         )
 
         // Then
-        assertNotNull("Subscriber StreamPeerConnection should not be null", rtcSession.subscriber)
+        assertNotNull(
+            "Subscriber StreamPeerConnection should not be null",
+            rtcSession.subscriber.value,
+        )
         assertEquals("Wrong sessionId", sessionId, rtcSession.fieldValue("sessionId"))
     }
 
@@ -191,6 +192,7 @@ class RtcSessionTest2 {
                 sfuUrl = sfuUrl,
                 sfuWsUrl = sfuWsUrl,
                 sfuToken = sfuToken,
+                sfuName = "test-sfu-edge",
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
                 remoteIceServers = remoteIceServers,
@@ -235,6 +237,7 @@ class RtcSessionTest2 {
                     sfuUrl = sfuUrl,
                     sfuWsUrl = sfuWsUrl,
                     sfuToken = sfuToken,
+                    sfuName = "test-sfu-edge",
                     clientImpl = mockVideoClient,
                     coroutineScope = testScope,
                     remoteIceServers = remoteIceServers,
@@ -242,30 +245,29 @@ class RtcSessionTest2 {
                 ),
             )
             val subscriber = rtcSession.subscriber
-            assertNotNull("Subscriber must not be null", subscriber)
+            assertNotNull("Subscriber must not be null", subscriber.value)
 
             val fakeSdpOffer = "fake-offer-sdp"
             val offerEvent = SubscriberOfferEvent(
                 sdp = fakeSdpOffer,
             )
-            coEvery { subscriber!!.setRemoteDescription(any()) } returns io.getstream.result.Result.Success(
+            coEvery {
+                subscriber.value!!.setRemoteDescription(any())
+            } returns io.getstream.result.Result.Success(
                 Unit,
             )
-            coEvery { subscriber!!.createAnswer() } returns io.getstream.result.Result.Success(
+            coEvery { subscriber.value!!.createAnswer() } returns io.getstream.result.Result.Success(
                 SessionDescription(SessionDescription.Type.ANSWER, "fake-answer-sdp"),
             )
-            coEvery { subscriber!!.setLocalDescription(any()) } returns io.getstream.result.Result.Success(
+            coEvery {
+                subscriber.value!!.setLocalDescription(any())
+            } returns io.getstream.result.Result.Success(
                 Unit,
             )
-            val mockApi = rtcSession.sfuConnectionModule.api
-            coEvery { mockApi.sendAnswer(any()) } returns SendAnswerResponse(
-                error = null,
-            )
-
             rtcSession.handleSubscriberOffer(offerEvent)
 
             coVerify {
-                subscriber!!.negotiate(
+                subscriber.value!!.negotiate(
                     match {
                         it.contains("fake-offer-sdp")
                     },
@@ -295,6 +297,7 @@ class RtcSessionTest2 {
             sfuUrl = "https://test-sfu.stream.com",
             sfuWsUrl = "wss://test-sfu.stream.com",
             sfuToken = "fake-sfu-token",
+            sfuName = "test-sfu-edge",
             clientImpl = mockVideoClient,
             coroutineScope = testScope,
             rtcSessionScope = testScope,
@@ -302,7 +305,7 @@ class RtcSessionTest2 {
             sfuConnectionModuleProvider = { mockModule },
         )
         // Confirm publisher is null
-        assertNull(rtcSession.publisher)
+        assertNull(rtcSession.publisher.value)
 
         // A typical ICETrickleEvent with peerType = PUBLISHER_UNSPECIFIED
         val event = ICETrickleEvent(
@@ -343,13 +346,14 @@ class RtcSessionTest2 {
                 sfuUrl = "https://test-sfu.stream.com",
                 sfuWsUrl = "wss://test-sfu.stream.com",
                 sfuToken = "fake-sfu-token",
+                sfuName = "test-sfu-edge",
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
                 remoteIceServers = emptyList(),
                 sfuConnectionModuleProvider = { mockk(relaxed = true) },
             )
             val mockPublisher = mockk<Publisher>(relaxed = true)
-            rtcSession.publisher = mockPublisher
+            rtcSession.publisher.value = mockPublisher
             val event = ICETrickleEvent(
                 candidate = """{
             "sdpMid": "0",
@@ -389,15 +393,16 @@ class RtcSessionTest2 {
             sfuUrl = "https://test-sfu.stream.com",
             sfuWsUrl = "wss://test-sfu.stream.com",
             sfuToken = "fake-sfu-token",
+            sfuName = "test-sfu-edge",
             clientImpl = mockVideoClient,
             coroutineScope = testScope,
             remoteIceServers = emptyList(),
             sfuConnectionModuleProvider = { mockk(relaxed = true) },
         )
-        val subscriber = rtcSession.subscriber
+        val subscriber = rtcSession.subscriber.value
         assertNotNull(subscriber)
         val publisher = mockk<Publisher>(relaxed = true)
-        rtcSession.publisher = publisher
+        rtcSession.publisher.value = publisher
         val mockSocketConnection = rtcSession.sfuConnectionModule.socketConnection
         coJustRun { mockSocketConnection.disconnect() }
 
@@ -417,7 +422,7 @@ class RtcSessionTest2 {
         rtcSession.handleEvent(event)
         testScope.testScheduler.advanceUntilIdle()
 
-        assertNull(rtcSession.publisher)
+        assertNull(rtcSession.publisher.value)
         verify(exactly = 0) { rtcSession["createPublisher"](any<List<PublishOption>>()) }
     }
 
@@ -473,7 +478,6 @@ class RtcSessionTest2 {
         }
         val mockModule = mockk<SfuConnectionModule>(relaxed = true) {
             every { socketConnection } returns mockSocket
-            every { api } returns mockk(relaxed = true)
         }
         val rtcSession = spyk(
             RtcSession(
@@ -486,6 +490,7 @@ class RtcSessionTest2 {
                 sfuUrl = "https://test-sfu.stream.com",
                 sfuWsUrl = "wss://test-sfu.stream.com",
                 sfuToken = "fake-sfu-token",
+                sfuName = "test-sfu-edge",
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
                 rtcSessionScope = testScope,
