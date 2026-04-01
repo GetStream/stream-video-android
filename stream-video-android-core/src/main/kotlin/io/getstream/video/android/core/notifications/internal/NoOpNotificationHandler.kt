@@ -115,7 +115,18 @@ internal object NoOpNotificationHandler : NotificationHandler {
         payload: Map<String, Any?>,
     ): Notification? = null
 
+    @Deprecated(
+        "Use StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
+        replaceWith = ReplaceWith(
+            "StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
+        ),
+        level = DeprecationLevel.WARNING,
+    )
     override fun getSettingUpCallNotification(): Notification? = null
+    override fun getSettingUpCallNotification(
+        trigger: String,
+        callId: StreamCallId,
+    ): Notification? = null
 
     @Deprecated(
         level = DeprecationLevel.ERROR,

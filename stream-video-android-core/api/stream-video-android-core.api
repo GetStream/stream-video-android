@@ -13189,6 +13189,7 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun getRejectAction (Landroid/app/PendingIntent;)Landroidx/core/app/NotificationCompat$Action;
 	public fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZLjava/util/Map;)Landroid/app/Notification;
 	public fun getSettingUpCallNotification ()Landroid/app/Notification;
+	public fun getSettingUpCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 	public fun getStreamNotificationDispatcher ()Lio/getstream/video/android/core/notifications/dispatchers/NotificationDispatcher;
 	public fun isInForeground ()Z
 	public fun maybeCreateChannel (Ljava/lang/String;Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
@@ -13441,6 +13442,7 @@ public class io/getstream/video/android/core/notifications/handlers/StreamDefaul
 	public fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/util/Map;)Landroid/app/Notification;
 	public fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZLjava/util/Map;)Landroid/app/Notification;
 	public fun getSettingUpCallNotification ()Landroid/app/Notification;
+	public fun getSettingUpCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 	public fun onCallNotificationUpdate (Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/util/Map;)V
 	public fun onMissedCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/util/Map;)V
@@ -13544,7 +13546,7 @@ public abstract interface class io/getstream/video/android/core/notifications/ha
 	public abstract fun onRingingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/util/Map;)V
 }
 
-public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationProvider : io/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload {
+public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationProvider : io/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload, io/getstream/video/android/core/notifications/handlers/StreamSettingUpCallNotificationProvider {
 	public fun getIncomingCallNotification (Landroid/app/PendingIntent;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Ljava/lang/String;Z)Landroid/app/Notification;
 	public fun getMissedCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)Landroid/app/Notification;
 	public static synthetic fun getMissedCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationProvider;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ILjava/lang/Object;)Landroid/app/Notification;
@@ -13587,6 +13589,10 @@ public abstract interface class io/getstream/video/android/core/notifications/ha
 	public abstract fun updateIncomingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateOngoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamSettingUpCallNotificationProvider {
+	public abstract fun getSettingUpCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 }
 
 public final class io/getstream/video/android/core/notifications/internal/receivers/ToggleCameraBroadcastReceiver : android/content/BroadcastReceiver {

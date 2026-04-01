@@ -216,7 +216,12 @@ internal open class CallService : Service() {
          * Mandatory, if not called then it will throw exception if we directly decide to stop the service.
          * For example: it will stop the service if [verifyPermissions] is false
          */
-        promoteToFgServiceIfNoActiveCall(params.streamVideo, notificationId, params.trigger)
+        promoteToFgServiceIfNoActiveCall(
+            params.streamVideo,
+            notificationId,
+            params.trigger,
+            params.callId,
+        )
         val call = params.streamVideo.call(params.callId.type, params.callId.id)
 
         // Rendering incoming call does not need audio/video permissions
@@ -654,8 +659,9 @@ internal open class CallService : Service() {
         videoClient: StreamVideoClient,
         notificationId: Int,
         trigger: String,
+        callId: StreamCallId,
     ) {
-        videoClient.getSettingUpCallNotification()?.let { notification ->
+        videoClient.getSettingUpCallNotification(trigger, callId)?.let { notification ->
             startForegroundWithServiceType(
                 notificationId,
                 notification,

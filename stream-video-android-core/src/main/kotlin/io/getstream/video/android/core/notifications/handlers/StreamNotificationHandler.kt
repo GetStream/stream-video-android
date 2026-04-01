@@ -183,6 +183,10 @@ interface StreamNotificationProviderWithPayload {
     ): Notification?
 }
 
+interface StreamSettingUpCallNotificationProvider {
+    fun getSettingUpCallNotification(trigger: String, callId: StreamCallId): Notification?
+}
+
 interface StreamNotificationUpdatesProvider {
 
     /**
@@ -228,7 +232,7 @@ interface StreamNotificationUpdatesProvider {
     ): Notification?
 }
 
-interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
+interface StreamNotificationProvider : StreamNotificationProviderWithPayload, StreamSettingUpCallNotificationProvider {
 
     /**
      * Customize the notification when you receive a push notification for ringing call with type [RingingState.Incoming]
@@ -348,6 +352,13 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload {
      *
      * @return A [Notification] object.
      */
+    @Deprecated(
+        "Use StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
+        replaceWith = ReplaceWith(
+            "StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
+        ),
+        level = DeprecationLevel.WARNING,
+    )
     fun getSettingUpCallNotification(): Notification?
 }
 
