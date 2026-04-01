@@ -92,6 +92,7 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
+import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
@@ -239,6 +240,12 @@ public class Call(
 
     var sessionId = UUID.randomUUID().toString()
     internal val unifiedSessionId = UUID.randomUUID().toString()
+
+    /**
+     * SFU IDs (edge names) we failed to connect to (e.g. SFU_FULL). Sent in migrating_from_list
+     * when requesting new credentials so the coordinator can exclude them.
+     */
+    private val failedSfuIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     internal var connectStartTime = 0L
     internal var reconnectStartTime = 0L
@@ -642,6 +649,7 @@ public class Call(
         val sfuToken = result.value.credentials.token
         val sfuUrl = result.value.credentials.server.url
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
+        val sfuName = result.value.credentials.server.edgeName
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
         try {
             val localSession = if (testInstanceProvider.rtcSessionCreator != null) {
@@ -656,6 +664,7 @@ public class Call(
                     sfuUrl = sfuUrl,
                     sfuWsUrl = sfuWsUrl,
                     sfuToken = sfuToken,
+                    sfuName = sfuName,
                     remoteIceServers = iceServers,
                     powerManager = powerManager,
                 )
@@ -842,6 +851,7 @@ public class Call(
                             cred.server.url,
                             cred.server.wsEndpoint,
                             cred.token,
+                            cred.server.edgeName,
                             cred.iceServers.map { ice ->
                                 ice.toIceServer()
                             },
@@ -876,15 +886,16 @@ public class Call(
         state._connection.value = RealtimeConnection.Migrating
         location?.let {
             reconnectStartTime = System.currentTimeMillis()
+            session.value?.sfuName?.let { addFailedSfuId(it) }
 
-            val joinResponse = joinRequest(location = it)
+            val joinResponse = joinRequest(location = it, migratingFrom = session.value?.sfuName)
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
                 val session = this.session.value!!
                 val currentOptions = this.session.value?.publisher?.value?.currentOptions()
-                val oldSfuUrl = session.sfuUrl
-                logger.i { "Rejoin SFU $oldSfuUrl to ${cred.server.url}" }
+                val oldSfuName = session.sfuName
+                logger.i { "Migrate SFU $oldSfuName to ${cred.server.edgeName}" }
 
                 this.sessionId = UUID.randomUUID().toString()
                 val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
@@ -893,7 +904,7 @@ public class Call(
                     strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
                     announced_tracks = publishingInfo,
                     subscriptions = subscriptionsInfo,
-                    from_sfu_id = oldSfuUrl,
+                    from_sfu_id = oldSfuName,
                     reconnect_attempt = reconnectAttepmts,
                 )
                 session.prepareRejoin()
@@ -909,6 +920,7 @@ public class Call(
                         cred.server.url,
                         cred.server.wsEndpoint,
                         cred.token,
+                        cred.server.edgeName,
                         cred.iceServers.map { ice ->
                             ice.toIceServer()
                         },
@@ -1497,14 +1509,38 @@ public class Call(
         return clientImpl.muteUsers(type, id, request)
     }
 
+    /** Adds the given SFU ID (edge name) to the failed set (for migrating_from_list). */
+    private fun addFailedSfuId(sfuId: String) {
+        if (sfuId.isBlank()) return
+        failedSfuIds.add(sfuId)
+    }
+
+    /** Returns a snapshot of failed SFU IDs to send as migrating_from_list. */
+    private fun getFailedSfuIdsSnapshot(): List<String> = failedSfuIds.toList()
+
+    /** Clears the failed SFU list (e.g. after a successful join). */
+    private fun clearFailedSfuIds() {
+        failedSfuIds.clear()
+    }
+
+    /**
+     * Called by [RtcSession] when connection to the SFU is established successfully.
+     * Clears the failed SFU list so we don't exclude this SFU on future requests.
+     */
+    internal fun onSfuConnectionEstablished() {
+        clearFailedSfuIds()
+    }
+
     @VisibleForTesting
     internal suspend fun joinRequest(
         create: CreateCallOptions? = null,
         location: String,
         migratingFrom: String? = null,
+        migratingFromList: List<String>? = null,
         ring: Boolean = false,
         notify: Boolean = false,
     ): Result<JoinCallResponse> {
+        val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
         val result = clientImpl.joinCall(
             type, id,
             create = create != null,
@@ -1517,6 +1553,7 @@ public class Call(
             notify = notify,
             location = location,
             migratingFrom = migratingFrom,
+            migratingFromList = migratingFromList,
         )
         result.onSuccess {
             state.updateFromResponse(it)
@@ -1771,6 +1808,10 @@ public class Call(
             call.scope.launch {
                 call.migrate()
             }
+        }
+
+        fun simulateSfuFull() = debugOnly {
+            call.session.value?.simulateSfuFull()
         }
 
         fun fastReconnect(reason: String = "Debug") {

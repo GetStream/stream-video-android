@@ -99,6 +99,15 @@ android {
         }
     }
 
+    buildTypes {
+        debug {
+            buildConfigField("boolean", "DEBUG_TOOLS_ENABLED", "true")
+        }
+        release {
+            buildConfigField("boolean", "DEBUG_TOOLS_ENABLED", "false")
+        }
+    }
+
     val envProps: File = rootProject.file(".env.properties")
     if (envProps.exists()) {
         val properties = Properties()
