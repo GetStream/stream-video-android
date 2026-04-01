@@ -57,7 +57,7 @@ class RtcSessionTest : IntegrationTestBase() {
     fun `Create a subscriber peer connection`() = runTest {
         val joinResult = call.join()
         assertSuccess(joinResult)
-        val subscriber = call.session!!.createSubscriber()
+        val subscriber = call.session.value!!.createSubscriber()
     }
 
     @Test
@@ -67,7 +67,7 @@ class RtcSessionTest : IntegrationTestBase() {
         assertSuccess(joinResult)
 
         val offerEvent = SubscriberOfferEvent(sdp = testData.fakeSDP)
-        call.session?.handleSubscriberOffer(offerEvent)
+        call.session.value?.handleSubscriberOffer(offerEvent)
     }
 
     @Test
@@ -80,10 +80,10 @@ class RtcSessionTest : IntegrationTestBase() {
         val candidate =
             """{"sdpMid": "test", "sdpMLineIndex": 0, "candidate": "test", "usernameFragment": "test"}"""
         val publisherTrickle = ICETrickleEvent(candidate, PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED)
-        call.session?.handleIceTrickle(publisherTrickle)
+        call.session.value?.handleIceTrickle(publisherTrickle)
         // subscriber trickle
         val subscriberTrickle = ICETrickleEvent(candidate, PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED)
-        call.session?.handleIceTrickle(subscriberTrickle)
+        call.session.value?.handleIceTrickle(subscriberTrickle)
     }
 
     @Test

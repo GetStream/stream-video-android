@@ -105,7 +105,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -232,7 +235,8 @@ public class Call(
     private var isDestroyed = false
 
     /** Session handles all real time communication for video and audio */
-    internal var session: RtcSession? = null
+    internal val session: MutableStateFlow<RtcSession?> = MutableStateFlow(null)
+
     var sessionId = UUID.randomUUID().toString()
     internal val unifiedSessionId = UUID.randomUUID().toString()
 
@@ -551,7 +555,7 @@ public class Call(
                 return result
             }
             if (result is Failure) {
-                session = null
+                session.value = null
                 logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
@@ -562,7 +566,7 @@ public class Call(
             }
             delay(retryCount - 1 * 1000L)
         }
-        session = null
+        session.value = null
         val errorMessage = "Join failed after 3 retries"
         state._connection.value = RealtimeConnection.Failed(errorMessage)
         return Failure(value = Error.GenericError(errorMessage))
@@ -608,7 +612,7 @@ public class Call(
         sfuEvents?.cancel()
         sfuListener?.cancel()
 
-        if (session != null) {
+        if (session.value != null) {
             return Failure(Error.GenericError("Call $cid has already been joined"))
         }
         logger.d {
@@ -640,7 +644,7 @@ public class Call(
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
         try {
-            session = if (testInstanceProvider.rtcSessionCreator != null) {
+            val localSession = if (testInstanceProvider.rtcSessionCreator != null) {
                 testInstanceProvider.rtcSessionCreator!!.invoke()
             } else {
                 RtcSession(
@@ -656,18 +660,19 @@ public class Call(
                     powerManager = powerManager,
                 )
             }
+            session.value = localSession
 
-            session?.let {
+            session.value?.let {
                 state._connection.value = RealtimeConnection.Joined(it)
             }
 
-            session?.connect()
+            session.value?.connect()
         } catch (e: Exception) {
             return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
         }
         client.state.setActiveCall(this)
         monitorSession(result.value)
-        return Success(value = session!!)
+        return Success(value = session.value!!)
     }
 
     private fun Call.monitorSession(result: JoinCallResponse) {
@@ -676,7 +681,7 @@ public class Call(
         startCallStatsReporting(result.statsOptions.reportingIntervalMs.toLong())
         // listen to Signal WS
         sfuEvents = scope.launch {
-            session?.let {
+            session.value?.let {
                 it.socket.events().collect { event ->
                     if (event is JoinCallResponseEvent) {
                         reconnectDeadlineMils = event.fastReconnectDeadlineSeconds * 1000
@@ -686,26 +691,34 @@ public class Call(
             }
         }
         monitorPublisherPCStateJob?.cancel()
-        monitorPublisherPCStateJob = scope.launch {
-            session?.publisher?.iceState?.collect {
-                when (it) {
-                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session?.publisher?.connection?.restartIce()
-                    }
 
-                    else -> {
-                        logger.d { "[monitorPubConnectionState] Ice connection state is $it" }
+        monitorPublisherPCStateJob = scope.launch {
+            session
+                .filterNotNull()
+                .flatMapLatest { it.publisher.filterNotNull() }
+                .flatMapLatest { publisher ->
+                    publisher.iceState.map { publisher to it }
+                }
+                .collect { (publisher, state) ->
+                    when (state) {
+                        PeerConnection.IceConnectionState.FAILED,
+                        PeerConnection.IceConnectionState.DISCONNECTED,
+                        -> {
+                            publisher.connection.restartIce()
+                        }
+                        else -> {
+                            logger.d { "[monitorPubConnectionState] Ice connection state is $state" }
+                        }
                     }
                 }
-            }
         }
 
         monitorSubscriberPCStateJob?.cancel()
         monitorSubscriberPCStateJob = scope.launch {
-            session?.subscriber?.iceState?.collect {
+            session.value?.subscriber?.value?.iceState?.collect {
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session?.requestSubscriberIceRestart()
+                        session.value?.requestSubscriberIceRestart()
                     }
 
                     else -> {
@@ -725,7 +738,7 @@ public class Call(
 
             while (isActive) {
                 delay(reportingIntervalMs)
-                session?.sendCallStats(
+                session.value?.sendCallStats(
                     report = collectStats(),
                 )
             }
@@ -733,8 +746,8 @@ public class Call(
     }
 
     internal suspend fun collectStats(): CallStatsReport {
-        val publisherStats = session?.getPublisherStats()
-        val subscriberStats = session?.getSubscriberStats()
+        val publisherStats = session.value?.getPublisherStats()
+        val subscriberStats = session.value?.getSubscriberStats()
         state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
         state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
         state.stats.updateLocalStats()
@@ -761,13 +774,13 @@ public class Call(
      */
     suspend fun fastReconnect(reason: String = "unknown") = schedule("fast") {
         logger.d { "[fastReconnect] Reconnecting, reconnectAttepmts:$reconnectAttepmts" }
-        session?.prepareReconnect()
+        session.value?.prepareReconnect()
         this@Call.state._connection.value = RealtimeConnection.Reconnecting
-        if (session != null) {
+        if (session.value != null) {
             reconnectStartTime = System.currentTimeMillis()
 
-            val session = session!!
-            val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
+            val currentSession = session.value!!
+            val (prevSessionId, subscriptionsInfo, publishingInfo) = currentSession.currentSfuInfo()
             val reconnectDetails = ReconnectDetails(
                 previous_session_id = prevSessionId,
                 strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
@@ -776,9 +789,9 @@ public class Call(
                 reconnect_attempt = reconnectAttepmts,
                 reason = reason,
             )
-            session.fastReconnect(reconnectDetails)
+            currentSession.fastReconnect(reconnectDetails)
             val oldSessionStats = collectStats()
-            session.sendCallStats(oldSessionStats)
+            currentSession.sendCallStats(oldSessionStats)
         } else {
             logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
             this@Call.state._connection.value = RealtimeConnection.Disconnected
@@ -799,9 +812,9 @@ public class Call(
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
-                val oldSession = this.session!!
+                val oldSession = this.session.value!!
                 val oldSessionStats = collectStats()
-                val currentOptions = this.session?.publisher?.currentOptions()
+                val currentOptions = this.session.value?.publisher?.value?.currentOptions()
                 logger.i { "Rejoin SFU ${oldSession?.sfuUrl} to ${cred.server.url}" }
 
                 this.sessionId = UUID.randomUUID().toString()
@@ -817,23 +830,25 @@ public class Call(
                 this.state.removeParticipant(prevSessionId)
                 oldSession.prepareRejoin()
                 try {
-                    this.session = RtcSession(
-                        clientImpl,
-                        reconnectAttepmts,
-                        powerManager,
-                        this,
-                        sessionId,
-                        clientImpl.apiKey,
-                        clientImpl.coordinatorConnectionModule.lifecycle,
-                        cred.server.url,
-                        cred.server.wsEndpoint,
-                        cred.token,
-                        cred.iceServers.map { ice ->
-                            ice.toIceServer()
-                        },
-                    )
-                    this.session?.connect(reconnectDetails, currentOptions)
-                    this.session?.sfuTracer?.trace("rejoin", reason)
+                    this.session.value = (
+                        RtcSession(
+                            clientImpl,
+                            reconnectAttepmts,
+                            powerManager,
+                            this,
+                            sessionId,
+                            clientImpl.apiKey,
+                            clientImpl.coordinatorConnectionModule.lifecycle,
+                            cred.server.url,
+                            cred.server.wsEndpoint,
+                            cred.token,
+                            cred.iceServers.map { ice ->
+                                ice.toIceServer()
+                            },
+                        )
+                        )
+                    this.session.value?.connect(reconnectDetails, currentOptions)
+                    this.session.value?.sfuTracer?.trace("rejoin", reason)
                     oldSession.sendCallStats(oldSessionStats)
                     oldSession.leaveWithReason("Rejoin :: $reason")
                     oldSession.cleanup()
@@ -866,8 +881,8 @@ public class Call(
             if (joinResponse is Success) {
                 // switch to the new SFU
                 val cred = joinResponse.value.credentials
-                val session = this.session!!
-                val currentOptions = this.session?.publisher?.currentOptions()
+                val session = this.session.value!!
+                val currentOptions = this.session.value?.publisher?.value?.currentOptions()
                 val oldSfuUrl = session.sfuUrl
                 logger.i { "Rejoin SFU $oldSfuUrl to ${cred.server.url}" }
 
@@ -898,9 +913,9 @@ public class Call(
                             ice.toIceServer()
                         },
                     )
-                    val oldSession = this.session
-                    this.session = newSession
-                    this.session?.connect(reconnectDetails, currentOptions)
+                    val oldSession = this.session.value
+                    this.session.value = newSession
+                    this.session.value?.connect(reconnectDetails, currentOptions)
                     monitorSession(joinResponse.value)
                     oldSession?.leaveWithReason("migrating")
                     oldSession?.cleanup()
@@ -940,7 +955,7 @@ public class Call(
         monitorPublisherPCStateJob?.cancel()
         monitorPublisherPCStateJob = null
         monitorSubscriberPCStateJob = null
-        session?.leaveWithReason("[reason=$reason, error=${disconnectionReason?.message}]")
+        session.value?.leaveWithReason("[reason=$reason, error=${disconnectionReason?.message}]")
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
@@ -977,12 +992,12 @@ public class Call(
 
         clientImpl.scope.launch {
             safeCall {
-                session?.sfuTracer?.trace(
+                session.value?.sfuTracer?.trace(
                     "leave-call",
                     "[reason=$reason, error=${disconnectionReason?.message}]",
                 )
                 val stats = collectStats()
-                session?.sendCallStats(stats)
+                session.value?.sendCallStats(stats)
             }
             cleanup()
         }
@@ -1054,7 +1069,7 @@ public class Call(
         logger.i {
             "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
-        session?.updateTrackDimensions(
+        session.value?.updateTrackDimensions(
             sessionId,
             trackType,
             visible,
@@ -1074,7 +1089,7 @@ public class Call(
         logger.i {
             "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
-        session?.updateTrackDimensions(
+        session.value?.updateTrackDimensions(
             sessionId,
             trackType,
             visible,
@@ -1124,7 +1139,7 @@ public class Call(
                             "sessionId: $sessionId"
                     }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session?.updateTrackDimensions(
+                        session.value?.updateTrackDimensions(
                             sessionId,
                             trackType,
                             true,
@@ -1151,7 +1166,7 @@ public class Call(
                     }
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session?.updateTrackDimensions(
+                        session.value?.updateTrackDimensions(
                             sessionId,
                             trackType,
                             true,
@@ -1243,7 +1258,7 @@ public class Call(
         includeAudio: Boolean = false,
     ) {
         if (state.ownCapabilities.value.contains(OwnCapability.Screenshare)) {
-            session?.setScreenShareTrack()
+            session.value?.setScreenShareTrack()
             screenShare.enable(mediaProjectionPermissionResultData, includeAudio = includeAudio)
         } else {
             logger.w { "Can't start screen sharing - user doesn't have wnCapability.Screenshare permission" }
@@ -1511,11 +1526,12 @@ public class Call(
 
     fun cleanup() {
         // monitor.stop()
-        session?.cleanup()
+        state.cleanup()
+        session.value?.cleanup()
         shutDownJobsGracefully()
         callStatsReportingJob?.cancel()
         mediaManager.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
-        session = null
+        session.value = null
         // Cleanup the call's scope provider
         scopeProvider.cleanup()
     }
@@ -1681,7 +1697,7 @@ public class Call(
         resolution: PreferredVideoResolution?,
         sessionIds: List<String>? = null,
     ) {
-        session?.let { session ->
+        session.value?.let { session ->
             session.trackOverridesHandler.updateOverrides(
                 sessionIds = sessionIds,
                 dimensions = resolution?.let { VideoDimension(it.width, it.height) },
@@ -1696,7 +1712,7 @@ public class Call(
      * @param sessionIds The participant session IDs to enable/disable the video feed for. If `null`, the setting will be applied to all participants.
      */
     fun setIncomingVideoEnabled(enabled: Boolean?, sessionIds: List<String>? = null) {
-        session?.trackOverridesHandler?.updateOverrides(sessionIds, visible = enabled)
+        session.value?.trackOverridesHandler?.updateOverrides(sessionIds, visible = enabled)
     }
 
     /**
@@ -1711,7 +1727,7 @@ public class Call(
      * If `null`, the audio setting is applied to all participants currently in the session.
      */
     fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) {
-        val participantTrackMap = session?.subscriber?.tracks ?: return
+        val participantTrackMap = session.value?.subscriber?.value?.tracks ?: return
 
         val targetTracks = when {
             sessionIds != null -> sessionIds.mapNotNull { participantTrackMap[it] }
@@ -1730,11 +1746,11 @@ public class Call(
     public class Debug(val call: Call) {
 
         public fun pause() {
-            call.session?.subscriber?.disable()
+            call.session.value?.subscriber?.value?.disable()
         }
 
         public fun resume() {
-            call.session?.subscriber?.enable()
+            call.session.value?.subscriber?.value?.enable()
         }
 
         public fun rejoin() {
@@ -1744,11 +1760,11 @@ public class Call(
         }
 
         public fun restartSubscriberIce() {
-            call.session?.subscriber?.connection?.restartIce()
+            call.session.value?.subscriber?.value?.connection?.restartIce()
         }
 
         public fun restartPublisherIce() {
-            call.session?.publisher?.connection?.restartIce()
+            call.session.value?.publisher?.value?.connection?.restartIce()
         }
 
         fun migrate() {

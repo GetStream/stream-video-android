@@ -30,5 +30,6 @@ class RingPage {
         val callParticipantAvatar = By.res("Stream_ParticipantAvatar")
         val incomingCallLabel = By.res("Stream_IncomingCallLabel")
         val outgoingCallLabel = By.res("Stream_OutgoingCallLabel")
+        val callProgressBar = By.res("Stream_CallProgressBar")
     }
 }

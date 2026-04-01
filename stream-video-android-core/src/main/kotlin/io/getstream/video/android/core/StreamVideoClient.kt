@@ -171,7 +171,6 @@ internal class StreamVideoClient internal constructor(
     internal val streamNotificationManager: StreamNotificationManager,
     internal val enableCallNotificationUpdates: Boolean,
     internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
-    internal val testSfuAddress: String? = null,
     internal val sounds: Sounds,
     internal val vibrationConfig: RingingCallVibrationConfig,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
@@ -624,7 +623,7 @@ internal class StreamVideoClient internal constructor(
     internal fun propagateEventToCall(cid: String, event: VideoEvent) {
         calls[cid]?.let { call ->
             call.state.handleEvent(event)
-            call.session?.handleEvent(event)
+            call.session.value?.handleEvent(event)
             call.handleEvent(event)
         }
     }
