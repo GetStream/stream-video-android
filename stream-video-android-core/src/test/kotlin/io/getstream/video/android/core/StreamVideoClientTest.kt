@@ -23,6 +23,7 @@ import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSessionStartedEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.video.android.core.call.CallBusyHandler
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
@@ -189,7 +190,11 @@ class StreamVideoClientTest {
     @Test
     fun `propagateEventToCall updates call components`() {
         val event = mockk<VideoEvent>()
-        val call = mockk<Call>(relaxed = true)
+        val rtcSession = mockk<RtcSession>(relaxed = true)
+        val sessionFlow: MutableStateFlow<RtcSession?> = MutableStateFlow(rtcSession)
+        val call = mockk<Call>(relaxed = true) {
+            every { session } returns sessionFlow
+        }
 
         client::class.java.getDeclaredField("calls").apply {
             isAccessible = true

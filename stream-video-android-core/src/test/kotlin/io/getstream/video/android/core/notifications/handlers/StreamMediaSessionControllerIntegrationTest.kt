@@ -69,13 +69,15 @@ class StreamMediaSessionControllerIntegrationTest {
         controller = DefaultStreamMediaSessionController(interceptors, updateInterceptors)
 
         val mockSubscriber = mockk<Subscriber>(relaxed = true)
+        val mockSubscriberFlow: MutableStateFlow<Subscriber?> = MutableStateFlow(mockSubscriber)
         val mockSession = mockk<RtcSession>(relaxed = true)
+        val mockSessionFlow: MutableStateFlow<RtcSession?> = MutableStateFlow(mockSession)
         val mockState = mockk<CallState>(relaxed = true)
         every { mockState.duration } returns MutableStateFlow(Duration.ZERO)
         every { call.state } returns mockState
         every { mockSubscriber.isEnabled() } returns MutableStateFlow(true)
-        every { mockSession.subscriber } returns mockSubscriber
-        every { call.session } returns mockSession
+        every { mockSession.subscriber } returns mockSubscriberFlow
+        every { call.session } returns mockSessionFlow
         every { call.cid } returns "default:123"
     }
 
