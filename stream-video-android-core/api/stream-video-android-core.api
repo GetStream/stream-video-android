@@ -3890,24 +3890,26 @@ public final class io/getstream/android/video/generated/models/IngressVideoLayer
 }
 
 public final class io/getstream/android/video/generated/models/JoinCallRequest {
-	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Lio/getstream/android/video/generated/models/CallRequest;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Lio/getstream/android/video/generated/models/CallRequest;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Lio/getstream/android/video/generated/models/CallRequest;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Lio/getstream/android/video/generated/models/CallRequest;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/Boolean;
 	public final fun component3 ()Ljava/lang/Integer;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/Boolean;
+	public final fun component5 ()Ljava/util/List;
 	public final fun component6 ()Ljava/lang/Boolean;
 	public final fun component7 ()Ljava/lang/Boolean;
-	public final fun component8 ()Lio/getstream/android/video/generated/models/CallRequest;
-	public final fun copy (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Lio/getstream/android/video/generated/models/CallRequest;)Lio/getstream/android/video/generated/models/JoinCallRequest;
-	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/JoinCallRequest;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Lio/getstream/android/video/generated/models/CallRequest;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/JoinCallRequest;
+	public final fun component8 ()Ljava/lang/Boolean;
+	public final fun component9 ()Lio/getstream/android/video/generated/models/CallRequest;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Lio/getstream/android/video/generated/models/CallRequest;)Lio/getstream/android/video/generated/models/JoinCallRequest;
+	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/JoinCallRequest;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/util/List;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Lio/getstream/android/video/generated/models/CallRequest;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/JoinCallRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCreate ()Ljava/lang/Boolean;
 	public final fun getData ()Lio/getstream/android/video/generated/models/CallRequest;
 	public final fun getLocation ()Ljava/lang/String;
 	public final fun getMembersLimit ()Ljava/lang/Integer;
 	public final fun getMigratingFrom ()Ljava/lang/String;
+	public final fun getMigratingFromList ()Ljava/util/List;
 	public final fun getNotify ()Ljava/lang/Boolean;
 	public final fun getRing ()Ljava/lang/Boolean;
 	public final fun getVideo ()Ljava/lang/Boolean;
@@ -13187,6 +13189,7 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun getRejectAction (Landroid/app/PendingIntent;)Landroidx/core/app/NotificationCompat$Action;
 	public fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZLjava/util/Map;)Landroid/app/Notification;
 	public fun getSettingUpCallNotification ()Landroid/app/Notification;
+	public fun getSettingUpCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 	public fun getStreamNotificationDispatcher ()Lio/getstream/video/android/core/notifications/dispatchers/NotificationDispatcher;
 	public fun isInForeground ()Z
 	public fun maybeCreateChannel (Ljava/lang/String;Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
@@ -13439,6 +13442,7 @@ public class io/getstream/video/android/core/notifications/handlers/StreamDefaul
 	public fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/util/Map;)Landroid/app/Notification;
 	public fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZLjava/util/Map;)Landroid/app/Notification;
 	public fun getSettingUpCallNotification ()Landroid/app/Notification;
+	public fun getSettingUpCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 	public fun onCallNotificationUpdate (Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun onLiveCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/util/Map;)V
 	public fun onMissedCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/util/Map;)V
@@ -13542,7 +13546,7 @@ public abstract interface class io/getstream/video/android/core/notifications/ha
 	public abstract fun onRingingCall (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/util/Map;)V
 }
 
-public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationProvider : io/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload {
+public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationProvider : io/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload, io/getstream/video/android/core/notifications/handlers/StreamSettingUpCallNotificationProvider {
 	public fun getIncomingCallNotification (Landroid/app/PendingIntent;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Ljava/lang/String;Z)Landroid/app/Notification;
 	public fun getMissedCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;)Landroid/app/Notification;
 	public static synthetic fun getMissedCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationProvider;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ILjava/lang/Object;)Landroid/app/Notification;
@@ -13550,7 +13554,8 @@ public abstract interface class io/getstream/video/android/core/notifications/ha
 	public static synthetic fun getOngoingCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationProvider;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZIILjava/lang/Object;)Landroid/app/Notification;
 	public fun getRingingCallNotification (Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Z)Landroid/app/Notification;
 	public static synthetic fun getRingingCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationProvider;Lio/getstream/video/android/core/RingingState;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/lang/Object;)Landroid/app/Notification;
-	public abstract fun getSettingUpCallNotification ()Landroid/app/Notification;
+	public fun getSettingUpCallNotification ()Landroid/app/Notification;
+	public fun getSettingUpCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 }
 
 public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload {
@@ -13585,6 +13590,10 @@ public abstract interface class io/getstream/video/android/core/notifications/ha
 	public abstract fun updateIncomingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateOngoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamSettingUpCallNotificationProvider {
+	public abstract fun getSettingUpCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 }
 
 public final class io/getstream/video/android/core/notifications/internal/receivers/ToggleCameraBroadcastReceiver : android/content/BroadcastReceiver {

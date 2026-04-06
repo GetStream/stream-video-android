@@ -244,6 +244,13 @@ public open class DefaultNotificationHandler(
             .build()
     }
 
+    @Deprecated(
+        "Use StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
+        replaceWith = ReplaceWith(
+            "StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
+        ),
+        level = DeprecationLevel.WARNING,
+    )
     override fun getSettingUpCallNotification(): Notification? {
         val channelId = application.getString(
             R.string.stream_video_call_setup_notification_channel_id,
@@ -276,6 +283,11 @@ public open class DefaultNotificationHandler(
             setOngoing(true)
         }
     }
+
+    override fun getSettingUpCallNotification(
+        trigger: String,
+        callId: StreamCallId,
+    ): Notification? = getSettingUpCallNotification()
 
     override suspend fun onCallNotificationUpdate(call: Call): Notification? {
         coroutineScope {

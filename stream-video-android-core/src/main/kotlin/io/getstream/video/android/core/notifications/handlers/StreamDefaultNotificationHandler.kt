@@ -59,6 +59,7 @@ import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
+import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
@@ -528,6 +529,13 @@ constructor(
         }
     }
 
+    @Deprecated(
+        "Use StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
+        replaceWith = ReplaceWith(
+            "StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
+        ),
+        level = DeprecationLevel.WARNING,
+    )
     override fun getSettingUpCallNotification(): Notification? {
         logger.d { "[getSettingUpCallNotification]" }
         val channelId = notificationChannels.outgoingCallChannel.id
@@ -540,6 +548,57 @@ constructor(
             setChannelId(channelId)
             setCategory(NotificationCompat.CATEGORY_CALL)
             setOngoing(true)
+        }
+    }
+
+    override fun getSettingUpCallNotification(trigger: String, callId: StreamCallId): Notification? {
+        return when (trigger) {
+            /**
+             * TODO: This logic is duplicated with getIncomingCallNotificationInternal.
+             * Update it soon
+             */
+
+            TRIGGER_INCOMING_CALL -> {
+                val title = application.getString(
+                    R.string.stream_video_call_setup_notification_title,
+                )
+                val description =
+                    application.getString(R.string.stream_video_call_setup_notification_description)
+
+                val notificationChannel = when {
+                    isAppInForeground() && hideRingingNotificationInForeground ->
+                        notificationChannels.incomingCallLowImportanceChannel
+                    else -> notificationChannels.incomingCallChannel
+                }
+
+                val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+                    callId,
+                    payload = emptyMap(),
+                )
+
+                if (fullScreenPendingIntent == null) {
+                    logger.w {
+                        "[getSettingUpCallNotification] fullScreenPendingIntent is null; lock-screen wake-up may not work."
+                    }
+                }
+                return ensureChannelAndBuildNotification(notificationChannel) {
+                    priority = if (hideRingingNotificationInForeground) {
+                        NotificationCompat.PRIORITY_LOW
+                    } else {
+                        NotificationCompat.PRIORITY_MAX
+                    }
+                    setContentTitle(title)
+                    setContentText(description)
+                    setSmallIcon(R.drawable.stream_video_ic_call)
+                    setChannelId(notificationChannel.id)
+                    setOngoing(true)
+                    setCategory(NotificationCompat.CATEGORY_CALL)
+                    setFullScreenIntent(fullScreenPendingIntent, true)
+                    setContentIntent(fullScreenPendingIntent)
+                }
+            }
+
+            else -> getSettingUpCallNotification()
         }
     }
 

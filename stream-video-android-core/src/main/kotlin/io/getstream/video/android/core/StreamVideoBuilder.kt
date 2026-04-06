@@ -87,7 +87,7 @@ import java.net.ConnectException
  * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig]. (Deprecated) Use `callServiceConfigRegistry` instead.
- * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
+ * @property localCoordinatorAddress Local coordinator address (IP:port) to be used for testing. Leave null if not needed.
  * @property sounds Overwrite the default SDK sounds. See [io.getstream.video.android.core.sounds.RingingConfig].
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
@@ -142,7 +142,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     )
     private val callServiceConfig: CallServiceConfig? = null,
     private val callServiceConfigRegistry: CallServiceConfigRegistry? = null,
-    private val localSfuAddress: String? = null,
+    private val localCoordinatorAddress: String? = null,
     private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
     private val vibrationConfig: RingingCallVibrationConfig = disableVibrationConfig(),
     private val crashOnMissingPermission: Boolean = false,
@@ -214,8 +214,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             throw IllegalArgumentException("The API key cannot be blank")
         }
 
-        if (token.isBlank()) {
-            throw IllegalArgumentException("The token cannot be blank")
+        if (user.type == UserType.Authenticated && token.isBlank()) {
+            throw IllegalArgumentException("The token cannot be blank for authenticated users")
         }
 
         if (user.type == UserType.Authenticated && user.id.isBlank()) {
@@ -234,11 +234,18 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         AndroidThreeTen.init(context)
         tokenRepository.updateToken(token)
         // This connection module class exposes the connections to the various retrofit APIs.
+        val resolvedApiUrl = localCoordinatorAddress?.let {
+            "http://${it.trimEnd('/')}"
+        } ?: apiUrl ?: "https:///$videoDomain"
+        val resolvedWssUrl = localCoordinatorAddress?.let {
+            "ws://${it.trimEnd('/')}/video/connect"
+        } ?: wssUrl ?: "wss://$videoDomain/video/connect"
+
         val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
             scope = scope,
-            apiUrl = apiUrl ?: "https:///$videoDomain",
-            wssUrl = wssUrl ?: "wss://$videoDomain/video/connect",
+            apiUrl = resolvedApiUrl,
+            wssUrl = resolvedWssUrl,
             connectionTimeoutInMs = connectionTimeoutInMs,
             loggingLevel = loggingLevel,
             user = user,
@@ -260,7 +267,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         )
 
         // Set call configuration
-        var callConfigRegistry = createCallConfigurationRegistry(
+        val callConfigRegistry = createCallConfigurationRegistry(
             callServiceConfigRegistry,
             callServiceConfig,
         )
@@ -278,7 +285,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             streamNotificationManager = streamNotificationManager,
             enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
             callServiceConfigRegistry = callConfigRegistry,
-            testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
             crashOnMissingPermission = crashOnMissingPermission,
@@ -302,7 +308,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         }
 
         // Establish a WS connection with the coordinator (we don't support this for anonymous users)
-        if (user.type != UserType.Anonymous) {
+        if (user.type == UserType.Authenticated) {
             scope.launch {
                 try {
                     if (notificationConfig.autoRegisterPushDevice) {

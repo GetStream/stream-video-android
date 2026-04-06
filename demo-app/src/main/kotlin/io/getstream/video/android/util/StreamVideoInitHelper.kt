@@ -52,6 +52,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
 import io.getstream.video.android.noise.cancellation.NoiseCancellation
 import io.getstream.video.android.notification.LiveStreamMediaNotificationInterceptor
 import io.getstream.video.android.notification.PausePlayMediaSessionCallback
@@ -65,6 +66,58 @@ import kotlinx.coroutines.runBlocking
 
 public enum class InitializedState {
     NOT_STARTED, RUNNING, FINISHED, FAILED
+}
+
+/**
+ * Configuration for connecting to a local dev environment instead of the cloud.
+ * Set [StreamVideoInitHelper.localDevConfig] before calling [StreamVideoInitHelper.loadSdk].
+ *
+ * Provide either [token] directly or [secret] to auto-generate a signed JWT.
+ * The SFU address is resolved automatically by the local coordinator's join response.
+ *
+ * @property coordinatorAddress Local coordinator IP:port (e.g. "192.168.1.2:3030").
+ * @property apiKey API key from the local coordinator database.
+ * @property secret API secret from the local coordinator — used to sign a JWT for [userId].
+ * @property userId User ID to connect as.
+ * @property token Pre-generated JWT token. If null, one is generated from [secret].
+ */
+data class LocalDevConfig(
+    val coordinatorAddress: String,
+    val apiKey: String,
+    val userId: String,
+    val secret: String? = null,
+    val token: String? = null,
+) {
+    init {
+        require(secret != null || token != null) {
+            "LocalDevConfig requires either 'secret' (to generate a token) or a pre-generated 'token'."
+        }
+    }
+
+    fun resolveToken(): String = token ?: generateSignedToken()
+
+    private fun generateSignedToken(): String {
+        val secret = requireNotNull(secret)
+        fun base64Url(data: ByteArray): String =
+            android.util.Base64.encodeToString(
+                data,
+                android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING,
+            )
+
+        val header = base64Url(
+            "{\"alg\":\"HS256\",\"typ\":\"JWT\"}".toByteArray(Charsets.UTF_8),
+        )
+        val now = System.currentTimeMillis() / 1000
+        val payload = base64Url(
+            "{\"user_id\":\"$userId\",\"iat\":$now,\"exp\":${now + 86_400}}"
+                .toByteArray(Charsets.UTF_8),
+        )
+        val signingInput = "$header.$payload"
+        val mac = javax.crypto.Mac.getInstance("HmacSHA256")
+        mac.init(javax.crypto.spec.SecretKeySpec(secret.toByteArray(Charsets.UTF_8), "HmacSHA256"))
+        val signature = base64Url(mac.doFinal(signingInput.toByteArray(Charsets.UTF_8)))
+        return "$signingInput.$signature"
+    }
 }
 
 @SuppressLint("StaticFieldLeak")
@@ -84,19 +137,22 @@ object StreamVideoInitHelper {
     suspend fun reloadSdk(
         dataStore: StreamUserDataStore,
         useRandomUserAsFallback: Boolean = true,
+        localDevConfig: LocalDevConfig? = null,
     ) {
         StreamVideo.removeClient()
-        loadSdk(dataStore, useRandomUserAsFallback)
+        loadSdk(dataStore, useRandomUserAsFallback, localDevConfig)
     }
 
     /**
      * A helper function that will initialise the [StreamVideo] SDK and also the [ChatClient].
      * Set [useRandomUserAsFallback] to true if you want to use a guest fallback if the user is not
      * logged in.
+     * Pass [localDevConfig] to bypass cloud auth and connect to a local coordinator instead.
      */
     suspend fun loadSdk(
         dataStore: StreamUserDataStore,
         useRandomUserAsFallback: Boolean = true,
+        localDevConfig: LocalDevConfig? = null,
     ) = AppConfig.load(context) {
         if (StreamVideo.isInstalled) {
             _initState.value = InitializedState.FINISHED
@@ -114,52 +170,74 @@ object StreamVideoInitHelper {
         _initState.value = InitializedState.RUNNING
 
         try {
-            // Load the signed-in user (can be null)
-            var loggedInUser = dataStore.data.firstOrNull()?.user
-            var authData: GetAuthDataResponse? = null
-
-            // Create and login a random new user if user is null and we allow a random user login
-            if (loggedInUser == null && useRandomUserAsFallback) {
-                val userId = UserHelper.generateRandomString()
-
-                authData = StreamService.instance.getAuthData(
-                    environment = AppConfig.currentEnvironment.value!!.env,
-                    userId = userId,
-                    StreamService.TOKEN_EXPIRY_TIME,
-                )
-
-                loggedInUser = User(id = authData.userId, role = "admin")
-
-                // Store the data (note that this datastore belongs to the client - it's not
-                // used by the SDK directly in any way)
+            if (localDevConfig != null) {
+                val localCfg = localDevConfig
+                val loggedInUser = User(id = localCfg.userId, role = "admin")
                 dataStore.updateUser(loggedInUser)
-            }
 
-            // If we have a logged in user (from the data store or randomly created above)
-            // then we can initialise the SDK
-            if (loggedInUser != null) {
-                if (authData == null) {
-                    authData = StreamService.instance.getAuthData(
-                        environment = AppConfig.currentEnvironment.value!!.env,
-                        userId = loggedInUser.id,
-                        StreamService.TOKEN_EXPIRY_TIME,
-                    )
-                }
-
-                initializeStreamChat(
-                    context = context,
-                    apiKey = authData.apiKey,
-                    user = loggedInUser,
-                    token = authData.token,
-                )
+                ChatClient.Builder(localCfg.apiKey, context)
+                    .logLevel(if (BuildConfig.DEBUG) ChatLogLevel.ALL else ChatLogLevel.NOTHING)
+                    .build()
 
                 initializeStreamVideo(
                     context = context,
-                    apiKey = authData.apiKey,
+                    apiKey = localCfg.apiKey,
                     user = loggedInUser,
-                    token = authData.token,
+                    token = localCfg.resolveToken(),
                     loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+                    localCoordinatorAddress = localCfg.coordinatorAddress,
+                    localTokenProvider = object : TokenProvider {
+                        override suspend fun loadToken(): String = localCfg.resolveToken()
+                    },
                 )
+            } else {
+                // Load the signed-in user (can be null)
+                var loggedInUser = dataStore.data.firstOrNull()?.user
+                var authData: GetAuthDataResponse? = null
+
+                // Create and login a random new user if user is null and we allow a random user login
+                if (loggedInUser == null && useRandomUserAsFallback) {
+                    val userId = UserHelper.generateRandomString()
+
+                    authData = StreamService.instance.getAuthData(
+                        environment = AppConfig.currentEnvironment.value!!.env,
+                        userId = userId,
+                        StreamService.TOKEN_EXPIRY_TIME,
+                    )
+
+                    loggedInUser = User(id = authData.userId, role = "admin")
+
+                    // Store the data (note that this datastore belongs to the client - it's not
+                    // used by the SDK directly in any way)
+                    dataStore.updateUser(loggedInUser)
+                }
+
+                // If we have a logged in user (from the data store or randomly created above)
+                // then we can initialise the SDK
+                if (loggedInUser != null) {
+                    if (authData == null) {
+                        authData = StreamService.instance.getAuthData(
+                            environment = AppConfig.currentEnvironment.value!!.env,
+                            userId = loggedInUser.id,
+                            StreamService.TOKEN_EXPIRY_TIME,
+                        )
+                    }
+
+                    initializeStreamChat(
+                        context = context,
+                        apiKey = authData.apiKey,
+                        user = loggedInUser,
+                        token = authData.token,
+                    )
+
+                    initializeStreamVideo(
+                        context = context,
+                        apiKey = authData.apiKey,
+                        user = loggedInUser,
+                        token = authData.token,
+                        loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+                    )
+                }
             }
             /**
              * The `connectOnInit` flag in `StreamVideoInitHelper` is set to `false` to give us
@@ -175,6 +253,53 @@ object StreamVideoInitHelper {
         } catch (e: Exception) {
             _initState.value = InitializedState.FAILED
             Log.e("StreamVideoInitHelper", "Init failed.", e)
+        }
+
+        isInitialising = false
+    }
+
+    /**
+     * Initialises the [StreamVideo] SDK for a [UserType.Guest] user.
+     * No server-side token is required — the SDK automatically calls the `/video/guest`
+     * endpoint to obtain a short-lived JWT token.
+     */
+    suspend fun loadSdkForGuest(
+        dataStore: StreamUserDataStore,
+        guestUser: User,
+    ) = AppConfig.load(context) {
+        if (StreamVideo.isInstalled) {
+            _initState.value = InitializedState.FINISHED
+            return@load
+        }
+
+        isInitialising = true
+        _initState.value = InitializedState.RUNNING
+
+        try {
+            // Fetch the apiKey from the backend; the returned token is intentionally discarded.
+            val authData = StreamService.instance.getAuthData(
+                environment = AppConfig.currentEnvironment.value!!.env,
+                userId = guestUser.id,
+                StreamService.TOKEN_EXPIRY_TIME,
+            )
+            dataStore.updateUser(guestUser)
+
+            // Pass an empty token — the fixed StreamVideoBuilder will call /video/guest
+            // automatically because user.type == UserType.Guest.
+            initializeStreamVideo(
+                context = context,
+                apiKey = authData.apiKey,
+                user = guestUser,
+                token = "",
+                loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+            )
+
+            StreamVideo.instanceOrNull()?.connect()
+            _initState.value = InitializedState.FINISHED
+        } catch (e: Exception) {
+            _initState.value = InitializedState.FAILED
+            Log.e("StreamVideoInitHelper", "Guest init failed.", e)
+            throw e
         }
 
         isInitialising = false
@@ -233,6 +358,8 @@ object StreamVideoInitHelper {
         user: User,
         token: String,
         loggingLevel: LoggingLevel,
+        localCoordinatorAddress: String? = null,
+        localTokenProvider: TokenProvider? = null,
     ): StreamVideo {
         val callServiceConfigRegistry = CallServiceConfigRegistry()
         callServiceConfigRegistry.apply {
@@ -265,6 +392,7 @@ object StreamVideoInitHelper {
             connectionTimeoutInMs = 12_000L,
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
+            localCoordinatorAddress = localCoordinatorAddress,
             callServiceConfigRegistry = callServiceConfigRegistry,
             vibrationConfig = enableRingingCallVibrationConfig(),
             notificationConfig = testNotificationConfig ?: NotificationConfig(
@@ -285,6 +413,20 @@ object StreamVideoInitHelper {
                         object : DefaultNotificationIntentBundleResolver() {
 
                             override fun getIncomingCallBundle(
+                                callId: StreamCallId,
+                                notificationId: Int,
+                                payload: Map<String, Any?>,
+                            ): Bundle {
+                                return StreamCallActivity.callIntentBundle(
+                                    callId,
+                                    configuration = StreamCallActivityConfiguration(
+                                        closeScreenOnCallEnded = true,
+                                    ),
+                                    leaveWhenLastInCall = true,
+                                )
+                            }
+
+                            override fun getOngoingCallBundle(
                                 callId: StreamCallId,
                                 notificationId: Int,
                                 payload: Map<String, Any?>,
@@ -328,7 +470,7 @@ object StreamVideoInitHelper {
                     ),
                 ),
             ),
-            tokenProvider = object : TokenProvider {
+            tokenProvider = localTokenProvider ?: object : TokenProvider {
                 override suspend fun loadToken(): String {
                     val userEmail = user.custom?.get("email")
                     val userId = user.id

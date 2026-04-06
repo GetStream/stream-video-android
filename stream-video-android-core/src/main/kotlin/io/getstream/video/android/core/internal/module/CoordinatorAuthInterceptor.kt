@@ -42,11 +42,19 @@ internal class CoordinatorAuthInterceptor(
             original.url
         }
 
-        val updated = original.newBuilder()
+        val token = tokenRepository.getToken()
+        val requestBuilder = original.newBuilder()
             .url(updatedUrl)
-            .addHeader(HEADER_AUTHORIZATION, tokenRepository.getToken())
             .header(STREAM_AUTH_TYPE, authType)
-            .build()
+
+        // Only add the Authorization header when a token is present.
+        // For guest and anonymous users the token starts empty, so omitting it
+        // prevents a spurious "Authorization: " header that the server rejects.
+        if (token.isNotBlank()) {
+            requestBuilder.addHeader(HEADER_AUTHORIZATION, token)
+        }
+
+        val updated = requestBuilder.build()
 
         return chain.proceed(updated)
     }

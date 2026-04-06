@@ -51,6 +51,9 @@ data class JoinCallRequest (
     @Json(name = "migrating_from")
     val migratingFrom: kotlin.String? = null,
 
+    @Json(name = "migrating_from_list")
+    val migratingFromList: kotlin.collections.List<kotlin.String>? = null,
+
     @Json(name = "notify")
     val notify: kotlin.Boolean? = null,
 

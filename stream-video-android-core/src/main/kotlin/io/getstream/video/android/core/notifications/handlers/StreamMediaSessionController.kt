@@ -279,7 +279,7 @@ open class DefaultStreamMediaSessionController(
         playbackStateBuilder: PlaybackStateCompat.Builder,
     ) {
         logger.d { "[updatePlaybackState] Updating media metadata for session: $mediaSession" }
-        val isPlaying = call.session?.subscriber?.isEnabled()?.value
+        val isPlaying = call.session.value?.subscriber?.value?.isEnabled()?.value
         val playbackState = if (isPlaying == true) {
             PlaybackStateCompat.STATE_PLAYING
         } else if (isPlaying == false) {

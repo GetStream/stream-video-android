@@ -17,6 +17,9 @@
 plugins {
     id("io.getstream.video.android.library")
 }
+apiValidation {
+    nonPublicMarkers.add("io.getstream.video.android.core.internal.InternalStreamVideoApi")
+}
 
 android {
     namespace = "io.getstream.video.android.ui.common"
