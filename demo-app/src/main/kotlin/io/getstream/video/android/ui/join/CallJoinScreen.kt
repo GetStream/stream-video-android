@@ -43,6 +43,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DriveFileMove
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Call
@@ -102,6 +103,7 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
+import io.getstream.video.android.ui.LogFilesScreen
 import io.getstream.video.android.ui.SingleButtonDialog
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
@@ -121,6 +123,8 @@ fun CallJoinScreen(
     var isSignOutDialogVisible by remember { mutableStateOf(false) }
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
     val isNetworkAvailable by callJoinViewModel.isNetworkAvailable.collectAsStateWithLifecycle()
+
+    var renderLogsFileUi by remember { mutableStateOf(false) }
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
@@ -143,6 +147,9 @@ fun CallJoinScreen(
             onSignOutClick = {
                 callJoinViewModel.autoLogInAfterLogOut = false
                 callJoinViewModel.logOut()
+            },
+            onLogsClick = {
+                renderLogsFileUi = true
             },
         )
 
@@ -182,6 +189,12 @@ fun CallJoinScreen(
             appContext.app.policyViolationUiData.value = null
         }
     }
+
+    if (renderLogsFileUi) {
+        LogFilesScreen({
+            renderLogsFileUi = false
+        })
+    }
 }
 
 @Composable
@@ -210,6 +223,7 @@ private fun CallJoinHeader(
     onAvatarLongClick: () -> Unit,
     onDirectCallClick: () -> Unit,
     onSignOutClick: () -> Unit,
+    onLogsClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -323,6 +337,19 @@ private fun CallJoinHeader(
                                 onClick = {
                                     showMenu = false
                                     onSignOutClick()
+                                },
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_ExportLogsButton"),
+                                icon = Icons.AutoMirrored.Default.DriveFileMove,
+                                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                                text = stringResource(id = R.string.logs),
+                                onClick = {
+                                    showMenu = false
+                                    onLogsClick()
                                 },
                             )
                         }
@@ -716,6 +743,6 @@ private fun CallJoinScreenLandscapePreview() {
 private fun CallJoinScreenHeader() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallJoinHeader(previewUsers[0], false, true, {}, {}, {})
+        CallJoinHeader(previewUsers[0], false, true, {}, {}, {}, {})
     }
 }
