@@ -330,19 +330,6 @@ private fun CallJoinHeader(
                             StreamButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .testTag("Stream_SignOutButton"),
-                                icon = Icons.AutoMirrored.Filled.Logout,
-                                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
-                                text = stringResource(id = R.string.sign_out),
-                                onClick = {
-                                    showMenu = false
-                                    onSignOutClick()
-                                },
-                            )
-                            Spacer(modifier = Modifier.width(5.dp))
-                            StreamButton(
-                                modifier = Modifier
-                                    .fillMaxWidth()
                                     .testTag("Stream_ExportLogsButton"),
                                 icon = Icons.AutoMirrored.Default.DriveFileMove,
                                 style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
@@ -350,6 +337,19 @@ private fun CallJoinHeader(
                                 onClick = {
                                     showMenu = false
                                     onLogsClick()
+                                },
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_SignOutButton"),
+                                icon = Icons.AutoMirrored.Filled.Logout,
+                                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                                text = stringResource(id = R.string.sign_out),
+                                onClick = {
+                                    showMenu = false
+                                    onSignOutClick()
                                 },
                             )
                         }

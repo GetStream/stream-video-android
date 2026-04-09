@@ -29,7 +29,7 @@
     <string name="sign_in_contact">Having problems logging in?&#160;</string>
     <string name="sign_in_contact_us">Contact us</string>
     <string name="sign_out">Sign out</string>
-    <string name="logs">Logs</string>
+    <string name="logs">Share Logs</string>
     <string name="join_description">Start a new call, join a meeting by \nentering the call ID or by scanning \na QR code.</string>
     <string name="join_call">Join Call</string>
     <string name="join_call_by_qr_code">Scan QR meeting code</string>
