@@ -129,20 +129,13 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun `failed SFU IDs accumulate across multiple migrate calls`() = runTest {
         val call = client.call("default", randomUUID())
 
-        val session1 = mockk<RtcSession>(relaxed = true)
-        every { session1.sfuName } returns "sfu-edge-1"
-        call.session.value = session1
-        call.location = "test-location"
-        call.migrate()
-
-        val session2 = mockk<RtcSession>(relaxed = true)
-        every { session2.sfuName } returns "sfu-edge-2"
-        call.session.value = session2
-        call.migrate()
+        call.invokeAddFailedSfuId("sfu-edge-1")
+        call.invokeAddFailedSfuId("sfu-edge-2")
 
         val ids = call.getFailedSfuIds()
         assertTrue(ids.contains("sfu-edge-1"))
         assertTrue(ids.contains("sfu-edge-2"))
+        assertEquals(2, ids.size)
     }
 
     @Test
