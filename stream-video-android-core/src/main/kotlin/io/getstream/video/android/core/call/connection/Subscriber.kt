@@ -330,6 +330,9 @@ internal class Subscriber(
 
     /**
      * Restarts the ICE connection with the SFU.
+     * Terminal errors (e.g. PARTICIPANT_NOT_FOUND) are propagated by the
+     * signaling decorator and trigger a rejoin; we cancel scheduled retries
+     * so this session stops attempting recovery on a dead SFU participant.
      */
     suspend fun restartIce() = wrapAPICall {
         val request = ICERestartRequest(
@@ -339,6 +342,7 @@ internal class Subscriber(
         sfuClient.iceRestart(request)
     }.onError {
         tracer.trace("iceRestart-error", it.message ?: "unknown")
+        restartIceJobDelegate.cancelScheduledRestartIce()
     }
 
     /**
