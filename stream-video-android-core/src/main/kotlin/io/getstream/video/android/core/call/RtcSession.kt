@@ -65,6 +65,7 @@ import io.getstream.video.android.core.events.InboundStateNotificationEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
+import io.getstream.video.android.core.events.ParticipantMigrationCompleteEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.events.SubscriberOfferEvent
@@ -97,8 +98,10 @@ import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -112,16 +115,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
@@ -1009,6 +1013,8 @@ public class RtcSession internal constructor(
     fun cleanup() = atomicCleanup {
         logger.i { "[cleanup] #sfu; #track; no args" }
 
+        mediaScope.cancel()
+
         coroutineScope.launch {
             serialProcessor.submit("cleanupSfuConnections") {
                 sfuConnectionModule.socketConnection.disconnect()
@@ -1886,15 +1892,55 @@ public class RtcSession internal constructor(
         }
     }
 
-    internal fun prepareRejoin() {
-        // We are rejoining from the start, we don't want to know.
+    // Prepares this session for migration to a new SFU without destroying it.
+    // Old peer connections stay alive so media keeps flowing during the transition.
+    // Returns a Deferred that completes when the old SFU sends ParticipantMigrationComplete
+    // (or false on timeout)
+    internal fun enterMigration(timeoutMs: Long = 7000L): Deferred<Boolean> {
+        // Start listening for migration complete BEFORE cancelling jobs.
+        // events() is a SharedFlow with replay=1, safe for new collectors.
+        val result = CompletableDeferred<Boolean>()
+        coroutineScope.launch {
+            val completed = withTimeoutOrNull(timeoutMs) {
+                sfuConnectionModule.socketConnection.events()
+                    .first { it is ParticipantMigrationCompleteEvent }
+            }
+            result.complete(completed != null)
+        }
+
+        // Stop reconnect triggers from old SFU state changes
+        stateJob?.cancel()
+
+        return result
+    }
+
+    // Tears down the old session after migration is confirmed (or timed out).
+    // No leaveWithReason — matches JS SDK behavior (just close WS, no explicit leave for migration).
+    internal fun finalizeMigration() {
+        eventJob?.cancel()
+        cleanup()
+    }
+
+    internal suspend fun prepareRejoin(reason: String) {
+        // Send final stats while the SFU connection is still alive.
+        val stats = call.collectStats()
+        sendCallStats(stats)
+
+        // Stop reacting to stale state/event updates.
         stateJob?.cancel()
         eventJob?.cancel()
-        runBlocking {
-            sfuConnectionModule.socketConnection.disconnect()
-        }
-        publisher.value?.close(true)
-        subscriber.value?.close()
+
+        // Mark disconnected immediately — late ICE candidates will be routed
+        // to iceTricklePendingEvents instead of being sent to the now-defunct SFU.
+        _sfuSfuSocketState.value = SfuSocketState.Disconnected.Stopped
+
+        // Tell the old SFU we're leaving so it evicts immediately
+        // instead of waiting for the reconnect grace period.
+        leaveWithReason(reason)
+
+        // Close peer connections, null references, clear orphaned tracks,
+        // remove lifecycle observer, cancel supervisorJob.
+        cleanup()
     }
 
     /**
@@ -1924,7 +1970,6 @@ public class RtcSession internal constructor(
     }
 
     internal fun leaveWithReason(reason: String) {
-        mediaScope.cancel()
         val leaveCallRequest = LeaveCallRequest(
             session_id = sessionId,
             reason = reason,
@@ -1932,10 +1977,7 @@ public class RtcSession internal constructor(
         sfuTracer.trace("leave-session", reason)
         val request = SfuRequest(leave_call_request = leaveCallRequest)
         coroutineScope.launch {
-            serialProcessor.submit("leaveWithReason") {
-                sfuConnectionModule.socketConnection.sendEvent(SfuDataRequest(request))
-                Unit
-            }
+            sfuConnectionModule.socketConnection.sendEvent(SfuDataRequest(request))
         }
     }
 }
