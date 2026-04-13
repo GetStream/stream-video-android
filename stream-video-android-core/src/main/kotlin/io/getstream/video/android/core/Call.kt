@@ -794,24 +794,26 @@ public class Call(
         strategy: WebsocketReconnectStrategy,
         reason: String,
     ) {
-        // Quick pre-check: terminal states → no point queueing
+        // Quick pre-check — mirrors JS SDK: skip only when already
+        // reconnecting, migrating, or in a terminal failed state.
         val conn = state.connection.value
-        if (conn is RealtimeConnection.ReconnectingFailed ||
-            conn is RealtimeConnection.Disconnected
+        if (conn is RealtimeConnection.Reconnecting ||
+            conn is RealtimeConnection.Migrating ||
+            conn is RealtimeConnection.ReconnectingFailed
         ) {
-            logger.d { "[reconnect] Terminal state $conn — skipping ($reason)" }
+            logger.d { "[reconnect] Already $conn — skipping ($reason)" }
             return
         }
 
         reconnectMutex.withLock {
-            // Re-check after acquiring the lock — a previous reconnect may
-            // have resolved while we were waiting.
+            // Re-check after acquiring the lock — another reconnect may
+            // have started while we were waiting.
             val currentConn = state.connection.value
-            if (currentConn is RealtimeConnection.Connected ||
-                currentConn is RealtimeConnection.ReconnectingFailed ||
-                currentConn is RealtimeConnection.Disconnected
+            if (currentConn is RealtimeConnection.Reconnecting ||
+                currentConn is RealtimeConnection.Migrating ||
+                currentConn is RealtimeConnection.ReconnectingFailed
             ) {
-                logger.d { "[reconnect] State changed to $currentConn while waiting — skipping ($reason)" }
+                logger.d { "[reconnect] Already $currentConn — skipping ($reason)" }
                 return
             }
 
@@ -820,13 +822,19 @@ public class Call(
             var attempt = 0
 
             while (true) {
-                val connectionState = state.connection.value
-                if (connectionState is RealtimeConnection.Connected ||
-                    connectionState is RealtimeConnection.ReconnectingFailed ||
-                    connectionState is RealtimeConnection.Disconnected
-                ) {
-                    logger.i { "[reconnect] Loop finished — state=$connectionState" }
-                    break
+                // After the first attempt, check if the state has settled
+                // (e.g. a previous iteration succeeded). On the first
+                // iteration we always execute the strategy — the call may
+                // be Connected (migration) or in any other state.
+                if (attempt > 0) {
+                    val connectionState = state.connection.value
+                    if (connectionState is RealtimeConnection.Connected ||
+                        connectionState is RealtimeConnection.ReconnectingFailed ||
+                        connectionState is RealtimeConnection.Disconnected
+                    ) {
+                        logger.i { "[reconnect] Loop finished — state=$connectionState" }
+                        break
+                    }
                 }
 
                 if (attempt >= MAX_RECONNECT_ATTEMPTS) {
