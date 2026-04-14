@@ -30,6 +30,7 @@ import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
 import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
 import io.getstream.video.android.core.call.state.CallAction
 
 /**
@@ -46,6 +47,7 @@ public fun OutgoingCallControls(
     isVideoCall: Boolean = true,
     isCameraEnabled: Boolean,
     isMicrophoneEnabled: Boolean,
+    isSpeakerphoneEnabled: Boolean,
     onCallAction: (CallAction) -> Unit,
 ) {
     Row(
@@ -61,6 +63,11 @@ public fun OutgoingCallControls(
             offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(1.5f),
             onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
         )
+
+        ToggleSpeakerphoneAction(modifier = Modifier
+            .testTag("Stream_SpeakerToggle_Enabled_$isMicrophoneEnabled"),
+            isSpeakerphoneEnabled = isSpeakerphoneEnabled,
+            onCallAction = onCallAction)
 
         if (isVideoCall) {
             ToggleCameraAction(
@@ -90,12 +97,14 @@ private fun OutgoingCallOptionsPreview() {
         Column {
             OutgoingCallControls(
                 isMicrophoneEnabled = true,
+                isSpeakerphoneEnabled = true,
                 isCameraEnabled = true,
                 onCallAction = { },
             )
 
             OutgoingCallControls(
                 isMicrophoneEnabled = false,
+                isSpeakerphoneEnabled = true,
                 isCameraEnabled = false,
                 onCallAction = { },
             )
@@ -103,6 +112,7 @@ private fun OutgoingCallOptionsPreview() {
             OutgoingCallControls(
                 isVideoCall = false,
                 isMicrophoneEnabled = false,
+                isSpeakerphoneEnabled = true,
                 isCameraEnabled = false,
                 onCallAction = { },
             )

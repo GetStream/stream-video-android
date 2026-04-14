@@ -46,6 +46,7 @@ import io.getstream.video.android.compose.ui.components.call.activecall.internal
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallControls
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
@@ -135,6 +136,7 @@ public fun AudioCallContent(
                 isVideoCall = false,
                 isCameraEnabled = false,
                 isMicrophoneEnabled = isMicrophoneEnabled,
+                isSpeakerphoneEnabled = false,
                 onCallAction = onCallAction,
             )
         },
@@ -161,6 +163,7 @@ public fun AudioOnlyCallContent(
     modifier: Modifier = Modifier,
     call: Call,
     isMicrophoneEnabled: Boolean,
+    isSpeakerphoneEnabled: Boolean,
     permissions: VideoPermissionsState = rememberCallPermissionsState(
         call = call,
         permissions = listOf(
@@ -215,6 +218,7 @@ public fun AudioOnlyCallContent(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = VideoTheme.dimens.genericXxl),
             isMicrophoneEnabled = isMicrophoneEnabled,
+            isSpeakerphoneEnabled = isSpeakerphoneEnabled,
             onCallAction = onCallAction,
         )
     }
@@ -257,6 +261,7 @@ public fun AudioOnlyCallDetails(
 public fun AudioOnlyCallControls(
     modifier: Modifier,
     isMicrophoneEnabled: Boolean,
+    isSpeakerphoneEnabled: Boolean,
     onCallAction: (CallAction) -> Unit,
 ) {
     Row(
@@ -270,6 +275,12 @@ public fun AudioOnlyCallControls(
             onCallAction = onCallAction,
             offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(1.5f),
             onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
+        )
+
+        ToggleSpeakerphoneAction(
+            modifier = Modifier.testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
+            isSpeakerphoneEnabled = isSpeakerphoneEnabled,
+            onCallAction = onCallAction,
         )
 
         LeaveCallAction(
@@ -303,6 +314,7 @@ private fun AudioOnlyCallContentPreview() {
         AudioOnlyCallContent(
             call = previewCall,
             isMicrophoneEnabled = false,
+            isSpeakerphoneEnabled = false
         )
     }
 }
