@@ -367,13 +367,13 @@ public final class io/getstream/video/android/compose/theme/VideoThemeKt {
 
 public final class io/getstream/video/android/compose/ui/ComposableSingletons$StreamCallActivityComposeDelegateKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/ComposableSingletons$StreamCallActivityComposeDelegateKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public static field lambda-2 Lkotlin/jvm/functions/Function3;
-	public static field lambda-3 Lkotlin/jvm/functions/Function2;
+	public static field lambda-3 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
-	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-3$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-3$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public class io/getstream/video/android/compose/ui/ComposeStreamCallActivity : io/getstream/video/android/ui/common/StreamCallActivity {
@@ -392,6 +392,7 @@ public class io/getstream/video/android/compose/ui/StreamCallActivityComposeDele
 	public fun CallFailedContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Ljava/lang/Exception;Landroidx/compose/runtime/Composer;I)V
 	public fun HandleCallRejectionFromNotification (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun IncomingCallContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public fun LivestreamContent (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun LoadingContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun NoAnswerContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun OutgoingCallContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
@@ -411,6 +412,7 @@ public abstract interface class io/getstream/video/android/compose/ui/StreamCall
 	public abstract fun CallDisconnectedContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public abstract fun CallFailedContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Ljava/lang/Exception;Landroidx/compose/runtime/Composer;I)V
 	public abstract fun IncomingCallContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public abstract fun LivestreamContent (Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public abstract fun LoadingContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public abstract fun NoAnswerContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public abstract fun OutgoingCallContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/core/Call;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V

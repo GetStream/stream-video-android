@@ -47,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -164,73 +165,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.RootContent(call: Call) {
         if (call.type == CallType.Livestream.name) {
-            LaunchPermissionRequest(getRequiredPermissions(call)) {
-                AllPermissionsGranted {
-                    Box {
-                        LivestreamPlayer(
-                            call = call,
-                            videoRendererConfig =
-                            videoRenderConfig {
-                                this.fallbackContent = {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(
-                                                color = VideoTheme.colors.baseSheetPrimary,
-                                            ),
-                                    ) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier
-                                                .size(48.dp)
-                                                .align(Alignment.Center),
-                                            color = VideoTheme.colors.basePrimary,
-                                        )
-                                    }
-                                }
-                                this.badNetworkContent = {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize(),
-                                    ) {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(
-                                                    color = VideoTheme.colors.baseSheetPrimary,
-                                                )
-                                                .align(Alignment.Center),
-                                            horizontalAlignment = CenterHorizontally,
-                                            verticalArrangement = Arrangement.Center,
-                                        ) {
-                                            Icon(
-                                                tint = VideoTheme.colors.basePrimary,
-                                                imageVector = Icons.Default.SignalWifiBad,
-                                                contentDescription = null,
-                                            )
-                                            Text(
-                                                color = VideoTheme.colors.basePrimary,
-                                                modifier = Modifier.padding(top = 16.dp),
-                                                text = getString(io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network_single_video),
-                                            )
-                                        }
-                                    }
-                                }
-                            },
-                        )
-                        CallAppBar(
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .padding(end = 16.dp, top = 16.dp),
-                            call = call,
-                            centerContent = { },
-                            onCallAction = {
-                                call.leave()
-                                safeFinish()
-                            },
-                        )
-                    }
-                }
-            }
+            LivestreamContent(call)
         } else {
             var callAction: CallAction by remember {
                 mutableStateOf(CustomAction(tag = "initial"))
@@ -633,6 +568,78 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                     onCallAction(call, LeaveCall)
                 },
             )
+        }
+    }
+
+    @Composable
+    override fun LivestreamContent(call: Call) {
+        val context = LocalContext.current
+        LaunchPermissionRequest(getRequiredPermissions(call)) {
+            AllPermissionsGranted {
+                Box {
+                    LivestreamPlayer(
+                        call = call,
+                        videoRendererConfig =
+                        videoRenderConfig {
+                            this.fallbackContent = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(
+                                            color = VideoTheme.colors.baseSheetPrimary,
+                                        ),
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .align(Alignment.Center),
+                                        color = VideoTheme.colors.basePrimary,
+                                    )
+                                }
+                            }
+                            this.badNetworkContent = {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize(),
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(
+                                                color = VideoTheme.colors.baseSheetPrimary,
+                                            )
+                                            .align(Alignment.Center),
+                                        horizontalAlignment = CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
+                                    ) {
+                                        Icon(
+                                            tint = VideoTheme.colors.basePrimary,
+                                            imageVector = Icons.Default.SignalWifiBad,
+                                            contentDescription = null,
+                                        )
+                                        Text(
+                                            color = VideoTheme.colors.basePrimary,
+                                            modifier = Modifier.padding(top = 16.dp),
+                                            text = context.getString(io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network_single_video),
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                    )
+                    CallAppBar(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(end = 16.dp, top = 16.dp),
+                        call = call,
+                        centerContent = { },
+                        onCallAction = {
+                            call.leave()
+                            (context as StreamCallActivity).safeFinish()
+                        },
+                    )
+                }
+            }
         }
     }
 }

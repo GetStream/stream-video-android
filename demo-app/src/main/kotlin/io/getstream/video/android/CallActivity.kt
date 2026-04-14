@@ -19,15 +19,39 @@ package io.getstream.video.android
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.OpenInFull
+import androidx.compose.material.icons.filled.PictureInPictureAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.models.Filters
 import io.getstream.chat.android.models.querysort.QuerySortByField
 import io.getstream.result.onSuccessSuspend
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContent
@@ -126,6 +150,77 @@ class CallActivity : ComposeStreamCallActivity() {
                 onCallAction = { onCallAction(call, it) },
                 onBackPressed = { onBackPressed(call) },
             )
+        }
+
+        @Composable
+        override fun LivestreamContent(call: Call) {
+            var isPipMode by remember { mutableStateOf(false) }
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (isPipMode) {
+                    Text(
+                        text = "Video player is minimized",
+                        style = VideoTheme.typography.subtitleS,
+                        color = VideoTheme.colors.basePrimary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(horizontal = 16.dp),
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(top = 16.dp, end = 16.dp, start = 16.dp)
+                            .size(300.dp, 300.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.Black),
+                    ) {
+                        super.LivestreamContent(call)
+                    }
+                } else {
+                    super.LivestreamContent(call)
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                ) {
+                    if (isPipMode) {
+                        // Expand button (near PiP)
+                        IconButton(
+                            onClick = { isPipMode = false },
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .offset(x = (-8).dp, y = (-100).dp) // slightly above PiP
+                                .size(26.dp)
+                                .background(Color.Black.copy(alpha = 0.6f), CircleShape),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.OpenInFull,
+                                contentDescription = "Expand",
+                                tint = Color.White,
+                            )
+                        }
+                    } else {
+                        // Collapse button (top-right)
+                        IconButton(
+                            onClick = { isPipMode = true },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(top = 100.dp)
+                                .size(40.dp)
+                                .background(Color.Black.copy(alpha = 0.6f), CircleShape),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PictureInPictureAlt,
+                                contentDescription = "Minimize",
+                                tint = Color.White,
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         private fun StreamCallActivity.goBackToMainScreen() {

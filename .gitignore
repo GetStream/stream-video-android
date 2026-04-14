@@ -124,3 +124,4 @@ demo-app/src/production/play/
 video-buddy-server.log
 video-buddy-console.log
 video-buddy-session.json
+/.claude/

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.trace
 
+import android.util.Log
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import java.util.Collections
 
@@ -78,6 +79,7 @@ class Tracer(private val id: String?) {
      */
     fun trace(tag: String, data: Any?) = synchronized(buffer) {
         if (!enabled) return@synchronized
+        Log.d("Tracer", "trace: $tag, $data")
         buffer.add(
             TraceRecord(
                 tag = tag,

@@ -163,4 +163,7 @@ public interface StreamCallActivityComposeUi : StreamActivityUiDelegate<StreamCa
         granted: List<String>,
         notGranted: List<String>,
     )
+
+    @Composable
+    public fun LivestreamContent(call: Call)
 }
