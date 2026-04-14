@@ -9630,7 +9630,6 @@ public abstract interface class io/getstream/video/android/core/api/MicrophoneMa
 	public abstract fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun isEnabled ()Lkotlinx/coroutines/flow/StateFlow;
-	public abstract fun listDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public abstract fun pause (Z)V
 	public static synthetic fun pause$default (Lio/getstream/video/android/core/api/MicrophoneManager;ZILjava/lang/Object;)V
 	public abstract fun resume (Z)V

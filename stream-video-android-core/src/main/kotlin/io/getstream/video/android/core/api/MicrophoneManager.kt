@@ -27,6 +27,9 @@ import stream.video.sfu.models.AudioBitrateProfile
  *
  * Provides controls for enabling/disabling the microphone, selecting audio devices,
  * and observing microphone state.
+ *
+ * This interface is not intended for external implementation. The SDK provides
+ * the only supported implementation. New members may be added in minor releases.
  */
 @Stable
 public interface MicrophoneManager {
@@ -57,9 +60,6 @@ public interface MicrophoneManager {
 
     /** Selects a specific audio device. */
     public fun select(device: StreamAudioDevice?)
-
-    /** Returns a StateFlow of available audio devices. */
-    public fun listDevices(): StateFlow<List<StreamAudioDevice>>
 
     /**
      * Sets the audio bitrate profile. Can only be set before joining the call.

@@ -46,6 +46,9 @@ import kotlinx.coroutines.flow.Flow
  *
  * Inherits [NotificationHandler] for push notification support. This coupling
  * is documented for future refactoring.
+ *
+ * This interface is not intended for external implementation. The SDK provides
+ * the only supported implementation. New members may be added in minor releases.
  */
 @Stable
 public interface StreamVideoClient : NotificationHandler {

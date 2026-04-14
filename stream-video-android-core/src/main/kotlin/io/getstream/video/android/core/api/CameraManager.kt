@@ -28,6 +28,9 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * Provides controls for enabling/disabling the camera, flipping between front and back,
  * selecting specific devices, and observing camera state.
+ *
+ * This interface is not intended for external implementation. The SDK provides
+ * the only supported implementation. New members may be added in minor releases.
  */
 @Stable
 public interface CameraManager {

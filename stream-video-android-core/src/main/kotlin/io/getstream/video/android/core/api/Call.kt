@@ -80,6 +80,9 @@ import stream.video.sfu.models.TrackType
  *
  * Internal methods (fastReconnect, rejoin, migrate, handleEvent, fireEvent) and
  * deprecated methods (subscribe, unsubscribe) are intentionally excluded.
+ *
+ * This interface is not intended for external implementation. The SDK provides
+ * the only supported implementation. New members may be added in minor releases.
  */
 @Stable
 public interface Call {
@@ -418,16 +421,16 @@ public interface Call {
     // -- Recording & Streaming --
 
     /** Starts recording with the default (composite) type. */
-    public suspend fun startRecording(): Result<Any>
+    public suspend fun startRecording(): Result<Unit>
 
     /** Starts recording with a specific type. */
-    public suspend fun startRecording(recordingType: RecordingType): Result<Any>
+    public suspend fun startRecording(recordingType: RecordingType): Result<Unit>
 
     /** Stops recording with the default (composite) type. */
-    public suspend fun stopRecording(): Result<Any>
+    public suspend fun stopRecording(): Result<Unit>
 
     /** Stops recording with a specific type. */
-    public suspend fun stopRecording(recordingType: RecordingType): Result<Any>
+    public suspend fun stopRecording(recordingType: RecordingType): Result<Unit>
 
     /**
      * Lists recordings for this call.
@@ -437,10 +440,10 @@ public interface Call {
     public suspend fun listRecordings(sessionId: String? = null): Result<ListRecordingsResponse>
 
     /** Starts HLS broadcasting. */
-    public suspend fun startHLS(): Result<Any>
+    public suspend fun startHLS(): Result<Unit>
 
     /** Stops HLS broadcasting. */
-    public suspend fun stopHLS(): Result<Any>
+    public suspend fun stopHLS(): Result<Unit>
 
     /**
      * Transitions the call to live mode.

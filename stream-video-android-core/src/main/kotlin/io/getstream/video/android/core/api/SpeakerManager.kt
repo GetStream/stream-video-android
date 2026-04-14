@@ -26,6 +26,9 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * Provides controls for enabling/disabling the speaker, toggling speakerphone,
  * adjusting volume, and observing speaker state.
+ *
+ * This interface is not intended for external implementation. The SDK provides
+ * the only supported implementation. New members may be added in minor releases.
  */
 @Stable
 public interface SpeakerManager {
