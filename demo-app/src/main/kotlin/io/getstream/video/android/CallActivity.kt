@@ -119,10 +119,12 @@ class CallActivity : ComposeStreamCallActivity() {
         @Composable
         override fun StreamCallActivity.AudioCallContent(call: Call) {
             val micEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
+            val isSpeakerEnabled by call.speaker.isEnabled.collectAsStateWithLifecycle()
 
             AudioOnlyCallContent(
                 call = call,
                 isMicrophoneEnabled = micEnabled,
+                isSpeakerphoneEnabled = isSpeakerEnabled,
                 onCallAction = { onCallAction(call, it) },
                 onBackPressed = { onBackPressed(call) },
             )

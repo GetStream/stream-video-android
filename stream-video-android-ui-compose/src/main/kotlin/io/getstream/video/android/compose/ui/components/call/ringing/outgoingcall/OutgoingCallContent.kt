@@ -136,6 +136,11 @@ public fun OutgoingCallContent(
     } else {
         call.microphone.isEnabled.collectAsStateWithLifecycle()
     }
+    val isSpeakerEnabled by if (LocalInspectionMode.current) {
+        remember { mutableStateOf(false) }
+    } else {
+        call.speaker.isEnabled.collectAsStateWithLifecycle()
+    }
 
     CallBackground(
         modifier = modifier,
@@ -166,6 +171,7 @@ public fun OutgoingCallContent(
                 .padding(bottom = VideoTheme.dimens.genericXxl),
             isVideoCall = isVideoType,
             isCameraEnabled = isCameraEnabled,
+            isSpeakerphoneEnabled = isSpeakerEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction,
         )
