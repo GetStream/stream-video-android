@@ -25,6 +25,8 @@ import stream.video.sfu.signal.ICERestartResponse
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
+import stream.video.sfu.signal.SendMetricsRequest
+import stream.video.sfu.signal.SendMetricsResponse
 import stream.video.sfu.signal.SendStatsRequest
 import stream.video.sfu.signal.SendStatsResponse
 import stream.video.sfu.signal.SetPublisherRequest
@@ -95,6 +97,10 @@ internal class SignalLostSignalingServiceDecorator(private val decorated: Signal
                 onPropagateError(error)
             }
         }
+    }
+
+    override suspend fun sendMetrics(sendMetricsRequest: SendMetricsRequest): SendMetricsResponse {
+        return decorated.sendMetrics(sendMetricsRequest)
     }
 
     override suspend fun startNoiseCancellation(startNoiseCancellationRequest: StartNoiseCancellationRequest): StartNoiseCancellationResponse {
