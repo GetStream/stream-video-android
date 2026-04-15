@@ -61,6 +61,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.PeerConnectionNotUsableException
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -114,7 +115,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
 import org.webrtc.PeerConnection
@@ -376,7 +376,6 @@ public class Call(
         }
 
         override suspend fun onDisconnected() {
-            state._connection.value = RealtimeConnection.Reconnecting
             logger.d {
                 "[NetworkStateListener#onDisconnected] #network; old lastDisconnect:$lastDisconnect, clientImpl.leaveAfterDisconnectSeconds:${clientImpl.leaveAfterDisconnectSeconds}"
             }
@@ -386,8 +385,15 @@ public class Call(
             }
             leaveTimeoutAfterDisconnect = scope.launch {
                 delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
+                val conn = state.connection.value
+                if (conn is RealtimeConnection.Connected) {
+                    logger.d {
+                        "[NetworkStateListener#onDisconnected] #network; Already reconnected ($conn) — not leaving"
+                    }
+                    return@launch
+                }
                 logger.d {
-                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
+                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds} (connection=$conn)"
                 }
                 leave()
             }
@@ -797,35 +803,36 @@ public class Call(
         val conn = state.connection.value
         logger.d { "[reconnect] Entry — strategy=$strategy reason=$reason connection=$conn" }
 
-        if (conn is RealtimeConnection.Reconnecting ||
-            conn is RealtimeConnection.Migrating ||
-            conn is RealtimeConnection.ReconnectingFailed
-        ) {
-            logger.d { "[reconnect] Already $conn — skipping ($reason)" }
+        if (isDestroyed || conn is RealtimeConnection.Disconnected) {
+            logger.d { "[reconnect] Call already left/destroyed (isDestroyed=$isDestroyed, conn=$conn) — skipping ($reason)" }
             return
         }
 
-        // Set the transient state immediately so that concurrent callers
-        // (e.g. stateJob reacting to socket state changes caused by the
-        // reconnect itself) see Reconnecting/Migrating and skip.
-        val isMigrate = strategy ==
-            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
-        state._connection.value = if (isMigrate) {
-            RealtimeConnection.Migrating
-        } else {
-            RealtimeConnection.Reconnecting
+        // Use tryLock so concurrent triggers (stateJob, NetworkStateListener,
+        // SfuSocket errors) don't queue up. If a reconnect loop is already
+        // running it will handle recovery; redundant callers return immediately.
+        if (!reconnectMutex.tryLock()) {
+            logger.d { "[reconnect] Active reconnect loop running — skipping ($reason)" }
+            return
         }
 
-        reconnectMutex.withLock {
-            // Re-check after acquiring the lock — another reconnect may
-            // have started and completed while we were waiting.
+        try {
+            // Re-check after acquiring the lock — bail only if the user left.
+            // We deliberately allow reconnect from Connected (SFU/network may
+            // request it) and from ReconnectingFailed (fresh trigger like
+            // network recovery should be retried).
             val currentConn = state.connection.value
-            if (currentConn is RealtimeConnection.Connected ||
-                currentConn is RealtimeConnection.ReconnectingFailed ||
-                currentConn is RealtimeConnection.Disconnected
-            ) {
-                logger.d { "[reconnect] State resolved to $currentConn while waiting — skipping ($reason)" }
+            if (currentConn is RealtimeConnection.Disconnected) {
+                logger.d { "[reconnect] State is $currentConn — no reconnect needed ($reason)" }
                 return
+            }
+
+            val isMigrate = strategy ==
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
+            state._connection.value = if (isMigrate) {
+                RealtimeConnection.Migrating
+            } else {
+                RealtimeConnection.Reconnecting
             }
 
             val reconnectStartTime = System.currentTimeMillis()
@@ -833,10 +840,6 @@ public class Call(
             var attempt = 0
 
             while (true) {
-                // After the first attempt, check if the state has settled
-                // (e.g. a previous iteration succeeded). On the first
-                // iteration we always execute the strategy — the call may
-                // be Connected (migration) or in any other state.
                 if (attempt > 0) {
                     val connectionState = state.connection.value
                     if (connectionState is RealtimeConnection.Connected ||
@@ -899,11 +902,13 @@ public class Call(
 
                     val wasMigrating = currentStrategy ==
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
+                    val peerConnectionsStale = error is PeerConnectionNotUsableException
                     val pastDeadline = (System.currentTimeMillis() - reconnectStartTime) >
                         reconnectDeadlineMils
 
                     val shouldRejoin = pastDeadline ||
                         wasMigrating ||
+                        peerConnectionsStale ||
                         attempt >= MAX_FAST_RECONNECT_ATTEMPTS
 
                     attempt++
@@ -915,6 +920,8 @@ public class Call(
                     logger.i { "[reconnect] Escalating to $currentStrategy (attempt=$attempt)" }
                 }
             }
+        } finally {
+            reconnectMutex.unlock()
         }
     }
 

@@ -91,6 +91,7 @@ internal open class SfuSocket(
             )
         },
         reconnectCallback = { sfuSocketStateService.onWebSocketEventLost() },
+        isNetworkAvailable = { networkStateProvider.isConnected() },
     )
     private val lifecycleHandler = NoOpLifecycleHandler()
 

@@ -22,6 +22,7 @@ import io.getstream.result.Error
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.common.fsm.FiniteStateMachine
+import io.getstream.video.android.core.socket.sfu.state.RestartReason
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketStateEvent
 import kotlinx.coroutines.flow.StateFlow
@@ -182,7 +183,7 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                     }
 
                     else -> {
-                        logger.e { "Cannot handle event $event while being in inappropriate state $state" }
+                        logger.d { "Cannot handle event $event while being in inappropriate state $state" }
                         state
                     }
                 }
@@ -279,6 +280,12 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
             }
 
             state<SfuSocketState.Disconnected.NetworkDisconnected> {
+                onEvent<SfuSocketStateEvent.NetworkAvailable> {
+                    SfuSocketState.RestartConnection(
+                        RestartReason.NETWORK_AVAILABLE,
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                    )
+                }
                 onEvent<SfuSocketStateEvent.Connect> {
                     SfuSocketState.Connecting(it.connectionConf, it.connectionType)
                 }
@@ -292,12 +299,10 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                         it.error,
                     )
                 }
-                onEvent<SfuSocketStateEvent.NetworkError> {
-                    SfuSocketState.Disconnected.DisconnectedTemporarily(
-                        it.error,
-                        it.reconnectStrategy,
-                    )
-                }
+                // Stay parked — socket errors are expected when the OS reports no network.
+                // The HealthMonitor is already stopped in this state; transitioning to
+                // DisconnectedTemporarily would restart it and cause futile retry loops.
+                onEvent<SfuSocketStateEvent.NetworkError> { currentState }
                 onEvent<SfuSocketStateEvent.RequiredDisconnection> {
                     SfuSocketState.Disconnected.DisconnectedByRequest
                 }

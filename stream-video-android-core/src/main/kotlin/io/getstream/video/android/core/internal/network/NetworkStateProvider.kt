@@ -53,8 +53,7 @@ public class NetworkStateProvider(
 
         override fun onLost(network: Network) {
             logger.d { "[callback#onLost] #network; onLost" }
-            isConnected = false
-            listeners.onDisconnected()
+            notifyListenersIfNetworkStateChanged()
         }
     }
 

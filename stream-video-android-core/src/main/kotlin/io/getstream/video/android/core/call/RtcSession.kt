@@ -209,6 +209,9 @@ data class TrackDimensions(
  *
  * For developers: RtcSession throws [IllegalStateException] because its [coroutineScope] & [rtcSessionScope] throws it
  */
+internal class PeerConnectionNotUsableException :
+    Exception("Peer connections are not usable after fast reconnect")
+
 public class RtcSession internal constructor(
     client: StreamVideo,
     private val sessionCounter: Int = 0,
@@ -249,6 +252,7 @@ public class RtcSession internal constructor(
             connectionTimeoutInMs = 2000L,
             lifecycle = lifecycle,
             onSfuApiError = { error ->
+                if (call.state.connection.value is RealtimeConnection.Disconnected) return@SfuConnectionModule
                 val strategy = when (error.code) {
                     stream.video.sfu.models.ErrorCode.ERROR_CODE_PARTICIPANT_SIGNAL_LOST ->
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST
@@ -260,6 +264,7 @@ public class RtcSession internal constructor(
                 }
             },
             onSfuNetworkFailure = { throwable ->
+                if (call.state.connection.value is RealtimeConnection.Disconnected) return@SfuConnectionModule
                 call.scope.launch {
                     call.reconnect(
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
@@ -284,6 +289,9 @@ public class RtcSession internal constructor(
     private val subscriberTracer = tracerManager.tracer("$oneBasedSessionCounter-sub")
 
     private val logger by taggedLogger("Video:RtcSession")
+    private val networkStateProvider by lazy {
+        clientImpl.coordinatorConnectionModule.networkStateProvider
+    }
     private val parser: VideoParser = MoshiVideoParser()
 
     /**
@@ -673,10 +681,25 @@ public class RtcSession internal constructor(
                             RealtimeConnection.InProgress
 
                     is SfuSocketState.Disconnected.DisconnectedTemporarily -> {
+                        if (!networkStateProvider.isConnected()) {
+                            logger.w { "[stateJob] Network down — skipping reconnect for $sfuName" }
+                            return@collect
+                        }
                         val strategy = sfuSocketState.reconnectStrategy
                         val reason = "SFU:${sfuSocketState.error.message}:$strategy"
                         logger.w { "[stateJob] SFU sent $strategy for $sfuName" }
                         coroutineScope.launch { call.reconnect(strategy, reason) }
+                    }
+
+                    is SfuSocketState.Disconnected.DisconnectedPermanently -> {
+                        val reason = "SFU:permanent:${sfuSocketState.error.message}"
+                        logger.w { "[stateJob] SFU permanently disconnected for $sfuName — escalating to rejoin" }
+                        coroutineScope.launch {
+                            call.reconnect(
+                                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                                reason,
+                            )
+                        }
                     }
 
                     is SfuSocketState.Disconnected.WebSocketEventLost -> {
@@ -1821,18 +1844,35 @@ public class RtcSession internal constructor(
         val peerConnectionNotUsable =
             subscriber.value?.isFailedOrClosed() == true || publisher.value?.isFailedOrClosed() == true
         if (peerConnectionNotUsable) {
-            logger.w { "[fastReconnect] Peer connections are not usable, rejoining." }
-            call.rejoin("fastReconnect:peerConnectionNotUsable")
-        } else {
-            sendConnectionTimeStats(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST)
-            setVideoSubscriptions(true)
+            throw PeerConnectionNotUsableException()
         }
+        sendConnectionTimeStats(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST)
+        setVideoSubscriptions(true)
     }
 
     // Prepares this session for migration to a new SFU without destroying it.
     // Old peer connections stay alive so media keeps flowing during the transition.
-    internal fun enterMigration() {
+    /**
+     * Cancels all active background jobs and stops the serial processor so that
+     * no stale SFU API calls can trigger unwanted reconnects. Every teardown
+     * path (migration, reconnect, rejoin, leave) goes through this first.
+     *
+     * @param cancelEventJob whether to also cancel [eventJob]. Migration defers
+     *   this to [finalizeMigration] because the event loop is still needed while
+     *   the new session is being established.
+     */
+    private fun cancelActiveWork(cancelEventJob: Boolean = true) {
         stateJob?.cancel()
+        if (cancelEventJob) eventJob?.cancel()
+        muteStateSyncJob?.cancel()
+        muteStateSyncJob = null
+        participantsMonitoringJob?.cancel()
+        participantsMonitoringJob = null
+        serialProcessor.stop()
+    }
+
+    internal fun enterMigration() {
+        cancelActiveWork(cancelEventJob = false)
     }
 
     // Tears down the old session after migration is confirmed (or timed out).
@@ -1843,13 +1883,10 @@ public class RtcSession internal constructor(
     }
 
     internal suspend fun prepareRejoin(reason: String) {
-        // Send final stats while the SFU connection is still alive.
         val stats = call.collectStats()
         sendCallStats(stats)
 
-        // Stop reacting to stale state/event updates.
-        stateJob?.cancel()
-        eventJob?.cancel()
+        cancelActiveWork()
 
         // Mark disconnected immediately — late ICE candidates will be routed
         // to iceTricklePendingEvents instead of being sent to the now-defunct SFU.
@@ -1859,8 +1896,6 @@ public class RtcSession internal constructor(
         // instead of waiting for the reconnect grace period.
         leaveWithReason(reason)
 
-        // Close peer connections, null references, clear orphaned tracks,
-        // remove lifecycle observer, cancel supervisorJob.
         cleanup()
     }
 
@@ -1885,12 +1920,12 @@ public class RtcSession internal constructor(
     }
 
     internal suspend fun prepareReconnect() {
-        stateJob?.cancel()
-        eventJob?.cancel()
+        cancelActiveWork()
         sfuConnectionModule.socketConnection.disconnect()
     }
 
     internal fun leaveWithReason(reason: String) {
+        cancelActiveWork()
         val leaveCallRequest = LeaveCallRequest(
             session_id = sessionId,
             reason = reason,

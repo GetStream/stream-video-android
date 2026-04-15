@@ -45,6 +45,7 @@ internal class HealthMonitor(
     private val userScope: UserScope,
     private val checkCallback: suspend () -> Unit,
     private val reconnectCallback: suspend () -> Unit,
+    private val isNetworkAvailable: () -> Boolean = { true },
 ) {
 
     private var consecutiveFailures = 0
@@ -125,8 +126,13 @@ internal class HealthMonitor(
         val retryIntervalTime = retryInterval.nextInterval(consecutiveFailures++)
         logger.i { "Next connection attempt in $retryIntervalTime ms" }
         reconnectJob = userScope.launchDelayed(retryIntervalTime) {
-            reconnectCallback()
-            postponeHealthMonitor()
+            if (isNetworkAvailable()) {
+                reconnectCallback()
+                postponeHealthMonitor()
+            } else {
+                logger.d { "Network unavailable — skipping reconnect attempt, will retry" }
+                postponeReconnect()
+            }
         }
     }
 

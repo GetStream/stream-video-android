@@ -29,7 +29,9 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
@@ -94,6 +96,7 @@ class SfuConnectionRetryTest {
     private lateinit var socketStateFlow: MutableStateFlow<SfuSocketState>
     private lateinit var mockSocket: SfuSocketConnection
     private lateinit var mockModule: SfuConnectionModule
+    private lateinit var mockNetworkStateProvider: NetworkStateProvider
 
     private var disconnectCounter = 0
 
@@ -102,6 +105,12 @@ class SfuConnectionRetryTest {
         MockKAnnotations.init(this, relaxUnitFun = true)
 
         mockStreamVideo = mockk(relaxed = true)
+        mockNetworkStateProvider = mockk(relaxed = true)
+        every { mockNetworkStateProvider.isConnected() } returns true
+        val mockCoordinatorModule = mockk<CoordinatorConnectionModule>(relaxed = true)
+        every { mockCoordinatorModule.networkStateProvider } returns mockNetworkStateProvider
+        every { mockVideoClient.coordinatorConnectionModule } returns mockCoordinatorModule
+
         every { mockCall.state } returns mockCallState
         every { mockCall.scope } returns testScope
         every { mockCall.mediaManager } returns mockMediaManager
@@ -282,6 +291,69 @@ class SfuConnectionRetryTest {
         }
 
         coVerify(exactly = 0) { mockCall.reconnect(any(), any()) }
+    }
+
+    // -- Network-aware guard --
+
+    @Test
+    fun `DisconnectedTemporarily does not trigger reconnect when network is down`() = runTest {
+        every { mockNetworkStateProvider.isConnected() } returns false
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = disconnectedTemporarily(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+        )
+        advance()
+
+        coVerify(exactly = 0) { mockCall.reconnect(any(), any()) }
+    }
+
+    // -- DisconnectedPermanently escalates to REJOIN --
+
+    @Test
+    fun `DisconnectedPermanently triggers call reconnect with REJOIN`() = runTest {
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedPermanently(
+            error = Error.NetworkError(
+                message = "Socket closed (1002)",
+                serverErrorCode = 1002,
+                statusCode = 1002,
+            ),
+        )
+        advance()
+
+        coVerify(exactly = 1) {
+            mockCall.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                match { it.contains("permanent") },
+            )
+        }
+    }
+
+    @Test
+    fun `DisconnectedPermanently does not trigger reconnect when network is down`() = runTest {
+        every { mockNetworkStateProvider.isConnected() } returns false
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedPermanently(
+            error = Error.NetworkError(
+                message = "Socket closed (1002)",
+                serverErrorCode = 1002,
+                statusCode = 1002,
+            ),
+        )
+        advance()
+
+        coVerify(exactly = 1) {
+            mockCall.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                any(),
+            )
+        }
     }
 
     // -- sfuName --
