@@ -65,7 +65,6 @@ import io.getstream.video.android.core.events.InboundStateNotificationEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.ParticipantLeftEvent
-import io.getstream.video.android.core.events.ParticipantMigrationCompleteEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.events.SubscriberOfferEvent
@@ -79,6 +78,7 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
+import io.getstream.video.android.core.socket.common.SocketActions
 import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.common.token.TokenRepository
@@ -98,10 +98,8 @@ import io.getstream.video.android.core.utils.defaultConstraints
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.stringify
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -125,7 +123,7 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
@@ -652,6 +650,10 @@ public class RtcSession internal constructor(
          */
         stateJob = coroutineScope.launch {
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
+                logger.d {
+                    "[stateJob] SFU socket: $sfuSocketState | " +
+                        "connection: ${call.state.connection.value} ($sfuName)"
+                }
                 _sfuSfuSocketState.value = sfuSocketState
                 when (sfuSocketState) {
                     is SfuSocketState.Connected -> {
@@ -674,7 +676,7 @@ public class RtcSession internal constructor(
                         val strategy = sfuSocketState.reconnectStrategy
                         val reason = "SFU:${sfuSocketState.error.message}:$strategy"
                         logger.w { "[stateJob] SFU sent $strategy for $sfuName" }
-                        call.reconnect(strategy, reason)
+                        coroutineScope.launch { call.reconnect(strategy, reason) }
                     }
 
                     is SfuSocketState.Disconnected.WebSocketEventLost -> {
@@ -1803,59 +1805,34 @@ public class RtcSession internal constructor(
         )
         sfuTracer.trace(PeerConnectionTraceKey.JOIN_REQUEST.value, request.toString())
 
-        logger.d { "Connecting RTC, $request" }
-        listenToSfuSocket()
-        coroutineScope.launch {
-            serialProcessor.submit("fastReconnect") {
-                sfuConnectionModule.socketConnection.connect(request)
-                sfuConnectionModule.socketConnection.whenConnected(
-                    connectionFailed = {
-                        sfuTracer.trace("fast-reconnect-connection-failed", "${it.message}")
-                        sendCallStats()
-                    },
-                ) {
-                    val peerConnectionNotUsable =
-                        subscriber.value?.isFailedOrClosed() == true || publisher.value?.isFailedOrClosed() == true
-                    if (peerConnectionNotUsable) {
-                        logger.w { "[fastReconnect] Peer connections are not usable, rejoining." }
-                        // We could not reuse the peer connections.
-                        call.rejoin("fastReconnect:peerConnectionNotUsable")
-                    } else {
-                        publisher.value?.restartIce("peerConnection is usable")
-                        sendCallStats(
-                            report = call.collectStats(),
-                            reconnectionTimeSeconds = Pair(
-                                (System.currentTimeMillis() - call.reconnectStartTime) / 1000f,
-                                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
-                            ),
-                        )
-                        setVideoSubscriptions(true)
-                    }
-                }
+        logger.d { "[fastReconnect] Connecting RTC, $request" }
+        sfuConnectionModule.socketConnection.connect(request)
+        try {
+            withTimeout(SocketActions.DEFAULT_SOCKET_TIMEOUT) {
+                sfuConnectionModule.socketConnection.state().first { it is SfuSocketState.Connected }
             }
+        } catch (e: Exception) {
+            sfuTracer.trace("fast-reconnect-connection-failed", "${e.message}")
+            sendCallStats()
+            throw e
+        }
+        logger.d { "[fastReconnect] Connection established, restoring session" }
+        listenToSfuSocket()
+        val peerConnectionNotUsable =
+            subscriber.value?.isFailedOrClosed() == true || publisher.value?.isFailedOrClosed() == true
+        if (peerConnectionNotUsable) {
+            logger.w { "[fastReconnect] Peer connections are not usable, rejoining." }
+            call.rejoin("fastReconnect:peerConnectionNotUsable")
+        } else {
+            sendConnectionTimeStats(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST)
+            setVideoSubscriptions(true)
         }
     }
 
     // Prepares this session for migration to a new SFU without destroying it.
     // Old peer connections stay alive so media keeps flowing during the transition.
-    // Returns a Deferred that completes when the old SFU sends ParticipantMigrationComplete
-    // (or false on timeout)
-    internal fun enterMigration(timeoutMs: Long = 7000L): Deferred<Boolean> {
-        // Start listening for migration complete BEFORE cancelling jobs.
-        // events() is a SharedFlow with replay=1, safe for new collectors.
-        val result = CompletableDeferred<Boolean>()
-        coroutineScope.launch {
-            val completed = withTimeoutOrNull(timeoutMs) {
-                sfuConnectionModule.socketConnection.events()
-                    .first { it is ParticipantMigrationCompleteEvent }
-            }
-            result.complete(completed != null)
-        }
-
-        // Stop reconnect triggers from old SFU state changes
+    internal fun enterMigration() {
         stateJob?.cancel()
-
-        return result
     }
 
     // Tears down the old session after migration is confirmed (or timed out).
@@ -1907,10 +1884,10 @@ public class RtcSession internal constructor(
         }
     }
 
-    internal fun prepareReconnect() {
-        // We are reconnecting from the start, we don't want to know.
+    internal suspend fun prepareReconnect() {
         stateJob?.cancel()
         eventJob?.cancel()
+        sfuConnectionModule.socketConnection.disconnect()
     }
 
     internal fun leaveWithReason(reason: String) {

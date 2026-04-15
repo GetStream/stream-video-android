@@ -78,6 +78,7 @@ internal open class SfuSocket(
     private val listeners = mutableSetOf<SocketListener<SfuDataEvent, JoinCallResponseEvent>>()
     private val sfuSocketStateService = SfuSocketStateService()
     private var socketStateObserverJob: Job? = null
+    private var socketListenerJob: Job? = null
     private val healthMonitor = HealthMonitor(
         monitorInterval = 5000L,
         noEventIntervalThreshold = 15000L,
@@ -105,13 +106,12 @@ internal open class SfuSocket(
 
     @Suppress("ComplexMethod")
     private fun observeSocketStateService(): Job {
-        var socketListenerJob: Job? = null
-
         suspend fun connectUser(connectionConf: ConnectionConf.SfuConnectionConf) {
             logger.d { "[connectUser] connectionConf: $connectionConf" }
             userScope.launch { startObservers() }
             this.connectionConf = connectionConf
             socketListenerJob?.cancel()
+            streamWebSocket?.close("connectUser:cleanup")
             when (networkStateProvider.isConnected()) {
                 true -> {
                     streamWebSocket =
@@ -237,6 +237,7 @@ internal open class SfuSocket(
 
     suspend fun connect(joinRequest: JoinRequest) {
         logger.d { "[connect] request: ${joinRequest.client_details}" }
+        socketListenerJob?.cancel()
         socketStateObserverJob?.cancel()
         socketStateObserverJob = observeSocketStateService()
         sfuSocketStateService.onConnect(

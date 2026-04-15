@@ -794,9 +794,9 @@ public class Call(
         strategy: WebsocketReconnectStrategy,
         reason: String,
     ) {
-        // Quick pre-check — mirrors JS SDK: skip only when already
-        // reconnecting, migrating, or in a terminal failed state.
         val conn = state.connection.value
+        logger.d { "[reconnect] Entry — strategy=$strategy reason=$reason connection=$conn" }
+
         if (conn is RealtimeConnection.Reconnecting ||
             conn is RealtimeConnection.Migrating ||
             conn is RealtimeConnection.ReconnectingFailed
@@ -805,15 +805,26 @@ public class Call(
             return
         }
 
+        // Set the transient state immediately so that concurrent callers
+        // (e.g. stateJob reacting to socket state changes caused by the
+        // reconnect itself) see Reconnecting/Migrating and skip.
+        val isMigrate = strategy ==
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
+        state._connection.value = if (isMigrate) {
+            RealtimeConnection.Migrating
+        } else {
+            RealtimeConnection.Reconnecting
+        }
+
         reconnectMutex.withLock {
             // Re-check after acquiring the lock — another reconnect may
-            // have started while we were waiting.
+            // have started and completed while we were waiting.
             val currentConn = state.connection.value
-            if (currentConn is RealtimeConnection.Reconnecting ||
-                currentConn is RealtimeConnection.Migrating ||
-                currentConn is RealtimeConnection.ReconnectingFailed
+            if (currentConn is RealtimeConnection.Connected ||
+                currentConn is RealtimeConnection.ReconnectingFailed ||
+                currentConn is RealtimeConnection.Disconnected
             ) {
-                logger.d { "[reconnect] Already $currentConn — skipping ($reason)" }
+                logger.d { "[reconnect] State resolved to $currentConn while waiting — skipping ($reason)" }
                 return
             }
 
@@ -916,6 +927,14 @@ public class Call(
         logger.d { "[reconnectFast] reconnectAttempts=$reconnectAttepmts" }
         val currentSession = session.value
             ?: throw IllegalStateException("No active session for fast reconnect")
+
+        try {
+            val stats = collectStats()
+            currentSession.sendCallStats(stats)
+        } catch (e: Exception) {
+            logger.w { "[reconnectFast] Failed to send pre-reconnect stats: ${e.message}" }
+        }
+
         currentSession.prepareReconnect()
         state._connection.value = RealtimeConnection.Reconnecting
         reconnectStartTime = System.currentTimeMillis()
@@ -930,12 +949,6 @@ public class Call(
             reason = reason,
         )
         currentSession.fastReconnect(reconnectDetails)
-        try {
-            val oldSessionStats = collectStats()
-            currentSession.sendCallStats(oldSessionStats)
-        } catch (e: Exception) {
-            logger.w { "[reconnectFast] Failed to send stats: ${e.message}" }
-        }
     }
 
     /**
@@ -1009,7 +1022,7 @@ public class Call(
             val oldSession = this.session.value!!
             val currentOptions = oldSession.publisher.value?.currentOptions()
             val oldSfuName = oldSession.sfuName
-            logger.i { "Migrate SFU $oldSfuName to ${cred.server.edgeName}" }
+            logger.i { "[reconnectMigrate] Migrate SFU $oldSfuName to ${cred.server.edgeName}" }
 
             val (_, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
             val reconnectDetails = ReconnectDetails(
@@ -1023,7 +1036,7 @@ public class Call(
 
             val stats = collectStats()
             oldSession.sendCallStats(stats)
-            val migrationTask = oldSession.enterMigration()
+            oldSession.enterMigration()
 
             try {
                 val newSession = RtcSession(
@@ -1043,13 +1056,7 @@ public class Call(
                 this.session.value = newSession
                 this.session.value?.connect(reconnectDetails, currentOptions)
                 monitorSession(joinResponse.value)
-
-                val completed = migrationTask.await()
-                if (!completed) {
-                    logger.w { "[reconnectMigrate] Migration complete timed out from $oldSfuName" }
-                }
             } finally {
-                migrationTask.cancel()
                 oldSession.finalizeMigration()
             }
         } else {
