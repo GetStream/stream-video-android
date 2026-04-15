@@ -121,7 +121,9 @@ class ReconnectEscalationTest {
      * proving early escalation.
      */
     @Test
-    fun `PeerConnectionNotUsableException escalates immediately to REJOIN`() = runTest(testDispatcher) {
+    fun `PeerConnectionNotUsableException escalates immediately to REJOIN`() = runTest(
+        testDispatcher,
+    ) {
         coEvery { mockSession.fastReconnect(any()) } throws PeerConnectionNotUsableException()
 
         call.reconnect(
@@ -131,7 +133,9 @@ class ReconnectEscalationTest {
         advanceUntilIdle()
 
         coVerify(exactly = 2) { mockSession.fastReconnect(any()) }
-        assertThat(call.state.connection.value).isInstanceOf(RealtimeConnection.ReconnectingFailed::class.java)
+        assertThat(
+            call.state.connection.value,
+        ).isInstanceOf(RealtimeConnection.ReconnectingFailed::class.java)
     }
 
     /**
@@ -149,7 +153,9 @@ class ReconnectEscalationTest {
         advanceUntilIdle()
 
         coVerify(exactly = 4) { mockSession.fastReconnect(any()) }
-        assertThat(call.state.connection.value).isInstanceOf(RealtimeConnection.ReconnectingFailed::class.java)
+        assertThat(
+            call.state.connection.value,
+        ).isInstanceOf(RealtimeConnection.ReconnectingFailed::class.java)
     }
 
     /**
@@ -158,7 +164,9 @@ class ReconnectEscalationTest {
      * mutex and hung indefinitely. This test proves the loop terminates.
      */
     @Test
-    fun `reconnect loop terminates without deadlock on PeerConnectionNotUsableException`() = runTest(testDispatcher) {
+    fun `reconnect loop terminates without deadlock on PeerConnectionNotUsableException`() = runTest(
+        testDispatcher,
+    ) {
         coEvery { mockSession.fastReconnect(any()) } throws PeerConnectionNotUsableException()
 
         call.reconnect(

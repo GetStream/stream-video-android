@@ -804,7 +804,9 @@ public class Call(
         logger.d { "[reconnect] Entry — strategy=$strategy reason=$reason connection=$conn" }
 
         if (isDestroyed || conn is RealtimeConnection.Disconnected) {
-            logger.d { "[reconnect] Call already left/destroyed (isDestroyed=$isDestroyed, conn=$conn) — skipping ($reason)" }
+            logger.d {
+                "[reconnect] Call already left/destroyed (isDestroyed=$isDestroyed, conn=$conn) — skipping ($reason)"
+            }
             return
         }
 

@@ -644,7 +644,7 @@ public class RtcSession internal constructor(
         /**
          * Monitors [SfuSocketState] transitions and delegates reconnection to
          * [Call.reconnect] — the unified retry loop that handles escalation
-         * (FAST → REJOIN, MIGRATE → REJOIN) 
+         * (FAST → REJOIN, MIGRATE → REJOIN)
          *
          * **Connected** — promotes the call to [RealtimeConnection.Connected]
          * and flushes any pending ICE trickle candidates.

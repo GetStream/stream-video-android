@@ -8684,10 +8684,6 @@ public final class io/getstream/video/android/core/CallHealthMonitor {
 	public final fun stopTimer ()V
 }
 
-public final class io/getstream/video/android/core/CallKt {
-	public static final field sfuReconnectTimeoutMillis I
-}
-
 public final class io/getstream/video/android/core/CallState {
 	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun clearParticipants ()V
@@ -9303,6 +9299,13 @@ public final class io/getstream/video/android/core/RealtimeConnection$PreJoin : 
 
 public final class io/getstream/video/android/core/RealtimeConnection$Reconnecting : io/getstream/video/android/core/RealtimeConnection {
 	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$Reconnecting;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/RealtimeConnection$ReconnectingFailed : io/getstream/video/android/core/RealtimeConnection {
+	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$ReconnectingFailed;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
