@@ -941,9 +941,6 @@ class MicrophoneManager(
             var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
 
             if (setupCompleted) {
-                logger.d {
-                    "[setup] Already complete (preferSpeaker=$preferSpeaker), invoking callback immediately"
-                }
                 capturedOnAudioDevicesUpdate?.invoke()
                 capturedOnAudioDevicesUpdate = null
 
@@ -959,28 +956,22 @@ class MicrophoneManager(
             }
 
             if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {
-                val preferredDeviceList = listOf(
-                    AudioDevice.BluetoothHeadset::class.java,
-                    AudioDevice.WiredHeadset::class.java,
-                ) + if (preferSpeaker) {
-                    listOf(
-                        AudioDevice.Speakerphone::class.java,
-                        AudioDevice.Earpiece::class.java,
-                    )
-                } else {
-                    listOf(
-                        AudioDevice.Earpiece::class.java,
-                        AudioDevice.Speakerphone::class.java,
-                    )
-                }
-
-                logger.d {
-                    "[setup] Creating audioHandler with preferSpeaker=$preferSpeaker, preferredDeviceList=${preferredDeviceList.map { it.simpleName }}"
-                }
-
                 audioHandler = AudioSwitchHandler(
                     context = mediaManager.context,
-                    preferredDeviceList = preferredDeviceList,
+                    preferredDeviceList = listOf(
+                        AudioDevice.BluetoothHeadset::class.java,
+                        AudioDevice.WiredHeadset::class.java,
+                    ) + if (preferSpeaker) {
+                        listOf(
+                            AudioDevice.Speakerphone::class.java,
+                            AudioDevice.Earpiece::class.java,
+                        )
+                    } else {
+                        listOf(
+                            AudioDevice.Earpiece::class.java,
+                            AudioDevice.Speakerphone::class.java,
+                        )
+                    },
                     audioDeviceChangeListener = { devices, selected ->
                         logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
 
@@ -997,7 +988,7 @@ class MicrophoneManager(
                 logger.d { "[setup] Calling start on instance $audioHandler" }
                 audioHandler.start()
             } else {
-                logger.d { "[setup] audioHandler already initialized or MEDIA usage — invoking callback directly" }
+                logger.d { "[MediaManager#setup] Usage is MEDIA or audioHandle is already initialized" }
                 capturedOnAudioDevicesUpdate?.invoke()
             }
         }
