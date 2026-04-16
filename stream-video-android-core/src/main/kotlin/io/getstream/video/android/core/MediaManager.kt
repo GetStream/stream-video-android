@@ -80,6 +80,7 @@ import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.VideoDimension
 import java.nio.ByteBuffer
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resumeWithException
 
 sealed class DeviceStatus {
@@ -551,7 +552,7 @@ class MicrophoneManager(
 
     private lateinit var audioHandler: AudioHandler
 
-    @Volatile private var setupCompleted: Boolean = false
+    private var setupCompleted = AtomicBoolean(false)
     internal var audioManager: AudioManager? = null
     internal var priorStatus: DeviceStatus? = null
 
@@ -883,7 +884,7 @@ class MicrophoneManager(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             cleanupUsbDeviceDetection()
         }
-        setupCompleted = false
+        setupCompleted.set(false)
     }
 
     fun canHandleDeviceSwitch() = audioUsageProvider.invoke() != AudioAttributes.USAGE_MEDIA
@@ -893,7 +894,7 @@ class MicrophoneManager(
         synchronized(this) {
             var capturedOnAudioDevicesUpdate = onAudioDevicesUpdate
 
-            if (setupCompleted) {
+            if (setupCompleted.get()) {
                 capturedOnAudioDevicesUpdate?.invoke()
                 capturedOnAudioDevicesUpdate = null
 
@@ -931,8 +932,7 @@ class MicrophoneManager(
                         _devices.value = devices.map { it.fromAudio() }
                         _selectedDevice.value = selected?.fromAudio()
 
-                        setupCompleted = true
-
+                        setupCompleted.set(true)
                         capturedOnAudioDevicesUpdate?.invoke()
                         capturedOnAudioDevicesUpdate = null
                     },
