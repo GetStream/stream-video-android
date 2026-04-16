@@ -552,7 +552,8 @@ class MicrophoneManager(
     private val logger by taggedLogger("Media:MicrophoneManager")
 
     private lateinit var audioHandler: AudioHandler
-    private var setupCompleted: Boolean = false
+
+    @Volatile private var setupCompleted: Boolean = false
     internal var audioManager: AudioManager? = null
     internal var priorStatus: DeviceStatus? = null
 

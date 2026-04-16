@@ -83,6 +83,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.audio.AudioHandlerThread
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
@@ -210,6 +211,15 @@ internal class StreamVideoClient internal constructor(
     private val destroyedCalls = LruCache<Int, Call>(maxSize = 100)
     internal val callSoundAndVibrationPlayer = CallSoundAndVibrationPlayer(context)
 
+    /**
+     * Lazily created and shared across all concurrent calls. Keeps AudioSwitch IPC calls
+     * (setCommunicationDevice, requestAudioFocus, etc.) off the main thread.
+     * Released when the SDK client is cleaned up via cleanup().
+     */
+    private val audioHandlerThreadLazy = lazy { AudioHandlerThread() }
+
+    internal fun getOrCreateAudioHandlerThread(): AudioHandlerThread = audioHandlerThreadLazy.value
+
     val socketImpl = coordinatorConnectionModule.socketConnection
 
     fun onCallCleanUp(call: Call) {
@@ -245,6 +255,9 @@ internal class StreamVideoClient internal constructor(
             }
         }
         activeCall?.leave("client-cleanup")
+        if (audioHandlerThreadLazy.isInitialized()) {
+            audioHandlerThreadLazy.value.release()
+        }
     }
 
     /**
