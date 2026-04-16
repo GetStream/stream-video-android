@@ -23,9 +23,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal class AudioExecutionContext {
 
+    val isReleased = AtomicBoolean(false)
     private val dispatcher: ExecutorCoroutineDispatcher by lazy {
         Executors.newSingleThreadExecutor { r ->
             Thread(r, "stream-audio-thread").apply { isDaemon = true }
@@ -36,11 +38,15 @@ internal class AudioExecutionContext {
         CoroutineScope(SupervisorJob() + dispatcher)
     }
 
-    fun createChildScope(): CoroutineScope {
-        return CoroutineScope(scope.coroutineContext + Job())
+    fun createChildScope(): CoroutineScope? {
+        if (isReleased.get()) {
+            return null
+        }
+        return CoroutineScope(scope.coroutineContext + Job(scope.coroutineContext[Job]))
     }
 
     fun release() {
+        isReleased.set(true)
         scope.cancel()
         dispatcher.close()
     }

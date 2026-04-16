@@ -18,15 +18,15 @@ package io.getstream.video.android.core.audio
 
 import android.content.Context
 import android.media.AudioManager
+import android.os.Handler
+import android.os.Looper
 import com.twilio.audioswitch.AudioDevice
 import com.twilio.audioswitch.AudioDeviceChangeListener
+import com.twilio.audioswitch.AudioSwitch
 import io.getstream.log.StreamLog
-import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoClient
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import io.getstream.log.taggedLogger
 
-// TODO it should be internal and its function should return Result<>
+// TODO Make it internal on v2
 public interface AudioHandler {
     /**
      * Called when a room is started.
@@ -40,45 +40,59 @@ public interface AudioHandler {
 }
 
 /**
- * TODO: this class should be merged into the Microphone Manager, should be internal class
+ * TODO Remove this class on v2
  */
+@Deprecated(
+    "Switched with AudioSwitchControllerDecorator which is coroutine backed",
+    ReplaceWith("AudioSwitchControllerDecorator"),
+)
 public class AudioSwitchHandler(
-    context: Context,
-    preferredDeviceList: List<Class<out AudioDevice>>,
-    audioDeviceChangeListener: AudioDeviceChangeListener,
+    private val context: Context,
+    private val preferredDeviceList: List<Class<out AudioDevice>>,
+    private var audioDeviceChangeListener: AudioDeviceChangeListener,
 ) : AudioHandler {
 
-    private val controller = AudioSwitchController(
-        context,
-        preferredDeviceList,
-        audioDeviceChangeListener,
-    )
-    private var scope: CoroutineScope? = null
-
-    private fun ensureScope(): CoroutineScope? {
-        val ctx = (StreamVideo.instanceOrNull() as? StreamVideoClient)
-            ?.getAudioContext() ?: return null
-
-        if (scope == null) {
-            scope = ctx.createChildScope()
-        }
-
-        return scope
-    }
+    private val logger by taggedLogger(TAG)
+    private var audioSwitch: AudioSwitch? = null
+    private val mainThreadHandler = Handler(Looper.getMainLooper())
+    private var isAudioSwitchInitScheduled = false
 
     override fun start() {
-        val scope = ensureScope() ?: return
-        scope.launch { controller.start() }
+        synchronized(this) {
+            if (!isAudioSwitchInitScheduled) {
+                isAudioSwitchInitScheduled = true
+                mainThreadHandler.removeCallbacksAndMessages(null)
+
+                logger.d { "[start] Posting on main" }
+
+                mainThreadHandler.post {
+                    logger.d { "[start] Running on main" }
+
+                    val switch = AudioSwitch(
+                        context = context,
+                        audioFocusChangeListener = onAudioFocusChangeListener,
+                        preferredDeviceList = preferredDeviceList,
+                    )
+                    audioSwitch = switch
+                    switch.start(audioDeviceChangeListener)
+                }
+            }
+        }
     }
 
     override fun stop() {
-        val scope = ensureScope() ?: return
-        scope.launch { controller.stop() }
+        logger.d { "[stop] no args" }
+        mainThreadHandler.removeCallbacksAndMessages(null)
+        mainThreadHandler.post {
+            audioSwitch?.stop()
+            audioSwitch = null
+        }
     }
 
-    fun selectDevice(device: AudioDevice?) {
-        val scope = ensureScope() ?: return
-        scope.launch { controller.selectDevice(device) }
+    public fun selectDevice(audioDevice: AudioDevice?) {
+        logger.i { "[selectDevice] audioDevice: $audioDevice" }
+        audioSwitch?.selectDevice(audioDevice)
+        audioSwitch?.activate()
     }
 
     public companion object {

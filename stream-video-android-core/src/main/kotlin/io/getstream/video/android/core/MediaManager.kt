@@ -43,8 +43,8 @@ import com.twilio.audioswitch.AudioDevice
 import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.extractCause
-import io.getstream.video.android.core.audio.AudioHandler
-import io.getstream.video.android.core.audio.AudioSwitchHandler
+import io.getstream.video.android.core.audio.AudioSwitchController
+import io.getstream.video.android.core.audio.AudioSwitchDecorator
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.fromAudio
 import io.getstream.video.android.core.audio.StreamAudioDevice.Companion.toAudioDevice
@@ -550,7 +550,7 @@ class MicrophoneManager(
     // Internal data
     private val logger by taggedLogger("Media:MicrophoneManager")
 
-    private lateinit var audioHandler: AudioHandler
+    private lateinit var audioHandler: AudioSwitchDecorator
 
     private var setupCompleted = AtomicBoolean(false)
     internal var audioManager: AudioManager? = null
@@ -910,32 +910,34 @@ class MicrophoneManager(
             }
 
             if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {
-                audioHandler = AudioSwitchHandler(
-                    context = mediaManager.context,
-                    preferredDeviceList = listOf(
-                        AudioDevice.BluetoothHeadset::class.java,
-                        AudioDevice.WiredHeadset::class.java,
-                    ) + if (preferSpeaker) {
-                        listOf(
-                            AudioDevice.Speakerphone::class.java,
-                            AudioDevice.Earpiece::class.java,
-                        )
-                    } else {
-                        listOf(
-                            AudioDevice.Earpiece::class.java,
-                            AudioDevice.Speakerphone::class.java,
-                        )
-                    },
-                    audioDeviceChangeListener = { devices, selected ->
-                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
+                audioHandler = AudioSwitchDecorator(
+                    AudioSwitchController(
+                        context = mediaManager.context,
+                        preferredDeviceList = listOf(
+                            AudioDevice.BluetoothHeadset::class.java,
+                            AudioDevice.WiredHeadset::class.java,
+                        ) + if (preferSpeaker) {
+                            listOf(
+                                AudioDevice.Speakerphone::class.java,
+                                AudioDevice.Earpiece::class.java,
+                            )
+                        } else {
+                            listOf(
+                                AudioDevice.Earpiece::class.java,
+                                AudioDevice.Speakerphone::class.java,
+                            )
+                        },
+                        audioDeviceChangeListener = { devices, selected ->
+                            logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
 
-                        _devices.value = devices.map { it.fromAudio() }
-                        _selectedDevice.value = selected?.fromAudio()
+                            _devices.value = devices.map { it.fromAudio() }
+                            _selectedDevice.value = selected?.fromAudio()
 
-                        setupCompleted.set(true)
-                        capturedOnAudioDevicesUpdate?.invoke()
-                        capturedOnAudioDevicesUpdate = null
-                    },
+                            setupCompleted.set(true)
+                            capturedOnAudioDevicesUpdate?.invoke()
+                            capturedOnAudioDevicesUpdate = null
+                        },
+                    ),
                 )
 
                 logger.d { "[setup] Calling start on instance $audioHandler" }
@@ -952,9 +954,9 @@ class MicrophoneManager(
         onAudioDevicesUpdate = actual,
     )
 
-    private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchHandler) -> Unit) {
+    private fun ifAudioHandlerInitialized(then: (audioHandler: AudioSwitchDecorator) -> Unit) {
         if (this::audioHandler.isInitialized) {
-            then(this.audioHandler as AudioSwitchHandler)
+            then(this.audioHandler)
         } else {
             logger.e { "Audio handler not initialized. Ensure calling setup(), before using the handler." }
         }

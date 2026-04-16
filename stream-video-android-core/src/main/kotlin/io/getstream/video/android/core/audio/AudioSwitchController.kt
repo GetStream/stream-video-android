@@ -25,26 +25,20 @@ import io.getstream.video.android.core.audio.AudioSwitchHandler.Companion.onAudi
 internal class AudioSwitchController(
     private val context: Context,
     private val preferredDeviceList: List<Class<out AudioDevice>>,
-    private val listener: AudioDeviceChangeListener,
-) {
+    private val audioDeviceChangeListener: AudioDeviceChangeListener,
+) : AudioHandler {
     private var audioSwitch: AudioSwitch? = null
     private var isActivated = false
 
-    fun start() {
+    override fun start() {
         if (audioSwitch != null) return
 
-        val switch = AudioSwitch(
-            context = context,
-            audioFocusChangeListener = onAudioFocusChangeListener,
-            preferredDeviceList = preferredDeviceList,
-        )
-
-        audioSwitch = switch
+        audioSwitch = getAudioSwitch()
         isActivated = false
-        switch.start(listener)
+        audioSwitch?.start(audioDeviceChangeListener)
     }
 
-    fun stop() {
+    override fun stop() {
         audioSwitch?.stop()
         audioSwitch = null
         isActivated = false
@@ -59,5 +53,13 @@ internal class AudioSwitchController(
             switch.activate()
             isActivated = true
         }
+    }
+
+    fun getAudioSwitch(): AudioSwitch {
+        return AudioSwitch(
+            context = context,
+            audioFocusChangeListener = onAudioFocusChangeListener,
+            preferredDeviceList = preferredDeviceList,
+        )
     }
 }
