@@ -1270,7 +1270,7 @@ public final class io/getstream/video/android/compose/ui/components/call/control
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/actions/ToggleSpeakerphoneActionKt {
-	public static final fun ToggleSpeakerphoneAction-uMBdHk4 (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun ToggleSpeakerphoneAction-m_EyDiA (Landroidx/compose/ui/Modifier;ZZLandroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lio/getstream/video/android/compose/ui/components/base/styling/StreamFixedSizeButtonStyle;Lio/getstream/video/android/compose/ui/components/base/styling/StreamFixedSizeButtonStyle;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;III)V
 	public static final fun ToggleSpeakerphoneActionPreview (Landroidx/compose/runtime/Composer;I)V
 }
 
