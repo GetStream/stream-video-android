@@ -26,6 +26,7 @@ import com.twilio.audioswitch.AudioSwitch
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 
+// TODO Make it internal on v2
 public interface AudioHandler {
     /**
      * Called when a room is started.
@@ -39,8 +40,14 @@ public interface AudioHandler {
 }
 
 /**
- * TODO: this class should be merged into the Microphone Manager
+ * TODO Remove this class on v2
  */
+@Deprecated(
+    "Replaced by AudioSwitchDecorator + AudioSwitchController which provide coroutine-backed audio handling",
+    ReplaceWith(
+        "AudioSwitchDecorator(AudioSwitchController(context, preferredDeviceList, audioDeviceChangeListener))",
+    ),
+)
 public class AudioSwitchHandler(
     private val context: Context,
     private val preferredDeviceList: List<Class<out AudioDevice>>,
@@ -92,11 +99,11 @@ public class AudioSwitchHandler(
 
     public companion object {
         private const val TAG = "AudioSwitchHandler"
-        private val onAudioFocusChangeListener by lazy(LazyThreadSafetyMode.NONE) {
+        internal val onAudioFocusChangeListener by lazy(LazyThreadSafetyMode.NONE) {
             DefaultOnAudioFocusChangeListener()
         }
 
-        private class DefaultOnAudioFocusChangeListener : AudioManager.OnAudioFocusChangeListener {
+        internal class DefaultOnAudioFocusChangeListener : AudioManager.OnAudioFocusChangeListener {
             override fun onAudioFocusChange(focusChange: Int) {
                 val typeOfChange: String = when (focusChange) {
                     AudioManager.AUDIOFOCUS_GAIN -> "AUDIOFOCUS_GAIN"
