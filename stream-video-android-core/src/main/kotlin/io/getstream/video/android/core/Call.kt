@@ -98,6 +98,7 @@ import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -895,6 +896,8 @@ public class Call(
                         }
                     }
                     break
+                } catch (cancel: CancellationException) {
+                    throw cancel
                 } catch (error: Exception) {
                     logger.w {
                         "[reconnect] $currentStrategy ($reconnectAttepmts) failed: ${error.message}"
