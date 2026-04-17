@@ -19,20 +19,24 @@ package io.getstream.video.android
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.models.Filters
 import io.getstream.chat.android.models.querysort.QuerySortByField
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
-import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContent
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
@@ -117,14 +121,35 @@ class CallActivity : ComposeStreamCallActivity() {
         }
 
         @Composable
-        override fun StreamCallActivity.AudioCallContent(call: Call) {
-            val micEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
-
-            AudioOnlyCallContent(
+        override fun StreamCallActivity.OutgoingCallContent(
+            modifier: Modifier,
+            call: Call,
+            isVideoType: Boolean,
+            isShowingHeader: Boolean,
+            headerContent: @Composable (ColumnScope.() -> Unit)?,
+            detailsContent: @Composable (ColumnScope.(List<MemberState>, Dp) -> Unit)?,
+            controlsContent: @Composable (BoxScope.() -> Unit)?,
+            onBackPressed: () -> Unit,
+            onCallAction: (CallAction) -> Unit,
+        ) {
+            DemoOutgoingCallContent(
                 call = call,
-                isMicrophoneEnabled = micEnabled,
-                onCallAction = { onCallAction(call, it) },
-                onBackPressed = { onBackPressed(call) },
+                isVideoType = isVideoType,
+                modifier = modifier,
+                isShowingHeader = isShowingHeader,
+                headerContent = headerContent,
+                detailsContent = detailsContent,
+                onBackPressed = onBackPressed,
+                onCallAction = onCallAction,
+            )
+        }
+
+        @Composable
+        override fun StreamCallActivity.AudioCallContent(call: Call) {
+            DemoAudioCallContent(
+                call,
+                { onCallAction(call, it) },
+                { onBackPressed(call) },
             )
         }
 
