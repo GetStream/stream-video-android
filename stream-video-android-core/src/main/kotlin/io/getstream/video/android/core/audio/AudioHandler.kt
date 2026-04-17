@@ -43,8 +43,10 @@ public interface AudioHandler {
  * TODO Remove this class on v2
  */
 @Deprecated(
-    "Switched with AudioSwitchControllerDecorator which is coroutine backed",
-    ReplaceWith("AudioSwitchControllerDecorator"),
+    "Replaced by AudioSwitchDecorator + AudioSwitchController which provide coroutine-backed audio handling",
+    ReplaceWith(
+        "AudioSwitchDecorator(AudioSwitchController(context, preferredDeviceList, audioDeviceChangeListener))",
+    ),
 )
 public class AudioSwitchHandler(
     private val context: Context,
