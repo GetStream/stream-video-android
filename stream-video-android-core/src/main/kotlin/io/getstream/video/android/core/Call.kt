@@ -571,7 +571,7 @@ public class Call(
                     retryCount += 1
                 }
             }
-            delay(retryCount - 1 * 1000L)
+            delay((retryCount - 1) * 1000L)
         }
         session.value = null
         val errorMessage = "Join failed after 3 retries"
