@@ -97,6 +97,8 @@ public class StreamPeerConnectionFactory(
     // Provider function to check if microphone is enabled
     private var microphoneEnabledProvider: (() -> Boolean)? = null
 
+    internal var onAudioRecordStartCallback: (() -> Unit)? = null
+
     /**
      * Set to get callbacks when audio input from microphone is received.
      * This can be example used to detect whether a person is speaking
@@ -175,6 +177,12 @@ public class StreamPeerConnectionFactory(
 
     private var adm: JavaAudioDeviceModule? = null
 
+    @Volatile
+    private var pendingPreferredInputDevice: AudioDeviceInfo? = null
+
+    @Volatile
+    private var hasPendingPreferredDevice = false
+
     private fun createFactory(): PeerConnectionFactory {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
@@ -207,6 +215,14 @@ public class StreamPeerConnectionFactory(
         )
 
         adm = initAudioDeviceModule()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && hasPendingPreferredDevice) {
+            adm?.setPreferredInputDevice(pendingPreferredInputDevice)
+            audioLogger.i {
+                "[createFactory] Applied pending preferred input device: ${pendingPreferredInputDevice?.productName}"
+            }
+            hasPendingPreferredDevice = false
+        }
 
         // Capture the audio bitrate profile when creating the factory
         val currentAudioBitrateProfile = audioBitrateProfileProvider?.invoke()
@@ -297,6 +313,7 @@ public class StreamPeerConnectionFactory(
                 JavaAudioDeviceModule.AudioRecordStateCallback {
                 override fun onWebRtcAudioRecordStart() {
                     audioLogger.d { "[onWebRtcAudioRecordStart] no args" }
+                    onAudioRecordStartCallback?.invoke()
                 }
 
                 override fun onWebRtcAudioRecordStop() {
@@ -353,9 +370,18 @@ public class StreamPeerConnectionFactory(
     @RequiresApi(Build.VERSION_CODES.M)
     fun setPreferredAudioInputDevice(deviceInfo: AudioDeviceInfo?): Boolean {
         return try {
-            adm?.setPreferredInputDevice(deviceInfo)
-            audioLogger.i {
-                "[setPreferredAudioInputDevice] Set preferred input device: ${deviceInfo?.productName}"
+            val currentAdm = adm
+            if (currentAdm != null) {
+                currentAdm.setPreferredInputDevice(deviceInfo)
+                audioLogger.i {
+                    "[setPreferredAudioInputDevice] Set preferred input device: ${deviceInfo?.productName}"
+                }
+            } else {
+                pendingPreferredInputDevice = deviceInfo
+                hasPendingPreferredDevice = true
+                audioLogger.w {
+                    "[setPreferredAudioInputDevice] ADM not yet initialized, queuing preference: ${deviceInfo?.productName}"
+                }
             }
             true
         } catch (e: Exception) {

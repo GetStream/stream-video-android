@@ -739,6 +739,10 @@ class MicrophoneManager(
         am.registerAudioDeviceCallback(audioDeviceCallback, null)
         logger.i { "[setupUsbDeviceDetection] Registered AudioDeviceCallback" }
 
+        mediaManager.call.peerConnectionFactory.onAudioRecordStartCallback = {
+            reapplyUsbDevicePreference()
+        }
+
         // Initial device scan
         updateUsbDeviceList()
     }
@@ -840,6 +844,7 @@ class MicrophoneManager(
             audioDeviceCallback = null
             logger.i { "[cleanupUsbDeviceDetection] Unregistered AudioDeviceCallback" }
         }
+        mediaManager.call.peerConnectionFactory.onAudioRecordStartCallback = null
     }
 
     // ==================== End USB Audio Input Device Support ====================
