@@ -973,13 +973,14 @@ public class Call(
         state._connection.value = RealtimeConnection.Reconnecting
         val loc = location
             ?: throw IllegalStateException("No location available for rejoin")
+        val oldSession = session.value
+            ?: throw IllegalStateException("No active session for rejoin")
         reconnectStartTime = System.currentTimeMillis()
 
         val joinResponse = joinRequest(location = loc)
         if (joinResponse is Success) {
             val cred = joinResponse.value.credentials
-            val oldSession = this.session.value!!
-            val currentOptions = this.session.value?.publisher?.value?.currentOptions()
+            val currentOptions = oldSession.publisher.value?.currentOptions()
             logger.i { "Rejoin SFU ${oldSession.sfuUrl} to ${cred.server.url}" }
 
             this.sessionId = UUID.randomUUID().toString()
@@ -1025,13 +1026,14 @@ public class Call(
         state._connection.value = RealtimeConnection.Migrating
         val loc = location
             ?: throw IllegalStateException("No location available for migrate")
+        val oldSession = session.value
+            ?: throw IllegalStateException("No active session for migrate")
         reconnectStartTime = System.currentTimeMillis()
-        session.value?.sfuName?.let { addFailedSfuId(it) }
+        addFailedSfuId(oldSession.sfuName)
 
-        val joinResponse = joinRequest(location = loc, migratingFrom = session.value?.sfuName)
+        val joinResponse = joinRequest(location = loc, migratingFrom = oldSession.sfuName)
         if (joinResponse is Success) {
             val cred = joinResponse.value.credentials
-            val oldSession = this.session.value!!
             val currentOptions = oldSession.publisher.value?.currentOptions()
             val oldSfuName = oldSession.sfuName
             logger.i { "[reconnectMigrate] Migrate SFU $oldSfuName to ${cred.server.edgeName}" }
@@ -1066,7 +1068,7 @@ public class Call(
                     cred.iceServers.map { ice -> ice.toIceServer() },
                 )
                 this.session.value = newSession
-                this.session.value?.connect(reconnectDetails, currentOptions)
+                newSession.connect(reconnectDetails, currentOptions)
                 monitorSession(joinResponse.value)
             } finally {
                 oldSession.finalizeMigration()
