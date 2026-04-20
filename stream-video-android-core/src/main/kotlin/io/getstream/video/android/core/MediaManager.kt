@@ -667,6 +667,10 @@ class MicrophoneManager(
         ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
         _selectedDevice.value = device
 
+        // AudioSwitch.activate() resets the audio routing mode, which can override
+        // the preferred USB input device. Re-apply the USB preference after each activation.
+        reapplyUsbDevicePreference()
+
         if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
             mediaManager.speaker._status.value = DeviceStatus.Disabled
         }
@@ -797,6 +801,22 @@ class MicrophoneManager(
     @RequiresApi(Build.VERSION_CODES.M)
     fun clearUsbDeviceSelection() {
         selectUsbDevice(null)
+    }
+
+    /**
+     * Re-applies the currently selected USB input device preference.
+     *
+     * AudioSwitch's `activate()` sets [AudioManager.MODE_IN_COMMUNICATION], which resets
+     * the system audio routing and can override the preferred input device previously set
+     * via [JavaAudioDeviceModule.setPreferredInputDevice]. This method must be called
+     * after every AudioSwitch activation to ensure USB input routing is preserved.
+     */
+    private fun reapplyUsbDevicePreference() {
+        val usbDevice = _selectedUsbDevice.value ?: return
+        logger.i {
+            "[reapplyUsbDevicePreference] Re-applying USB device after AudioSwitch activation: ${usbDevice.name}"
+        }
+        mediaManager.call.peerConnectionFactory.setPreferredAudioInputDevice(usbDevice.deviceInfo)
     }
 
     /**
@@ -932,6 +952,10 @@ class MicrophoneManager(
 
                             _devices.value = devices.map { it.fromAudio() }
                             _selectedDevice.value = selected?.fromAudio()
+
+                            // AudioSwitch activation resets audio routing mode, which can
+                            // override the preferred USB input device. Re-apply after each callback.
+                            reapplyUsbDevicePreference()
 
                             setupCompleted.set(true)
                             capturedOnAudioDevicesUpdate?.invoke()
