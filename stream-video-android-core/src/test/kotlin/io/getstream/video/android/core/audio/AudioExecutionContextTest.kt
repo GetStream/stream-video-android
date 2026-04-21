@@ -22,7 +22,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import kotlin.test.Test
@@ -99,7 +98,7 @@ class AudioExecutionContextTest {
             delay(100)
         }
 
-        advanceUntilIdle()
+        job1.join()
 
         assertTrue(job1.isCompleted)
         assertTrue(job2.isActive || job2.isCompleted)
