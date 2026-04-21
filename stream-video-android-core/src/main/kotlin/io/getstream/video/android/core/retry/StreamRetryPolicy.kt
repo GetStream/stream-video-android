@@ -44,6 +44,14 @@ internal constructor(
     val nextBackOffDelayFunction: (retry: Int, previousDelay: Long) -> Long,
 ) {
     companion object {
+        /**
+         * Creates a policy with accelerating backoff.
+         *
+         * Note: the growth formula is `prev + retry * backoffStepMillis` which
+         * produces quadratic growth (e.g. 250 → 750 → 1500 → 2500), not true
+         * exponential doubling. This matches the stream-core-android retry
+         * behavior and is kept for compatibility.
+         */
         fun exponential(
             minRetries: Int = 1,
             maxRetries: Int = 5,

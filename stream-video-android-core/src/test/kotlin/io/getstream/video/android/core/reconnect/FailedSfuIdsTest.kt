@@ -126,7 +126,7 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    fun `failed SFU IDs accumulate across multiple migrate calls`() = runTest {
+    fun `failed SFU IDs accumulate across multiple addFailedSfuId calls`() = runTest {
         val call = client.call("default", randomUUID())
 
         call.invokeAddFailedSfuId("sfu-edge-1")

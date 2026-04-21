@@ -334,7 +334,7 @@ class SfuConnectionRetryTest {
     }
 
     @Test
-    fun `DisconnectedPermanently does not trigger reconnect when network is down`() = runTest {
+    fun `DisconnectedPermanently escalates to REJOIN even when network is down`() = runTest {
         every { mockNetworkStateProvider.isConnected() } returns false
         createRtcSession()
         advance()
