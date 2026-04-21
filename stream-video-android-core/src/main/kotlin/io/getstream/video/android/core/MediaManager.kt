@@ -39,6 +39,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import androidx.core.telecom.CallEndpointCompat
 import com.twilio.audioswitch.AudioDevice
 import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
@@ -53,6 +54,8 @@ import io.getstream.video.android.core.audio.UsbAudioInputDevice.Companion.isUsb
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.camera.CameraCharacteristicsValidator
 import io.getstream.video.android.core.camera.DefaultCameraCharacteristicsValidator
+import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
+import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCallAction
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.mapState
@@ -149,7 +152,6 @@ class SpeakerManager(
      */
     fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
         logger.i { "setEnabled $enabled" }
-        // TODO: what is fromUser?
         if (enabled) {
             enable(fromUser = fromUser)
         } else {
@@ -650,12 +652,10 @@ class MicrophoneManager(
      * Enable or disable the microphone
      */
     fun setEnabled(enabled: Boolean, fromUser: Boolean = true) {
-        enforceSetup {
-            if (enabled) {
-                enable(fromUser = fromUser)
-            } else {
-                disable(fromUser = fromUser)
-            }
+        if (enabled) {
+            enable(fromUser = fromUser)
+        } else {
+            disable(fromUser = fromUser)
         }
     }
 
@@ -666,6 +666,14 @@ class MicrophoneManager(
         logger.i { "selecting device $device" }
         ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
         _selectedDevice.value = device
+
+        // For Telecom-managed calls (e.g. audio calls registered as CALL_TYPE_AUDIO_CALL),
+        // the Telecom framework controls audio routing and has higher priority than
+        // AudioManager.setCommunicationDevice(). Route the switch through the Telecom API
+        // so the OS honours it on all devices including Samsung S21 Ultra (Android 14).
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            switchTelecomEndpointForDevice(device)
+        }
 
         if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
             mediaManager.speaker._status.value = DeviceStatus.Disabled
@@ -678,6 +686,46 @@ class MicrophoneManager(
         if (device !is StreamAudioDevice.BluetoothHeadset && device !is StreamAudioDevice.WiredHeadset) {
             nonHeadsetFallbackDevice = device
         }
+    }
+
+    /**
+     * When a call is registered with the Android Telecom framework (e.g. audio calls use
+     * CALL_TYPE_AUDIO_CALL), the framework owns audio routing and can override
+     * AudioManager.setCommunicationDevice(). This function mirrors any device selection to the
+     * Telecom endpoint API so the routing is actually honoured.
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun switchTelecomEndpointForDevice(device: StreamAudioDevice?) {
+        val telecomCall = mediaManager.call.state.jetpackTelecomRepository
+            ?.currentCall?.value as? TelecomCall.Registered ?: return
+
+        val targetEndpointType = when (device) {
+            is StreamAudioDevice.Speakerphone -> CallEndpointCompat.TYPE_SPEAKER
+            is StreamAudioDevice.Earpiece -> CallEndpointCompat.TYPE_EARPIECE
+            is StreamAudioDevice.BluetoothHeadset -> CallEndpointCompat.TYPE_BLUETOOTH
+            is StreamAudioDevice.WiredHeadset -> CallEndpointCompat.TYPE_WIRED_HEADSET
+            else -> return
+        }
+
+        val endpoint = telecomCall.availableCallEndpoints
+            .firstOrNull { it.type == targetEndpointType }
+
+        if (endpoint == null) {
+            logger.w {
+                "[switchTelecomEndpointForDevice] No Telecom endpoint of type=$targetEndpointType available; available=${telecomCall.availableCallEndpoints.map { it.name }}"
+            }
+            return
+        }
+
+        if (telecomCall.currentCallEndpoint?.identifier == endpoint.identifier) {
+            logger.d { "[switchTelecomEndpointForDevice] Telecom endpoint already set to '${endpoint.name}'" }
+            return
+        }
+
+        logger.i {
+            "[switchTelecomEndpointForDevice] Switching Telecom endpoint to '${endpoint.name}' (type=$targetEndpointType)"
+        }
+        telecomCall.processAction(TelecomCallAction.SwitchAudioEndpoint(endpoint.identifier))
     }
 
     /**
