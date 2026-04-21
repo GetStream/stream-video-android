@@ -35,7 +35,6 @@ import android.media.AudioRecord.READ_BLOCKING
 import android.media.projection.MediaProjection
 import android.os.Build
 import android.os.IBinder
-import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
@@ -667,10 +666,6 @@ class MicrophoneManager(
         ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
         _selectedDevice.value = device
 
-        // AudioSwitch.activate() resets the audio routing mode, which can override
-        // the preferred USB input device. Re-apply the USB preference after each activation.
-        reapplyUsbDevicePreference()
-
         if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
             mediaManager.speaker._status.value = DeviceStatus.Disabled
         }
@@ -702,7 +697,6 @@ class MicrophoneManager(
      *
      * Requires Android M (API 23) or higher.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
     fun setupUsbDeviceDetection() {
         if (audioDeviceCallback != null) {
             logger.d { "[setupUsbDeviceDetection] Already set up" }
@@ -739,10 +733,6 @@ class MicrophoneManager(
         am.registerAudioDeviceCallback(audioDeviceCallback, null)
         logger.i { "[setupUsbDeviceDetection] Registered AudioDeviceCallback" }
 
-        mediaManager.call.peerConnectionFactory.onAudioRecordStartCallback = {
-            reapplyUsbDevicePreference()
-        }
-
         // Initial device scan
         updateUsbDeviceList()
     }
@@ -750,7 +740,6 @@ class MicrophoneManager(
     /**
      * Updates the list of available USB input devices.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun updateUsbDeviceList() {
         val am = audioManager ?: return
 
@@ -781,7 +770,6 @@ class MicrophoneManager(
      * @param device The USB device to use, or null to restore default routing.
      * @return true if the device was selected successfully, false otherwise.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
     fun selectUsbDevice(device: UsbAudioInputDevice?): Boolean {
         logger.i { "[selectUsbDevice] Selecting USB device: ${device?.name}" }
 
@@ -801,26 +789,15 @@ class MicrophoneManager(
 
     /**
      * Clears the USB device selection, restoring default audio routing.
-     */
-    @RequiresApi(Build.VERSION_CODES.M)
-    fun clearUsbDeviceSelection() {
-        selectUsbDevice(null)
-    }
-
-    /**
-     * Re-applies the currently selected USB input device preference.
      *
-     * AudioSwitch's `activate()` sets [AudioManager.MODE_IN_COMMUNICATION], which resets
-     * the system audio routing and can override the preferred input device previously set
-     * via [JavaAudioDeviceModule.setPreferredInputDevice]. This method must be called
-     * after every AudioSwitch activation to ensure USB input routing is preserved.
+     * Resets the state directly rather than going through [selectUsbDevice] with null,
+     * because the WebRTC ADM's setPreferredInputDevice does not accept null safely.
+     * When the USB device is physically removed, the system automatically falls back
+     * to default audio routing, so an explicit ADM call is unnecessary.
      */
-    private fun reapplyUsbDevicePreference() {
-        val usbDevice = _selectedUsbDevice.value ?: return
-        logger.i {
-            "[reapplyUsbDevicePreference] Re-applying USB device after AudioSwitch activation: ${usbDevice.name}"
-        }
-        mediaManager.call.peerConnectionFactory.setPreferredAudioInputDevice(usbDevice.deviceInfo)
+    fun clearUsbDeviceSelection() {
+        logger.i { "[clearUsbDeviceSelection] Clearing USB device selection" }
+        _selectedUsbDevice.value = null
     }
 
     /**
@@ -828,7 +805,6 @@ class MicrophoneManager(
      *
      * @return StateFlow of available USB input devices.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
     fun listUsbDevices(): StateFlow<List<UsbAudioInputDevice>> {
         setupUsbDeviceDetection()
         return usbInputDevices
@@ -837,14 +813,12 @@ class MicrophoneManager(
     /**
      * Cleans up USB device detection callback.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
     private fun cleanupUsbDeviceDetection() {
         audioDeviceCallback?.let { callback ->
             audioManager?.unregisterAudioDeviceCallback(callback)
             audioDeviceCallback = null
             logger.i { "[cleanupUsbDeviceDetection] Unregistered AudioDeviceCallback" }
         }
-        mediaManager.call.peerConnectionFactory.onAudioRecordStartCallback = null
     }
 
     // ==================== End USB Audio Input Device Support ====================
@@ -906,9 +880,7 @@ class MicrophoneManager(
 
     fun cleanup() {
         ifAudioHandlerInitialized { it.stop() }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            cleanupUsbDeviceDetection()
-        }
+        cleanupUsbDeviceDetection()
         setupCompleted.set(false)
     }
 
@@ -957,10 +929,6 @@ class MicrophoneManager(
 
                             _devices.value = devices.map { it.fromAudio() }
                             _selectedDevice.value = selected?.fromAudio()
-
-                            // AudioSwitch activation resets audio routing mode, which can
-                            // override the preferred USB input device. Re-apply after each callback.
-                            reapplyUsbDevicePreference()
 
                             setupCompleted.set(true)
                             capturedOnAudioDevicesUpdate?.invoke()

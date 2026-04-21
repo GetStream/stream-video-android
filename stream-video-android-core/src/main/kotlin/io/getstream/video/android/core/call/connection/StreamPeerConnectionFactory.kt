@@ -97,8 +97,6 @@ public class StreamPeerConnectionFactory(
     // Provider function to check if microphone is enabled
     private var microphoneEnabledProvider: (() -> Boolean)? = null
 
-    internal var onAudioRecordStartCallback: (() -> Unit)? = null
-
     /**
      * Set to get callbacks when audio input from microphone is received.
      * This can be example used to detect whether a person is speaking
@@ -216,7 +214,7 @@ public class StreamPeerConnectionFactory(
 
         adm = initAudioDeviceModule()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && hasPendingPreferredDevice) {
+        if (hasPendingPreferredDevice) {
             adm?.setPreferredInputDevice(pendingPreferredInputDevice)
             audioLogger.i {
                 "[createFactory] Applied pending preferred input device: ${pendingPreferredInputDevice?.productName}"
@@ -313,7 +311,6 @@ public class StreamPeerConnectionFactory(
                 JavaAudioDeviceModule.AudioRecordStateCallback {
                 override fun onWebRtcAudioRecordStart() {
                     audioLogger.d { "[onWebRtcAudioRecordStart] no args" }
-                    onAudioRecordStartCallback?.invoke()
                 }
 
                 override fun onWebRtcAudioRecordStop() {
@@ -362,12 +359,9 @@ public class StreamPeerConnectionFactory(
      * This allows routing audio input to a specific device, such as a USB microphone
      * that may not be detected by AudioSwitch (e.g., Rode Wireless Go II).
      *
-     * Must be called on API 23+ (Android M). On older versions, this is a no-op.
-     *
      * @param deviceInfo The AudioDeviceInfo to use for recording, or null to restore default routing.
      * @return true if the preference was set successfully, false otherwise.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
     fun setPreferredAudioInputDevice(deviceInfo: AudioDeviceInfo?): Boolean {
         return try {
             val currentAdm = adm
