@@ -132,6 +132,13 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
 
+@Deprecated(
+    message = "No longer used internally. The reconnect deadline is now driven by the server's " +
+        "fastReconnectDeadlineSeconds. This constant will be removed in a future release.",
+    level = DeprecationLevel.WARNING,
+)
+const val sfuReconnectTimeoutMillis = 30_000
+
 /**
  * The call class gives you access to all call level API calls
  *
