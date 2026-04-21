@@ -175,6 +175,12 @@ public class StreamPeerConnectionFactory(
 
     private var adm: JavaAudioDeviceModule? = null
 
+    @Volatile
+    private var pendingPreferredInputDevice: AudioDeviceInfo? = null
+
+    @Volatile
+    private var hasPendingPreferredDevice = false
+
     private fun createFactory(): PeerConnectionFactory {
         PeerConnectionFactory.initialize(
             PeerConnectionFactory.InitializationOptions.builder(context)
@@ -207,6 +213,14 @@ public class StreamPeerConnectionFactory(
         )
 
         adm = initAudioDeviceModule()
+
+        if (hasPendingPreferredDevice) {
+            adm?.setPreferredInputDevice(pendingPreferredInputDevice)
+            audioLogger.i {
+                "[createFactory] Applied pending preferred input device: ${pendingPreferredInputDevice?.productName}"
+            }
+            hasPendingPreferredDevice = false
+        }
 
         // Capture the audio bitrate profile when creating the factory
         val currentAudioBitrateProfile = audioBitrateProfileProvider?.invoke()
@@ -345,17 +359,23 @@ public class StreamPeerConnectionFactory(
      * This allows routing audio input to a specific device, such as a USB microphone
      * that may not be detected by AudioSwitch (e.g., Rode Wireless Go II).
      *
-     * Must be called on API 23+ (Android M). On older versions, this is a no-op.
-     *
      * @param deviceInfo The AudioDeviceInfo to use for recording, or null to restore default routing.
      * @return true if the preference was set successfully, false otherwise.
      */
-    @RequiresApi(Build.VERSION_CODES.M)
     fun setPreferredAudioInputDevice(deviceInfo: AudioDeviceInfo?): Boolean {
         return try {
-            adm?.setPreferredInputDevice(deviceInfo)
-            audioLogger.i {
-                "[setPreferredAudioInputDevice] Set preferred input device: ${deviceInfo?.productName}"
+            val currentAdm = adm
+            if (currentAdm != null) {
+                currentAdm.setPreferredInputDevice(deviceInfo)
+                audioLogger.i {
+                    "[setPreferredAudioInputDevice] Set preferred input device: ${deviceInfo?.productName}"
+                }
+            } else {
+                pendingPreferredInputDevice = deviceInfo
+                hasPendingPreferredDevice = true
+                audioLogger.w {
+                    "[setPreferredAudioInputDevice] ADM not yet initialized, queuing preference: ${deviceInfo?.productName}"
+                }
             }
             true
         } catch (e: Exception) {
