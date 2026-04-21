@@ -107,6 +107,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -1834,6 +1835,8 @@ public class RtcSession internal constructor(
             withTimeout(SocketActions.DEFAULT_SOCKET_TIMEOUT) {
                 sfuConnectionModule.socketConnection.state().first { it is SfuSocketState.Connected }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             sfuTracer.trace("fast-reconnect-connection-failed", "${e.message}")
             sendCallStats()
