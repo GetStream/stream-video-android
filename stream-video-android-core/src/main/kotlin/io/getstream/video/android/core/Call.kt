@@ -160,6 +160,11 @@ public class Call(
     internal var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
+    /**
+     * Cumulative count of non-FAST reconnect attempts across the call's lifetime.
+     * Passed to [RtcSession] and sent to the SFU via `ReconnectDetails.reconnect_attempt`.
+     * Reset to zero on a fresh [join].
+     */
     internal var reconnectAttempts = 0
     internal val clientImpl = client as StreamVideoClient
     internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
@@ -847,10 +852,13 @@ public class Call(
 
             val loopStartTime = System.currentTimeMillis()
             var currentStrategy = strategy
-            var attempt = 0
+            // Local iteration counter for this reconnect() invocation only.
+            // Controls MAX_RECONNECT_ATTEMPTS cap and FAST→REJOIN escalation.
+            // Distinct from the class-level reconnectAttempts which is cumulative.
+            var loopIteration = 0
 
             while (true) {
-                if (attempt > 0) {
+                if (loopIteration > 0) {
                     val connectionState = state.connection.value
                     if (connectionState is RealtimeConnection.Connected ||
                         connectionState is RealtimeConnection.ReconnectingFailed ||
@@ -861,7 +869,7 @@ public class Call(
                     }
                 }
 
-                if (attempt >= MAX_RECONNECT_ATTEMPTS) {
+                if (loopIteration >= MAX_RECONNECT_ATTEMPTS) {
                     logger.w { "[reconnect] Max reconnect attempts ($MAX_RECONNECT_ATTEMPTS) reached — giving up" }
                     state._connection.value = RealtimeConnection.ReconnectingFailed
                     break
@@ -881,7 +889,7 @@ public class Call(
                 }
 
                 logger.i {
-                    "[reconnect] attempt=$attempt strategy=$currentStrategy reason=$reason"
+                    "[reconnect] loopIteration=$loopIteration strategy=$currentStrategy reason=$reason"
                 }
 
                 try {
@@ -921,15 +929,15 @@ public class Call(
                     val shouldRejoin = pastDeadline ||
                         wasMigrating ||
                         peerConnectionsStale ||
-                        attempt >= MAX_FAST_RECONNECT_ATTEMPTS
+                        loopIteration >= MAX_FAST_RECONNECT_ATTEMPTS
 
-                    attempt++
+                    loopIteration++
                     currentStrategy = if (shouldRejoin) {
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
                     } else {
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST
                     }
-                    logger.i { "[reconnect] Escalating to $currentStrategy (attempt=$attempt)" }
+                    logger.i { "[reconnect] Escalating to $currentStrategy (loopIteration=$loopIteration)" }
                 }
             }
         } finally {
