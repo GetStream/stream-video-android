@@ -119,7 +119,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retry
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -212,6 +211,17 @@ data class TrackDimensions(
  */
 internal class PeerConnectionNotUsableException :
     Exception("Peer connections are not usable after fast reconnect")
+
+/**
+ * Outcome of an SFU connection attempt ([RtcSession.connect] or
+ * [RtcSession.fastReconnect]). Makes the result explicit so callers
+ * don't need to guess which exceptions a method might throw.
+ */
+internal sealed class SfuConnectionResult {
+    object Connected : SfuConnectionResult()
+    object PeerConnectionStale : SfuConnectionResult()
+    data class Failed(val error: Exception) : SfuConnectionResult()
+}
 
 public class RtcSession internal constructor(
     client: StreamVideo,
@@ -782,24 +792,36 @@ public class RtcSession internal constructor(
         awaitAll(subscriberAsync, publisherAsync)
     }
 
+    /**
+     * Public entry point kept for backward compatibility (used by the initial
+     * join flow). Delegates to [internalConnect] and throws on failure so the
+     * existing call-site in [io.getstream.video.android.core.Call.join] keeps
+     * working without changes.
+     */
     suspend fun connect(
         reconnectDetails: ReconnectDetails? = null,
         options: List<PublishOption>? = null,
     ) {
-        logger.i { "[connect] #sfu; #track; no args" }
-        val request = JoinRequest(
-            subscriber_sdp = throwawaySubscriberSdpAndOptions(),
-            publisher_sdp = throwawayPublisherSdpAndOptions(),
-            unified_session_id = call.unifiedSessionId,
-            session_id = sessionId,
-            token = sfuToken,
-            fast_reconnect = false,
-            client_details = clientDetails,
-            preferred_publish_options = options ?: emptyList(),
-            reconnect_details = reconnectDetails,
-            capabilities = call.clientCapabilities.values.toList(),
-            source = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
-        )
+        when (val result = internalConnect(reconnectDetails, options)) {
+            is SfuConnectionResult.Connected -> Unit
+            is SfuConnectionResult.PeerConnectionStale ->
+                throw PeerConnectionNotUsableException()
+            is SfuConnectionResult.Failed ->
+                throw result.error
+        }
+    }
+
+    /**
+     * Connects to the SFU and suspends until the connection is established or
+     * fails. Returns a typed [SfuConnectionResult] so callers can react to the
+     * outcome without catching exceptions.
+     */
+    internal suspend fun internalConnect(
+        reconnectDetails: ReconnectDetails? = null,
+        options: List<PublishOption>? = null,
+    ): SfuConnectionResult {
+        logger.i { "[internalConnect] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
+        val request = buildJoinRequest(reconnectDetails, options)
         sfuTracer.trace(
             PeerConnectionTraceKey.JOIN_REQUEST.value,
             safeCallWithDefault(null) {
@@ -808,15 +830,37 @@ public class RtcSession internal constructor(
         )
         listenToSfuSocket()
         sfuConnectionModule.socketConnection.connect(request)
-        sfuConnectionModule.socketConnection.whenConnected(
-            connectionFailed = {
-                sfuTracer.trace("connect-failed", "${it.message}")
-                sendCallStats()
-            },
-        ) {
+        return try {
+            withTimeout(SocketActions.DEFAULT_SOCKET_TIMEOUT) {
+                sfuConnectionModule.socketConnection.state().first { it is SfuSocketState.Connected }
+            }
             sendConnectionTimeStats(reconnectDetails?.strategy)
+            SfuConnectionResult.Connected
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            sfuTracer.trace("connect-failed", "${e.message}")
+            sendCallStats()
+            SfuConnectionResult.Failed(e)
         }
     }
+
+    private suspend fun buildJoinRequest(
+        reconnectDetails: ReconnectDetails?,
+        options: List<PublishOption>?,
+    ): JoinRequest = JoinRequest(
+        subscriber_sdp = throwawaySubscriberSdpAndOptions(),
+        publisher_sdp = throwawayPublisherSdpAndOptions(),
+        unified_session_id = call.unifiedSessionId,
+        session_id = sessionId,
+        token = sfuToken,
+        fast_reconnect = false,
+        client_details = clientDetails,
+        preferred_publish_options = options ?: emptyList(),
+        reconnect_details = reconnectDetails,
+        capabilities = call.clientCapabilities.values.toList(),
+        source = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+    )
 
     private suspend fun sendConnectionTimeStats(reconnectStrategy: WebsocketReconnectStrategy? = null) {
         if (reconnectStrategy == null) {
@@ -1807,50 +1851,25 @@ public class RtcSession internal constructor(
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
 
-    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?) {
-        // Fast reconnect, send a JOIN request on the same SFU
-        // and restart ICE on publisher
+    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?): SfuConnectionResult {
         logger.d { "[fastReconnect] Starting fast reconnect." }
         sfuTracer.trace("fastReconnect", reconnectDetails.toString())
-        val (previousSessionId, currentSubscriptions, publisherTracks) = currentSfuInfo()
+        val (_, _, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
 
-        val request = JoinRequest(
-            subscriber_sdp = throwawaySubscriberSdpAndOptions(),
-            publisher_sdp = throwawayPublisherSdpAndOptions(),
-            unified_session_id = call.unifiedSessionId,
-            session_id = sessionId,
-            token = sfuToken,
-            client_details = clientDetails,
-            preferred_publish_options = publisher.value?.currentOptions() ?: emptyList(),
-            reconnect_details = reconnectDetails,
-            capabilities = call.clientCapabilities.values.toList(),
-            source = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+        val result = internalConnect(
+            reconnectDetails,
+            publisher.value?.currentOptions(),
         )
-        sfuTracer.trace(PeerConnectionTraceKey.JOIN_REQUEST.value, request.toString())
+        if (result !is SfuConnectionResult.Connected) return result
 
-        logger.d { "[fastReconnect] Connecting RTC, $request" }
-        sfuConnectionModule.socketConnection.connect(request)
-        try {
-            withTimeout(SocketActions.DEFAULT_SOCKET_TIMEOUT) {
-                sfuConnectionModule.socketConnection.state().first { it is SfuSocketState.Connected }
-            }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            sfuTracer.trace("fast-reconnect-connection-failed", "${e.message}")
-            sendCallStats()
-            throw e
-        }
-        logger.d { "[fastReconnect] Connection established, restoring session" }
-        listenToSfuSocket()
         val peerConnectionNotUsable =
             subscriber.value?.isFailedOrClosed() == true || publisher.value?.isFailedOrClosed() == true
         if (peerConnectionNotUsable) {
-            throw PeerConnectionNotUsableException()
+            return SfuConnectionResult.PeerConnectionStale
         }
-        sendConnectionTimeStats(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST)
         setVideoSubscriptions(true)
+        return SfuConnectionResult.Connected
     }
 
     // Prepares this session for migration to a new SFU without destroying it.

@@ -61,8 +61,8 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
-import io.getstream.video.android.core.call.PeerConnectionNotUsableException
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.connection.Subscriber
@@ -1011,15 +1011,10 @@ public class Call(
             reconnect_attempt = reconnectAttempts,
             reason = reason,
         )
-        return try {
-            currentSession.fastReconnect(reconnectDetails)
-            ReconnectOutcome.Success
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: PeerConnectionNotUsableException) {
-            ReconnectOutcome.PeerConnectionStale
-        } catch (e: Exception) {
-            ReconnectOutcome.Failed(e)
+        return when (val result = currentSession.fastReconnect(reconnectDetails)) {
+            is SfuConnectionResult.Connected -> ReconnectOutcome.Success
+            is SfuConnectionResult.PeerConnectionStale -> ReconnectOutcome.PeerConnectionStale
+            is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
         }
     }
 
@@ -1037,52 +1032,60 @@ public class Call(
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for rejoin")
         reconnectStartTime = System.currentTimeMillis()
 
-        return try {
-            val joinResponse = joinRequest(location = loc)
-            if (joinResponse is Success) {
-                val cred = joinResponse.value.credentials
-                val currentOptions = oldSession.publisher.value?.currentOptions()
-                logger.i { "Rejoin SFU ${oldSession.sfuUrl} to ${cred.server.url}" }
-
-                this.sessionId = UUID.randomUUID().toString()
-                val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
-                val reconnectDetails = ReconnectDetails(
-                    previous_session_id = prevSessionId,
-                    strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-                    announced_tracks = publishingInfo,
-                    subscriptions = subscriptionsInfo,
-                    reconnect_attempt = reconnectAttempts,
-                    reason = reason,
-                )
-                this.state.removeParticipant(prevSessionId)
-                oldSession.prepareRejoin("rejoin")
-                this.session.value = RtcSession(
-                    clientImpl,
-                    reconnectAttempts,
-                    powerManager,
-                    this,
-                    sessionId,
-                    clientImpl.apiKey,
-                    clientImpl.coordinatorConnectionModule.lifecycle,
-                    cred.server.url,
-                    cred.server.wsEndpoint,
-                    cred.token,
-                    cred.server.edgeName,
-                    cred.iceServers.map { ice -> ice.toIceServer() },
-                )
-                this.session.value?.connect(reconnectDetails, currentOptions)
-                this.session.value?.sfuTracer?.trace("rejoin", reason)
-                monitorSession(joinResponse.value)
-                ReconnectOutcome.Success
-            } else {
-                ReconnectOutcome.Failed(
-                    Exception("Failed to get join response: ${joinResponse.errorOrNull()}"),
-                )
-            }
+        val joinResponse = try {
+            joinRequest(location = loc)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            ReconnectOutcome.Failed(e)
+            return ReconnectOutcome.Failed(e)
+        }
+
+        if (joinResponse !is Success) {
+            return ReconnectOutcome.Failed(
+                Exception("Failed to get join response: ${joinResponse.errorOrNull()}"),
+            )
+        }
+
+        val cred = joinResponse.value.credentials
+        val currentOptions = oldSession.publisher.value?.currentOptions()
+        logger.i { "Rejoin SFU ${oldSession.sfuUrl} to ${cred.server.url}" }
+
+        this.sessionId = UUID.randomUUID().toString()
+        val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
+        val reconnectDetails = ReconnectDetails(
+            previous_session_id = prevSessionId,
+            strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+            announced_tracks = publishingInfo,
+            subscriptions = subscriptionsInfo,
+            reconnect_attempt = reconnectAttempts,
+            reason = reason,
+        )
+        this.state.removeParticipant(prevSessionId)
+        oldSession.prepareRejoin("rejoin")
+        val newSession = RtcSession(
+            clientImpl,
+            reconnectAttempts,
+            powerManager,
+            this,
+            sessionId,
+            clientImpl.apiKey,
+            clientImpl.coordinatorConnectionModule.lifecycle,
+            cred.server.url,
+            cred.server.wsEndpoint,
+            cred.token,
+            cred.server.edgeName,
+            cred.iceServers.map { ice -> ice.toIceServer() },
+        )
+        this.session.value = newSession
+
+        return when (val result = newSession.internalConnect(reconnectDetails, currentOptions)) {
+            is SfuConnectionResult.Connected -> {
+                newSession.sfuTracer.trace("rejoin", reason)
+                monitorSession(joinResponse.value)
+                ReconnectOutcome.Success
+            }
+            is SfuConnectionResult.PeerConnectionStale -> ReconnectOutcome.PeerConnectionStale
+            is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
         }
     }
 
@@ -1100,61 +1103,69 @@ public class Call(
         reconnectStartTime = System.currentTimeMillis()
         addFailedSfuId(oldSession.sfuName)
 
-        return try {
-            val joinResponse = joinRequest(location = loc, migratingFrom = oldSession.sfuName)
-            if (joinResponse is Success) {
-                val cred = joinResponse.value.credentials
-                val currentOptions = oldSession.publisher.value?.currentOptions()
-                val oldSfuName = oldSession.sfuName
-                logger.i { "[reconnectMigrate] Migrate SFU $oldSfuName to ${cred.server.edgeName}" }
-
-                val (_, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
-                val reconnectDetails = ReconnectDetails(
-                    previous_session_id = "",
-                    strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
-                    announced_tracks = publishingInfo,
-                    subscriptions = subscriptionsInfo,
-                    from_sfu_id = oldSfuName,
-                    reconnect_attempt = reconnectAttempts,
-                )
-
-                val stats = collectStats()
-                oldSession.sendCallStats(stats)
-                oldSession.enterMigration()
-
-                try {
-                    val newSession = RtcSession(
-                        clientImpl,
-                        reconnectAttempts,
-                        powerManager,
-                        this,
-                        sessionId,
-                        clientImpl.apiKey,
-                        clientImpl.coordinatorConnectionModule.lifecycle,
-                        cred.server.url,
-                        cred.server.wsEndpoint,
-                        cred.token,
-                        cred.server.edgeName,
-                        cred.iceServers.map { ice -> ice.toIceServer() },
-                    )
-                    this.session.value = newSession
-                    newSession.connect(reconnectDetails, currentOptions)
-                    monitorSession(joinResponse.value)
-                } finally {
-                    oldSession.finalizeMigration()
-                }
-                ReconnectOutcome.Success
-            } else {
-                ReconnectOutcome.Failed(
-                    Exception(
-                        "Failed to get join response during migration: ${joinResponse.errorOrNull()}",
-                    ),
-                )
-            }
+        val joinResponse = try {
+            joinRequest(location = loc, migratingFrom = oldSession.sfuName)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            ReconnectOutcome.Failed(e)
+            return ReconnectOutcome.Failed(e)
+        }
+
+        if (joinResponse !is Success) {
+            return ReconnectOutcome.Failed(
+                Exception(
+                    "Failed to get join response during migration: ${joinResponse.errorOrNull()}",
+                ),
+            )
+        }
+
+        val cred = joinResponse.value.credentials
+        val currentOptions = oldSession.publisher.value?.currentOptions()
+        val oldSfuName = oldSession.sfuName
+        logger.i { "[reconnectMigrate] Migrate SFU $oldSfuName to ${cred.server.edgeName}" }
+
+        val (_, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
+        val reconnectDetails = ReconnectDetails(
+            previous_session_id = "",
+            strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+            announced_tracks = publishingInfo,
+            subscriptions = subscriptionsInfo,
+            from_sfu_id = oldSfuName,
+            reconnect_attempt = reconnectAttempts,
+        )
+
+        val stats = collectStats()
+        oldSession.sendCallStats(stats)
+        oldSession.enterMigration()
+
+        val newSession = RtcSession(
+            clientImpl,
+            reconnectAttempts,
+            powerManager,
+            this,
+            sessionId,
+            clientImpl.apiKey,
+            clientImpl.coordinatorConnectionModule.lifecycle,
+            cred.server.url,
+            cred.server.wsEndpoint,
+            cred.token,
+            cred.server.edgeName,
+            cred.iceServers.map { ice -> ice.toIceServer() },
+        )
+        this.session.value = newSession
+
+        return try {
+            val result = newSession.internalConnect(reconnectDetails, currentOptions)
+            when (result) {
+                is SfuConnectionResult.Connected -> {
+                    monitorSession(joinResponse.value)
+                    ReconnectOutcome.Success
+                }
+                is SfuConnectionResult.PeerConnectionStale -> ReconnectOutcome.PeerConnectionStale
+                is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
+            }
+        } finally {
+            oldSession.finalizeMigration()
         }
     }
 
