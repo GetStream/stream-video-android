@@ -140,6 +140,12 @@ import kotlin.coroutines.resume
 const val sfuReconnectTimeoutMillis = 30_000
 
 /**
+ * Thrown when a reconnect method's preconditions are not met (e.g. no session, no location).
+ * Retrying won't help — the reconnect loop should terminate immediately.
+ */
+private class ReconnectPreconditionException(message: String) : Exception(message)
+
+/**
  * The call class gives you access to all call level API calls
  *
  * @sample
@@ -913,6 +919,10 @@ public class Call(
                     break
                 } catch (cancel: CancellationException) {
                     throw cancel
+                } catch (precondition: ReconnectPreconditionException) {
+                    logger.w { "[reconnect] Precondition not met — giving up: ${precondition.message}" }
+                    state._connection.value = RealtimeConnection.ReconnectingFailed
+                    break
                 } catch (error: Exception) {
                     logger.w {
                         "[reconnect] $currentStrategy ($reconnectAttempts) failed: ${error.message}"
@@ -953,7 +963,7 @@ public class Call(
     private suspend fun reconnectFast(reason: String) {
         logger.d { "[reconnectFast] reconnectAttempts=$reconnectAttempts" }
         val currentSession = session.value
-            ?: throw IllegalStateException("No active session for fast reconnect")
+            ?: throw ReconnectPreconditionException("No active session for fast reconnect")
 
         try {
             val stats = collectStats()
@@ -987,9 +997,9 @@ public class Call(
         logger.d { "[reconnectRejoin] reconnectAttempts=$reconnectAttempts" }
         state._connection.value = RealtimeConnection.Reconnecting
         val loc = location
-            ?: throw IllegalStateException("No location available for rejoin")
+            ?: throw ReconnectPreconditionException("No location available for rejoin")
         val oldSession = session.value
-            ?: throw IllegalStateException("No active session for rejoin")
+            ?: throw ReconnectPreconditionException("No active session for rejoin")
         reconnectStartTime = System.currentTimeMillis()
 
         val joinResponse = joinRequest(location = loc)
@@ -1040,9 +1050,9 @@ public class Call(
         logger.d { "[reconnectMigrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         val loc = location
-            ?: throw IllegalStateException("No location available for migrate")
+            ?: throw ReconnectPreconditionException("No location available for migrate")
         val oldSession = session.value
-            ?: throw IllegalStateException("No active session for migrate")
+            ?: throw ReconnectPreconditionException("No active session for migrate")
         reconnectStartTime = System.currentTimeMillis()
         addFailedSfuId(oldSession.sfuName)
 
