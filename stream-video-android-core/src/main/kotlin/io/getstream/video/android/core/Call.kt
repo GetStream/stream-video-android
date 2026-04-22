@@ -845,7 +845,7 @@ public class Call(
                 RealtimeConnection.Reconnecting
             }
 
-            val reconnectStartTime = System.currentTimeMillis()
+            val loopStartTime = System.currentTimeMillis()
             var currentStrategy = strategy
             var attempt = 0
 
@@ -867,7 +867,7 @@ public class Call(
                     break
                 }
 
-                val elapsedMs = System.currentTimeMillis() - reconnectStartTime
+                val elapsedMs = System.currentTimeMillis() - loopStartTime
                 if (clientImpl.leaveAfterDisconnectSeconds > 0 &&
                     elapsedMs / 1000 > clientImpl.leaveAfterDisconnectSeconds
                 ) {
@@ -915,7 +915,7 @@ public class Call(
                     val wasMigrating = currentStrategy ==
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
                     val peerConnectionsStale = error is PeerConnectionNotUsableException
-                    val pastDeadline = (System.currentTimeMillis() - reconnectStartTime) >
+                    val pastDeadline = (System.currentTimeMillis() - loopStartTime) >
                         reconnectDeadlineMillis
 
                     val shouldRejoin = pastDeadline ||
