@@ -805,6 +805,7 @@ internal class StreamVideoClient internal constructor(
         location: String,
         migratingFrom: String? = null,
         migratingFromList: List<String>? = null,
+        hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest(
             create = create,
@@ -820,6 +821,7 @@ internal class StreamVideoClient internal constructor(
             location = location,
             migratingFrom = migratingFrom,
             migratingFromList = migratingFromList,
+            hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
         )
 
         val result = apiCall {

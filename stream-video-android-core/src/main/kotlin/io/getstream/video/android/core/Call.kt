@@ -512,6 +512,7 @@ public class Call(
         createOptions: CreateCallOptions? = null,
         ring: Boolean = false,
         notify: Boolean = false,
+        hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<RtcSession> {
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -545,7 +546,7 @@ public class Call(
 
         atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
-            result = _join(create, createOptions, ring, notify)
+            result = _join(create, createOptions, ring, notify, hintHighScaleLivestreamPublisher)
             if (result is Success) {
                 // we initialise the camera, mic and other according to local + backend settings
                 // only when the call is joined to make sure we don't switch and override
@@ -614,6 +615,7 @@ public class Call(
         createOptions: CreateCallOptions? = null,
         ring: Boolean = false,
         notify: Boolean = false,
+        hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<RtcSession> {
         reconnectAttepmts = 0
         sfuEvents?.cancel()
@@ -641,7 +643,14 @@ public class Call(
             } else {
                 null
             }
-        val result = joinRequest(options, locationResult.value, ring = ring, notify = notify)
+        val result =
+            joinRequest(
+                options,
+                locationResult.value,
+                ring = ring,
+                notify = notify,
+                hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
+            )
 
         if (result !is Success) {
             return result as Failure
@@ -1539,6 +1548,7 @@ public class Call(
         migratingFromList: List<String>? = null,
         ring: Boolean = false,
         notify: Boolean = false,
+        hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<JoinCallResponse> {
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
         val result = clientImpl.joinCall(
@@ -1554,6 +1564,7 @@ public class Call(
             location = location,
             migratingFrom = migratingFrom,
             migratingFromList = migratingFromList,
+            hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
         )
         result.onSuccess {
             state.updateFromResponse(it)

@@ -64,5 +64,8 @@ data class JoinCallRequest (
     val video: kotlin.Boolean? = null,
 
     @Json(name = "data")
-    val data: io.getstream.android.video.generated.models.CallRequest? = null
+    val data: io.getstream.android.video.generated.models.CallRequest? = null,
+
+    @Json(name = "hint_high_scale_livestream_publisher")
+    val hintHighScaleLivestreamPublisher: kotlin.Boolean? = null
 )
