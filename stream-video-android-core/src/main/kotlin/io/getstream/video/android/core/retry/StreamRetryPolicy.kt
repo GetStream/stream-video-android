@@ -74,6 +74,12 @@ internal constructor(
                 },
             ).validate()
 
+        /**
+         * Creates a policy with linearly growing backoff.
+         *
+         * Each retry adds a fixed [backoffStepMillis] to the previous delay
+         * (e.g. 250 → 500 → 750 → 1000), capped at [maxBackoffMillis].
+         */
         fun linear(
             minRetries: Int = 1,
             maxRetries: Int = 5,
@@ -94,6 +100,12 @@ internal constructor(
                 },
             ).validate()
 
+        /**
+         * Creates a policy with a constant delay between retries.
+         *
+         * Every retry waits exactly [delayMillis] (e.g. 500 → 500 → 500),
+         * capped at [maxBackoffMillis].
+         */
         fun fixed(
             minRetries: Int = 1,
             maxRetries: Int = 5,
