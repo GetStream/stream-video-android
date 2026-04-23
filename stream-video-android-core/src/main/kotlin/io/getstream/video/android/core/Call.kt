@@ -61,6 +61,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.audio.InputAudioFilter
@@ -129,7 +130,6 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.cancellation.CancellationException
 import kotlin.coroutines.resume
 
 @Deprecated(
@@ -680,33 +680,37 @@ public class Call(
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
         val sfuName = result.value.credentials.server.edgeName
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
-        try {
-            val localSession = if (testInstanceProvider.rtcSessionCreator != null) {
-                testInstanceProvider.rtcSessionCreator!!.invoke()
-            } else {
-                RtcSession(
-                    sessionId = this.sessionId,
-                    apiKey = clientImpl.apiKey,
-                    lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                    client = client,
-                    call = this,
-                    sfuUrl = sfuUrl,
-                    sfuWsUrl = sfuWsUrl,
-                    sfuToken = sfuToken,
-                    sfuName = sfuName,
-                    remoteIceServers = iceServers,
-                    powerManager = powerManager,
+        val localSession = if (testInstanceProvider.rtcSessionCreator != null) {
+            testInstanceProvider.rtcSessionCreator!!.invoke()
+        } else {
+            RtcSession(
+                sessionId = this.sessionId,
+                apiKey = clientImpl.apiKey,
+                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
+                client = client,
+                call = this,
+                sfuUrl = sfuUrl,
+                sfuWsUrl = sfuWsUrl,
+                sfuToken = sfuToken,
+                sfuName = sfuName,
+                remoteIceServers = iceServers,
+                powerManager = powerManager,
+            )
+        }
+        session.value = localSession
+
+        session.value?.let {
+            state._connection.value = RealtimeConnection.Joined(it)
+        }
+
+        when (val result = session.value?.internalConnect()) {
+            is SfuConnectionResult.Connected -> Unit
+            is SfuConnectionResult.Failed ->
+                return Failure(
+                    Error.GenericError(result.error.message ?: "RtcSession error occurred."),
                 )
-            }
-            session.value = localSession
-
-            session.value?.let {
-                state._connection.value = RealtimeConnection.Joined(it)
-            }
-
-            session.value?.connect()
-        } catch (e: Exception) {
-            return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
+            null ->
+                return Failure(Error.GenericError("RtcSession was null during connect"))
         }
         client.state.setActiveCall(this)
         monitorSession(result.value)
@@ -989,14 +993,8 @@ public class Call(
         val currentSession = session.value
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for fast reconnect")
 
-        try {
-            val stats = collectStats()
-            currentSession.sendCallStats(stats)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            logger.w { "[reconnectFast] Failed to send pre-reconnect stats: ${e.message}" }
-        }
+        val stats = collectStats()
+        currentSession.sendCallStats(stats)
 
         currentSession.prepareReconnect()
         state._connection.value = RealtimeConnection.Reconnecting
@@ -1012,9 +1010,9 @@ public class Call(
             reason = reason,
         )
         return when (val result = currentSession.fastReconnect(reconnectDetails)) {
-            is SfuConnectionResult.Connected -> ReconnectOutcome.Success
-            is SfuConnectionResult.PeerConnectionStale -> ReconnectOutcome.PeerConnectionStale
-            is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
+            is FastReconnectResult.Connected -> ReconnectOutcome.Success
+            is FastReconnectResult.PeerConnectionStale -> ReconnectOutcome.PeerConnectionStale
+            is FastReconnectResult.Failed -> ReconnectOutcome.Failed(result.error)
         }
     }
 
@@ -1032,14 +1030,7 @@ public class Call(
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for rejoin")
         reconnectStartTime = System.currentTimeMillis()
 
-        val joinResponse = try {
-            joinRequest(location = loc)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            return ReconnectOutcome.Failed(e)
-        }
-
+        val joinResponse = joinRequest(location = loc)
         if (joinResponse !is Success) {
             return ReconnectOutcome.Failed(
                 Exception("Failed to get join response: ${joinResponse.errorOrNull()}"),
@@ -1084,7 +1075,6 @@ public class Call(
                 monitorSession(joinResponse.value)
                 ReconnectOutcome.Success
             }
-            is SfuConnectionResult.PeerConnectionStale -> ReconnectOutcome.PeerConnectionStale
             is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
         }
     }
@@ -1103,14 +1093,7 @@ public class Call(
         reconnectStartTime = System.currentTimeMillis()
         addFailedSfuId(oldSession.sfuName)
 
-        val joinResponse = try {
-            joinRequest(location = loc, migratingFrom = oldSession.sfuName)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            return ReconnectOutcome.Failed(e)
-        }
-
+        val joinResponse = joinRequest(location = loc, migratingFrom = oldSession.sfuName)
         if (joinResponse !is Success) {
             return ReconnectOutcome.Failed(
                 Exception(
@@ -1161,7 +1144,6 @@ public class Call(
                     monitorSession(joinResponse.value)
                     ReconnectOutcome.Success
                 }
-                is SfuConnectionResult.PeerConnectionStale -> ReconnectOutcome.PeerConnectionStale
                 is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
             }
         } finally {
@@ -1195,7 +1177,6 @@ public class Call(
         monitorPublisherPCStateJob?.cancel()
         monitorPublisherPCStateJob = null
         monitorSubscriberPCStateJob = null
-        session.value?.leaveWithReason("[reason=$reason, error=${disconnectionReason?.message}]")
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
@@ -1231,14 +1212,14 @@ public class Call(
         (client as StreamVideoClient).onCallCleanUp(this)
 
         clientImpl.scope.launch {
+            val leaveReason = "[reason=$reason, error=${disconnectionReason?.message}]"
             safeCall {
-                session.value?.sfuTracer?.trace(
-                    "leave-call",
-                    "[reason=$reason, error=${disconnectionReason?.message}]",
-                )
+                session.value?.sfuTracer?.trace("leave-call", leaveReason)
                 val stats = collectStats()
                 session.value?.sendCallStats(stats)
             }
+            // Must complete before cleanup() cancels the session's supervisor job.
+            safeCall { session.value?.sendLeaveEvent(leaveReason) }
             cleanup()
         }
     }

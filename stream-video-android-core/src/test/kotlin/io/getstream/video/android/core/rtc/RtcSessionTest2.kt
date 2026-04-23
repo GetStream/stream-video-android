@@ -167,6 +167,7 @@ class RtcSessionTest2 {
         assertEquals("Wrong sessionId", sessionId, rtcSession.fieldValue("sessionId"))
     }
 
+    @Suppress("DEPRECATION")
     @Test
     fun `connect calls socketConnection_connect with JoinRequest and sets state to Connected`() =
         runTest(

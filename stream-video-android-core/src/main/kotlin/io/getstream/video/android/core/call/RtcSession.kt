@@ -122,7 +122,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.IOException
@@ -165,8 +165,6 @@ import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.util.Collections
-import kotlin.coroutines.cancellation.CancellationException
-
 /**
  * Keeps track of which track is being rendered at what resolution.
  * Also stores if the track is visible or not
@@ -213,14 +211,23 @@ internal class PeerConnectionNotUsableException :
     Exception("Peer connections are not usable after fast reconnect")
 
 /**
- * Outcome of an SFU connection attempt ([RtcSession.connect] or
- * [RtcSession.fastReconnect]). Makes the result explicit so callers
- * don't need to guess which exceptions a method might throw.
+ * Outcome of [RtcSession.internalConnect] — either the SFU socket
+ * connected successfully or the attempt failed.
  */
 internal sealed class SfuConnectionResult {
     object Connected : SfuConnectionResult()
-    object PeerConnectionStale : SfuConnectionResult()
     data class Failed(val error: Exception) : SfuConnectionResult()
+}
+
+/**
+ * Outcome of [RtcSession.fastReconnect] — extends [SfuConnectionResult]
+ * semantics with a [PeerConnectionStale] case for when the socket
+ * connected but peer connections are no longer usable.
+ */
+internal sealed class FastReconnectResult {
+    object Connected : FastReconnectResult()
+    object PeerConnectionStale : FastReconnectResult()
+    data class Failed(val error: Exception) : FastReconnectResult()
 }
 
 public class RtcSession internal constructor(
@@ -793,21 +800,23 @@ public class RtcSession internal constructor(
     }
 
     /**
-     * Public entry point kept for backward compatibility (used by the initial
-     * join flow). Delegates to [internalConnect] and throws on failure so the
-     * existing call-site in [io.getstream.video.android.core.Call.join] keeps
-     * working without changes.
+     * Public entry point kept for backward compatibility.
+     * Delegates to [internalConnect] and throws on failure.
+     *
+     * Prefer [internalConnect] which returns a typed [SfuConnectionResult]
+     * instead of throwing, enabling exhaustive `when` handling.
      */
+    @Deprecated(
+        message = "Use internalConnect() which returns SfuConnectionResult instead of throwing.",
+        replaceWith = ReplaceWith("internalConnect(reconnectDetails, options)"),
+    )
     suspend fun connect(
         reconnectDetails: ReconnectDetails? = null,
         options: List<PublishOption>? = null,
     ) {
         when (val result = internalConnect(reconnectDetails, options)) {
             is SfuConnectionResult.Connected -> Unit
-            is SfuConnectionResult.PeerConnectionStale ->
-                throw PeerConnectionNotUsableException()
-            is SfuConnectionResult.Failed ->
-                throw result.error
+            is SfuConnectionResult.Failed -> throw result.error
         }
     }
 
@@ -830,19 +839,16 @@ public class RtcSession internal constructor(
         )
         listenToSfuSocket()
         sfuConnectionModule.socketConnection.connect(request)
-        return try {
-            withTimeout(SocketActions.DEFAULT_SOCKET_TIMEOUT) {
-                sfuConnectionModule.socketConnection.state().first { it is SfuSocketState.Connected }
-            }
-            sendConnectionTimeStats(reconnectDetails?.strategy)
-            SfuConnectionResult.Connected
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            sfuTracer.trace("connect-failed", "${e.message}")
-            sendCallStats()
-            SfuConnectionResult.Failed(e)
+        val connected = withTimeoutOrNull(SocketActions.DEFAULT_SOCKET_TIMEOUT) {
+            sfuConnectionModule.socketConnection.state().first { it is SfuSocketState.Connected }
         }
+        if (connected == null) {
+            sfuTracer.trace("connect-failed", "Connection timed out")
+            sendCallStats()
+            return SfuConnectionResult.Failed(Exception("SFU connection timed out"))
+        }
+        sendConnectionTimeStats(reconnectDetails?.strategy)
+        return SfuConnectionResult.Connected
     }
 
     private suspend fun buildJoinRequest(
@@ -1851,25 +1857,27 @@ public class RtcSession internal constructor(
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
 
-    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?): SfuConnectionResult {
+    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?): FastReconnectResult {
         logger.d { "[fastReconnect] Starting fast reconnect." }
         sfuTracer.trace("fastReconnect", reconnectDetails.toString())
         val (_, _, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
 
-        val result = internalConnect(
+        val connectResult = internalConnect(
             reconnectDetails,
             publisher.value?.currentOptions(),
         )
-        if (result !is SfuConnectionResult.Connected) return result
+        if (connectResult is SfuConnectionResult.Failed) {
+            return FastReconnectResult.Failed(connectResult.error)
+        }
 
         val peerConnectionNotUsable =
             subscriber.value?.isFailedOrClosed() == true || publisher.value?.isFailedOrClosed() == true
         if (peerConnectionNotUsable) {
-            return SfuConnectionResult.PeerConnectionStale
+            return FastReconnectResult.PeerConnectionStale
         }
         setVideoSubscriptions(true)
-        return SfuConnectionResult.Connected
+        return FastReconnectResult.Connected
     }
 
     // Prepares this session for migration to a new SFU without destroying it.
@@ -1898,7 +1906,7 @@ public class RtcSession internal constructor(
     }
 
     // Tears down the old session after migration is confirmed (or timed out).
-    // No leaveWithReason — matches JS SDK behavior (just close WS, no explicit leave for migration).
+    // No sendLeaveEvent — matches JS SDK behavior (just close WS, no explicit leave for migration).
     internal fun finalizeMigration() {
         eventJob?.cancel()
         cleanup()
@@ -1908,16 +1916,15 @@ public class RtcSession internal constructor(
         val stats = call.collectStats()
         sendCallStats(stats)
 
-        cancelActiveWork()
-
         // Mark disconnected immediately — late ICE candidates will be routed
         // to iceTricklePendingEvents instead of being sent to the now-defunct SFU.
         _sfuSfuSocketState.value = SfuSocketState.Disconnected.Stopped
 
         // Tell the old SFU we're leaving so it evicts immediately
         // instead of waiting for the reconnect grace period.
-        leaveWithReason(reason)
-
+        // Must complete before cleanup() cancels the supervisor job.
+        sendLeaveEvent(reason)
+        cancelActiveWork()
         cleanup()
     }
 
@@ -1946,16 +1953,18 @@ public class RtcSession internal constructor(
         sfuConnectionModule.socketConnection.disconnect()
     }
 
-    internal fun leaveWithReason(reason: String) {
-        cancelActiveWork()
+    /**
+     * Sends a leave event to the SFU so it evicts this participant immediately
+     * instead of waiting for the reconnect grace period. This must be called
+     * **before** [cleanup] to ensure the socket is still open.
+     */
+    internal suspend fun sendLeaveEvent(reason: String) {
         val leaveCallRequest = LeaveCallRequest(
             session_id = sessionId,
             reason = reason,
         )
         sfuTracer.trace("leave-session", reason)
         val request = SfuRequest(leave_call_request = leaveCallRequest)
-        coroutineScope.launch {
-            sfuConnectionModule.socketConnection.sendEvent(SfuDataRequest(request))
-        }
+        sfuConnectionModule.socketConnection.sendEvent(SfuDataRequest(request))
     }
 }
