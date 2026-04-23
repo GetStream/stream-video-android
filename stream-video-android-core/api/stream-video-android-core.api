@@ -9708,6 +9708,7 @@ public class io/getstream/video/android/core/call/connection/StreamPeerConnectio
 	public final fun getVideoTransceiver ()Lorg/webrtc/RtpTransceiver;
 	public final fun handleNewIceCandidate (Lio/getstream/video/android/core/model/IceCandidate;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun initialize (Lorg/webrtc/PeerConnection;)V
+	public final fun isClosed ()Z
 	public final fun isFailedOrClosed ()Z
 	public final fun isHealthy ()Z
 	public fun onAddStream (Lorg/webrtc/MediaStream;)V
