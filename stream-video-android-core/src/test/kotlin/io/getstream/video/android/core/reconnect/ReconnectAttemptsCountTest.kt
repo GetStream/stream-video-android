@@ -18,8 +18,12 @@ package io.getstream.video.android.core.reconnect
 
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
+import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,9 +41,23 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 class ReconnectAttemptsCountTest : IntegrationTestBase() {
 
+    private fun stubSessionForReconnect(sessionMock: RtcSession) {
+        coEvery { sessionMock.getPublisherStats() } returns null
+        coEvery { sessionMock.getSubscriberStats() } returns null
+        every { sessionMock.subscriber } returns MutableStateFlow(null)
+        every { sessionMock.publisher } returns MutableStateFlow(null)
+        every { sessionMock.currentSfuInfo() } returns Triple(
+            "",
+            emptyList(),
+            emptyList(),
+        )
+    }
+
     @Test
     fun `FAST reconnect does not increment reconnectAttempts`() = runTest {
         val sessionMock = mockk<RtcSession>(relaxed = true)
+        stubSessionForReconnect(sessionMock)
+        coEvery { sessionMock.fastReconnect(any()) } returns FastReconnectResult.Connected
         val call = client.call("default", randomUUID())
         call.session.value = sessionMock
 
@@ -60,6 +78,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
     @Test
     fun `REJOIN increments reconnectAttempts`() = runTest {
         val sessionMock = mockk<RtcSession>(relaxed = true)
+        stubSessionForReconnect(sessionMock)
         val call = client.call("default", randomUUID())
         call.session.value = sessionMock
 
@@ -78,6 +97,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
     @Test
     fun `Multiple reconnect calls accumulate attempts`() = runTest {
         val sessionMock = mockk<RtcSession>(relaxed = true)
+        stubSessionForReconnect(sessionMock)
         val call = client.call("default", randomUUID())
         call.session.value = sessionMock
 

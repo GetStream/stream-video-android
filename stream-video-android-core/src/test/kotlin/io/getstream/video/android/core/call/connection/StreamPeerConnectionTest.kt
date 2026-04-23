@@ -126,6 +126,33 @@ class StreamPeerConnectionTest {
     }
 
     @Test
+    fun `isClosed returns true for CLOSED PeerConnectionState`() {
+        streamPeerConnection.state.value = PeerConnection.PeerConnectionState.CLOSED
+        assertTrue("CLOSED PC state should be closed", streamPeerConnection.isClosed())
+    }
+
+    @Test
+    fun `isClosed returns true for CLOSED IceConnectionState`() {
+        streamPeerConnection.state.value = PeerConnection.PeerConnectionState.CONNECTED
+        streamPeerConnection.iceState.value = PeerConnection.IceConnectionState.CLOSED
+        assertTrue("CLOSED ICE state should be closed", streamPeerConnection.isClosed())
+    }
+
+    @Test
+    fun `isClosed returns false for FAILED states`() {
+        streamPeerConnection.state.value = PeerConnection.PeerConnectionState.FAILED
+        streamPeerConnection.iceState.value = PeerConnection.IceConnectionState.FAILED
+        assertFalse("FAILED is not closed", streamPeerConnection.isClosed())
+    }
+
+    @Test
+    fun `isClosed returns false for healthy states`() {
+        streamPeerConnection.state.value = PeerConnection.PeerConnectionState.CONNECTED
+        streamPeerConnection.iceState.value = PeerConnection.IceConnectionState.CONNECTED
+        assertFalse("CONNECTED is not closed", streamPeerConnection.isClosed())
+    }
+
+    @Test
     fun `createOffer calls connectioncreateOffer`() = testScope.runTest {
         // Mock webrtc createOffer
         coEvery {

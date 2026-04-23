@@ -109,7 +109,16 @@ class RtcSessionTest2 {
                 makePeerConnection(
                     any(), any(), any(), any(),
                 )
-            } returns mockk(relaxed = true) {}
+            } answers {
+                mockk(relaxed = true) {
+                    coEvery { createOffer(any()) } returns io.getstream.result.Result.Success(
+                        SessionDescription(SessionDescription.Type.OFFER, "fake-sdp"),
+                    )
+                    coEvery { createAnswer(any()) } returns io.getstream.result.Result.Success(
+                        SessionDescription(SessionDescription.Type.ANSWER, "fake-answer-sdp"),
+                    )
+                }
+            }
         }
         every { mockCallState.ownCapabilities } returns ownCapabilitiesFlow
         every { mockCallState.participants } returns participantsFlow
@@ -181,8 +190,15 @@ class RtcSessionTest2 {
             val sfuToken = "fake-sfu-token"
             val remoteIceServers = emptyList<IceServer>()
 
-            // We’ll create an RtcSession with all mocks prepared:
             val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
+            val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
+                SfuSocketState.Disconnected.Stopped,
+            )
+            every { sfuSocketModule.socketConnection.state() } returns sfuSocketStateFlow
+            coEvery { sfuSocketModule.socketConnection.connect(any()) } coAnswers {
+                sfuSocketStateFlow.value = SfuSocketState.Connected(mockk(relaxed = true))
+            }
+
             val rtcSession = RtcSession(
                 client = mockStreamVideo,
                 powerManager = mockPowerManager,

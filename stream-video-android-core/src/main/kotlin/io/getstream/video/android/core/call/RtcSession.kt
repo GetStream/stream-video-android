@@ -1871,13 +1871,37 @@ public class RtcSession internal constructor(
             return FastReconnectResult.Failed(connectResult.error)
         }
 
-        val peerConnectionNotUsable =
-            subscriber.value?.isFailedOrClosed() == true || publisher.value?.isFailedOrClosed() == true
-        if (peerConnectionNotUsable) {
+        val peerConnectionClosed =
+            subscriber.value?.isClosed() == true || publisher.value?.isClosed() == true
+        if (peerConnectionClosed) {
+            logger.w { "[fastReconnect] Peer connection is closed — cannot recover, escalating to rejoin" }
             return FastReconnectResult.PeerConnectionStale
         }
+
+        restartIceAfterFastReconnect()
         setVideoSubscriptions(true)
         return FastReconnectResult.Connected
+    }
+
+    /**
+     * After a successful fast reconnect the underlying network path may have
+     * changed (e.g. WiFi ↔ cellular). Proactively restart ICE on both the
+     * publisher and subscriber so fresh candidates are gathered and media
+     * can flow over the new path.
+     *
+     * Subscriber restarts are also issued for completeness — the SFU will
+     * typically send a new offer, but an explicit restart guarantees recovery
+     * even if that offer is delayed or lost.
+     */
+    private suspend fun restartIceAfterFastReconnect() {
+        publisher.value?.let {
+            logger.i { "[fastReconnect] Restarting publisher ICE after fast reconnect" }
+            it.restartIce("fastReconnect - network change recovery")
+        }
+        subscriber.value?.let {
+            logger.i { "[fastReconnect] Restarting subscriber ICE after fast reconnect" }
+            requestSubscriberIceRestart()
+        }
     }
 
     // Prepares this session for migration to a new SFU without destroying it.

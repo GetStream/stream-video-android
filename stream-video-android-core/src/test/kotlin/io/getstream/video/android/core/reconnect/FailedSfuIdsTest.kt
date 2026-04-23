@@ -19,8 +19,10 @@ package io.getstream.video.android.core.reconnect
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -117,6 +119,15 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val call = client.call("default", randomUUID())
         val sessionMock = mockk<RtcSession>(relaxed = true)
         every { sessionMock.sfuName } returns "sfu-edge-old"
+        coEvery { sessionMock.getPublisherStats() } returns null
+        coEvery { sessionMock.getSubscriberStats() } returns null
+        every { sessionMock.subscriber } returns MutableStateFlow(null)
+        every { sessionMock.publisher } returns MutableStateFlow(null)
+        every { sessionMock.currentSfuInfo() } returns Triple(
+            "",
+            emptyList(),
+            emptyList(),
+        )
         call.session.value = sessionMock
         call.location = "test-location"
 

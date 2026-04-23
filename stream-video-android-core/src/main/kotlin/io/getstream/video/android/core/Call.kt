@@ -788,11 +788,13 @@ public class Call(
     }
 
     internal suspend fun collectStats(): CallStatsReport {
-        val publisherStats = session.value?.getPublisherStats()
-        val subscriberStats = session.value?.getSubscriberStats()
-        state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
-        state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
-        state.stats.updateLocalStats()
+        val publisherStats = runCatching { session.value?.getPublisherStats() }.getOrNull()
+        val subscriberStats = runCatching { session.value?.getSubscriberStats() }.getOrNull()
+        runCatching {
+            state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
+            state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
+            state.stats.updateLocalStats()
+        }.onFailure { logger.w { "[collectStats] Failed to update stats: ${it.message}" } }
         val local = state.stats._local.value
 
         val report = CallStatsReport(
@@ -919,6 +921,25 @@ public class Call(
                     logger.w { "[reconnect] DISCONNECT requested — leaving call" }
                     leave("SFU:DISCONNECT")
                     break
+                }
+
+                // Skip FAST attempts when the network is down to avoid burning
+                // the limited attempt budget against a dead network. The attempt
+                // is NOT counted (loopIteration stays the same) so all FAST tries
+                // remain available once connectivity returns. The time-based
+                // leaveAfterDisconnectSeconds guard above still fires each
+                // iteration, preventing an infinite loop if the network never
+                // comes back.
+                val isFastStrategy =
+                    currentStrategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST ||
+                        currentStrategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED
+                if (isFastStrategy && !network.isConnected()) {
+                    logger.i {
+                        "[reconnect] Network unavailable — skipping FAST attempt (not counted), " +
+                            "loopIteration=$loopIteration"
+                    }
+                    delay(RECONNECT_DELAY_MS)
+                    continue
                 }
 
                 val outcome = when (currentStrategy) {
@@ -2031,8 +2052,21 @@ public class Call(
     }
 
     companion object {
+        /** How many consecutive FAST reconnect failures are allowed before
+         *  escalating to a full REJOIN. Kept small because each failed FAST
+         *  attempt can cost up to DEFAULT_SOCKET_TIMEOUT (10 s) waiting for
+         *  the WebSocket handshake to time out. */
         private const val MAX_FAST_RECONNECT_ATTEMPTS = 3
+
+        /** Absolute upper bound on loop iterations across all strategies
+         *  (FAST + REJOIN + MIGRATE combined). Prevents infinite retries
+         *  when every strategy keeps failing. */
         private const val MAX_RECONNECT_ATTEMPTS = 10
+
+        /** Delay between consecutive reconnect attempts (both after a
+         *  failed attempt and while polling for network availability
+         *  during FAST reconnect). Kept short so the SDK reacts quickly
+         *  once conditions improve. */
         private const val RECONNECT_DELAY_MS = 500L
 
         internal var testInstanceProvider = TestInstanceProvider()

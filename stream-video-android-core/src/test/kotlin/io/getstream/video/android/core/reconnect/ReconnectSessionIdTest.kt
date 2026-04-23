@@ -17,8 +17,12 @@
 package io.getstream.video.android.core.reconnect
 
 import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
+import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotEquals
@@ -46,6 +50,16 @@ class ReconnectSessionIdTest : IntegrationTestBase() {
     fun `Fast reconnect does not recreate session`() = runTest {
         // create the call
         val sessionMock = mockk<RtcSession>(relaxed = true)
+        coEvery { sessionMock.getPublisherStats() } returns null
+        coEvery { sessionMock.getSubscriberStats() } returns null
+        every { sessionMock.subscriber } returns MutableStateFlow(null)
+        every { sessionMock.publisher } returns MutableStateFlow(null)
+        every { sessionMock.currentSfuInfo() } returns Triple(
+            "",
+            emptyList(),
+            emptyList(),
+        )
+        coEvery { sessionMock.fastReconnect(any()) } returns FastReconnectResult.Connected
         val call = client.call("default", randomUUID())
         call.session.value = sessionMock
 

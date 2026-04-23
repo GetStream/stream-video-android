@@ -22,7 +22,7 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.base.DispatcherRule
-import io.getstream.video.android.core.call.PeerConnectionNotUsableException
+import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -35,6 +35,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -50,7 +51,7 @@ import stream.video.sfu.signal.TrackSubscriptionDetails
 /**
  * Tests the reconnect loop escalation in [Call.reconnect].
  *
- * When [RtcSession.fastReconnect] throws [PeerConnectionNotUsableException],
+ * When [RtcSession.fastReconnect] returns [FastReconnectResult.PeerConnectionStale],
  * the loop must immediately escalate to REJOIN instead of retrying FAST
  * (which would deadlock because REJOIN requires re-acquiring the reconnect mutex).
  */
@@ -98,6 +99,10 @@ class ReconnectEscalationTest {
         )
 
         every { mockSession.sfuName } returns "sfu-edge-1"
+        coEvery { mockSession.getPublisherStats() } returns null
+        coEvery { mockSession.getSubscriberStats() } returns null
+        every { mockSession.subscriber } returns MutableStateFlow(null)
+        every { mockSession.publisher } returns MutableStateFlow(null)
         every { mockSession.currentSfuInfo() } returns Triple(
             "prev-session",
             emptyList<TrackSubscriptionDetails>(),
@@ -114,17 +119,15 @@ class ReconnectEscalationTest {
     }
 
     /**
-     * With PCE the loop escalates to REJOIN on the very first failure (attempt 0).
-     * REJOIN then fails (location = null) and briefly falls back to FAST once
-     * (attempt < MAX_FAST_RECONNECT_ATTEMPTS) before stabilizing on REJOIN.
-     * Net result: fastReconnect is called only at attempts 0 and 2 → exactly 2 calls,
-     * proving early escalation.
+     * With PeerConnectionStale the loop escalates to REJOIN on the very first attempt.
+     * REJOIN fails immediately (location = null) and the loop terminates.
+     * fastReconnect is called exactly once, proving early escalation.
      */
     @Test
-    fun `PeerConnectionNotUsableException escalates immediately to REJOIN`() = runTest(
+    fun `PeerConnectionStale escalates immediately to REJOIN`() = runTest(
         testDispatcher,
     ) {
-        coEvery { mockSession.fastReconnect(any()) } throws PeerConnectionNotUsableException()
+        coEvery { mockSession.fastReconnect(any()) } returns FastReconnectResult.PeerConnectionStale
 
         call.reconnect(
             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
@@ -132,7 +135,7 @@ class ReconnectEscalationTest {
         )
         advanceUntilIdle()
 
-        coVerify(exactly = 2) { mockSession.fastReconnect(any()) }
+        coVerify(exactly = 1) { mockSession.fastReconnect(any()) }
         assertThat(
             call.state.connection.value,
         ).isInstanceOf(RealtimeConnection.ReconnectingFailed::class.java)
@@ -143,8 +146,10 @@ class ReconnectEscalationTest {
      * before escalating to REJOIN. fastReconnect is called at attempts 0,1,2,3 → 4 calls.
      */
     @Test
-    fun `generic exception retries FAST before escalating to REJOIN`() = runTest(testDispatcher) {
-        coEvery { mockSession.fastReconnect(any()) } throws Exception("SFU connect timeout")
+    fun `Failed result retries FAST before escalating to REJOIN`() = runTest(testDispatcher) {
+        coEvery { mockSession.fastReconnect(any()) } returns FastReconnectResult.Failed(
+            Exception("SFU connect timeout"),
+        )
 
         call.reconnect(
             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
@@ -164,10 +169,10 @@ class ReconnectEscalationTest {
      * mutex and hung indefinitely. This test proves the loop terminates.
      */
     @Test
-    fun `reconnect loop terminates without deadlock on PeerConnectionNotUsableException`() = runTest(
+    fun `reconnect loop terminates without deadlock on PeerConnectionStale`() = runTest(
         testDispatcher,
     ) {
-        coEvery { mockSession.fastReconnect(any()) } throws PeerConnectionNotUsableException()
+        coEvery { mockSession.fastReconnect(any()) } returns FastReconnectResult.PeerConnectionStale
 
         call.reconnect(
             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,

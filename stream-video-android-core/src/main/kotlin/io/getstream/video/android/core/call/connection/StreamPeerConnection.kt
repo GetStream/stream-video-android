@@ -130,6 +130,11 @@ open class StreamPeerConnection(
         }
     }
 
+    fun isClosed(): Boolean {
+        return state.value == PeerConnection.PeerConnectionState.CLOSED ||
+            iceState.value == PeerConnection.IceConnectionState.CLOSED
+    }
+
     fun isFailedOrClosed(): Boolean {
         val pcFailedOrClosed = when (state.value) {
             PeerConnection.PeerConnectionState.CLOSED,
