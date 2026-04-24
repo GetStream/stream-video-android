@@ -909,7 +909,9 @@ public class Call(
                     break
                 }
 
-                if (currentStrategy != WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST) {
+                if (currentStrategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN ||
+                    currentStrategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
+                ) {
                     reconnectAttempts++
                 }
 
@@ -921,25 +923,6 @@ public class Call(
                     logger.w { "[reconnect] DISCONNECT requested — leaving call" }
                     leave("SFU:DISCONNECT")
                     break
-                }
-
-                // Skip FAST attempts when the network is down to avoid burning
-                // the limited attempt budget against a dead network. The attempt
-                // is NOT counted (loopIteration stays the same) so all FAST tries
-                // remain available once connectivity returns. The time-based
-                // leaveAfterDisconnectSeconds guard above still fires each
-                // iteration, preventing an infinite loop if the network never
-                // comes back.
-                val isFastStrategy =
-                    currentStrategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST ||
-                        currentStrategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED
-                if (isFastStrategy && !network.isConnected()) {
-                    logger.i {
-                        "[reconnect] Network unavailable — skipping FAST attempt (not counted), " +
-                            "loopIteration=$loopIteration"
-                    }
-                    delay(RECONNECT_DELAY_MS)
-                    continue
                 }
 
                 val outcome = when (currentStrategy) {
@@ -979,27 +962,31 @@ public class Call(
                         }
 
                         delay(RECONNECT_DELAY_MS)
+                        loopIteration++
 
                         val wasMigrating = currentStrategy ==
                             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
-                        val pastDeadline = (System.currentTimeMillis() - loopStartTime) >
+                        val pastFastReconnectDeadline = (System.currentTimeMillis() - loopStartTime) >
                             reconnectDeadlineMillis
-
-                        val shouldRejoin = pastDeadline ||
-                            wasMigrating ||
+                        val shouldEscalateToRejoin = wasMigrating ||
+                            pastFastReconnectDeadline ||
                             loopIteration >= MAX_FAST_RECONNECT_ATTEMPTS
 
-                        loopIteration++
-                        currentStrategy = if (shouldRejoin) {
-                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
-                        } else {
-                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST
+                        if (shouldEscalateToRejoin) {
+                            currentStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
                         }
-                        logger.i { "[reconnect] Escalating to $currentStrategy (loopIteration=$loopIteration)" }
+                        logger.i { "[reconnect] Next strategy: $currentStrategy (loopIteration=$loopIteration)" }
                     }
                 }
             }
+
+            if (state.connection.value is RealtimeConnection.ReconnectingFailed) {
+                logger.w { "[reconnect] All recovery attempts exhausted — leaving call ($reason)" }
+                leave("reconnect-failed:$reason")
+            }
         } finally {
+            // Always release the mutex — even on exceptions or coroutine
+            // cancellation — so future reconnect() calls aren't permanently blocked.
             reconnectMutex.unlock()
         }
     }

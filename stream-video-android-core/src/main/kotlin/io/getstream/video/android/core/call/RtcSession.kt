@@ -721,7 +721,13 @@ public class RtcSession internal constructor(
                     }
 
                     is SfuSocketState.Disconnected.WebSocketEventLost -> {
-                        // Intermediate HealthMonitor state — no action needed.
+                        logger.w { "[stateJob] HealthMonitor detected event loss for $sfuName — triggering reconnect" }
+                        coroutineScope.launch {
+                            call.reconnect(
+                                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                                "SFU:healthcheck-timeout",
+                            )
+                        }
                     }
 
                     else -> { }
@@ -1974,7 +1980,12 @@ public class RtcSession internal constructor(
 
     internal suspend fun prepareReconnect() {
         cancelActiveWork()
-        sfuConnectionModule.socketConnection.disconnect()
+        val currentState = sfuConnectionModule.socketConnection.state().value
+        if (currentState is SfuSocketState.Connected || currentState is SfuSocketState.Connecting) {
+            sfuConnectionModule.socketConnection.disconnect()
+        } else {
+            logger.d { "[prepareReconnect] Socket already disconnected ($currentState) — skipping disconnect" }
+        }
     }
 
     /**

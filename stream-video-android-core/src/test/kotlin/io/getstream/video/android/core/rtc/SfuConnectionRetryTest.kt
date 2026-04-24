@@ -281,16 +281,19 @@ class SfuConnectionRetryTest {
     // -- WebSocketEventLost --
 
     @Test
-    fun `WebSocketEventLost does not trigger reconnect`() = runTest {
+    fun `WebSocketEventLost triggers FAST reconnect`() = runTest {
         createRtcSession()
         advance()
 
-        repeat(5) {
-            socketStateFlow.value = SfuSocketState.Disconnected.WebSocketEventLost
-            advance()
-        }
+        socketStateFlow.value = SfuSocketState.Disconnected.WebSocketEventLost
+        advance()
 
-        coVerify(exactly = 0) { mockCall.reconnect(any(), any()) }
+        coVerify(exactly = 1) {
+            mockCall.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                match { it.contains("healthcheck-timeout") },
+            )
+        }
     }
 
     // -- Network-aware guard --
