@@ -120,8 +120,8 @@ class ReconnectEscalationTest {
 
     /**
      * With PeerConnectionStale the loop escalates to REJOIN on the very first attempt.
-     * REJOIN fails immediately (location = null) and the loop terminates.
-     * fastReconnect is called exactly once, proving early escalation.
+     * REJOIN fails immediately (location = null) → ReconnectingFailed → leave() →
+     * Disconnected. fastReconnect is called exactly once, proving early escalation.
      */
     @Test
     fun `PeerConnectionStale escalates immediately to REJOIN`() = runTest(
@@ -138,12 +138,13 @@ class ReconnectEscalationTest {
         coVerify(exactly = 1) { mockSession.fastReconnect(any()) }
         assertThat(
             call.state.connection.value,
-        ).isInstanceOf(RealtimeConnection.ReconnectingFailed::class.java)
+        ).isInstanceOf(RealtimeConnection.Disconnected::class.java)
     }
 
     /**
-     * With a generic exception the loop retries FAST up to MAX_FAST_RECONNECT_ATTEMPTS
-     * before escalating to REJOIN. fastReconnect is called at attempts 0,1,2,3 → 4 calls.
+     * With a generic exception the loop retries FAST up to MAX_FAST_RECONNECT_ATTEMPTS (3)
+     * before escalating to REJOIN. fastReconnect is called at iterations 0,1,2 → 3 calls.
+     * REJOIN then fails (location = null) → ReconnectingFailed → leave() → Disconnected.
      */
     @Test
     fun `Failed result retries FAST before escalating to REJOIN`() = runTest(testDispatcher) {
@@ -157,10 +158,10 @@ class ReconnectEscalationTest {
         )
         advanceUntilIdle()
 
-        coVerify(exactly = 4) { mockSession.fastReconnect(any()) }
+        coVerify(exactly = 3) { mockSession.fastReconnect(any()) }
         assertThat(
             call.state.connection.value,
-        ).isInstanceOf(RealtimeConnection.ReconnectingFailed::class.java)
+        ).isInstanceOf(RealtimeConnection.Disconnected::class.java)
     }
 
     /**
