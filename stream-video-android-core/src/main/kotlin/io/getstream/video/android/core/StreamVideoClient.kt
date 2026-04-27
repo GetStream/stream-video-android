@@ -83,6 +83,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.audio.AudioExecutionContext
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
@@ -210,6 +211,10 @@ internal class StreamVideoClient internal constructor(
     private val destroyedCalls = LruCache<Int, Call>(maxSize = 100)
     internal val callSoundAndVibrationPlayer = CallSoundAndVibrationPlayer(context)
 
+    internal val audioExecutionContext = AudioExecutionContext()
+
+    internal fun getAudioContext(): AudioExecutionContext = audioExecutionContext
+
     val socketImpl = coordinatorConnectionModule.socketConnection
 
     fun onCallCleanUp(call: Call) {
@@ -245,6 +250,7 @@ internal class StreamVideoClient internal constructor(
             }
         }
         activeCall?.leave("client-cleanup")
+        audioExecutionContext.release()
     }
 
     /**
@@ -799,6 +805,7 @@ internal class StreamVideoClient internal constructor(
         location: String,
         migratingFrom: String? = null,
         migratingFromList: List<String>? = null,
+        hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest(
             create = create,
@@ -814,6 +821,7 @@ internal class StreamVideoClient internal constructor(
             location = location,
             migratingFrom = migratingFrom,
             migratingFromList = migratingFromList,
+            hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
         )
 
         val result = apiCall {
