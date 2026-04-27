@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.reconnect
 
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
@@ -31,19 +32,26 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 
+private inline fun <R> Call.use(block: (Call) -> R): R {
+    try {
+        return block(this)
+    } finally {
+        cleanup()
+    }
+}
+
 @RunWith(RobolectricTestRunner::class)
 class ReconnectSessionIdTest : IntegrationTestBase() {
 
     @Test
     fun `Rejoin creates a new session`() = runTest(UnconfinedTestDispatcher()) {
-        // create the call
         val sessionMock = mockk<RtcSession>(relaxed = true)
         val call = client.call("default", randomUUID())
-        call.join().getOrNull()
-
-        // Rejoin
-        call.rejoin()
-        assertNotEquals(sessionMock, call.session.value)
+        call.use {
+            call.join().getOrNull()
+            call.rejoin()
+            assertNotEquals(sessionMock, call.session.value)
+        }
     }
 
     @Test

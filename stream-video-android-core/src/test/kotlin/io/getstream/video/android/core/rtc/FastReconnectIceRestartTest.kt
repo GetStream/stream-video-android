@@ -117,6 +117,7 @@ class FastReconnectIceRestartTest {
 
     @After
     fun tearDown() {
+        StreamVideo.removeClient()
         unmockkAll()
     }
 

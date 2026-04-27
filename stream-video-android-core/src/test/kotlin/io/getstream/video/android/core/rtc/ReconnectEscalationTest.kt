@@ -115,6 +115,7 @@ class ReconnectEscalationTest {
 
     @After
     fun tearDown() {
+        StreamVideo.removeClient()
         unmockkAll()
     }
 

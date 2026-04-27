@@ -137,6 +137,7 @@ class SfuConnectionRetryTest {
 
     @After
     fun tearDown() {
+        StreamVideo.removeClient()
         unmockkAll()
     }
 
