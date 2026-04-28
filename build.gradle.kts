@@ -41,6 +41,8 @@ plugins {
 }
 
 streamProject {
+    repositoryName = "stream-video-android"
+
     spotless {
         excludePatterns = setOf("**/generated/**")
     }
