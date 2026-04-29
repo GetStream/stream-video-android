@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.video.generated.models.BlockedUserEvent
@@ -1104,12 +1103,7 @@ public class CallState(
                     // Remove any pins for the participant
                     unpin(sessionId)
                 }
-                Log.d(
-                    "Noob",
-                    "[ParticipantLeftEvent], _serverPins: ${_serverPins.value.map { it.key }.joinToString(
-                        ",",
-                    ) }",
-                )
+
                 if (_serverPins.value.containsKey(sessionId)) {
                     _serverPins.value = _serverPins.value.filter { it.key != event.participant.session_id }
                     scope.launch {
@@ -1266,19 +1260,10 @@ public class CallState(
     }
 
     private fun updateServerSidePins(pins: List<PinUpdate>) {
-        val internalParticipantsText =
-            internalParticipants.toList().joinToString(",") {
-                "[name: ${it.second.name.value}, sessionId: ${it.second.sessionId}]"
-            }
-
         // Update participants that are still in the call
         val pinnedInCall = pins.filter {
             internalParticipants.containsKey(it.sessionId)
         }
-        Log.d(
-            "Noob",
-            "[updateServerSidePins] 2, pins: $pins, internalParticipantsText: $internalParticipantsText, pinnedInCall: $pinnedInCall",
-        )
         _serverPins.value = pinnedInCall.associate {
             Pair(
                 it.sessionId,
@@ -1502,9 +1487,6 @@ public class CallState(
     }
 
     public fun upsertParticipants(participants: List<ParticipantState>) {
-        val participantNames = participants.joinToString(",") {
-            "[name:${it.name.value}, sessionId:${it.sessionId}]"
-        }
         val screensharing = mutableListOf<ParticipantState>()
         participants.forEach {
             internalParticipants[it.sessionId] = it
