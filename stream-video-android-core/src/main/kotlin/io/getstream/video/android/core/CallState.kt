@@ -1079,13 +1079,12 @@ public class CallState(
                             getOrCreateParticipants(pendingParticipantsJoined.values.toList())
                         }
                     }
+                    updateServerSidePins(internalParticipants, event)
                 } catch (e: Exception) {
                     logger.e(e) {
                         "[ParticipantJoinedEvent] #participants; #debounce; Failed to debounce, processing as usual."
                     }
                     getOrCreateParticipant(event.participant)
-                } finally {
-                    updateServerSidePins(internalParticipants, event)
                 }
             }
 
