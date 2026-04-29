@@ -45,7 +45,6 @@ import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -309,9 +308,9 @@ public fun BoxScope.ParticipantLabel(
     },
 ) {
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
-    val pinned by remember {
-        derivedStateOf { call.state.pinnedParticipants.value.contains(participant.sessionId) }
-    }
+    val pinnedParticipants by call.state.pinnedParticipants.collectAsStateWithLifecycle()
+    val pinned = pinnedParticipants.containsKey(participant.sessionId)
+
     val userNameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
     val nameLabel = if (participant.isLocal) {
         stringResource(id = R.string.stream_video_myself)
