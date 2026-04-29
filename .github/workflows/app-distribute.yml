@@ -11,7 +11,7 @@ jobs:
     name: Build and Distribute Dogfooding Android
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: GetStream/android-ci-actions/actions/setup-java@main
       - name: Prepare environment
         run: |
@@ -23,7 +23,7 @@ jobs:
       - name: Assemble
         run: bash ./gradlew :demo-app:assembleRelease --stacktrace
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: demo-app-release
           path: demo-app/build/outputs/apk/demo-app/release/
