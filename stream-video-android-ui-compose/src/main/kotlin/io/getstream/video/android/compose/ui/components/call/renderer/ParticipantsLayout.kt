@@ -97,6 +97,7 @@ public fun ParticipantsLayout(
             }
         }
     }
+
     if (screenSharing == null || screenSharing.participant.isLocal) {
         if (showSpotlight) {
             ParticipantsSpotlight(
