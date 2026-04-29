@@ -767,7 +767,6 @@ public class CallState(
             }
 
             is PinsUpdatedEvent -> {
-                Log.d("Noob", "[PinsUpdatedEvent] : $event")
                 updateServerSidePins(event.pins)
             }
 
@@ -1054,7 +1053,6 @@ public class CallState(
             }
 
             is JoinCallResponseEvent -> {
-                Log.d("Noob", "[JoinCallResponseEvent], $event ")
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
                 if (!isJoinAndRingInProgress.get()) {
@@ -1070,7 +1068,6 @@ public class CallState(
             }
 
             is ParticipantJoinedEvent -> {
-                Log.d("Noob", "[ParticipantJoinedEvent], $event ")
                 try {
                     if (participants.value.size < 8) {
                         getOrCreateParticipant(event.participant)
@@ -1094,7 +1091,6 @@ public class CallState(
             }
 
             is ParticipantLeftEvent -> {
-                Log.d("Noob", "[ParticipantLeftEvent], event: $event")
                 safeCall { pendingParticipantsJoined.remove(event.participant.session_id) }
                 val sessionId = event.participant.session_id
                 removeParticipant(sessionId)
@@ -1292,7 +1288,6 @@ public class CallState(
     }
 
     internal fun updateServerSidePins(internalParticipants: Map<SessionId, ParticipantState>, event: ParticipantJoinedEvent) {
-        Log.d("Noob", "[updateServerSidePins] 1, event: $event")
         val participantSessionId = event.participant.session_id
         if (internalParticipants.containsKey(participantSessionId)) {
             if (event.isPinned) {
@@ -1510,7 +1505,6 @@ public class CallState(
         val participantNames = participants.joinToString(",") {
             "[name:${it.name.value}, sessionId:${it.sessionId}]"
         }
-        Log.d("Noob", "[upsertParticipants], participantNames: $participantNames")
         val screensharing = mutableListOf<ParticipantState>()
         participants.forEach {
             internalParticipants[it.sessionId] = it
