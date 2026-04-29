@@ -128,11 +128,9 @@ class CallStateTest : IntegrationTestBase() {
         val sorted1 = sortedParticipants.value
         assertThat(sorted1).isEmpty()
 
-        call.state.pins.updateLocalPins(
-            mutableMapOf(
-                "1" to PinUpdateAtTime(
-                    PinUpdate("1", "userId"), OffsetDateTime.now(Clock.systemUTC()), PinType.Local,
-                ),
+        call.state._localPins.value = mutableMapOf(
+            "1" to PinUpdateAtTime(
+                PinUpdate("1", "userId"), OffsetDateTime.now(Clock.systemUTC()), PinType.Local,
             ),
         )
 
