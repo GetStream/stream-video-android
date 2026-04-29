@@ -126,9 +126,9 @@ public data class TrackUnpublishedEvent(
 ) : SfuDataEvent()
 
 public data class ParticipantJoinedEvent(
-
     val participant: Participant,
     val callCid: String,
+    val isPinned: Boolean,
 ) : SfuDataEvent()
 
 public data class ParticipantLeftEvent(

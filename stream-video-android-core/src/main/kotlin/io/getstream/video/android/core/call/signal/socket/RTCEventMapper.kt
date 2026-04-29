@@ -95,7 +95,7 @@ public object RTCEventMapper {
             }
 
             event.participant_joined != null -> with(event.participant_joined) {
-                ParticipantJoinedEvent(participant!!, call_cid)
+                ParticipantJoinedEvent(participant!!, call_cid, is_pinned)
             }
 
             event.participant_left != null -> with(event.participant_left) {

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer
 
+import android.util.Log
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -97,7 +98,10 @@ public fun ParticipantsLayout(
             }
         }
     }
-
+    Log.d(
+        "Noob",
+        "[ParticipantsLayout] showSpotlight: $showSpotlight, pinnedParticipants: $pinnedParticipants",
+    )
     if (screenSharing == null || screenSharing.participant.isLocal) {
         if (showSpotlight) {
             ParticipantsSpotlight(
