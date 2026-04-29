@@ -62,7 +62,7 @@ public fun ParticipantInformation(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val context = LocalContext.current
-        val callUsers by remember { derivedStateOf { participants.map { it.toCallUser() } } }
+        val callUsers = remember(participants) { participants.map { it.toCallUser() } }
         val text = if (participants.size <= 3) {
             buildSmallCallText(context, callUsers)
         } else {
