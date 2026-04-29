@@ -1,0 +1,23 @@
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+  warningsAsErrors: false
+  excludes: ".*StreamRules.*"
+
+console-reports:
+  active: true
+  exclude:
+    - 'ProjectStatisticsReport'
+    - 'ComplexityReport'
+    - 'FindingsReport'
+    - 'FileBasedFindingsReport'
+    - 'LiteFindingsReport'
+    - 'NotificationReport'
+
+# ─── Custom Stream rules ────────────────────────────────────────────────────
+StreamRules:
+  NoDirectTimeUsage:
+    active: true
+    excludes: ["**/test/**", "**/androidTest/**"]

@@ -90,3 +90,5 @@ This repository hosts Stream’s Kotlin-based Video SDK for Android. It delivers
 - [ ] Coordinate with the release owner before modifying versioning metadata.
 - [ ] Document new APIs and significant changes in `README.md` or module-specific docs.
 - [ ] Sanitise logs to avoid leaking sensitive information.
+
+See /docs/rules.md for coding rules

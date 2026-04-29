@@ -1,5 +1,10 @@
 plugins {
     `kotlin-dsl`
+    id("io.gitlab.arturbosch.detekt") version "1.23.6"
+}
+
+dependencies {
+    implementation("io.gitlab.arturbosch.detekt:detekt-api:1.23.6")
 }
 
 gradlePlugin {
