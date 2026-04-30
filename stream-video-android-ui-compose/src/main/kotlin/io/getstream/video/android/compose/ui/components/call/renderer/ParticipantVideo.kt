@@ -110,7 +110,7 @@ import kotlinx.coroutines.delay
  * @param labelContent Content is shown that displays participant's name and device states.
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
- * @param videoRendererModifier Modifier applied to the inner video renderer view.
+ * @param mirrorStream Whether to mirror the video stream horizontally.
  * @param reactionContent Content is shown for the reaction.
  * @param actionsContent Content to show action picker with call actions related to the selected participant.
  */
@@ -133,7 +133,7 @@ public fun ParticipantVideo(
         )
     },
     scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
-    videoRendererModifier: Modifier = Modifier,
+    mirrorStream: Boolean = false,
     videoFallbackContent: @Composable (Call) -> Unit = {
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
@@ -205,7 +205,7 @@ public fun ParticipantVideo(
             call = call,
             participant = participant,
             scalingType = scalingType,
-            modifier = videoRendererModifier,
+            mirrorStream = mirrorStream,
             videoFallbackContent = videoFallbackContent,
         )
 
@@ -232,15 +232,16 @@ public fun ParticipantVideo(
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
  * @param scalingType The scaling type for the video renderer.
+ * @param mirrorStream Whether to mirror the video stream horizontally.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  */
 @OptIn(StreamVideoUiDelicateApi::class)
 @Composable
 public fun ParticipantVideoRenderer(
-    modifier: Modifier = Modifier,
     call: Call,
     participant: ParticipantState,
     scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
+    mirrorStream: Boolean = false,
     videoFallbackContent: @Composable (Call) -> Unit = {
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
@@ -264,20 +265,19 @@ public fun ParticipantVideoRenderer(
     val video by participant.video.collectAsStateWithLifecycle()
     val cameraDirection by call.camera.direction.collectAsStateWithLifecycle()
     val me by call.state.me.collectAsStateWithLifecycle()
-    val mirror by remember(cameraDirection) {
+    val mirror by remember(cameraDirection, mirrorStream) {
         mutableStateOf(
-            cameraDirection == CameraDirection.Front && me?.sessionId == participant.sessionId,
+            mirrorStream || (cameraDirection == CameraDirection.Front && me?.sessionId == participant.sessionId),
         )
     }
     val videoRendererConfig = remember(mirror, scalingType, videoFallbackContent) {
         videoRenderConfig {
-            mirrorStream = mirror
+            this.mirrorStream = mirror
             this.videoScalingType = scalingType
             this.fallbackContent = videoFallbackContent
         }
     }
     VideoRenderer(
-        modifier = modifier,
         call = call,
         video = video,
         videoRendererConfig = videoRendererConfig,
