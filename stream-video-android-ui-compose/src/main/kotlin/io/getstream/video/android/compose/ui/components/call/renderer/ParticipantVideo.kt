@@ -265,11 +265,8 @@ public fun ParticipantVideoRenderer(
     val video by participant.video.collectAsStateWithLifecycle()
     val cameraDirection by call.camera.direction.collectAsStateWithLifecycle()
     val me by call.state.me.collectAsStateWithLifecycle()
-    val mirror by remember(cameraDirection, mirrorStream) {
-        mutableStateOf(
-            mirrorStream || (cameraDirection == CameraDirection.Front && me?.sessionId == participant.sessionId),
-        )
-    }
+    val mirror =
+        mirrorStream || (cameraDirection == CameraDirection.Front && me?.sessionId == participant.sessionId)
     val videoRendererConfig = remember(mirror, scalingType, videoFallbackContent) {
         videoRenderConfig {
             this.mirrorStream = mirror
