@@ -9737,8 +9737,8 @@ public class io/getstream/video/android/core/call/connection/StreamPeerConnectio
 }
 
 public final class io/getstream/video/android/core/call/connection/StreamPeerConnectionFactory {
-	public fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
-	public synthetic fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lorg/webrtc/Logging$Severity;)V
+	public synthetic fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lorg/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lorg/webrtc/Logging$Severity;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun clearPreferredAudioInputDevice ()V
 	public final fun getEglBase ()Lorg/webrtc/EglBase;
 	public final fun getSenderCapabilities (Lorg/webrtc/MediaStreamTrack$MediaType;)Lorg/webrtc/RtpCapabilities;
@@ -12394,14 +12394,18 @@ public final class io/getstream/video/android/core/logging/LoggingLevel {
 	public fun <init> ()V
 	public fun <init> (Lio/getstream/log/Priority;)V
 	public fun <init> (Lio/getstream/log/Priority;Lio/getstream/video/android/core/logging/HttpLoggingLevel;)V
-	public synthetic fun <init> (Lio/getstream/log/Priority;Lio/getstream/video/android/core/logging/HttpLoggingLevel;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lio/getstream/log/Priority;Lio/getstream/video/android/core/logging/HttpLoggingLevel;Lorg/webrtc/Logging$Severity;)V
+	public synthetic fun <init> (Lio/getstream/log/Priority;Lio/getstream/video/android/core/logging/HttpLoggingLevel;Lorg/webrtc/Logging$Severity;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lio/getstream/log/Priority;
 	public final fun component2 ()Lio/getstream/video/android/core/logging/HttpLoggingLevel;
+	public final fun component3 ()Lorg/webrtc/Logging$Severity;
 	public final fun copy (Lio/getstream/log/Priority;Lio/getstream/video/android/core/logging/HttpLoggingLevel;)Lio/getstream/video/android/core/logging/LoggingLevel;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/log/Priority;Lio/getstream/video/android/core/logging/HttpLoggingLevel;ILjava/lang/Object;)Lio/getstream/video/android/core/logging/LoggingLevel;
+	public final fun copy (Lio/getstream/log/Priority;Lio/getstream/video/android/core/logging/HttpLoggingLevel;Lorg/webrtc/Logging$Severity;)Lio/getstream/video/android/core/logging/LoggingLevel;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/log/Priority;Lio/getstream/video/android/core/logging/HttpLoggingLevel;Lorg/webrtc/Logging$Severity;ILjava/lang/Object;)Lio/getstream/video/android/core/logging/LoggingLevel;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getHttpLoggingLevel ()Lio/getstream/video/android/core/logging/HttpLoggingLevel;
 	public final fun getPriority ()Lio/getstream/log/Priority;
+	public final fun getWebRtcLoggingLevel ()Lorg/webrtc/Logging$Severity;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
