@@ -3,13 +3,18 @@ name: SDK size checks
 on:
   pull_request:
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   compare-sdk-sizes:
-    uses: GetStream/stream-build-conventions-android/.github/workflows/sdk-size-checks.yml@v0.10.0
+    uses: GetStream/stream-build-conventions-android/.github/workflows/sdk-size-checks.yml@v0.11.0
     with:
       modules: "stream-video-android-core stream-video-android-ui-xml stream-video-android-ui-compose"
       metrics-project: "stream-video-android-metrics"
