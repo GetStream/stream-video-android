@@ -32,7 +32,7 @@ import org.webrtc.Logging
 public data class LoggingLevel @JvmOverloads constructor(
     public val priority: Priority = Priority.ERROR,
     public val httpLoggingLevel: HttpLoggingLevel = HttpLoggingLevel.BASIC,
-    public val webRtcLoggingLevel: Logging.Severity = Logging.Severity.LS_WARNING,
+    public val webRtcLoggingLevel: Logging.Severity = Logging.Severity.LS_ERROR,
 ) {
     // Restores the binary-compatible copy(Priority, HttpLoggingLevel) signature that existed
     // before webRtcLoggingLevel was added.
