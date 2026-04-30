@@ -25,7 +25,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import stream.video.sfu.models.Error
@@ -49,21 +48,18 @@ class RetryableSignalingServiceDecoratorTest {
         val inner = mockk<SignalServerService>(relaxed = true) {
             coEvery { updateSubscriptions(any()) } returns successResponse
         }
-        val terminalErrors = mutableListOf<Error>()
-        val networkErrors = mutableListOf<Throwable>()
+        val sessionErrors = mutableListOf<Error>()
 
         val decorator = RetryableSignalingServiceDecorator(
             decorated = inner,
-            onTerminalError = { terminalErrors.add(it) },
-            onNetworkFailure = { networkErrors.add(it) },
+            onSessionError = { sessionErrors.add(it) },
             retryProcessor = StreamRetryProcessor("test"),
             policy = noDelayPolicy,
         )
 
         val result = decorator.updateSubscriptions(UpdateSubscriptionsRequest())
         assertNull(result.error)
-        assertTrue(terminalErrors.isEmpty())
-        assertTrue(networkErrors.isEmpty())
+        assertTrue(sessionErrors.isEmpty())
     }
 
     @Test
@@ -85,11 +81,11 @@ class RetryableSignalingServiceDecoratorTest {
                 }
             }
         }
-        val terminalErrors = mutableListOf<Error>()
+        val sessionErrors = mutableListOf<Error>()
 
         val decorator = RetryableSignalingServiceDecorator(
             decorated = inner,
-            onTerminalError = { terminalErrors.add(it) },
+            onSessionError = { sessionErrors.add(it) },
             retryProcessor = StreamRetryProcessor("test"),
             policy = noDelayPolicy,
         )
@@ -97,37 +93,72 @@ class RetryableSignalingServiceDecoratorTest {
         val result = decorator.updateSubscriptions(UpdateSubscriptionsRequest())
         assertNull(result.error)
         assertEquals(3, callCount)
-        assertTrue(terminalErrors.isEmpty())
+        assertTrue(sessionErrors.isEmpty())
     }
 
     @Test
-    fun `terminal SFU error (should_retry=false) invokes onTerminalError`() = runTest {
-        val terminalError = Error(
+    fun `session-fatal error (PARTICIPANT_NOT_FOUND) fires onSessionError and throws`() = runTest {
+        val fatalError = Error(
             code = ErrorCode.ERROR_CODE_PARTICIPANT_NOT_FOUND,
             message = "participant gone",
             should_retry = false,
         )
         val inner = mockk<SignalServerService>(relaxed = true) {
             coEvery { updateSubscriptions(any()) } returns
-                UpdateSubscriptionsResponse(error = terminalError)
+                UpdateSubscriptionsResponse(error = fatalError)
         }
-        val terminalErrors = mutableListOf<Error>()
+        val sessionErrors = mutableListOf<Error>()
 
         val decorator = RetryableSignalingServiceDecorator(
             decorated = inner,
-            onTerminalError = { terminalErrors.add(it) },
+            onSessionError = { sessionErrors.add(it) },
+            retryProcessor = StreamRetryProcessor("test"),
+            policy = noDelayPolicy,
+        )
+
+        var thrown: Throwable? = null
+        try {
+            decorator.updateSubscriptions(UpdateSubscriptionsRequest())
+        } catch (e: Throwable) {
+            thrown = e
+        }
+
+        assertTrue(
+            "Session-fatal error should throw SessionFatalException",
+            thrown is SessionFatalException,
+        )
+        assertEquals(fatalError, (thrown as SessionFatalException).sfuError)
+        assertEquals(1, sessionErrors.size)
+        assertEquals(ErrorCode.ERROR_CODE_PARTICIPANT_NOT_FOUND, sessionErrors[0].code)
+    }
+
+    @Test
+    fun `non-fatal SFU error (validation) does NOT fire onSessionError`() = runTest {
+        val validationError = Error(
+            code = ErrorCode.ERROR_CODE_REQUEST_VALIDATION_FAILED,
+            message = "invalid request",
+            should_retry = false,
+        )
+        val inner = mockk<SignalServerService>(relaxed = true) {
+            coEvery { updateSubscriptions(any()) } returns
+                UpdateSubscriptionsResponse(error = validationError)
+        }
+        val sessionErrors = mutableListOf<Error>()
+
+        val decorator = RetryableSignalingServiceDecorator(
+            decorated = inner,
+            onSessionError = { sessionErrors.add(it) },
             retryProcessor = StreamRetryProcessor("test"),
             policy = noDelayPolicy,
         )
 
         val result = decorator.updateSubscriptions(UpdateSubscriptionsRequest())
-        assertEquals(terminalError, result.error)
-        assertEquals(1, terminalErrors.size)
-        assertEquals(ErrorCode.ERROR_CODE_PARTICIPANT_NOT_FOUND, terminalErrors[0].code)
+        assertEquals(validationError, result.error)
+        assertTrue("Non-fatal errors should not trigger onSessionError", sessionErrors.isEmpty())
     }
 
     @Test
-    fun `SIGNAL_LOST error is not retried and fires onTerminalError`() = runTest {
+    fun `SIGNAL_LOST error is not retried and fires onSessionError and throws`() = runTest {
         val signalLostError = Error(
             code = ErrorCode.ERROR_CODE_PARTICIPANT_SIGNAL_LOST,
             message = "signal lost",
@@ -137,34 +168,42 @@ class RetryableSignalingServiceDecoratorTest {
             coEvery { updateSubscriptions(any()) } returns
                 UpdateSubscriptionsResponse(error = signalLostError)
         }
-        val terminalErrors = mutableListOf<Error>()
+        val sessionErrors = mutableListOf<Error>()
 
         val decorator = RetryableSignalingServiceDecorator(
             decorated = inner,
-            onTerminalError = { terminalErrors.add(it) },
+            onSessionError = { sessionErrors.add(it) },
             retryProcessor = StreamRetryProcessor("test"),
             policy = noDelayPolicy,
         )
 
-        val result = decorator.updateSubscriptions(UpdateSubscriptionsRequest())
-        assertEquals(signalLostError, result.error)
-        assertEquals(1, terminalErrors.size)
-        assertEquals(ErrorCode.ERROR_CODE_PARTICIPANT_SIGNAL_LOST, terminalErrors[0].code)
+        var thrown: Throwable? = null
+        try {
+            decorator.updateSubscriptions(UpdateSubscriptionsRequest())
+        } catch (e: Throwable) {
+            thrown = e
+        }
+
+        assertTrue(
+            "SIGNAL_LOST should throw SessionFatalException",
+            thrown is SessionFatalException,
+        )
+        assertEquals(signalLostError, (thrown as SessionFatalException).sfuError)
+        assertEquals(1, sessionErrors.size)
+        assertEquals(ErrorCode.ERROR_CODE_PARTICIPANT_SIGNAL_LOST, sessionErrors[0].code)
         coVerify(exactly = 1) { inner.updateSubscriptions(any()) }
     }
 
     @Test
-    fun `network failure after max retries invokes onNetworkFailure`() = runTest {
+    fun `network failure after max retries rethrows without triggering reconnect`() = runTest {
         val inner = mockk<SignalServerService>(relaxed = true) {
             coEvery { updateSubscriptions(any()) } throws IOException("timeout")
         }
-        val networkErrors = mutableListOf<Throwable>()
-        val terminalErrors = mutableListOf<Error>()
+        val sessionErrors = mutableListOf<Error>()
 
         val decorator = RetryableSignalingServiceDecorator(
             decorated = inner,
-            onTerminalError = { terminalErrors.add(it) },
-            onNetworkFailure = { networkErrors.add(it) },
+            onSessionError = { sessionErrors.add(it) },
             retryProcessor = StreamRetryProcessor("test"),
             policy = noDelayPolicy,
         )
@@ -177,9 +216,7 @@ class RetryableSignalingServiceDecoratorTest {
         }
 
         assertTrue(thrown is IOException)
-        assertEquals(1, networkErrors.size)
-        assertTrue(networkErrors[0] is IOException)
-        assertTrue(terminalErrors.isEmpty())
+        assertTrue("Network failures should not trigger onSessionError", sessionErrors.isEmpty())
     }
 
     @Test
@@ -193,11 +230,11 @@ class RetryableSignalingServiceDecoratorTest {
                 successResponse
             }
         }
-        val networkErrors = mutableListOf<Throwable>()
+        val sessionErrors = mutableListOf<Error>()
 
         val decorator = RetryableSignalingServiceDecorator(
             decorated = inner,
-            onNetworkFailure = { networkErrors.add(it) },
+            onSessionError = { sessionErrors.add(it) },
             retryProcessor = StreamRetryProcessor("test"),
             policy = noDelayPolicy,
         )
@@ -205,11 +242,11 @@ class RetryableSignalingServiceDecoratorTest {
         val result = decorator.updateSubscriptions(UpdateSubscriptionsRequest())
         assertNull(result.error)
         assertEquals(3, callCount)
-        assertTrue(networkErrors.isEmpty())
+        assertTrue(sessionErrors.isEmpty())
     }
 
     @Test
-    fun `exhausted SFU retries fires onTerminalError with last error`() = runTest {
+    fun `exhausted retries on non-fatal error returns last error response without throwing`() = runTest {
         val retriableError = Error(
             code = ErrorCode.ERROR_CODE_SFU_SHUTTING_DOWN,
             message = "shutting down",
@@ -219,19 +256,26 @@ class RetryableSignalingServiceDecoratorTest {
             coEvery { updateSubscriptions(any()) } returns
                 UpdateSubscriptionsResponse(error = retriableError)
         }
-        val terminalErrors = mutableListOf<Error>()
+        val sessionErrors = mutableListOf<Error>()
 
         val decorator = RetryableSignalingServiceDecorator(
             decorated = inner,
-            onTerminalError = { terminalErrors.add(it) },
+            onSessionError = { sessionErrors.add(it) },
             retryProcessor = StreamRetryProcessor("test"),
             policy = noDelayPolicy,
         )
 
         val result = decorator.updateSubscriptions(UpdateSubscriptionsRequest())
-        assertEquals(retriableError, result.error)
-        assertEquals(1, terminalErrors.size)
-        assertSame(retriableError, terminalErrors[0])
+
+        assertEquals(
+            "Exhausted retries should return the last error response",
+            retriableError,
+            result.error,
+        )
+        assertTrue(
+            "Non-fatal errors should not trigger onSessionError even after retry exhaustion",
+            sessionErrors.isEmpty(),
+        )
     }
 
     @Test

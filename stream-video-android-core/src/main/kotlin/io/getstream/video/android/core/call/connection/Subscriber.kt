@@ -24,7 +24,7 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.TrackDimensions
 import io.getstream.video.android.core.call.connection.job.RestartIceJobDelegate
 import io.getstream.video.android.core.call.connection.stats.ComputedStats
-import io.getstream.video.android.core.call.connection.utils.wrapAPICall
+import io.getstream.video.android.core.call.connection.utils.sfuCall
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
@@ -40,7 +40,6 @@ import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.enableStereo
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
-import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.safeSuspendingCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -316,7 +315,7 @@ internal class Subscriber(
                     answerSdp.description,
                     sessionId,
                 )
-                safeCallWithResult {
+                sfuCall {
                     sfuClient.sendAnswer(request)
                 }.onErrorSuspend {
                     tracer.trace("negotiate-error-sendanswer", it.message ?: "unknown")
@@ -334,7 +333,7 @@ internal class Subscriber(
      * signaling decorator and trigger a rejoin; we cancel scheduled retries
      * so this session stops attempting recovery on a dead SFU participant.
      */
-    suspend fun restartIce() = wrapAPICall {
+    suspend fun restartIce() = sfuCall {
         val request = ICERestartRequest(
             session_id = sessionId,
             peer_type = PeerType.PEER_TYPE_SUBSCRIBER,

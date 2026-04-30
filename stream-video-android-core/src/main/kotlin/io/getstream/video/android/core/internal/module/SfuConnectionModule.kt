@@ -46,7 +46,6 @@ internal class SfuConnectionModule(
     override val lifecycle: Lifecycle,
     override val tracer: Tracer,
     val onSfuApiError: (Error) -> Unit,
-    val onSfuNetworkFailure: (Throwable) -> Unit,
 ) : ConnectionModuleDeclaration<SignalServerService, SfuSocketConnection, OkHttpClient, SfuToken> {
 
     // Internal logic
@@ -78,8 +77,7 @@ internal class SfuConnectionModule(
             signalRetrofitClient.create(SignalServerService::class.java),
             tracer,
         ),
-        onTerminalError = { onSfuApiError(it) },
-        onNetworkFailure = { onSfuNetworkFailure(it) },
+        onSessionError = { onSfuApiError(it) },
     )
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(

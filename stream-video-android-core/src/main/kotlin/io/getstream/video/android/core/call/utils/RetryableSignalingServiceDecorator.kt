@@ -47,25 +47,39 @@ import stream.video.sfu.signal.UpdateSubscriptionsResponse
 internal class SfuRetryableException(val sfuError: Error) : Exception(sfuError.message)
 
 /**
+ * Thrown when the SFU reports a session-fatal error (PARTICIPANT_NOT_FOUND,
+ * SIGNAL_LOST, etc.). Reconnection has already been initiated via
+ * [RetryableSignalingServiceDecorator.onSessionError] — callers should
+ * **not** retry the failed request.
+ */
+internal class SessionFatalException(val sfuError: Error) : Exception(sfuError.message)
+
+/**
  * Decorator that retries SFU API calls on transient failures and propagates
- * errors to callbacks for reconnection handling.
+ * **session-fatal** errors to [onSessionError] for reconnection handling.
  *
  * **Retry behaviour** (via [StreamRetryProcessor]):
  * - Network errors (IOException, timeout) are retried automatically.
- * - SFU responses with `should_retry = true` are retried (except SIGNAL_LOST,
- *   which needs a WebSocket reconnect, not an HTTP retry).
+ * - SFU responses with `should_retry = true` are retried (except session-fatal
+ *   codes like SIGNAL_LOST which need a WebSocket reconnect, not an HTTP retry).
  * - Retries stop on success, terminal error (`should_retry = false`),
  *   max attempts exhausted, or coroutine cancellation.
  *
- * **Error propagation**:
- * - SFU response errors → [onTerminalError] (maps to fastReconnect / rejoin).
- * - Network errors after all retries exhausted → [onNetworkFailure] (triggers
- *   reconnect since the SFU is unreachable via HTTP).
+ * **Error propagation** — only errors that indicate the SFU session is broken
+ * trigger reconnection. Regular API errors (validation, permission, etc.)
+ * are returned to the caller without triggering a reconnect:
+ *
+ * - Session-fatal SFU errors (SIGNAL_LOST, PARTICIPANT_NOT_FOUND, etc.)
+ *   → [onSessionError] (triggers fast reconnect or rejoin).
+ * - Network errors after all retries exhausted → rethrown to the caller.
+ *   No reconnect is triggered because the WebSocket has its own health
+ *   monitoring (HealthMonitor / stateJob) and will detect connectivity
+ *   problems independently.
+ * - All other SFU errors → returned to the caller as-is, no reconnect.
  */
 internal class RetryableSignalingServiceDecorator(
     private val decorated: SignalServerService,
-    private val onTerminalError: (Error) -> Unit = {},
-    private val onNetworkFailure: (Throwable) -> Unit = {},
+    private val onSessionError: (Error) -> Unit = {},
     private val retryProcessor: StreamRetryProcessor = StreamRetryProcessor("SfuRetry"),
     private val policy: StreamRetryPolicy = StreamRetryPolicy.linear(
         minRetries = 1,
@@ -108,13 +122,27 @@ internal class RetryableSignalingServiceDecorator(
     /**
      * Wraps an SFU API call with retry + error propagation.
      *
-     * Network errors throw naturally and are retried by the processor.
-     * SFU-level `should_retry=true` errors are converted to [SfuRetryableException]
-     * to re-enter the retry loop (except SIGNAL_LOST which requires WS reconnect).
+     * Four possible outcomes after the retry loop finishes:
      *
-     * After the final outcome:
-     * - SFU response with error → [onTerminalError]
-     * - Network failure after all retries → [onNetworkFailure], then rethrow
+     * 1. **Success** — response has no error. Returned directly.
+     *
+     * 2. **Non-fatal SFU error** — the response carries an [Error] that is
+     *    not session-fatal. Returned to the caller as-is. If retries were
+     *    exhausted (`should_retry` errors), the last error response is
+     *    returned rather than throwing.
+     *
+     * 3. **Session-fatal SFU error** — fires [onSessionError] to trigger
+     *    reconnection, then throws [SessionFatalException]. Callers must
+     *    not retry — the session is being rebuilt.
+     *
+     * 4. **Network failure** — the HTTP call itself threw (IOException, timeout)
+     *    on every retry and no response was ever received. Rethrown to the
+     *    caller. No reconnect — the WebSocket has its own health monitoring.
+     *
+     * The retry loop retries both network exceptions (thrown naturally) and
+     * SFU errors with `should_retry = true` (converted to [SfuRetryableException]).
+     * Session-fatal errors are never retried because they require a WebSocket
+     * reconnect or rejoin, not another HTTP attempt.
      */
     private suspend inline fun <T> retryCall(
         crossinline errorExtractor: (T) -> Error?,
@@ -122,31 +150,46 @@ internal class RetryableSignalingServiceDecorator(
     ): T {
         var lastResponse: T? = null
 
-        val result = retryProcessor.retry(policy) {
+        val response = retryProcessor.retry(policy) {
             val response = block()
             lastResponse = response
             val error = errorExtractor(response)
-            if (error != null && error.should_retry && !error.requiresReconnect()) {
+            if (error != null && error.should_retry && !error.isSessionFatal()) {
                 throw SfuRetryableException(error)
             }
             response
+        }.getOrElse { throwable ->
+            // SFU retries exhausted → return the last error response so callers
+            // handle it normally (via sfuCall → RtcException). No exception thrown.
+            // Network failures (IOException) still propagate — lastResponse is null
+            // because the HTTP call itself never completed.
+            lastResponse ?: throw throwable
         }
 
-        val response = result.getOrElse { throwable ->
-            if (throwable is SfuRetryableException && lastResponse != null) {
-                @Suppress("UNCHECKED_CAST")
-                lastResponse as T
-            } else {
-                onNetworkFailure(throwable)
-                throw throwable
-            }
+        val sfuError = errorExtractor(response)
+        if (sfuError != null && sfuError.isSessionFatal()) {
+            onSessionError(sfuError)
+            throw SessionFatalException(sfuError)
         }
-
-        errorExtractor(response)?.let { onTerminalError(it) }
 
         return response
     }
 
-    private fun Error.requiresReconnect(): Boolean =
-        code == ErrorCode.ERROR_CODE_PARTICIPANT_SIGNAL_LOST
+    /**
+     * Returns true for error codes that indicate the SFU session is broken
+     * and cannot recover with a simple HTTP retry. These need a WebSocket
+     * reconnect (SIGNAL_LOST) or a full rejoin (PARTICIPANT_NOT_FOUND, etc.).
+     *
+     * All other errors (validation, permission, rate-limit, etc.) are
+     * regular API failures that don't affect the underlying session.
+     */
+    private fun Error.isSessionFatal(): Boolean = when (code) {
+        ErrorCode.ERROR_CODE_PARTICIPANT_NOT_FOUND,
+        ErrorCode.ERROR_CODE_PARTICIPANT_SIGNAL_LOST,
+        ErrorCode.ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE,
+        ErrorCode.ERROR_CODE_PARTICIPANT_RECONNECT_FAILED,
+        ErrorCode.ERROR_CODE_CALL_NOT_FOUND,
+        -> true
+        else -> false
+    }
 }
