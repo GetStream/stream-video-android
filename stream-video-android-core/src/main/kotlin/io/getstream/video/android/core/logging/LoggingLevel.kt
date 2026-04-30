@@ -20,7 +20,7 @@ import io.getstream.log.Priority
 import org.webrtc.Logging
 
 /**
- * Represents and wraps the HTTP logging level for our API service.
+ * Represents and wraps SDK logging levels for Stream logger, HTTP interceptor and native WebRTC logging.
  *
  * @property priority The priority level of information logged by the Stream Android logger.
  * @property httpLoggingLevel The level of information logged by our HTTP interceptor.

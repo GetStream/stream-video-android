@@ -80,7 +80,7 @@ import java.net.ConnectException
  * @property user The user object. Can be an authenticated user, guest user or anonymous.
  * @property token The token for this user, generated using your API secret on your server.
  * @property tokenProvider Used to make a request to your backend for a new token when the token has expired.
- * @property loggingLevel Represents and wraps the HTTP logging level for our API service.
+ * @property loggingLevel Represents and wraps SDK logging levels for Stream logger, HTTP interceptor and native WebRTC logging.
  * @property notificationConfig The configurations for handling push notification.
  * @property ringNotification Overwrite the default notification logic for incoming calls.
  * @property connectionTimeoutInMs Connection timeout in seconds.
