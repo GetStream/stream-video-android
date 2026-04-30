@@ -90,6 +90,7 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
+import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedCalls
@@ -178,6 +179,7 @@ internal class StreamVideoClient internal constructor(
     internal val crashOnMissingPermission: Boolean = false,
     internal val appName: String? = null,
     internal val audioProcessing: ManagedAudioProcessingFactory? = null,
+    internal val loggingLevel: LoggingLevel = LoggingLevel(),
     internal val leaveAfterDisconnectSeconds: Long = 30,
     internal val appVersion: String? = null,
     internal val enableCallUpdatesAfterLeave: Boolean = false,

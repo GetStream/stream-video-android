@@ -17,14 +17,20 @@
 package io.getstream.video.android.core.logging
 
 import io.getstream.log.Priority
+import org.webrtc.Logging
 
 /**
  * Represents and wraps the HTTP logging level for our API service.
  *
  * @property priority The priority level of information logged by the Stream Android logger.
  * @property httpLoggingLevel The level of information logged by our HTTP interceptor.
+ * @property webRtcLoggingLevel The minimum severity for native WebRTC log messages delivered to
+ *   the injectable logger. Defaults to [Logging.Severity.LS_WARNING] to avoid the heavy string
+ *   allocation caused by codec-negotiation VERBOSE messages, which compounds under reconnect
+ *   storms. Set to [Logging.Severity.LS_VERBOSE] when debugging WebRTC internals.
  */
 public data class LoggingLevel @JvmOverloads constructor(
     public val priority: Priority = Priority.ERROR,
     public val httpLoggingLevel: HttpLoggingLevel = HttpLoggingLevel.BASIC,
+    public val webRtcLoggingLevel: Logging.Severity = Logging.Severity.LS_WARNING,
 )

@@ -290,6 +290,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             crashOnMissingPermission = crashOnMissingPermission,
             appName = appName,
             audioProcessing = audioProcessing,
+            loggingLevel = loggingLevel,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
             enableStatsCollection = enableStatsReporting,
