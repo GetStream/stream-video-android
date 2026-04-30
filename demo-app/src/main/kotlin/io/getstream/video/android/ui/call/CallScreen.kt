@@ -69,6 +69,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -483,6 +484,11 @@ fun CallScreen(
                                             reactionDuration = 5000,
                                         ),
                                     )
+                                },
+                                videoRendererModifier = if (participant.sessionId != me?.sessionId) {
+                                    Modifier.graphicsLayer { scaleX = -1f }
+                                } else {
+                                    Modifier
                                 },
                                 actionsContent = { actions, call, participant ->
                                     ParticipantActions(

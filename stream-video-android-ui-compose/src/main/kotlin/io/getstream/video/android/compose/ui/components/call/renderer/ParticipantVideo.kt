@@ -110,6 +110,7 @@ import kotlinx.coroutines.delay
  * @param labelContent Content is shown that displays participant's name and device states.
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
+ * @param videoRendererModifier Modifier applied to the inner video renderer view.
  * @param reactionContent Content is shown for the reaction.
  * @param actionsContent Content to show action picker with call actions related to the selected participant.
  */
@@ -132,6 +133,7 @@ public fun ParticipantVideo(
         )
     },
     scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
+    videoRendererModifier: Modifier = Modifier,
     videoFallbackContent: @Composable (Call) -> Unit = {
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
@@ -203,6 +205,7 @@ public fun ParticipantVideo(
             call = call,
             participant = participant,
             scalingType = scalingType,
+            modifier = videoRendererModifier,
             videoFallbackContent = videoFallbackContent,
         )
 
@@ -234,6 +237,7 @@ public fun ParticipantVideo(
 @OptIn(StreamVideoUiDelicateApi::class)
 @Composable
 public fun ParticipantVideoRenderer(
+    modifier: Modifier = Modifier,
     call: Call,
     participant: ParticipantState,
     scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
@@ -273,6 +277,7 @@ public fun ParticipantVideoRenderer(
         }
     }
     VideoRenderer(
+        modifier = modifier,
         call = call,
         video = video,
         videoRendererConfig = videoRendererConfig,
