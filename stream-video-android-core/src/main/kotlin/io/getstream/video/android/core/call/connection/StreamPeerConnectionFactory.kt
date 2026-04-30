@@ -75,6 +75,7 @@ public class StreamPeerConnectionFactory(
     private var audioProcessing: ManagedAudioProcessingFactory? = null,
     private val audioBitrateProfileProvider: (() -> stream.video.sfu.models.AudioBitrateProfile)? = null,
     private val sharedEglBaseProvider: () -> EglBase = { EglBase.create() },
+    private val webRtcLoggingLevel: Logging.Severity = Logging.Severity.LS_WARNING,
 ) {
     /**
      * The audio bitrate profile that was used when this factory was created.
@@ -208,7 +209,7 @@ public class StreamPeerConnectionFactory(
 
                         else -> {}
                     }
-                }, Logging.Severity.LS_VERBOSE)
+                }, webRtcLoggingLevel)
                 .createInitializationOptions(),
         )
 

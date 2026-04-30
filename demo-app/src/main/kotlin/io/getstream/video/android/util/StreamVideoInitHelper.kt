@@ -63,6 +63,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import org.webrtc.Logging
 
 public enum class InitializedState {
     NOT_STARTED, RUNNING, FINISHED, FAILED
@@ -235,7 +236,10 @@ object StreamVideoInitHelper {
                         apiKey = authData.apiKey,
                         user = loggedInUser,
                         token = authData.token,
-                        loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+                        loggingLevel = LoggingLevel(
+                            priority = Priority.VERBOSE,
+                            webRtcLoggingLevel = Logging.Severity.LS_WARNING,
+                        ),
                     )
                 }
             }
@@ -291,7 +295,10 @@ object StreamVideoInitHelper {
                 apiKey = authData.apiKey,
                 user = guestUser,
                 token = "",
-                loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
+                loggingLevel = LoggingLevel(
+                    priority = Priority.VERBOSE,
+                    webRtcLoggingLevel = Logging.Severity.LS_WARNING,
+                ),
             )
 
             StreamVideo.instanceOrNull()?.connect()
