@@ -706,11 +706,6 @@ public class RtcSession internal constructor(
                     }
 
                     is SfuSocketState.Disconnected.DisconnectedTemporarily -> {
-                        if (!networkStateProvider.isConnected()) {
-                            logger.w { "[stateJob] Network down — skipping reconnect for $sfuName" }
-                            call.state._connection.value = RealtimeConnection.Reconnecting
-                            return@collect
-                        }
                         val strategy = sfuSocketState.reconnectStrategy
                         val reason = "SFU:${sfuSocketState.error.message}:$strategy"
                         logger.w { "[stateJob] SFU sent $strategy for $sfuName" }
@@ -894,16 +889,35 @@ public class RtcSession internal constructor(
         )
         listenToSfuSocket()
         sfuConnectionModule.socketConnection.connect(request)
-        val connected = withTimeoutOrNull(SocketActions.DEFAULT_SOCKET_TIMEOUT) {
-            sfuConnectionModule.socketConnection.state().first { it is SfuSocketState.Connected }
+        val terminalState = withTimeoutOrNull(SocketActions.DEFAULT_SOCKET_TIMEOUT) {
+            sfuConnectionModule.socketConnection.state().first {
+                it is SfuSocketState.Connected || it is SfuSocketState.Disconnected
+            }
         }
-        if (connected == null) {
-            sfuTracer.trace("connect-failed", "Connection timed out")
-            sendCallStats()
-            return SfuConnectionResult.Failed(Exception("SFU connection timed out"))
+        return when (terminalState) {
+            is SfuSocketState.Connected -> {
+                sendConnectionTimeStats(reconnectDetails?.strategy)
+                SfuConnectionResult.Connected
+            }
+            is SfuSocketState.Disconnected -> {
+                val msg = when (terminalState) {
+                    is SfuSocketState.Disconnected.DisconnectedTemporarily ->
+                        "SFU socket disconnected: ${terminalState.error.message}"
+                    is SfuSocketState.Disconnected.DisconnectedPermanently ->
+                        "SFU socket permanently disconnected: ${terminalState.error.message}"
+                    else -> "SFU socket disconnected"
+                }
+                logger.w { "[connectInternal] $msg" }
+                sfuTracer.trace("connect-failed", msg)
+                sendCallStats()
+                SfuConnectionResult.Failed(Exception(msg))
+            }
+            else -> {
+                sfuTracer.trace("connect-failed", "Connection timed out")
+                sendCallStats()
+                SfuConnectionResult.Failed(Exception("SFU connection timed out"))
+            }
         }
-        sendConnectionTimeStats(reconnectDetails?.strategy)
-        return SfuConnectionResult.Connected
     }
 
     private suspend fun buildJoinRequest(

@@ -894,15 +894,24 @@ public class Call(
             var loopIteration = 0
 
             while (true) {
-                if (loopIteration > 0) {
-                    val connectionState = state.connection.value
-                    if (connectionState is RealtimeConnection.Connected ||
-                        connectionState is RealtimeConnection.ReconnectingFailed ||
-                        connectionState is RealtimeConnection.Disconnected
-                    ) {
-                        logger.i { "[reconnect] Loop finished — state=$connectionState" }
-                        break
+                // Wait for network before doing anything else. Polls without
+                // consuming the attempt budget — the elapsed-time guard below
+                // will still fire if we wait too long.
+                if (!network.isConnected()) {
+                    logger.d {
+                        "[reconnect] Network unavailable — waiting for connectivity (loopIteration=$loopIteration)"
                     }
+                    delay(RECONNECT_DELAY_MS)
+                    continue
+                }
+
+                val connectionState = state.connection.value
+                if (connectionState is RealtimeConnection.Connected ||
+                    connectionState is RealtimeConnection.ReconnectingFailed ||
+                    connectionState is RealtimeConnection.Disconnected
+                ) {
+                    logger.i { "[reconnect] Loop finished — state=$connectionState" }
+                    break
                 }
 
                 if (loopIteration >= MAX_RECONNECT_ATTEMPTS) {
