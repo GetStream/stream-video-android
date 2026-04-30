@@ -12391,6 +12391,7 @@ public final class io/getstream/video/android/core/logging/LoggingLevel {
 	public final fun component1 ()Lio/getstream/log/Priority;
 	public final fun component2 ()Lio/getstream/video/android/core/logging/HttpLoggingLevel;
 	public final fun component3 ()Lorg/webrtc/Logging$Severity;
+	public final fun copy (Lio/getstream/log/Priority;Lio/getstream/video/android/core/logging/HttpLoggingLevel;)Lio/getstream/video/android/core/logging/LoggingLevel;
 	public final fun copy (Lio/getstream/log/Priority;Lio/getstream/video/android/core/logging/HttpLoggingLevel;Lorg/webrtc/Logging$Severity;)Lio/getstream/video/android/core/logging/LoggingLevel;
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/logging/LoggingLevel;Lio/getstream/log/Priority;Lio/getstream/video/android/core/logging/HttpLoggingLevel;Lorg/webrtc/Logging$Severity;ILjava/lang/Object;)Lio/getstream/video/android/core/logging/LoggingLevel;
 	public fun equals (Ljava/lang/Object;)Z

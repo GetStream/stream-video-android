@@ -33,4 +33,11 @@ public data class LoggingLevel @JvmOverloads constructor(
     public val priority: Priority = Priority.ERROR,
     public val httpLoggingLevel: HttpLoggingLevel = HttpLoggingLevel.BASIC,
     public val webRtcLoggingLevel: Logging.Severity = Logging.Severity.LS_WARNING,
-)
+) {
+    // Restores the binary-compatible copy(Priority, HttpLoggingLevel) signature that existed
+    // before webRtcLoggingLevel was added.
+    public fun copy(
+        priority: Priority,
+        httpLoggingLevel: HttpLoggingLevel,
+    ): LoggingLevel = LoggingLevel(priority, httpLoggingLevel, this.webRtcLoggingLevel)
+}
