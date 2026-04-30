@@ -48,7 +48,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.Subscriber
-import io.getstream.video.android.core.call.connection.utils.sfuCall
+import io.getstream.video.android.core.call.connection.utils.safeApiCall
 import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.video.android.core.call.utils.SessionFatalException
@@ -208,7 +208,7 @@ internal class PeerConnectionNotUsableException :
     Exception("Peer connections are not usable after fast reconnect")
 
 /**
- * Outcome of [RtcSession.internalConnect] — either the SFU socket
+ * Outcome of [RtcSession.connectInternal] — either the SFU socket
  * connected successfully or the attempt failed.
  */
 internal sealed class SfuConnectionResult {
@@ -867,20 +867,20 @@ public class RtcSession internal constructor(
 
     /**
      * Public entry point kept for backward compatibility.
-     * Delegates to [internalConnect] and throws on failure.
+     * Delegates to [connectInternal] and throws on failure.
      *
-     * Prefer [internalConnect] which returns a typed [SfuConnectionResult]
+     * Prefer [connectInternal] which returns a typed [SfuConnectionResult]
      * instead of throwing, enabling exhaustive `when` handling.
      */
     @Deprecated(
-        message = "Use internalConnect() which returns SfuConnectionResult instead of throwing.",
-        replaceWith = ReplaceWith("internalConnect(reconnectDetails, options)"),
+        message = "Use connectInternal() which returns SfuConnectionResult instead of throwing.",
+        replaceWith = ReplaceWith("connectInternal(reconnectDetails, options)"),
     )
     suspend fun connect(
         reconnectDetails: ReconnectDetails? = null,
         options: List<PublishOption>? = null,
     ) {
-        when (val result = internalConnect(reconnectDetails, options)) {
+        when (val result = connectInternal(reconnectDetails, options)) {
             is SfuConnectionResult.Connected -> Unit
             is SfuConnectionResult.Failed -> throw result.error
         }
@@ -891,11 +891,11 @@ public class RtcSession internal constructor(
      * fails. Returns a typed [SfuConnectionResult] so callers can react to the
      * outcome without catching exceptions.
      */
-    internal suspend fun internalConnect(
+    internal suspend fun connectInternal(
         reconnectDetails: ReconnectDetails? = null,
         options: List<PublishOption>? = null,
     ): SfuConnectionResult {
-        logger.i { "[internalConnect] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
+        logger.i { "[connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
         val request = buildJoinRequest(reconnectDetails, options)
         sfuTracer.trace(
             PeerConnectionTraceKey.JOIN_REQUEST.value,
@@ -1707,7 +1707,7 @@ public class RtcSession internal constructor(
         connectionTimeSeconds: Float? = null,
         reconnectionTimeSeconds: Pair<Float, WebsocketReconnectStrategy>? = null,
     ) {
-        val result = sfuCall {
+        val result = safeApiCall {
             val androidThermalState =
                 safeCallWithDefault(AndroidThermalState.ANDROID_THERMAL_STATE_UNSPECIFIED) {
                     val thermalState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -1806,12 +1806,12 @@ public class RtcSession internal constructor(
 
     // send whenever we have a new ice candidate
     private suspend fun sendIceCandidate(request: ICETrickle): Result<ICETrickleResponse> =
-        sfuCall { sfuConnectionModule.api.iceTrickle(request) }
+        safeApiCall { sfuConnectionModule.api.iceTrickle(request) }
 
     // share what size and which participants we're looking at
     internal suspend fun updateSubscriptions(
         request: UpdateSubscriptionsRequest,
-    ): Result<UpdateSubscriptionsResponse> = sfuCall {
+    ): Result<UpdateSubscriptionsResponse> = safeApiCall {
         logger.v { "[updateSubscriptions] #sfu; #track; request $request" }
         sfuConnectionModule.api.updateSubscriptions(request)
     }
@@ -1825,7 +1825,7 @@ public class RtcSession internal constructor(
             ),
         )
 
-    suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> = sfuCall {
+    suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> = safeApiCall {
         val request = ICERestartRequest(
             session_id = sessionId,
             peer_type = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
@@ -1834,7 +1834,7 @@ public class RtcSession internal constructor(
     }
 
     private suspend fun updateMuteState(request: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
-        sfuCall { sfuConnectionModule.api.updateMuteStates(request) }
+        safeApiCall { sfuConnectionModule.api.updateMuteStates(request) }
 
     // sets display track visibility
     @Synchronized
@@ -1877,7 +1877,7 @@ public class RtcSession internal constructor(
         val (_, _, publisherTracks) = currentSfuInfo()
         logger.d { "[fastReconnect] Published tracks: $publisherTracks" }
 
-        val connectResult = internalConnect(
+        val connectResult = connectInternal(
             reconnectDetails,
             publisher.value?.currentOptions(),
         )

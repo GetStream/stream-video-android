@@ -42,17 +42,19 @@ public class NetworkStateProvider(
     private val lock: Any = Any()
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            logger.d { "[callback#onAvailable] #network; onAvailable." }
+            logger.d { "[callback#onAvailable] #network; onAvailable :: $network" }
             notifyListenersIfNetworkStateChanged()
         }
 
         override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
-            logger.d { "[callback#onCapabilitiesChanged] #network; onCapabilitiesChanged" }
+            logger.d {
+                "[callback#onCapabilitiesChanged] #network; onCapabilitiesChanged :: $networkCapabilities"
+            }
             notifyListenersIfNetworkStateChanged()
         }
 
         override fun onLost(network: Network) {
-            logger.d { "[callback#onLost] #network; onLost" }
+            logger.d { "[callback#onLost] #network; onLost :: $network" }
             notifyListenersIfNetworkStateChanged()
         }
     }

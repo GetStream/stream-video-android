@@ -231,7 +231,7 @@ class RtcSessionTest2 {
 
     @Suppress("DEPRECATION")
     @Test
-    fun `internalConnect returns Failed when socket connection times out`() =
+    fun `connectInternal returns Failed when socket connection times out`() =
         runTest(testDispatcher) {
             val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
                 SfuSocketState.Disconnected.Stopped,
@@ -261,7 +261,7 @@ class RtcSessionTest2 {
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
 
-            val result = rtcSession.internalConnect()
+            val result = rtcSession.connectInternal()
 
             assertTrue(
                 "Expected SfuConnectionResult.Failed but got $result",
@@ -275,7 +275,7 @@ class RtcSessionTest2 {
 
     @Suppress("DEPRECATION")
     @Test
-    fun `internalConnect forwards ReconnectDetails in the JoinRequest`() =
+    fun `connectInternal forwards ReconnectDetails in the JoinRequest`() =
         runTest(testDispatcher) {
             val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
                 SfuSocketState.Disconnected.Stopped,
@@ -318,7 +318,7 @@ class RtcSessionTest2 {
                 reason = "test-rejoin",
             )
 
-            val result = rtcSession.internalConnect(reconnectDetails = reconnectDetails)
+            val result = rtcSession.connectInternal(reconnectDetails = reconnectDetails)
 
             assertEquals(SfuConnectionResult.Connected, result)
             coVerify {

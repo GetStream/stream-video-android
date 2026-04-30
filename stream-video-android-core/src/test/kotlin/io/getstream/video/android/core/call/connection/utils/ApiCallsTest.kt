@@ -32,7 +32,7 @@ class ApiCallsTest {
 
     @Test
     fun `returns Success when block succeeds`() = runTest {
-        val result = sfuCall { "OK" }
+        val result = safeApiCall { "OK" }
 
         assertIs<Success<String>>(result)
         assertEquals("OK", result.value)
@@ -41,7 +41,7 @@ class ApiCallsTest {
     @Test
     fun `returns Failure when HttpException occurs`() = runTest {
         val exception = mockHttpException(404)
-        val result = sfuCall<String> { throw exception }
+        val result = safeApiCall<String> { throw exception }
 
         assertIs<Failure>(result)
         val error = result.value as io.getstream.result.Error.ThrowableError
@@ -51,7 +51,7 @@ class ApiCallsTest {
     @Test
     fun `returns Failure when RtcException occurs`() = runTest {
         val rtcException = RtcException("RTC Failed", RuntimeException())
-        val result = sfuCall<String> { throw rtcException }
+        val result = safeApiCall<String> { throw rtcException }
 
         assertIs<Failure>(result)
         val error = result.value as io.getstream.result.Error.ThrowableError
@@ -62,7 +62,7 @@ class ApiCallsTest {
     @Test
     fun `returns Failure when IOException occurs`() = runTest {
         val ioException = IOException("No Internet")
-        val result = sfuCall<String> { throw ioException }
+        val result = safeApiCall<String> { throw ioException }
 
         assertIs<Failure>(result)
         val error = result.value as io.getstream.result.Error.ThrowableError
@@ -73,7 +73,7 @@ class ApiCallsTest {
     @Test
     fun `CancellationException is rethrown, not wrapped`() = runTest {
         assertFailsWith<CancellationException> {
-            sfuCall<String> { throw CancellationException("cancelled") }
+            safeApiCall<String> { throw CancellationException("cancelled") }
         }
     }
 

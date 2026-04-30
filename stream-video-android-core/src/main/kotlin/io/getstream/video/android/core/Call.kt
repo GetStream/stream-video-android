@@ -154,6 +154,9 @@ private sealed class ReconnectOutcome {
     /** Peer connections are stale and can't be reused. Should escalate to REJOIN. */
     object PeerConnectionStale : ReconnectOutcome()
 
+    /** Server-initiated disconnect — leave the call cleanly. */
+    object Disconnect : ReconnectOutcome()
+
     /** A transient failure occurred. The loop should retry with escalation. */
     data class Failed(val error: Exception) : ReconnectOutcome()
 }
@@ -712,7 +715,7 @@ public class Call(
             state._connection.value = RealtimeConnection.Joined(it)
         }
 
-        when (val result = session.value?.internalConnect()) {
+        when (val result = session.value?.connectInternal()) {
             is SfuConnectionResult.Connected -> Unit
             is SfuConnectionResult.Failed ->
                 return Failure(
@@ -928,12 +931,6 @@ public class Call(
                     "[reconnect] loopIteration=$loopIteration strategy=$currentStrategy reason=$reason"
                 }
 
-                if (currentStrategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT) {
-                    logger.w { "[reconnect] DISCONNECT requested — leaving call" }
-                    leave("SFU:DISCONNECT")
-                    break
-                }
-
                 val outcome = when (currentStrategy) {
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
@@ -946,11 +943,17 @@ public class Call(
                         reconnectMigrate()
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT ->
-                        error("Handled above")
+                        ReconnectOutcome.Disconnect
                 }
 
                 when (outcome) {
                     is ReconnectOutcome.Success -> break
+
+                    is ReconnectOutcome.Disconnect -> {
+                        logger.w { "[reconnect] DISCONNECT requested — leaving call" }
+                        leave("SFU:DISCONNECT")
+                        break
+                    }
 
                     is ReconnectOutcome.PreconditionNotMet -> {
                         logger.w { "[reconnect] Precondition not met — giving up: ${outcome.reason}" }
@@ -1086,7 +1089,7 @@ public class Call(
         )
         this.session.value = newSession
 
-        return when (val result = newSession.internalConnect(reconnectDetails, currentOptions)) {
+        return when (val result = newSession.connectInternal(reconnectDetails, currentOptions)) {
             is SfuConnectionResult.Connected -> {
                 newSession.sfuTracer.trace("rejoin", reason)
                 monitorSession(joinResponse.value)
@@ -1155,7 +1158,7 @@ public class Call(
         this.session.value = newSession
 
         return try {
-            val result = newSession.internalConnect(reconnectDetails, currentOptions)
+            val result = newSession.connectInternal(reconnectDetails, currentOptions)
             when (result) {
                 is SfuConnectionResult.Connected -> {
                     monitorSession(joinResponse.value)

@@ -81,6 +81,7 @@ internal open class CoordinatorSocket(
         reconnectCallback = {
             coordinatorSocketStateService.onWebSocketEventLost()
         },
+        isNetworkAvailable = { networkStateProvider.isConnected() },
     )
     private val connectionPolicies = listOf(
         CallAwareConnectionPolicy(StreamVideo.instanceState),

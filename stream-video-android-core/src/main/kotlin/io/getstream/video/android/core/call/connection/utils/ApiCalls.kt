@@ -24,17 +24,16 @@ import io.getstream.result.Result.Success
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * Wraps an SFU API call, catching all exceptions except [CancellationException]
+ * Wraps an API call, catching all exceptions except [CancellationException]
  * (which is rethrown to preserve structured concurrency).
  *
  * Replaces the previous mix of `wrapAPICall`, `safeCall`, and
- * `safeCallWithResult` with a single, consistent wrapper for all SFU
- * signaling calls.
+ * `safeCallWithResult` with a single, consistent wrapper.
  *
  * @return [Success] if [block] completed, [Failure] if it threw.
  */
 @Suppress("TooGenericExceptionCaught")
-internal suspend inline fun <T : Any> sfuCall(
+internal suspend inline fun <T : Any> safeApiCall(
     crossinline block: suspend () -> T,
 ): Result<T> {
     return try {
@@ -42,7 +41,7 @@ internal suspend inline fun <T : Any> sfuCall(
     } catch (ce: CancellationException) {
         throw ce
     } catch (t: Throwable) {
-        StreamLog.e("SfuCall", t) { "SFU API call failed: ${t.message}" }
-        Failure(Error.ThrowableError(t.message ?: "SFU call failed", t))
+        StreamLog.e("SafeApiCall", t) { "API call failed: ${t.message}" }
+        Failure(Error.ThrowableError(t.message ?: "API call failed", t))
     }
 }

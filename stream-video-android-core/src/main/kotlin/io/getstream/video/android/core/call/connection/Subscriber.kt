@@ -24,7 +24,7 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.TrackDimensions
 import io.getstream.video.android.core.call.connection.job.RestartIceJobDelegate
 import io.getstream.video.android.core.call.connection.stats.ComputedStats
-import io.getstream.video.android.core.call.connection.utils.sfuCall
+import io.getstream.video.android.core.call.connection.utils.safeApiCall
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
@@ -315,7 +315,7 @@ internal class Subscriber(
                     answerSdp.description,
                     sessionId,
                 )
-                sfuCall {
+                safeApiCall {
                     sfuClient.sendAnswer(request)
                 }.onErrorSuspend {
                     tracer.trace("negotiate-error-sendanswer", it.message ?: "unknown")
@@ -333,7 +333,7 @@ internal class Subscriber(
      * signaling decorator and trigger a rejoin; we cancel scheduled retries
      * so this session stops attempting recovery on a dead SFU participant.
      */
-    suspend fun restartIce() = sfuCall {
+    suspend fun restartIce() = safeApiCall {
         val request = ICERestartRequest(
             session_id = sessionId,
             peer_type = PeerType.PEER_TYPE_SUBSCRIBER,

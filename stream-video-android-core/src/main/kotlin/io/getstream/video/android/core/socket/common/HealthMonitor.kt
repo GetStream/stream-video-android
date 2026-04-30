@@ -45,7 +45,7 @@ internal class HealthMonitor(
     private val userScope: UserScope,
     private val checkCallback: suspend () -> Unit,
     private val reconnectCallback: suspend () -> Unit,
-    private val isNetworkAvailable: () -> Boolean = { true },
+    private val isNetworkAvailable: () -> Boolean,
 ) {
 
     private var consecutiveFailures = 0

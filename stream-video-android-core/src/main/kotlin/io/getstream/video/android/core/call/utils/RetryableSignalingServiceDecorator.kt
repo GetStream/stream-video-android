@@ -41,8 +41,12 @@ import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 
 /**
- * SFU response error wrapper that lets the retry loop inspect `should_retry`
- * without knowing the concrete response type.
+ * Thrown inside [retryCall] to signal [StreamRetryProcessor] that the SFU
+ * returned an error with `should_retry = true`. The retry processor catches
+ * all [Throwable]s generically — this class is never matched by type at
+ * catch sites; it exists solely to convert a successful HTTP response that
+ * contains a retryable SFU error into a thrown exception so the retry loop
+ * treats it as a failure and retries.
  */
 internal class SfuRetryableException(val sfuError: Error) : Exception(sfuError.message)
 
@@ -160,7 +164,7 @@ internal class RetryableSignalingServiceDecorator(
             response
         }.getOrElse { throwable ->
             // SFU retries exhausted → return the last error response so callers
-            // handle it normally (via sfuCall → RtcException). No exception thrown.
+            // handle it normally (via safeApiCall). No exception thrown.
             // Network failures (IOException) still propagate — lastResponse is null
             // because the HTTP call itself never completed.
             lastResponse ?: throw throwable
