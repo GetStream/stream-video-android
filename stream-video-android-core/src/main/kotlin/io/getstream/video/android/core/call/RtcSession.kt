@@ -717,17 +717,6 @@ public class RtcSession internal constructor(
                         coroutineScope.launch { call.reconnect(strategy, reason) }
                     }
 
-                    is SfuSocketState.Disconnected.DisconnectedPermanently -> {
-                        val reason = "SFU:permanent:${sfuSocketState.error.message}"
-                        logger.w { "[stateJob] SFU permanently disconnected for $sfuName — escalating to rejoin" }
-                        coroutineScope.launch {
-                            call.reconnect(
-                                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-                                reason,
-                            )
-                        }
-                    }
-
                     is SfuSocketState.Disconnected.WebSocketEventLost -> {
                         logger.w { "[stateJob] HealthMonitor detected event loss for $sfuName — triggering reconnect" }
                         coroutineScope.launch {

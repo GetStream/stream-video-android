@@ -183,11 +183,9 @@ public class Call(
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
     /**
-     * Cumulative count of non-FAST reconnect attempts across the call's lifetime.
-     * Passed to [RtcSession] and sent to the SFU via `ReconnectDetails.reconnect_attempt`.
-     * Reset to zero on a fresh [join].
+     * Increment this only for REJOIN and MIGRATION strategies
      */
-    internal var reconnectAttempts = 0
+    internal var nonFastReconnectAttempts = 0
     internal val clientImpl = client as StreamVideoClient
     internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
@@ -650,7 +648,7 @@ public class Call(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<RtcSession> {
-        reconnectAttempts = 0
+        nonFastReconnectAttempts = 0
         sfuEvents?.cancel()
         sfuListener?.cancel()
 
@@ -925,7 +923,7 @@ public class Call(
                 if (currentStrategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN ||
                     currentStrategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
                 ) {
-                    reconnectAttempts++
+                    nonFastReconnectAttempts++
                 }
 
                 logger.i {
@@ -971,7 +969,7 @@ public class Call(
 
                     is ReconnectOutcome.Failed -> {
                         logger.w {
-                            "[reconnect] $currentStrategy ($reconnectAttempts) failed: ${outcome.error.message}"
+                            "[reconnect] $currentStrategy ($nonFastReconnectAttempts) failed: ${outcome.error.message}"
                         }
 
                         delay(RECONNECT_DELAY_MS)
@@ -982,8 +980,7 @@ public class Call(
                         val pastFastReconnectDeadline = (System.currentTimeMillis() - loopStartTime) >
                             reconnectDeadlineMillis
                         val shouldEscalateToRejoin = wasMigrating ||
-                            pastFastReconnectDeadline ||
-                            loopIteration >= MAX_FAST_RECONNECT_ATTEMPTS
+                            pastFastReconnectDeadline
 
                         if (shouldEscalateToRejoin) {
                             currentStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
@@ -1010,7 +1007,7 @@ public class Call(
      * SFU already knows this participant.
      */
     private suspend fun reconnectFast(reason: String): ReconnectOutcome {
-        logger.d { "[reconnectFast] reconnectAttempts=$reconnectAttempts" }
+        logger.d { "[reconnectFast] reconnectAttempts=$nonFastReconnectAttempts" }
         val currentSession = session.value
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for fast reconnect")
 
@@ -1027,7 +1024,7 @@ public class Call(
             strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
             announced_tracks = publishingInfo,
             subscriptions = subscriptionsInfo,
-            reconnect_attempt = reconnectAttempts,
+            reconnect_attempt = nonFastReconnectAttempts,
             reason = reason,
         )
         return when (val result = currentSession.fastReconnect(reconnectDetails)) {
@@ -1043,7 +1040,7 @@ public class Call(
      * subscriptions) from the old session to the new one.
      */
     private suspend fun reconnectRejoin(reason: String): ReconnectOutcome {
-        logger.d { "[reconnectRejoin] reconnectAttempts=$reconnectAttempts" }
+        logger.d { "[reconnectRejoin] reconnectAttempts=$nonFastReconnectAttempts" }
         state._connection.value = RealtimeConnection.Reconnecting
         val loc = location
             ?: return ReconnectOutcome.PreconditionNotMet("No location available for rejoin")
@@ -1069,14 +1066,14 @@ public class Call(
             strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
             announced_tracks = publishingInfo,
             subscriptions = subscriptionsInfo,
-            reconnect_attempt = reconnectAttempts,
+            reconnect_attempt = nonFastReconnectAttempts,
             reason = reason,
         )
         this.state.removeParticipant(prevSessionId)
         oldSession.prepareRejoin("rejoin")
         val newSession = RtcSession(
             clientImpl,
-            reconnectAttempts,
+            nonFastReconnectAttempts,
             powerManager,
             this,
             sessionId,
@@ -1135,7 +1132,7 @@ public class Call(
             announced_tracks = publishingInfo,
             subscriptions = subscriptionsInfo,
             from_sfu_id = oldSfuName,
-            reconnect_attempt = reconnectAttempts,
+            reconnect_attempt = nonFastReconnectAttempts,
         )
 
         val stats = collectStats()
@@ -1144,7 +1141,7 @@ public class Call(
 
         val newSession = RtcSession(
             clientImpl,
-            reconnectAttempts,
+            nonFastReconnectAttempts,
             powerManager,
             this,
             sessionId,

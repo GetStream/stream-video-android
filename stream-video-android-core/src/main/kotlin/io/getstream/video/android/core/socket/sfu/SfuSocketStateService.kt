@@ -155,7 +155,6 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                     }
 
                     else -> {
-                        logger.d { "Cannot handle event $event while being in inappropriate state $state" }
                         state
                     }
                 }

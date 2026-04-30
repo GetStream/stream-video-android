@@ -55,7 +55,8 @@ public class NetworkStateProvider(
 
         override fun onLost(network: Network) {
             logger.d { "[callback#onLost] #network; onLost :: $network" }
-            notifyListenersIfNetworkStateChanged()
+            isConnected = false
+            listeners.onDisconnected()
         }
     }
 
