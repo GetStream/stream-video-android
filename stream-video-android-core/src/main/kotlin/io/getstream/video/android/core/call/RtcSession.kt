@@ -653,7 +653,6 @@ public class RtcSession internal constructor(
         eventJob?.cancel()
         stateJob?.cancel()
         participantsMonitoringJob?.cancel()
-        iceMonitoringJob?.cancel()
 
         participantsMonitoringJob = coroutineScope.launch {
             call.state.participants.collect {
@@ -688,6 +687,7 @@ public class RtcSession internal constructor(
                         call.state._connection.value =
                             RealtimeConnection.Connected
                         call.onSfuConnectionEstablished()
+                        startIceMonitoring()
 
                         val pendingTrickleEvents = iceTricklePendingEvents.toList()
                         iceTricklePendingEvents.clear()
@@ -743,11 +743,17 @@ public class RtcSession internal constructor(
             }
         }
 
-        // Monitor ICE connection states on publisher/subscriber.
-        // When either peer connection's ICE goes DISCONNECTED or FAILED while
-        // the call is Connected, surface RealtimeConnection.Reconnecting so the
-        // UI shows a reconnecting indicator. When both recover and the SFU
-        // WebSocket is still connected, restore RealtimeConnection.Connected.
+        // listen to socket events and errors
+        eventJob = coroutineScope.launch {
+            sfuConnectionModule.socketConnection.events().collect {
+                traceEvent(it)
+                clientImpl.fireEvent(it, call.cid)
+            }
+        }
+    }
+
+    private fun startIceMonitoring() {
+        if (iceMonitoringJob?.isActive == true) return
         iceMonitoringJob = coroutineScope.launch {
             val badIceStates = setOf(
                 PeerConnection.IceConnectionState.DISCONNECTED,
@@ -794,14 +800,6 @@ public class RtcSession internal constructor(
                 subscriber.collect { sub ->
                     sub?.iceState?.collect { evaluateIceHealth() }
                 }
-            }
-        }
-
-        // listen to socket events and errors
-        eventJob = coroutineScope.launch {
-            sfuConnectionModule.socketConnection.events().collect {
-                traceEvent(it)
-                clientImpl.fireEvent(it, call.cid)
             }
         }
     }
