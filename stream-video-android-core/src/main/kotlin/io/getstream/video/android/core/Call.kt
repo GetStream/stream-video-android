@@ -271,6 +271,7 @@ public class Call(
                     audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
                     audioBitrateProfileProvider = { mediaManager.microphone.audioBitrateProfile.value },
                     sharedEglBaseProvider = { eglBase },
+                    webRtcLoggingLevel = clientImpl.loggingLevel.webRtcLoggingLevel,
                 )
             }
             return _peerConnectionFactory!!
