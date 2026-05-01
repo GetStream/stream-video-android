@@ -130,7 +130,7 @@ open class StreamPeerConnection(
         }
     }
 
-    fun isClosed(): Boolean {
+    internal fun isClosed(): Boolean {
         return state.value == PeerConnection.PeerConnectionState.CLOSED ||
             iceState.value == PeerConnection.IceConnectionState.CLOSED
     }

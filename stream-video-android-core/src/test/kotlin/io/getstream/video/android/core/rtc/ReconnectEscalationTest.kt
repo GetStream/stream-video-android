@@ -143,9 +143,11 @@ class ReconnectEscalationTest {
     }
 
     /**
-     * With a generic exception the loop retries FAST up to MAX_FAST_RECONNECT_ATTEMPTS (3)
-     * before escalating to REJOIN. fastReconnect is called at iterations 0,1,2 → 3 calls.
-     * REJOIN then fails (location = null) → ReconnectingFailed → leave() → Disconnected.
+     * With a generic exception the loop retries FAST until MAX_RECONNECT_ATTEMPTS (10)
+     * is exhausted. Time-based escalation (reconnectDeadlineMillis) uses
+     * System.currentTimeMillis() which does not advance in virtual time, so the
+     * strategy remains FAST for the entire loop.
+     * After 10 failed attempts → ReconnectingFailed → leave() → Disconnected.
      */
     @Test
     fun `Failed result retries FAST before escalating to REJOIN`() = runTest(testDispatcher) {
@@ -159,7 +161,7 @@ class ReconnectEscalationTest {
         )
         advanceUntilIdle()
 
-        coVerify(exactly = 3) { mockSession.fastReconnect(any()) }
+        coVerify(exactly = 10) { mockSession.fastReconnect(any()) }
         assertThat(
             call.state.connection.value,
         ).isInstanceOf(RealtimeConnection.Disconnected::class.java)

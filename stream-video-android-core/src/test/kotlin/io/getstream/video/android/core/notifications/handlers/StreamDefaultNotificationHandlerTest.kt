@@ -177,6 +177,7 @@ class StreamDefaultNotificationHandlerTest {
         every { mockCallState.ringingState } returns MutableStateFlow(RingingState.Incoming())
         every { mockCallState.members } returns MutableStateFlow(emptyList())
         every { mockCallState.remoteParticipants } returns MutableStateFlow(emptyList())
+        every { mockCallState.atomicNotification } returns java.util.concurrent.atomic.AtomicReference(null)
 
         mockkStatic(NotificationCompat.Builder::class)
     }

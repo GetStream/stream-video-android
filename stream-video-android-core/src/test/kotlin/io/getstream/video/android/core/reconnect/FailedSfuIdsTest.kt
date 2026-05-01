@@ -19,6 +19,7 @@ package io.getstream.video.android.core.reconnect
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -33,6 +34,14 @@ import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
+
+    private fun Call.injectMockNetwork(connected: Boolean = true) {
+        val mockNetwork = mockk<NetworkStateProvider>(relaxed = true)
+        every { mockNetwork.isConnected() } returns connected
+        val field = Call::class.java.getDeclaredField("network\$delegate")
+        field.isAccessible = true
+        field.set(this, lazyOf(mockNetwork))
+    }
 
     @Suppress("UNCHECKED_CAST")
     private fun Call.getFailedSfuIds(): MutableSet<String> {
@@ -117,6 +126,7 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `migrate adds current session sfuName to failed list`() = runTest {
         val call = client.call("default", randomUUID())
+        call.injectMockNetwork(connected = true)
         val sessionMock = mockk<RtcSession>(relaxed = true)
         every { sessionMock.sfuName } returns "sfu-edge-old"
         coEvery { sessionMock.getPublisherStats() } returns null

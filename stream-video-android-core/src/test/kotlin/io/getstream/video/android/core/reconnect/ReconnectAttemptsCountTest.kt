@@ -16,10 +16,12 @@
 
 package io.getstream.video.android.core.reconnect
 
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -41,6 +43,14 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 class ReconnectAttemptsCountTest : IntegrationTestBase() {
 
+    private fun Call.injectMockNetwork(connected: Boolean = true) {
+        val mockNetwork = mockk<NetworkStateProvider>(relaxed = true)
+        every { mockNetwork.isConnected() } returns connected
+        val field = Call::class.java.getDeclaredField("network\$delegate")
+        field.isAccessible = true
+        field.set(this, lazyOf(mockNetwork))
+    }
+
     private fun stubSessionForReconnect(sessionMock: RtcSession) {
         coEvery { sessionMock.getPublisherStats() } returns null
         coEvery { sessionMock.getSubscriberStats() } returns null
@@ -59,6 +69,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
         stubSessionForReconnect(sessionMock)
         coEvery { sessionMock.fastReconnect(any()) } returns FastReconnectResult.Connected
         val call = client.call("default", randomUUID())
+        call.injectMockNetwork(connected = true)
         call.session.value = sessionMock
 
         call.fastReconnect()
@@ -80,6 +91,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
         val sessionMock = mockk<RtcSession>(relaxed = true)
         stubSessionForReconnect(sessionMock)
         val call = client.call("default", randomUUID())
+        call.injectMockNetwork(connected = true)
         call.session.value = sessionMock
 
         call.reconnect(
@@ -99,6 +111,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
         val sessionMock = mockk<RtcSession>(relaxed = true)
         stubSessionForReconnect(sessionMock)
         val call = client.call("default", randomUUID())
+        call.injectMockNetwork(connected = true)
         call.session.value = sessionMock
 
         call.reconnect(
