@@ -36,6 +36,7 @@ import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.mockk.MockKAnnotations
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -114,6 +115,7 @@ class SfuConnectionRetryTest {
         every { mockCall.state } returns mockCallState
         every { mockCall.scope } returns testScope
         every { mockCall.mediaManager } returns mockMediaManager
+        coEvery { mockCall.reconnect(any(), any()) } returns Unit
         every { mockCall.peerConnectionFactory } returns mockk(relaxed = true) {
             every { makePeerConnection(any(), any(), any(), any()) } returns mockk(relaxed = true)
         }
