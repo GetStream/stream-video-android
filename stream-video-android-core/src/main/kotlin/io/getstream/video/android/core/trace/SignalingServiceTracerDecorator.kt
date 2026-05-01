@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.trace
 
 import io.getstream.video.android.core.api.SignalServerService
+import stream.video.sfu.models.Error
 import stream.video.sfu.models.ICETrickle
 import stream.video.sfu.signal.ICERestartRequest
 import stream.video.sfu.signal.ICERestartResponse
@@ -35,6 +36,7 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Creates a decorator for the given target that traces all method calls.
@@ -52,92 +54,77 @@ internal inline fun <reified T : SignalServerService> tracedWith(
 }
 
 /**
- * Count the invocations of the methods of the target object.
- *
- * @param scope The scope in which the counter should run.
- * @param target The target object to count the invocations of.
- * @param config The configuration for the counter.
+ * Traces every SFU API call: the outgoing request, any SFU-level error in the
+ * response, and any exception thrown by the underlying transport (network
+ * timeout, connection reset, etc.). Placed directly around Retrofit so that
+ * each retry attempt is individually visible in traces.
  */
 internal class SignalingServiceTracerDecorator<T : SignalServerService>(
     private val tracer: Tracer,
     private val target: T,
 ) : SignalServerService {
-    override suspend fun setPublisher(
-        setPublisherRequest: SetPublisherRequest,
-    ): SetPublisherResponse {
-        tracer.trace("setPublisher", setPublisherRequest.toString())
-        val response = target.setPublisher(setPublisherRequest)
-        if (response.error != null) {
-            tracer.trace("setPublisher-error", response.error.toString() ?: "unknown")
-        }
-        return response
-    }
 
-    override suspend fun sendAnswer(sendAnswerRequest: SendAnswerRequest): SendAnswerResponse {
-        tracer.trace("sendAnswer", sendAnswerRequest.toString())
-        val response = target.sendAnswer(sendAnswerRequest)
-        if (response.error != null) {
-            tracer.trace("sendAnswer-error", response.error.toString() ?: "unknown")
+    override suspend fun setPublisher(setPublisherRequest: SetPublisherRequest): SetPublisherResponse =
+        traced("setPublisher", setPublisherRequest, { it.error }) {
+            target.setPublisher(setPublisherRequest)
         }
-        return response
-    }
 
-    override suspend fun iceTrickle(iCETrickle: ICETrickle): ICETrickleResponse {
-        tracer.trace("iceTrickle", iCETrickle.toString())
-        val response = target.iceTrickle(iCETrickle)
-        if (response.error != null) {
-            tracer.trace("iceTrickle-error", response.error.toString() ?: "unknown")
+    override suspend fun sendAnswer(sendAnswerRequest: SendAnswerRequest): SendAnswerResponse =
+        traced("sendAnswer", sendAnswerRequest, { it.error }) {
+            target.sendAnswer(sendAnswerRequest)
         }
-        return response
-    }
 
-    override suspend fun updateSubscriptions(updateSubscriptionsRequest: UpdateSubscriptionsRequest): UpdateSubscriptionsResponse {
-        tracer.trace("updateSubscriptions", updateSubscriptionsRequest.toString())
-        val response = target.updateSubscriptions(updateSubscriptionsRequest)
-        if (response.error != null) {
-            tracer.trace("updateSubscriptions-error", response.error.toString() ?: "unknown")
+    override suspend fun iceTrickle(iCETrickle: ICETrickle): ICETrickleResponse =
+        traced("iceTrickle", iCETrickle, { it.error }) {
+            target.iceTrickle(iCETrickle)
         }
-        return response
-    }
 
-    override suspend fun updateMuteStates(updateMuteStatesRequest: UpdateMuteStatesRequest): UpdateMuteStatesResponse {
-        tracer.trace("updateMuteStates", updateMuteStatesRequest.toString())
-        val response = target.updateMuteStates(updateMuteStatesRequest)
-        if (response.error != null) {
-            tracer.trace("updateMuteStates-error", response.error.toString() ?: "unknown")
+    override suspend fun updateSubscriptions(updateSubscriptionsRequest: UpdateSubscriptionsRequest): UpdateSubscriptionsResponse =
+        traced("updateSubscriptions", updateSubscriptionsRequest, { it.error }) {
+            target.updateSubscriptions(updateSubscriptionsRequest)
         }
-        return response
-    }
 
-    override suspend fun iceRestart(iCERestartRequest: ICERestartRequest): ICERestartResponse {
-        tracer.trace("iceRestart", iCERestartRequest.toString())
-        val response = target.iceRestart(iCERestartRequest)
-        if (response.error != null) {
-            tracer.trace("iceRestart-error", response.error.toString() ?: "unknown")
+    override suspend fun updateMuteStates(updateMuteStatesRequest: UpdateMuteStatesRequest): UpdateMuteStatesResponse =
+        traced("updateMuteStates", updateMuteStatesRequest, { it.error }) {
+            target.updateMuteStates(updateMuteStatesRequest)
         }
-        return response
-    }
 
-    override suspend fun sendStats(sendStatsRequest: SendStatsRequest): SendStatsResponse {
-        // Not traced
-        return target.sendStats(sendStatsRequest)
-    }
-
-    override suspend fun startNoiseCancellation(startNoiseCancellationRequest: StartNoiseCancellationRequest): StartNoiseCancellationResponse {
-        tracer.trace("startNoiseCancellation", startNoiseCancellationRequest.toString())
-        val response = target.startNoiseCancellation(startNoiseCancellationRequest)
-        if (response.error != null) {
-            tracer.trace("startNoiseCancellation-error", response.error.toString() ?: "unknown")
+    override suspend fun iceRestart(iCERestartRequest: ICERestartRequest): ICERestartResponse =
+        traced("iceRestart", iCERestartRequest, { it.error }) {
+            target.iceRestart(iCERestartRequest)
         }
-        return response
-    }
 
-    override suspend fun stopNoiseCancellation(stopNoiseCancellationRequest: StopNoiseCancellationRequest): StopNoiseCancellationResponse {
-        tracer.trace("stopNoiseCancellation", stopNoiseCancellationRequest.toString())
-        val response = target.stopNoiseCancellation(stopNoiseCancellationRequest)
-        if (response.error != null) {
-            tracer.trace("stopNoiseCancellation-error", response.error.toString() ?: "unknown")
+    override suspend fun sendStats(sendStatsRequest: SendStatsRequest): SendStatsResponse =
+        target.sendStats(sendStatsRequest)
+
+    override suspend fun startNoiseCancellation(startNoiseCancellationRequest: StartNoiseCancellationRequest): StartNoiseCancellationResponse =
+        traced("startNoiseCancellation", startNoiseCancellationRequest, { it.error }) {
+            target.startNoiseCancellation(startNoiseCancellationRequest)
         }
-        return response
+
+    override suspend fun stopNoiseCancellation(stopNoiseCancellationRequest: StopNoiseCancellationRequest): StopNoiseCancellationResponse =
+        traced("stopNoiseCancellation", stopNoiseCancellationRequest, { it.error }) {
+            target.stopNoiseCancellation(stopNoiseCancellationRequest)
+        }
+
+    private suspend inline fun <R, T> traced(
+        name: String,
+        request: T,
+        crossinline errorExtractor: (R) -> Error?,
+        crossinline block: suspend () -> R,
+    ): R {
+        tracer.trace(name, request.toString())
+        try {
+            val response = block()
+            errorExtractor(response)?.let {
+                tracer.trace("$name-error", it.toString())
+            }
+            return response
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            tracer.trace("$name-exception", e.message ?: e::class.simpleName ?: "unknown")
+            throw e
+        }
     }
 }

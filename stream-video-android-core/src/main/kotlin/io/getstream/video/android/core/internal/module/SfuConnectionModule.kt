@@ -20,7 +20,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.api.SignalServerService
-import io.getstream.video.android.core.call.utils.SignalLostSignalingServiceDecorator
+import io.getstream.video.android.core.call.utils.RetryableSignalingServiceDecorator
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
@@ -45,7 +45,7 @@ internal class SfuConnectionModule(
     override val connectionTimeoutInMs: Long,
     override val lifecycle: Lifecycle,
     override val tracer: Tracer,
-    val onSignalingLost: (Error) -> Unit,
+    val onSfuApiError: (Error) -> Unit,
 ) : ConnectionModuleDeclaration<SignalServerService, SfuSocketConnection, OkHttpClient, SfuToken> {
 
     // Internal logic
@@ -70,17 +70,15 @@ internal class SfuConnectionModule(
             .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
     }
 
-    // API
-    override val api: SignalServerService = SignalLostSignalingServiceDecorator(
-        tracedWith(
-            signalRetrofitClient.create(
-                SignalServerService::class.java,
-            ),
+    // API – decorator chain: Retrofit → Trace → Retry (+ error propagation)
+    // Tracer wraps Retrofit so every attempt (including retries) is traced.
+    override val api: SignalServerService = RetryableSignalingServiceDecorator(
+        decorated = tracedWith(
+            signalRetrofitClient.create(SignalServerService::class.java),
             tracer,
         ),
-    ) {
-        onSignalingLost(it)
-    }
+        onSessionError = { onSfuApiError(it) },
+    )
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,

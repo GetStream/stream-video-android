@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")
+
 package io.getstream.video.android.core.socket.sfu.state
 
 import io.getstream.result.Error
@@ -23,9 +25,11 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
 
 public sealed class SfuSocketState {
 
-    /**
-     * State of socket when connection need to be reestablished.
-     */
+    @Deprecated(
+        "RestartConnection is no longer emitted. " +
+            "Reconnection is now managed exclusively by Call.reconnect().",
+        level = DeprecationLevel.WARNING,
+    )
     data class RestartConnection(
         val reason: RestartReason,
         val reconnectStrategy: WebsocketReconnectStrategy,

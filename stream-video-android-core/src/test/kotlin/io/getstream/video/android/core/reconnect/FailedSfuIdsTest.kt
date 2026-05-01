@@ -19,8 +19,11 @@ package io.getstream.video.android.core.reconnect
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,6 +34,14 @@ import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
+
+    private fun Call.injectMockNetwork(connected: Boolean = true) {
+        val mockNetwork = mockk<NetworkStateProvider>(relaxed = true)
+        every { mockNetwork.isConnected() } returns connected
+        val field = Call::class.java.getDeclaredField("network\$delegate")
+        field.isAccessible = true
+        field.set(this, lazyOf(mockNetwork))
+    }
 
     @Suppress("UNCHECKED_CAST")
     private fun Call.getFailedSfuIds(): MutableSet<String> {
@@ -115,8 +126,18 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
     @Test
     fun `migrate adds current session sfuName to failed list`() = runTest {
         val call = client.call("default", randomUUID())
+        call.injectMockNetwork(connected = true)
         val sessionMock = mockk<RtcSession>(relaxed = true)
         every { sessionMock.sfuName } returns "sfu-edge-old"
+        coEvery { sessionMock.getPublisherStats() } returns null
+        coEvery { sessionMock.getSubscriberStats() } returns null
+        every { sessionMock.subscriber } returns MutableStateFlow(null)
+        every { sessionMock.publisher } returns MutableStateFlow(null)
+        every { sessionMock.currentSfuInfo() } returns Triple(
+            "",
+            emptyList(),
+            emptyList(),
+        )
         call.session.value = sessionMock
         call.location = "test-location"
 
@@ -126,23 +147,16 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
     }
 
     @Test
-    fun `failed SFU IDs accumulate across multiple migrate calls`() = runTest {
+    fun `failed SFU IDs accumulate across multiple addFailedSfuId calls`() = runTest {
         val call = client.call("default", randomUUID())
 
-        val session1 = mockk<RtcSession>(relaxed = true)
-        every { session1.sfuName } returns "sfu-edge-1"
-        call.session.value = session1
-        call.location = "test-location"
-        call.migrate()
-
-        val session2 = mockk<RtcSession>(relaxed = true)
-        every { session2.sfuName } returns "sfu-edge-2"
-        call.session.value = session2
-        call.migrate()
+        call.invokeAddFailedSfuId("sfu-edge-1")
+        call.invokeAddFailedSfuId("sfu-edge-2")
 
         val ids = call.getFailedSfuIds()
         assertTrue(ids.contains("sfu-edge-1"))
         assertTrue(ids.contains("sfu-edge-2"))
+        assertEquals(2, ids.size)
     }
 
     @Test

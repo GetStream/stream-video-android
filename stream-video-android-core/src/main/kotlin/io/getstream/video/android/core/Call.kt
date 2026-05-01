@@ -61,7 +61,9 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.connection.Subscriber
@@ -91,7 +93,6 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
-import io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -114,6 +115,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
 import org.webrtc.PeerConnection
@@ -130,10 +132,34 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
 
-/**
- * How long do we keep trying to make a full-reconnect (once the SFU signalling WS went down)
- */
+@Deprecated(
+    message = "No longer used internally. The reconnect deadline is now driven by the server's " +
+        "fastReconnectDeadlineSeconds. This constant will be removed in a future release.",
+    level = DeprecationLevel.WARNING,
+)
 const val sfuReconnectTimeoutMillis = 30_000
+
+/**
+ * Outcome of a single reconnect attempt. Each reconnect method returns one of
+ * these instead of throwing, making the control flow in the reconnect loop
+ * explicit and exhaustively checked by the compiler.
+ */
+private sealed class ReconnectOutcome {
+    /** Reconnect succeeded — exit the loop. */
+    object Success : ReconnectOutcome()
+
+    /** A required precondition is missing (no session, no location). Terminal — don't retry. */
+    data class PreconditionNotMet(val reason: String) : ReconnectOutcome()
+
+    /** Peer connections are stale and can't be reused. Should escalate to REJOIN. */
+    object PeerConnectionStale : ReconnectOutcome()
+
+    /** Server-initiated disconnect — leave the call cleanly. */
+    object Disconnect : ReconnectOutcome()
+
+    /** A transient failure occurred. The loop should retry with escalation. */
+    data class Failed(val error: Exception) : ReconnectOutcome()
+}
 
 /**
  * The call class gives you access to all call level API calls
@@ -156,7 +182,10 @@ public class Call(
     internal var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
 
-    internal var reconnectAttepmts = 0
+    /**
+     * Increment this only for REJOIN and MIGRATION strategies
+     */
+    internal var nonFastReconnectAttempts = 0
     internal val clientImpl = client as StreamVideoClient
     internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
@@ -370,23 +399,17 @@ public class Call(
 
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
             logger.d {
-                "[NetworkStateListener#onConnected] #network; no args, elapsedTimeMils:$elapsedTimeMils, lastDisconnect:$lastDisconnect, reconnectDeadlineMils:$reconnectDeadlineMils"
+                "[NetworkStateListener#onConnected] #network; no args, elapsedTimeMils:$elapsedTimeMils, lastDisconnect:$lastDisconnect, reconnectDeadlineMils:$reconnectDeadlineMillis"
             }
-            if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMils) {
-                logger.d {
-                    "[NetworkStateListener#onConnected] #network; Reconnecting (fast). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
-                }
-                fastReconnect("NetworkStateListener#onConnected")
+            val strategy = if (lastDisconnect > 0 && elapsedTimeMils < reconnectDeadlineMillis) {
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST
             } else {
-                logger.d {
-                    "[NetworkStateListener#onConnected] #network; Reconnecting (full). Time since last disconnect is ${elapsedTimeMils / 1000} seconds. Deadline is ${reconnectDeadlineMils / 1000} seconds"
-                }
-                rejoin("NetworkStateListener#onConnected")
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
             }
+            reconnect(strategy, "NetworkStateListener#onConnected")
         }
 
         override suspend fun onDisconnected() {
-            state._connection.value = RealtimeConnection.Reconnecting
             logger.d {
                 "[NetworkStateListener#onDisconnected] #network; old lastDisconnect:$lastDisconnect, clientImpl.leaveAfterDisconnectSeconds:${clientImpl.leaveAfterDisconnectSeconds}"
             }
@@ -396,8 +419,15 @@ public class Call(
             }
             leaveTimeoutAfterDisconnect = scope.launch {
                 delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
+                val conn = state.connection.value
+                if (conn is RealtimeConnection.Connected) {
+                    logger.d {
+                        "[NetworkStateListener#onDisconnected] #network; Already reconnected ($conn) — not leaving"
+                    }
+                    return@launch
+                }
                 logger.d {
-                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
+                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds} (connection=$conn)"
                 }
                 leave()
             }
@@ -407,13 +437,13 @@ public class Call(
 
     private var leaveTimeoutAfterDisconnect: Job? = null
     private var lastDisconnect = 0L
-    private var reconnectDeadlineMils: Int = 10_000
+    private var reconnectDeadlineMillis: Int = 10_000
+    private val reconnectMutex = Mutex()
 
     private var monitorPublisherPCStateJob: Job? = null
     private var monitorSubscriberPCStateJob: Job? = null
     private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
-    private val streamSingleFlightProcessorImpl = StreamSingleFlightProcessorImpl(scope)
 
     init {
         scope.launch {
@@ -618,7 +648,7 @@ public class Call(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<RtcSession> {
-        reconnectAttepmts = 0
+        nonFastReconnectAttempts = 0
         sfuEvents?.cancel()
         sfuListener?.cancel()
 
@@ -661,33 +691,37 @@ public class Call(
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
         val sfuName = result.value.credentials.server.edgeName
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
-        try {
-            val localSession = if (testInstanceProvider.rtcSessionCreator != null) {
-                testInstanceProvider.rtcSessionCreator!!.invoke()
-            } else {
-                RtcSession(
-                    sessionId = this.sessionId,
-                    apiKey = clientImpl.apiKey,
-                    lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                    client = client,
-                    call = this,
-                    sfuUrl = sfuUrl,
-                    sfuWsUrl = sfuWsUrl,
-                    sfuToken = sfuToken,
-                    sfuName = sfuName,
-                    remoteIceServers = iceServers,
-                    powerManager = powerManager,
+        val localSession = if (testInstanceProvider.rtcSessionCreator != null) {
+            testInstanceProvider.rtcSessionCreator!!.invoke()
+        } else {
+            RtcSession(
+                sessionId = this.sessionId,
+                apiKey = clientImpl.apiKey,
+                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
+                client = client,
+                call = this,
+                sfuUrl = sfuUrl,
+                sfuWsUrl = sfuWsUrl,
+                sfuToken = sfuToken,
+                sfuName = sfuName,
+                remoteIceServers = iceServers,
+                powerManager = powerManager,
+            )
+        }
+        session.value = localSession
+
+        session.value?.let {
+            state._connection.value = RealtimeConnection.Joined(it)
+        }
+
+        when (val result = session.value?.connectInternal()) {
+            is SfuConnectionResult.Connected -> Unit
+            is SfuConnectionResult.Failed ->
+                return Failure(
+                    Error.GenericError(result.error.message ?: "RtcSession error occurred."),
                 )
-            }
-            session.value = localSession
-
-            session.value?.let {
-                state._connection.value = RealtimeConnection.Joined(it)
-            }
-
-            session.value?.connect()
-        } catch (e: Exception) {
-            return Failure(Error.GenericError(e.message ?: "RtcSession error occurred."))
+            null ->
+                return Failure(Error.GenericError("RtcSession was null during connect"))
         }
         client.state.setActiveCall(this)
         monitorSession(result.value)
@@ -703,8 +737,8 @@ public class Call(
             session.value?.let {
                 it.socket.events().collect { event ->
                     if (event is JoinCallResponseEvent) {
-                        reconnectDeadlineMils = event.fastReconnectDeadlineSeconds * 1000
-                        logger.d { "[join] #deadline for reconnect is ${reconnectDeadlineMils / 1000} seconds" }
+                        reconnectDeadlineMillis = event.fastReconnectDeadlineSeconds * 1000
+                        logger.d { "[join] #deadline for reconnect is ${reconnectDeadlineMillis / 1000} seconds" }
                     }
                 }
             }
@@ -765,11 +799,13 @@ public class Call(
     }
 
     internal suspend fun collectStats(): CallStatsReport {
-        val publisherStats = session.value?.getPublisherStats()
-        val subscriberStats = session.value?.getSubscriberStats()
-        state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
-        state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
-        state.stats.updateLocalStats()
+        val publisherStats = runCatching { session.value?.getPublisherStats() }.getOrNull()
+        val subscriberStats = runCatching { session.value?.getSubscriberStats() }.getOrNull()
+        runCatching {
+            state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
+            state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)
+            state.stats.updateLocalStats()
+        }.onFailure { logger.w { "[collectStats] Failed to update stats: ${it.message}" } }
         val local = state.stats._local.value
 
         val report = CallStatsReport(
@@ -788,183 +824,390 @@ public class Call(
         return report
     }
 
+    // region Reconnection — unified loop
+
+    /**
+     * Unified reconnection entry point.
+     *
+     * All callers (stateJob, NetworkStateListener, error handlers) funnel through
+     * this method. It acquires [reconnectMutex] so only one flow runs at a time,
+     * and implements a retry loop that **escalates** the strategy on failure:
+     *
+     * - **FAST** → **REJOIN** after [MAX_FAST_RECONNECT_ATTEMPTS] failures *or*
+     *   when the elapsed time exceeds [reconnectDeadlineMillis].
+     * - **MIGRATE** → **REJOIN** if the migration attempt fails.
+     * - **DISCONNECT** → leaves the call (server-initiated).
+     * - **UNSPECIFIED** → treated as FAST (HealthMonitor already attempted the WS).
+     *
+     * The loop exits when the connection state becomes [RealtimeConnection.Connected],
+     * [RealtimeConnection.ReconnectingFailed], or [RealtimeConnection.Disconnected].
+     *
+     * @param strategy the initial reconnection strategy requested by the caller.
+     * @param reason a human-readable reason for logging / tracing.
+     */
+    internal suspend fun reconnect(
+        strategy: WebsocketReconnectStrategy,
+        reason: String,
+    ) {
+        val conn = state.connection.value
+        logger.d { "[reconnect] Entry — strategy=$strategy reason=$reason connection=$conn" }
+
+        if (isDestroyed || conn is RealtimeConnection.Disconnected) {
+            logger.d {
+                "[reconnect] Call already left/destroyed (isDestroyed=$isDestroyed, conn=$conn) — skipping ($reason)"
+            }
+            return
+        }
+
+        // Use tryLock so concurrent triggers (stateJob, NetworkStateListener,
+        // SfuSocket errors) don't queue up. If a reconnect loop is already
+        // running it will handle recovery; redundant callers return immediately.
+        if (!reconnectMutex.tryLock()) {
+            logger.d { "[reconnect] Active reconnect loop running — skipping ($reason)" }
+            return
+        }
+        var currentStrategy = strategy
+        try {
+            // Re-check after acquiring the lock — bail only if the user left.
+            // We deliberately allow reconnect from Connected (SFU/network may
+            // request it) and from ReconnectingFailed (fresh trigger like
+            // network recovery should be retried).
+            val currentConn = state.connection.value
+            if (currentConn is RealtimeConnection.Disconnected) {
+                logger.d { "[reconnect] State is $currentConn — no reconnect needed ($reason)" }
+                return
+            }
+
+            val isMigrate = strategy ==
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
+            state._connection.value = if (isMigrate) {
+                RealtimeConnection.Migrating
+            } else {
+                RealtimeConnection.Reconnecting
+            }
+
+            val loopStartTime = System.currentTimeMillis()
+            // Local iteration counter for this reconnect() invocation only.
+            // Controls MAX_RECONNECT_ATTEMPTS cap and FAST→REJOIN escalation.
+            // Distinct from the class-level reconnectAttempts which is cumulative.
+            var loopIteration = 0
+
+            while (true) {
+                // EARLY EXIT CASE 1 - State based
+                val connectionState = state.connection.value
+                if (connectionState is RealtimeConnection.Connected ||
+                    connectionState is RealtimeConnection.ReconnectingFailed ||
+                    connectionState is RealtimeConnection.Disconnected
+                ) {
+                    logger.i { "[reconnect] Loop finished — state=$connectionState" }
+                    break
+                }
+
+                // EARLY EXIT CASE 2 - count based
+                if (loopIteration >= MAX_RECONNECT_ATTEMPTS) {
+                    logger.w { "[reconnect] Max reconnect attempts ($MAX_RECONNECT_ATTEMPTS) reached — giving up" }
+                    state._connection.value = RealtimeConnection.ReconnectingFailed
+                    break
+                }
+
+                // EARLY EXIT CASE 3 - time based
+                val elapsedMs = System.currentTimeMillis() - loopStartTime
+                if (clientImpl.leaveAfterDisconnectSeconds > 0 &&
+                    elapsedMs / 1000 > clientImpl.leaveAfterDisconnectSeconds
+                ) {
+                    logger.w { "[reconnect] Disconnection timeout reached — giving up" }
+                    state._connection.value = RealtimeConnection.ReconnectingFailed
+                    break
+                }
+
+                // Wait for network before doing anything else. Polls without
+                // consuming the attempt budget — the elapsed-time guard below
+                // will still fire if we wait too long.
+                if (!network.isConnected()) {
+                    logger.d {
+                        "[reconnect] Network unavailable — waiting for connectivity (loopIteration=$loopIteration)"
+                    }
+                    delay(RECONNECT_DELAY_MS)
+                    continue
+                }
+
+                val currentTimeInMillis = System.currentTimeMillis()
+                if (currentTimeInMillis - loopStartTime >= reconnectDeadlineMillis) {
+                    currentStrategy = when (currentStrategy) {
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+                        -> {
+                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
+                        }
+
+                        else -> currentStrategy
+                    }
+                }
+
+                logger.i {
+                    "[reconnect] loopIteration=$loopIteration strategy=$currentStrategy reason=$reason"
+                }
+
+                val outcome = when (currentStrategy) {
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+                    -> reconnectFast(reason)
+
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+                        nonFastReconnectAttempts++
+                        reconnectRejoin(reason)
+                    }
+
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
+                        nonFastReconnectAttempts++
+                        reconnectMigrate()
+                    }
+
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT ->
+                        ReconnectOutcome.Disconnect
+                }
+
+                when (outcome) {
+                    is ReconnectOutcome.Success -> break
+
+                    is ReconnectOutcome.Disconnect -> {
+                        logger.w { "[reconnect] DISCONNECT requested — leaving call" }
+                        leave("SFU:DISCONNECT")
+                        break
+                    }
+
+                    is ReconnectOutcome.PreconditionNotMet -> {
+                        logger.w { "[reconnect] Precondition not met — giving up: ${outcome.reason}" }
+                        state._connection.value = RealtimeConnection.ReconnectingFailed
+                        break
+                    }
+
+                    is ReconnectOutcome.PeerConnectionStale -> {
+                        logger.w { "[reconnect] Peer connections stale — escalating to REJOIN" }
+                        delay(RECONNECT_DELAY_MS)
+                        loopIteration++
+                        currentStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
+                    }
+
+                    is ReconnectOutcome.Failed -> {
+                        logger.w {
+                            "[reconnect] $currentStrategy ($nonFastReconnectAttempts) failed: ${outcome.error.message}"
+                        }
+
+                        delay(RECONNECT_DELAY_MS)
+                        loopIteration++
+
+                        val wasMigrating = currentStrategy ==
+                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
+                        val pastFastReconnectDeadline = (System.currentTimeMillis() - loopStartTime) >
+                            reconnectDeadlineMillis
+                        val shouldEscalateToRejoin = wasMigrating ||
+                            pastFastReconnectDeadline
+
+                        if (shouldEscalateToRejoin) {
+                            currentStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
+                        }
+                        logger.i { "[reconnect] Next strategy: $currentStrategy (loopIteration=$loopIteration)" }
+                    }
+                }
+            }
+
+            if (state.connection.value is RealtimeConnection.ReconnectingFailed) {
+                logger.w { "[reconnect] All recovery attempts exhausted — leaving call ($reason)" }
+                leave("reconnect-failed:$reason")
+            }
+        } finally {
+            // Always release the mutex — even on exceptions or coroutine
+            // cancellation — so future reconnect() calls aren't permanently blocked.
+            reconnectMutex.unlock()
+            logger.d {
+                "[reconnect] Free reconnectMutex, initialStrategy: $strategy, finalStrategy: $currentStrategy"
+            }
+        }
+    }
+
     /**
      * Fast reconnect to the same SFU with the same participant session.
+     * Reuses the existing session ID — no previous_session_id needed since the
+     * SFU already knows this participant.
      */
-    suspend fun fastReconnect(reason: String = "unknown") = schedule("fast") {
-        logger.d { "[fastReconnect] Reconnecting, reconnectAttepmts:$reconnectAttepmts" }
-        session.value?.prepareReconnect()
-        this@Call.state._connection.value = RealtimeConnection.Reconnecting
-        if (session.value != null) {
-            reconnectStartTime = System.currentTimeMillis()
+    private suspend fun reconnectFast(reason: String): ReconnectOutcome {
+        logger.d { "[reconnectFast] reconnectAttempts=$nonFastReconnectAttempts" }
+        val currentSession = session.value
+            ?: return ReconnectOutcome.PreconditionNotMet("No active session for fast reconnect")
 
-            val currentSession = session.value!!
-            val (prevSessionId, subscriptionsInfo, publishingInfo) = currentSession.currentSfuInfo()
-            val reconnectDetails = ReconnectDetails(
-                previous_session_id = prevSessionId,
-                strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
-                announced_tracks = publishingInfo,
-                subscriptions = subscriptionsInfo,
-                reconnect_attempt = reconnectAttepmts,
-                reason = reason,
-            )
-            currentSession.fastReconnect(reconnectDetails)
-            val oldSessionStats = collectStats()
-            currentSession.sendCallStats(oldSessionStats)
-        } else {
-            logger.d { "[fastReconnect] [RealtimeConnection.Disconnected], call_id:$id" }
-            this@Call.state._connection.value = RealtimeConnection.Disconnected
-        }
-    }
+        val stats = collectStats()
+        currentSession.sendCallStats(stats)
 
-    /**
-     * Rejoin a call. Creates a new session and joins as a new participant.
-     */
-    suspend fun rejoin(reason: String = "unknown") = schedule("rejoin") {
-        logger.d { "[rejoin] Rejoining" }
-        reconnectAttepmts++
+        currentSession.prepareReconnect()
         state._connection.value = RealtimeConnection.Reconnecting
-        location?.let {
-            reconnectStartTime = System.currentTimeMillis()
+        reconnectStartTime = System.currentTimeMillis()
 
-            val joinResponse = joinRequest(location = it)
-            if (joinResponse is Success) {
-                // switch to the new SFU
-                val cred = joinResponse.value.credentials
-                val oldSession = this.session.value!!
-                val oldSessionStats = collectStats()
-                val currentOptions = this.session.value?.publisher?.value?.currentOptions()
-                logger.i { "Rejoin SFU ${oldSession?.sfuUrl} to ${cred.server.url}" }
-
-                this.sessionId = UUID.randomUUID().toString()
-                val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
-                val reconnectDetails = ReconnectDetails(
-                    previous_session_id = prevSessionId,
-                    strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-                    announced_tracks = publishingInfo,
-                    subscriptions = subscriptionsInfo,
-                    reconnect_attempt = reconnectAttepmts,
-                    reason = reason,
-                )
-                this.state.removeParticipant(prevSessionId)
-                oldSession.prepareRejoin()
-                try {
-                    this.session.value = (
-                        RtcSession(
-                            clientImpl,
-                            reconnectAttepmts,
-                            powerManager,
-                            this,
-                            sessionId,
-                            clientImpl.apiKey,
-                            clientImpl.coordinatorConnectionModule.lifecycle,
-                            cred.server.url,
-                            cred.server.wsEndpoint,
-                            cred.token,
-                            cred.server.edgeName,
-                            cred.iceServers.map { ice ->
-                                ice.toIceServer()
-                            },
-                        )
-                        )
-                    this.session.value?.connect(reconnectDetails, currentOptions)
-                    this.session.value?.sfuTracer?.trace("rejoin", reason)
-                    oldSession.sendCallStats(oldSessionStats)
-                    oldSession.leaveWithReason("Rejoin :: $reason")
-                    oldSession.cleanup()
-                    monitorSession(joinResponse.value)
-                } catch (ex: Exception) {
-                    logger.e(ex) {
-                        "[rejoin] Failed to join response with ex: ${ex.message}"
-                    }
-                    state._connection.value = RealtimeConnection.Failed(ex)
-                }
-            } else {
-                logger.e {
-                    "[rejoin] Failed to get a join response ${joinResponse.errorOrNull()}"
-                }
-                state._connection.value = RealtimeConnection.Reconnecting
-            }
+        val (_, subscriptionsInfo, publishingInfo) = currentSession.currentSfuInfo()
+        val reconnectDetails = ReconnectDetails(
+            previous_session_id = "",
+            strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+            announced_tracks = publishingInfo,
+            subscriptions = subscriptionsInfo,
+            reconnect_attempt = nonFastReconnectAttempts,
+            reason = reason,
+        )
+        return when (val result = currentSession.fastReconnect(reconnectDetails)) {
+            is FastReconnectResult.Connected -> ReconnectOutcome.Success
+            is FastReconnectResult.PeerConnectionStale -> ReconnectOutcome.PeerConnectionStale
+            is FastReconnectResult.Failed -> ReconnectOutcome.Failed(result.error)
         }
     }
 
     /**
-     * Migrate to another SFU.
+     * Rejoin a call. Creates a new session ID and joins as a new participant.
+     * previous_session_id is set so the SFU can transfer state (tracks,
+     * subscriptions) from the old session to the new one.
      */
-    suspend fun migrate() = schedule("migrate") {
-        logger.d { "[migrate] Migrating" }
-        state._connection.value = RealtimeConnection.Migrating
-        location?.let {
-            reconnectStartTime = System.currentTimeMillis()
-            session.value?.sfuName?.let { addFailedSfuId(it) }
+    private suspend fun reconnectRejoin(reason: String): ReconnectOutcome {
+        logger.d { "[reconnectRejoin] reconnectAttempts=$nonFastReconnectAttempts" }
+        state._connection.value = RealtimeConnection.Reconnecting
+        val loc = location
+            ?: return ReconnectOutcome.PreconditionNotMet("No location available for rejoin")
+        val oldSession = session.value
+            ?: return ReconnectOutcome.PreconditionNotMet("No active session for rejoin")
+        reconnectStartTime = System.currentTimeMillis()
 
-            val joinResponse = joinRequest(location = it, migratingFrom = session.value?.sfuName)
-            if (joinResponse is Success) {
-                // switch to the new SFU
-                val cred = joinResponse.value.credentials
-                val session = this.session.value!!
-                val currentOptions = this.session.value?.publisher?.value?.currentOptions()
-                val oldSfuName = session.sfuName
-                logger.i { "Migrate SFU $oldSfuName to ${cred.server.edgeName}" }
+        val joinResponse = joinRequest(location = loc)
+        if (joinResponse !is Success) {
+            return ReconnectOutcome.Failed(
+                Exception("Failed to get join response: ${joinResponse.errorOrNull()}"),
+            )
+        }
 
-                this.sessionId = UUID.randomUUID().toString()
-                val (prevSessionId, subscriptionsInfo, publishingInfo) = session.currentSfuInfo()
-                val reconnectDetails = ReconnectDetails(
-                    previous_session_id = prevSessionId,
-                    strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
-                    announced_tracks = publishingInfo,
-                    subscriptions = subscriptionsInfo,
-                    from_sfu_id = oldSfuName,
-                    reconnect_attempt = reconnectAttepmts,
-                )
-                session.prepareRejoin()
-                try {
-                    val newSession = RtcSession(
-                        clientImpl,
-                        reconnectAttepmts,
-                        powerManager,
-                        this,
-                        sessionId,
-                        clientImpl.apiKey,
-                        clientImpl.coordinatorConnectionModule.lifecycle,
-                        cred.server.url,
-                        cred.server.wsEndpoint,
-                        cred.token,
-                        cred.server.edgeName,
-                        cred.iceServers.map { ice ->
-                            ice.toIceServer()
-                        },
-                    )
-                    val oldSession = this.session.value
-                    this.session.value = newSession
-                    this.session.value?.connect(reconnectDetails, currentOptions)
-                    monitorSession(joinResponse.value)
-                    oldSession?.leaveWithReason("migrating")
-                    oldSession?.cleanup()
-                } catch (ex: Exception) {
-                    logger.e(ex) {
-                        "[switchSfu] Failed to join during " +
-                            "migration - Error ${ex.message}"
-                    }
-                    state._connection.value = RealtimeConnection.Failed(ex)
-                }
-            } else {
-                logger.e {
-                    "[switchSfu] Failed to get a join response during " +
-                        "migration - falling back to reconnect. Error ${joinResponse.errorOrNull()}"
-                }
-                state._connection.value = RealtimeConnection.Reconnecting
+        val cred = joinResponse.value.credentials
+        val currentOptions = oldSession.publisher.value?.currentOptions()
+        logger.i { "Rejoin SFU ${oldSession.sfuUrl} to ${cred.server.url}" }
+
+        this.sessionId = UUID.randomUUID().toString()
+        val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
+        val reconnectDetails = ReconnectDetails(
+            previous_session_id = prevSessionId,
+            strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+            announced_tracks = publishingInfo,
+            subscriptions = subscriptionsInfo,
+            reconnect_attempt = nonFastReconnectAttempts,
+            reason = reason,
+        )
+        this.state.removeParticipant(prevSessionId)
+        oldSession.prepareRejoin("rejoin")
+        val newSession = RtcSession(
+            clientImpl,
+            nonFastReconnectAttempts,
+            powerManager,
+            this,
+            sessionId,
+            clientImpl.apiKey,
+            clientImpl.coordinatorConnectionModule.lifecycle,
+            cred.server.url,
+            cred.server.wsEndpoint,
+            cred.token,
+            cred.server.edgeName,
+            cred.iceServers.map { ice -> ice.toIceServer() },
+        )
+        this.session.value = newSession
+
+        return when (val result = newSession.connectInternal(reconnectDetails, currentOptions)) {
+            is SfuConnectionResult.Connected -> {
+                newSession.sfuTracer.trace("rejoin", reason)
+                monitorSession(joinResponse.value)
+                ReconnectOutcome.Success
             }
+            is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
         }
     }
 
-    private var reconnectJob: Job? = null
+    /**
+     * Migrate to another SFU. Reuses the same session ID — the SFU
+     * identifies the participant via from_sfu_id, not previous_session_id.
+     */
+    private suspend fun reconnectMigrate(): ReconnectOutcome {
+        logger.d { "[reconnectMigrate] Migrating" }
+        state._connection.value = RealtimeConnection.Migrating
+        val loc = location
+            ?: return ReconnectOutcome.PreconditionNotMet("No location available for migrate")
+        val oldSession = session.value
+            ?: return ReconnectOutcome.PreconditionNotMet("No active session for migrate")
+        reconnectStartTime = System.currentTimeMillis()
+        addFailedSfuId(oldSession.sfuName)
 
-    private suspend fun schedule(key: String, block: suspend () -> Unit) {
-        logger.d { "[schedule] #reconnect; no args" }
+        val joinResponse = joinRequest(location = loc, migratingFrom = oldSession.sfuName)
+        if (joinResponse !is Success) {
+            return ReconnectOutcome.Failed(
+                Exception(
+                    "Failed to get join response during migration: ${joinResponse.errorOrNull()}",
+                ),
+            )
+        }
 
-        streamSingleFlightProcessorImpl.run(key, block)
+        val cred = joinResponse.value.credentials
+        val currentOptions = oldSession.publisher.value?.currentOptions()
+        val oldSfuName = oldSession.sfuName
+        logger.i { "[reconnectMigrate] Migrate SFU $oldSfuName to ${cred.server.edgeName}" }
+
+        val (_, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
+        val reconnectDetails = ReconnectDetails(
+            previous_session_id = "",
+            strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+            announced_tracks = publishingInfo,
+            subscriptions = subscriptionsInfo,
+            from_sfu_id = oldSfuName,
+            reconnect_attempt = nonFastReconnectAttempts,
+        )
+
+        val stats = collectStats()
+        oldSession.sendCallStats(stats)
+        oldSession.enterMigration()
+
+        val newSession = RtcSession(
+            clientImpl,
+            nonFastReconnectAttempts,
+            powerManager,
+            this,
+            sessionId,
+            clientImpl.apiKey,
+            clientImpl.coordinatorConnectionModule.lifecycle,
+            cred.server.url,
+            cred.server.wsEndpoint,
+            cred.token,
+            cred.server.edgeName,
+            cred.iceServers.map { ice -> ice.toIceServer() },
+        )
+        this.session.value = newSession
+
+        return try {
+            val result = newSession.connectInternal(reconnectDetails, currentOptions)
+            when (result) {
+                is SfuConnectionResult.Connected -> {
+                    monitorSession(joinResponse.value)
+                    ReconnectOutcome.Success
+                }
+                is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
+            }
+        } finally {
+            oldSession.finalizeMigration()
+        }
     }
+
+    // Keep public wrappers for backward compatibility and Debug class
+    suspend fun fastReconnect(reason: String = "unknown") {
+        reconnect(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST, reason)
+    }
+
+    suspend fun rejoin(reason: String = "unknown") {
+        reconnect(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN, reason)
+    }
+
+    suspend fun migrate() {
+        reconnect(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE, "migrate")
+    }
+
+    // endregion
 
     /** Leave the call, but don't end it for other users */
     fun leave(reason: String = "user") {
@@ -977,7 +1220,6 @@ public class Call(
         monitorPublisherPCStateJob?.cancel()
         monitorPublisherPCStateJob = null
         monitorSubscriberPCStateJob = null
-        session.value?.leaveWithReason("[reason=$reason, error=${disconnectionReason?.message}]")
         leaveTimeoutAfterDisconnect?.cancel()
         network.unsubscribe(listener)
         sfuListener?.cancel()
@@ -1013,14 +1255,14 @@ public class Call(
         (client as StreamVideoClient).onCallCleanUp(this)
 
         clientImpl.scope.launch {
+            val leaveReason = "[reason=$reason, error=${disconnectionReason?.message}]"
             safeCall {
-                session.value?.sfuTracer?.trace(
-                    "leave-call",
-                    "[reason=$reason, error=${disconnectionReason?.message}]",
-                )
+                session.value?.sfuTracer?.trace("leave-call", leaveReason)
                 val stats = collectStats()
                 session.value?.sendCallStats(stats)
             }
+            // Must complete before cleanup() cancels the session's supervisor job.
+            safeCall { session.value?.sendLeaveEvent(leaveReason) }
             cleanup()
         }
     }
@@ -1802,9 +2044,9 @@ public class Call(
             call.session.value?.subscriber?.value?.enable()
         }
 
-        public fun rejoin() {
+        public fun rejoin(reason: String = "Debug") {
             call.scope.launch {
-                call.rejoin()
+                call.rejoin(reason)
             }
         }
 
@@ -1834,6 +2076,22 @@ public class Call(
     }
 
     companion object {
+        /** How many consecutive FAST reconnect failures are allowed before
+         *  escalating to a full REJOIN. Kept small because each failed FAST
+         *  attempt can cost up to DEFAULT_SOCKET_TIMEOUT (10 s) waiting for
+         *  the WebSocket handshake to time out. */
+        private const val MAX_FAST_RECONNECT_ATTEMPTS = 3
+
+        /** Absolute upper bound on loop iterations across all strategies
+         *  (FAST + REJOIN + MIGRATE combined). Prevents infinite retries
+         *  when every strategy keeps failing. */
+        private const val MAX_RECONNECT_ATTEMPTS = 10
+
+        /** Delay between consecutive reconnect attempts (both after a
+         *  failed attempt and while polling for network availability
+         *  during FAST reconnect). Kept short so the SDK reacts quickly
+         *  once conditions improve. */
+        private const val RECONNECT_DELAY_MS = 500L
 
         internal var testInstanceProvider = TestInstanceProvider()
 
