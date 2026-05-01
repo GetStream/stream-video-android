@@ -936,7 +936,7 @@ public class Call(
                     currentStrategy = when (currentStrategy) {
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
-                            -> {
+                        -> {
                             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
                         }
 
