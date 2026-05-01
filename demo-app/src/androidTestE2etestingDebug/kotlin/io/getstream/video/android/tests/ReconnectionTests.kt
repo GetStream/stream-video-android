@@ -132,6 +132,7 @@ class ReconnectionTests : StreamTestCase() {
             device.enableInternetConnection()
         }
         step("THEN user still can see that participant is recording the call") {
+            userRobot.sleep(5.seconds)
             userRobot.assertRecordingView(isDisplayed = true)
         }
     }
