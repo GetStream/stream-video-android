@@ -866,7 +866,7 @@ public class Call(
             logger.d { "[reconnect] Active reconnect loop running — skipping ($reason)" }
             return
         }
-
+        var currentStrategy = strategy
         try {
             // Re-check after acquiring the lock — bail only if the user left.
             // We deliberately allow reconnect from Connected (SFU/network may
@@ -887,7 +887,6 @@ public class Call(
             }
 
             val loopStartTime = System.currentTimeMillis()
-            var currentStrategy = strategy
             // Local iteration counter for this reconnect() invocation only.
             // Controls MAX_RECONNECT_ATTEMPTS cap and FAST→REJOIN escalation.
             // Distinct from the class-level reconnectAttempts which is cumulative.
@@ -903,6 +902,19 @@ public class Call(
                     }
                     delay(RECONNECT_DELAY_MS)
                     continue
+                }
+
+                val currentTimeInMillis = System.currentTimeMillis()
+                if (currentTimeInMillis - loopStartTime >= reconnectDeadlineMillis) {
+                    currentStrategy = when (currentStrategy) {
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+                        -> {
+                            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
+                        }
+
+                        else -> currentStrategy
+                    }
                 }
 
                 val connectionState = state.connection.value
@@ -1007,6 +1019,9 @@ public class Call(
             // Always release the mutex — even on exceptions or coroutine
             // cancellation — so future reconnect() calls aren't permanently blocked.
             reconnectMutex.unlock()
+            logger.d {
+                "[reconnect] Free reconnectMutex, strategy: $strategy, currentStrategy: $currentStrategy"
+            }
         }
     }
 
