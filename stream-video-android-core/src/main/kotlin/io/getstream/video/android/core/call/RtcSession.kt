@@ -868,10 +868,15 @@ public class RtcSession internal constructor(
     }
 
     internal val mediaScope = CoroutineScope(Dispatchers.Default)
+    private var cameraStatusJob: Job? = null
+    private var microphoneStatusJob: Job? = null
+    private var screenShareStatusJob: Job? = null
 
     private fun listenToMediaChanges() {
         logger.d { "[trackPublishing] listenToMediaChanges" }
-        mediaScope.launch {
+
+        cameraStatusJob?.cancel()
+        cameraStatusJob = mediaScope.launch {
             // update the tracks when the camera or microphone status changes
             call.mediaManager.camera.status.collectLatest {
                 val canUserSendVideo = call.state.ownCapabilities.value.contains(
@@ -912,7 +917,8 @@ public class RtcSession internal constructor(
             }
         }
 
-        mediaScope.launch {
+        microphoneStatusJob?.cancel()
+        microphoneStatusJob = mediaScope.launch {
             call.mediaManager.microphone.status.collectLatest {
                 if (it == DeviceStatus.Enabled) {
                     createAndPublishAudioTrack()
@@ -923,7 +929,8 @@ public class RtcSession internal constructor(
             }
         }
 
-        mediaScope.launch {
+        screenShareStatusJob?.cancel()
+        screenShareStatusJob = mediaScope.launch {
             call.mediaManager.screenShare.status.collectLatest {
                 val canUserShareScreen = call.state.ownCapabilities.value.contains(
                     OwnCapability.Screenshare,
