@@ -20,6 +20,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -42,6 +43,14 @@ private inline fun <R> Call.use(block: (Call) -> R): R {
 
 @RunWith(RobolectricTestRunner::class)
 class ReconnectSessionIdTest : IntegrationTestBase() {
+
+    private fun Call.injectMockNetwork(connected: Boolean = true) {
+        val mockNetwork = mockk<NetworkStateProvider>(relaxed = true)
+        every { mockNetwork.isConnected() } returns connected
+        val field = Call::class.java.getDeclaredField("network\$delegate")
+        field.isAccessible = true
+        field.set(this, lazyOf(mockNetwork))
+    }
 
     @Test
     fun `Rejoin creates a new session`() = runTest(UnconfinedTestDispatcher()) {
@@ -69,9 +78,10 @@ class ReconnectSessionIdTest : IntegrationTestBase() {
         )
         coEvery { sessionMock.fastReconnect(any()) } returns FastReconnectResult.Connected
         val call = client.call("default", randomUUID())
+        call.injectMockNetwork(connected = true)
         call.session.value = sessionMock
 
-        // Rejoin
+        // Fast reconnect
         call.fastReconnect()
         assertEquals(sessionMock, call.session.value)
     }

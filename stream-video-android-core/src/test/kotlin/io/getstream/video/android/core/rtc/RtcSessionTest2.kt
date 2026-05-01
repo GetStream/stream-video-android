@@ -238,6 +238,11 @@ class RtcSessionTest2 {
             )
             val mockSocketConnection = mockk<SfuSocketConnection>(relaxed = true)
             every { mockSocketConnection.state() } returns sfuSocketStateFlow
+            coEvery { mockSocketConnection.connect(any()) } coAnswers {
+                sfuSocketStateFlow.value = SfuSocketState.Connecting(
+                    connectionConf = mockk(relaxed = true),
+                )
+            }
             val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
             every { sfuSocketModule.socketConnection } returns mockSocketConnection
 

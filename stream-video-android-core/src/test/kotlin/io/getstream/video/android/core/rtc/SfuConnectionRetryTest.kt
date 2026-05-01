@@ -298,9 +298,12 @@ class SfuConnectionRetryTest {
     }
 
     // -- Network-aware guard --
+    // Network availability is checked inside Call.reconnect, not in listenToSfuSocket.
+    // The stateJob always forwards DisconnectedTemporarily to call.reconnect regardless
+    // of network state.
 
     @Test
-    fun `DisconnectedTemporarily does not trigger reconnect when network is down`() = runTest {
+    fun `DisconnectedTemporarily forwards to reconnect even when network is down`() = runTest {
         every { mockNetworkStateProvider.isConnected() } returns false
         createRtcSession()
         advance()
@@ -310,13 +313,21 @@ class SfuConnectionRetryTest {
         )
         advance()
 
-        coVerify(exactly = 0) { mockCall.reconnect(any(), any()) }
+        coVerify(exactly = 1) {
+            mockCall.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                any(),
+            )
+        }
     }
 
-    // -- DisconnectedPermanently escalates to REJOIN --
+    // -- DisconnectedPermanently --
+    // DisconnectedPermanently is not handled in listenToSfuSocket (falls through
+    // to the else branch). The socket is considered unrecoverable at this layer;
+    // reconnect is NOT triggered from the stateJob.
 
     @Test
-    fun `DisconnectedPermanently triggers call reconnect with REJOIN`() = runTest {
+    fun `DisconnectedPermanently does not trigger call reconnect`() = runTest {
         createRtcSession()
         advance()
 
@@ -329,16 +340,11 @@ class SfuConnectionRetryTest {
         )
         advance()
 
-        coVerify(exactly = 1) {
-            mockCall.reconnect(
-                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-                match { it.contains("permanent") },
-            )
-        }
+        coVerify(exactly = 0) { mockCall.reconnect(any(), any()) }
     }
 
     @Test
-    fun `DisconnectedPermanently escalates to REJOIN even when network is down`() = runTest {
+    fun `DisconnectedPermanently does not trigger reconnect even when network is down`() = runTest {
         every { mockNetworkStateProvider.isConnected() } returns false
         createRtcSession()
         advance()
@@ -352,12 +358,7 @@ class SfuConnectionRetryTest {
         )
         advance()
 
-        coVerify(exactly = 1) {
-            mockCall.reconnect(
-                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-                any(),
-            )
-        }
+        coVerify(exactly = 0) { mockCall.reconnect(any(), any()) }
     }
 
     // -- sfuName --
