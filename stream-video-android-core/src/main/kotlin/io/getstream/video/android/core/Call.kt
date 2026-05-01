@@ -893,6 +893,33 @@ public class Call(
             var loopIteration = 0
 
             while (true) {
+                // EARLY EXIT CASE 1 - State based
+                val connectionState = state.connection.value
+                if (connectionState is RealtimeConnection.Connected ||
+                    connectionState is RealtimeConnection.ReconnectingFailed ||
+                    connectionState is RealtimeConnection.Disconnected
+                ) {
+                    logger.i { "[reconnect] Loop finished — state=$connectionState" }
+                    break
+                }
+
+                // EARLY EXIT CASE 2 - count based
+                if (loopIteration >= MAX_RECONNECT_ATTEMPTS) {
+                    logger.w { "[reconnect] Max reconnect attempts ($MAX_RECONNECT_ATTEMPTS) reached — giving up" }
+                    state._connection.value = RealtimeConnection.ReconnectingFailed
+                    break
+                }
+
+                // EARLY EXIT CASE 3 - time based
+                val elapsedMs = System.currentTimeMillis() - loopStartTime
+                if (clientImpl.leaveAfterDisconnectSeconds > 0 &&
+                    elapsedMs / 1000 > clientImpl.leaveAfterDisconnectSeconds
+                ) {
+                    logger.w { "[reconnect] Disconnection timeout reached — giving up" }
+                    state._connection.value = RealtimeConnection.ReconnectingFailed
+                    break
+                }
+
                 // Wait for network before doing anything else. Polls without
                 // consuming the attempt budget — the elapsed-time guard below
                 // will still fire if we wait too long.
@@ -909,42 +936,12 @@ public class Call(
                     currentStrategy = when (currentStrategy) {
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
-                        -> {
+                            -> {
                             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
                         }
 
                         else -> currentStrategy
                     }
-                }
-
-                val connectionState = state.connection.value
-                if (connectionState is RealtimeConnection.Connected ||
-                    connectionState is RealtimeConnection.ReconnectingFailed ||
-                    connectionState is RealtimeConnection.Disconnected
-                ) {
-                    logger.i { "[reconnect] Loop finished — state=$connectionState" }
-                    break
-                }
-
-                if (loopIteration >= MAX_RECONNECT_ATTEMPTS) {
-                    logger.w { "[reconnect] Max reconnect attempts ($MAX_RECONNECT_ATTEMPTS) reached — giving up" }
-                    state._connection.value = RealtimeConnection.ReconnectingFailed
-                    break
-                }
-
-                val elapsedMs = System.currentTimeMillis() - loopStartTime
-                if (clientImpl.leaveAfterDisconnectSeconds > 0 &&
-                    elapsedMs / 1000 > clientImpl.leaveAfterDisconnectSeconds
-                ) {
-                    logger.w { "[reconnect] Disconnection timeout reached — giving up" }
-                    state._connection.value = RealtimeConnection.ReconnectingFailed
-                    break
-                }
-
-                if (currentStrategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN ||
-                    currentStrategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
-                ) {
-                    nonFastReconnectAttempts++
                 }
 
                 logger.i {
@@ -956,11 +953,15 @@ public class Call(
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
                     -> reconnectFast(reason)
 
-                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN ->
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
+                        nonFastReconnectAttempts++
                         reconnectRejoin(reason)
+                    }
 
-                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE ->
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
+                        nonFastReconnectAttempts++
                         reconnectMigrate()
+                    }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT ->
                         ReconnectOutcome.Disconnect
@@ -1020,7 +1021,7 @@ public class Call(
             // cancellation — so future reconnect() calls aren't permanently blocked.
             reconnectMutex.unlock()
             logger.d {
-                "[reconnect] Free reconnectMutex, strategy: $strategy, currentStrategy: $currentStrategy"
+                "[reconnect] Free reconnectMutex, initialStrategy: $strategy, finalStrategy: $currentStrategy"
             }
         }
     }
