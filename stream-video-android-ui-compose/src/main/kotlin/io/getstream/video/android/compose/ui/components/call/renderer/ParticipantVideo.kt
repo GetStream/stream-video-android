@@ -110,10 +110,12 @@ import kotlinx.coroutines.delay
  * @param labelContent Content is shown that displays participant's name and device states.
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
- * @param mirrorStream Whether to mirror the video stream horizontally.
  * @param reactionContent Content is shown for the reaction.
+ * @param mirrorMode Controls horizontal mirroring of the video stream. Defaults to [MirrorMode.AUTO] which mirrors
+ * only the local self-view when using the front camera; remote participants are never mirrored.
  * @param actionsContent Content to show action picker with call actions related to the selected participant.
  */
+
 @Composable
 public fun ParticipantVideo(
     call: Call,
@@ -133,7 +135,6 @@ public fun ParticipantVideo(
         )
     },
     scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
-    mirrorStream: Boolean = false,
     videoFallbackContent: @Composable (Call) -> Unit = {
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
@@ -145,6 +146,7 @@ public fun ParticipantVideo(
             style = style,
         )
     },
+    mirrorMode: MirrorMode = MirrorMode.AUTO,
     actionsContent: @Composable BoxScope.(
         actions: List<ParticipantAction>,
         call: Call,
@@ -205,7 +207,7 @@ public fun ParticipantVideo(
             call = call,
             participant = participant,
             scalingType = scalingType,
-            mirrorStream = mirrorStream,
+            mirrorMode = mirrorMode,
             videoFallbackContent = videoFallbackContent,
         )
 
@@ -232,7 +234,8 @@ public fun ParticipantVideo(
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
  * @param scalingType The scaling type for the video renderer.
- * @param mirrorStream Whether to mirror the video stream horizontally.
+ * @param mirrorMode Controls horizontal mirroring of the video stream. Defaults to [MirrorMode.AUTO] which mirrors
+ * only the local self-view when using the front camera; remote participants are never mirrored.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  */
 @OptIn(StreamVideoUiDelicateApi::class)
@@ -241,7 +244,7 @@ public fun ParticipantVideoRenderer(
     call: Call,
     participant: ParticipantState,
     scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
-    mirrorStream: Boolean = false,
+    mirrorMode: MirrorMode = MirrorMode.AUTO,
     videoFallbackContent: @Composable (Call) -> Unit = {
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
@@ -265,8 +268,11 @@ public fun ParticipantVideoRenderer(
     val video by participant.video.collectAsStateWithLifecycle()
     val cameraDirection by call.camera.direction.collectAsStateWithLifecycle()
     val me by call.state.me.collectAsStateWithLifecycle()
-    val mirror =
-        mirrorStream || (cameraDirection == CameraDirection.Front && me?.sessionId == participant.sessionId)
+    val mirror = when (mirrorMode) {
+        MirrorMode.AUTO -> cameraDirection == CameraDirection.Front && me?.sessionId == participant.sessionId
+        MirrorMode.ALWAYS -> true
+        MirrorMode.NEVER -> false
+    }
     val videoRendererConfig = remember(mirror, scalingType, videoFallbackContent) {
         videoRenderConfig {
             this.mirrorStream = mirror
