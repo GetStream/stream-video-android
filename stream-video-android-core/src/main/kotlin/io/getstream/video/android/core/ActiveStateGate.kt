@@ -21,7 +21,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -51,21 +50,23 @@ internal class ActiveStateGate(
         onReady: () -> Unit,
     ) {
         logger.d { "[awaitAndTransition], ringingState: $currentRingingState" }
-        when (strategy) {
-            TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR -> {
-                onReady()
-            }
 
-            else -> {
-                val isIncomingOrOutgoing =
-                    previousRingingStates.any { it is RingingState.Incoming || it is RingingState.Outgoing }
+        if (strategy == TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR) {
+            onReady()
+            return
+        }
 
-                if (isIncomingOrOutgoing && currentRingingState !is RingingState.Active) {
-                    observePeerConnection(call, interceptor, onReady, strategy)
-                } else if (!isIncomingOrOutgoing) {
-                    onReady()
-                }
-            }
+        val isRingingCall = previousRingingStates.any {
+            it is RingingState.Incoming || it is RingingState.Outgoing
+        }
+
+        when {
+            !isRingingCall -> onReady()
+            currentRingingState !is RingingState.Active -> observePeerConnection(
+                call,
+                interceptor,
+                onReady,
+            )
         }
     }
 
@@ -73,17 +74,15 @@ internal class ActiveStateGate(
         call: Call,
         interceptor: RingingCallJoinInterceptor,
         onReady: () -> Unit,
-        strategy: TransitionToRingingStateStrategy,
     ) {
         if (peerConnectionObserverJob?.isActive == true) return
 
         peerConnectionObserverJob = coroutineScope.launch {
             val start = System.currentTimeMillis()
-            val result =
-                withTimeoutOrNull(timeoutMs) { buildConnectionFlow(call, strategy).first() }
+            val result = withTimeoutOrNull(timeoutMs) { buildConnectionFlow(call).first() }
             val duration = System.currentTimeMillis() - start
 
-            logConnectionResult(result, strategy, duration)
+            logConnectionResult(result, duration)
 
             if (isActive) {
                 invokeInterceptorSafely(call, interceptor)
@@ -93,24 +92,15 @@ internal class ActiveStateGate(
         }
     }
 
-    private fun buildConnectionFlow(
-        call: Call,
-        strategy: TransitionToRingingStateStrategy,
-    ): Flow<Unit> =
+    private fun buildConnectionFlow(call: Call): Flow<Unit> =
         call.session
             .filterNotNull()
             .flatMapLatest { session ->
-                val publisherFlow = session.publisher
+                session.publisher
                     .filterNotNull()
                     .flatMapLatest { it.state }
-                when (strategy) {
-                    TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR ->
-                        emptyFlow()
-                    TransitionToRingingStateStrategy.PUBLISHER_CONNECTED ->
-                        publisherFlow
-                            .filter { it == PeerConnectionState.CONNECTED }
-                            .map { }
-                }
+                    .filter { it == PeerConnectionState.CONNECTED }
+                    .map { }
             }
 
     private suspend fun invokeInterceptorSafely(call: Call, interceptor: RingingCallJoinInterceptor) {
@@ -125,11 +115,11 @@ internal class ActiveStateGate(
         }
     }
 
-    private fun logConnectionResult(result: Unit?, strategy: TransitionToRingingStateStrategy, duration: Long) {
+    private fun logConnectionResult(result: Unit?, duration: Long) {
         if (result != null) {
-            logger.d { "[observeConnection-$strategy] Connected in ${duration}ms" }
+            logger.d { "[observeConnection] Connected in ${duration}ms" }
         } else {
-            logger.w { "[observeConnection-$strategy] Timeout after ${duration}ms" }
+            logger.w { "[observeConnection] Timeout after ${duration}ms" }
         }
     }
 
