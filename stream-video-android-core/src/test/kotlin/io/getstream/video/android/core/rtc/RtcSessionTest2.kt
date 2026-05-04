@@ -26,6 +26,7 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -60,10 +61,12 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.webrtc.SessionDescription
+import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
+import stream.video.sfu.models.WebsocketReconnectStrategy
 
 class RtcSessionTest2 {
 
@@ -123,6 +126,7 @@ class RtcSessionTest2 {
 
     @After
     fun tearDown() {
+        StreamVideo.removeClient()
         unmockkAll()
     }
 
@@ -167,10 +171,11 @@ class RtcSessionTest2 {
         assertEquals("Wrong sessionId", sessionId, rtcSession.fieldValue("sessionId"))
     }
 
+    @Suppress("DEPRECATION")
     @Test
     fun `connect calls socketConnection_connect with JoinRequest and sets state to Connected`() =
         runTest(
-            UnconfinedTestDispatcher(),
+            testDispatcher,
         ) {
             // Given
             val sessionId = "test-session-id"
@@ -180,35 +185,151 @@ class RtcSessionTest2 {
             val sfuToken = "fake-sfu-token"
             val remoteIceServers = emptyList<IceServer>()
 
-            // We’ll create an RtcSession with all mocks prepared:
-            val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
-            val rtcSession = RtcSession(
-                client = mockStreamVideo,
-                powerManager = mockPowerManager,
-                call = mockCall,
-                sessionId = sessionId,
-                apiKey = apiKey,
-                lifecycle = mockLifecycle,
-                sfuUrl = sfuUrl,
-                sfuWsUrl = sfuWsUrl,
-                sfuToken = sfuToken,
-                sfuName = "test-sfu-edge",
-                clientImpl = mockVideoClient,
-                coroutineScope = testScope,
-                remoteIceServers = remoteIceServers,
-                sfuConnectionModuleProvider = { sfuSocketModule },
+            val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
+                SfuSocketState.Disconnected.Stopped,
             )
+            val mockSocketConnection = mockk<SfuSocketConnection>(relaxed = true)
+            every { mockSocketConnection.state() } returns sfuSocketStateFlow
+            coEvery { mockSocketConnection.connect(any()) } coAnswers {
+                sfuSocketStateFlow.value = SfuSocketState.Connected(mockk(relaxed = true))
+            }
+            val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
+            every { sfuSocketModule.socketConnection } returns mockSocketConnection
+
+            val rtcSession = spyk(
+                RtcSession(
+                    client = mockStreamVideo,
+                    powerManager = mockPowerManager,
+                    call = mockCall,
+                    sessionId = sessionId,
+                    apiKey = apiKey,
+                    lifecycle = mockLifecycle,
+                    sfuUrl = sfuUrl,
+                    sfuWsUrl = sfuWsUrl,
+                    sfuToken = sfuToken,
+                    sfuName = "test-sfu-edge",
+                    clientImpl = mockVideoClient,
+                    coroutineScope = testScope,
+                    remoteIceServers = remoteIceServers,
+                    sfuConnectionModuleProvider = { sfuSocketModule },
+                ),
+            )
+            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
 
             // When
             rtcSession.connect()
 
             // Then
-            // We verify that connect(...) was actually called on the socket with any JoinRequest
             coVerify {
-                sfuSocketModule.socketConnection.connect(
+                mockSocketConnection.connect(
                     match { request ->
-                        // Optionally, we can be more strict about checking the session_id, etc.
                         request.session_id == sessionId && request.token == sfuToken
+                    },
+                )
+            }
+        }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `connectInternal returns Failed when socket connection times out`() =
+        runTest(testDispatcher) {
+            val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
+                SfuSocketState.Disconnected.Stopped,
+            )
+            val mockSocketConnection = mockk<SfuSocketConnection>(relaxed = true)
+            every { mockSocketConnection.state() } returns sfuSocketStateFlow
+            coEvery { mockSocketConnection.connect(any()) } coAnswers {
+                sfuSocketStateFlow.value = SfuSocketState.Connecting(
+                    connectionConf = mockk(relaxed = true),
+                )
+            }
+            val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
+            every { sfuSocketModule.socketConnection } returns mockSocketConnection
+
+            val rtcSession = spyk(
+                RtcSession(
+                    client = mockStreamVideo,
+                    powerManager = mockPowerManager,
+                    call = mockCall,
+                    sessionId = "test-session-id",
+                    apiKey = "test-api-key",
+                    lifecycle = mockLifecycle,
+                    sfuUrl = "https://test-sfu.stream.com",
+                    sfuWsUrl = "wss://test-sfu.stream.com",
+                    sfuToken = "fake-sfu-token",
+                    sfuName = "test-sfu-edge",
+                    clientImpl = mockVideoClient,
+                    coroutineScope = testScope,
+                    remoteIceServers = emptyList(),
+                    sfuConnectionModuleProvider = { sfuSocketModule },
+                ),
+            )
+            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+
+            val result = rtcSession.connectInternal()
+
+            assertTrue(
+                "Expected SfuConnectionResult.Failed but got $result",
+                result is SfuConnectionResult.Failed,
+            )
+            assertTrue(
+                "Expected timeout message",
+                (result as SfuConnectionResult.Failed).error.message!!.contains("timed out"),
+            )
+        }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `connectInternal forwards ReconnectDetails in the JoinRequest`() =
+        runTest(testDispatcher) {
+            val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
+                SfuSocketState.Disconnected.Stopped,
+            )
+            val mockSocketConnection = mockk<SfuSocketConnection>(relaxed = true)
+            every { mockSocketConnection.state() } returns sfuSocketStateFlow
+            coEvery { mockSocketConnection.connect(any()) } coAnswers {
+                sfuSocketStateFlow.value = SfuSocketState.Connected(mockk(relaxed = true))
+            }
+            val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
+            every { sfuSocketModule.socketConnection } returns mockSocketConnection
+
+            val rtcSession = spyk(
+                RtcSession(
+                    client = mockStreamVideo,
+                    powerManager = mockPowerManager,
+                    call = mockCall,
+                    sessionId = "test-session-id",
+                    apiKey = "test-api-key",
+                    lifecycle = mockLifecycle,
+                    sfuUrl = "https://test-sfu.stream.com",
+                    sfuWsUrl = "wss://test-sfu.stream.com",
+                    sfuToken = "fake-sfu-token",
+                    sfuName = "test-sfu-edge",
+                    clientImpl = mockVideoClient,
+                    coroutineScope = testScope,
+                    remoteIceServers = emptyList(),
+                    sfuConnectionModuleProvider = { sfuSocketModule },
+                ),
+            )
+            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+
+            val reconnectDetails = ReconnectDetails(
+                strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                previous_session_id = "old-session-id",
+                announced_tracks = emptyList(),
+                subscriptions = emptyList(),
+                from_sfu_id = "",
+                reconnect_attempt = 1,
+                reason = "test-rejoin",
+            )
+
+            val result = rtcSession.connectInternal(reconnectDetails = reconnectDetails)
+
+            assertEquals(SfuConnectionResult.Connected, result)
+            coVerify {
+                mockSocketConnection.connect(
+                    match { request ->
+                        request.reconnect_details == reconnectDetails
                     },
                 )
             }

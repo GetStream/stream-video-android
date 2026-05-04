@@ -22,6 +22,8 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import stream.video.sfu.signal.ICERestartResponse
 import stream.video.sfu.signal.ICETrickleResponse
@@ -31,6 +33,7 @@ import stream.video.sfu.signal.StartNoiseCancellationResponse
 import stream.video.sfu.signal.StopNoiseCancellationResponse
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
+import java.io.IOException
 
 class SignalingServiceTracerDecoratorKtTest {
 
@@ -99,5 +102,57 @@ class SignalingServiceTracerDecoratorKtTest {
         coVerify { tracer.trace("iceRestart-error", any()) }
         coVerify { tracer.trace("startNoiseCancellation-error", any()) }
         coVerify { tracer.trace("stopNoiseCancellation-error", any()) }
+    }
+
+    @Test
+    fun `network exception is traced and rethrown`() = runTest {
+        val tracer = spyk(Tracer("iface"))
+        val impl = mockk<SignalServerService>(relaxed = true) {
+            coEvery { updateSubscriptions(any()) } throws IOException("connection reset")
+        }
+        val proxy = tracedWith<SignalServerService>(impl, tracer)
+
+        try {
+            proxy.updateSubscriptions(mockk(relaxed = true))
+            fail("Expected IOException")
+        } catch (e: IOException) {
+            assertTrue(e.message == "connection reset")
+        }
+
+        coVerify { tracer.trace("updateSubscriptions", any()) }
+        coVerify { tracer.trace("updateSubscriptions-exception", "connection reset") }
+    }
+
+    @Test
+    fun `exception traces use class name when message is null`() = runTest {
+        val tracer = spyk(Tracer("iface"))
+        val impl = mockk<SignalServerService>(relaxed = true) {
+            coEvery { setPublisher(any()) } throws RuntimeException()
+        }
+        val proxy = tracedWith<SignalServerService>(impl, tracer)
+
+        try {
+            proxy.setPublisher(mockk(relaxed = true))
+            fail("Expected RuntimeException")
+        } catch (_: RuntimeException) { }
+
+        coVerify { tracer.trace("setPublisher-exception", "RuntimeException") }
+    }
+
+    @Test
+    fun `exception tracing works for iceRestart`() = runTest {
+        val tracer = spyk(Tracer("iface"))
+        val impl = mockk<SignalServerService>(relaxed = true) {
+            coEvery { iceRestart(any()) } throws IOException("timeout")
+        }
+        val proxy = tracedWith<SignalServerService>(impl, tracer)
+
+        try {
+            proxy.iceRestart(mockk(relaxed = true))
+            fail("Expected IOException")
+        } catch (_: IOException) { }
+
+        coVerify { tracer.trace("iceRestart", any()) }
+        coVerify { tracer.trace("iceRestart-exception", "timeout") }
     }
 }
