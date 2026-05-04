@@ -484,7 +484,6 @@ fun CallScreen(
                                         ),
                                     )
                                 },
-                                mirrorStream = (participant.sessionId != me?.sessionId),
                                 actionsContent = { actions, call, participant ->
                                     ParticipantActions(
                                         modifier = Modifier

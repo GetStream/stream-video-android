@@ -162,6 +162,7 @@ public fun ParticipantVideo(
             participant,
         )
     },
+
 ) {
     val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
     val participants by call.state.participants.collectAsStateWithLifecycle()
@@ -225,6 +226,73 @@ public fun ParticipantVideo(
             reactionContent.invoke(this, participant)
         }
     }
+}
+
+@Deprecated(
+    "Use ParticipantVideo which accepts mirrorMode instead.",
+    ReplaceWith(
+        "ParticipantVideo(call, participant, modifier, style, labelContent, connectionIndicatorContent, scalingType, videoFallbackContent, reactionContent, actionsContent, mirrorMode)",
+    ),
+)
+@Composable
+public fun ParticipantVideo(
+    call: Call,
+    participant: ParticipantState,
+    modifier: Modifier = Modifier,
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
+    labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
+        ParticipantLabel(call, participant, style.labelPosition)
+    },
+    connectionIndicatorContent: @Composable BoxScope.(NetworkQuality) -> Unit = {
+        NetworkQualityIndicator(
+            networkQuality = it,
+            modifier = Modifier
+                .align(BottomEnd)
+                .height(VideoTheme.dimens.componentHeightM)
+                .testTag("Stream_ParticipantNetworkQualityIndicator"),
+        )
+    },
+    scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
+    videoFallbackContent: @Composable (Call) -> Unit = {
+        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userImage = userImage, userName = userName)
+    },
+    reactionContent: @Composable BoxScope.(ParticipantState) -> Unit = {
+        DefaultReaction(
+            participant = participant,
+            style = style,
+        )
+    },
+    actionsContent: @Composable BoxScope.(
+        actions: List<ParticipantAction>,
+        call: Call,
+        participant: ParticipantState,
+    ) -> Unit = { actions, call, participant ->
+        ParticipantActions(
+            Modifier
+                .align(TopStart)
+                .padding(8.dp)
+                .testTag("Stream_ParticipantActionsIcon"),
+            actions,
+            call,
+            participant,
+        )
+    },
+) {
+    ParticipantVideo(
+        call,
+        participant,
+        modifier,
+        style,
+        labelContent,
+        connectionIndicatorContent,
+        scalingType,
+        videoFallbackContent,
+        reactionContent,
+        MirrorMode.AUTO,
+        actionsContent,
+    )
 }
 
 /**
