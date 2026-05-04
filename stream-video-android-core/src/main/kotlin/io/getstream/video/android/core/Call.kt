@@ -544,6 +544,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
+        ringingCallJoinInterceptor: RingingCallJoinInterceptor = DefaultRingingCallJoinInterceptor,
     ): Result<RtcSession> {
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -566,6 +567,8 @@ public class Call(
 
         // Ensure factory is created with the current audioBitrateProfile before joining
         ensureFactoryMatchesAudioProfile()
+
+        this.state.ringingCallJoinInterceptor = ringingCallJoinInterceptor
 
         // the join flow should retry up to 3 times
         // if the error is not permanent

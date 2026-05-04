@@ -17,8 +17,10 @@
 package io.getstream.video.android.core
 
 import io.getstream.log.taggedLogger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -28,9 +30,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import org.webrtc.PeerConnection
+import org.webrtc.PeerConnection.PeerConnectionState
 
 private const val PEER_CONNECTION_OBSERVER_TIMEOUT = 5_000L
+private const val INTERCEPTOR_TIMEOUT_MS = 5_000L
 
 internal class ActiveStateGate(
     private val coroutineScope: CoroutineScope,
@@ -44,6 +47,7 @@ internal class ActiveStateGate(
     internal fun awaitAndTransition(
         currentRingingState: RingingState,
         call: Call,
+        interceptor: RingingCallJoinInterceptor,
         onReady: () -> Unit,
     ) {
         logger.d { "[awaitAndTransition], ringingState: $currentRingingState" }
@@ -57,11 +61,7 @@ internal class ActiveStateGate(
                     previousRingingStates.any { it is RingingState.Incoming || it is RingingState.Outgoing }
 
                 if (isIncomingOrOutgoing && currentRingingState !is RingingState.Active) {
-                    observePeerConnection(
-                        call,
-                        onReady,
-                        strategy,
-                    )
+                    observePeerConnection(call, interceptor, onReady, strategy)
                 } else if (!isIncomingOrOutgoing) {
                     onReady()
                 }
@@ -69,51 +69,67 @@ internal class ActiveStateGate(
         }
     }
 
-    private fun observePeerConnection(call: Call, onReady: () -> Unit, strategy: TransitionToRingingStateStrategy) {
+    private fun observePeerConnection(
+        call: Call,
+        interceptor: RingingCallJoinInterceptor,
+        onReady: () -> Unit,
+        strategy: TransitionToRingingStateStrategy,
+    ) {
         if (peerConnectionObserverJob?.isActive == true) return
 
         peerConnectionObserverJob = coroutineScope.launch {
             val start = System.currentTimeMillis()
-
-            val result = withTimeoutOrNull(timeoutMs) {
-                call.session
-                    .filterNotNull()
-                    .flatMapLatest { session ->
-
-                        val publisherFlow = session.publisher
-                            .filterNotNull()
-                            .flatMapLatest { it.state }
-
-                        when (strategy) {
-                            TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR -> {
-                                emptyFlow<Int>()
-                                    .map { "none" to it }
-                            }
-                            TransitionToRingingStateStrategy.PUBLISHER_CONNECTED -> {
-                                publisherFlow.filter { it == PeerConnection.PeerConnectionState.CONNECTED }
-                                    .map { "publisher" to it }
-                            }
-                        }
-                    }
-                    .first()
-            }
-
+            val result =
+                withTimeoutOrNull(timeoutMs) { buildConnectionFlow(call, strategy).first() }
             val duration = System.currentTimeMillis() - start
 
-            if (result != null) {
-                val (source, state) = result
-                logger.d {
-                    "[observeConnection-$strategy] $source reached $state in ${duration}ms"
-                }
-            } else {
-                logger.w {
-                    "[observeConnection-$strategy] Timeout after ${duration}ms"
-                }
-            }
+            logConnectionResult(result, strategy, duration)
+
             if (isActive) {
+                invokeInterceptorSafely(call, interceptor)
                 onReady()
                 cleanup()
             }
+        }
+    }
+
+    private fun buildConnectionFlow(
+        call: Call,
+        strategy: TransitionToRingingStateStrategy,
+    ): Flow<Unit> =
+        call.session
+            .filterNotNull()
+            .flatMapLatest { session ->
+                val publisherFlow = session.publisher
+                    .filterNotNull()
+                    .flatMapLatest { it.state }
+                when (strategy) {
+                    TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR ->
+                        emptyFlow()
+                    TransitionToRingingStateStrategy.PUBLISHER_CONNECTED ->
+                        publisherFlow
+                            .filter { it == PeerConnectionState.CONNECTED }
+                            .map { }
+                }
+            }
+
+    private suspend fun invokeInterceptorSafely(call: Call, interceptor: RingingCallJoinInterceptor) {
+        try {
+            withTimeoutOrNull(INTERCEPTOR_TIMEOUT_MS) {
+                interceptor.callReadyToJoinWithTimeout(call)
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.e(e) { "[RingingCallJoinInterceptor] interceptor threw, proceeding to Active" }
+        }
+    }
+
+    private fun logConnectionResult(result: Unit?, strategy: TransitionToRingingStateStrategy, duration: Long) {
+        if (result != null) {
+            logger.d { "[observeConnection-$strategy] Connected in ${duration}ms" }
+        } else {
+            logger.w { "[observeConnection-$strategy] Timeout after ${duration}ms" }
         }
     }
 

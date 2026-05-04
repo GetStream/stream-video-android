@@ -22,6 +22,7 @@ import io.getstream.video.android.core.call.connection.Subscriber
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -35,6 +36,7 @@ import org.junit.After
 import org.junit.Before
 import org.webrtc.PeerConnection
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class ActiveStateGateTest {
@@ -198,8 +200,8 @@ class ActiveStateGateTest {
             val transitioned = mutableListOf<Unit>()
             val action = { transitioned += Unit }
 
-            sut.awaitAndTransition(incomingRingingState, call, action)
-            sut.awaitAndTransition(incomingRingingState, call, action)
+            sut.awaitAndTransition(incomingRingingState, call, onReady = action)
+            sut.awaitAndTransition(incomingRingingState, call, onReady = action)
 
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             subState.value = PeerConnection.PeerConnectionState.CONNECTED
@@ -381,5 +383,153 @@ class ActiveStateGateTest {
 
             pubState.value = PeerConnection.PeerConnectionState.CONNECTED
             assertTrue(transitioned.size == 1)
+        }
+
+    // ── RingingCallJoinInterceptor tests ──────────────────────────────────────
+
+    @Test
+    fun `interceptor is called before onReady for ringing call`() =
+        runTest(testDispatcher) {
+            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
+                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
+            val (call, _, _, _) = fakeCall(pubState)
+
+            val interceptorCalled = mutableListOf<Unit>()
+            val interceptor = object : RingingCallJoinInterceptor {
+                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+                    interceptorCalled += Unit
+                }
+            }
+
+            val incoming = RingingState.Incoming(false)
+            val sut = ActiveStateGate(
+                coroutineScope = this,
+                previousRingingStates = setOf(incoming),
+                timeoutMs = 5_000L,
+            )
+            val transitioned = mutableListOf<Unit>()
+
+            sut.awaitAndTransition(incoming, call, interceptor) { transitioned += Unit }
+            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
+
+            assertEquals(1, interceptorCalled.size)
+            assertEquals(1, transitioned.size)
+        }
+
+    @Test
+    fun `delaying interceptor postpones onReady`() =
+        runTest(StandardTestDispatcher()) {
+            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
+                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
+            val (call, _, _, _) = fakeCall(pubState)
+
+            val interceptor = object : RingingCallJoinInterceptor {
+                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+                    delay(1_000L)
+                }
+            }
+
+            val incoming = RingingState.Incoming(false)
+            val sut = ActiveStateGate(
+                coroutineScope = this,
+                previousRingingStates = setOf(incoming),
+                timeoutMs = 5_000L,
+            )
+            val transitioned = mutableListOf<Unit>()
+
+            sut.awaitAndTransition(incoming, call, interceptor) { transitioned += Unit }
+            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
+            // Advance just enough for the peer connection detection to process,
+            // but not enough to drain the interceptor's delay(1_000L)
+            advanceTimeBy(10L)
+
+            // onReady not yet called — interceptor is still suspending
+            assertTrue(transitioned.isEmpty())
+
+            advanceTimeBy(1_100L)
+            assertTrue(transitioned.size == 1)
+        }
+
+    @Test
+    fun `interceptor exceeding 5s timeout still proceeds to Active`() =
+        runTest(StandardTestDispatcher()) {
+            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
+                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
+            val (call, _, _, _) = fakeCall(pubState)
+
+            val interceptor = object : RingingCallJoinInterceptor {
+                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+                    delay(Long.MAX_VALUE) // never returns on its own
+                }
+            }
+
+            val incoming = RingingState.Incoming(false)
+            val sut = ActiveStateGate(
+                coroutineScope = this,
+                previousRingingStates = setOf(incoming),
+                timeoutMs = 100L,
+            )
+            val transitioned = mutableListOf<Unit>()
+
+            sut.awaitAndTransition(incoming, call, interceptor) { transitioned += Unit }
+            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
+            // Advance past the 100ms peer connection timeout so the interceptor starts,
+            // but not past the 5s interceptor timeout
+            advanceTimeBy(200L)
+
+            assertTrue(transitioned.isEmpty())
+
+            advanceTimeBy(5_100L) // past 5s interceptor timeout
+            assertTrue(transitioned.size == 1)
+        }
+
+    @Test
+    fun `interceptor throwing exception still proceeds to Active`() =
+        runTest(testDispatcher) {
+            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
+                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
+            val (call, _, _, _) = fakeCall(pubState)
+
+            val interceptor = object : RingingCallJoinInterceptor {
+                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+                    throw RuntimeException("interceptor error")
+                }
+            }
+
+            val incoming = RingingState.Incoming(false)
+            val sut = ActiveStateGate(
+                coroutineScope = this,
+                previousRingingStates = setOf(incoming),
+                timeoutMs = 5_000L,
+            )
+            val transitioned = mutableListOf<Unit>()
+
+            sut.awaitAndTransition(incoming, call, interceptor) { transitioned += Unit }
+            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
+
+            assertEquals(1, transitioned.size)
+        }
+
+    @Test
+    fun `interceptor is NOT called for non-ringing Active transitions`() =
+        runTest(testDispatcher) {
+            val interceptorCalled = mutableListOf<Unit>()
+            val interceptor = object : RingingCallJoinInterceptor {
+                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+                    interceptorCalled += Unit
+                }
+            }
+
+            val (call, _, _, _) = fakeCall()
+            val sut = ActiveStateGate(
+                coroutineScope = this,
+                previousRingingStates = emptySet(), // no incoming/outgoing history
+            )
+            val transitioned = mutableListOf<Unit>()
+
+            sut.awaitAndTransition(RingingState.Idle, call, interceptor) { transitioned += Unit }
+
+            assertTrue(interceptorCalled.isEmpty())
+            assertEquals(1, transitioned.size) // onReady called directly
         }
 }
