@@ -492,6 +492,36 @@ class ActiveStateGateTest {
         }
 
     @Test
+    fun `interceptor and publisher wait run in parallel`() =
+        runTest(StandardTestDispatcher()) {
+            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
+                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
+            val (call, _) = fakeCall(pubState)
+
+            val interceptor = object : RingingCallJoinInterceptor {
+                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+                    delay(2_000L)
+                }
+            }
+
+            val incoming = RingingState.Incoming(false)
+            val sut = ActiveStateGate(
+                coroutineScope = this,
+                previousRingingStates = setOf(incoming),
+                timeoutMs = 5_000L,
+            )
+            val transitioned = mutableListOf<Unit>()
+
+            sut.awaitAndTransition(incoming, call, interceptor) { transitioned += Unit }
+
+            advanceTimeBy(2_000L)
+            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
+            advanceTimeBy(50L)
+
+            assertEquals(1, transitioned.size)
+        }
+
+    @Test
     fun `interceptor is NOT called for non-ringing Active transitions`() =
         runTest(testDispatcher) {
             val interceptorCalled = mutableListOf<Unit>()

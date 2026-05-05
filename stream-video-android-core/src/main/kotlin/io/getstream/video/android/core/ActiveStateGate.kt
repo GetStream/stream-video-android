@@ -20,6 +20,7 @@ import io.getstream.log.taggedLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -79,13 +80,18 @@ internal class ActiveStateGate(
 
         peerConnectionObserverJob = coroutineScope.launch {
             val start = System.currentTimeMillis()
-            val result = withTimeoutOrNull(timeoutMs) { buildConnectionFlow(call).first() }
-            val duration = System.currentTimeMillis() - start
 
-            logConnectionResult(result, duration)
+            val peerWait = async {
+                withTimeoutOrNull(timeoutMs) { buildConnectionFlow(call).first() }
+            }
+            val interceptorWait = async {
+                invokeInterceptorSafely(call, interceptor)
+            }
+            val peerResult = peerWait.await()
+            interceptorWait.await()
+            logConnectionResult(peerResult, System.currentTimeMillis() - start)
 
             if (isActive) {
-                invokeInterceptorSafely(call, interceptor)
                 onReady()
                 cleanup()
             }
