@@ -207,6 +207,7 @@ public sealed interface RealtimeConnection {
 
     public data object Migrating : RealtimeConnection
     public data class Failed(val error: Any) : RealtimeConnection // permanent failure
+    public data object ReconnectingFailed : RealtimeConnection // all retry attempts exhausted
     public data object Disconnected : RealtimeConnection // normal disconnect by the app
 }
 

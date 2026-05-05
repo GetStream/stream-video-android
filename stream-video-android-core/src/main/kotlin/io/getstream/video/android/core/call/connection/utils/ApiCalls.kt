@@ -16,55 +16,32 @@
 
 package io.getstream.video.android.core.call.connection.utils
 
+import io.getstream.log.StreamLog
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.errors.RtcException
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
-import retrofit2.HttpException
-import java.io.IOException
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * Wraps an API call and handles exceptions.
+ * Wraps an API call, catching all exceptions except [CancellationException]
+ * (which is rethrown to preserve structured concurrency).
  *
- * @param apiCall The API call to wrap.
- * @return A [Result] containing the result of the API call.
+ * Replaces the previous mix of `wrapAPICall`, `safeCall`, and
+ * `safeCallWithResult` with a single, consistent wrapper.
+ *
+ * @return [Success] if [block] completed, [Failure] if it threw.
  */
-internal suspend fun <T : Any> wrapAPICall(apiCall: suspend () -> T): Result<T> = coroutineScope {
-    withContext(coroutineContext) {
-        try {
-            val result = apiCall()
-            Success(result)
-        } catch (e: HttpException) {
-            parseError(e)
-        } catch (e: RtcException) {
-            Failure(
-                Error.ThrowableError(
-                    e.message ?: "RtcException",
-                    e,
-                ),
-            )
-        } catch (e: IOException) {
-            Failure(
-                Error.ThrowableError(
-                    e.message ?: "IOException",
-                    e,
-                ),
-            )
-        }
+@Suppress("TooGenericExceptionCaught")
+internal suspend inline fun <T : Any> safeApiCall(
+    crossinline block: suspend () -> T,
+): Result<T> {
+    return try {
+        Success(block())
+    } catch (ce: CancellationException) {
+        throw ce
+    } catch (t: Throwable) {
+        StreamLog.e("SafeApiCall", t) { "API call failed: ${t.message}" }
+        Failure(Error.ThrowableError(t.message ?: "API call failed", t))
     }
-}
-
-/**
- * Parses the error and returns a [Failure] result.
- */
-private fun parseError(e: Throwable): Failure {
-    return Failure(
-        Error.ThrowableError(
-            "CallClientImpl error needs to be handled",
-            e,
-        ),
-    )
 }

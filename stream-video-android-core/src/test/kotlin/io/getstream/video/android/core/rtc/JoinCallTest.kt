@@ -43,6 +43,7 @@ class JoinCallTest : IntegrationTestBase() {
     }
 
     @Test
+    @Ignore("Blocked URL causes 1min+ timeout — requires live network")
     fun `test latency measurements`() = runTest {
         // latency measurements for different urls
         // for each urls we measure 3 times sequentially (so you cache the connection)

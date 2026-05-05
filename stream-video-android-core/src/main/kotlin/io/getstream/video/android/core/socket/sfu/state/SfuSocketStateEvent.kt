@@ -48,9 +48,11 @@ public sealed class SfuSocketStateEvent {
      */
     object NetworkNotAvailable : SfuSocketStateEvent() { override fun toString() = "NetworkNotAvailable" }
 
-    /**
-     * Event to notify Network is available.
-     */
+    @Deprecated(
+        "NetworkAvailable is no longer sent. " +
+            "Network recovery is handled by Call's NetworkStateListener.",
+        level = DeprecationLevel.WARNING,
+    )
     object NetworkAvailable : SfuSocketStateEvent() { override fun toString() = "NetworkAvailable" }
 
     /**

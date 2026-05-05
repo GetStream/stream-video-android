@@ -123,7 +123,7 @@ android {
 
     resourcePrefix = "stream_video_"
 
-    sourceSets.configureEach {
+    sourceSets.getByName("main") {
         kotlin.srcDir("${project.buildDir}/generated/source/services")
     }
 

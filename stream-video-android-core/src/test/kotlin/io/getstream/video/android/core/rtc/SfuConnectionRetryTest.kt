@@ -29,11 +29,14 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.JoinCallResponseEvent
+import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
+import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.mockk.MockKAnnotations
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -52,6 +55,14 @@ import org.junit.Rule
 import org.junit.Test
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
+/**
+ * Tests that [RtcSession]'s stateJob correctly delegates SFU socket-state
+ * transitions to [Call.reconnect] (the unified reconnection entry point).
+ *
+ * The retry-loop escalation logic (FAST → REJOIN, MIGRATE → REJOIN, etc.)
+ * is tested separately; this class only verifies the thin forwarding layer
+ * inside RtcSession.
+ */
 class SfuConnectionRetryTest {
 
     @get:Rule
@@ -86,6 +97,7 @@ class SfuConnectionRetryTest {
     private lateinit var socketStateFlow: MutableStateFlow<SfuSocketState>
     private lateinit var mockSocket: SfuSocketConnection
     private lateinit var mockModule: SfuConnectionModule
+    private lateinit var mockNetworkStateProvider: NetworkStateProvider
 
     private var disconnectCounter = 0
 
@@ -94,9 +106,16 @@ class SfuConnectionRetryTest {
         MockKAnnotations.init(this, relaxUnitFun = true)
 
         mockStreamVideo = mockk(relaxed = true)
+        mockNetworkStateProvider = mockk(relaxed = true)
+        every { mockNetworkStateProvider.isConnected() } returns true
+        val mockCoordinatorModule = mockk<CoordinatorConnectionModule>(relaxed = true)
+        every { mockCoordinatorModule.networkStateProvider } returns mockNetworkStateProvider
+        every { mockVideoClient.coordinatorConnectionModule } returns mockCoordinatorModule
+
         every { mockCall.state } returns mockCallState
         every { mockCall.scope } returns testScope
         every { mockCall.mediaManager } returns mockMediaManager
+        coEvery { mockCall.reconnect(any(), any()) } returns Unit
         every { mockCall.peerConnectionFactory } returns mockk(relaxed = true) {
             every { makePeerConnection(any(), any(), any(), any()) } returns mockk(relaxed = true)
         }
@@ -120,6 +139,7 @@ class SfuConnectionRetryTest {
 
     @After
     fun tearDown() {
+        StreamVideo.removeClient()
         unmockkAll()
     }
 
@@ -143,98 +163,111 @@ class SfuConnectionRetryTest {
         )
     }
 
-    private fun disconnectedTemporarily() = SfuSocketState.Disconnected.DisconnectedTemporarily(
+    private fun disconnectedTemporarily(
+        strategy: WebsocketReconnectStrategy =
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+    ) = SfuSocketState.Disconnected.DisconnectedTemporarily(
         error = Error.NetworkError(
             message = "Connection failed #${++disconnectCounter}",
             serverErrorCode = 1003,
             statusCode = 1003,
         ),
-        reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+        reconnectStrategy = strategy,
     )
 
     private fun advance() = testScope.advanceUntilIdle()
 
+    // -- Forwarding tests: stateJob delegates to call.reconnect --
+
     @Test
-    fun `first DisconnectedTemporarily does not trigger migrate`() = runTest {
+    fun `UNSPECIFIED strategy forwards to call reconnect`() = runTest {
         createRtcSession()
         advance()
 
         socketStateFlow.value = disconnectedTemporarily()
         advance()
 
-        coVerify(exactly = 0) { mockCall.migrate() }
-    }
-
-    @Test
-    fun `second DisconnectedTemporarily does not trigger migrate`() = runTest {
-        createRtcSession()
-        advance()
-
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-        socketStateFlow.value = SfuSocketState.Disconnected.WebSocketEventLost
-        advance()
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-
-        coVerify(exactly = 0) { mockCall.migrate() }
-    }
-
-    @Test
-    fun `third DisconnectedTemporarily triggers migrate`() = runTest {
-        createRtcSession()
-        advance()
-
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-        socketStateFlow.value = SfuSocketState.Disconnected.WebSocketEventLost
-        advance()
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-        socketStateFlow.value = SfuSocketState.Disconnected.WebSocketEventLost
-        advance()
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-
-        coVerify(exactly = 1) { mockCall.migrate() }
-        coVerify(exactly = 1) { mockSocket.disconnect() }
-    }
-
-    @Test
-    fun `WebSocketEventLost alone does not increment retry counter or trigger migrate`() =
-        runTest {
-            createRtcSession()
-            advance()
-
-            repeat(5) {
-                socketStateFlow.value = SfuSocketState.Disconnected.WebSocketEventLost
-                advance()
-            }
-
-            coVerify(exactly = 0) { mockCall.migrate() }
+        coVerify(exactly = 1) {
+            mockCall.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+                any(),
+            )
         }
+    }
 
     @Test
-    fun `Connected state resets retry counter`() = runTest {
-        val connectedEvent = mockk<JoinCallResponseEvent>(relaxed = true)
+    fun `MIGRATE strategy forwards to call reconnect`() = runTest {
         createRtcSession()
         advance()
 
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-
-        socketStateFlow.value = SfuSocketState.Connected(connectedEvent)
+        socketStateFlow.value = disconnectedTemporarily(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+        )
         advance()
 
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-
-        coVerify(exactly = 0) { mockCall.migrate() }
+        coVerify(exactly = 1) {
+            mockCall.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+                any(),
+            )
+        }
     }
+
+    @Test
+    fun `REJOIN strategy forwards to call reconnect`() = runTest {
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = disconnectedTemporarily(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+        )
+        advance()
+
+        coVerify(exactly = 1) {
+            mockCall.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `FAST strategy forwards to call reconnect`() = runTest {
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = disconnectedTemporarily(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+        )
+        advance()
+
+        coVerify(exactly = 1) {
+            mockCall.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `DISCONNECT strategy forwards to call reconnect`() = runTest {
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = disconnectedTemporarily(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT,
+        )
+        advance()
+
+        coVerify(exactly = 1) {
+            mockCall.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT,
+                any(),
+            )
+        }
+    }
+
+    // -- Connected state --
 
     @Test
     fun `Connected state calls onSfuConnectionEstablished`() = runTest {
@@ -248,148 +281,93 @@ class SfuConnectionRetryTest {
         coVerify(exactly = 1) { mockCall.onSfuConnectionEstablished() }
     }
 
+    // -- WebSocketEventLost --
+
     @Test
-    fun `retry counter resets after triggering migrate`() = runTest {
+    fun `WebSocketEventLost triggers FAST reconnect`() = runTest {
         createRtcSession()
         advance()
 
-        repeat(3) {
-            socketStateFlow.value = disconnectedTemporarily()
-            advance()
+        socketStateFlow.value = SfuSocketState.Disconnected.WebSocketEventLost
+        advance()
+
+        coVerify(exactly = 1) {
+            mockCall.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                match { it.contains("healthcheck-timeout") },
+            )
         }
-        coVerify(exactly = 1) { mockCall.migrate() }
-
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-
-        coVerify(exactly = 1) { mockCall.migrate() }
     }
+
+    // -- Network-aware guard --
+    // Network availability is checked inside Call.reconnect, not in listenToSfuSocket.
+    // The stateJob always forwards DisconnectedTemporarily to call.reconnect regardless
+    // of network state.
+
+    @Test
+    fun `DisconnectedTemporarily forwards to reconnect even when network is down`() = runTest {
+        every { mockNetworkStateProvider.isConnected() } returns false
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = disconnectedTemporarily(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+        )
+        advance()
+
+        coVerify(exactly = 1) {
+            mockCall.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                any(),
+            )
+        }
+    }
+
+    // -- DisconnectedPermanently --
+    // DisconnectedPermanently is not handled in listenToSfuSocket (falls through
+    // to the else branch). The socket is considered unrecoverable at this layer;
+    // reconnect is NOT triggered from the stateJob.
+
+    @Test
+    fun `DisconnectedPermanently does not trigger call reconnect`() = runTest {
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedPermanently(
+            error = Error.NetworkError(
+                message = "Socket closed (1002)",
+                serverErrorCode = 1002,
+                statusCode = 1002,
+            ),
+        )
+        advance()
+
+        coVerify(exactly = 0) { mockCall.reconnect(any(), any()) }
+    }
+
+    @Test
+    fun `DisconnectedPermanently does not trigger reconnect even when network is down`() = runTest {
+        every { mockNetworkStateProvider.isConnected() } returns false
+        createRtcSession()
+        advance()
+
+        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedPermanently(
+            error = Error.NetworkError(
+                message = "Socket closed (1002)",
+                serverErrorCode = 1002,
+                statusCode = 1002,
+            ),
+        )
+        advance()
+
+        coVerify(exactly = 0) { mockCall.reconnect(any(), any()) }
+    }
+
+    // -- sfuName --
 
     @Test
     fun `sfuName is stored correctly in RtcSession`() = runTest {
         val session = createRtcSession(sfuName = "edge-eu-west-1")
         assert(session.sfuName == "edge-eu-west-1")
-    }
-
-    @Test
-    fun `MIGRATE strategy triggers immediate migration without retries`() = runTest {
-        createRtcSession()
-        advance()
-
-        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
-            error = Error.NetworkError(
-                message = "SFU_FULL",
-                serverErrorCode = 700,
-                statusCode = 700,
-            ),
-            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
-        )
-        advance()
-
-        coVerify(exactly = 1) { mockCall.migrate() }
-        coVerify(exactly = 1) { mockSocket.disconnect() }
-    }
-
-    @Test
-    fun `MIGRATE strategy on first error migrates immediately`() = runTest {
-        createRtcSession()
-        advance()
-
-        // Even on the very first failure, MIGRATE strategy should trigger immediate migration
-        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
-            error = Error.NetworkError(
-                message = "SFU_FULL first time",
-                serverErrorCode = 700,
-                statusCode = 700,
-            ),
-            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
-        )
-        advance()
-
-        coVerify(exactly = 1) { mockCall.migrate() }
-    }
-
-    @Test
-    fun `non-MIGRATE strategy still requires retries before migration`() = runTest {
-        createRtcSession()
-        advance()
-
-        // First failure with UNSPECIFIED strategy — should not migrate
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-        coVerify(exactly = 0) { mockCall.migrate() }
-
-        // Second failure — should not migrate
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-        coVerify(exactly = 0) { mockCall.migrate() }
-
-        // Third failure — now migrate
-        socketStateFlow.value = disconnectedTemporarily()
-        advance()
-        coVerify(exactly = 1) { mockCall.migrate() }
-    }
-
-    @Test
-    fun `REJOIN strategy triggers immediate rejoin without retries`() = runTest {
-        createRtcSession()
-        advance()
-
-        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
-            error = Error.NetworkError(
-                message = "SFU wants rejoin",
-                serverErrorCode = 500,
-                statusCode = 500,
-            ),
-            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
-        )
-        advance()
-
-        coVerify(exactly = 1) { mockCall.rejoin(any()) }
-        coVerify(exactly = 1) { mockSocket.disconnect() }
-        coVerify(exactly = 0) { mockCall.migrate() }
-    }
-
-    @Test
-    fun `DISCONNECT strategy disconnects immediately without retries`() = runTest {
-        createRtcSession()
-        advance()
-
-        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
-            error = Error.NetworkError(
-                message = "SFU wants disconnect",
-                serverErrorCode = 500,
-                statusCode = 500,
-            ),
-            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT,
-        )
-        advance()
-
-        coVerify(exactly = 1) { mockSocket.disconnect() }
-        coVerify(exactly = 0) { mockCall.migrate() }
-        coVerify(exactly = 0) { mockCall.rejoin(any()) }
-    }
-
-    @Test
-    fun `FAST strategy disconnects and triggers fastReconnect immediately`() = runTest {
-        createRtcSession()
-        advance()
-
-        socketStateFlow.value = SfuSocketState.Disconnected.DisconnectedTemporarily(
-            error = Error.NetworkError(
-                message = "Fast reconnect requested",
-                serverErrorCode = 1003,
-                statusCode = 1003,
-            ),
-            reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
-        )
-        advance()
-
-        coVerify(exactly = 1) { mockSocket.disconnect() }
-        coVerify(exactly = 1) { mockCall.fastReconnect(any()) }
-        coVerify(exactly = 0) { mockCall.migrate() }
-        coVerify(exactly = 0) { mockCall.rejoin(any()) }
     }
 }

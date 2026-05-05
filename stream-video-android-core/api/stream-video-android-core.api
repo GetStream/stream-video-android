@@ -9310,6 +9310,13 @@ public final class io/getstream/video/android/core/RealtimeConnection$Reconnecti
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/RealtimeConnection$ReconnectingFailed : io/getstream/video/android/core/RealtimeConnection {
+	public static final field INSTANCE Lio/getstream/video/android/core/RealtimeConnection$ReconnectingFailed;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class io/getstream/video/android/core/RingingState {
 }
 
