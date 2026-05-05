@@ -343,7 +343,7 @@ public fun ParticipantVideoRenderer(
     }
     val videoRendererConfig = remember(mirror, scalingType, videoFallbackContent) {
         videoRenderConfig {
-            this.mirrorStream = mirror
+            mirrorStream = mirror
             this.videoScalingType = scalingType
             this.fallbackContent = videoFallbackContent
         }
