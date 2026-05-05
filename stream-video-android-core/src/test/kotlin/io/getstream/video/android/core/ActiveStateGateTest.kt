@@ -87,7 +87,7 @@ class ActiveStateGateTest {
             sut.awaitAndTransition(
                 currentRingingState = RingingState.Idle,
                 call = call,
-                interceptor = DefaultRingingCallJoinInterceptor,
+                interceptor = null,
                 onReady = { transitioned += Unit },
             )
 
@@ -109,7 +109,7 @@ class ActiveStateGateTest {
             sut.awaitAndTransition(
                 currentRingingState = RingingState.Active,
                 call = call,
-                interceptor = DefaultRingingCallJoinInterceptor,
+                interceptor = null,
                 onReady = { transitioned += Unit },
             )
 
@@ -134,7 +134,7 @@ class ActiveStateGateTest {
             sut.awaitAndTransition(
                 currentRingingState = outgoingRingingState,
                 call = call,
-                interceptor = DefaultRingingCallJoinInterceptor,
+                interceptor = null,
                 onReady = { transitioned += Unit },
             )
 
@@ -160,7 +160,7 @@ class ActiveStateGateTest {
             sut.awaitAndTransition(
                 currentRingingState = incomingRingingState,
                 call = call,
-                interceptor = DefaultRingingCallJoinInterceptor,
+                interceptor = null,
                 onReady = { transitioned += Unit },
             )
 
@@ -190,13 +190,13 @@ class ActiveStateGateTest {
             sut.awaitAndTransition(
                 incomingRingingState,
                 call,
-                DefaultRingingCallJoinInterceptor,
+                null,
                 onReady = action,
             )
             sut.awaitAndTransition(
                 incomingRingingState,
                 call,
-                DefaultRingingCallJoinInterceptor,
+                null,
                 onReady = action,
             )
 
@@ -223,7 +223,7 @@ class ActiveStateGateTest {
             sut.awaitAndTransition(
                 currentRingingState = incomingRingingState,
                 call = call,
-                interceptor = DefaultRingingCallJoinInterceptor,
+                interceptor = null,
                 onReady = { transitioned += Unit },
             )
 
@@ -248,11 +248,11 @@ class ActiveStateGateTest {
             )
             val transitioned = mutableListOf<Unit>()
 
-            sut.awaitAndTransition(incomingRingingState, call, DefaultRingingCallJoinInterceptor) {
+            sut.awaitAndTransition(incomingRingingState, call, null) {
                 transitioned += Unit
             }
             sut.cleanup()
-            sut.awaitAndTransition(incomingRingingState, call, DefaultRingingCallJoinInterceptor) {
+            sut.awaitAndTransition(incomingRingingState, call, null) {
                 transitioned += Unit
             }
 
@@ -284,7 +284,7 @@ class ActiveStateGateTest {
             )
             val transitioned = mutableListOf<Unit>()
 
-            sut.awaitAndTransition(incomingRingingState, call, DefaultRingingCallJoinInterceptor) {
+            sut.awaitAndTransition(incomingRingingState, call, null) {
                 transitioned += Unit
             }
 
@@ -312,7 +312,7 @@ class ActiveStateGateTest {
             )
             val transitioned = mutableListOf<Unit>()
 
-            sut.awaitAndTransition(incomingRingingState, call, DefaultRingingCallJoinInterceptor) {
+            sut.awaitAndTransition(incomingRingingState, call, null) {
                 transitioned += Unit
             }
 
@@ -346,7 +346,7 @@ class ActiveStateGateTest {
             timeoutMs = 5_000L,
         )
         val transitioned = mutableListOf<Unit>()
-        sut.awaitAndTransition(incoming, testData.call, DefaultRingingCallJoinInterceptor) {
+        sut.awaitAndTransition(incoming, testData.call, null) {
             transitioned += Unit
         }
         block(testData.call, sut, transitioned, pubState)

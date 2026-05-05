@@ -47,7 +47,7 @@ internal class ActiveStateGate(
     internal fun awaitAndTransition(
         currentRingingState: RingingState,
         call: Call,
-        interceptor: RingingCallJoinInterceptor,
+        interceptor: RingingCallJoinInterceptor?,
         onReady: () -> Unit,
     ) {
         logger.d { "[awaitAndTransition], ringingState: $currentRingingState" }
@@ -73,7 +73,7 @@ internal class ActiveStateGate(
 
     private fun observePeerConnection(
         call: Call,
-        interceptor: RingingCallJoinInterceptor,
+        interceptor: RingingCallJoinInterceptor?,
         onReady: () -> Unit,
     ) {
         if (peerConnectionObserverJob?.isActive == true) return
@@ -84,11 +84,11 @@ internal class ActiveStateGate(
             val peerWait = async {
                 withTimeoutOrNull(timeoutMs) { buildConnectionFlow(call).first() }
             }
-            val interceptorWait = async {
-                invokeInterceptorSafely(call, interceptor)
+            val interceptorWait = interceptor?.let {
+                async { invokeInterceptorSafely(call, it) }
             }
             val peerResult = peerWait.await()
-            interceptorWait.await()
+            interceptorWait?.await()
             logConnectionResult(peerResult, System.currentTimeMillis() - start)
 
             if (isActive) {

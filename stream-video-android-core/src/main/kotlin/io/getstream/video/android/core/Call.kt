@@ -544,7 +544,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
-        ringingCallJoinInterceptor: RingingCallJoinInterceptor = DefaultRingingCallJoinInterceptor,
+        ringingCallJoinInterceptor: RingingCallJoinInterceptor? = null,
     ): Result<RtcSession> {
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"

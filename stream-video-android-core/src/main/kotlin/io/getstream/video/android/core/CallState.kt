@@ -751,7 +751,7 @@ public class CallState(
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
     private val ringingLogger by taggedLogger("RingingState")
 
-    internal var ringingCallJoinInterceptor: RingingCallJoinInterceptor = DefaultRingingCallJoinInterceptor
+    internal var ringingCallJoinInterceptor: RingingCallJoinInterceptor? = null
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }

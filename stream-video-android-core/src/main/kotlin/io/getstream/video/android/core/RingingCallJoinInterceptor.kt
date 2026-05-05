@@ -22,8 +22,6 @@ package io.getstream.video.android.core
  * Implement this to insert custom logic (e.g. waiting for user confirmation) between
  * the publisher peer connection becoming ready and the call going active.
  * Has no effect on non-ringing joins (livestream, direct join).
- *
- * @see DefaultRingingCallJoinInterceptor
  */
 public interface RingingCallJoinInterceptor {
 
@@ -34,11 +32,4 @@ public interface RingingCallJoinInterceptor {
      * The SDK enforces a 5-second maximum — the transition proceeds automatically on timeout.
      */
     public suspend fun callReadyToJoinWithTimeout(call: Call)
-}
-
-/**
- * Default implementation that proceeds to [RingingState.Active] immediately.
- */
-public object DefaultRingingCallJoinInterceptor : RingingCallJoinInterceptor {
-    override suspend fun callReadyToJoinWithTimeout(call: Call) {}
 }
