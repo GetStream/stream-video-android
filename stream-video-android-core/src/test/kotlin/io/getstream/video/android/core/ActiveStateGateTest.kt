@@ -371,7 +371,7 @@ class ActiveStateGateTest {
             assertTrue(transitioned.size == 1)
         }
 
-    // ── RingingCallJoinInterceptor tests ──────────────────────────────────────
+    // ── RingingCallActivationInterceptor tests ──────────────────────────────────────
 
     @Test
     fun `interceptor is called before onReady for ringing call`() =
@@ -381,8 +381,8 @@ class ActiveStateGateTest {
             val (call, _) = fakeCall(pubState)
 
             val interceptorCalled = mutableListOf<Unit>()
-            val interceptor = object : RingingCallJoinInterceptor {
-                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+            val interceptor = object : RingingCallActivationInterceptor {
+                override suspend fun callReadyToActivateWithTimeout(call: Call) {
                     interceptorCalled += Unit
                 }
             }
@@ -409,8 +409,8 @@ class ActiveStateGateTest {
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val (call, _) = fakeCall(pubState)
 
-            val interceptor = object : RingingCallJoinInterceptor {
-                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+            val interceptor = object : RingingCallActivationInterceptor {
+                override suspend fun callReadyToActivateWithTimeout(call: Call) {
                     delay(1_000L)
                 }
             }
@@ -440,8 +440,8 @@ class ActiveStateGateTest {
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val (call, _) = fakeCall(pubState)
 
-            val interceptor = object : RingingCallJoinInterceptor {
-                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+            val interceptor = object : RingingCallActivationInterceptor {
+                override suspend fun callReadyToActivateWithTimeout(call: Call) {
                     delay(Long.MAX_VALUE)
                 }
             }
@@ -471,8 +471,8 @@ class ActiveStateGateTest {
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val (call, _) = fakeCall(pubState)
 
-            val interceptor = object : RingingCallJoinInterceptor {
-                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+            val interceptor = object : RingingCallActivationInterceptor {
+                override suspend fun callReadyToActivateWithTimeout(call: Call) {
                     throw RuntimeException("interceptor error")
                 }
             }
@@ -498,8 +498,8 @@ class ActiveStateGateTest {
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val (call, _) = fakeCall(pubState)
 
-            val interceptor = object : RingingCallJoinInterceptor {
-                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+            val interceptor = object : RingingCallActivationInterceptor {
+                override suspend fun callReadyToActivateWithTimeout(call: Call) {
                     delay(2_000L)
                 }
             }
@@ -525,8 +525,8 @@ class ActiveStateGateTest {
     fun `interceptor is NOT called for non-ringing Active transitions`() =
         runTest(testDispatcher) {
             val interceptorCalled = mutableListOf<Unit>()
-            val interceptor = object : RingingCallJoinInterceptor {
-                override suspend fun callReadyToJoinWithTimeout(call: Call) {
+            val interceptor = object : RingingCallActivationInterceptor {
+                override suspend fun callReadyToActivateWithTimeout(call: Call) {
                     interceptorCalled += Unit
                 }
             }

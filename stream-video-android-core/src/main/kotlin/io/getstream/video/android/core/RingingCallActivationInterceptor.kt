@@ -23,7 +23,7 @@ package io.getstream.video.android.core
  * the publisher peer connection becoming ready and the call going active.
  * Has no effect on non-ringing joins (livestream, direct join).
  */
-public interface RingingCallJoinInterceptor {
+public interface RingingCallActivationInterceptor {
 
     /**
      * Called when the SDK is ready to transition to [RingingState.Active].
@@ -31,5 +31,5 @@ public interface RingingCallJoinInterceptor {
      *
      * The SDK enforces a 5-second maximum — the transition proceeds automatically on timeout.
      */
-    public suspend fun callReadyToJoinWithTimeout(call: Call)
+    public suspend fun callReadyToActivateWithTimeout(call: Call)
 }

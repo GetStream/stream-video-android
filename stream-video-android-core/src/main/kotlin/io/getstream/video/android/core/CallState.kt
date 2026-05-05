@@ -751,7 +751,7 @@ public class CallState(
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
     private val ringingLogger by taggedLogger("RingingState")
 
-    internal var ringingCallJoinInterceptor: RingingCallJoinInterceptor? = null
+    internal var ringingCallActivationInterceptor: RingingCallActivationInterceptor? = null
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
@@ -1386,7 +1386,7 @@ public class CallState(
             activeStateGate.awaitAndTransition(
                 ringingState.value,
                 call,
-                ringingCallJoinInterceptor,
+                ringingCallActivationInterceptor,
             ) {
                 _ringingState.value = state
                 activeStateGate.cleanup()

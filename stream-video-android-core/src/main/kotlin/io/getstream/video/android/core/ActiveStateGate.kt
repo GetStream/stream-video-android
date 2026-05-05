@@ -47,7 +47,7 @@ internal class ActiveStateGate(
     internal fun awaitAndTransition(
         currentRingingState: RingingState,
         call: Call,
-        interceptor: RingingCallJoinInterceptor?,
+        interceptor: RingingCallActivationInterceptor?,
         onReady: () -> Unit,
     ) {
         logger.d { "[awaitAndTransition], ringingState: $currentRingingState" }
@@ -73,7 +73,7 @@ internal class ActiveStateGate(
 
     private fun observePeerConnection(
         call: Call,
-        interceptor: RingingCallJoinInterceptor?,
+        interceptor: RingingCallActivationInterceptor?,
         onReady: () -> Unit,
     ) {
         if (peerConnectionObserverJob?.isActive == true) return
@@ -109,15 +109,17 @@ internal class ActiveStateGate(
                     .map { }
             }
 
-    private suspend fun invokeInterceptorSafely(call: Call, interceptor: RingingCallJoinInterceptor) {
+    private suspend fun invokeInterceptorSafely(call: Call, interceptor: RingingCallActivationInterceptor) {
         try {
             withTimeoutOrNull(INTERCEPTOR_TIMEOUT_MS) {
-                interceptor.callReadyToJoinWithTimeout(call)
+                interceptor.callReadyToActivateWithTimeout(call)
             }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            logger.e(e) { "[RingingCallJoinInterceptor] interceptor threw, proceeding to Active" }
+            logger.e(
+                e,
+            ) { "[RingingCallActivationInterceptor] interceptor threw, proceeding to Active" }
         }
     }
 
