@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   compare-sdk-sizes:
-    uses: GetStream/stream-build-conventions-android/.github/workflows/sdk-size-checks.yml@v0.11.0
+    uses: GetStream/stream-build-conventions-android/.github/workflows/sdk-size-checks.yml@v0.12.0
     with:
       modules: "stream-video-android-core stream-video-android-ui-xml stream-video-android-ui-compose"
       metrics-project: "stream-video-android-metrics"
