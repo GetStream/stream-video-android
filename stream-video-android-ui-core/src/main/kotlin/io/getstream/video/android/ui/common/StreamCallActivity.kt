@@ -46,6 +46,7 @@ import io.getstream.result.flatMap
 import io.getstream.result.onErrorSuspend
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallJoinInterceptor
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
@@ -341,6 +342,8 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             }
         }
     }
+
+    protected open val callJoinInterceptor: CallJoinInterceptor? = null
 
     // Platform restriction
     public override fun onCreate(savedInstanceState: Bundle?) {
@@ -966,9 +969,12 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             val joinAndRing = intent.getBooleanExtra(EXTRA_JOIN_AND_RING, false)
             if (joinAndRing) {
                 logger.d { "[joinAndRing] Join and ring call, ${call.cid}" }
-                availableCall.joinAndRing(call.state.members.value.map { it.user.id })
+                availableCall.joinAndRing(
+                    call.state.members.value.map { it.user.id },
+                    callJoinInterceptor = callJoinInterceptor,
+                )
             } else {
-                availableCall.join()
+                availableCall.join(callJoinInterceptor = callJoinInterceptor)
             }
         }
     }
@@ -1387,7 +1393,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
 
     private suspend fun Call.acceptThenJoin() =
         withContext(Dispatchers.IO) {
-            accept().flatMap { join() }
+            accept().flatMap { join(callJoinInterceptor = callJoinInterceptor) }
         }
 
     public fun safeFinish() {

@@ -94,28 +94,6 @@ class ActiveStateGateTest {
             assertTrue(transitioned.size == 1)
         }
 
-    // ── 2. Already Active ─────────────────────────────────────────────────────
-
-    @Test
-    fun `does NOT observe peer connection when already in Active state`() =
-        runTest(testDispatcher) {
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = setOf(RingingState.Incoming(false)),
-            )
-            val (call, _) = fakeCall()
-            val transitioned = mutableListOf<Unit>()
-
-            sut.awaitAndTransition(
-                currentRingingState = RingingState.Active,
-                call = call,
-                interceptor = null,
-                onReady = { transitioned += Unit },
-            )
-
-            assertTrue(transitioned.isEmpty())
-        }
-
     @Test
     fun `transitions when publisher connects for Outgoing previous state`() =
         runTest(testDispatcher) {
@@ -381,8 +359,8 @@ class ActiveStateGateTest {
             val (call, _) = fakeCall(pubState)
 
             val interceptorCalled = mutableListOf<Unit>()
-            val interceptor = object : RingingCallActivationInterceptor {
-                override suspend fun callReadyToActivateWithTimeout(call: Call) {
+            val interceptor = object : CallJoinInterceptor {
+                override suspend fun callReadyToJoin(call: Call) {
                     interceptorCalled += Unit
                 }
             }
@@ -409,8 +387,8 @@ class ActiveStateGateTest {
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val (call, _) = fakeCall(pubState)
 
-            val interceptor = object : RingingCallActivationInterceptor {
-                override suspend fun callReadyToActivateWithTimeout(call: Call) {
+            val interceptor = object : CallJoinInterceptor {
+                override suspend fun callReadyToJoin(call: Call) {
                     delay(1_000L)
                 }
             }
@@ -440,8 +418,8 @@ class ActiveStateGateTest {
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val (call, _) = fakeCall(pubState)
 
-            val interceptor = object : RingingCallActivationInterceptor {
-                override suspend fun callReadyToActivateWithTimeout(call: Call) {
+            val interceptor = object : CallJoinInterceptor {
+                override suspend fun callReadyToJoin(call: Call) {
                     delay(Long.MAX_VALUE)
                 }
             }
@@ -471,8 +449,8 @@ class ActiveStateGateTest {
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val (call, _) = fakeCall(pubState)
 
-            val interceptor = object : RingingCallActivationInterceptor {
-                override suspend fun callReadyToActivateWithTimeout(call: Call) {
+            val interceptor = object : CallJoinInterceptor {
+                override suspend fun callReadyToJoin(call: Call) {
                     throw RuntimeException("interceptor error")
                 }
             }
@@ -498,8 +476,8 @@ class ActiveStateGateTest {
                 MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
             val (call, _) = fakeCall(pubState)
 
-            val interceptor = object : RingingCallActivationInterceptor {
-                override suspend fun callReadyToActivateWithTimeout(call: Call) {
+            val interceptor = object : CallJoinInterceptor {
+                override suspend fun callReadyToJoin(call: Call) {
                     delay(2_000L)
                 }
             }
@@ -525,8 +503,8 @@ class ActiveStateGateTest {
     fun `interceptor is NOT called for non-ringing Active transitions`() =
         runTest(testDispatcher) {
             val interceptorCalled = mutableListOf<Unit>()
-            val interceptor = object : RingingCallActivationInterceptor {
-                override suspend fun callReadyToActivateWithTimeout(call: Call) {
+            val interceptor = object : CallJoinInterceptor {
+                override suspend fun callReadyToJoin(call: Call) {
                     interceptorCalled += Unit
                 }
             }

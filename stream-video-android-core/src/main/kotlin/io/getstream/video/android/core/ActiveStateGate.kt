@@ -20,7 +20,6 @@ import io.getstream.log.taggedLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -32,8 +31,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.webrtc.PeerConnection.PeerConnectionState
 
-private const val PEER_CONNECTION_OBSERVER_TIMEOUT = 5_000L
-private const val INTERCEPTOR_TIMEOUT_MS = 5_000L
+private const val PEER_CONNECTION_OBSERVER_TIMEOUT = 10_000L
+private const val INTERCEPTOR_TIMEOUT_MS = 10_000L
 
 internal class ActiveStateGate(
     private val coroutineScope: CoroutineScope,
@@ -43,17 +42,18 @@ internal class ActiveStateGate(
 ) {
     private val logger by taggedLogger("ActiveStateGate")
     private var peerConnectionObserverJob: Job? = null
+    private var interceptorJob: Job? = null
 
     internal fun awaitAndTransition(
         currentRingingState: RingingState,
         call: Call,
-        interceptor: RingingCallActivationInterceptor?,
+        interceptor: CallJoinInterceptor?,
         onReady: () -> Unit,
     ) {
         logger.d { "[awaitAndTransition], ringingState: $currentRingingState" }
 
         if (strategy == TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR) {
-            onReady()
+            handleLegacyBehaviour(call, onReady, interceptor)
             return
         }
 
@@ -61,41 +61,56 @@ internal class ActiveStateGate(
             it is RingingState.Incoming || it is RingingState.Outgoing
         }
 
-        when {
-            !isRingingCall -> onReady()
-            currentRingingState !is RingingState.Active -> observePeerConnection(
-                call,
-                interceptor,
-                onReady,
-            )
+        launchGate(call, interceptor, waitForPeerConnection = isRingingCall, onReady)
+    }
+
+    private fun handleLegacyBehaviour(call: Call, onReady: () -> Unit, interceptor: CallJoinInterceptor?) {
+        logger.d { "[handleLegacyBehaviour]" }
+        if (interceptorJob?.isActive == true) return
+
+        if (interceptor == null) {
+            onReady()
+            return
+        }
+
+        interceptorJob = coroutineScope.launch {
+            val shouldProceed = invokeInterceptor(call, interceptor)
+            if (!isActive) return@launch
+
+            if (shouldProceed) onReady()
+            cleanupInterceptorJob()
         }
     }
 
-    private fun observePeerConnection(
+    private fun launchGate(
         call: Call,
-        interceptor: RingingCallActivationInterceptor?,
+        interceptor: CallJoinInterceptor?,
+        waitForPeerConnection: Boolean,
         onReady: () -> Unit,
     ) {
+        logger.d {
+            "[launchGate] peerConnectionObserverJob?.isActive: ${peerConnectionObserverJob?.isActive}"
+        }
         if (peerConnectionObserverJob?.isActive == true) return
 
         peerConnectionObserverJob = coroutineScope.launch {
-            val start = System.currentTimeMillis()
+            if (waitForPeerConnection) {
+                awaitPeerConnection(call)
+                if (!isActive) return@launch
+            }
 
-            val peerWait = async {
-                withTimeoutOrNull(timeoutMs) { buildConnectionFlow(call).first() }
-            }
-            val interceptorWait = interceptor?.let {
-                async { invokeInterceptorSafely(call, it) }
-            }
-            val peerResult = peerWait.await()
-            interceptorWait?.await()
-            logConnectionResult(peerResult, System.currentTimeMillis() - start)
+            val shouldProceed = invokeInterceptor(call, interceptor)
+            if (!isActive) return@launch
 
-            if (isActive) {
-                onReady()
-                cleanup()
-            }
+            if (shouldProceed) onReady()
+            cleanup()
         }
+    }
+
+    private suspend fun awaitPeerConnection(call: Call) {
+        val start = System.currentTimeMillis()
+        val result = withTimeoutOrNull(timeoutMs) { buildConnectionFlow(call).first() }
+        logConnectionResult(result, System.currentTimeMillis() - start)
     }
 
     private fun buildConnectionFlow(call: Call): Flow<Unit> =
@@ -109,17 +124,29 @@ internal class ActiveStateGate(
                     .map { }
             }
 
-    private suspend fun invokeInterceptorSafely(call: Call, interceptor: RingingCallActivationInterceptor) {
-        try {
+    private suspend fun invokeInterceptor(
+        call: Call,
+        interceptor: CallJoinInterceptor?,
+    ): Boolean {
+        val startTime = System.currentTimeMillis()
+        logger.d { "[invokeInterceptor] start at $startTime" }
+        if (interceptor == null) return true
+        return try {
             withTimeoutOrNull(INTERCEPTOR_TIMEOUT_MS) {
-                interceptor.callReadyToActivateWithTimeout(call)
+                interceptor.callReadyToJoin(call)
             }
+            logger.d { "[invokeInterceptor] finish at ${(System.currentTimeMillis() - startTime) / 1000}s " }
+            true
         } catch (e: CancellationException) {
             throw e
+        } catch (e: CallJoinInterceptionException) {
+            val message = "[CallJoinInterceptor] aborted with reason: ${e.reason}"
+            logger.e(e) { message }
+            call.leave(reason = message)
+            false
         } catch (e: Exception) {
-            logger.e(
-                e,
-            ) { "[RingingCallActivationInterceptor] interceptor threw, proceeding to Active" }
+            logger.e(e) { "[CallJoinInterceptor] interceptor threw, proceeding" }
+            true
         }
     }
 
@@ -134,5 +161,11 @@ internal class ActiveStateGate(
     fun cleanup() {
         peerConnectionObserverJob?.cancel()
         peerConnectionObserverJob = null
+        cleanupInterceptorJob()
+    }
+
+    fun cleanupInterceptorJob() {
+        interceptorJob?.cancel()
+        interceptorJob = null
     }
 }

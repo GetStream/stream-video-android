@@ -69,7 +69,12 @@ import java.util.UUID
 @Composable
 fun DirectCallJoinScreen(
     viewModel: DirectCallJoinViewModel = hiltViewModel(),
-    navigateToDirectCall: (cid: StreamCallId, memberList: String, joinAndRing: Boolean) -> Unit,
+    navigateToDirectCall: (
+        cid: StreamCallId,
+        memberList: String,
+        joinAndRing: Boolean,
+        useCallJoinInterceptor: Boolean,
+    ) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -135,9 +140,15 @@ private fun Header(user: User?) {
 private fun Body(
     uiState: DirectCallUiState,
     toggleUserSelection: (Int) -> Unit,
-    onStartCallClick: (cid: StreamCallId, membersList: String, joinAndRing: Boolean) -> Unit,
+    onStartCallClick: (
+        cid: StreamCallId,
+        membersList: String,
+        joinAndRing: Boolean,
+        useCallJoinInterceptor: Boolean,
+    ) -> Unit,
 ) {
     var callerJoinsFirst by rememberSaveable { mutableStateOf(true) }
+    var useCallJoinInterceptor by rememberSaveable { mutableStateOf(true) }
 
     Box(
         modifier = Modifier
@@ -179,6 +190,27 @@ private fun Body(
                             },
                         )
                     }
+                    Row(
+                        verticalAlignment = CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text("Use Call Join Interceptor", color = Color.White)
+                        Checkbox(
+                            useCallJoinInterceptor,
+                            modifier = Modifier.offset(x = 10.dp),
+                            colors = CheckboxDefaults.colors(
+                                uncheckedColor = Color.White, // Border color when unchecked
+                                checkedColor = Color.White, // Fill color when checked
+                                checkmarkColor = VideoTheme.colors.buttonBrandDefault, // Tick color
+                            ),
+                            onCheckedChange = {
+                                useCallJoinInterceptor = !useCallJoinInterceptor
+                            },
+                        )
+                    }
                     UserList(
                         entries = users,
                         onUserClick = { clickedIndex -> toggleUserSelection(clickedIndex) },
@@ -204,11 +236,11 @@ private fun Body(
                         onClick = {
                             onStartCallClick(
                                 StreamCallId("audio_call", UUID.randomUUID().toString()),
-//                                StreamCallId("default", UUID.randomUUID().toString()),
                                 users
                                     .filter { it.isSelected }
                                     .joinToString(separator = ",") { it.user.id ?: "" },
                                 callerJoinsFirst,
+                                useCallJoinInterceptor,
                             )
                         },
                     )
@@ -230,6 +262,7 @@ private fun Body(
                                     .filter { it.isSelected }
                                     .joinToString(separator = ",") { it.user.id ?: "" },
                                 callerJoinsFirst,
+                                useCallJoinInterceptor,
                             )
                         },
                     )
@@ -326,7 +359,7 @@ private fun HeaderPreview() {
                 },
             ),
             toggleUserSelection = {},
-        ) { _, _, _ ->
+        ) { _, _, _, _ ->
         }
     }
 }

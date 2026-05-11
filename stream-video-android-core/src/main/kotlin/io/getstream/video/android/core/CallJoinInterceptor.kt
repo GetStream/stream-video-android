@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core
 
+import kotlin.jvm.Throws
+
 /**
  * Controls when a ringing call transitions to [RingingState.Active].
  *
@@ -23,13 +25,28 @@ package io.getstream.video.android.core
  * the publisher peer connection becoming ready and the call going active.
  * Has no effect on non-ringing joins (livestream, direct join).
  */
-public interface RingingCallActivationInterceptor {
+public interface CallJoinInterceptor {
 
     /**
      * Called when the SDK is ready to transition to [RingingState.Active].
      * Suspend here to delay the transition; return to allow it to proceed.
      *
+     * Throw [CallJoinInterceptionException] to abort the join — the SDK will leave
+     * the call cleanly
+     *
      * The SDK enforces a 5-second maximum — the transition proceeds automatically on timeout.
      */
-    public suspend fun callReadyToActivateWithTimeout(call: Call)
+    @Throws(CallJoinInterceptionException::class)
+    public suspend fun callReadyToJoin(call: Call)
 }
+
+/**
+ * Thrown by a [CallJoinInterceptor] to abort the join.
+ *
+ * When raised inside [CallJoinInterceptor.callReadyToJoin], the SDK leaves the call
+ * cleanly using [reason] for tracing.
+ */
+public class CallJoinInterceptionException(
+    public val reason: String,
+    cause: Throwable? = null,
+) : RuntimeException(reason, cause)

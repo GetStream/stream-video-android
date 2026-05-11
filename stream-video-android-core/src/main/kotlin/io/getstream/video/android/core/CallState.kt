@@ -751,10 +751,14 @@ public class CallState(
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
     private val ringingLogger by taggedLogger("RingingState")
 
-    internal var ringingCallActivationInterceptor: RingingCallActivationInterceptor? = null
+    @Volatile
+    internal var callJoinInterceptor: CallJoinInterceptor? = null
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
+        if (event is CustomVideoEvent) {
+            logger.d { "[CustomVideoEvent] $event" }
+        }
 
         when (event) {
             is BlockedUserEvent -> {
@@ -1383,13 +1387,15 @@ public class CallState(
         ringingLogger.d { "Update: $state" }
 
         if (state is RingingState.Active) {
-            activeStateGate.awaitAndTransition(
-                ringingState.value,
-                call,
-                ringingCallActivationInterceptor,
-            ) {
-                _ringingState.value = state
-                activeStateGate.cleanup()
+            if (ringingState.value !is RingingState.Active) {
+                activeStateGate.awaitAndTransition(
+                    ringingState.value,
+                    call,
+                    callJoinInterceptor,
+                ) {
+                    _ringingState.value = state
+                    activeStateGate.cleanup()
+                }
             }
         } else {
             _ringingState.value = state

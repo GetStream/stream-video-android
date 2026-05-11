@@ -544,7 +544,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
-        ringingCallActivationInterceptor: RingingCallActivationInterceptor? = null,
+        callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -568,7 +568,7 @@ public class Call(
         // Ensure factory is created with the current audioBitrateProfile before joining
         ensureFactoryMatchesAudioProfile()
 
-        this.state.ringingCallActivationInterceptor = ringingCallActivationInterceptor
+        this.state.callJoinInterceptor = callJoinInterceptor
 
         // the join flow should retry up to 3 times
         // if the error is not permanent
@@ -618,10 +618,15 @@ public class Call(
         members: List<String>,
         createOptions: CreateCallOptions? = CreateCallOptions(members),
         video: Boolean = isVideoEnabled(),
+        callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
         logger.d { "[joinAndRing] #ringing; #track; members: $members, video: $video" }
         state.toggleJoinAndRingProgress(true)
-        return join(ring = false, createOptions = createOptions).flatMap { rtcSession ->
+        return join(
+            ring = false,
+            createOptions = createOptions,
+            callJoinInterceptor = callJoinInterceptor,
+        ).flatMap { rtcSession ->
             logger.d { "[joinAndRing] Joined #ringing; #track; ring: $members" }
             ring(RingCallRequest(isVideoEnabled(), members)).map {
                 logger.d { "[joinAndRing] Ringed #ringing; #track; ring: $members" }
