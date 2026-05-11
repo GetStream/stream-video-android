@@ -1384,15 +1384,13 @@ public class CallState(
         ringingLogger.d { "Update: $state" }
 
         if (state is RingingState.Active) {
-            if (ringingState.value !is RingingState.Active) {
-                activeStateGate.awaitAndTransition(
-                    ringingState.value,
-                    call,
-                    callJoinInterceptor,
-                ) {
-                    _ringingState.value = state
-                    activeStateGate.cleanup()
-                }
+            activeStateGate.awaitAndTransition(
+                ringingState.value,
+                call,
+                callJoinInterceptor,
+            ) {
+                _ringingState.value = state
+                activeStateGate.cleanup()
             }
         } else {
             _ringingState.value = state

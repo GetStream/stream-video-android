@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import androidx.lifecycle.AtomicReference
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -41,8 +42,9 @@ internal class ActiveStateGate(
     private val timeoutMs: Long = PEER_CONNECTION_OBSERVER_TIMEOUT,
 ) {
     private val logger by taggedLogger("ActiveStateGate")
-    private var peerConnectionObserverJob: Job? = null
-    private var interceptorJob: Job? = null
+
+    private var peerConnectionObserverJob: AtomicReference<Job?> = AtomicReference()
+    private var interceptorJob: AtomicReference<Job?> = AtomicReference()
 
     internal fun awaitAndTransition(
         currentRingingState: RingingState,
@@ -50,6 +52,9 @@ internal class ActiveStateGate(
         interceptor: CallJoinInterceptor?,
         onReady: () -> Unit,
     ) {
+        if (currentRingingState is RingingState.Active) {
+            return
+        }
         logger.d { "[awaitAndTransition], ringingState: $currentRingingState" }
 
         if (strategy == TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR) {
@@ -61,49 +66,51 @@ internal class ActiveStateGate(
             it is RingingState.Incoming || it is RingingState.Outgoing
         }
 
-        launchGate(call, interceptor, waitForPeerConnection = isRingingCall, onReady)
+        launchGate(call, interceptor, waitForPublisherConnection = isRingingCall, onReady)
     }
 
     private fun handleLegacyBehaviour(call: Call, onReady: () -> Unit, interceptor: CallJoinInterceptor?) {
-        if (interceptorJob?.isActive == true) return
+        if (interceptorJob.get()?.isActive == true) return
 
         if (interceptor == null) {
             onReady()
             return
         }
 
-        interceptorJob = coroutineScope.launch {
-            val shouldProceed = invokeInterceptor(call, interceptor)
-            if (!isActive) return@launch
+        interceptorJob.set(
+            coroutineScope.launch {
+                val shouldProceed = invokeInterceptor(call, interceptor)
+                if (!isActive) return@launch
 
-            if (shouldProceed) onReady()
-            cleanupInterceptorJob()
-        }
+                if (shouldProceed) onReady()
+                clearInterceptorJob()
+            },
+        )
     }
 
     private fun launchGate(
         call: Call,
         interceptor: CallJoinInterceptor?,
-        waitForPeerConnection: Boolean,
+        waitForPublisherConnection: Boolean,
         onReady: () -> Unit,
     ) {
-        logger.d {
-            "[launchGate] peerConnectionObserverJob?.isActive: ${peerConnectionObserverJob?.isActive}"
-        }
-        if (peerConnectionObserverJob?.isActive == true) return
+        logger.d { "[launchGate] ignored duplicate gate launch" }
+        if (peerConnectionObserverJob.get()?.isActive == true) return
 
-        peerConnectionObserverJob = coroutineScope.launch {
-            if (waitForPeerConnection) {
-                awaitPeerConnection(call)
+        peerConnectionObserverJob.set(
+            coroutineScope.launch {
+                if (waitForPublisherConnection) {
+                    awaitPeerConnection(call)
+                    if (!isActive) return@launch
+                }
+
+                val shouldProceed = invokeInterceptor(call, interceptor)
                 if (!isActive) return@launch
-            }
 
-            val shouldProceed = invokeInterceptor(call, interceptor)
-            if (!isActive) return@launch
-
-            if (shouldProceed) onReady()
-            cleanup()
-        }
+                if (shouldProceed) onReady()
+                cleanup()
+            },
+        )
     }
 
     private suspend fun awaitPeerConnection(call: Call) {
@@ -158,13 +165,13 @@ internal class ActiveStateGate(
     }
 
     fun cleanup() {
-        peerConnectionObserverJob?.cancel()
-        peerConnectionObserverJob = null
-        cleanupInterceptorJob()
+        peerConnectionObserverJob.get()?.cancel()
+        peerConnectionObserverJob.set(null)
+        clearInterceptorJob()
     }
 
-    fun cleanupInterceptorJob() {
-        interceptorJob?.cancel()
-        interceptorJob = null
+    fun clearInterceptorJob() {
+        interceptorJob.get()?.cancel()
+        interceptorJob.set(null)
     }
 }
