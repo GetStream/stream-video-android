@@ -31,8 +31,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.webrtc.PeerConnection.PeerConnectionState
 
-private const val PEER_CONNECTION_OBSERVER_TIMEOUT = 10_000L
-private const val INTERCEPTOR_TIMEOUT_MS = 10_000L
+private const val PEER_CONNECTION_OBSERVER_TIMEOUT = 5_000L
+private const val INTERCEPTOR_TIMEOUT_MS = 5_000L
 
 internal class ActiveStateGate(
     private val coroutineScope: CoroutineScope,
@@ -65,7 +65,6 @@ internal class ActiveStateGate(
     }
 
     private fun handleLegacyBehaviour(call: Call, onReady: () -> Unit, interceptor: CallJoinInterceptor?) {
-        logger.d { "[handleLegacyBehaviour]" }
         if (interceptorJob?.isActive == true) return
 
         if (interceptor == null) {

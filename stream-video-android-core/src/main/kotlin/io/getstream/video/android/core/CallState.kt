@@ -756,9 +756,6 @@ public class CallState(
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
-        if (event is CustomVideoEvent) {
-            logger.d { "[CustomVideoEvent] $event" }
-        }
 
         when (event) {
             is BlockedUserEvent -> {
