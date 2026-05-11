@@ -27,7 +27,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import io.getstream.android.video.generated.models.CustomVideoEvent
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.models.Filters
 import io.getstream.chat.android.models.querysort.QuerySortByField

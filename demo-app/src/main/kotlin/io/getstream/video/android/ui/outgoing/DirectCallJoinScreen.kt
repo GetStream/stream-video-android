@@ -103,7 +103,7 @@ private fun Header(user: User?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp) // Outer padding
+            .padding(start = 24.dp, end = 24.dp, top = 24.dp) // Outer padding
             .padding(vertical = 12.dp), // Inner padding
         verticalArrangement = Arrangement.Center,
     ) {
@@ -172,8 +172,7 @@ private fun Body(
                     Row(
                         verticalAlignment = CenterVertically,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 10.dp),
+                            .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         Text("Join First", color = Color.White)
