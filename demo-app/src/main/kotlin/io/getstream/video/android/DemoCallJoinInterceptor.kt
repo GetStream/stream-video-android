@@ -40,10 +40,6 @@ class DemoCallJoinInterceptor(
     }
 
     override suspend fun callReadyToJoin(call: Call) {
-        val previousRingingStatesText = previousRingingStates.joinToString { it.toString() }
-        logger.d {
-            "[callReadyToJoin] USE_CALL_JOIN_INTERCEPTOR: $USE_CALL_JOIN_INTERCEPTOR, previous ringingState: $previousRingingStatesText"
-        }
         if (USE_CALL_JOIN_INTERCEPTOR) {
             val isIncomingOrOutgoing = previousRingingStates.first {
                 it is RingingState.Incoming || it is RingingState.Outgoing
