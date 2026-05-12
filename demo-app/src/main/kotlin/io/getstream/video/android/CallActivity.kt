@@ -61,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap
 class CallActivity : ComposeStreamCallActivity() {
 
     companion object {
-        var USE_CALL_JOIN_INTERCEPTOR = true
+        var USE_CALL_JOIN_INTERCEPTOR = false
     }
 
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()

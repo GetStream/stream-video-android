@@ -149,7 +149,7 @@ private fun Body(
     ) -> Unit,
 ) {
     var callerJoinsFirst by rememberSaveable { mutableStateOf(true) }
-    var useCallJoinInterceptor by rememberSaveable { mutableStateOf(true) }
+    var useCallJoinInterceptor by rememberSaveable { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
