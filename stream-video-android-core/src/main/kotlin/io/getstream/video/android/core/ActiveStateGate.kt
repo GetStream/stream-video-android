@@ -39,7 +39,8 @@ internal class ActiveStateGate(
     private val coroutineScope: CoroutineScope,
     private val previousRingingStates: Set<RingingState>,
     private val strategy: TransitionToRingingStateStrategy = TransitionToRingingStateStrategy.PUBLISHER_CONNECTED,
-    private val timeoutMs: Long = PEER_CONNECTION_OBSERVER_TIMEOUT,
+    private val peerConnectionObserverTimeoutMs: Long = PEER_CONNECTION_OBSERVER_TIMEOUT,
+    private val interceptorTimeoutMs: Long = INTERCEPTOR_TIMEOUT_MS,
 ) {
     private val logger by taggedLogger("ActiveStateGate")
 
@@ -83,7 +84,7 @@ internal class ActiveStateGate(
                 if (!isActive) return@launch
 
                 if (shouldProceed) onReady()
-                clearInterceptorJob()
+                cancelInterceptorJob()
             },
         )
     }
@@ -115,7 +116,8 @@ internal class ActiveStateGate(
 
     private suspend fun awaitPeerConnection(call: Call) {
         val start = System.currentTimeMillis()
-        val result = withTimeoutOrNull(timeoutMs) { buildConnectionFlow(call).first() }
+        val result =
+            withTimeoutOrNull(peerConnectionObserverTimeoutMs) { buildConnectionFlow(call).first() }
         logConnectionResult(result, System.currentTimeMillis() - start)
     }
 
@@ -138,7 +140,7 @@ internal class ActiveStateGate(
         logger.d { "[invokeInterceptor] start at $startTime" }
         if (interceptor == null) return true
         return try {
-            withTimeoutOrNull(INTERCEPTOR_TIMEOUT_MS) {
+            withTimeoutOrNull(interceptorTimeoutMs) {
                 interceptor.callReadyToJoin(call)
             }
             logger.d { "[invokeInterceptor] finish at ${(System.currentTimeMillis() - startTime) / 1000}s " }
@@ -149,6 +151,7 @@ internal class ActiveStateGate(
             val message = "[CallJoinInterceptor] aborted with reason: ${e.reason}"
             logger.e(e) { message }
             call.leave(reason = message)
+            clearAllJobs()
             false
         } catch (e: Exception) {
             logger.e(e) { "[CallJoinInterceptor] interceptor threw, proceeding" }
@@ -167,10 +170,15 @@ internal class ActiveStateGate(
     fun cleanup() {
         peerConnectionObserverJob.get()?.cancel()
         peerConnectionObserverJob.set(null)
-        clearInterceptorJob()
+        cancelInterceptorJob()
     }
 
-    fun clearInterceptorJob() {
+    fun clearAllJobs() {
+        peerConnectionObserverJob.set(null)
+        interceptorJob.set(null)
+    }
+
+    fun cancelInterceptorJob() {
         interceptorJob.get()?.cancel()
         interceptorJob.set(null)
     }
