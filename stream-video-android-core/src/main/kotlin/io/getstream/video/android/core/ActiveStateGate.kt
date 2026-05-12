@@ -95,7 +95,6 @@ internal class ActiveStateGate(
         waitForPublisherConnection: Boolean,
         onReady: () -> Unit,
     ) {
-        logger.d { "[launchGate] ignored duplicate gate launch" }
         if (peerConnectionObserverJob.get()?.isActive == true) return
 
         peerConnectionObserverJob.set(

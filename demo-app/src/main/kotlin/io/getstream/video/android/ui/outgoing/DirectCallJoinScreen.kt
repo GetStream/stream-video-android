@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
@@ -175,7 +176,7 @@ private fun Body(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Join First", color = Color.White)
+                        Text(stringResource(id = R.string.join_first), color = Color.White)
                         Checkbox(
                             callerJoinsFirst,
                             modifier = Modifier.offset(x = 10.dp),
@@ -196,7 +197,7 @@ private fun Body(
                             .padding(vertical = 10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Use Call Join Interceptor", color = Color.White)
+                        Text(stringResource(id = R.string.use_call_join_interceptor), color = Color.White)
                         Checkbox(
                             useCallJoinInterceptor,
                             modifier = Modifier.offset(x = 10.dp),
