@@ -21,7 +21,6 @@ import io.getstream.video.android.CallActivity.Companion.USE_CALL_JOIN_INTERCEPT
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallJoinInterceptor
 import io.getstream.video.android.core.RingingState
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 
@@ -31,7 +30,6 @@ import kotlinx.coroutines.flow.first
  * Set [io.getstream.video.android.core.PEER_CONNECTION_OBSERVER_TIMEOUT] to 10_000L
  */
 class DemoCallJoinInterceptor(
-    private val callReadyToJoinFlow: StateFlow<Boolean>,
     private val previousRingingStates: Set<RingingState>,
 ) : CallJoinInterceptor {
     private val logger by taggedLogger("DemoCallJoinInterceptor")

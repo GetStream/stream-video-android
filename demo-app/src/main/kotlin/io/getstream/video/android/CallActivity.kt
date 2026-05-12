@@ -49,7 +49,6 @@ import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -68,10 +67,8 @@ class CallActivity : ComposeStreamCallActivity() {
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
     var observeCallReadyToJoinJob: Job? = null
     var observeRingingJob: Job? = null
-    val callerReadyToJoinFlow = MutableStateFlow<Boolean>(false)
     private val previousRingingStates = ConcurrentHashMap.newKeySet<RingingState>()
-    override val callJoinInterceptor =
-        DemoCallJoinInterceptor(callerReadyToJoinFlow, previousRingingStates)
+    override val callJoinInterceptor = DemoCallJoinInterceptor(previousRingingStates)
 
     /**
      * This code is required to pass the UI-tests (as it hardcodes the configuration)
