@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import stream.video.sfu.models.ParticipantSource
 
 /**
  * Renders a livestream video player UI based on the current state of the provided [call].
@@ -92,7 +93,9 @@ public fun LivestreamPlayer(
                     .map { (participant, _) -> participant }
             }
         }.flatMapLatest { participantWithVideo ->
-            participantWithVideo.firstOrNull()?.video ?: flow { emit(null) }
+            participantWithVideo.minByOrNull {
+                participantSourceRank(it.source)
+            }?.video ?: flow { emit(null) }
         },
     rendererContent: @Composable BoxScope.(Call) -> Unit = defaultRenderer,
     overlayContent: @Composable BoxScope.(Call) -> Unit = defaultLivestreamPlayerOverlay,
@@ -330,4 +333,13 @@ private val defaultRenderer: @Composable BoxScope.(Call) -> Unit = { call ->
 }
 private val defaultLivestreamPlayerOverlay: @Composable BoxScope.(Call) -> Unit = { call ->
     LivestreamPlayerOverlay(call = call)
+}
+
+private fun participantSourceRank(s: ParticipantSource): Int = when (s) {
+    ParticipantSource.PARTICIPANT_SOURCE_RTMP -> 0
+    ParticipantSource.PARTICIPANT_SOURCE_WHIP -> 1
+    ParticipantSource.PARTICIPANT_SOURCE_RTSP -> 2
+    ParticipantSource.PARTICIPANT_SOURCE_SRT -> 3
+    ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED -> 4
+    ParticipantSource.PARTICIPANT_SOURCE_SIP -> 2
 }
