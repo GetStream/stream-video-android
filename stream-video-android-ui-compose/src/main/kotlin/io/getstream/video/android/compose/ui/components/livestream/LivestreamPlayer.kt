@@ -44,7 +44,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import stream.video.sfu.models.ParticipantSource
 
 /**
  * Renders a livestream video player UI based on the current state of the provided [call].
@@ -80,22 +79,24 @@ public fun LivestreamPlayer(
     },
     videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
     livestreamFlow: Flow<ParticipantState.Video?> =
-        call.state.participants.flatMapLatest { participants: List<ParticipantState> ->
-            // For each participant, create a small Flow that watches videoEnabled.
-            val participantVideoFlows = participants.map { participant ->
-                participant.videoEnabled.map { enabled -> participant to enabled }
+        call.state.sortedParticipants.flatMapLatest { sorted ->
+            // Pick the first participant in sort order with an enabled video track.
+            // Ingress sources (RTMP / WHIP / SRT / RTSP) are prioritized by the Default
+            // SortPreset's bySourcePriority inside its visibility guard, so when viewers
+            // aren't rendered (UNKNOWN visibility) the host sorts first.
+            if (sorted.isEmpty()) {
+                flow { emit(null) }
+            } else {
+                combine(
+                    sorted.map { participant ->
+                        participant.videoEnabled.map { enabled -> participant to enabled }
+                    },
+                ) { pairs ->
+                    pairs.firstOrNull { (_, enabled) -> enabled }?.first
+                }
             }
-            // Combine these Flows: whenever a participant’s videoEnabled changes,
-            // we re-calculate which participants have video.
-            combine(participantVideoFlows) { participantEnabledPairs ->
-                participantEnabledPairs
-                    .filter { (_, isEnabled) -> isEnabled }
-                    .map { (participant, _) -> participant }
-            }
-        }.flatMapLatest { participantWithVideo ->
-            participantWithVideo.minByOrNull {
-                participantSourceRank(it.source)
-            }?.video ?: flow { emit(null) }
+        }.flatMapLatest { participant ->
+            participant?.video ?: flow { emit(null) }
         },
     rendererContent: @Composable BoxScope.(Call) -> Unit = defaultRenderer,
     overlayContent: @Composable BoxScope.(Call) -> Unit = defaultLivestreamPlayerOverlay,
@@ -333,13 +334,4 @@ private val defaultRenderer: @Composable BoxScope.(Call) -> Unit = { call ->
 }
 private val defaultLivestreamPlayerOverlay: @Composable BoxScope.(Call) -> Unit = { call ->
     LivestreamPlayerOverlay(call = call)
-}
-
-private fun participantSourceRank(s: ParticipantSource): Int = when (s) {
-    ParticipantSource.PARTICIPANT_SOURCE_RTMP -> 0
-    ParticipantSource.PARTICIPANT_SOURCE_WHIP -> 1
-    ParticipantSource.PARTICIPANT_SOURCE_RTSP -> 2
-    ParticipantSource.PARTICIPANT_SOURCE_SRT -> 3
-    ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED -> 4
-    ParticipantSource.PARTICIPANT_SOURCE_SIP -> 2
 }
