@@ -17,24 +17,22 @@
 package io.getstream.video.android.core.sorting
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallActions
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.video.android.core.pinning.PinUpdateAtTime
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.threeten.bp.OffsetDateTime
 
 /**
  * Regression test for the SortedParticipantsState channelFlow bug.
@@ -70,16 +68,12 @@ class SortedParticipantsChannelFlowRegressionTest {
             }
             val participants =
                 MutableStateFlow<Map<String, ParticipantState>>(emptyMap())
-            val pinned: StateFlow<Map<String, OffsetDateTime>> =
+            val pinned: StateFlow<Map<String, PinUpdateAtTime>> =
                 MutableStateFlow(emptyMap())
 
             val sut = SortedParticipantsState(scope, call, participants, pinned)
 
-            val sortedFlow = sut.asFlow().stateIn(
-                scope = backgroundScope,
-                started = SharingStarted.Eagerly,
-                initialValue = emptyList(),
-            )
+            val sortedFlow = sut.sortedParticipants
 
             advanceUntilIdle()
             assertThat(sortedFlow.value).isEmpty()

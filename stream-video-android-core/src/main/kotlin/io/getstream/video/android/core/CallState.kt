@@ -121,6 +121,7 @@ import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.sorting.SortPreset
 import io.getstream.video.android.core.sorting.SortedParticipantsState
 import io.getstream.video.android.core.utils.ScheduleConfig
 import io.getstream.video.android.core.utils.TaskSchedulerWithDebounce
@@ -314,15 +315,24 @@ public class CallState(
     internal val _serverPins: MutableStateFlow<Map<String, PinUpdateAtTime>> =
         MutableStateFlow(emptyMap())
 
-    internal val _pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> =
+    /**
+     * Combined pin state preserving the underlying [PinUpdateAtTime] (which carries
+     * [io.getstream.video.android.core.pinning.PinType] and the original timestamp).
+     * Internal; the sorter consumes this to apply local-pin > server-pin > recency.
+     * Local pins win on key collision.
+     */
+    internal val _pinnedParticipantsDetailed: StateFlow<Map<String, PinUpdateAtTime>> =
         combine(_localPins, _serverPins) { local, server ->
             val combined = mutableMapOf<String, PinUpdateAtTime>()
-            combined.putAll(local)
             combined.putAll(server)
-            combined.toMap().asIterable().associate {
-                Pair(it.key, it.value.at)
-            }
+            combined.putAll(local) // local overrides server on key collision
+            combined.toMap()
         }.stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+    internal val _pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> =
+        _pinnedParticipantsDetailed.mapState { detailed ->
+            detailed.mapValues { it.value.at }
+        }
 
     /**
      * Pinned participants, combined value both from server and local pins.
@@ -420,28 +430,33 @@ public class CallState(
     val livestream: StateFlow<ParticipantState.Video?> =
         livestreamFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
 
-    private var _sortedParticipantsState = SortedParticipantsState(
-        scope,
-        call,
-        _participants,
-        _pinnedParticipants,
+    private val _sortedParticipantsState = SortedParticipantsState(
+        scope = scope,
+        call = call,
+        participants = _participants,
+        pinnedParticipantsDetailed = _pinnedParticipantsDetailed,
     )
 
     /**
-     * Sorted participants based on
-     * - Pinned
-     * - Dominant Speaker
-     * - Screensharing
-     * - Last speaking at
-     * - Video enabled
-     * - Call joined at
+     * Sorted participants list. Order is driven by the active [SortPreset] (default
+     * [SortPreset.Default]); see [setSortPreset] to switch and [updateParticipantSortingOrder]
+     * to plug in an ad-hoc comparator.
      *
-     * Debounced 100ms to avoid rapid changes
+     * The list updates whenever participants, pin state, the preset, or any call event
+     * changes. Identical orderings are suppressed — consumers only see emissions for
+     * actual position changes.
      */
-    val sortedParticipants = _sortedParticipantsState.asFlow().debounce(100)
+    val sortedParticipants: StateFlow<List<ParticipantState>> =
+        _sortedParticipantsState.sortedParticipants
 
     /**
-     * Update participant sorting order
+     * Switch the active sort preset.
+     */
+    fun setSortPreset(preset: SortPreset) = _sortedParticipantsState.setPreset(preset)
+
+    /**
+     * Plug in an ad-hoc [Comparator] for participant sorting. Overrides the active preset
+     * until called again with a different comparator or [setSortPreset] is invoked.
      *
      * @param comparator a new comparator to be used in [sortedParticipants] flow.
      */
