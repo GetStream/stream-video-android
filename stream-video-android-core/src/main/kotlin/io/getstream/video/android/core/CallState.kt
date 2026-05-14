@@ -117,8 +117,8 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.permission.PermissionRequest
-import io.getstream.video.android.core.pinning.PinType
-import io.getstream.video.android.core.pinning.PinUpdateAtTime
+import io.getstream.video.android.core.pinning.PinEntry
+import io.getstream.video.android.core.pinning.PinManager
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.sorting.SortedParticipantsState
@@ -166,7 +166,6 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.collections.map
-import kotlin.collections.none
 import kotlin.collections.toMutableList
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -211,7 +210,7 @@ public sealed interface RealtimeConnection {
     public data object Disconnected : RealtimeConnection // normal disconnect by the app
 }
 
-private typealias SessionId = String
+internal typealias SessionId = String
 
 /**
  * The CallState class keeps all state for a call
@@ -272,7 +271,7 @@ public class CallState(
         it is RealtimeConnection.Reconnecting
     }
 
-    private val internalParticipants = ConcurrentHashMap<String, ParticipantState>()
+    private val internalParticipants = ConcurrentHashMap<SessionId, ParticipantState>()
     private val _participants = MutableStateFlow<Map<String, ParticipantState>>(emptyMap())
 
     /** Participants returns a list of participant state object. @see [ParticipantState] */
@@ -314,14 +313,14 @@ public class CallState(
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
     public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
 
-    internal val _localPins: MutableStateFlow<Map<SessionId, PinUpdateAtTime>> =
+    internal val _localPins: MutableStateFlow<Map<SessionId, PinEntry>> =
         MutableStateFlow(emptyMap())
-    internal val _serverPins: MutableStateFlow<Map<SessionId, PinUpdateAtTime>> =
+    internal val _serverPins: MutableStateFlow<Map<SessionId, PinEntry>> =
         MutableStateFlow(emptyMap())
 
     internal val _pinnedParticipants: StateFlow<Map<SessionId, OffsetDateTime>> =
         combine(_localPins, _serverPins) { local, server ->
-            val combined = mutableMapOf<String, PinUpdateAtTime>()
+            val combined = mutableMapOf<String, PinEntry>()
             combined.putAll(local)
             combined.putAll(server)
             combined.toMap().asIterable().associate {
@@ -333,6 +332,8 @@ public class CallState(
      * Pinned participants, combined value both from server and local pins.
      */
     val pinnedParticipants: StateFlow<Map<SessionId, OffsetDateTime>> = _pinnedParticipants
+
+    internal val pinManager = PinManager(_localPins, _serverPins) { internalParticipants }
 
     val stats = CallStats(call, scope)
 
@@ -767,7 +768,7 @@ public class CallState(
             }
 
             is PinsUpdatedEvent -> {
-                updateServerSidePins(event.pins)
+                pinManager.setServerPins(event.pins)
             }
 
             is UnblockedUserEvent -> {
@@ -1060,7 +1061,7 @@ public class CallState(
                 } else {
                     _ringingState.value = RingingState.Outgoing(acceptedByCallee = true)
                 }
-                updateServerSidePins(
+                pinManager.setServerPins(
                     event.callState.pins.map {
                         PinUpdate(it.user_id, it.session_id)
                     },
@@ -1080,7 +1081,7 @@ public class CallState(
                             getOrCreateParticipants(pendingParticipantsJoined.values.toList())
                         }
                     }
-                    updateServerSidePins(internalParticipants, event)
+                    pinManager.onParticipantJoined(internalParticipants, event)
                 } catch (e: Exception) {
                     logger.e(e) {
                         "[ParticipantJoinedEvent] #participants; #debounce; Failed to debounce, processing as usual."
@@ -1101,14 +1102,11 @@ public class CallState(
                 }
                 if (_localPins.value.containsKey(sessionId)) {
                     // Remove any pins for the participant
-                    unpin(sessionId)
+                    pinManager.unpin(sessionId)
                 }
 
                 if (_serverPins.value.containsKey(sessionId)) {
                     _serverPins.value = _serverPins.value.filter { it.key != event.participant.session_id }
-                    scope.launch {
-                        call.unpinForEveryone(sessionId, event.participant.user_id)
-                    }
                 }
             }
 
@@ -1255,40 +1253,6 @@ public class CallState(
                         call.state.moderationManager.clearVideoModeration()
                     }
                 }
-            }
-        }
-    }
-
-    private fun updateServerSidePins(pins: List<PinUpdate>) {
-        // Update participants that are still in the call
-        val pinnedInCall = pins.filter {
-            internalParticipants.containsKey(it.sessionId)
-        }
-        _serverPins.value = pinnedInCall.associate {
-            Pair(
-                it.sessionId,
-                PinUpdateAtTime(it, OffsetDateTime.now(Clock.systemUTC()), PinType.Server),
-            )
-        }
-    }
-
-    internal fun updateServerSidePins(internalParticipants: Map<SessionId, ParticipantState>, event: ParticipantJoinedEvent) {
-        val participantSessionId = event.participant.session_id
-        if (internalParticipants.containsKey(participantSessionId)) {
-            if (event.isPinned) {
-                val pinUpdate =
-                    PinUpdate(event.participant.user_id, participantSessionId)
-                val tempPinUpdateList = _serverPins.value.map { it.value.it }
-                val participantIsNotPresent =
-                    tempPinUpdateList.none { it.sessionId == participantSessionId }
-                if (participantIsNotPresent) {
-                    val updatedList = tempPinUpdateList.toMutableList().apply {
-                        add(pinUpdate)
-                    }
-                    updateServerSidePins(updatedList)
-                }
-            } else {
-                _serverPins.value = _serverPins.value.filter { it.key != participantSessionId }
             }
         }
     }
@@ -1681,19 +1645,11 @@ public class CallState(
     }
 
     fun pin(userId: String, sessionId: String) {
-        val pins = _localPins.value.toMutableMap()
-        pins[sessionId] = PinUpdateAtTime(
-            PinUpdate(userId, sessionId),
-            OffsetDateTime.now(Clock.systemUTC()),
-            PinType.Local,
-        )
-        _localPins.value = pins
+        pinManager.pin(userId, sessionId)
     }
 
     fun unpin(sessionId: String) {
-        val pins = _localPins.value.toMutableMap()
-        pins.remove(sessionId)
-        _localPins.value = pins
+        pinManager.unpin(sessionId)
     }
 
     fun updateFromResponse(result: StopLiveResponse) {

@@ -37,4 +37,4 @@ internal enum class PinType {
  * @param at at what time was the update received/created
  * @param type what type of update is it from SFU, or local
  */
-internal data class PinUpdateAtTime(val it: PinUpdate, val at: OffsetDateTime, val type: PinType)
+internal data class PinEntry(val it: PinUpdate, val at: OffsetDateTime, val type: PinType)
