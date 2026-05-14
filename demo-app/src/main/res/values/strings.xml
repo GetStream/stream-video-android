@@ -62,6 +62,8 @@
     <string name="policy_violation_message">We have to end your call as we have detected policy violation</string>
     <string name="policy_violation_action_button">OK</string>
     <string name="moderation_warning_title">Warning</string>
+    <string name="join_first">Join First</string>
+    <string name="use_call_join_interceptor">Use Call Join Interceptor</string>
 
     <plurals name="chat_typing">
         <item quantity="one">%s is typing</item>

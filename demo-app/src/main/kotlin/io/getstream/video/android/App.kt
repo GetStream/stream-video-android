@@ -20,6 +20,9 @@ import android.app.Application
 import android.content.Context
 import dagger.hilt.android.HiltAndroidApp
 import io.getstream.android.video.generated.models.CallEndedEvent
+import io.getstream.android.video.generated.models.CustomVideoEvent
+import io.getstream.video.android.DemoCallJoinInterceptor.Companion.CALLEE_READY_TO_JOIN_EVENT_TYPE
+import io.getstream.video.android.DemoCallJoinInterceptor.Companion.CALLER_READY_TO_JOIN_EVENT_TYPE
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.moderations.CallModerationConstants
 import io.getstream.video.android.data.model.PolicyViolationUiData
@@ -39,9 +42,19 @@ import kotlinx.coroutines.runBlocking
 @HiltAndroidApp
 class App : Application() {
 
+    companion object {
+        lateinit var demoApp: App
+    }
+
+    internal var policyViolationUiData: MutableStateFlow<PolicyViolationUiData?> =
+        MutableStateFlow(null)
+
+    public val callerReadyToJoinFlow = MutableStateFlow<CustomVideoEvent?>(null)
+    public val calleeReadyToJoinFlow = MutableStateFlow<CustomVideoEvent?>(null)
+
     override fun onCreate() {
         super.onCreate()
-
+        demoApp = this
         // We use the provided StreamUserDataStore in the demo app for user data storage.
         // This is a convenience class provided for storage but the SDK itself is not aware of
         // this instance and doesn't use it. You can use it to store the logged in user and then
@@ -66,10 +79,31 @@ class App : Application() {
         }
 
         observePolicyViolation()
+        observeCallReadyToJoin()
     }
 
-    internal var policyViolationUiData: MutableStateFlow<PolicyViolationUiData?> =
-        MutableStateFlow(null)
+    private fun observeCallReadyToJoin() {
+        CoroutineScope(Dispatchers.Default).launch {
+            StreamVideo.instanceState
+                .flatMapLatest { instance ->
+                    instance?.state?.ringingCall ?: flowOf(null)
+                }.filterNotNull()
+                .collectLatest { call ->
+                    call.events.collectLatest { event ->
+                        if (event is CustomVideoEvent) {
+                            when (event.custom["type"]) {
+                                CALLER_READY_TO_JOIN_EVENT_TYPE -> {
+                                    callerReadyToJoinFlow.value = event
+                                }
+                                CALLEE_READY_TO_JOIN_EVENT_TYPE -> {
+                                    calleeReadyToJoinFlow.value = event
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+    }
 
     private fun observePolicyViolation() {
         CoroutineScope(Dispatchers.Default).launch {
