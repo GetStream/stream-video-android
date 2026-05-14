@@ -1391,6 +1391,7 @@ public class CallState(
             ) {
                 _ringingState.value = state
                 activeStateGate.cleanup()
+                callJoinInterceptor = null
             }
         } else {
             _ringingState.value = state
