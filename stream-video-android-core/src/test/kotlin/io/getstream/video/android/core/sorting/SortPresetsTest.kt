@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.sorting
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.pinning.PinType
@@ -49,7 +48,9 @@ class SortPresetsTest {
             publishingAudio,
         )
         val sorted = participantsAF(scope, callActions).sortedWith(comparator)
-        assertThat(sorted.map { it.name.value }).containsExactly("B", "E", "D", "A", "F", "C").inOrder()
+        assertThat(
+            sorted.map { it.name.value },
+        ).containsExactly("B", "E", "D", "A", "F", "C").inOrder()
     }
 
     @Test
@@ -68,7 +69,9 @@ class SortPresetsTest {
             screenSharing,
         )
         val sorted = participantsAF(scope, callActions).sortedWith(comparator)
-        assertThat(sorted.map { it.name.value }).containsExactly("F", "D", "B", "A", "E", "C").inOrder()
+        assertThat(
+            sorted.map { it.name.value },
+        ).containsExactly("F", "D", "B", "A", "E", "C").inOrder()
     }
 
     // ------------------------------------------------------------------
@@ -129,7 +132,9 @@ class SortPresetsTest {
             "3" to pinUpdateAt("3", OffsetDateTime.parse("2026-05-14T10:00:01Z"), PinType.Server),
         )
         val sorted = ps.sortedWith(SortPreset.Default.build(pins))
-        assertThat(sorted.map { it.name.value }).containsExactly("B", "E", "F", "C", "D", "A").inOrder()
+        assertThat(
+            sorted.map { it.name.value },
+        ).containsExactly("B", "E", "F", "C", "D", "A").inOrder()
     }
 
     // ------------------------------------------------------------------
@@ -164,8 +169,8 @@ class SortPresetsTest {
     @Test
     fun `Default preset - two off-screen promotions bubble across viewport in chain order`() {
         val ps = participants15(scope, callActions).toMutableList()
-        ps[14]._dominantSpeaker.value = true        // P15 dominant
-        ps[2]._videoEnabled.value = true            // P3 gains video
+        ps[14]._dominantSpeaker.value = true // P15 dominant
+        ps[2]._videoEnabled.value = true // P3 gains video
 
         val sorted = ps.sortedWith(SortPreset.Default.build(emptyMap()))
         assertThat(sorted.map { it.name.value }).containsExactly(
@@ -177,7 +182,8 @@ class SortPresetsTest {
     @Test
     fun `Default preset - UNKNOWN off-screen still bubbles dominant speaker up`() {
         val ps = participants15(
-            scope, callActions,
+            scope,
+            callActions,
             offscreenVisibility = VisibilityOnScreenState.UNKNOWN,
         ).toMutableList()
         ps[14]._dominantSpeaker.value = true
@@ -203,7 +209,8 @@ class SortPresetsTest {
     @Test
     fun `SpeakerLayout - dominant speaker bubbles up even with all VISIBLE`() {
         val ps = participants15(
-            scope, callActions,
+            scope,
+            callActions,
             offscreenVisibility = VisibilityOnScreenState.VISIBLE,
         ).toMutableList()
         ps[14]._dominantSpeaker.value = true
@@ -216,7 +223,8 @@ class SortPresetsTest {
     fun `SpeakerLayout - publishing video does NOT bubble up when all VISIBLE`() {
         // publishingVideo is inside ifInvisible, so visible-visible pairs return 0.
         val ps = participants15(
-            scope, callActions,
+            scope,
+            callActions,
             offscreenVisibility = VisibilityOnScreenState.VISIBLE,
         ).toMutableList()
         ps[14]._videoEnabled.value = true

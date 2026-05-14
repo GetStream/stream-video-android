@@ -123,7 +123,11 @@ internal fun SortPreset.build(
                 publishingAudio,
             ),
         ),
-        byRole(AUDIO_ROOM_PRIORITY_ROLE_ADMIN, AUDIO_ROOM_PRIORITY_ROLE_HOST, AUDIO_ROOM_PRIORITY_ROLE_SPEAKER),
+        byRole(
+            AUDIO_ROOM_PRIORITY_ROLE_ADMIN,
+            AUDIO_ROOM_PRIORITY_ROLE_HOST,
+            AUDIO_ROOM_PRIORITY_ROLE_SPEAKER,
+        ),
     )
 }
 

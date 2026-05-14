@@ -58,11 +58,17 @@ class ComparatorsTest {
     @Test
     fun `ifInvisible returns 0 for visible-visible pair`() {
         val a = participant(
-            "a", scope, callActions, dominantSpeaker = true,
+            "a",
+            scope,
+            callActions,
+            dominantSpeaker = true,
             visibility = VisibilityOnScreenState.VISIBLE,
         )
         val b = participant(
-            "b", scope, callActions, dominantSpeaker = false,
+            "b",
+            scope,
+            callActions,
+            dominantSpeaker = false,
             visibility = VisibilityOnScreenState.VISIBLE,
         )
         assertThat(ifInvisible(dominantSpeaker).compare(a, b)).isEqualTo(0)
@@ -72,11 +78,17 @@ class ComparatorsTest {
     @Test
     fun `ifInvisible delegates when at least one side is INVISIBLE`() {
         val visibleDominant = participant(
-            "a", scope, callActions, dominantSpeaker = true,
+            "a",
+            scope,
+            callActions,
+            dominantSpeaker = true,
             visibility = VisibilityOnScreenState.VISIBLE,
         )
         val invisible = participant(
-            "b", scope, callActions, dominantSpeaker = false,
+            "b",
+            scope,
+            callActions,
+            dominantSpeaker = false,
             visibility = VisibilityOnScreenState.INVISIBLE,
         )
         assertThat(ifInvisible(dominantSpeaker).compare(visibleDominant, invisible))
@@ -88,11 +100,17 @@ class ComparatorsTest {
     @Test
     fun `ifInvisible treats UNKNOWN as visible (does NOT fire comparator)`() {
         val unknownDominant = participant(
-            "a", scope, callActions, dominantSpeaker = true,
+            "a",
+            scope,
+            callActions,
+            dominantSpeaker = true,
             visibility = VisibilityOnScreenState.UNKNOWN,
         )
         val unknownOther = participant(
-            "b", scope, callActions, dominantSpeaker = false,
+            "b",
+            scope,
+            callActions,
+            dominantSpeaker = false,
             visibility = VisibilityOnScreenState.UNKNOWN,
         )
         assertThat(ifInvisible(dominantSpeaker).compare(unknownDominant, unknownOther))
@@ -102,11 +120,17 @@ class ComparatorsTest {
     @Test
     fun `ifInvisibleOrUnknown returns 0 only when both are VISIBLE`() {
         val visibleDominant = participant(
-            "a", scope, callActions, dominantSpeaker = true,
+            "a",
+            scope,
+            callActions,
+            dominantSpeaker = true,
             visibility = VisibilityOnScreenState.VISIBLE,
         )
         val visibleOther = participant(
-            "b", scope, callActions, dominantSpeaker = false,
+            "b",
+            scope,
+            callActions,
+            dominantSpeaker = false,
             visibility = VisibilityOnScreenState.VISIBLE,
         )
         assertThat(ifInvisibleOrUnknown(dominantSpeaker).compare(visibleDominant, visibleOther))
@@ -116,11 +140,17 @@ class ComparatorsTest {
     @Test
     fun `ifInvisibleOrUnknown delegates when at least one side is INVISIBLE`() {
         val visible = participant(
-            "a", scope, callActions, dominantSpeaker = true,
+            "a",
+            scope,
+            callActions,
+            dominantSpeaker = true,
             visibility = VisibilityOnScreenState.VISIBLE,
         )
         val invisible = participant(
-            "b", scope, callActions, dominantSpeaker = false,
+            "b",
+            scope,
+            callActions,
+            dominantSpeaker = false,
             visibility = VisibilityOnScreenState.INVISIBLE,
         )
         assertThat(ifInvisibleOrUnknown(dominantSpeaker).compare(visible, invisible))
@@ -130,11 +160,17 @@ class ComparatorsTest {
     @Test
     fun `ifInvisibleOrUnknown delegates when at least one side is UNKNOWN`() {
         val visible = participant(
-            "a", scope, callActions, dominantSpeaker = true,
+            "a",
+            scope,
+            callActions,
+            dominantSpeaker = true,
             visibility = VisibilityOnScreenState.VISIBLE,
         )
         val unknown = participant(
-            "b", scope, callActions, dominantSpeaker = false,
+            "b",
+            scope,
+            callActions,
+            dominantSpeaker = false,
             visibility = VisibilityOnScreenState.UNKNOWN,
         )
         assertThat(ifInvisibleOrUnknown(dominantSpeaker).compare(visible, unknown))
@@ -144,11 +180,17 @@ class ComparatorsTest {
     @Test
     fun `ifInvisibleOrUnknown handles UNKNOWN-UNKNOWN by firing comparator`() {
         val a = participant(
-            "a", scope, callActions, dominantSpeaker = true,
+            "a",
+            scope,
+            callActions,
+            dominantSpeaker = true,
             visibility = VisibilityOnScreenState.UNKNOWN,
         )
         val b = participant(
-            "b", scope, callActions, dominantSpeaker = false,
+            "b",
+            scope,
+            callActions,
+            dominantSpeaker = false,
             visibility = VisibilityOnScreenState.UNKNOWN,
         )
         assertThat(ifInvisibleOrUnknown(dominantSpeaker).compare(a, b)).isEqualTo(-1)
