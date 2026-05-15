@@ -21,41 +21,60 @@ import io.getstream.video.android.core.SessionId
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.PinUpdate
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.threeten.bp.Clock
+import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.ZoneOffset
 
 internal class PinManager(
-    private val localPins: MutableStateFlow<Map<SessionId, PinEntry>>,
-    private val serverPins: MutableStateFlow<Map<SessionId, PinEntry>>,
+    private val timeProvider: TimeProvider = DefaultTimeProvider(),
     private val participants: () -> Map<SessionId, ParticipantState>,
 ) {
+    private val _localPins: MutableStateFlow<Map<SessionId, PinEntry>> =
+        MutableStateFlow(emptyMap())
+    internal val localPins: StateFlow<Map<SessionId, PinEntry>> = _localPins
+    private val _serverPins: MutableStateFlow<Map<SessionId, PinEntry>> =
+        MutableStateFlow(emptyMap())
+    internal val serverPins: StateFlow<Map<SessionId, PinEntry>> = _serverPins
+
+    fun onParticipantLeft(sessionId: SessionId) {
+        if (localPins.value.containsKey(sessionId)) {
+            // Remove any pins for the participant
+            unpin(sessionId)
+        }
+
+        if (serverPins.value.containsKey(sessionId)) {
+            _serverPins.value = serverPins.value.filter { it.key != sessionId }
+        }
+    }
 
     fun pin(userId: String, sessionId: String) {
-        localPins.value = localPins.value + (
+        _localPins.value = localPins.value + (
             sessionId to PinEntry(
                 PinUpdate(userId, sessionId),
-                OffsetDateTime.now(Clock.systemUTC()),
+                timeProvider.now(),
                 PinType.Local,
             )
             )
     }
 
     fun unpin(sessionId: String) {
-        localPins.value = localPins.value - sessionId
+        _localPins.value = localPins.value - sessionId
     }
 
     fun setServerPins(pins: List<PinUpdate>) {
-        serverPins.value = resolveServerPins(pins, buildPinnedAtLookup(pins))
+        _serverPins.value = resolveServerPins(pins, buildPinnedAtLookup(pins))
     }
 
-    fun onParticipantJoined(internalParticipants: Map<String, ParticipantState>, event: ParticipantJoinedEvent) {
+    fun onParticipantJoined(event: ParticipantJoinedEvent) {
         val sessionId = event.participant.session_id
-        if (internalParticipants.containsKey(sessionId) && event.isPinned) {
+        if (participants().containsKey(sessionId) && event.isPinned) {
             if (!serverPins.value.containsKey(sessionId)) {
-                serverPins.value = serverPins.value + (
+                _serverPins.value = serverPins.value + (
                     sessionId to PinEntry(
                         PinUpdate(event.participant.user_id, sessionId),
-                        getCurrentTime(),
+                        timeProvider.now(),
                         PinType.Server,
                     )
                     )
@@ -63,18 +82,17 @@ internal class PinManager(
         }
     }
 
-    // The server delivers pins in priority order (index 0 = highest priority).
-    // To preserve that order as timestamps, each pin is assigned
-    //   pinnedAt = now + (pins.size - index)
-    // so the first pin gets the largest value and the last gets the smallest.
-    // Sorting participants by pinnedAt descending then naturally reflects
-    // the server's intended priority order.
-    //
-    // Note: byUserId maps a userId to null when two pins share the same userId,
-    // disabling the userId fallback for that user to avoid ambiguous matches
-    // during reconnection (see resolveServerPins).
+    /**
+     * The server delivers pins in priority order (index 0 = highest priority).
+     * To preserve that order as timestamps, each pin is assigned
+     * pinnedAt = now + (pins.size - index)
+     * so the first pin gets the largest value and the last gets the smallest.
+     * Sorting participants by pinnedAt descending then naturally reflects
+     * the server's intended priority order.
+     * Duplicate userIds disable reconnect fallback matching to avoid ambiguity.
+     */
     private fun buildPinnedAtLookup(pins: List<PinUpdate>): PinLookup {
-        val now = System.currentTimeMillis()
+        val now = timeProvider.currentTimeMillis()
         val bySessionId = mutableMapOf<String, Long>()
         val byUserId = mutableMapOf<String, Long?>()
         pins.forEachIndexed { index, pin ->
@@ -85,39 +103,65 @@ internal class PinManager(
         return PinLookup(bySessionId, byUserId)
     }
 
-    // Resolves which participants are pinned server-side.
-    // Matches by sessionId first (exact); falls back to userId for reconnection scenarios.
+    /**
+     * Resolves which participants are pinned server-side.
+     * Matches by sessionId first (exact); falls back to userId for reconnection scenarios.
+     */
     private fun resolveServerPins(
         pins: List<PinUpdate>,
         lookup: PinLookup,
     ): Map<String, PinEntry> = participants()
         .mapNotNull { (sessionId, participant) ->
-            val pinnedAtTime = lookup.pinnedAtFor(sessionId, participant.userId.value)
-            pinnedAtTime?.let {
-                val pinTarget = pins.find { it.sessionId == sessionId }
+            val pinnedAtMillis = lookup.pinnedAtFor(
+                sessionId = sessionId,
+                userId = participant.userId.value,
+            ) ?: return@mapNotNull null
+
+            val pinTarget =
+                pins.find { it.sessionId == sessionId }
                     ?: pins.find { it.userId == participant.userId.value }
-                pinTarget?.let {
-                    val at = serverPins.value[sessionId]?.at ?: getCurrentTime()
-                    sessionId to PinEntry(
-                        it,
-                        at,
-                        PinType.Server,
-                    )
-                }
-            }
+                    ?: return@mapNotNull null
+
+            val existingTimestamp = serverPins.value[sessionId]?.at
+            val timestamp = existingTimestamp ?: timeProvider.fromMillis(pinnedAtMillis)
+            sessionId to PinEntry(
+                pinTarget,
+                timestamp,
+                PinType.Server,
+            )
         }
         .toMap()
-
-    private fun getCurrentTime() = OffsetDateTime.now(Clock.systemUTC())
 }
 
-// Holds pin timestamps split by lookup axis so sessionId and userId keys never collide.
-// byUserId is null for a given userId when multiple pins share it (conflict),
-// which disables the userId fallback for that user.
+/**
+ * Separate lookup maps for sessionId and reconnect-by-userId matching.
+ * Duplicate userIds disable the fallback match to avoid ambiguity.
+ */
 private data class PinLookup(
     val bySessionId: Map<String, Long>,
     val byUserId: Map<String, Long?>,
 ) {
     fun pinnedAtFor(sessionId: String, userId: String): Long? =
         bySessionId[sessionId] ?: byUserId[userId]
+}
+
+internal interface TimeProvider {
+    fun now(): OffsetDateTime
+    fun currentTimeMillis(): Long
+    fun fromMillis(millis: Long): OffsetDateTime
+}
+
+internal class DefaultTimeProvider : TimeProvider {
+    override fun now(): OffsetDateTime {
+        return OffsetDateTime.now(Clock.systemUTC())
+    }
+
+    override fun currentTimeMillis(): Long = System.currentTimeMillis()
+
+    override fun fromMillis(millis: Long): OffsetDateTime {
+        return OffsetDateTime.ofInstant(
+            Instant.ofEpochMilli(millis),
+            ZoneOffset.UTC,
+        )
+    }
 }

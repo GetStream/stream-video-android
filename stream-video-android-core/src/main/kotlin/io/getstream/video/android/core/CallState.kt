@@ -313,13 +313,9 @@ public class CallState(
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
     public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
 
-    internal val _localPins: MutableStateFlow<Map<SessionId, PinEntry>> =
-        MutableStateFlow(emptyMap())
-    internal val _serverPins: MutableStateFlow<Map<SessionId, PinEntry>> =
-        MutableStateFlow(emptyMap())
-
+    internal val pinManager = PinManager() { internalParticipants }
     internal val _pinnedParticipants: StateFlow<Map<SessionId, OffsetDateTime>> =
-        combine(_localPins, _serverPins) { local, server ->
+        combine(pinManager.localPins, pinManager.serverPins) { local, server ->
             val combined = mutableMapOf<String, PinEntry>()
             combined.putAll(local)
             combined.putAll(server)
@@ -332,8 +328,6 @@ public class CallState(
      * Pinned participants, combined value both from server and local pins.
      */
     val pinnedParticipants: StateFlow<Map<SessionId, OffsetDateTime>> = _pinnedParticipants
-
-    internal val pinManager = PinManager(_localPins, _serverPins) { internalParticipants }
 
     val stats = CallStats(call, scope)
 
@@ -1081,7 +1075,7 @@ public class CallState(
                             getOrCreateParticipants(pendingParticipantsJoined.values.toList())
                         }
                     }
-                    pinManager.onParticipantJoined(internalParticipants, event)
+                    pinManager.onParticipantJoined(event)
                 } catch (e: Exception) {
                     logger.e(e) {
                         "[ParticipantJoinedEvent] #participants; #debounce; Failed to debounce, processing as usual."
@@ -1100,14 +1094,12 @@ public class CallState(
                 if (current?.participant?.sessionId == sessionId) {
                     _screenSharingSession.value = null
                 }
-                if (_localPins.value.containsKey(sessionId)) {
+                if (pinManager.localPins.value.containsKey(sessionId)) {
                     // Remove any pins for the participant
                     pinManager.unpin(sessionId)
                 }
 
-                if (_serverPins.value.containsKey(sessionId)) {
-                    _serverPins.value = _serverPins.value.filter { it.key != event.participant.session_id }
-                }
+                pinManager.onParticipantLeft(sessionId)
             }
 
             is SubscriberOfferEvent -> {

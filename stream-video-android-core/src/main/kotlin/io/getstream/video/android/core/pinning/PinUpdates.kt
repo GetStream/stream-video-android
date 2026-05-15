@@ -33,8 +33,8 @@ internal enum class PinType {
 /**
  * Represents a [PinUpdate] enriched with time information.
  *
- * @param it the actual update, containing user and session IDs
+ * @param pinTarget the actual update, containing user and session IDs
  * @param at at what time was the update received/created
  * @param type what type of update is it from SFU, or local
  */
-internal data class PinEntry(val it: PinUpdate, val at: OffsetDateTime, val type: PinType)
+internal data class PinEntry(val pinTarget: PinUpdate, val at: OffsetDateTime, val type: PinType)
