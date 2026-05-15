@@ -38,7 +38,25 @@ import com.squareup.moshi.ToJson
  * 
  */
 
-data class TypingIndicators (
-    @Json(name = "enabled")
-    val enabled: kotlin.Boolean
+data class ChatPreferencesResponse (
+    @Json(name = "channel_mentions")
+    val channelMentions: kotlin.String? = null,
+
+    @Json(name = "default_preference")
+    val defaultPreference: kotlin.String? = null,
+
+    @Json(name = "direct_mentions")
+    val directMentions: kotlin.String? = null,
+
+    @Json(name = "group_mentions")
+    val groupMentions: kotlin.String? = null,
+
+    @Json(name = "here_mentions")
+    val hereMentions: kotlin.String? = null,
+
+    @Json(name = "role_mentions")
+    val roleMentions: kotlin.String? = null,
+
+    @Json(name = "thread_replies")
+    val threadReplies: kotlin.String? = null
 )

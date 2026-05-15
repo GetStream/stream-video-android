@@ -35,16 +35,19 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Request to determine SIP trunk authentication requirements
  */
 
-data class PrivacySettings (
-    @Json(name = "delivery_receipts")
-    val deliveryReceipts: io.getstream.android.video.generated.models.DeliveryReceipts? = null,
+data class ResolveSipAuthRequest (
+    @Json(name = "sip_caller_number")
+    val sipCallerNumber: kotlin.String,
 
-    @Json(name = "read_receipts")
-    val readReceipts: io.getstream.android.video.generated.models.ReadReceipts? = null,
+    @Json(name = "sip_trunk_number")
+    val sipTrunkNumber: kotlin.String,
 
-    @Json(name = "typing_indicators")
-    val typingIndicators: io.getstream.android.video.generated.models.TypingIndicators? = null
+    @Json(name = "from_host")
+    val fromHost: kotlin.String? = null,
+
+    @Json(name = "source_ip")
+    val sourceIp: kotlin.String? = null
 )

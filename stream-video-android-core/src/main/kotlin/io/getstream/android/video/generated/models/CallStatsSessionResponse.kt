@@ -38,26 +38,25 @@ import com.squareup.moshi.ToJson
  * 
  */
 
-data class UserMutedEvent (
-    @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+data class CallStatsSessionResponse (
+    @Json(name = "call_id")
+    val callId: kotlin.String,
 
-    @Json(name = "type")
-    val type: kotlin.String,
+    @Json(name = "call_session_id")
+    val callSessionId: kotlin.String,
 
-    @Json(name = "target_user")
-    val targetUser: kotlin.String? = null,
+    @Json(name = "call_type")
+    val callType: kotlin.String,
 
-    @Json(name = "target_users")
-    val targetUsers: kotlin.collections.List<kotlin.String>? = emptyList(),
+    @Json(name = "generated_at")
+    val generatedAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "user")
-    val user: io.getstream.android.video.generated.models.User? = null
+    @Json(name = "counts")
+    val counts: io.getstream.android.video.generated.models.CallStatsParticipantCounts,
+
+    @Json(name = "call_ended_at")
+    val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
+
+    @Json(name = "call_started_at")
+    val callStartedAt: org.threeten.bp.OffsetDateTime? = null
 )
-: io.getstream.android.video.generated.models.VideoEvent()
-{
-    
-    override fun getEventType(): kotlin.String {
-        return type
-    }    
-}

@@ -35,10 +35,13 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Geographic coordinates
  */
 
-data class ReadReceipts (
-    @Json(name = "enabled")
-    val enabled: kotlin.Boolean
+data class CoordinatesResponse (
+    @Json(name = "latitude")
+    val latitude: kotlin.Float,
+
+    @Json(name = "longitude")
+    val longitude: kotlin.Float
 )

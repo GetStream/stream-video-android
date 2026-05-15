@@ -35,13 +35,19 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * Basic response information
+ * 
  */
 
-data class SendReactionResponse (
-    @Json(name = "duration")
-    val duration: kotlin.String,
+data class CallLevelEventPayload (
+    @Json(name = "event_type")
+    val eventType: kotlin.String,
 
-    @Json(name = "reaction")
-    val reaction: io.getstream.android.video.generated.models.ReactionResponse
+    @Json(name = "timestamp")
+    val timestamp: kotlin.Int,
+
+    @Json(name = "user_id")
+    val userId: kotlin.String,
+
+    @Json(name = "payload")
+    val payload: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
 )

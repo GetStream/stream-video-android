@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2024 Stream.io Inc. All rights reserved.
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
@@ -23,40 +23,31 @@
 
 package io.getstream.android.video.generated.models
 
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.*
+import kotlin.io.*
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import org.threeten.bp.OffsetDateTime
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
+import com.squareup.moshi.ToJson
 
 /**
- * This event is sent after [CallRejectedEvent] is consumed in [io.getstream.video.android.core.CallState]
+ * 
  */
 
-internal data class LocalCallRejectedPostEvent (
-    @Json(name = "call_cid")
-    val callCid: String,
-
-    @Json(name = "created_at")
-    val createdAt: OffsetDateTime,
-
-    @Json(name = "call")
-    val call: CallResponse,
+data class VideoReactionResponse (
+    @Json(name = "type")
+    val type: kotlin.String,
 
     @Json(name = "user")
-    val user: UserResponse,
+    val user: io.getstream.android.video.generated.models.UserResponse,
 
-    @Json(name = "type")
-    val type: String,
+    @Json(name = "emoji_code")
+    val emojiCode: kotlin.String? = null,
 
-    @Json(name = "reason")
-    val reason: String? = null
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
 )
-: VideoEvent(), WSCallEvent
-{
-    
-    override fun getEventType(): String {
-        return type
-    }
-
-    override fun getCallCID(): String {
-        return callCid
-    }    
-}

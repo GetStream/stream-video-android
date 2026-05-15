@@ -36,6 +36,15 @@ import retrofit2.http.PUT
 interface ProductvideoApi {
     
     /**
+     * Report client-side call event
+     * Reports a single client-side join-lifecycle event (initiated or completed) for one of CoordinatorJoin, WSJoin, or PeerConnectionConnect. Pairs are correlated by event_session_id.
+     */
+    @POST("/video/call/client_event")
+    suspend fun reportClientCallEvent(
+        @Body reportClientCallEventRequest: io.getstream.android.video.generated.models.ReportClientCallEventRequest
+    ): io.getstream.android.video.generated.models.ReportClientCallEventResponse
+    
+    /**
      * Query call members
      * Query call members with filter query
      */
@@ -332,8 +341,8 @@ interface ProductvideoApi {
     suspend fun sendVideoReaction(
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String ,
-        @Body sendReactionRequest: io.getstream.android.video.generated.models.SendReactionRequest
-    ): io.getstream.android.video.generated.models.SendReactionResponse
+        @Body sendVideoReactionRequest: io.getstream.android.video.generated.models.SendVideoReactionRequest
+    ): io.getstream.android.video.generated.models.SendVideoReactionResponse
     
     /**
      * List recordings
@@ -716,7 +725,7 @@ interface ProductvideoApi {
         @Path("session") session: kotlin.String,
         @Path("filename") filename: kotlin.String
     ): io.getstream.android.video.generated.models.DeleteTranscriptionResponse
-    
+
     /**
      * Map call participants by location
      * 
@@ -850,7 +859,7 @@ interface ProductvideoApi {
     @GET("/video/longpoll")
     suspend fun videoConnect(
     )
-    
+
     /**
      * Resolve SIP Inbound Routing
      * Resolve SIP inbound routing based on trunk number, caller number, and challenge authentication

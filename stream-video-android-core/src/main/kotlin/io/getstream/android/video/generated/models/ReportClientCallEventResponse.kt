@@ -35,16 +35,10 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Response for reporting a client-side call event
  */
 
-data class SendReactionRequest (
-    @Json(name = "type")
-    val type: kotlin.String,
-
-    @Json(name = "emoji_code")
-    val emojiCode: kotlin.String? = null,
-
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
+data class ReportClientCallEventResponse (
+    @Json(name = "duration")
+    val duration: kotlin.String
 )

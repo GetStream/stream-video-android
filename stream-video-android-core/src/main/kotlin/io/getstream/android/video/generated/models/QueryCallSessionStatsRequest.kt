@@ -35,25 +35,22 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * Request to resolve SIP inbound routing using challenge authentication
+ * 
  */
 
-data class ResolveSipInboundRequest (
-    @Json(name = "sip_caller_number")
-    val sipCallerNumber: kotlin.String,
+data class QueryCallSessionStatsRequest (
+    @Json(name = "limit")
+    val limit: kotlin.Int? = null,
 
-    @Json(name = "sip_trunk_number")
-    val sipTrunkNumber: kotlin.String,
+    @Json(name = "next")
+    val next: kotlin.String? = null,
 
-    @Json(name = "routing_number")
-    val routingNumber: kotlin.String? = null,
+    @Json(name = "prev")
+    val prev: kotlin.String? = null,
 
-    @Json(name = "trunk_id")
-    val trunkId: kotlin.String? = null,
+    @Json(name = "sort")
+    val sort: kotlin.collections.List<io.getstream.android.video.generated.models.SortParamRequest>? = emptyList(),
 
-    @Json(name = "challenge")
-    val challenge: io.getstream.android.video.generated.models.SIPChallengeRequest? = null,
-
-    @Json(name = "sip_headers")
-    val sipHeaders: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()
+    @Json(name = "filter_conditions")
+    val filterConditions: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
 )

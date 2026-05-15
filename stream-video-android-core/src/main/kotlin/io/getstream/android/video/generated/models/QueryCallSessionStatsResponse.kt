@@ -35,16 +35,19 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Basic response information
  */
 
-data class Location (
-    @Json(name = "continent_code")
-    val continentCode: kotlin.String,
+data class QueryCallSessionStatsResponse (
+    @Json(name = "duration")
+    val duration: kotlin.String,
 
-    @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String,
+    @Json(name = "call_stats")
+    val callStats: kotlin.collections.List<io.getstream.android.video.generated.models.CallStatsSessionResponse> = emptyList(),
 
-    @Json(name = "subdivision_iso_code")
-    val subdivisionIsoCode: kotlin.String
+    @Json(name = "next")
+    val next: kotlin.String? = null,
+
+    @Json(name = "prev")
+    val prev: kotlin.String? = null
 )
