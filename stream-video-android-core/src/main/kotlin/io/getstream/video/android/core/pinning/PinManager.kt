@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.pinning
 
+import androidx.annotation.VisibleForTesting
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.SessionId
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
@@ -37,6 +38,16 @@ internal class PinManager(
     private val _serverPins: MutableStateFlow<Map<SessionId, PinEntry>> =
         MutableStateFlow(emptyMap())
     internal val serverPins: StateFlow<Map<SessionId, PinEntry>> = _serverPins
+
+    @VisibleForTesting
+    fun updateLocalPins(pins: Map<SessionId, PinEntry>) {
+        _localPins.value = pins
+    }
+
+    @VisibleForTesting
+    fun updateServerPins(pins: Map<SessionId, PinEntry>) {
+        _serverPins.value = pins
+    }
 
     fun onParticipantLeft(sessionId: SessionId) {
         if (localPins.value.containsKey(sessionId)) {
