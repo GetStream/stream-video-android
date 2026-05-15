@@ -79,7 +79,7 @@ public fun LivestreamPlayer(
     },
     videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
     livestreamFlow: Flow<ParticipantState.Video?> =
-        call.state.sortedParticipants.flatMapLatest { sorted ->
+        call.state.participants.flatMapLatest { sorted ->
             // Pick the first participant in sort order with an enabled video track.
             // Ingress sources (RTMP / WHIP / SRT / RTSP) are prioritized by the Default
             // SortPreset's bySourcePriority inside its visibility guard, so when viewers

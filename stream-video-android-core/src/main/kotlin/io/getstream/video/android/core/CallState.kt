@@ -271,9 +271,16 @@ public class CallState(
     private val internalParticipants = ConcurrentHashMap<String, ParticipantState>()
     private val _participants = MutableStateFlow<Map<String, ParticipantState>>(emptyMap())
 
-    /** Participants returns a list of participant state object. @see [ParticipantState] */
-    public val participants: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.values.toList() }
+    /**
+     * Participants in this call, ordered by the active [SortPreset]. The list emits whenever
+     * the order changes — identity-equal emissions are suppressed by the sorter's internal
+     * coalescing so consumers don't recompose for non-changes.
+     *
+     * Implemented as a property getter to defer resolution of [_sortedParticipantsState],
+     * which is initialized later in this class.
+     */
+    public val participants: StateFlow<List<ParticipantState>>
+        get() = _sortedParticipantsState.sortedParticipants
 
     private val _startedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
 
@@ -302,9 +309,14 @@ public class CallState(
         MutableStateFlow(emptyList())
     public val activeSpeakers: StateFlow<List<ParticipantState>> = _activeSpeakers
 
-    /** participants other than yourself */
-    public val remoteParticipants: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.filterKeys { key -> key != call.sessionId }.values.toList() }
+    /**
+     * Participants other than yourself, in the same sort order as [participants].
+     * Lazy-initialized to defer resolving [_sortedParticipantsState] (defined later in
+     * this class).
+     */
+    public val remoteParticipants: StateFlow<List<ParticipantState>> by lazy {
+        participants.mapState { list -> list.filter { it.sessionId != call.sessionId } }
+    }
 
     /** the dominant speaker */
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
@@ -438,16 +450,19 @@ public class CallState(
     )
 
     /**
-     * Sorted participants list. Order is driven by the active [SortPreset] (default
-     * [SortPreset.Default]); see [setSortPreset] to switch and [updateParticipantSortingOrder]
-     * to plug in an ad-hoc comparator.
+     * Alias for [participants], which is already sorted by the active [SortPreset].
      *
-     * The list updates whenever participants, pin state, the preset, or any call event
-     * changes. Identical orderings are suppressed — consumers only see emissions for
-     * actual position changes.
+     * Kept for source compatibility while callers migrate. The previous dual-flow design
+     * (raw `participants` map ordering vs. sorted list) created subtle staleness bugs in
+     * the renderer; collapsing into a single sorted flow eliminates that class of issue.
      */
-    val sortedParticipants: StateFlow<List<ParticipantState>> =
-        _sortedParticipantsState.sortedParticipants
+    @Deprecated(
+        message = "participants is already sorted. Use participants directly.",
+        replaceWith = ReplaceWith("participants"),
+        level = DeprecationLevel.WARNING,
+    )
+    val sortedParticipants: StateFlow<List<ParticipantState>>
+        get() = participants
 
     /**
      * Switch the active sort preset.

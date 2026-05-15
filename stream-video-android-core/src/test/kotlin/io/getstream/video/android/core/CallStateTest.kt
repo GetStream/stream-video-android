@@ -119,7 +119,7 @@ class CallStateTest : IntegrationTestBase() {
     fun `Participants should be sorted`() = runTest {
         val call = client.call("default", randomUUID())
 
-        val sortedParticipants = call.state.sortedParticipants.stateIn(
+        val sortedParticipants = call.state.participants.stateIn(
             backgroundScope,
             SharingStarted.Eagerly,
             emptyList(),
@@ -188,7 +188,7 @@ class CallStateTest : IntegrationTestBase() {
     @Test
     fun `Update sorting order`() = runTest {
         val call = client.call("default", randomUUID())
-        val sortedParticipants = call.state.sortedParticipants.stateIn(
+        val sortedParticipants = call.state.participants.stateIn(
             backgroundScope,
             SharingStarted.Eagerly,
             emptyList(),
