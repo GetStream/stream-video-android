@@ -35,16 +35,13 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Basic response information
  */
 
-data class Credentials (
-    @Json(name = "token")
-    val token: kotlin.String,
+data class SendReactionResponse (
+    @Json(name = "duration")
+    val duration: kotlin.String,
 
-    @Json(name = "ice_servers")
-    val iceServers: kotlin.collections.List<io.getstream.android.video.generated.models.ICEServer> = emptyList(),
-
-    @Json(name = "server")
-    val server: io.getstream.android.video.generated.models.SFUResponse
+    @Json(name = "reaction")
+    val reaction: io.getstream.android.video.generated.models.ReactionResponse
 )

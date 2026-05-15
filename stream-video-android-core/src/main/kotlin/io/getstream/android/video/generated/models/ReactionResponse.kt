@@ -35,13 +35,19 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * Basic response information
+ * 
  */
 
-data class SendVideoReactionResponse (
-    @Json(name = "duration")
-    val duration: kotlin.String,
+data class ReactionResponse (
+    @Json(name = "type")
+    val type: kotlin.String,
 
-    @Json(name = "reaction")
-    val reaction: io.getstream.android.video.generated.models.VideoReactionResponse
+    @Json(name = "user")
+    val user: io.getstream.android.video.generated.models.UserResponse,
+
+    @Json(name = "emoji_code")
+    val emojiCode: kotlin.String? = null,
+
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
 )

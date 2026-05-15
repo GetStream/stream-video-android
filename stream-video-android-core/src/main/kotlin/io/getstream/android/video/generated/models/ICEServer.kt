@@ -38,7 +38,7 @@ import com.squareup.moshi.ToJson
  * ICE server configuration for WebRTC connections
  */
 
-data class ICEServerResponse (
+data class ICEServer (
     @Json(name = "password")
     val password: kotlin.String,
 

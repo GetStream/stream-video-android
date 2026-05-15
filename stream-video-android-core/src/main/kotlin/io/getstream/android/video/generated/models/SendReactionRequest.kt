@@ -38,13 +38,13 @@ import com.squareup.moshi.ToJson
  * 
  */
 
-data class Credentials (
-    @Json(name = "token")
-    val token: kotlin.String,
+data class SendReactionRequest (
+    @Json(name = "type")
+    val type: kotlin.String,
 
-    @Json(name = "ice_servers")
-    val iceServers: kotlin.collections.List<io.getstream.android.video.generated.models.ICEServer> = emptyList(),
+    @Json(name = "emoji_code")
+    val emojiCode: kotlin.String? = null,
 
-    @Json(name = "server")
-    val server: io.getstream.android.video.generated.models.SFUResponse
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
 )
