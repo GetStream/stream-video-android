@@ -22,6 +22,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallActions
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.events.PinUpdate
+import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.getstream.video.android.core.pinning.PinType
 import io.getstream.video.android.core.pinning.PinUpdateAtTime
 import io.mockk.every
@@ -151,6 +152,86 @@ class SortedParticipantsStateTest {
         advanceUntilIdle()
         assertThat(sut.sorted.value.first().sessionId).isEqualTo("b")
     }
+
+    @Test
+    fun `visible-block internal order survives off-screen dominant-speaker promotion`() =
+        runTest(dispatcher) {
+            // End-to-end through the live flow: not just the static comparator. Verifies
+            // that when an off-screen participant gains a sort-promoting signal, the tiles
+            // currently in the viewport keep their relative order in the emitted list.
+            val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
+            val sut = newSut(events = events)
+
+            // 15 participants, P8..P12 visible (sessionIds "8" through "12").
+            val ps = (1..15).associate { n ->
+                val visible = n in 8..12
+                val visibility =
+                    if (visible) {
+                        VisibilityOnScreenState.VISIBLE
+                    } else {
+                        VisibilityOnScreenState.INVISIBLE
+                    }
+                n.toString() to sut.participant(n.toString()).apply {
+                    _visibleOnScreen.value = visibility
+                }
+            }
+            sut.participants.value = ps
+            advanceUntilIdle()
+
+            val initialOrder = sut.sorted.value.map { it.sessionId }
+            assertThat(initialOrder)
+                .containsExactlyElementsIn((1..15).map { it.toString() }).inOrder()
+
+            // P15 (off-screen, after the viewport) becomes dominant speaker. Mutating the
+            // field directly mirrors the SDK's DominantSpeakerChangedEvent handler; the
+            // call event drives the resort.
+            ps["15"]!!._dominantSpeaker.value = true
+            events.emit(mockk<VideoEvent>(relaxed = true))
+            advanceUntilIdle()
+
+            // P15 jumps to top.
+            assertThat(sut.sorted.value.first().sessionId).isEqualTo("15")
+
+            // The visible window's internal order is preserved across the resort.
+            val visibleBlock = sut.sorted.value
+                .filter { it.sessionId.toInt() in 8..12 }
+                .map { it.sessionId }
+            assertThat(visibleBlock)
+                .containsExactly("8", "9", "10", "11", "12").inOrder()
+        }
+
+    @Test
+    fun `visible block stays stable when a visible participant gains a signal`() =
+        runTest(dispatcher) {
+            // Edge case: the signal-gainer is itself inside the viewport. Even then the
+            // visible/visible predicate returns 0 and the block keeps its order.
+            val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
+            val sut = newSut(events = events)
+            val ps = (1..15).associate { n ->
+                val visible = n in 8..12
+                n.toString() to sut.participant(n.toString()).apply {
+                    _visibleOnScreen.value = if (visible) {
+                        VisibilityOnScreenState.VISIBLE
+                    } else {
+                        VisibilityOnScreenState.INVISIBLE
+                    }
+                }
+            }
+            sut.participants.value = ps
+            advanceUntilIdle()
+
+            // P10 (the third visible tile) starts speaking.
+            ps["10"]!!._dominantSpeaker.value = true
+            events.emit(mockk<VideoEvent>(relaxed = true))
+            advanceUntilIdle()
+
+            // ifInvisibleOrUnknown's predicate sees only visible-visible pairs for the
+            // P8..P12 set → returns 0 → no internal reshuffle within the block. P10 stays
+            // at index 9 (its original position) instead of jumping to the top.
+            assertThat(sut.sorted.value.map { it.sessionId })
+                .containsExactlyElementsIn((1..15).map { it.toString() })
+                .inOrder()
+        }
 
     // ------------------------------------------------------------------
     // Helpers
