@@ -35,6 +35,7 @@ import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
+import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
@@ -45,12 +46,29 @@ import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import io.getstream.video.android.util.FullScreenCircleProgressBar
 import io.getstream.video.android.util.StreamVideoInitHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.util.concurrent.ConcurrentHashMap
 
 @OptIn(StreamCallActivityDelicateApi::class)
 class CallActivity : ComposeStreamCallActivity() {
 
+    companion object {
+        var USE_CALL_JOIN_INTERCEPTOR = false
+    }
+
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
+    var observeCallReadyToJoinJob: Job? = null
+    var observeRingingJob: Job? = null
+    private val previousRingingStates = ConcurrentHashMap.newKeySet<RingingState>()
+    override val callJoinInterceptor = DemoCallJoinInterceptor(previousRingingStates)
 
     /**
      * This code is required to pass the UI-tests (as it hardcodes the configuration)
@@ -59,6 +77,27 @@ class CallActivity : ComposeStreamCallActivity() {
     override fun loadConfigFromIntent(intent: Intent?): StreamCallActivityConfiguration {
         return super.loadConfigFromIntent(intent)
             .copy(closeScreenOnCallEnded = false, canSkipPermissionRationale = false)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        observeRingingState()
+    }
+
+    private fun observeRingingState() {
+        previousRingingStates.clear()
+        observeRingingJob?.cancel()
+        observeRingingJob = CoroutineScope(Dispatchers.Default).launch {
+            StreamVideo.instanceState
+                .flatMapLatest { instance ->
+                    instance?.state?.ringingCall ?: flowOf(null)
+                }.filterNotNull()
+                .collectLatest { call ->
+                    call.state.ringingState.collectLatest {
+                        previousRingingStates.add(it)
+                    }
+                }
+        }
     }
 
     @StreamCallActivityDelicateApi
@@ -162,5 +201,12 @@ class CallActivity : ComposeStreamCallActivity() {
                 safeFinish()
             }
         }
+    }
+
+    override fun finish() {
+        super.finish()
+        observeCallReadyToJoinJob?.cancel()
+        observeRingingJob?.cancel()
+        previousRingingStates.clear()
     }
 }

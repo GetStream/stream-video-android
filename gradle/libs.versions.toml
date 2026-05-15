@@ -15,7 +15,6 @@ kotlinSerialization = "1.6.3"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.9.0"
 cameraCore = "1.4.2"
-kotlinDokka = "1.9.20"
 
 androidxMaterial = "1.12.0"
 androidxAppCompat = "1.7.0"
@@ -248,7 +247,6 @@ stream-android-library = { id = "io.getstream.android.library", version.ref = "s
 stream-android-test = { id = "io.getstream.android.test", version.ref = "streamConventions" }
 stream-java-library = { id = "io.getstream.java.library", version.ref = "streamConventions" }
 stream-java-platform = { id = "io.getstream.java.platform", version.ref = "streamConventions" }
-dokka = { id = "org.jetbrains.dokka", version.ref = "kotlinDokka" }
 google-gms = { id = "com.google.gms.google-services", version.ref = "googleService" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }
 paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" }
