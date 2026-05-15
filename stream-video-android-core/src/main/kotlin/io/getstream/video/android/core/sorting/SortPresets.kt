@@ -95,6 +95,10 @@ internal fun SortPreset.build(
                 publishingAudio,
             ),
         ),
+        // Deterministic tiebreaker (mirrors iOS's trailing `ifInvisibleBy(userId)`).
+        // Runs only when at least one side is off-screen so the visible block keeps
+        // its internal order.
+        ifInvisibleOrUnknown(byUserId),
     )
 
     SortPreset.SpeakerLayout -> combineComparators(
@@ -110,6 +114,7 @@ internal fun SortPreset.build(
                 publishingAudio,
             ),
         ),
+        ifInvisible(byUserId),
     )
 
     SortPreset.AudioRoom -> combineComparators(
@@ -128,6 +133,7 @@ internal fun SortPreset.build(
             AUDIO_ROOM_PRIORITY_ROLE_HOST,
             AUDIO_ROOM_PRIORITY_ROLE_SPEAKER,
         ),
+        ifInvisibleOrUnknown(byUserId),
     )
 }
 

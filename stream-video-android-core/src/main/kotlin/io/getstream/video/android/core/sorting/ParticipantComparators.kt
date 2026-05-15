@@ -106,6 +106,22 @@ public val byName: Comparator<ParticipantState> = Comparator { a, b ->
 }
 
 /**
+ * Sorts participants by their [ParticipantState.userId] ascending (string compare).
+ *
+ * Intended as a deterministic last-resort tiebreaker so participants with otherwise
+ * equal signals (no dominant-speaker, no pin, no raised hand, etc.) don't shuffle
+ * around between sort passes. Mirrors iOS's `userId` comparator used in the trailing
+ * `ifInvisibleBy(userId)` of every iOS preset.
+ *
+ * Note: this is lexicographic string compare — for production user IDs (UUIDs or
+ * arbitrary strings) the resulting order is meaningless to humans but is stable
+ * across re-sorts.
+ */
+public val byUserId: Comparator<ParticipantState> = Comparator { a, b ->
+    a.userId.value.compareTo(b.userId.value)
+}
+
+/**
  * Sorts participants by their [ParticipantState.joinedAt], earliest first. Nulls last.
  */
 public val byJoinedAt: Comparator<ParticipantState> = Comparator { a, b ->

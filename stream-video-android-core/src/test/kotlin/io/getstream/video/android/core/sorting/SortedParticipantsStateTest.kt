@@ -111,10 +111,10 @@ class SortedParticipantsStateTest {
         // Calling setPreset clears the custom comparator and reverts to preset order.
         sut.state.setPreset(SortPreset.Default)
         advanceUntilIdle()
-        assertThat(sut.sorted.value.map { it.sessionId }).containsExactly("c", "b", "a").inOrder()
-        // ↑ Default preset returns 0 for every pair (no signals on a/b/c, UNKNOWN visibility
-        // would fire ifInvisibleOrUnknown but every comparator inside returns 0). With stable
-        // sort, the input order (which is now [c, b, a] from the previous sort) is preserved.
+        // Default preset's trailing `ifInvisibleOrUnknown(byUserId)` tiebreaker fires
+        // (visibility UNKNOWN by default → predicate true) and sorts the participants
+        // alphabetically by userId. The previous custom order is replaced.
+        assertThat(sut.sorted.value.map { it.sessionId }).containsExactly("a", "b", "c").inOrder()
     }
 
     @Test

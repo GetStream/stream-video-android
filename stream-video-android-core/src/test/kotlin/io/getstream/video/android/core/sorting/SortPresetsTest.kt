@@ -167,15 +167,22 @@ class SortPresetsTest {
     }
 
     @Test
-    fun `Default preset - two off-screen promotions bubble across viewport in chain order`() {
+    fun `Default preset - two off-screen promotions bubble to top, byUserId tiebreaks the rest`() {
         val ps = participants15(scope, callActions).toMutableList()
         ps[14]._dominantSpeaker.value = true // P15 dominant
         ps[2]._videoEnabled.value = true // P3 gains video
 
         val sorted = ps.sortedWith(SortPreset.Default.build(emptyMap()))
+        // P15 wins on dominantSpeaker → index 0
+        // P3 wins on publishingVideo → index 1
+        // Remaining 13 participants have no distinguishing signals; the trailing
+        // `ifInvisibleOrUnknown(byUserId)` decorator sorts them lexicographically by
+        // userId. Fixture userIds are the same as sessionIds ("1".."14"), so the lex
+        // order is "1", "10", "11", "12", "13", "14", "2", "4", "5", "6", "7", "8", "9".
+        // In real calls userIds are UUIDs and the order looks "random" but is stable.
         assertThat(sorted.map { it.name.value }).containsExactly(
-            "P15", "P3", "P1", "P2", "P4", "P5", "P6", "P7",
-            "P8", "P9", "P10", "P11", "P12", "P13", "P14",
+            "P15", "P3", "P1", "P10", "P11", "P12", "P13", "P14",
+            "P2", "P4", "P5", "P6", "P7", "P8", "P9",
         ).inOrder()
     }
 

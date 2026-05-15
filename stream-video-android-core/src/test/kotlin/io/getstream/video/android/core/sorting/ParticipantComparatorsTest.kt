@@ -95,6 +95,22 @@ class ParticipantComparatorsTest {
     }
 
     @Test
+    fun `byUserId sorts lexicographically by userId`() {
+        val a = participant("alpha", scope, callActions, userId = "alice")
+        val b = participant("beta", scope, callActions, userId = "bob")
+        assertThat(byUserId.compare(a, b)).isLessThan(0)
+        assertThat(byUserId.compare(b, a)).isGreaterThan(0)
+        assertThat(byUserId.compare(a, a)).isEqualTo(0)
+    }
+
+    @Test
+    fun `byUserId on equal ids returns 0`() {
+        val a = participant("a-session", scope, callActions, userId = "u")
+        val b = participant("b-session", scope, callActions, userId = "u")
+        assertThat(byUserId.compare(a, b)).isEqualTo(0)
+    }
+
+    @Test
     fun `byJoinedAt sorts earliest first, nulls last`() {
         val t = OffsetDateTime.parse("2026-05-14T10:00:00Z")
         val a = participant("a", scope, callActions, joinedAt = t)
