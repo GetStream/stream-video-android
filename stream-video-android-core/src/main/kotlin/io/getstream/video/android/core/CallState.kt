@@ -1097,10 +1097,6 @@ public class CallState(
                 if (current?.participant?.sessionId == sessionId) {
                     _screenSharingSession.value = null
                 }
-                if (pinManager.localPins.value.containsKey(sessionId)) {
-                    // Remove any pins for the participant
-                    pinManager.unpin(sessionId)
-                }
 
                 pinManager.onParticipantLeft(sessionId)
             }
