@@ -82,6 +82,7 @@ import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
@@ -447,6 +448,10 @@ public class CallState(
         call = call,
         participants = _participants,
         pinnedParticipantsDetailed = _pinnedParticipantsDetailed,
+        // Pick up the call type's default sort preset (e.g. CallType.Livestream →
+        // LivestreamOrAudioRoom). Unknown call types fall back to SortPreset.Default.
+        // Callers can override at any time via setSortPreset(...).
+        initialPreset = CallType.fromName(call.type)?.sortPreset ?: SortPreset.Default,
     )
 
     /**

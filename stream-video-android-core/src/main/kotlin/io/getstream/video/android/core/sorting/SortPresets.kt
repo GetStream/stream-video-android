@@ -54,13 +54,15 @@ public sealed interface SortPreset {
     public data object SpeakerLayout : SortPreset
 
     /**
-     * Audio room / livestream-style room preset. Role-aware: admins, hosts and speakers
-     * sort ahead of regular participants among those with the same activity profile.
+     * Livestream / audio-room preset. Role-aware: admins, hosts and speakers sort ahead
+     * of regular participants among those with the same activity profile.
      *
      * Order: `ifInvisibleOrUnknown(dominantSpeaker → speaking → raised-hand →
      *        ingress-source → publishing video → publishing audio)` → role priority.
+     *
+     * Matches iOS `livestreamOrAudioRoomSortPreset` and React `livestreamOrAudioRoomSortPreset`.
      */
-    public data object AudioRoom : SortPreset
+    public data object LivestreamOrAudioRoom : SortPreset
 }
 
 /**
@@ -117,7 +119,7 @@ internal fun SortPreset.build(
         ifInvisible(byUserId),
     )
 
-    SortPreset.AudioRoom -> combineComparators(
+    SortPreset.LivestreamOrAudioRoom -> combineComparators(
         ifInvisibleOrUnknown(
             combineComparators(
                 dominantSpeaker,

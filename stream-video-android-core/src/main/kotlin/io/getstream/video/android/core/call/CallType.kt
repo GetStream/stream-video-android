@@ -16,8 +16,20 @@
 
 package io.getstream.video.android.core.call
 
+import io.getstream.video.android.core.sorting.SortPreset
+
 sealed class CallType(val name: String) {
-    object Livestream : CallType("livestream")
+    /**
+     * Default participant sort preset for this call type. Applied automatically when the
+     * call's [io.getstream.video.android.core.CallState] is constructed. Callers can still
+     * override at runtime via `CallState.setSortPreset(...)` or
+     * `CallState.updateParticipantSortingOrder(...)`.
+     */
+    open val sortPreset: SortPreset get() = SortPreset.Default
+
+    object Livestream : CallType("livestream") {
+        override val sortPreset: SortPreset get() = SortPreset.LivestreamOrAudioRoom
+    }
     object AudioCall : CallType("audio_call")
     object Default : CallType("default")
     object AnyMarker : CallType("ALL_CALL_TYPES")

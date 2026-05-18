@@ -242,26 +242,26 @@ class SortPresetsTest {
     }
 
     // ------------------------------------------------------------------
-    // AudioRoom preset — role priority
+    // LivestreamOrAudioRoom preset — role priority
     // ------------------------------------------------------------------
 
     @Test
-    fun `AudioRoom - host role beats regular participant`() {
+    fun `LivestreamOrAudioRoom - host role beats regular participant`() {
         val ps = participants15(scope, callActions).toMutableList()
         ps[10]._roles.value = listOf("host") // P11 is a host
 
-        val sorted = ps.sortedWith(SortPreset.AudioRoom.build(emptyMap()))
+        val sorted = ps.sortedWith(SortPreset.LivestreamOrAudioRoom.build(emptyMap()))
         // P11 wins the role tier among all role-less participants.
         assertThat(sorted.first().name.value).isEqualTo("P11")
     }
 
     @Test
-    fun `AudioRoom - dominant speaker beats host when off-screen`() {
+    fun `LivestreamOrAudioRoom - dominant speaker beats host when off-screen`() {
         val ps = participants15(scope, callActions).toMutableList()
         ps[10]._roles.value = listOf("host")
         ps[5]._dominantSpeaker.value = true // P6 dominant
 
-        val sorted = ps.sortedWith(SortPreset.AudioRoom.build(emptyMap()))
+        val sorted = ps.sortedWith(SortPreset.LivestreamOrAudioRoom.build(emptyMap()))
         // ifInvisibleOrUnknown(dominantSpeaker → ...) runs first (P6 invisible/off-screen),
         // ahead of byRole.
         assertThat(sorted.first().name.value).isEqualTo("P6")
