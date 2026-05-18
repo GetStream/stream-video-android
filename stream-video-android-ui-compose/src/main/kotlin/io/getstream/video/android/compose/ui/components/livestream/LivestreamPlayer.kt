@@ -37,6 +37,7 @@ import io.getstream.video.android.compose.ui.components.video.config.videoRender
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.sorting.bySourcePriority
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import kotlinx.coroutines.flow.Flow
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import stream.video.sfu.models.ParticipantSource
 
 /**
  * Renders a livestream video player UI based on the current state of the provided [call].
@@ -79,11 +81,20 @@ public fun LivestreamPlayer(
     },
     videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
     livestreamFlow: Flow<ParticipantState.Video?> =
-        call.state.participants.flatMapLatest { sorted ->
-            // Pick the first participant in sort order with an enabled video track.
-            // Ingress sources (RTMP / WHIP / SRT / RTSP) are prioritized by the Default
-            // SortPreset's bySourcePriority inside its visibility guard, so when viewers
-            // aren't rendered (UNKNOWN visibility) the host sorts first.
+        call.state.participants.flatMapLatest { participants ->
+            // Re-sort by ingress source priority before picking. The grid-level preset
+            // already orders ingress sources first, but applying the livestream-specific
+            // priority here makes the picker independent of whatever preset is active —
+            // changing the grid preset cannot accidentally affect the livestream host.
+            // Stable sort preserves the upstream order among equal-priority participants.
+            val sorted = participants.sortedWith(
+                bySourcePriority(
+                    ParticipantSource.PARTICIPANT_SOURCE_RTMP,
+                    ParticipantSource.PARTICIPANT_SOURCE_WHIP,
+                    ParticipantSource.PARTICIPANT_SOURCE_SRT,
+                    ParticipantSource.PARTICIPANT_SOURCE_RTSP,
+                ),
+            )
             if (sorted.isEmpty()) {
                 flow { emit(null) }
             } else {
