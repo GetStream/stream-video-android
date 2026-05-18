@@ -456,12 +456,17 @@ public class CallState(
      * (raw `participants` map ordering vs. sorted list) created subtle staleness bugs in
      * the renderer; collapsing into a single sorted flow eliminates that class of issue.
      */
+    /**
+     * Deprecated alias for [participants]. Return type is intentionally declared as
+     * [Flow] (not [StateFlow]) to preserve binary compatibility with the pre-existing
+     * public API — [StateFlow] is a [Flow], so consumers see the same underlying value.
+     */
     @Deprecated(
         message = "participants is already sorted. Use participants directly.",
         replaceWith = ReplaceWith("participants"),
         level = DeprecationLevel.WARNING,
     )
-    val sortedParticipants: StateFlow<List<ParticipantState>>
+    val sortedParticipants: Flow<List<ParticipantState>>
         get() = participants
 
     /**
