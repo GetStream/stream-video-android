@@ -1,0 +1,95 @@
+/*
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.getstream.video.android.core
+
+internal enum class SdkCause {
+    /** App was swiped from the recents screen. */
+    TASK_REMOVED,
+
+    /** Telecom system put the call on hold for another call. */
+    CALL_ON_HOLD,
+
+    /** SDK-level cleanup (e.g. logout, StreamVideo instance teardown). */
+    CLIENT_CLEANUP,
+
+    /** Outgoing call auto-cancel timeout elapsed with no answer. */
+    RING_TIMEOUT,
+
+    ACCEPTED_ON_OTHER_DEVICE,
+    LOCAL_CALL_MISSED_EVENT,
+    REJECTED_BY_ALL,
+    END_CALL,
+}
+
+internal enum class UserActionCause {
+    /** User rejected the call from a paired wearable device. */
+    WEARABLE_REJECTED,
+
+    /** A [io.getstream.video.android.core.CallJoinInterceptor] aborted the join sequence. */
+    CALL_JOIN_ABORT,
+    REJECTED_BY_SELF,
+    LEAVE_FROM_NOTIFICATION,
+}
+
+internal enum class BackendCause {
+    LEAVE_TIMEOUT_AFTER_DISCONNECT,
+    CALL_ENDED_EVENT,
+    CALL_ENDED_SFU_EVENT,
+}
+
+internal sealed interface CallLeaveReason {
+
+    val message: String?
+
+    val metadata: Map<String, String>
+
+    /** The local user explicitly chose to leave. */
+    data class UserAction(
+        val cause: UserActionCause,
+        override val message: String? = null,
+        override val metadata: Map<String, String> = emptyMap(),
+    ) : CallLeaveReason
+
+    /** The backend ended or rejected the call (CallEndedEvent, SFU termination, etc.). */
+    data class Backend(
+        val cause: BackendCause,
+        val backendCode: String? = null,
+        override val message: String?,
+        override val metadata: Map<String, String> = emptyMap(),
+    ) : CallLeaveReason
+
+    /** All reconnect attempts were exhausted after a network or SFU failure. */
+    data class RetryExhausted(
+        val retryCount: Int,
+        val failureCode: String?,
+        override val message: String?,
+        override val metadata: Map<String, String> = emptyMap(),
+    ) : CallLeaveReason
+
+    /** A platform/system event (task removal, hold, wearable, interceptor, etc.) caused the leave. */
+    data class SdkDriven(
+        val cause: SdkCause,
+        override val message: String? = null,
+        override val metadata: Map<String, String> = emptyMap(),
+    ) : CallLeaveReason
+
+    /** SDK consumer supplied an arbitrary reason. */
+    data class Custom(
+        override val message: String? = null,
+        override val metadata: Map<String, String> = emptyMap(),
+    ) : CallLeaveReason
+}

@@ -428,10 +428,11 @@ public class Call(
                     }
                     return@launch
                 }
+                val message = "Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
                 logger.d {
-                    "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds} (connection=$conn)"
+                    "[NetworkStateListener#onDisconnected] #network; $message (connection=$conn)"
                 }
-                leave()
+                leave(CallLeaveReason.Backend(cause = BackendCause.LEAVE_TIMEOUT_AFTER_DISCONNECT, message = message)) // TODO Rahul before merge
             }
             logger.d { "[NetworkStateListener#onDisconnected] #network; at $lastDisconnect" }
         }
@@ -1244,12 +1245,18 @@ public class Call(
     // endregion
 
     /** Leave the call, but don't end it for other users */
-    fun leave(reason: String = "user") {
-        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
-        internalLeave(null, reason)
+    internal fun leave(reason: CallLeaveReason) {
+        logger.d { "[leave] #ringing; call_cid:$cid" }
+        internalLeave(reason)
     }
 
-    private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
+    fun leave(reason: String = "user") {
+        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
+        internalLeave(CallLeaveReason.Custom(reason))
+    }
+
+//    private fun internalLeave(reason: CallLeaveReason) = atomicLeave {
+    private fun internalLeave(reason: CallLeaveReason) = atomicLeave {
         monitorSubscriberPCStateJob?.cancel()
         monitorPublisherPCStateJob?.cancel()
         monitorPublisherPCStateJob = null
@@ -1259,7 +1266,7 @@ public class Call(
         sfuListener?.cancel()
         sfuEvents?.cancel()
         state._connection.value = RealtimeConnection.Disconnected
-        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = $id" }
+        logger.v { "[leave] #ringing; call_id = $id" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
             return@atomicLeave
@@ -1289,12 +1296,12 @@ public class Call(
         (client as StreamVideoClient).onCallCleanUp(this)
 
         clientImpl.scope.launch {
-            val leaveReason = "[reason=$reason, error=${disconnectionReason?.message}]"
+            val leaveReason = "[reason=${reason::class.simpleName}, message=${reason.message}]"
+//            val leaveReason = "[reason=$reason]"
             eventReporter?.let { reporter ->
-                val abortReason = if (disconnectionReason != null) {
-                    CallEventReporter.AbortReason.BACKEND_LEAVE
-                } else {
-                    CallEventReporter.AbortReason.CLIENT_ABORTED
+                val abortReason = when (reason) {
+                    is CallLeaveReason.Backend -> CallEventReporter.AbortReason.BACKEND_LEAVE
+                    else -> CallEventReporter.AbortReason.CLIENT_ABORTED
                 }
                 reporter.abortAllInFlight(abortReason)
             }
@@ -1314,7 +1321,12 @@ public class Call(
         // end the call for everyone
         val result = clientImpl.endCall(type, id)
         // cleanup
-        leave("call-ended")
+        leave(
+            CallLeaveReason.SdkDriven(
+                cause = SdkCause.END_CALL,
+                message = "CALL_ENDED", // Call ended by local user
+            ),
+        )
         return result
     }
 
