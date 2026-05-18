@@ -880,6 +880,11 @@ public class RtcSession internal constructor(
         options: List<PublishOption>? = null,
     ): SfuConnectionResult {
         logger.i { "[connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
+        val wsReporter = call.eventReporter
+        val wsEventId = wsReporter?.reportWsJoinInitiated(
+            sfuId = sfuName,
+            wasPreviouslyConnected = reconnectDetails != null,
+        )
         val request = buildJoinRequest(reconnectDetails, options)
         sfuTracer.trace(
             PeerConnectionTraceKey.JOIN_REQUEST.value,
@@ -896,6 +901,13 @@ public class RtcSession internal constructor(
         }
         return when (terminalState) {
             is SfuSocketState.Connected -> {
+                wsEventId?.let {
+                    wsReporter?.reportWsJoinCompleted(
+                        it,
+                        success = true,
+                        retryCount = 0,
+                    )
+                }
                 sendConnectionTimeStats(reconnectDetails?.strategy)
                 SfuConnectionResult.Connected
             }
@@ -909,11 +921,29 @@ public class RtcSession internal constructor(
                 }
                 logger.w { "[connectInternal] $msg" }
                 sfuTracer.trace("connect-failed", msg)
+                wsEventId?.let {
+                    wsReporter?.reportWsJoinCompleted(
+                        it,
+                        success = false,
+                        retryCount = 0,
+                        failureReason = msg,
+                        failureCode = "WS_DISCONNECTED",
+                    )
+                }
                 sendCallStats()
                 SfuConnectionResult.Failed(Exception(msg))
             }
             else -> {
                 sfuTracer.trace("connect-failed", "Connection timed out")
+                wsEventId?.let {
+                    wsReporter?.reportWsJoinCompleted(
+                        it,
+                        success = false,
+                        retryCount = 0,
+                        failureReason = "SFU connection timed out",
+                        failureCode = "REQUEST_TIMEOUT",
+                    )
+                }
                 sendCallStats()
                 SfuConnectionResult.Failed(Exception("SFU connection timed out"))
             }

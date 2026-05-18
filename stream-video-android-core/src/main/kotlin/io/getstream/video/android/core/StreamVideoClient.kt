@@ -87,8 +87,10 @@ import io.getstream.video.android.core.audio.AudioExecutionContext
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.events.reporting.CallEventReporter
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
+import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
@@ -1179,6 +1181,16 @@ internal class StreamVideoClient internal constructor(
             calls[cid]!!
         } else {
             val call = Call(this, type, idOrRandom, user)
+            call.eventReporter = CallEventReporter(
+                api = coordinatorConnectionModule.api,
+                callType = type,
+                callId = idOrRandom,
+                callCid = cid,
+                userId = user.id,
+                userAgent = { HeadersUtil().buildSdkTrackingHeaders() },
+                sdkVersion = BuildConfig.STREAM_VIDEO_VERSION,
+                scope = call.scope,
+            )
             calls[cid] = call
             call
         }

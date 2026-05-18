@@ -76,6 +76,8 @@ import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.events.reporting.CallEventReporter
+import io.getstream.video.android.core.events.reporting.PeerConnectionRole
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.AudioTrack
@@ -445,6 +447,9 @@ public class Call(
     private var sfuListener: Job? = null
     private var sfuEvents: Job? = null
 
+    /** Reports join lifecycle events to the backend for success-rate analytics. Set by StreamVideoClient. */
+    internal var eventReporter: CallEventReporter? = null
+
     init {
         scope.launch {
             soundInputProcessor.currentAudioLevel.collect {
@@ -760,15 +765,22 @@ public class Call(
                 .flatMapLatest { publisher ->
                     publisher.iceState.map { publisher to it }
                 }
-                .collect { (publisher, state) ->
-                    when (state) {
+                .collect { (publisher, iceState) ->
+                    if (iceState != null) {
+                        eventReporter?.onPeerConnectionIceStateChanged(
+                            role = PeerConnectionRole.PUBLISH,
+                            iceState = iceState,
+                            dtlsState = publisher.state.value,
+                        )
+                    }
+                    when (iceState) {
                         PeerConnection.IceConnectionState.FAILED,
                         PeerConnection.IceConnectionState.DISCONNECTED,
                         -> {
                             publisher.connection.restartIce()
                         }
                         else -> {
-                            logger.d { "[monitorPubConnectionState] Ice connection state is $state" }
+                            logger.d { "[monitorPubConnectionState] Ice connection state is $iceState" }
                         }
                     }
                 }
@@ -776,17 +788,31 @@ public class Call(
 
         monitorSubscriberPCStateJob?.cancel()
         monitorSubscriberPCStateJob = scope.launch {
-            session.value?.subscriber?.value?.iceState?.collect {
-                when (it) {
-                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session.value?.requestSubscriberIceRestart()
+            session
+                .filterNotNull()
+                .flatMapLatest { it.subscriber.filterNotNull() }
+                .flatMapLatest { subscriber ->
+                    subscriber.iceState.map { subscriber to it }
+                }
+                .collect { (subscriber, iceState) ->
+                    if (iceState != null) {
+                        eventReporter?.onPeerConnectionIceStateChanged(
+                            role = PeerConnectionRole.SUBSCRIBE,
+                            iceState = iceState,
+                            dtlsState = subscriber.state.value,
+                        )
                     }
-
-                    else -> {
-                        logger.d { "[monitorSubConnectionState] Ice connection state is $it" }
+                    when (iceState) {
+                        PeerConnection.IceConnectionState.FAILED,
+                        PeerConnection.IceConnectionState.DISCONNECTED,
+                        -> {
+                            session.value?.requestSubscriberIceRestart()
+                        }
+                        else -> {
+                            logger.d { "[monitorSubConnectionState] Ice connection state is $iceState" }
+                        }
                     }
                 }
-            }
         }
         network.subscribe(listener)
     }
@@ -1264,6 +1290,14 @@ public class Call(
 
         clientImpl.scope.launch {
             val leaveReason = "[reason=$reason, error=${disconnectionReason?.message}]"
+            eventReporter?.let { reporter ->
+                val abortReason = if (disconnectionReason != null) {
+                    CallEventReporter.AbortReason.BACKEND_LEAVE
+                } else {
+                    CallEventReporter.AbortReason.CLIENT_ABORTED
+                }
+                reporter.abortAllInFlight(abortReason)
+            }
             safeCall {
                 session.value?.sfuTracer?.trace("leave-call", leaveReason)
                 val stats = collectStats()
@@ -1801,6 +1835,10 @@ public class Call(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<JoinCallResponse> {
+        val reporter = eventReporter
+        reporter?.resetJoinSuccessId()
+        val coordEventId = reporter?.reportCoordinatorJoinInitiated()
+
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
         val result = clientImpl.joinCall(
             type, id,
@@ -1819,6 +1857,25 @@ public class Call(
         )
         result.onSuccess {
             state.updateFromResponse(it)
+            coordEventId?.let { id ->
+                reporter?.reportCoordinatorJoinCompleted(
+                    eventSessionId = id,
+                    success = true,
+                    retryCount = 0,
+                    callSessionId = it.call.currentSessionId,
+                )
+            }
+        }
+        if (result is Failure) {
+            coordEventId?.let { id ->
+                reporter?.reportCoordinatorJoinCompleted(
+                    eventSessionId = id,
+                    success = false,
+                    retryCount = 0,
+                    failureReason = (result.value as? Error)?.message,
+                    failureCode = null,
+                )
+            }
         }
         return result
     }
