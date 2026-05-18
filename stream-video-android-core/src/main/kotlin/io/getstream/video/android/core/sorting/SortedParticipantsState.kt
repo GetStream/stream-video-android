@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Maintains the sorted participants list as a hot [StateFlow].
@@ -52,6 +54,11 @@ internal class SortedParticipantsState(
     private val customComparator = MutableStateFlow<Comparator<ParticipantState>?>(null)
 
     private var lastSortOrder: List<String> = emptyList()
+
+    // Serializes resort() across the two driving collectors (state combine + call events)
+    // so updates to lastSortOrder + _sortedParticipants are atomic regardless of the
+    // dispatcher the call's scope is running on.
+    private val resortMutex = Mutex()
 
     private val _sortedParticipants = MutableStateFlow<List<ParticipantState>>(emptyList())
     val sortedParticipants: StateFlow<List<ParticipantState>> = _sortedParticipants
@@ -92,7 +99,7 @@ internal class SortedParticipantsState(
         custom = customComparator.value,
     )
 
-    private fun resort(inputs: SortInputs) {
+    private suspend fun resort(inputs: SortInputs) = resortMutex.withLock {
         val comparator = inputs.custom ?: inputs.preset.build(inputs.pins)
         val ordered = orderedForSort(lastSortOrder, inputs.participants).sortedWith(comparator)
         val newOrder = ordered.map { it.sessionId }

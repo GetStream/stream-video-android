@@ -137,6 +137,13 @@ internal fun SortPreset.build(
         ),
         ifInvisibleOrUnknown(byUserId),
     )
+
+    // Defensive fallback for SortPreset implementations defined outside this module.
+    // Kotlin sealed interfaces aren't enforced by the JVM on targets below JDK 17, so
+    // Java consumers can implement SortPreset and pass an unknown instance to
+    // setSortPreset(...). Fall back to Default rather than throwing — sorting must
+    // never crash a call.
+    else -> SortPreset.Default.build(pins)
 }
 
 internal const val AUDIO_ROOM_PRIORITY_ROLE_ADMIN: String = "admin"
