@@ -30,6 +30,15 @@ sealed class CallType(val name: String) {
     object Livestream : CallType("livestream") {
         override val sortPreset: SortPreset get() = SortPreset.LivestreamOrAudioRoom
     }
+
+    /**
+     * Group audio chat (mirrors React's `audio_room` and iOS's `audio_room` call type).
+     * Distinct from [AudioCall], which is the Android-specific 1:1 voice call type.
+     */
+    object AudioRoom : CallType("audio_room") {
+        override val sortPreset: SortPreset get() = SortPreset.LivestreamOrAudioRoom
+    }
+
     object AudioCall : CallType("audio_call")
     object Default : CallType("default")
     object AnyMarker : CallType("ALL_CALL_TYPES")
@@ -43,7 +52,13 @@ sealed class CallType(val name: String) {
 
     companion object {
         fun fromName(name: String): CallType? {
-            return listOf(Livestream, AudioCall, Default, AnyMarker).find { it.name == name }
+            return listOf(
+                Livestream,
+                AudioRoom,
+                AudioCall,
+                Default,
+                AnyMarker,
+            ).find { it.name == name }
         }
     }
 }
