@@ -119,7 +119,7 @@ class CallStateTest : IntegrationTestBase() {
     fun `Participants should be sorted`() = runTest {
         val call = client.call("default", randomUUID())
 
-        val sortedParticipants = call.state.sortedParticipants.stateIn(
+        val sortedParticipants = call.state.participants.stateIn(
             backgroundScope,
             SharingStarted.Eagerly,
             emptyList(),
@@ -170,21 +170,26 @@ class CallStateTest : IntegrationTestBase() {
         delay(60)
 
         val sorted2 = sortedParticipants.value.map { it.sessionId }
-        assertThat(sorted2).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))
+        // Default preset ordering with this setup:
+        //   tier 1 (screenSharing): "2"
+        //   tier 2 (pinned): "1"
+        //   tier 3 (ifInvisibleOrUnknown chain): "3" (dominant) → "4" (publishing video)
+        //     → "5", "6" (no signals; insertion order preserved)
+        assertThat(sorted2).isEqualTo(listOf("2", "1", "3", "4", "5", "6"))
 
         clientImpl.fireEvent(DominantSpeakerChangedEvent("3", "3"), call.cid)
         assertThat(call.state.getParticipantBySessionId("3")?.dominantSpeaker?.value).isTrue()
         delay(60)
 
         val sorted3 = sortedParticipants.value.map { it.sessionId }
-        assertThat(sorted3).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))
+        assertThat(sorted3).isEqualTo(listOf("2", "1", "3", "4", "5", "6"))
     }
 
     @Test
     fun `Update sorting order`() = runTest {
         val call = client.call("default", randomUUID())
-        val sortedParticipants = call.state.sortedParticipants.stateIn(
-            this,
+        val sortedParticipants = call.state.participants.stateIn(
+            backgroundScope,
             SharingStarted.Eagerly,
             emptyList(),
         )

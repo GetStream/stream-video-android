@@ -19,9 +19,7 @@ package io.getstream.video.android.compose.ui.components.call.renderer.internal
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
@@ -62,17 +60,7 @@ internal fun BoxScope.OrientationVideoRenderer(
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
 ) {
     val dominantSpeaker by call.state.dominantSpeaker.collectAsStateWithLifecycle()
-    val participants by call.state.participants.collectAsStateWithLifecycle()
-    val sortedParticipants by call.state.sortedParticipants.collectAsStateWithLifecycle(emptyList())
-    val callParticipants by remember(participants) {
-        derivedStateOf {
-            if (sortedParticipants.size > 6) {
-                sortedParticipants
-            } else {
-                participants
-            }
-        }
-    }
+    val callParticipants by call.state.participants.collectAsStateWithLifecycle()
 
     val orientation = LocalConfiguration.current.orientation
 

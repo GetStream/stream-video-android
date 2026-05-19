@@ -8773,6 +8773,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun markSpeakingAsMuted ()V
 	public final fun pin (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun replaceParticipants (Ljava/util/List;)V
+	public final fun setSortPreset (Lio/getstream/video/android/core/sorting/SortPreset;)V
 	public final fun unpin (Ljava/lang/String;)V
 	public final fun updateFromResponse (Lio/getstream/android/video/generated/models/CallResponse;)V
 	public final fun updateFromResponse (Lio/getstream/android/video/generated/models/CallStateResponseFields;)V
@@ -9635,6 +9636,7 @@ public abstract class io/getstream/video/android/core/call/CallType {
 	public static final field Companion Lio/getstream/video/android/core/call/CallType$Companion;
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getName ()Ljava/lang/String;
+	public fun getSortPreset ()Lio/getstream/video/android/core/sorting/SortPreset;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -9660,6 +9662,7 @@ public final class io/getstream/video/android/core/call/CallType$Default : io/ge
 
 public final class io/getstream/video/android/core/call/CallType$Livestream : io/getstream/video/android/core/call/CallType {
 	public static final field INSTANCE Lio/getstream/video/android/core/call/CallType$Livestream;
+	public fun getSortPreset ()Lio/getstream/video/android/core/sorting/SortPreset;
 }
 
 public final class io/getstream/video/android/core/call/RtcSession {
@@ -14630,6 +14633,52 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 
 public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent$WebSocketEventLost : io/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent {
 	public static final field INSTANCE Lio/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent$WebSocketEventLost;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/sorting/ComparatorsKt {
+	public static final fun combineComparators ([Ljava/util/Comparator;)Ljava/util/Comparator;
+	public static final fun conditional (Lkotlin/jvm/functions/Function2;Ljava/util/Comparator;)Ljava/util/Comparator;
+	public static final fun ifInvisible (Ljava/util/Comparator;)Ljava/util/Comparator;
+	public static final fun ifInvisibleOrUnknown (Ljava/util/Comparator;)Ljava/util/Comparator;
+}
+
+public final class io/getstream/video/android/core/sorting/ParticipantComparatorsKt {
+	public static final fun byReactionType (Ljava/lang/String;)Ljava/util/Comparator;
+	public static final fun byRole ([Ljava/lang/String;)Ljava/util/Comparator;
+	public static final fun bySourcePriority ([Lstream/video/sfu/models/ParticipantSource;)Ljava/util/Comparator;
+	public static final fun getByJoinedAt ()Ljava/util/Comparator;
+	public static final fun getByName ()Ljava/util/Comparator;
+	public static final fun getByUserId ()Ljava/util/Comparator;
+	public static final fun getDominantSpeaker ()Ljava/util/Comparator;
+	public static final fun getPublishingAudio ()Ljava/util/Comparator;
+	public static final fun getPublishingVideo ()Ljava/util/Comparator;
+	public static final fun getRaisedHand ()Ljava/util/Comparator;
+	public static final fun getScreenSharing ()Ljava/util/Comparator;
+	public static final fun getSpeaking ()Ljava/util/Comparator;
+}
+
+public abstract interface class io/getstream/video/android/core/sorting/SortPreset {
+}
+
+public final class io/getstream/video/android/core/sorting/SortPreset$Default : io/getstream/video/android/core/sorting/SortPreset {
+	public static final field INSTANCE Lio/getstream/video/android/core/sorting/SortPreset$Default;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/sorting/SortPreset$LivestreamOrAudioRoom : io/getstream/video/android/core/sorting/SortPreset {
+	public static final field INSTANCE Lio/getstream/video/android/core/sorting/SortPreset$LivestreamOrAudioRoom;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/sorting/SortPreset$SpeakerLayout : io/getstream/video/android/core/sorting/SortPreset {
+	public static final field INSTANCE Lio/getstream/video/android/core/sorting/SortPreset$SpeakerLayout;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
