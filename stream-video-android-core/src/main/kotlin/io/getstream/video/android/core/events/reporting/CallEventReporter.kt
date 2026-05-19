@@ -17,10 +17,12 @@
 package io.getstream.video.android.core.events.reporting
 
 import io.getstream.android.video.generated.apis.ProductvideoApi
-import io.getstream.android.video.generated.models.SendCallEventRequest
+import io.getstream.android.video.generated.models.ReportClientCallEventRequest
 import io.getstream.log.taggedLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.threeten.bp.OffsetDateTime
+import org.threeten.bp.ZoneOffset
 import org.webrtc.PeerConnection
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -84,17 +86,10 @@ internal class CallEventReporter(
             joinSuccessIdSnapshot = joinSuccessId,
         )
         sendEvent(
-            buildEventMap(
-                userId = userId,
-                callType = callType,
-                callId = callId,
-                callCid = callCid,
+            buildRequest(
                 stage = CallEventStage.COORDINATOR_JOIN,
                 eventType = CallEventType.INITIATED,
                 eventSessionId = eventSessionId,
-                joinSuccessId = joinSuccessId,
-                userAgent = userAgent.invoke(),
-                sdkVersion = sdkVersion,
             ),
         )
         return eventSessionId
@@ -111,17 +106,10 @@ internal class CallEventReporter(
         val session = inFlightSessions.remove(eventSessionId) ?: return
         val elapsedTime = System.currentTimeMillis() - session.startedAtMs
         sendEvent(
-            buildEventMap(
-                userId = userId,
-                callType = callType,
-                callId = callId,
-                callCid = callCid,
+            buildRequest(
                 stage = CallEventStage.COORDINATOR_JOIN,
                 eventType = CallEventType.COMPLETED,
                 eventSessionId = eventSessionId,
-                joinSuccessId = session.joinSuccessIdSnapshot,
-                userAgent = userAgent.invoke(),
-                sdkVersion = sdkVersion,
                 elapsedTime = elapsedTime,
                 outcome = if (success) CallEventOutcome.SUCCESS else CallEventOutcome.FAILURE,
                 retryCountAttempt = retryCount,
@@ -149,17 +137,10 @@ internal class CallEventReporter(
             wasPreviouslyConnected = wasPreviouslyConnected,
         )
         sendEvent(
-            buildEventMap(
-                userId = userId,
-                callType = callType,
-                callId = callId,
-                callCid = callCid,
+            buildRequest(
                 stage = CallEventStage.WS_JOIN,
                 eventType = CallEventType.INITIATED,
                 eventSessionId = eventSessionId,
-                joinSuccessId = joinSuccessId,
-                userAgent = userAgent.invoke(),
-                sdkVersion = sdkVersion,
                 sfuId = sfuId,
                 wasPreviouslyConnected = wasPreviouslyConnected,
             ),
@@ -178,17 +159,10 @@ internal class CallEventReporter(
         val session = inFlightSessions.remove(eventSessionId) ?: return
         val elapsedTime = System.currentTimeMillis() - session.startedAtMs
         sendEvent(
-            buildEventMap(
-                userId = userId,
-                callType = callType,
-                callId = callId,
-                callCid = callCid,
+            buildRequest(
                 stage = CallEventStage.WS_JOIN,
                 eventType = CallEventType.COMPLETED,
                 eventSessionId = eventSessionId,
-                joinSuccessId = session.joinSuccessIdSnapshot,
-                userAgent = userAgent.invoke(),
-                sdkVersion = sdkVersion,
                 elapsedTime = elapsedTime,
                 outcome = if (success) CallEventOutcome.SUCCESS else CallEventOutcome.FAILURE,
                 retryCountAttempt = retryCount,
@@ -215,8 +189,7 @@ internal class CallEventReporter(
                     completePeerConnectionSession(
                         eventSessionId = oldId,
                         success = false,
-                        iceStateName = iceState.name,
-                        dtlsStateName = dtlsState?.name,
+                        iceState = iceState,
                         failureReason = "ICE restart superseded previous attempt",
                         failureCode = "ICE_CONNECTIVITY_FAILED",
                     )
@@ -233,17 +206,10 @@ internal class CallEventReporter(
                 )
                 activePcSessionIds[role] = eventSessionId
                 sendEvent(
-                    buildEventMap(
-                        userId = userId,
-                        callType = callType,
-                        callId = callId,
-                        callCid = callCid,
+                    buildRequest(
                         stage = CallEventStage.PEER_CONNECTION_CONNECT,
                         eventType = CallEventType.INITIATED,
                         eventSessionId = eventSessionId,
-                        joinSuccessId = joinSuccessId,
-                        userAgent = userAgent.invoke(),
-                        sdkVersion = sdkVersion,
                         peerConnection = role,
                         wasPreviouslyConnected = wasPrev,
                     ),
@@ -256,8 +222,7 @@ internal class CallEventReporter(
                 completePeerConnectionSession(
                     eventSessionId = eventSessionId,
                     success = true,
-                    iceStateName = iceState.name,
-                    dtlsStateName = dtlsState?.name,
+                    iceState = iceState,
                 )
             }
 
@@ -266,8 +231,7 @@ internal class CallEventReporter(
                 completePeerConnectionSession(
                     eventSessionId = eventSessionId,
                     success = false,
-                    iceStateName = iceState.name,
-                    dtlsStateName = dtlsState?.name,
+                    iceState = iceState,
                     failureReason = "ICE connectivity checks failed",
                     failureCode = "ICE_CONNECTIVITY_FAILED",
                 )
@@ -280,25 +244,17 @@ internal class CallEventReporter(
     private fun completePeerConnectionSession(
         eventSessionId: String,
         success: Boolean,
-        iceStateName: String?,
-        dtlsStateName: String?,
+        iceState: PeerConnection.IceConnectionState,
         failureReason: String? = null,
         failureCode: String? = null,
     ) {
         val session = inFlightSessions.remove(eventSessionId) ?: return
         val elapsedTime = System.currentTimeMillis() - session.startedAtMs
         sendEvent(
-            buildEventMap(
-                userId = userId,
-                callType = callType,
-                callId = callId,
-                callCid = callCid,
+            buildRequest(
                 stage = CallEventStage.PEER_CONNECTION_CONNECT,
                 eventType = CallEventType.COMPLETED,
                 eventSessionId = eventSessionId,
-                joinSuccessId = session.joinSuccessIdSnapshot,
-                userAgent = userAgent.invoke(),
-                sdkVersion = sdkVersion,
                 elapsedTime = elapsedTime,
                 outcome = if (success) CallEventOutcome.SUCCESS else CallEventOutcome.FAILURE,
                 retryCountAttempt = 0,
@@ -306,8 +262,7 @@ internal class CallEventReporter(
                 retryFailureCode = if (!success) failureCode else null,
                 peerConnection = session.peerConnectionRole,
                 wasPreviouslyConnected = session.wasPreviouslyConnected,
-                iceState = iceStateName,
-                dtlsState = dtlsStateName,
+                iceState = iceState.toRequestIceState(),
             ),
         )
     }
@@ -321,17 +276,10 @@ internal class CallEventReporter(
         val now = System.currentTimeMillis()
         for (session in snapshot) {
             sendEvent(
-                buildEventMap(
-                    userId = userId,
-                    callType = callType,
-                    callId = callId,
-                    callCid = callCid,
+                buildRequest(
                     stage = session.stage,
                     eventType = CallEventType.COMPLETED,
                     eventSessionId = session.eventSessionId,
-                    joinSuccessId = session.joinSuccessIdSnapshot,
-                    userAgent = userAgent.invoke(),
-                    sdkVersion = sdkVersion,
                     elapsedTime = now - session.startedAtMs,
                     outcome = CallEventOutcome.FAILURE,
                     retryCountAttempt = 0,
@@ -341,21 +289,92 @@ internal class CallEventReporter(
                     callSessionId = session.callSessionId,
                     peerConnection = session.peerConnectionRole,
                     wasPreviouslyConnected = session.wasPreviouslyConnected,
+                    userSessionId = session.userSessionId,
                 ),
             )
         }
     }
 
+    // --- Request builder ---
+
+    private fun buildRequest(
+        stage: CallEventStage,
+        eventType: CallEventType,
+        eventSessionId: String,
+        elapsedTime: Long? = null,
+        outcome: CallEventOutcome? = null,
+        retryCountAttempt: Int? = null,
+        retryFailureReason: String? = null,
+        retryFailureCode: String? = null,
+        callSessionId: String? = null,
+        sfuId: String? = null,
+        peerConnection: PeerConnectionRole? = null,
+        wasPreviouslyConnected: Boolean? = null,
+        iceState: ReportClientCallEventRequest.IceState? = null,
+        userSessionId: String? = null,
+    ): ReportClientCallEventRequest = ReportClientCallEventRequest(
+        eventSessionId = eventSessionId,
+        eventType = eventType.toRequestEventType(),
+        id = callId,
+        sdkVersion = sdkVersion,
+        stage = stage.toRequestStage(),
+        timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+        type = callType,
+        userAgent = userAgent.invoke().take(512),
+        userId = userId,
+        callSessionId = callSessionId,
+        elapsedTime = elapsedTime?.toInt(),
+        iceState = iceState,
+        outcome = outcome?.toRequestOutcome(),
+        peerConnection = peerConnection?.toRequestPeerConnection(),
+        previouslyConnectedTimestamp = null,
+        retryCountAttempt = retryCountAttempt,
+        retryFailureCode = retryFailureCode,
+        retryFailureReason = retryFailureReason,
+        sfuId = sfuId,
+        userSessionId = userSessionId,
+        wasPreviouslyConnected = wasPreviouslyConnected,
+    )
+
     // --- Delivery ---
 
-    private fun sendEvent(customMap: Map<String, Any>) {
+    private fun sendEvent(request: ReportClientCallEventRequest) {
         scope.launch {
             // TODO: wrap with StreamRetryPolicy when retries are added
             runCatching {
-                api.sendCallEvent(callType, callId, SendCallEventRequest(custom = customMap))
+                api.reportClientCallEvent(request)
             }.onFailure { e ->
                 logger.w { "[sendEvent] Failed to send client event: ${e.message}" }
             }
         }
     }
+}
+
+// --- Enum mappers ---
+
+private fun CallEventStage.toRequestStage(): ReportClientCallEventRequest.Stage = when (this) {
+    CallEventStage.COORDINATOR_JOIN -> ReportClientCallEventRequest.Stage.CoordinatorJoin
+    CallEventStage.WS_JOIN -> ReportClientCallEventRequest.Stage.WSJoin
+    CallEventStage.PEER_CONNECTION_CONNECT -> ReportClientCallEventRequest.Stage.PeerConnectionConnect
+}
+
+private fun CallEventType.toRequestEventType(): ReportClientCallEventRequest.EventType = when (this) {
+    CallEventType.INITIATED -> ReportClientCallEventRequest.EventType.Initiated
+    CallEventType.COMPLETED -> ReportClientCallEventRequest.EventType.Completed
+}
+
+private fun CallEventOutcome.toRequestOutcome(): ReportClientCallEventRequest.Outcome = when (this) {
+    CallEventOutcome.SUCCESS -> ReportClientCallEventRequest.Outcome.Success
+    CallEventOutcome.FAILURE -> ReportClientCallEventRequest.Outcome.Failure
+}
+
+private fun PeerConnectionRole.toRequestPeerConnection(): ReportClientCallEventRequest.PeerConnection = when (this) {
+    PeerConnectionRole.PUBLISH -> ReportClientCallEventRequest.PeerConnection.Publish
+    PeerConnectionRole.SUBSCRIBE -> ReportClientCallEventRequest.PeerConnection.Subscribe
+}
+
+private fun PeerConnection.IceConnectionState.toRequestIceState(): ReportClientCallEventRequest.IceState? = when (this) {
+    PeerConnection.IceConnectionState.CONNECTED -> ReportClientCallEventRequest.IceState.CONNECTED
+    PeerConnection.IceConnectionState.FAILED -> ReportClientCallEventRequest.IceState.FAILED
+    else -> null
 }
