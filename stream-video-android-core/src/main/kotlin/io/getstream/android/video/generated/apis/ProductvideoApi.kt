@@ -31,17 +31,9 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.PUT
 
 interface ProductvideoApi {
-    
-    /**
-     * Report client-side call event
-     * Reports a single client-side join-lifecycle event (initiated or completed) for one of CoordinatorJoin, WSJoin, or PeerConnectionConnect. Pairs are correlated by event_session_id.
-     */
-    @POST("/video/call/client_event")
-    suspend fun reportClientCallEvent(
-        @Body reportClientCallEventRequest: io.getstream.android.video.generated.models.ReportClientCallEventRequest
-    ): io.getstream.android.video.generated.models.ReportClientCallEventResponse
     
     /**
      * Query call members
@@ -724,7 +716,33 @@ interface ProductvideoApi {
         @Path("session") session: kotlin.String,
         @Path("filename") filename: kotlin.String
     ): io.getstream.android.video.generated.models.DeleteTranscriptionResponse
-
+    
+    /**
+     * Report client-side call event
+     * Reports a single client-side join-lifecycle event (initiated or completed) for one of CoordinatorJoin, WSJoin, or PeerConnectionConnect. Pairs are correlated by event_session_id.
+     */
+    @POST("/video/call_client_event")
+    suspend fun reportClientCallEvent(
+        @Body reportClientCallEventRequest: io.getstream.android.video.generated.models.ReportClientCallEventRequest
+    ): io.getstream.android.video.generated.models.ReportClientCallEventResponse
+    
+    /**
+     * Query call session stats
+     * 
+     */
+    @POST("/video/call_stats")
+    suspend fun queryCallSessionStats(
+        @Body queryCallSessionStatsRequest: io.getstream.android.video.generated.models.QueryCallSessionStatsRequest
+    ): io.getstream.android.video.generated.models.QueryCallSessionStatsResponse
+    
+    /**
+     * Query call session stats
+     * 
+     */
+    @POST("/video/call_stats")
+    suspend fun queryCallSessionStats(
+    ): io.getstream.android.video.generated.models.QueryCallSessionStatsResponse
+    
     /**
      * Map call participants by location
      * 
@@ -858,7 +876,16 @@ interface ProductvideoApi {
     @GET("/video/longpoll")
     suspend fun videoConnect(
     )
-
+    
+    /**
+     * Resolve SIP Auth
+     * Determine authentication requirements for an inbound SIP call before sending a digest challenge
+     */
+    @POST("/video/sip/auth")
+    suspend fun resolveSipAuth(
+        @Body resolveSipAuthRequest: io.getstream.android.video.generated.models.ResolveSipAuthRequest
+    ): io.getstream.android.video.generated.models.ResolveSipAuthResponse
+    
     /**
      * Resolve SIP Inbound Routing
      * Resolve SIP inbound routing based on trunk number, caller number, and challenge authentication

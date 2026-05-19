@@ -69,6 +69,9 @@ data class ReportClientCallEventRequest (
     @Json(name = "call_session_id")
     val callSessionId: kotlin.String? = null,
 
+    @Json(name = "elapsed_time")
+    val elapsedTime: kotlin.Int? = null,
+
     @Json(name = "ice_state")
     val iceState: IceState? = null,
 
