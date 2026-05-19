@@ -25,6 +25,8 @@ import org.webrtc.PeerConnection
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
+private typealias EventSessionId = String
+
 internal class CallEventReporter(
     private val api: ProductvideoApi,
     private val callType: String,
@@ -39,7 +41,7 @@ internal class CallEventReporter(
 
     @Volatile private var joinSuccessId: String = UUID.randomUUID().toString()
 
-    private val inFlightSessions = ConcurrentHashMap<String, InFlightSession>()
+    private val inFlightSessions = ConcurrentHashMap<EventSessionId, InFlightSession>()
 
     // Active event_session_id per PC role — drives the ICE state machine
     private val activePcSessionIds = ConcurrentHashMap<PeerConnectionRole, String>()
@@ -48,7 +50,7 @@ internal class CallEventReporter(
     private val pcEverConnected = ConcurrentHashMap<PeerConnectionRole, Boolean>()
 
     private data class InFlightSession(
-        val eventSessionId: String,
+        val eventSessionId: EventSessionId,
         val stage: CallEventStage,
         val startedAtMs: Long,
         val joinSuccessIdSnapshot: String,
