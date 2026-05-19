@@ -18,27 +18,35 @@ package io.getstream.video.android.core
 
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Publisher
-import io.getstream.video.android.core.call.connection.Subscriber
+import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.webrtc.PeerConnection
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ActiveStateGateTest {
-    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setUp() {
@@ -50,287 +58,267 @@ class ActiveStateGateTest {
         Dispatchers.resetMain()
     }
 
-    // ── TestData now exposes firstRtpPacketArrived ────────────────────────────
-
     private data class TestData(
         val call: Call,
         val publisherState: MutableStateFlow<PeerConnection.PeerConnectionState?>,
-        val subscriberState: MutableStateFlow<PeerConnection.PeerConnectionState?>,
-        val firstRtpPacketArrived: MutableStateFlow<Boolean>,
     )
 
     private fun fakeCall(
         publisherState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
             MutableStateFlow(PeerConnection.PeerConnectionState.NEW),
-        subscriberState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-            MutableStateFlow(PeerConnection.PeerConnectionState.NEW),
-        firstRtpPacketArrived: MutableStateFlow<Boolean> = MutableStateFlow(false),
     ): TestData {
         val publisher = mockk<Publisher>(relaxed = true) {
             every { state } returns publisherState
         }
-        val subscriber = mockk<Subscriber>(relaxed = true) {
-            every { state } returns subscriberState
-        }
         val session = mockk<RtcSession> {
             every { this@mockk.publisher } returns MutableStateFlow(publisher)
-            every { this@mockk.subscriber } returns MutableStateFlow(subscriber)
         }
         val call = mockk<Call> {
             every { this@mockk.session } returns MutableStateFlow(session)
+            every { leave(any()) } just runs
         }
-        return TestData(call, publisherState, subscriberState, firstRtpPacketArrived)
+        return TestData(call, publisherState)
     }
 
-    // ── 1. Non-ringing previous states ────────────────────────────────────────
-
     @Test
-    fun `transitions immediately when no previous incoming or outgoing state`() =
-        runTest(testDispatcher) {
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = emptySet(),
-            )
-            val (call, _, _, _) = fakeCall()
-            val transitioned = mutableListOf<Unit>()
-
-            sut.awaitAndTransition(
-                currentRingingState = RingingState.Idle,
-                call = call,
-                onReady = { transitioned += Unit },
-            )
-
-            assertTrue(transitioned.size == 1)
+    fun `should ignore when current state already active`() = runTest(testDispatcher) {
+        val data = fakeCall()
+        var readyCalled = false
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+        )
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Active,
+            call = data.call,
+            interceptor = null,
+        ) {
+            readyCalled = true
         }
-
-    // ── 2. Already Active ─────────────────────────────────────────────────────
+        advanceUntilIdle()
+        assertFalse(readyCalled)
+    }
 
     @Test
-    fun `does NOT observe peer connection when already in Active state`() =
-        runTest(testDispatcher) {
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = setOf(RingingState.Incoming(false)),
-            )
-            val (call, _, _, _) = fakeCall()
-            val transitioned = mutableListOf<Unit>()
+    fun `should invoke immediately for non ringing call`() = runTest(testDispatcher) {
+        val data = fakeCall()
+        var readyCalled = false
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+        )
 
-            sut.awaitAndTransition(
-                currentRingingState = RingingState.Active,
-                call = call,
-                onReady = { transitioned += Unit },
-            )
-
-            assertTrue(transitioned.isEmpty())
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = null,
+        ) {
+            readyCalled = true
         }
+        advanceUntilIdle()
+        assertTrue(readyCalled)
+    }
 
     @Test
-    fun `transitions when both peers connect for Outgoing previous state`() =
-        runTest(testDispatcher) {
-            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val (call, _, _, _) = fakeCall(pubState, subState)
+    fun `should wait for publisher connection before transition`() = runTest(testDispatcher) {
+        val data = fakeCall()
+        var readyCalled = false
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = setOf(RingingState.Incoming(false)),
+        )
 
-            val outgoingRingingState = RingingState.Outgoing(false)
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = setOf(outgoingRingingState),
-                timeoutMs = 5_000L,
-            )
-            val transitioned = mutableListOf<Unit>()
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = null,
+        ) { readyCalled = true }
 
-            sut.awaitAndTransition(
-                currentRingingState = outgoingRingingState,
-                call = call,
-                onReady = { transitioned += Unit },
-            )
-
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.size == 1)
-        }
-
-    // ── 4. Timeout ────────────────────────────────────────────────────────────
+        runCurrent()
+        assertFalse(readyCalled)
+        data.publisherState.value = PeerConnection.PeerConnectionState.CONNECTED
+        advanceUntilIdle()
+        assertTrue(readyCalled)
+    }
 
     @Test
-    fun `still calls onReady after timeout even if peers never connect`() =
-        runTest(testDispatcher) {
-            val (call, _, _, _) = fakeCall()
+    fun `should proceed after peer connection timeout`() = runTest(testDispatcher) {
+        val data = fakeCall()
+        var readyCalled = false
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = setOf(RingingState.Incoming()),
+            peerConnectionObserverTimeoutMs = 100,
+        )
 
-            val incomingRingingState = RingingState.Incoming(false)
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 100L,
-            )
-            val transitioned = mutableListOf<Unit>()
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = null,
+        ) { readyCalled = true }
 
-            sut.awaitAndTransition(
-                currentRingingState = incomingRingingState,
-                call = call,
-                onReady = { transitioned += Unit },
-            )
-
-            assertTrue(transitioned.isEmpty())
-            advanceTimeBy(200L)
-            assertTrue(transitioned.size == 1)
-        }
-
-    // ── 5. Duplicate observer guard ───────────────────────────────────────────
+        advanceTimeBy(101)
+        advanceUntilIdle()
+        assertTrue(readyCalled)
+    }
 
     @Test
-    fun `calling awaitAndTransition twice does not start a second observer`() =
-        runTest(testDispatcher) {
-            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val (call, _, _, _) = fakeCall(pubState, subState)
-
-            val incomingRingingState = RingingState.Incoming(false)
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
-            )
-            val transitioned = mutableListOf<Unit>()
-            val action = { transitioned += Unit }
-
-            sut.awaitAndTransition(incomingRingingState, call, action)
-            sut.awaitAndTransition(incomingRingingState, call, action)
-
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-
-            assertTrue(transitioned.size == 1)
-        }
-
-    // ── 6. cleanup() ─────────────────────────────────────────────────────────
-
-    @Test
-    fun `cleanup cancels the observer job and onReady is never called`() =
-        runTest(testDispatcher) {
-            val (call, pubState, subState, _) = fakeCall()
-
-            val incomingRingingState = RingingState.Incoming(false)
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
-            )
-            val transitioned = mutableListOf<Unit>()
-
-            sut.awaitAndTransition(
-                currentRingingState = incomingRingingState,
-                call = call,
-                onReady = { transitioned += Unit },
-            )
-
-            sut.cleanup()
-
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-
-            assertTrue(transitioned.isEmpty())
-        }
-
-    @Test
-    fun `cleanup allows a new observer to be started afterwards`() =
-        runTest(testDispatcher) {
-            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val (call, _, _, _) = fakeCall(pubState, subState)
-
-            val incomingRingingState = RingingState.Incoming(false)
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
-            )
-            val transitioned = mutableListOf<Unit>()
-
-            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
-            sut.cleanup()
-            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
-
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-
-            assertTrue(transitioned.size == 1)
-        }
-
-    // ── 7. Null session / late-arriving session ───────────────────────────────
-
-    @Test
-    fun `waits for non-null session before observing peer connections`() =
-        runTest(testDispatcher) {
-            val sessionFlow = MutableStateFlow<RtcSession?>(null)
-            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-
-            val publisher = mockk<Publisher> { every { state } returns pubState }
-            val subscriber = mockk<Subscriber>(relaxed = true) { every { state } returns subState }
-            val session = mockk<RtcSession> {
-                every { this@mockk.publisher } returns MutableStateFlow(publisher)
-                every { this@mockk.subscriber } returns MutableStateFlow(subscriber)
+    fun `should invoke interceptor before transition`() = runTest {
+        val data = fakeCall()
+        val events = mutableListOf<String>()
+        val interceptor = object : CallJoinInterceptor {
+            override suspend fun callReadyToJoin(call: Call) {
+                events += "interceptor"
             }
-            val call = mockk<Call> { every { this@mockk.session } returns sessionFlow }
-
-            val incomingRingingState = RingingState.Incoming(false)
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
-            )
-            val transitioned = mutableListOf<Unit>()
-
-            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
-
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.isEmpty())
-
-            sessionFlow.value = session
-            assertTrue(transitioned.size == 1)
         }
 
-    // ── isActive guard tests ──────────────────────────────────────────────────
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+        )
+
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = interceptor,
+        ) { events += "ready" }
+
+        advanceUntilIdle()
+        assertEquals(
+            listOf("interceptor", "ready"),
+            events,
+        )
+    }
 
     @Test
-    fun `onReady is NOT called if cleanup happens while waiting for peer connection`() =
-        runTest(StandardTestDispatcher()) {
-            val pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-                MutableStateFlow(PeerConnection.PeerConnectionState.NEW)
-            val (call, _, _, _) = fakeCall(pubState, subState)
-
-            val incomingRingingState = RingingState.Incoming(false)
-            val sut = ActiveStateGate(
-                coroutineScope = this,
-                previousRingingStates = setOf(incomingRingingState),
-                timeoutMs = 5_000L,
-            )
-            val transitioned = mutableListOf<Unit>()
-
-            sut.awaitAndTransition(incomingRingingState, call) { transitioned += Unit }
-
-            // Peers connect but cleanup cancels before the coroutine resumes
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-            sut.cleanup() // cancels before isActive check runs
-
-            // Now let any pending coroutine work drain — onReady must not fire
-            advanceUntilIdle()
-
-            assertTrue(transitioned.isEmpty())
+    fun `should proceed when interceptor throws generic exception`() = runTest(testDispatcher) {
+        val data = fakeCall()
+        var readyCalled = false
+        val interceptor = object : CallJoinInterceptor {
+            override suspend fun callReadyToJoin(call: Call) {
+                error("boom")
+            }
         }
+
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+        )
+
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = interceptor,
+        ) { readyCalled = true }
+
+        advanceUntilIdle()
+        assertTrue(readyCalled)
+    }
+
+    @Test
+    fun `should not proceed when interceptor rejects`() = runTest(testDispatcher) {
+        val data = fakeCall()
+        var readyCalled = false
+        val interceptor = object : CallJoinInterceptor {
+            override suspend fun callReadyToJoin(call: Call) {
+                throw CallJoinInterceptionException("blocked")
+            }
+        }
+
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+        )
+
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = interceptor,
+        ) { readyCalled = true }
+
+        advanceUntilIdle()
+        assertFalse(readyCalled)
+        coVerify { data.call.leave(any()) }
+    }
+
+    @Test
+    fun `should proceed when interceptor times out`() = runTest(testDispatcher) {
+        val data = fakeCall()
+        var readyCalled = false
+        val interceptor = object : CallJoinInterceptor {
+            override suspend fun callReadyToJoin(call: Call) {
+                delay(10_000)
+            }
+        }
+        val interceptorTimeoutMs = 5_000L
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            interceptorTimeoutMs = interceptorTimeoutMs,
+            previousRingingStates = emptySet(),
+        )
+
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = interceptor,
+        ) { readyCalled = true }
+
+        advanceTimeBy(interceptorTimeoutMs + 1)
+        advanceUntilIdle()
+        assertTrue(readyCalled)
+    }
+
+    @Test
+    fun `should ignore duplicate gate launches`() = runTest(testDispatcher) {
+        val data = fakeCall()
+        var readyInvocationCount = 0
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = setOf(RingingState.Incoming()),
+        )
+
+        repeat(2) {
+            gate.awaitAndTransition(
+                currentRingingState = RingingState.Idle,
+                call = data.call,
+                interceptor = null,
+            ) { readyInvocationCount++ }
+        }
+        data.publisherState.value = PeerConnection.PeerConnectionState.CONNECTED
+        advanceUntilIdle()
+        assertEquals(1, readyInvocationCount)
+    }
+
+    @Test
+    fun `cleanup should cancel ongoing gate`() = runTest(testDispatcher) {
+        val data = fakeCall()
+        var readyCalled = false
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = setOf(RingingState.Incoming()),
+        )
+
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = null,
+        ) { readyCalled = true }
+
+        gate.cleanup()
+        data.publisherState.value = PeerConnection.PeerConnectionState.CONNECTED
+
+        advanceUntilIdle()
+        assertFalse(readyCalled)
+
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = null,
+        ) { readyCalled = true }
+
+        advanceUntilIdle()
+        assertTrue(readyCalled)
+    }
 
     // ── Strategy tests ────────────────────────────────────────────────────────
 
@@ -338,48 +326,166 @@ class ActiveStateGateTest {
         strategy: TransitionToRingingStateStrategy,
         pubState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
             MutableStateFlow(PeerConnection.PeerConnectionState.NEW),
-        subState: MutableStateFlow<PeerConnection.PeerConnectionState?> =
-            MutableStateFlow(PeerConnection.PeerConnectionState.NEW),
-        firstRtpPacketArrived: MutableStateFlow<Boolean> = MutableStateFlow(false),
         block: suspend TestScope.(
             call: Call,
             sut: ActiveStateGate,
             transitioned: MutableList<Unit>,
             pubState: MutableStateFlow<PeerConnection.PeerConnectionState?>,
-            subState: MutableStateFlow<PeerConnection.PeerConnectionState?>,
-            firstRtpPacketArrived: MutableStateFlow<Boolean>,
         ) -> Unit,
     ) = runTest(testDispatcher) {
-        val testData = fakeCall(pubState, subState, firstRtpPacketArrived)
+        val testData = fakeCall(pubState)
         val incoming = RingingState.Incoming(false)
         val sut = ActiveStateGate(
             coroutineScope = this,
             previousRingingStates = setOf(incoming),
             strategy = strategy,
-            timeoutMs = 5_000L,
+            peerConnectionObserverTimeoutMs = 5_000L,
         )
         val transitioned = mutableListOf<Unit>()
-        sut.awaitAndTransition(incoming, testData.call) { transitioned += Unit }
-        block(testData.call, sut, transitioned, pubState, subState, firstRtpPacketArrived)
+        sut.awaitAndTransition(incoming, testData.call, null) {
+            transitioned += Unit
+        }
+        block(testData.call, sut, transitioned, pubState)
     }
 
     @Test
-    fun `LEGACY_BEHAVIOUR – transition still fires without timeout fallback`() =
-        runStrategyTest(
-            TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR,
-        ) { _, _, transitioned, _, _, _ ->
-            assertTrue(transitioned.size == 1)
-        }
+    fun `legacy behaviour should invoke immediately when interceptor is null`() = runTest {
+        val data = fakeCall()
+        var readyCalled = false
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+            strategy = TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR,
+        )
+
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = null,
+        ) { readyCalled = true }
+
+        runCurrent()
+        assertTrue(readyCalled)
+    }
 
     @Test
-    fun `PUBLISHER_CONNECTED – subscriber alone is not enough`() =
-        runStrategyTest(
-            TransitionToRingingStateStrategy.PUBLISHER_CONNECTED,
-        ) { _, _, transitioned, pubState, subState, _ ->
-            subState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.isEmpty())
-
-            pubState.value = PeerConnection.PeerConnectionState.CONNECTED
-            assertTrue(transitioned.size == 1)
+    fun `legacy behaviour should invoke interceptor before transition`() = runTest {
+        val data = fakeCall()
+        val events = mutableListOf<String>()
+        val interceptor = object : CallJoinInterceptor {
+            override suspend fun callReadyToJoin(call: Call) {
+                events += "interceptor"
+            }
         }
+
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+            strategy = TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR,
+        )
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = interceptor,
+        ) { events += "ready" }
+
+        advanceUntilIdle()
+        assertEquals(
+            listOf("interceptor", "ready"),
+            events,
+        )
+    }
+
+    @Test
+    fun `legacy behaviour should not proceed when interceptor rejects`() = runTest {
+        val data = fakeCall()
+        var readyCalled = false
+        val interceptor = object : CallJoinInterceptor {
+            override suspend fun callReadyToJoin(call: Call) {
+                throw CallJoinInterceptionException("blocked")
+            }
+        }
+
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+            strategy = TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR,
+        )
+
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = interceptor,
+        ) { readyCalled = true }
+
+        advanceUntilIdle()
+        assertFalse(readyCalled)
+        coVerify { data.call.leave(any()) }
+    }
+
+    @Test
+    fun `legacy behaviour should ignore duplicate interceptor launches`() = runTest {
+        val data = fakeCall()
+        var interceptorInvocationCount = 0
+        val interceptor = object : CallJoinInterceptor {
+            override suspend fun callReadyToJoin(call: Call) {
+                interceptorInvocationCount++
+                delay(1000)
+            }
+        }
+
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+            strategy = TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR,
+        )
+
+        repeat(2) {
+            gate.awaitAndTransition(
+                currentRingingState = RingingState.Idle,
+                call = data.call,
+                interceptor = interceptor,
+            ) {}
+        }
+
+        runCurrent()
+        assertEquals(1, interceptorInvocationCount)
+    }
+
+    @Test
+    fun `cleanup should cancel gate during interceptor execution`() = runTest {
+        val data = fakeCall()
+        var readyCalled = false
+        val interceptorStarted = CompletableDeferred<Unit>()
+        val interceptorCancelled = CompletableDeferred<Unit>()
+
+        val interceptor = object : CallJoinInterceptor {
+            override suspend fun callReadyToJoin(call: Call) {
+                interceptorStarted.complete(Unit)
+                try {
+                    awaitCancellation()
+                } catch (e: CancellationException) {
+                    interceptorCancelled.complete(Unit)
+                    throw e
+                }
+            }
+        }
+
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+        )
+
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptor = interceptor,
+        ) { readyCalled = true }
+
+        interceptorStarted.await()
+        gate.cleanup()
+        interceptorCancelled.await()
+        runCurrent()
+        assertFalse(readyCalled)
+    }
 }
