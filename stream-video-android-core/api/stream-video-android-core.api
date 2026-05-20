@@ -9648,6 +9648,11 @@ public final class io/getstream/video/android/core/call/CallType$AudioCall : io/
 	public static final field INSTANCE Lio/getstream/video/android/core/call/CallType$AudioCall;
 }
 
+public final class io/getstream/video/android/core/call/CallType$AudioRoom : io/getstream/video/android/core/call/CallType {
+	public static final field INSTANCE Lio/getstream/video/android/core/call/CallType$AudioRoom;
+	public fun getSortPreset ()Lio/getstream/video/android/core/sorting/SortPreset;
+}
+
 public final class io/getstream/video/android/core/call/CallType$Companion {
 	public final fun fromName (Ljava/lang/String;)Lio/getstream/video/android/core/call/CallType;
 }
