@@ -21,7 +21,7 @@ import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallActions
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.pinning.PinUpdateAtTime
+import io.getstream.video.android.core.pinning.PinEntry
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
@@ -68,7 +68,7 @@ class SortedParticipantsChannelFlowRegressionTest {
             }
             val participants =
                 MutableStateFlow<Map<String, ParticipantState>>(emptyMap())
-            val pinned: StateFlow<Map<String, PinUpdateAtTime>> =
+            val pinned: StateFlow<Map<String, PinEntry>> =
                 MutableStateFlow(emptyMap())
 
             val sut = SortedParticipantsState(scope, call, participants, pinned)

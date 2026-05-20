@@ -333,7 +333,7 @@ class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false
         val call = client.call("default", randomUUID())
         val participant =
             Participant(user_id = "thierry", is_speaking = true, session_id = "thierry")
-        val joinEvent = ParticipantJoinedEvent(participant = participant, callCid = call.cid)
+        val joinEvent = ParticipantJoinedEvent(participant = participant, callCid = call.cid, false)
         clientImpl.fireEvent(joinEvent, call.cid)
         assertThat(call.state.getParticipantBySessionId("thierry")!!.speaking.value).isTrue()
         val leaveEvent = ParticipantLeftEvent(participant, callCid = call.cid)
@@ -427,7 +427,7 @@ class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false
             Participant(user_id = "thierry", is_speaking = true, session_id = sessionId)
 
         // participant joins
-        val joinEvent = ParticipantJoinedEvent(participant = participant, callCid = call.cid)
+        val joinEvent = ParticipantJoinedEvent(participant = participant, callCid = call.cid, false)
         clientImpl.fireEvent(joinEvent, call.cid)
 
         // participant shares screens

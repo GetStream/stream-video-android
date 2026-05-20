@@ -19,7 +19,7 @@ package io.getstream.video.android.core.sorting
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.pinning.PinUpdateAtTime
+import io.getstream.video.android.core.pinning.PinEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +45,7 @@ internal class SortedParticipantsState(
     scope: CoroutineScope,
     private val call: Call,
     private val participants: StateFlow<Map<String, ParticipantState>>,
-    private val pinnedParticipantsDetailed: StateFlow<Map<String, PinUpdateAtTime>>,
+    private val pinnedParticipantsDetailed: StateFlow<Map<String, PinEntry>>,
     initialPreset: SortPreset = SortPreset.Default,
 ) {
     private val logger by taggedLogger("ParticipantSorting")
@@ -132,7 +132,7 @@ internal class SortedParticipantsState(
 
     private data class SortInputs(
         val participants: Map<String, ParticipantState>,
-        val pins: Map<String, PinUpdateAtTime>,
+        val pins: Map<String, PinEntry>,
         val preset: SortPreset,
         val custom: Comparator<ParticipantState>?,
     )

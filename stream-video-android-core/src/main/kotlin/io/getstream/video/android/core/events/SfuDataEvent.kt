@@ -126,9 +126,9 @@ public data class TrackUnpublishedEvent(
 ) : SfuDataEvent()
 
 public data class ParticipantJoinedEvent(
-
     val participant: Participant,
     val callCid: String,
+    val isPinned: Boolean,
 ) : SfuDataEvent()
 
 public data class ParticipantLeftEvent(
@@ -168,6 +168,7 @@ public data class PinsUpdatedEvent(
     val pins: List<PinUpdate>,
 ) : SfuDataEvent()
 
+// Todo Rahul, should rename it to PinTarget in v2
 public data class PinUpdate(val userId: String, val sessionId: String)
 
 public data class UnknownEvent(val event: Any?) : SfuDataEvent()
