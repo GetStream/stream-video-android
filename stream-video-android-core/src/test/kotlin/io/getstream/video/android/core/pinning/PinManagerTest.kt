@@ -259,6 +259,117 @@ class PinManagerTest {
 
         assertTrue(manager.serverPins.value.isEmpty())
     }
+
+    @Test
+    fun `onParticipantsJoined should add server pins for pinned participants`() {
+        participants["session-1"] = fakeParticipant(
+            sessionId = "session-1",
+            userId = "user-1",
+        )
+
+        participants["session-2"] = fakeParticipant(
+            sessionId = "session-2",
+            userId = "user-2",
+        )
+
+        val participant1 = mockk<Participant> {
+            every { session_id } returns "session-1"
+            every { user_id } returns "user-1"
+        }
+
+        val participant2 = mockk<Participant> {
+            every { session_id } returns "session-2"
+            every { user_id } returns "user-2"
+        }
+
+        manager.onParticipantsJoined(
+            listOf(
+                participant1 to true,
+                participant2 to true,
+            ),
+        )
+
+        assertEquals(2, manager.serverPins.value.size)
+
+        assertTrue(manager.serverPins.value.containsKey("session-1"))
+        assertTrue(manager.serverPins.value.containsKey("session-2"))
+    }
+
+    @Test
+    fun `onParticipantsJoined should ignore unpinned participants`() {
+        participants["session-1"] = fakeParticipant(
+            sessionId = "session-1",
+            userId = "user-1",
+        )
+
+        val participant = mockk<Participant> {
+            every { session_id } returns "session-1"
+            every { user_id } returns "user-1"
+        }
+
+        manager.onParticipantsJoined(
+            listOf(
+                participant to false,
+            ),
+        )
+
+        assertTrue(manager.serverPins.value.isEmpty())
+    }
+
+    @Test
+    fun `onParticipantsJoined should ignore participants not present in participant map`() {
+        val participant = mockk<Participant> {
+            every { session_id } returns "missing-session"
+            every { user_id } returns "user-1"
+        }
+
+        manager.onParticipantsJoined(
+            listOf(
+                participant to true,
+            ),
+        )
+
+        assertTrue(manager.serverPins.value.isEmpty())
+    }
+
+    @Test
+    fun `onParticipantsJoined should only pin eligible participants`() {
+        participants["session-1"] = fakeParticipant(
+            sessionId = "session-1",
+            userId = "user-1",
+        )
+
+        participants["session-2"] = fakeParticipant(
+            sessionId = "session-2",
+            userId = "user-2",
+        )
+
+        val pinnedParticipant = mockk<Participant> {
+            every { session_id } returns "session-1"
+            every { user_id } returns "user-1"
+        }
+
+        val unpinnedParticipant = mockk<Participant> {
+            every { session_id } returns "session-2"
+            every { user_id } returns "user-2"
+        }
+
+        val missingParticipant = mockk<Participant> {
+            every { session_id } returns "missing-session"
+            every { user_id } returns "user-3"
+        }
+
+        manager.onParticipantsJoined(
+            listOf(
+                pinnedParticipant to true,
+                unpinnedParticipant to false,
+                missingParticipant to true,
+            ),
+        )
+
+        assertEquals(1, manager.serverPins.value.size)
+        assertTrue(manager.serverPins.value.containsKey("session-1"))
+    }
 }
 
 internal class FakeTimeProvider(

@@ -81,32 +81,70 @@ internal class PinManager(
     }
 
     fun onParticipantJoined(event: ParticipantJoinedEvent) {
-        val sessionId = event.participant.session_id
-        val participantUserId = event.participant.user_id
-        updateServerPins(sessionId, event.isPinned, participantUserId)
+        val updatedPins = serverPins.value.toMutableMap()
+
+        val changed =
+            updatedPins.addServerPinIfEligible(
+                participant = event.participant,
+                isPinned = event.isPinned,
+                connectedParticipants = participants(),
+                timeProvider = timeProvider,
+            )
+
+        if (changed) {
+            _serverPins.value = updatedPins
+        }
     }
 
     fun onParticipantsJoined(list: List<Pair<Participant, IsPinned>>) {
-        for (item in list) {
-            val isPinned = item.second
-            val sessionId = item.first.session_id
-            val participantUserId = item.first.user_id
-            updateServerPins(sessionId, isPinned, participantUserId)
+        val updatedPins = serverPins.value.toMutableMap()
+        val connectedParticipants = participants()
+
+        var changed = false
+
+        for ((participant, isPinned) in list) {
+            changed =
+                updatedPins.addServerPinIfEligible(
+                    participant = participant,
+                    isPinned = isPinned,
+                    connectedParticipants = connectedParticipants,
+                    timeProvider = timeProvider,
+                ) || changed
+        }
+
+        if (changed) {
+            _serverPins.value = updatedPins
         }
     }
 
-    fun updateServerPins(sessionId: SessionId, isPinned: Boolean, participantUserId: String) {
-        if (participants().containsKey(sessionId) && isPinned) {
-            if (!serverPins.value.containsKey(sessionId)) {
-                _serverPins.value = serverPins.value + (
-                    sessionId to PinEntry(
-                        PinUpdate(participantUserId, sessionId),
-                        timeProvider.now(),
-                        PinType.Server,
-                    )
-                    )
-            }
+    private fun MutableMap<SessionId, PinEntry>.addServerPinIfEligible(
+        participant: Participant,
+        isPinned: Boolean,
+        connectedParticipants: Map<SessionId, ParticipantState>,
+        timeProvider: TimeProvider,
+    ): Boolean {
+        if (!isPinned) return false
+
+        val sessionId = participant.session_id
+
+        if (!connectedParticipants.containsKey(sessionId)) {
+            return false
         }
+
+        if (containsKey(sessionId)) {
+            return false
+        }
+
+        this[sessionId] = PinEntry(
+            pinTarget = PinUpdate(
+                userId = participant.user_id,
+                sessionId = sessionId,
+            ),
+            at = timeProvider.now(),
+            type = PinType.Server,
+        )
+
+        return true
     }
 
     /**
