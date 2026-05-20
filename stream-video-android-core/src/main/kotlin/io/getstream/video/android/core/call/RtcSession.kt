@@ -880,8 +880,10 @@ public class RtcSession internal constructor(
         options: List<PublishOption>? = null,
     ): SfuConnectionResult {
         logger.i { "[connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
-        val wsReporter = call.eventReporter
-        val wsEventId = wsReporter?.reportWsJoinInitiated(
+        val wsReporter = call.client.state.clientEventReporter
+        val wsEventId = wsReporter.reportWsJoinInitiated(
+            callId = call.id,
+            callType = call.type,
             sfuId = sfuName,
             wasPreviouslyConnected = reconnectDetails != null,
         )
@@ -902,7 +904,7 @@ public class RtcSession internal constructor(
         return when (terminalState) {
             is SfuSocketState.Connected -> {
                 wsEventId?.let {
-                    wsReporter?.reportWsJoinCompleted(
+                    wsReporter.reportWsJoinCompleted(
                         it,
                         success = true,
                         retryCount = 0,
@@ -922,7 +924,7 @@ public class RtcSession internal constructor(
                 logger.w { "[connectInternal] $msg" }
                 sfuTracer.trace("connect-failed", msg)
                 wsEventId?.let {
-                    wsReporter?.reportWsJoinCompleted(
+                    wsReporter.reportWsJoinCompleted(
                         it,
                         success = false,
                         retryCount = 0,

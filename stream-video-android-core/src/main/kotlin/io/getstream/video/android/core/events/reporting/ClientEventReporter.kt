@@ -20,6 +20,7 @@ import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.android.video.generated.models.ReportClientEventRequest
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import kotlinx.coroutines.CoroutineScope
@@ -34,15 +35,11 @@ private typealias EventSessionId = String
 
 internal class ClientEventReporter(
     private val api: ProductvideoApi,
-    private val callType: String,
-    private val callId: String,
-    private val callCid: String,
-    private val userId: String,
     private val userAgent: () -> String,
     private val sdkVersion: String,
     private val scope: CoroutineScope = UserScope(ClientScope()),
 ) {
-    private val logger by taggedLogger("CallEventReporter:$callCid")
+    private val logger by taggedLogger("CallEventReporter")
 
     @Volatile private var joinSuccessId: String = UUID.randomUUID().toString()
 
@@ -56,6 +53,8 @@ internal class ClientEventReporter(
 
     private data class InFlightSession(
         val eventSessionId: EventSessionId,
+        val callId: String,
+        val callType: String,
         val stage: CallEventStage,
         val startedAtMs: Long,
         val joinSuccessIdSnapshot: String,
@@ -79,17 +78,20 @@ internal class ClientEventReporter(
 
     // --- CoordinatorJoin ---
 
-    internal fun reportCoordinatorJoinInitiated(): String {
+    internal fun reportCoordinatorJoinInitiated(callId: String, callType: String): String {
         val eventSessionId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
         inFlightSessions[eventSessionId] = InFlightSession(
             eventSessionId = eventSessionId,
+            callId = callId, callType = callType,
             stage = CallEventStage.COORDINATOR_JOIN,
             startedAtMs = now,
             joinSuccessIdSnapshot = joinSuccessId,
         )
         sendEvent(
             buildRequest(
+                callId,
+                callType,
                 stage = CallEventStage.COORDINATOR_JOIN,
                 eventType = CallEventType.INITIATED,
                 eventSessionId = eventSessionId,
@@ -110,6 +112,8 @@ internal class ClientEventReporter(
         val elapsedTime = System.currentTimeMillis() - session.startedAtMs
         sendEvent(
             buildRequest(
+                callId = session.callId,
+                callType = session.callType,
                 stage = CallEventStage.COORDINATOR_JOIN,
                 eventType = CallEventType.COMPLETED,
                 eventSessionId = eventSessionId,
@@ -127,11 +131,15 @@ internal class ClientEventReporter(
 
     internal fun reportWsJoinInitiated(
         sfuId: String,
+        callId: String,
+        callType: String,
         wasPreviouslyConnected: Boolean,
     ): String {
         val eventSessionId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
         inFlightSessions[eventSessionId] = InFlightSession(
+            callId = callId,
+            callType = callType,
             eventSessionId = eventSessionId,
             stage = CallEventStage.WS_JOIN,
             startedAtMs = now,
@@ -141,6 +149,8 @@ internal class ClientEventReporter(
         )
         sendEvent(
             buildRequest(
+                callId = callId,
+                callType = callType,
                 stage = CallEventStage.WS_JOIN,
                 eventType = CallEventType.INITIATED,
                 eventSessionId = eventSessionId,
@@ -163,6 +173,8 @@ internal class ClientEventReporter(
         val elapsedTime = System.currentTimeMillis() - session.startedAtMs
         sendEvent(
             buildRequest(
+                callId = session.callId,
+                callType = session.callType,
                 stage = CallEventStage.WS_JOIN,
                 eventType = CallEventType.COMPLETED,
                 eventSessionId = eventSessionId,
@@ -180,6 +192,8 @@ internal class ClientEventReporter(
     // --- PeerConnectionConnect (ICE state machine) ---
 
     internal fun onPeerConnectionIceStateChanged(
+        callId: String,
+        callType: String,
         role: PeerConnectionRole,
         iceState: PeerConnection.IceConnectionState,
         dtlsState: PeerConnection.PeerConnectionState?,
@@ -190,6 +204,8 @@ internal class ClientEventReporter(
                 // If an existing session is still in-flight, close it as failed first
                 activePcSessionIds.remove(role)?.let { oldId ->
                     completePeerConnectionSession(
+                        callId = callId,
+                        callType = callType,
                         eventSessionId = oldId,
                         success = false,
                         iceState = iceState,
@@ -200,6 +216,8 @@ internal class ClientEventReporter(
                 val eventSessionId = UUID.randomUUID().toString()
                 val now = System.currentTimeMillis()
                 inFlightSessions[eventSessionId] = InFlightSession(
+                    callId = callId,
+                    callType = callType,
                     eventSessionId = eventSessionId,
                     stage = CallEventStage.PEER_CONNECTION_CONNECT,
                     startedAtMs = now,
@@ -210,6 +228,8 @@ internal class ClientEventReporter(
                 activePcSessionIds[role] = eventSessionId
                 sendEvent(
                     buildRequest(
+                        callId = callId,
+                        callType = callType,
                         stage = CallEventStage.PEER_CONNECTION_CONNECT,
                         eventType = CallEventType.INITIATED,
                         eventSessionId = eventSessionId,
@@ -223,6 +243,8 @@ internal class ClientEventReporter(
                 val eventSessionId = activePcSessionIds.remove(role) ?: return
                 pcEverConnected[role] = true
                 completePeerConnectionSession(
+                    callId = callId,
+                    callType = callType,
                     eventSessionId = eventSessionId,
                     success = true,
                     iceState = iceState,
@@ -232,6 +254,8 @@ internal class ClientEventReporter(
             PeerConnection.IceConnectionState.FAILED -> {
                 val eventSessionId = activePcSessionIds.remove(role) ?: return
                 completePeerConnectionSession(
+                    callId = callId,
+                    callType = callType,
                     eventSessionId = eventSessionId,
                     success = false,
                     iceState = iceState,
@@ -245,6 +269,8 @@ internal class ClientEventReporter(
     }
 
     private fun completePeerConnectionSession(
+        callId: String,
+        callType: String,
         eventSessionId: String,
         success: Boolean,
         iceState: PeerConnection.IceConnectionState,
@@ -255,6 +281,8 @@ internal class ClientEventReporter(
         val elapsedTime = System.currentTimeMillis() - session.startedAtMs
         sendEvent(
             buildRequest(
+                callId = callId,
+                callType = callType,
                 stage = CallEventStage.PEER_CONNECTION_CONNECT,
                 eventType = CallEventType.COMPLETED,
                 eventSessionId = eventSessionId,
@@ -280,6 +308,8 @@ internal class ClientEventReporter(
         for (session in snapshot) {
             sendEvent(
                 buildRequest(
+                    callId = session.callId,
+                    callType = session.callType,
                     stage = session.stage,
                     eventType = CallEventType.COMPLETED,
                     eventSessionId = session.eventSessionId,
@@ -301,6 +331,8 @@ internal class ClientEventReporter(
     // --- Request builder ---
 
     private fun buildRequest(
+        callId: String,
+        callType: String,
         stage: CallEventStage,
         eventType: CallEventType,
         eventSessionId: String,
@@ -324,7 +356,7 @@ internal class ClientEventReporter(
         timestamp = OffsetDateTime.now(ZoneOffset.UTC),
         type = callType,
         userAgent = userAgent.invoke().take(512),
-        userId = userId,
+        userId = StreamVideo.instanceOrNull()?.userId,
         callSessionId = callSessionId,
         elapsedTime = elapsedTime?.toInt(),
         iceState = iceState?.name,

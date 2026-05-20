@@ -449,7 +449,6 @@ public class Call(
     private var sfuEvents: Job? = null
 
     /** Reports join lifecycle events to the backend for success-rate analytics. Set by StreamVideoClient. */
-    internal var eventReporter: ClientEventReporter? = null
 
     init {
         scope.launch {
@@ -768,7 +767,9 @@ public class Call(
                 }
                 .collect { (publisher, iceState) ->
                     if (iceState != null) {
-                        eventReporter?.onPeerConnectionIceStateChanged(
+                        client.state.clientEventReporter.onPeerConnectionIceStateChanged(
+                            callId = this@Call.id,
+                            callType = this@Call.type,
                             role = PeerConnectionRole.PUBLISH,
                             iceState = iceState,
                             dtlsState = publisher.state.value,
@@ -797,7 +798,9 @@ public class Call(
                 }
                 .collect { (subscriber, iceState) ->
                     if (iceState != null) {
-                        eventReporter?.onPeerConnectionIceStateChanged(
+                        client.state.clientEventReporter.onPeerConnectionIceStateChanged(
+                            callId = this@Call.id,
+                            callType = this@Call.type,
                             role = PeerConnectionRole.SUBSCRIBE,
                             iceState = iceState,
                             dtlsState = subscriber.state.value,
@@ -1298,7 +1301,7 @@ public class Call(
         clientImpl.scope.launch {
             val leaveReason = "[reason=${reason::class.simpleName}, message=${reason.message}]"
 //            val leaveReason = "[reason=$reason]"
-            eventReporter?.let { reporter ->
+            client.state.clientEventReporter.let { reporter ->
                 val abortReason = when (reason) {
                     is CallLeaveReason.Backend -> ClientEventReporter.AbortReason.BACKEND_LEAVE
                     else -> ClientEventReporter.AbortReason.CLIENT_ABORTED
@@ -1847,9 +1850,12 @@ public class Call(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<JoinCallResponse> {
-        val reporter = eventReporter
-        reporter?.resetJoinSuccessId()
-        val coordEventId = reporter?.reportCoordinatorJoinInitiated()
+        val reporter = client.state.clientEventReporter
+        reporter.resetJoinSuccessId()
+        val coordEventId = reporter.reportCoordinatorJoinInitiated(
+            callType = this.type,
+            callId = this.id,
+        )
 
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
         val result = clientImpl.joinCall(
@@ -1869,25 +1875,21 @@ public class Call(
         )
         result.onSuccess {
             state.updateFromResponse(it)
-            coordEventId?.let { id ->
-                reporter?.reportCoordinatorJoinCompleted(
-                    eventSessionId = id,
-                    success = true,
-                    retryCount = 0,
-                    callSessionId = it.call.currentSessionId,
-                )
-            }
+            reporter.reportCoordinatorJoinCompleted(
+                eventSessionId = id,
+                success = true,
+                retryCount = 0,
+                callSessionId = it.call.currentSessionId,
+            )
         }
         if (result is Failure) {
-            coordEventId?.let { id ->
-                reporter?.reportCoordinatorJoinCompleted(
-                    eventSessionId = id,
-                    success = false,
-                    retryCount = 0,
-                    failureReason = (result.value as? Error)?.message,
-                    failureCode = null,
-                )
-            }
+            reporter.reportCoordinatorJoinCompleted(
+                eventSessionId = id,
+                success = false,
+                retryCount = 0,
+                failureReason = result.value.message,
+                failureCode = null,
+            )
         }
         return result
     }
