@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.pinning
 
 import androidx.annotation.VisibleForTesting
+import io.getstream.video.android.core.IsPinned
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.SessionId
 import io.getstream.video.android.core.events.ParticipantJoinedEvent
@@ -27,6 +28,7 @@ import org.threeten.bp.Clock
 import org.threeten.bp.Instant
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
+import stream.video.sfu.models.Participant
 
 internal class PinManager(
     private val timeProvider: TimeProvider = DefaultTimeProvider(),
@@ -80,11 +82,25 @@ internal class PinManager(
 
     fun onParticipantJoined(event: ParticipantJoinedEvent) {
         val sessionId = event.participant.session_id
-        if (participants().containsKey(sessionId) && event.isPinned) {
+        val participantUserId = event.participant.user_id
+        updateServerPins(sessionId, event.isPinned, participantUserId)
+    }
+
+    fun onParticipantsJoined(list: List<Pair<Participant, IsPinned>>) {
+        for (item in list) {
+            val isPinned = item.second
+            val sessionId = item.first.session_id
+            val participantUserId = item.first.user_id
+            updateServerPins(sessionId, isPinned, participantUserId)
+        }
+    }
+
+    fun updateServerPins(sessionId: SessionId, isPinned: Boolean, participantUserId: String) {
+        if (participants().containsKey(sessionId) && isPinned) {
             if (!serverPins.value.containsKey(sessionId)) {
                 _serverPins.value = serverPins.value + (
                     sessionId to PinEntry(
-                        PinUpdate(event.participant.user_id, sessionId),
+                        PinUpdate(participantUserId, sessionId),
                         timeProvider.now(),
                         PinType.Server,
                     )

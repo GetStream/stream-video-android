@@ -211,6 +211,7 @@ public sealed interface RealtimeConnection {
 }
 
 internal typealias SessionId = String
+internal typealias IsPinned = Boolean
 
 /**
  * The CallState class keeps all state for a call
@@ -715,7 +716,8 @@ public class CallState(
      */
     val ccMode: StateFlow<ClosedCaptionMode> = closedCaptionManager.ccMode
 
-    private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
+    private val pendingParticipantsJoined =
+        ConcurrentHashMap<SessionId, Pair<Participant, IsPinned>>()
 
     /**
      * We re-create notification more than 1 times, so we don't want to
@@ -1069,16 +1071,19 @@ public class CallState(
                 try {
                     if (participants.value.size < 8) {
                         getOrCreateParticipant(event.participant)
+                        pinManager.onParticipantJoined(event)
                     } else {
-                        pendingParticipantsJoined[event.participant.session_id] = event.participant
+                        pendingParticipantsJoined[event.participant.session_id] = Pair(event.participant, event.isPinned)
                         participantsUpdate.schedule(scope, participantsUpdateConfig) {
                             logger.d {
                                 "[ParticipantJoinedEvent] #participants; #debounce; participants: ${participants.value.size}"
                             }
-                            getOrCreateParticipants(pendingParticipantsJoined.values.toList())
+                            val pendingParticipants = pendingParticipantsJoined.values.map { it.first }.toList()
+                            getOrCreateParticipants(pendingParticipants)
+                            val pendingParticipantsWithPin = pendingParticipantsJoined.values.toList()
+                            pinManager.onParticipantsJoined(pendingParticipantsWithPin)
                         }
                     }
-                    pinManager.onParticipantJoined(event)
                 } catch (e: Exception) {
                     logger.e(e) {
                         "[ParticipantJoinedEvent] #participants; #debounce; Failed to debounce, processing as usual."
