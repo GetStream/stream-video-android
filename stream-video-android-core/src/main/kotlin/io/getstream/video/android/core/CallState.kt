@@ -329,8 +329,9 @@ public class CallState(
     public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
 
     internal val pinManager = PinManager() { internalParticipants }
+
     /**
-     * Combined pin state preserving the underlying [PinUpdateAtTime] (which carries
+     * Combined pin state preserving the underlying [PinEntry] (which carries
      * [io.getstream.video.android.core.pinning.PinType] and the original timestamp).
      * Internal; the sorter consumes this to apply local-pin > server-pin > recency.
      * Local pins win on key collision.

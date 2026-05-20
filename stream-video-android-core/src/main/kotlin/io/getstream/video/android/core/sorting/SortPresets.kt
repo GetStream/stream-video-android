@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.sorting
 
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.pinning.PinUpdateAtTime
+import io.getstream.video.android.core.pinning.PinEntry
 import stream.video.sfu.models.ParticipantSource
 
 /**
@@ -82,7 +82,7 @@ internal val ingressSourcePriority: Comparator<ParticipantState> = bySourcePrior
  * current local/server pin map.
  */
 internal fun SortPreset.build(
-    pins: Map<String, PinUpdateAtTime>,
+    pins: Map<String, PinEntry>,
 ): Comparator<ParticipantState> = when (this) {
     SortPreset.Default -> combineComparators(
         screenSharing,

@@ -19,8 +19,8 @@ package io.getstream.video.android.core.sorting
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.model.VisibilityOnScreenState
+import io.getstream.video.android.core.pinning.PinEntry
 import io.getstream.video.android.core.pinning.PinType
-import io.getstream.video.android.core.pinning.PinUpdateAtTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -275,8 +275,8 @@ class SortPresetsTest {
         sessionId: String,
         at: OffsetDateTime,
         type: PinType,
-    ): PinUpdateAtTime = PinUpdateAtTime(
-        it = PinUpdate(sessionId = sessionId, userId = "user-$sessionId"),
+    ): PinEntry = PinEntry(
+        pinTarget = PinUpdate(sessionId = sessionId, userId = "user-$sessionId"),
         at = at,
         type = type,
     )

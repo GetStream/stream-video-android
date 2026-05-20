@@ -17,8 +17,8 @@
 package io.getstream.video.android.core.sorting
 
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.pinning.PinEntry
 import io.getstream.video.android.core.pinning.PinType
-import io.getstream.video.android.core.pinning.PinUpdateAtTime
 import stream.video.sfu.models.ParticipantSource
 
 /**
@@ -170,14 +170,14 @@ public fun byRole(vararg roles: String): Comparator<ParticipantState> =
  * Returns a comparator that prioritizes pinned participants. Within pinned, local pins
  * win over server pins; among pins of the same type, more recently pinned wins.
  *
- * Internal: parameter type [PinUpdateAtTime] is an internal SDK type. Callers compose
+ * Internal: parameter type [PinEntry] is an internal SDK type. Callers compose
  * presets via [SortPresets]; this is invoked by [SortedParticipantsState] with the
  * latest detailed pin map before each sort pass.
  *
  * @param pins the current snapshot of pin state, keyed by session id.
  */
 internal fun pinned(
-    pins: Map<String, PinUpdateAtTime>,
+    pins: Map<String, PinEntry>,
 ): Comparator<ParticipantState> = Comparator { a, b ->
     val aPin = pins[a.sessionId]
     val bPin = pins[b.sessionId]
