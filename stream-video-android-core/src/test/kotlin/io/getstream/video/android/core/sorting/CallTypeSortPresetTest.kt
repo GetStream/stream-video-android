@@ -38,11 +38,24 @@ class CallTypeSortPresetTest {
     }
 
     @Test
+    fun `AudioRoom call type uses SortPreset LivestreamOrAudioRoom`() {
+        // CallType.AudioRoom mirrors the "audio_room" server type used by React and iOS.
+        // It applies the same livestream-style sort (activity + roles).
+        assertThat(CallType.AudioRoom.sortPreset).isEqualTo(SortPreset.LivestreamOrAudioRoom)
+    }
+
+    @Test
     fun `AudioCall call type falls back to SortPreset Default (1to1 audio is not livestream-like)`() {
-        // CallType.AudioCall represents a 1:1 audio call, not the React/iOS audio_room
-        // concept. Auto-applying LivestreamOrAudioRoom there would mis-sort the two
-        // participants. Stays on Default until a dedicated AudioRoom call type lands.
+        // CallType.AudioCall represents a 1:1 audio call, distinct from AudioRoom (group
+        // audio). Auto-applying LivestreamOrAudioRoom there would mis-sort the two
+        // participants. AudioCall stays on Default.
         assertThat(CallType.AudioCall.sortPreset).isEqualTo(SortPreset.Default)
+    }
+
+    @Test
+    fun `fromName audio_room resolves to AudioRoom call type with LivestreamOrAudioRoom preset`() {
+        val resolved = CallType.fromName("audio_room")?.sortPreset ?: SortPreset.Default
+        assertThat(resolved).isEqualTo(SortPreset.LivestreamOrAudioRoom)
     }
 
     @Test
