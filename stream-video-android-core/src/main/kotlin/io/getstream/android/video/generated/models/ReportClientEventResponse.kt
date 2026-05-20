@@ -35,10 +35,10 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * Response for reporting a client-side call event
+ * Response for reporting client-side telemetry events
  */
 
-data class ReportClientCallEventResponse (
+data class ReportClientEventResponse (
     @Json(name = "duration")
     val duration: kotlin.String
 )

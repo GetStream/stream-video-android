@@ -17,8 +17,11 @@
 package io.getstream.video.android.core.events.reporting
 
 import io.getstream.android.video.generated.apis.ProductvideoApi
-import io.getstream.android.video.generated.models.ReportClientCallEventRequest
+import io.getstream.android.video.generated.models.ClientEvent
+import io.getstream.android.video.generated.models.ReportClientEventRequest
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.socket.common.scope.ClientScope
+import io.getstream.video.android.core.socket.common.scope.UserScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
@@ -29,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 private typealias EventSessionId = String
 
-internal class CallEventReporter(
+internal class ClientEventReporter(
     private val api: ProductvideoApi,
     private val callType: String,
     private val callId: String,
@@ -37,7 +40,7 @@ internal class CallEventReporter(
     private val userId: String,
     private val userAgent: () -> String,
     private val sdkVersion: String,
-    private val scope: CoroutineScope,
+    private val scope: CoroutineScope = UserScope(ClientScope()),
 ) {
     private val logger by taggedLogger("CallEventReporter:$callCid")
 
@@ -262,7 +265,7 @@ internal class CallEventReporter(
                 retryFailureCode = if (!success) failureCode else null,
                 peerConnection = session.peerConnectionRole,
                 wasPreviouslyConnected = session.wasPreviouslyConnected,
-                iceState = iceState.toRequestIceState(),
+                iceState = iceState,
             ),
         )
     }
@@ -310,23 +313,23 @@ internal class CallEventReporter(
         sfuId: String? = null,
         peerConnection: PeerConnectionRole? = null,
         wasPreviouslyConnected: Boolean? = null,
-        iceState: ReportClientCallEventRequest.IceState? = null,
+        iceState: PeerConnection.IceConnectionState? = null,
         userSessionId: String? = null,
-    ): ReportClientCallEventRequest = ReportClientCallEventRequest(
+    ): ClientEvent = ClientEvent(
         eventSessionId = eventSessionId,
-        eventType = eventType.toRequestEventType(),
+        eventType = eventType.value,
         id = callId,
         sdkVersion = sdkVersion,
-        stage = stage.toRequestStage(),
+        stage = stage.value,
         timestamp = OffsetDateTime.now(ZoneOffset.UTC),
         type = callType,
         userAgent = userAgent.invoke().take(512),
         userId = userId,
         callSessionId = callSessionId,
         elapsedTime = elapsedTime?.toInt(),
-        iceState = iceState,
-        outcome = outcome?.toRequestOutcome(),
-        peerConnection = peerConnection?.toRequestPeerConnection(),
+        iceState = iceState?.name,
+        outcome = outcome?.value,
+        peerConnection = peerConnection?.value,
         previouslyConnectedTimestamp = null,
         retryCountAttempt = retryCountAttempt,
         retryFailureCode = retryFailureCode,
@@ -338,43 +341,25 @@ internal class CallEventReporter(
 
     // --- Delivery ---
 
-    private fun sendEvent(request: ReportClientCallEventRequest) {
+//    private fun sendEvent(request: ReportClientEventRequest) {
+//        scope.launch {
+//            // TODO: wrap with StreamRetryPolicy when retries are added
+//            runCatching {
+//                api.reportClientCallEvent(request)
+//            }.onFailure { e ->
+//                logger.w { "[sendEvent] Failed to send client event: ${e.message}" }
+//            }
+//        }
+//    }
+
+    private fun sendEvent(request: ClientEvent) {
         scope.launch {
             // TODO: wrap with StreamRetryPolicy when retries are added
             runCatching {
-                api.reportClientCallEvent(request)
+                api.reportClientCallEvent(ReportClientEventRequest(arrayListOf(request)))
             }.onFailure { e ->
                 logger.w { "[sendEvent] Failed to send client event: ${e.message}" }
             }
         }
     }
-}
-
-// --- Enum mappers ---
-
-private fun CallEventStage.toRequestStage(): ReportClientCallEventRequest.Stage = when (this) {
-    CallEventStage.COORDINATOR_JOIN -> ReportClientCallEventRequest.Stage.CoordinatorJoin
-    CallEventStage.WS_JOIN -> ReportClientCallEventRequest.Stage.WSJoin
-    CallEventStage.PEER_CONNECTION_CONNECT -> ReportClientCallEventRequest.Stage.PeerConnectionConnect
-}
-
-private fun CallEventType.toRequestEventType(): ReportClientCallEventRequest.EventType = when (this) {
-    CallEventType.INITIATED -> ReportClientCallEventRequest.EventType.Initiated
-    CallEventType.COMPLETED -> ReportClientCallEventRequest.EventType.Completed
-}
-
-private fun CallEventOutcome.toRequestOutcome(): ReportClientCallEventRequest.Outcome = when (this) {
-    CallEventOutcome.SUCCESS -> ReportClientCallEventRequest.Outcome.Success
-    CallEventOutcome.FAILURE -> ReportClientCallEventRequest.Outcome.Failure
-}
-
-private fun PeerConnectionRole.toRequestPeerConnection(): ReportClientCallEventRequest.PeerConnection = when (this) {
-    PeerConnectionRole.PUBLISH -> ReportClientCallEventRequest.PeerConnection.Publish
-    PeerConnectionRole.SUBSCRIBE -> ReportClientCallEventRequest.PeerConnection.Subscribe
-}
-
-private fun PeerConnection.IceConnectionState.toRequestIceState(): ReportClientCallEventRequest.IceState? = when (this) {
-    PeerConnection.IceConnectionState.CONNECTED -> ReportClientCallEventRequest.IceState.CONNECTED
-    PeerConnection.IceConnectionState.FAILED -> ReportClientCallEventRequest.IceState.FAILED
-    else -> null
 }

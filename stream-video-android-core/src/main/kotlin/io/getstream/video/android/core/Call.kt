@@ -76,7 +76,7 @@ import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
-import io.getstream.video.android.core.events.reporting.CallEventReporter
+import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import io.getstream.video.android.core.events.reporting.PeerConnectionRole
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -449,7 +449,7 @@ public class Call(
     private var sfuEvents: Job? = null
 
     /** Reports join lifecycle events to the backend for success-rate analytics. Set by StreamVideoClient. */
-    internal var eventReporter: CallEventReporter? = null
+    internal var eventReporter: ClientEventReporter? = null
 
     init {
         scope.launch {
@@ -1300,8 +1300,8 @@ public class Call(
 //            val leaveReason = "[reason=$reason]"
             eventReporter?.let { reporter ->
                 val abortReason = when (reason) {
-                    is CallLeaveReason.Backend -> CallEventReporter.AbortReason.BACKEND_LEAVE
-                    else -> CallEventReporter.AbortReason.CLIENT_ABORTED
+                    is CallLeaveReason.Backend -> ClientEventReporter.AbortReason.BACKEND_LEAVE
+                    else -> ClientEventReporter.AbortReason.CLIENT_ABORTED
                 }
                 reporter.abortAllInFlight(abortReason)
             }

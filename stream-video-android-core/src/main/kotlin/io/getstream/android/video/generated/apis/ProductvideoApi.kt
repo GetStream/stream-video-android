@@ -718,13 +718,13 @@ interface ProductvideoApi {
     ): io.getstream.android.video.generated.models.DeleteTranscriptionResponse
     
     /**
-     * Report client-side call event
-     * Reports a single client-side join-lifecycle event (initiated or completed) for one of CoordinatorJoin, WSJoin, or PeerConnectionConnect. Pairs are correlated by event_session_id.
+     * Report client-side events
+     * Reports a batch of client-side telemetry events. Events are processed independently; one invalid event does not block the rest of the batch.
      */
     @POST("/video/call_client_event")
     suspend fun reportClientCallEvent(
-        @Body reportClientCallEventRequest: io.getstream.android.video.generated.models.ReportClientCallEventRequest
-    ): io.getstream.android.video.generated.models.ReportClientCallEventResponse
+        @Body reportClientEventRequest: io.getstream.android.video.generated.models.ReportClientEventRequest
+    ): io.getstream.android.video.generated.models.ReportClientEventResponse
     
     /**
      * Query call session stats
