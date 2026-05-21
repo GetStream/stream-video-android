@@ -24,6 +24,8 @@ import stream.video.sfu.signal.ICERestartResponse
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
+import stream.video.sfu.signal.SendMetricsRequest
+import stream.video.sfu.signal.SendMetricsResponse
 import stream.video.sfu.signal.SendStatsRequest
 import stream.video.sfu.signal.SendStatsResponse
 import stream.video.sfu.signal.SetPublisherRequest
@@ -96,6 +98,9 @@ internal class SignalingServiceTracerDecorator<T : SignalServerService>(
 
     override suspend fun sendStats(sendStatsRequest: SendStatsRequest): SendStatsResponse =
         target.sendStats(sendStatsRequest)
+
+    override suspend fun sendMetrics(sendMetricsRequest: SendMetricsRequest): SendMetricsResponse =
+        target.sendMetrics(sendMetricsRequest)
 
     override suspend fun startNoiseCancellation(startNoiseCancellationRequest: StartNoiseCancellationRequest): StartNoiseCancellationResponse =
         traced("startNoiseCancellation", startNoiseCancellationRequest, { it.error }) {

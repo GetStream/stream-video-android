@@ -2016,9 +2016,13 @@ public class Call(
             sessionId,
         )
 
-    fun isServerPin(sessionId: String): Boolean = state._serverPins.value.containsKey(sessionId)
+    fun isServerPin(sessionId: String): Boolean = state.pinManager.serverPins.value.containsKey(
+        sessionId,
+    )
 
-    fun isLocalPin(sessionId: String): Boolean = state._localPins.value.containsKey(sessionId)
+    fun isLocalPin(sessionId: String): Boolean = state.pinManager.localPins.value.containsKey(
+        sessionId,
+    )
 
     fun hasCapability(vararg capability: OwnCapability): Boolean {
         val elements = capability.toList()

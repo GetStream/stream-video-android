@@ -82,6 +82,7 @@ import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
@@ -117,10 +118,11 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.permission.PermissionRequest
-import io.getstream.video.android.core.pinning.PinType
-import io.getstream.video.android.core.pinning.PinUpdateAtTime
+import io.getstream.video.android.core.pinning.PinEntry
+import io.getstream.video.android.core.pinning.PinManager
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.sorting.SortPreset
 import io.getstream.video.android.core.sorting.SortedParticipantsState
 import io.getstream.video.android.core.utils.ScheduleConfig
 import io.getstream.video.android.core.utils.TaskSchedulerWithDebounce
@@ -165,6 +167,8 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.collections.map
+import kotlin.collections.toMutableList
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -207,6 +211,9 @@ public sealed interface RealtimeConnection {
     public data object ReconnectingFailed : RealtimeConnection // all retry attempts exhausted
     public data object Disconnected : RealtimeConnection // normal disconnect by the app
 }
+
+internal typealias SessionId = String
+internal typealias IsPinned = Boolean
 
 /**
  * The CallState class keeps all state for a call
@@ -267,12 +274,19 @@ public class CallState(
         it is RealtimeConnection.Reconnecting
     }
 
-    private val internalParticipants = ConcurrentHashMap<String, ParticipantState>()
+    private val internalParticipants = ConcurrentHashMap<SessionId, ParticipantState>()
     private val _participants = MutableStateFlow<Map<String, ParticipantState>>(emptyMap())
 
-    /** Participants returns a list of participant state object. @see [ParticipantState] */
-    public val participants: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.values.toList() }
+    /**
+     * Participants in this call, ordered by the active [SortPreset]. The list emits whenever
+     * the order changes — identity-equal emissions are suppressed by the sorter's internal
+     * coalescing so consumers don't recompose for non-changes.
+     *
+     * Implemented as a property getter to defer resolution of [_sortedParticipantsState],
+     * which is initialized later in this class.
+     */
+    public val participants: StateFlow<List<ParticipantState>>
+        get() = _sortedParticipantsState.sortedParticipants
 
     private val _startedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
 
@@ -301,33 +315,44 @@ public class CallState(
         MutableStateFlow(emptyList())
     public val activeSpeakers: StateFlow<List<ParticipantState>> = _activeSpeakers
 
-    /** participants other than yourself */
-    public val remoteParticipants: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.filterKeys { key -> key != call.sessionId }.values.toList() }
+    /**
+     * Participants other than yourself, in the same sort order as [participants].
+     * Lazy-initialized to defer resolving [_sortedParticipantsState] (defined later in
+     * this class).
+     */
+    public val remoteParticipants: StateFlow<List<ParticipantState>> by lazy {
+        participants.mapState { list -> list.filter { it.sessionId != call.sessionId } }
+    }
 
     /** the dominant speaker */
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
     public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
 
-    internal val _localPins: MutableStateFlow<Map<String, PinUpdateAtTime>> =
-        MutableStateFlow(emptyMap())
-    internal val _serverPins: MutableStateFlow<Map<String, PinUpdateAtTime>> =
-        MutableStateFlow(emptyMap())
+    internal val pinManager = PinManager() { internalParticipants }
 
-    internal val _pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> =
-        combine(_localPins, _serverPins) { local, server ->
-            val combined = mutableMapOf<String, PinUpdateAtTime>()
-            combined.putAll(local)
+    /**
+     * Combined pin state preserving the underlying [PinEntry] (which carries
+     * [io.getstream.video.android.core.pinning.PinType] and the original timestamp).
+     * Internal; the sorter consumes this to apply local-pin > server-pin > recency.
+     * Local pins win on key collision.
+     */
+    internal val _pinnedParticipantsDetailed: StateFlow<Map<SessionId, PinEntry>> =
+        combine(pinManager.localPins, pinManager.serverPins) { local, server ->
+            val combined = mutableMapOf<String, PinEntry>()
             combined.putAll(server)
-            combined.toMap().asIterable().associate {
-                Pair(it.key, it.value.at)
-            }
+            combined.putAll(local) // local overrides server on key collision
+            combined.toMap()
         }.stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+    internal val _pinnedParticipants: StateFlow<Map<SessionId, OffsetDateTime>> =
+        _pinnedParticipantsDetailed.mapState { detailed ->
+            detailed.mapValues { it.value.at }
+        }
 
     /**
      * Pinned participants, combined value both from server and local pins.
      */
-    val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
+    val pinnedParticipants: StateFlow<Map<SessionId, OffsetDateTime>> = _pinnedParticipants
 
     val stats = CallStats(call, scope)
 
@@ -420,28 +445,45 @@ public class CallState(
     val livestream: StateFlow<ParticipantState.Video?> =
         livestreamFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
 
-    private var _sortedParticipantsState = SortedParticipantsState(
-        scope,
-        call,
-        _participants,
-        _pinnedParticipants,
+    private val _sortedParticipantsState = SortedParticipantsState(
+        scope = scope,
+        call = call,
+        participants = _participants,
+        pinnedParticipantsDetailed = _pinnedParticipantsDetailed,
+        // Pick up the call type's default sort preset (e.g. CallType.Livestream →
+        // LivestreamOrAudioRoom). Unknown call types fall back to SortPreset.Default.
+        // Callers can override at any time via setSortPreset(...).
+        initialPreset = CallType.fromName(call.type)?.sortPreset ?: SortPreset.Default,
     )
 
     /**
-     * Sorted participants based on
-     * - Pinned
-     * - Dominant Speaker
-     * - Screensharing
-     * - Last speaking at
-     * - Video enabled
-     * - Call joined at
+     * Alias for [participants], which is already sorted by the active [SortPreset].
      *
-     * Debounced 100ms to avoid rapid changes
+     * Kept for source compatibility while callers migrate. The previous dual-flow design
+     * (raw `participants` map ordering vs. sorted list) created subtle staleness bugs in
+     * the renderer; collapsing into a single sorted flow eliminates that class of issue.
      */
-    val sortedParticipants = _sortedParticipantsState.asFlow().debounce(100)
+    /**
+     * Deprecated alias for [participants]. Return type is intentionally declared as
+     * [Flow] (not [StateFlow]) to preserve binary compatibility with the pre-existing
+     * public API — [StateFlow] is a [Flow], so consumers see the same underlying value.
+     */
+    @Deprecated(
+        message = "participants is already sorted. Use participants directly.",
+        replaceWith = ReplaceWith("participants"),
+        level = DeprecationLevel.WARNING,
+    )
+    val sortedParticipants: Flow<List<ParticipantState>>
+        get() = participants
 
     /**
-     * Update participant sorting order
+     * Switch the active sort preset.
+     */
+    fun setSortPreset(preset: SortPreset) = _sortedParticipantsState.setPreset(preset)
+
+    /**
+     * Plug in an ad-hoc [Comparator] for participant sorting. Overrides the active preset
+     * until called again with a different comparator or [setSortPreset] is invoked.
      *
      * @param comparator a new comparator to be used in [sortedParticipants] flow.
      */
@@ -715,7 +757,8 @@ public class CallState(
      */
     val ccMode: StateFlow<ClosedCaptionMode> = closedCaptionManager.ccMode
 
-    private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
+    private val pendingParticipantsJoined =
+        ConcurrentHashMap<SessionId, Pair<Participant, IsPinned>>()
 
     /**
      * We re-create notification more than 1 times, so we don't want to
@@ -765,7 +808,7 @@ public class CallState(
             }
 
             is PinsUpdatedEvent -> {
-                updateServerSidePins(event.pins)
+                pinManager.setServerPins(event.pins)
             }
 
             is UnblockedUserEvent -> {
@@ -1080,7 +1123,7 @@ public class CallState(
                 } else {
                     _ringingState.value = RingingState.Outgoing(acceptedByCallee = true)
                 }
-                updateServerSidePins(
+                pinManager.setServerPins(
                     event.callState.pins.map {
                         PinUpdate(it.user_id, it.session_id)
                     },
@@ -1091,13 +1134,17 @@ public class CallState(
                 try {
                     if (participants.value.size < 8) {
                         getOrCreateParticipant(event.participant)
+                        pinManager.onParticipantJoined(event)
                     } else {
-                        pendingParticipantsJoined[event.participant.session_id] = event.participant
+                        pendingParticipantsJoined[event.participant.session_id] = Pair(event.participant, event.isPinned)
                         participantsUpdate.schedule(scope, participantsUpdateConfig) {
                             logger.d {
                                 "[ParticipantJoinedEvent] #participants; #debounce; participants: ${participants.value.size}"
                             }
-                            getOrCreateParticipants(pendingParticipantsJoined.values.toList())
+                            val pendingParticipants = pendingParticipantsJoined.values.map { it.first }.toList()
+                            getOrCreateParticipants(pendingParticipants)
+                            val pendingParticipantsWithPin = pendingParticipantsJoined.values.toList()
+                            pinManager.onParticipantsJoined(pendingParticipantsWithPin)
                         }
                     }
                 } catch (e: Exception) {
@@ -1118,16 +1165,8 @@ public class CallState(
                 if (current?.participant?.sessionId == sessionId) {
                     _screenSharingSession.value = null
                 }
-                if (_localPins.value.containsKey(sessionId)) {
-                    // Remove any pins for the participant
-                    unpin(sessionId)
-                }
 
-                if (_serverPins.value.containsKey(sessionId)) {
-                    scope.launch {
-                        call.unpinForEveryone(sessionId, event.participant.user_id)
-                    }
-                }
+                pinManager.onParticipantLeft(sessionId)
             }
 
             is SubscriberOfferEvent -> {
@@ -1274,19 +1313,6 @@ public class CallState(
                     }
                 }
             }
-        }
-    }
-
-    private fun updateServerSidePins(pins: List<PinUpdate>) {
-        // Update participants that are still in the call
-        val pinnedInCall = pins.filter {
-            internalParticipants.containsKey(it.sessionId)
-        }
-        _serverPins.value = pinnedInCall.associate {
-            Pair(
-                it.sessionId,
-                PinUpdateAtTime(it, OffsetDateTime.now(Clock.systemUTC()), PinType.Server),
-            )
         }
     }
 
@@ -1693,19 +1719,11 @@ public class CallState(
     }
 
     fun pin(userId: String, sessionId: String) {
-        val pins = _localPins.value.toMutableMap()
-        pins[sessionId] = PinUpdateAtTime(
-            PinUpdate(userId, sessionId),
-            OffsetDateTime.now(Clock.systemUTC()),
-            PinType.Local,
-        )
-        _localPins.value = pins
+        pinManager.pin(userId, sessionId)
     }
 
     fun unpin(sessionId: String) {
-        val pins = _localPins.value.toMutableMap()
-        pins.remove(sessionId)
-        _localPins.value = pins
+        pinManager.unpin(sessionId)
     }
 
     fun updateFromResponse(result: StopLiveResponse) {

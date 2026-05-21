@@ -4,13 +4,12 @@ package stream.video.sfu.signal;
 
 import "video/sfu/models/models.proto";
 
+option csharp_namespace = "Stream.Video.v1.Sfu.Signal";
 option go_package = "github.com/GetStream/protocol/protobuf/video/sfu/signal_rpc";
 option java_multiple_files = true;
 option java_outer_classname = "SfuSignalV1";
-option csharp_namespace = "Stream.Video.v1.Sfu.Signal";
 
 service SignalServer {
-
   // SetPublisher sends the WebRTC offer for the peer connection used to publish A/V
   rpc SetPublisher(SetPublisherRequest) returns (SetPublisherResponse);
 
@@ -29,6 +28,8 @@ service SignalServer {
   rpc IceRestart(ICERestartRequest) returns (ICERestartResponse);
 
   rpc SendStats(SendStatsRequest) returns (SendStatsResponse);
+
+  rpc SendMetrics(SendMetricsRequest) returns (SendMetricsResponse);
 
   rpc StartNoiseCancellation(StartNoiseCancellationRequest) returns (StartNoiseCancellationResponse);
 
@@ -61,6 +62,19 @@ message Telemetry {
     float connection_time_seconds = 1;
     Reconnection reconnection = 2;
   }
+}
+
+message SendMetricsRequest {
+  string session_id = 1;
+  string unified_session_id = 2;
+
+  repeated models.InboundRtp inbounds = 3;
+  repeated models.OutboundRtp outbounds = 4;
+  repeated models.RemoteInboundRtp remote_inbounds = 5;
+  repeated models.RemoteOutboundRtp remote_outbounds = 6;
+}
+
+message SendMetricsResponse {
 }
 
 message SendStatsRequest {
@@ -106,16 +120,16 @@ message ICERestartResponse {
   models.Error error = 1;
 }
 
-message UpdateMuteStatesRequest{
+message UpdateMuteStatesRequest {
   string session_id = 1;
   repeated TrackMuteState mute_states = 3;
 }
 
-message UpdateMuteStatesResponse{
+message UpdateMuteStatesResponse {
   models.Error error = 4;
 }
 
-message TrackMuteState{
+message TrackMuteState {
   models.TrackType track_type = 1;
   bool muted = 2;
 }
@@ -148,16 +162,16 @@ message SendAnswerRequest {
   stream.video.sfu.models.PeerType peer_type = 1;
   string sdp = 2;
   string session_id = 3;
+  uint32 negotiation_id = 4;
 }
 
 message SendAnswerResponse {
   models.Error error = 4;
 }
 
-message ICETrickleResponse{
+message ICETrickleResponse {
   models.Error error = 4;
 }
-
 
 message SetPublisherRequest {
   // sdp offer

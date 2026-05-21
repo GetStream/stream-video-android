@@ -37,6 +37,7 @@ import io.getstream.video.android.compose.ui.components.video.config.videoRender
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.sorting.bySourcePriority
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import kotlinx.coroutines.flow.Flow
@@ -80,22 +81,33 @@ public fun LivestreamPlayer(
     },
     videoRendererConfig: VideoRendererConfig = videoRenderConfig(),
     livestreamFlow: Flow<ParticipantState.Video?> =
-        call.state.participants.flatMapLatest { participants: List<ParticipantState> ->
-            // For each participant, create a small Flow that watches videoEnabled.
-            val participantVideoFlows = participants.map { participant ->
-                participant.videoEnabled.map { enabled -> participant to enabled }
+        call.state.participants.flatMapLatest { participants ->
+            // Re-sort by ingress source priority before picking. The grid-level preset
+            // already orders ingress sources first, but applying the livestream-specific
+            // priority here makes the picker independent of whatever preset is active —
+            // changing the grid preset cannot accidentally affect the livestream host.
+            // Stable sort preserves the upstream order among equal-priority participants.
+            val sorted = participants.sortedWith(
+                bySourcePriority(
+                    ParticipantSource.PARTICIPANT_SOURCE_RTMP,
+                    ParticipantSource.PARTICIPANT_SOURCE_WHIP,
+                    ParticipantSource.PARTICIPANT_SOURCE_SRT,
+                    ParticipantSource.PARTICIPANT_SOURCE_RTSP,
+                ),
+            )
+            if (sorted.isEmpty()) {
+                flow { emit(null) }
+            } else {
+                combine(
+                    sorted.map { participant ->
+                        participant.videoEnabled.map { enabled -> participant to enabled }
+                    },
+                ) { pairs ->
+                    pairs.firstOrNull { (_, enabled) -> enabled }?.first
+                }
             }
-            // Combine these Flows: whenever a participant’s videoEnabled changes,
-            // we re-calculate which participants have video.
-            combine(participantVideoFlows) { participantEnabledPairs ->
-                participantEnabledPairs
-                    .filter { (_, isEnabled) -> isEnabled }
-                    .map { (participant, _) -> participant }
-            }
-        }.flatMapLatest { participantWithVideo ->
-            participantWithVideo.minByOrNull {
-                participantSourceRank(it.source)
-            }?.video ?: flow { emit(null) }
+        }.flatMapLatest { participant ->
+            participant?.video ?: flow { emit(null) }
         },
     rendererContent: @Composable BoxScope.(Call) -> Unit = defaultRenderer,
     overlayContent: @Composable BoxScope.(Call) -> Unit = defaultLivestreamPlayerOverlay,
@@ -333,13 +345,4 @@ private val defaultRenderer: @Composable BoxScope.(Call) -> Unit = { call ->
 }
 private val defaultLivestreamPlayerOverlay: @Composable BoxScope.(Call) -> Unit = { call ->
     LivestreamPlayerOverlay(call = call)
-}
-
-private fun participantSourceRank(s: ParticipantSource): Int = when (s) {
-    ParticipantSource.PARTICIPANT_SOURCE_RTMP -> 0
-    ParticipantSource.PARTICIPANT_SOURCE_WHIP -> 1
-    ParticipantSource.PARTICIPANT_SOURCE_RTSP -> 2
-    ParticipantSource.PARTICIPANT_SOURCE_SRT -> 3
-    ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED -> 4
-    ParticipantSource.PARTICIPANT_SOURCE_SIP -> 2
 }
