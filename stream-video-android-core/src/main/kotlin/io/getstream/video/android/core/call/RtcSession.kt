@@ -162,6 +162,7 @@ import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.util.Collections
+
 /**
  * Keeps track of which track is being rendered at what resolution.
  * Also stores if the track is visible or not
@@ -880,8 +881,8 @@ public class RtcSession internal constructor(
         options: List<PublishOption>? = null,
     ): SfuConnectionResult {
         logger.i { "[connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
-        val wsReporter = call.client.state.clientEventReporter
-        val wsEventId = wsReporter.reportWsJoinInitiated(
+        val reporter = call.client.state.clientEventReporter
+        val telemetryWsEventSessionId = reporter.reportWsJoinInitiated(
             callId = call.id,
             callType = call.type,
             sfuId = sfuName,
@@ -903,13 +904,12 @@ public class RtcSession internal constructor(
         }
         return when (terminalState) {
             is SfuSocketState.Connected -> {
-                wsEventId?.let {
-                    wsReporter.reportWsJoinCompleted(
-                        it,
-                        success = true,
-                        retryCount = 0,
-                    )
-                }
+                reporter.reportWsJoinCompleted(
+                    telemetryWsEventSessionId,
+                    success = true,
+                    retryCount = 0,
+                )
+
                 sendConnectionTimeStats(reconnectDetails?.strategy)
                 SfuConnectionResult.Connected
             }
@@ -923,29 +923,26 @@ public class RtcSession internal constructor(
                 }
                 logger.w { "[connectInternal] $msg" }
                 sfuTracer.trace("connect-failed", msg)
-                wsEventId?.let {
-                    wsReporter.reportWsJoinCompleted(
-                        it,
-                        success = false,
-                        retryCount = 0,
-                        failureReason = msg,
-                        failureCode = "WS_DISCONNECTED",
-                    )
-                }
+                reporter.reportWsJoinCompleted(
+                    telemetryWsEventSessionId,
+                    success = false,
+                    retryCount = 0,
+                    failureReason = msg,
+                    failureCode = "WS_DISCONNECTED",
+                )
                 sendCallStats()
                 SfuConnectionResult.Failed(Exception(msg))
             }
             else -> {
                 sfuTracer.trace("connect-failed", "Connection timed out")
-                wsEventId?.let {
-                    wsReporter?.reportWsJoinCompleted(
-                        it,
-                        success = false,
-                        retryCount = 0,
-                        failureReason = "SFU connection timed out",
-                        failureCode = "REQUEST_TIMEOUT",
-                    )
-                }
+                reporter.reportWsJoinCompleted(
+                    telemetryWsEventSessionId,
+                    success = false,
+                    retryCount = 0,
+                    failureReason = "SFU connection timed out",
+                    failureCode = "REQUEST_TIMEOUT",
+                )
+
                 sendCallStats()
                 SfuConnectionResult.Failed(Exception("SFU connection timed out"))
             }

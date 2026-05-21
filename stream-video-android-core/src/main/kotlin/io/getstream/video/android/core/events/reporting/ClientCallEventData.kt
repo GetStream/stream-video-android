@@ -17,9 +17,9 @@
 package io.getstream.video.android.core.events.reporting
 
 internal enum class CallEventStage(val value: String) {
-    COORDINATOR_JOIN("coordinator_join"),
-    WS_JOIN("ws_join"),
-    PEER_CONNECTION_CONNECT("peer_connection_connect"),
+    COORDINATOR_JOIN("CoordinatorJoin"),
+    WS_JOIN("WSJoin"),
+    PEER_CONNECTION_CONNECT("PeerConnectionConnect"),
 }
 
 internal enum class CallEventType(val value: String) {

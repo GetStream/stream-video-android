@@ -140,6 +140,7 @@ import kotlin.coroutines.resume
     level = DeprecationLevel.WARNING,
 )
 const val sfuReconnectTimeoutMillis = 30_000
+internal typealias CallSessionId = String
 
 /**
  * Outcome of a single reconnect attempt. Each reconnect method returns one of
@@ -554,6 +555,12 @@ public class Call(
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
+        val eventSessionId = UUID.randomUUID().toString()
+        client.state.clientEventReporter.reportCoordinatorJoinInitiated(
+            eventSessionId,
+            callType = this.type,
+            callId = this.id,
+        )
         val permissionPass =
             clientImpl.permissionCheck.checkAndroidPermissionsGroup(clientImpl.context, this)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
@@ -585,8 +592,9 @@ public class Call(
 
         atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
-            result = _join(create, createOptions, ring, notify, hintHighScaleLivestreamPublisher)
-            if (result is Success) {
+            val tempResult =
+                _join(create, createOptions, ring, notify, hintHighScaleLivestreamPublisher)
+            if (tempResult is Success) {
                 // we initialise the camera, mic and other according to local + backend settings
                 // only when the call is joined to make sure we don't switch and override
                 // the settings during a call.
@@ -599,13 +607,27 @@ public class Call(
                             "is joined. MediaManager will not be initialised with server settings."
                     }
                 }
+                client.state.clientEventReporter.reportCoordinatorJoinCompleted(
+                    eventSessionId = eventSessionId,
+                    success = true,
+                    retryCount = retryCount,
+                    callSessionId = tempResult.value.second,
+                )
+                result = Success<RtcSession>(tempResult.value.first)
                 return result
             }
-            if (result is Failure) {
+            if (tempResult is Failure) {
+                result = tempResult
                 session.value = null
                 logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
+                    client.state.clientEventReporter.reportCoordinatorJoinCompleted(
+                        eventSessionId = eventSessionId,
+                        success = false,
+                        retryCount = retryCount,
+                        failureReason = result.value.message,
+                    )
                     return result
                 } else {
                     retryCount += 1
@@ -616,6 +638,12 @@ public class Call(
         session.value = null
         val errorMessage = "Join failed after 3 retries"
         state._connection.value = RealtimeConnection.Failed(errorMessage)
+        client.state.clientEventReporter.reportCoordinatorJoinCompleted(
+            eventSessionId = id,
+            success = false,
+            retryCount = retryCount,
+            failureReason = errorMessage,
+        )
         return Failure(value = Error.GenericError(errorMessage))
     }
 
@@ -660,7 +688,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
-    ): Result<RtcSession> {
+    ): Result<Pair<RtcSession, CallSessionId>> {
         nonFastReconnectAttempts = 0
         sfuEvents?.cancel()
         sfuListener?.cancel()
@@ -738,7 +766,7 @@ public class Call(
         }
         client.state.setActiveCall(this)
         monitorSession(result.value)
-        return Success(value = session.value!!)
+        return Success(value = Pair(session.value!!, result.value.call.currentSessionId))
     }
 
     private fun Call.monitorSession(result: JoinCallResponse) {
@@ -772,7 +800,7 @@ public class Call(
                             callType = this@Call.type,
                             role = PeerConnectionRole.PUBLISH,
                             iceState = iceState,
-                            dtlsState = publisher.state.value,
+                            peerConnectionState = publisher.state.value,
                         )
                     }
                     when (iceState) {
@@ -803,7 +831,7 @@ public class Call(
                             callType = this@Call.type,
                             role = PeerConnectionRole.SUBSCRIBE,
                             iceState = iceState,
-                            dtlsState = subscriber.state.value,
+                            peerConnectionState = subscriber.state.value,
                         )
                     }
                     when (iceState) {
@@ -1258,7 +1286,6 @@ public class Call(
         internalLeave(CallLeaveReason.Custom(reason))
     }
 
-//    private fun internalLeave(reason: CallLeaveReason) = atomicLeave {
     private fun internalLeave(reason: CallLeaveReason) = atomicLeave {
         monitorSubscriberPCStateJob?.cancel()
         monitorPublisherPCStateJob?.cancel()
@@ -1306,6 +1333,7 @@ public class Call(
                     is CallLeaveReason.Backend -> ClientEventReporter.AbortReason.BACKEND_LEAVE
                     else -> ClientEventReporter.AbortReason.CLIENT_ABORTED
                 }
+                reporter.sendAllPendingEvents()
                 reporter.abortAllInFlight(abortReason)
             }
             safeCall {
@@ -1851,11 +1879,6 @@ public class Call(
         hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<JoinCallResponse> {
         val reporter = client.state.clientEventReporter
-        reporter.resetJoinSuccessId()
-        val coordEventId = reporter.reportCoordinatorJoinInitiated(
-            callType = this.type,
-            callId = this.id,
-        )
 
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
         val result = clientImpl.joinCall(
@@ -1875,21 +1898,6 @@ public class Call(
         )
         result.onSuccess {
             state.updateFromResponse(it)
-            reporter.reportCoordinatorJoinCompleted(
-                eventSessionId = id,
-                success = true,
-                retryCount = 0,
-                callSessionId = it.call.currentSessionId,
-            )
-        }
-        if (result is Failure) {
-            reporter.reportCoordinatorJoinCompleted(
-                eventSessionId = id,
-                success = false,
-                retryCount = 0,
-                failureReason = result.value.message,
-                failureCode = null,
-            )
         }
         return result
     }
