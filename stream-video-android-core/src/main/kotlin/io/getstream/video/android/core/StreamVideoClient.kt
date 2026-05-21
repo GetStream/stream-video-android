@@ -1170,7 +1170,10 @@ internal class StreamVideoClient internal constructor(
     override fun logOut() {
         scope.launch(
             CoroutineName("logOut"),
-        ) { streamNotificationManager.deviceTokenStorage.clear() }
+        ) {
+            streamNotificationManager.deviceTokenStorage.clear()
+            // TODO Rahul should we flush our pending analytics events
+        }
     }
 
     override fun call(type: String, id: String): Call {
