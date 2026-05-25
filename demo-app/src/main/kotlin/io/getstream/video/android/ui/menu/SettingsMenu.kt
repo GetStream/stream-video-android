@@ -163,6 +163,12 @@ internal fun SettingsMenu(
         Toast.makeText(context, "Fast Reconnect SFU", Toast.LENGTH_SHORT).show()
     }
 
+    val onSimulateSfuFullClick: () -> Unit = {
+        call.debug.simulateSfuFull()
+        onDismissed.invoke()
+        Toast.makeText(context, "Simulating SFU Full (700) → migrate", Toast.LENGTH_SHORT).show()
+    }
+
     val codecInfos = remember {
         MediaCodecList(MediaCodecList.ALL_CODECS).codecInfos.filter {
             it.name.contains("encoder") && it.supportedTypes.firstOrNull {
@@ -375,6 +381,7 @@ internal fun SettingsMenu(
                 onToggleIncomingVideoEnabled = { onToggleIncomingVideoVisibility(it) },
                 onSfuRejoinClick = onSfuRejoinClick,
                 onSfuFastReconnectClick = onSfuFastReconnectClick,
+                onSimulateSfuFullClick = onSimulateSfuFullClick,
                 onSelectScaleType = onSelectScaleType,
                 loadRecordings = onLoadRecordings,
                 onToggleClosedCaptions = onClosedCaptionsToggle,
@@ -441,6 +448,7 @@ private fun SettingsMenuPreview() {
                 onRestartPublisherIceClick = { },
                 onSfuRejoinClick = { },
                 onSfuFastReconnectClick = {},
+                onSimulateSfuFullClick = {},
                 onSwitchSfuClick = { },
                 availableDevices = emptyList(),
                 onDeviceSelected = {},

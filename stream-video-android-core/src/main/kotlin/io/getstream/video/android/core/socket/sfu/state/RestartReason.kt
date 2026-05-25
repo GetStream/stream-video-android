@@ -16,6 +16,11 @@
 
 package io.getstream.video.android.core.socket.sfu.state
 
+@Deprecated(
+    "RestartReason is no longer used by the SFU socket. " +
+        "Reconnection is now managed exclusively by Call.reconnect().",
+    level = DeprecationLevel.WARNING,
+)
 enum class RestartReason {
     RECONNECT_STRATEGY,
     NETWORK_AVAILABLE,

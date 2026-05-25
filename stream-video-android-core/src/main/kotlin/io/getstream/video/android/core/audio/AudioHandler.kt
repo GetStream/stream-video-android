@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.audio
 
-interface AudioHandler {
+internal interface AudioHandler {
     /**
      * Called when a room is started.
      */

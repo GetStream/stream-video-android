@@ -64,7 +64,12 @@ import java.net.ConnectException
  *      geo = GEO.GlobalEdgeNetwork,
  *      user = user,
  *      token = token,
+ *      sounds = ringingConfig(
+ *                 defaultResourcesRingingConfig(context),
+ *                 defaultMutedRingingConfig(true, true)
+ *             ),
  *      loggingLevel = LoggingLevel.BODY,
+ *
  *      // ...
  * ).build()
  *```
@@ -75,15 +80,15 @@ import java.net.ConnectException
  * @property user The user object. Can be an authenticated user, guest user or anonymous.
  * @property token The token for this user, generated using your API secret on your server.
  * @property tokenProvider Used to make a request to your backend for a new token when the token has expired.
- * @property loggingLevel Represents and wraps the HTTP logging level for our API service.
+ * @property loggingLevel Represents and wraps SDK logging levels for Stream logger, HTTP interceptor and native WebRTC logging.
  * @property notificationConfig The configurations for handling push notification.
  * @property ringNotification Overwrite the default notification logic for incoming calls.
  * @property connectionTimeoutInMs Connection timeout in seconds.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig]. (Deprecated) Use `callServiceConfigRegistry` instead.
- * @property localSfuAddress Local SFU address (IP:port) to be used for testing. Leave null if not needed.
- * @property sounds Overwrite the default SDK sounds. See [Sounds].
+ * @property localCoordinatorAddress Local coordinator address (IP:port) to be used for testing. Leave null if not needed.
+ * @property sounds Overwrite the default SDK sounds. See [io.getstream.video.android.core.sounds.RingingConfig].
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
  * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
@@ -97,6 +102,9 @@ import java.net.ConnectException
  *          When `false` and the socket is not connected, incoming calls will not be delivered via WebSocket events;
  *          the SDK will rely on push notifications instead.
  *          To start receiving WebSocket events, explicitly invoke `client.connect()`.
+ * @property rejectCallWhenBusy Automatically rejects incoming calls when the user is already in another call.
+ *          When enabled, the SDK suppresses incoming call notifications.
+ *          CallRingEvent will not be propagated if there is an active or ongoing ringing call.
  *
  * @see build
  * @see ClientState.connection
@@ -118,7 +126,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
-    private val connectionTimeoutInMs: Long = 10000,
+    private val connectionTimeoutInMs: Long = 10_000,
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
     @Deprecated(
@@ -134,7 +142,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     )
     private val callServiceConfig: CallServiceConfig? = null,
     private val callServiceConfigRegistry: CallServiceConfigRegistry? = null,
-    private val localSfuAddress: String? = null,
+    private val localCoordinatorAddress: String? = null,
     private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
     private val vibrationConfig: RingingCallVibrationConfig = disableVibrationConfig(),
     private val crashOnMissingPermission: Boolean = false,
@@ -153,6 +161,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val enableStereoForSubscriber: Boolean = true,
     private val telecomConfig: TelecomConfig? = null,
     private val connectOnInit: Boolean = true,
+    private val rejectCallWhenBusy: Boolean = false,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -205,8 +214,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             throw IllegalArgumentException("The API key cannot be blank")
         }
 
-        if (token.isBlank()) {
-            throw IllegalArgumentException("The token cannot be blank")
+        if (user.type == UserType.Authenticated && token.isBlank()) {
+            throw IllegalArgumentException("The token cannot be blank for authenticated users")
         }
 
         if (user.type == UserType.Authenticated && user.id.isBlank()) {
@@ -225,11 +234,18 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         AndroidThreeTen.init(context)
         tokenRepository.updateToken(token)
         // This connection module class exposes the connections to the various retrofit APIs.
+        val resolvedApiUrl = localCoordinatorAddress?.let {
+            "http://${it.trimEnd('/')}"
+        } ?: apiUrl ?: "https:///$videoDomain"
+        val resolvedWssUrl = localCoordinatorAddress?.let {
+            "ws://${it.trimEnd('/')}/video/connect"
+        } ?: wssUrl ?: "wss://$videoDomain/video/connect"
+
         val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
             scope = scope,
-            apiUrl = apiUrl ?: "https:///$videoDomain",
-            wssUrl = wssUrl ?: "wss://$videoDomain/video/connect",
+            apiUrl = resolvedApiUrl,
+            wssUrl = resolvedWssUrl,
             connectionTimeoutInMs = connectionTimeoutInMs,
             loggingLevel = loggingLevel,
             user = user,
@@ -251,7 +267,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         )
 
         // Set call configuration
-        var callConfigRegistry = createCallConfigurationRegistry(
+        val callConfigRegistry = createCallConfigurationRegistry(
             callServiceConfigRegistry,
             callServiceConfig,
         )
@@ -269,12 +285,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             streamNotificationManager = streamNotificationManager,
             enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
             callServiceConfigRegistry = callConfigRegistry,
-            testSfuAddress = localSfuAddress,
             sounds = sounds,
             permissionCheck = permissionCheck,
             crashOnMissingPermission = crashOnMissingPermission,
             appName = appName,
             audioProcessing = audioProcessing,
+            loggingLevel = loggingLevel,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
             enableStatsCollection = enableStatsReporting,
@@ -282,6 +298,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableStereoForSubscriber = enableStereoForSubscriber,
             telecomConfig = telecomConfig,
             tokenRepository = tokenRepository,
+            rejectCallWhenBusy = rejectCallWhenBusy,
         )
 
         if (user.type == UserType.Guest) {
@@ -292,7 +309,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         }
 
         // Establish a WS connection with the coordinator (we don't support this for anonymous users)
-        if (user.type != UserType.Anonymous) {
+        if (user.type == UserType.Authenticated) {
             scope.launch {
                 try {
                     if (notificationConfig.autoRegisterPushDevice) {

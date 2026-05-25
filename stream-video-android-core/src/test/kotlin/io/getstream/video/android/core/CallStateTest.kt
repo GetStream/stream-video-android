@@ -25,8 +25,8 @@ import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.model.SortField
+import io.getstream.video.android.core.pinning.PinEntry
 import io.getstream.video.android.core.pinning.PinType
-import io.getstream.video.android.core.pinning.PinUpdateAtTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
@@ -119,7 +119,7 @@ class CallStateTest : IntegrationTestBase() {
     fun `Participants should be sorted`() = runTest {
         val call = client.call("default", randomUUID())
 
-        val sortedParticipants = call.state.sortedParticipants.stateIn(
+        val sortedParticipants = call.state.participants.stateIn(
             backgroundScope,
             SharingStarted.Eagerly,
             emptyList(),
@@ -128,9 +128,11 @@ class CallStateTest : IntegrationTestBase() {
         val sorted1 = sortedParticipants.value
         assertThat(sorted1).isEmpty()
 
-        call.state._localPins.value = mutableMapOf(
-            "1" to PinUpdateAtTime(
-                PinUpdate("1", "userId"), OffsetDateTime.now(Clock.systemUTC()), PinType.Local,
+        call.state.pinManager.updateLocalPins(
+            mutableMapOf(
+                "1" to PinEntry(
+                    PinUpdate("1", "userId"), OffsetDateTime.now(Clock.systemUTC()), PinType.Local,
+                ),
             ),
         )
 
@@ -170,21 +172,26 @@ class CallStateTest : IntegrationTestBase() {
         delay(60)
 
         val sorted2 = sortedParticipants.value.map { it.sessionId }
-        assertThat(sorted2).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))
+        // Default preset ordering with this setup:
+        //   tier 1 (screenSharing): "2"
+        //   tier 2 (pinned): "1"
+        //   tier 3 (ifInvisibleOrUnknown chain): "3" (dominant) → "4" (publishing video)
+        //     → "5", "6" (no signals; insertion order preserved)
+        assertThat(sorted2).isEqualTo(listOf("2", "1", "3", "4", "5", "6"))
 
         clientImpl.fireEvent(DominantSpeakerChangedEvent("3", "3"), call.cid)
         assertThat(call.state.getParticipantBySessionId("3")?.dominantSpeaker?.value).isTrue()
         delay(60)
 
         val sorted3 = sortedParticipants.value.map { it.sessionId }
-        assertThat(sorted3).isEqualTo(listOf("1", "2", "3", "4", "5", "6"))
+        assertThat(sorted3).isEqualTo(listOf("2", "1", "3", "4", "5", "6"))
     }
 
     @Test
     fun `Update sorting order`() = runTest {
         val call = client.call("default", randomUUID())
-        val sortedParticipants = call.state.sortedParticipants.stateIn(
-            this,
+        val sortedParticipants = call.state.participants.stateIn(
+            backgroundScope,
             SharingStarted.Eagerly,
             emptyList(),
         )

@@ -101,7 +101,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.join()
         Thread.sleep(2000L)
         // disconnect a peer connection
-        call.session?.publisher?.connection?.dispose()
+        call.session.value?.publisher?.value?.connection?.dispose()
         // if we wait a bit we should recover
         Thread.sleep(4000L)
         println(states)
@@ -116,7 +116,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
         // join a call
         val result = call.join(create = true)
         // create a turbine of the publisher's peer connection state
-        val publisher = call.session?.publisher?.state?.testIn(backgroundScope)
+        val publisher = call.session.value?.publisher?.value?.state?.testIn(backgroundScope)
 
         // create a turbine connection state
         val connectionState = call.state.connection.testIn(backgroundScope)
@@ -137,7 +137,7 @@ class ReconnectTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
         // the socket and rtc connection disconnect...,
         // or ice candidate don't arrive due to temporary network failure
-        call.session?.reconnect(forceRestart = true)
+        call.session.value?.reconnect(forceRestart = true)
 
         // leave and clean up a call
         call.leave()

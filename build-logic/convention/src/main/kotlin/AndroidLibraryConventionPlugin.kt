@@ -11,7 +11,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             pluginManager.apply("io.getstream.android.library")
             pluginManager.apply("org.jetbrains.kotlin.android")
             pluginManager.apply("binary-compatibility-validator")
-            pluginManager.apply("org.jetbrains.dokka")
             pluginManager.apply("androidx.baselineprofile")
 
             extensions.configure<LibraryExtension> {

@@ -99,6 +99,15 @@ android {
         }
     }
 
+    buildTypes {
+        debug {
+            buildConfigField("boolean", "DEBUG_TOOLS_ENABLED", "true")
+        }
+        release {
+            buildConfigField("boolean", "DEBUG_TOOLS_ENABLED", "false")
+        }
+    }
+
     val envProps: File = rootProject.file(".env.properties")
     if (envProps.exists()) {
         val properties = Properties()
@@ -114,7 +123,7 @@ android {
 
     resourcePrefix = "stream_video_"
 
-    sourceSets.configureEach {
+    sourceSets.getByName("main") {
         kotlin.srcDir("${project.buildDir}/generated/source/services")
     }
 
@@ -237,11 +246,14 @@ afterEvaluate {
 
 tasks.register<Test>("isolatedTest") {
 
-    description = "Runs StreamVideoBuilderTest in an isolation"
+    description = "Runs Tests in an isolation"
     group = "verification"
 
     // Only this class
-    include("**/StreamVideoBuilderTest.class")
+    include(
+        "**/StreamVideoBuilderTest.class",
+        "**/ClientAndAuthTest.class",
+    )
 
     // Force new JVM
     forkEvery = 1

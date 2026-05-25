@@ -274,3 +274,12 @@ fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean
     }
     return this
 }
+
+fun UserRobot.assertConnectingView(): UserRobot {
+    assertEquals("Connecting...", RingPage.callProgressBar.waitToAppear().text)
+    assertFalse(
+        "Connecting screen should disappear",
+        RingPage.callProgressBar.waitToDisappear(timeOutMillis = 10000).isDisplayed(),
+    )
+    return this
+}

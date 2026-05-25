@@ -8,14 +8,13 @@ allureKotlin = "2.4.0"
 androidGradlePlugin = "8.5.2"
 cameraCamera2 = "1.3.4"
 spotless = "6.21.0"
-streamConventions = "0.7.0"
+streamConventions = "0.13.1"
 kotlin = "1.9.25"
 ksp = "1.9.25-1.0.20"
 kotlinSerialization = "1.6.3"
 kotlinSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.9.0"
 cameraCore = "1.4.2"
-kotlinDokka = "1.9.20"
 
 androidxMaterial = "1.12.0"
 androidxAppCompat = "1.7.0"
@@ -53,7 +52,7 @@ streamNoiseCancellation = "2.0.0"
 streamResult = "1.3.0"
 streamChat = "6.10.0"
 streamLog = "1.3.2"
-streamPush = "1.3.1"
+streamPush = "1.3.4"
 streamRenderscript = "0.0.1"
 
 androidxTestRunner = "1.6.2"
@@ -245,7 +244,6 @@ stream-android-library = { id = "io.getstream.android.library", version.ref = "s
 stream-android-test = { id = "io.getstream.android.test", version.ref = "streamConventions" }
 stream-java-library = { id = "io.getstream.java.library", version.ref = "streamConventions" }
 stream-java-platform = { id = "io.getstream.java.platform", version.ref = "streamConventions" }
-dokka = { id = "org.jetbrains.dokka", version.ref = "kotlinDokka" }
 google-gms = { id = "com.google.gms.google-services", version.ref = "googleService" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }
 paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" }

@@ -45,7 +45,6 @@ import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -111,8 +110,129 @@ import kotlinx.coroutines.delay
  * @param connectionIndicatorContent Content is shown that indicates the connection quality.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  * @param reactionContent Content is shown for the reaction.
+ * @param mirrorMode Controls horizontal mirroring of the video stream. Defaults to [MirrorMode.AUTO] which mirrors
+ * only the local self-view when using the front camera; remote participants are never mirrored.
  * @param actionsContent Content to show action picker with call actions related to the selected participant.
  */
+
+@Composable
+public fun ParticipantVideo(
+    call: Call,
+    participant: ParticipantState,
+    modifier: Modifier = Modifier,
+    style: VideoRendererStyle = RegularVideoRendererStyle(),
+    labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
+        ParticipantLabel(call, participant, style.labelPosition)
+    },
+    connectionIndicatorContent: @Composable BoxScope.(NetworkQuality) -> Unit = {
+        NetworkQualityIndicator(
+            networkQuality = it,
+            modifier = Modifier
+                .align(BottomEnd)
+                .height(VideoTheme.dimens.componentHeightM)
+                .testTag("Stream_ParticipantNetworkQualityIndicator"),
+        )
+    },
+    scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
+    videoFallbackContent: @Composable (Call) -> Unit = {
+        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userImage = userImage, userName = userName)
+    },
+    reactionContent: @Composable BoxScope.(ParticipantState) -> Unit = {
+        DefaultReaction(
+            participant = participant,
+            style = style,
+        )
+    },
+    mirrorMode: MirrorMode = MirrorMode.AUTO,
+    actionsContent: @Composable BoxScope.(
+        actions: List<ParticipantAction>,
+        call: Call,
+        participant: ParticipantState,
+    ) -> Unit = { actions, call, participant ->
+        ParticipantActions(
+            Modifier
+                .align(TopStart)
+                .padding(8.dp)
+                .testTag("Stream_ParticipantActionsIcon"),
+            actions,
+            call,
+            participant,
+        )
+    },
+
+) {
+    val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
+    val participants by call.state.participants.collectAsStateWithLifecycle()
+
+    DisposableEffect(call, participant.sessionId) {
+        // Inform the call of this participant visibility on screen, affects sorting order.
+        updateParticipantVisibility(participant.sessionId, call, VisibilityOnScreenState.VISIBLE)
+
+        onDispose {
+            updateParticipantVisibility(
+                participant.sessionId,
+                call,
+                VisibilityOnScreenState.INVISIBLE,
+            )
+        }
+    }
+
+    val containerShape = VideoTheme.shapes.sheet
+    val containerModifier = if (style.isFocused && participants.size > 1) {
+        modifier.border(
+            border = if (style.isScreenSharing) {
+                BorderStroke(
+                    VideoTheme.dimens.genericXXs,
+                    VideoTheme.colors.brandPrimary,
+                )
+            } else {
+                BorderStroke(
+                    VideoTheme.dimens.genericXXs,
+                    VideoTheme.colors.brandPrimary,
+                )
+            },
+            shape = containerShape,
+        )
+    } else {
+        modifier
+    }
+    Box(
+        modifier = containerModifier
+            .clip(containerShape)
+            .background(VideoTheme.colors.baseSheetTertiary),
+    ) {
+        ParticipantVideoRenderer(
+            call = call,
+            participant = participant,
+            scalingType = scalingType,
+            mirrorMode = mirrorMode,
+            videoFallbackContent = videoFallbackContent,
+        )
+
+        actionsContent.invoke(this, participantActions, call, participant)
+
+        if (style.isShowingParticipantLabel) {
+            labelContent.invoke(this, participant)
+        }
+
+        if (style.isShowingConnectionQualityIndicator) {
+            connectionIndicatorContent.invoke(this, connectionQuality)
+        }
+
+        if (style.isShowingReactions) {
+            reactionContent.invoke(this, participant)
+        }
+    }
+}
+
+@Deprecated(
+    "Use ParticipantVideo which accepts mirrorMode instead.",
+    ReplaceWith(
+        "ParticipantVideo(call, participant, modifier, style, labelContent, connectionIndicatorContent, scalingType, videoFallbackContent, reactionContent, actionsContent, mirrorMode)",
+    ),
+)
 @Composable
 public fun ParticipantVideo(
     call: Call,
@@ -159,67 +279,19 @@ public fun ParticipantVideo(
         )
     },
 ) {
-    val connectionQuality by participant.networkQuality.collectAsStateWithLifecycle()
-    val participants by call.state.participants.collectAsStateWithLifecycle()
-
-    DisposableEffect(call, participant.sessionId) {
-        // Inform the call of this participant visibility on screen, affects sorting order.
-        updateParticipantVisibility(participant.sessionId, call, VisibilityOnScreenState.VISIBLE)
-
-        onDispose {
-            updateParticipantVisibility(
-                participant.sessionId,
-                call,
-                VisibilityOnScreenState.INVISIBLE,
-            )
-        }
-    }
-
-    val containerShape = VideoTheme.shapes.sheet
-    val containerModifier = if (style.isFocused && participants.size > 1) {
-        modifier.border(
-            border = if (style.isScreenSharing) {
-                BorderStroke(
-                    VideoTheme.dimens.genericXXs,
-                    VideoTheme.colors.brandPrimary,
-                )
-            } else {
-                BorderStroke(
-                    VideoTheme.dimens.genericXXs,
-                    VideoTheme.colors.brandPrimary,
-                )
-            },
-            shape = containerShape,
-        )
-    } else {
-        modifier
-    }
-    Box(
-        modifier = containerModifier
-            .clip(containerShape)
-            .background(VideoTheme.colors.baseSheetTertiary),
-    ) {
-        ParticipantVideoRenderer(
-            call = call,
-            participant = participant,
-            scalingType = scalingType,
-            videoFallbackContent = videoFallbackContent,
-        )
-
-        actionsContent.invoke(this, participantActions, call, participant)
-
-        if (style.isShowingParticipantLabel) {
-            labelContent.invoke(this, participant)
-        }
-
-        if (style.isShowingConnectionQualityIndicator) {
-            connectionIndicatorContent.invoke(this, connectionQuality)
-        }
-
-        if (style.isShowingReactions) {
-            reactionContent.invoke(this, participant)
-        }
-    }
+    ParticipantVideo(
+        call,
+        participant,
+        modifier,
+        style,
+        labelContent,
+        connectionIndicatorContent,
+        scalingType,
+        videoFallbackContent,
+        reactionContent,
+        MirrorMode.AUTO,
+        actionsContent,
+    )
 }
 
 /**
@@ -229,6 +301,8 @@ public fun ParticipantVideo(
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render.
  * @param scalingType The scaling type for the video renderer.
+ * @param mirrorMode Controls horizontal mirroring of the video stream. Defaults to [MirrorMode.AUTO] which mirrors
+ * only the local self-view when using the front camera; remote participants are never mirrored.
  * @param videoFallbackContent Content is shown the video track is failed to load or not available.
  */
 @OptIn(StreamVideoUiDelicateApi::class)
@@ -237,6 +311,7 @@ public fun ParticipantVideoRenderer(
     call: Call,
     participant: ParticipantState,
     scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
+    mirrorMode: MirrorMode = MirrorMode.AUTO,
     videoFallbackContent: @Composable (Call) -> Unit = {
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
@@ -260,10 +335,10 @@ public fun ParticipantVideoRenderer(
     val video by participant.video.collectAsStateWithLifecycle()
     val cameraDirection by call.camera.direction.collectAsStateWithLifecycle()
     val me by call.state.me.collectAsStateWithLifecycle()
-    val mirror by remember(cameraDirection) {
-        mutableStateOf(
-            cameraDirection == CameraDirection.Front && me?.sessionId == participant.sessionId,
-        )
+    val mirror = when (mirrorMode) {
+        MirrorMode.AUTO -> cameraDirection == CameraDirection.Front && me?.sessionId == participant.sessionId
+        MirrorMode.ALWAYS -> true
+        MirrorMode.NEVER -> false
     }
     val videoRendererConfig = remember(mirror, scalingType, videoFallbackContent) {
         videoRenderConfig {
@@ -309,9 +384,9 @@ public fun BoxScope.ParticipantLabel(
     },
 ) {
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
-    val pinned by remember {
-        derivedStateOf { call.state.pinnedParticipants.value.contains(participant.sessionId) }
-    }
+    val pinnedParticipants by call.state.pinnedParticipants.collectAsStateWithLifecycle()
+    val pinned = pinnedParticipants.containsKey(participant.sessionId)
+
     val userNameOrId by participant.userNameOrId.collectAsStateWithLifecycle()
     val nameLabel = if (participant.isLocal) {
         stringResource(id = R.string.stream_video_myself)

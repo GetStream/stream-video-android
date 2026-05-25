@@ -220,10 +220,7 @@ internal class Publisher(
                      * This will cause emission of ParticipantLeftEvent to other person
                      */
                     ErrorCode.ERROR_CODE_REQUEST_VALIDATION_FAILED -> rejoin()
-                    ErrorCode.ERROR_CODE_PARTICIPANT_NOT_FOUND -> {}
-                    ErrorCode.ERROR_CODE_PARTICIPANT_SIGNAL_LOST -> {
-                        // should fast-reconnect but wait for further investigation
-                    }
+
                     else -> {}
                 }
             }

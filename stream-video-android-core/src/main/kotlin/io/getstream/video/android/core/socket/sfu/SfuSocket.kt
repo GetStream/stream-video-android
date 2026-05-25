@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")
+
 package io.getstream.video.android.core.socket.sfu
 
 import io.getstream.log.taggedLogger
@@ -45,6 +47,7 @@ import io.getstream.video.android.core.socket.common.token.TokenManager
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.safeCallWithResult
+import io.getstream.video.android.core.utils.suspendDebugOnly
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Job
@@ -77,6 +80,7 @@ internal open class SfuSocket(
     private val listeners = mutableSetOf<SocketListener<SfuDataEvent, JoinCallResponseEvent>>()
     private val sfuSocketStateService = SfuSocketStateService()
     private var socketStateObserverJob: Job? = null
+    private var socketListenerJob: Job? = null
     private val healthMonitor = HealthMonitor(
         monitorInterval = 5000L,
         noEventIntervalThreshold = 15000L,
@@ -89,28 +93,18 @@ internal open class SfuSocket(
             )
         },
         reconnectCallback = { sfuSocketStateService.onWebSocketEventLost() },
+        isNetworkAvailable = { networkStateProvider.isConnected() },
     )
     private val lifecycleHandler = NoOpLifecycleHandler()
 
-    private val networkStateListener = object : NetworkStateProvider.NetworkStateListener {
-        override suspend fun onConnected() {
-            sfuSocketStateService.onNetworkAvailable()
-        }
-
-        override suspend fun onDisconnected() {
-            sfuSocketStateService.onNetworkNotAvailable()
-        }
-    }
-
     @Suppress("ComplexMethod")
     private fun observeSocketStateService(): Job {
-        var socketListenerJob: Job? = null
-
         suspend fun connectUser(connectionConf: ConnectionConf.SfuConnectionConf) {
             logger.d { "[connectUser] connectionConf: $connectionConf" }
             userScope.launch { startObservers() }
             this.connectionConf = connectionConf
             socketListenerJob?.cancel()
+            streamWebSocket?.close("connectUser:cleanup")
             when (networkStateProvider.isConnected()) {
                 true -> {
                     streamWebSocket =
@@ -153,13 +147,6 @@ internal open class SfuSocket(
             sfuSocketStateService.observer { state ->
                 logger.i { "[onSocketStateChanged] state: $state" }
                 when (state) {
-                    is SfuSocketState.RestartConnection -> {
-                        connectionConf?.let { sfuSocketStateService.onReconnect(it) }
-                            ?: run {
-                                logger.e { "[onSocketStateChanged] #reconnect; connectionConf is null" }
-                            }
-                    }
-
                     is SfuSocketState.Connected -> {
                         healthMonitor.ack()
                         callListeners { listener -> listener.onConnected(state.event) }
@@ -168,6 +155,10 @@ internal open class SfuSocket(
                     is SfuSocketState.Connecting -> {
                         connectUser(state.connectionConf)
                         callListeners { listener -> listener.onConnecting() }
+                    }
+
+                    is SfuSocketState.RestartConnection -> {
+                        logger.w { "[onSocketStateChanged] RestartConnection is deprecated and no longer acted upon" }
                     }
 
                     is SfuSocketState.Disconnected -> {
@@ -194,13 +185,11 @@ internal open class SfuSocket(
                             is SfuSocketState.Disconnected.Rejoin -> {
                                 streamWebSocket?.close("SfuSocketState.Disconnected.Rejoin")
                                 healthMonitor.stop()
-                                disposeNetworkStateObserver()
                             }
 
                             is SfuSocketState.Disconnected.Stopped -> {
                                 streamWebSocket?.close("SfuSocketState.Disconnected.Stopped")
                                 healthMonitor.stop()
-                                disposeNetworkStateObserver()
                             }
 
                             is SfuSocketState.Disconnected.DisconnectedPermanently -> {
@@ -212,7 +201,7 @@ internal open class SfuSocket(
                             }
 
                             is SfuSocketState.Disconnected.DisconnectedTemporarily -> {
-                                healthMonitor.onDisconnected()
+                                healthMonitor.stop()
                             }
 
                             is SfuSocketState.Disconnected.WebSocketEventLost -> {
@@ -221,11 +210,7 @@ internal open class SfuSocket(
                                     DISPOSE_SOCKET_RECONNECT,
                                     DISPOSE_SOCKET_REASON,
                                 )
-                                connectionConf?.let {
-                                    sfuSocketStateService.onReconnect(
-                                        it,
-                                    )
-                                }
+                                healthMonitor.stop()
                             }
                         }
                     }
@@ -236,6 +221,7 @@ internal open class SfuSocket(
 
     suspend fun connect(joinRequest: JoinRequest) {
         logger.d { "[connect] request: ${joinRequest.client_details}" }
+        socketListenerJob?.cancel()
         socketStateObserverJob?.cancel()
         socketStateObserverJob = observeSocketStateService()
         sfuSocketStateService.onConnect(
@@ -273,16 +259,10 @@ internal open class SfuSocket(
 
     private suspend fun startObservers() {
         lifecycleObserver.observe(lifecycleHandler)
-        networkStateProvider.subscribe(networkStateListener)
     }
 
     private suspend fun disposeObservers() {
         lifecycleObserver.dispose(lifecycleHandler)
-        disposeNetworkStateObserver()
-    }
-
-    private fun disposeNetworkStateObserver() {
-        networkStateProvider.unsubscribe(networkStateListener)
     }
 
     private suspend fun handleError(error: StreamWebSocketEvent.Error) {
@@ -363,6 +343,14 @@ internal open class SfuSocket(
 
     internal fun isConnected(): Boolean =
         sfuSocketStateService.currentState is SfuSocketState.Connected
+
+    internal suspend fun simulateNetworkError(
+        error: Error.NetworkError,
+        reconnectStrategy: WebsocketReconnectStrategy,
+    ) = suspendDebugOnly {
+        logger.w { "[simulateNetworkError] Injecting error: $error, strategy: $reconnectStrategy" }
+        sfuSocketStateService.onNetworkError(error, reconnectStrategy)
+    }
 
     /**
      * Awaits until [VideoSocketState.Connected] is set.

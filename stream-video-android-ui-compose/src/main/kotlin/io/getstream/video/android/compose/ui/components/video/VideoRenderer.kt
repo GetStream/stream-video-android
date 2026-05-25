@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -117,70 +118,76 @@ public fun VideoRenderer(
             if (isIncomingVideoEnabled(call, sessionId, videoEnabledOverrides)) {
                 val mediaTrack = video.track
                 val trackType = video.type
+                key(mediaTrack?.streamId) {
+                    var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
 
-                var view: VideoTextureViewRenderer? by remember { mutableStateOf(null) }
+                    if (videoRendererConfig.updateVisibility) {
+                        DisposableEffect(call, video) {
+                            // inform the call that we want to render this video track. (this will trigger a subscription to the track)
+                            call.setVisibility(sessionId, trackType, true, viewportId)
 
-                if (videoRendererConfig.updateVisibility) {
-                    DisposableEffect(call, video) {
-                        // inform the call that we want to render this video track. (this will trigger a subscription to the track)
-                        call.setVisibility(sessionId, trackType, true, viewportId)
-
-                        onDispose {
-                            cleanTrack(view, mediaTrack)
-                            // inform the call that we no longer want to render this video track
-                            call.setVisibility(sessionId, trackType, false, viewportId)
+                            onDispose {
+                                cleanTrack(view, mediaTrack)
+                                // inform the call that we no longer want to render this video track
+                                call.setVisibility(sessionId, trackType, false, viewportId)
+                            }
                         }
                     }
-                }
 
-                if (mediaTrack != null) {
-                    StreamLog.d("VideoRenderer") { "Rendering video track: $mediaTrack" }
-                    Box(
-                        modifier = videoRendererConfig.modifiers.containerModifier.invoke(this)
-                            .testTag("Stream_VideoViewWithMediaTrack"),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        StreamLog.d("VideoRenderer") { "Rendering video viewportId: $viewportId" }
-                        AndroidView(
-                            factory = { context ->
-                                StreamVideoTextureViewRenderer(context).apply {
+                    if (mediaTrack != null) {
+                        StreamLog.d("VideoRenderer") { "Rendering video track: $mediaTrack" }
+                        Box(
+                            modifier = videoRendererConfig.modifiers.containerModifier
+                                .invoke(this)
+                                .testTag("Stream_VideoViewWithMediaTrack"),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            StreamLog.d(
+                                "VideoRenderer",
+                            ) { "Rendering video viewportId: $viewportId" }
+                            AndroidView(
+                                factory = { context ->
+                                    StreamVideoTextureViewRenderer(context).apply {
+                                        StreamLog.d(
+                                            "VideoRenderer",
+                                        ) { "Rendering video (init renderer)" }
+                                        call.initRenderer(
+                                            viewportId = viewportId,
+                                            videoRenderer = this,
+                                            sessionId = sessionId,
+                                            trackType = trackType,
+                                            onRendered = onRendered,
+                                        )
+                                        setMirror(videoRendererConfig.mirrorStream)
+                                        setScalingType(
+                                            videoRendererConfig.scalingType.toCommonScalingType(),
+                                        )
+                                        setupVideo(mediaTrack, this)
+
+                                        view = this
+                                    }
+                                },
+                                update = { v ->
                                     StreamLog.d(
                                         "VideoRenderer",
-                                    ) { "Rendering video (init renderer)" }
-                                    call.initRenderer(
-                                        viewportId = viewportId,
-                                        videoRenderer = this,
-                                        sessionId = sessionId,
-                                        trackType = trackType,
-                                        onRendered = onRendered,
-                                    )
-                                    setMirror(videoRendererConfig.mirrorStream)
-                                    setScalingType(
+                                    ) { "Rendering video (update renderer)" }
+                                    v.setMirror(videoRendererConfig.mirrorStream)
+                                    v.setScalingType(
                                         videoRendererConfig.scalingType.toCommonScalingType(),
                                     )
-                                    setupVideo(mediaTrack, this)
-
-                                    view = this
-                                }
-                            },
-                            update = { v ->
-                                StreamLog.d("VideoRenderer") { "Rendering video (update renderer)" }
-                                v.setMirror(videoRendererConfig.mirrorStream)
-                                v.setScalingType(
-                                    videoRendererConfig.scalingType.toCommonScalingType(),
-                                )
-                                setupVideo(mediaTrack, v)
-                            },
-                            modifier = videoRendererConfig
-                                .modifiers
-                                .componentModifier(
-                                    this,
-                                )
-                                .testTag("video_renderer"),
-                        )
+                                    setupVideo(mediaTrack, v)
+                                },
+                                modifier = videoRendererConfig
+                                    .modifiers
+                                    .componentModifier(
+                                        this,
+                                    )
+                                    .testTag("video_renderer"),
+                            )
+                        }
+                    } else {
+                        // Do something when there is no media track
                     }
-                } else {
-                    // Do something when there is no media track
                 }
             }
         } else {
@@ -304,7 +311,9 @@ internal fun DefaultBadNetworkFallbackContent(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            modifier = Modifier.padding(12.dp).align(CenterVertically),
+            modifier = Modifier
+                .padding(12.dp)
+                .align(CenterVertically),
             imageVector = Icons.Default.SignalWifiBad,
             contentDescription = null,
             tint = VideoTheme.colors.basePrimary,

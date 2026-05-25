@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.os.Bundle
-import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.video.generated.models.BlockedUserEvent
@@ -83,6 +82,7 @@ import io.getstream.android.video.generated.models.UpdatedCallPermissionsEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
+import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
@@ -116,11 +116,13 @@ import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
+import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.permission.PermissionRequest
-import io.getstream.video.android.core.pinning.PinType
-import io.getstream.video.android.core.pinning.PinUpdateAtTime
+import io.getstream.video.android.core.pinning.PinEntry
+import io.getstream.video.android.core.pinning.PinManager
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.sorting.SortPreset
 import io.getstream.video.android.core.sorting.SortedParticipantsState
 import io.getstream.video.android.core.utils.ScheduleConfig
 import io.getstream.video.android.core.utils.TaskSchedulerWithDebounce
@@ -130,6 +132,7 @@ import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.currentCoroutineContext
@@ -144,7 +147,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
@@ -160,7 +165,10 @@ import java.util.Locale
 import java.util.SortedMap
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.collections.map
+import kotlin.collections.toMutableList
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -200,8 +208,12 @@ public sealed interface RealtimeConnection {
 
     public data object Migrating : RealtimeConnection
     public data class Failed(val error: Any) : RealtimeConnection // permanent failure
+    public data object ReconnectingFailed : RealtimeConnection // all retry attempts exhausted
     public data object Disconnected : RealtimeConnection // normal disconnect by the app
 }
+
+internal typealias SessionId = String
+internal typealias IsPinned = Boolean
 
 /**
  * The CallState class keeps all state for a call
@@ -262,12 +274,19 @@ public class CallState(
         it is RealtimeConnection.Reconnecting
     }
 
-    private val internalParticipants = ConcurrentHashMap<String, ParticipantState>()
+    private val internalParticipants = ConcurrentHashMap<SessionId, ParticipantState>()
     private val _participants = MutableStateFlow<Map<String, ParticipantState>>(emptyMap())
 
-    /** Participants returns a list of participant state object. @see [ParticipantState] */
-    public val participants: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.values.toList() }
+    /**
+     * Participants in this call, ordered by the active [SortPreset]. The list emits whenever
+     * the order changes — identity-equal emissions are suppressed by the sorter's internal
+     * coalescing so consumers don't recompose for non-changes.
+     *
+     * Implemented as a property getter to defer resolution of [_sortedParticipantsState],
+     * which is initialized later in this class.
+     */
+    public val participants: StateFlow<List<ParticipantState>>
+        get() = _sortedParticipantsState.sortedParticipants
 
     private val _startedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
 
@@ -296,33 +315,44 @@ public class CallState(
         MutableStateFlow(emptyList())
     public val activeSpeakers: StateFlow<List<ParticipantState>> = _activeSpeakers
 
-    /** participants other than yourself */
-    public val remoteParticipants: StateFlow<List<ParticipantState>> =
-        _participants.mapState { it.filterKeys { key -> key != call.sessionId }.values.toList() }
+    /**
+     * Participants other than yourself, in the same sort order as [participants].
+     * Lazy-initialized to defer resolving [_sortedParticipantsState] (defined later in
+     * this class).
+     */
+    public val remoteParticipants: StateFlow<List<ParticipantState>> by lazy {
+        participants.mapState { list -> list.filter { it.sessionId != call.sessionId } }
+    }
 
     /** the dominant speaker */
     private val _dominantSpeaker: MutableStateFlow<ParticipantState?> = MutableStateFlow(null)
     public val dominantSpeaker: StateFlow<ParticipantState?> = _dominantSpeaker
 
-    internal val _localPins: MutableStateFlow<Map<String, PinUpdateAtTime>> =
-        MutableStateFlow(emptyMap())
-    internal val _serverPins: MutableStateFlow<Map<String, PinUpdateAtTime>> =
-        MutableStateFlow(emptyMap())
+    internal val pinManager = PinManager() { internalParticipants }
 
-    internal val _pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> =
-        combine(_localPins, _serverPins) { local, server ->
-            val combined = mutableMapOf<String, PinUpdateAtTime>()
-            combined.putAll(local)
+    /**
+     * Combined pin state preserving the underlying [PinEntry] (which carries
+     * [io.getstream.video.android.core.pinning.PinType] and the original timestamp).
+     * Internal; the sorter consumes this to apply local-pin > server-pin > recency.
+     * Local pins win on key collision.
+     */
+    internal val _pinnedParticipantsDetailed: StateFlow<Map<SessionId, PinEntry>> =
+        combine(pinManager.localPins, pinManager.serverPins) { local, server ->
+            val combined = mutableMapOf<String, PinEntry>()
             combined.putAll(server)
-            combined.toMap().asIterable().associate {
-                Pair(it.key, it.value.at)
-            }
+            combined.putAll(local) // local overrides server on key collision
+            combined.toMap()
         }.stateIn(scope, SharingStarted.Eagerly, emptyMap())
+
+    internal val _pinnedParticipants: StateFlow<Map<SessionId, OffsetDateTime>> =
+        _pinnedParticipantsDetailed.mapState { detailed ->
+            detailed.mapValues { it.value.at }
+        }
 
     /**
      * Pinned participants, combined value both from server and local pins.
      */
-    val pinnedParticipants: StateFlow<Map<String, OffsetDateTime>> = _pinnedParticipants
+    val pinnedParticipants: StateFlow<Map<SessionId, OffsetDateTime>> = _pinnedParticipants
 
     val stats = CallStats(call, scope)
 
@@ -415,28 +445,45 @@ public class CallState(
     val livestream: StateFlow<ParticipantState.Video?> =
         livestreamFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
 
-    private var _sortedParticipantsState = SortedParticipantsState(
-        scope,
-        call,
-        _participants,
-        _pinnedParticipants,
+    private val _sortedParticipantsState = SortedParticipantsState(
+        scope = scope,
+        call = call,
+        participants = _participants,
+        pinnedParticipantsDetailed = _pinnedParticipantsDetailed,
+        // Pick up the call type's default sort preset (e.g. CallType.Livestream →
+        // LivestreamOrAudioRoom). Unknown call types fall back to SortPreset.Default.
+        // Callers can override at any time via setSortPreset(...).
+        initialPreset = CallType.fromName(call.type)?.sortPreset ?: SortPreset.Default,
     )
 
     /**
-     * Sorted participants based on
-     * - Pinned
-     * - Dominant Speaker
-     * - Screensharing
-     * - Last speaking at
-     * - Video enabled
-     * - Call joined at
+     * Alias for [participants], which is already sorted by the active [SortPreset].
      *
-     * Debounced 100ms to avoid rapid changes
+     * Kept for source compatibility while callers migrate. The previous dual-flow design
+     * (raw `participants` map ordering vs. sorted list) created subtle staleness bugs in
+     * the renderer; collapsing into a single sorted flow eliminates that class of issue.
      */
-    val sortedParticipants = _sortedParticipantsState.asFlow().debounce(100)
+    /**
+     * Deprecated alias for [participants]. Return type is intentionally declared as
+     * [Flow] (not [StateFlow]) to preserve binary compatibility with the pre-existing
+     * public API — [StateFlow] is a [Flow], so consumers see the same underlying value.
+     */
+    @Deprecated(
+        message = "participants is already sorted. Use participants directly.",
+        replaceWith = ReplaceWith("participants"),
+        level = DeprecationLevel.WARNING,
+    )
+    val sortedParticipants: Flow<List<ParticipantState>>
+        get() = participants
 
     /**
-     * Update participant sorting order
+     * Switch the active sort preset.
+     */
+    fun setSortPreset(preset: SortPreset) = _sortedParticipantsState.setPreset(preset)
+
+    /**
+     * Plug in an ad-hoc [Comparator] for participant sorting. Overrides the active preset
+     * until called again with a different comparator or [setSortPreset] is invoked.
      *
      * @param comparator a new comparator to be used in [sortedParticipants] flow.
      */
@@ -481,6 +528,8 @@ public class CallState(
     /** Specific to ringing calls, additional state about incoming, outgoing calls */
     private val _ringingState: MutableStateFlow<RingingState> = MutableStateFlow(RingingState.Idle)
     public val ringingState: StateFlow<RingingState> = _ringingState
+
+    private val previousRingingStates = ConcurrentHashMap.newKeySet<RingingState>()
 
     /** The settings for the call */
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
@@ -666,10 +715,12 @@ public class CallState(
         MutableStateFlow<Map<String, Boolean?>>(emptyMap())
     val participantVideoEnabledOverrides = _participantVideoEnabledOverrides.asStateFlow()
 
+    private val _thumbnail = MutableStateFlow<String?>(null)
+    public val thumbnail: StateFlow<String?> = _thumbnail
+
     private var speakingWhileMutedResetJob: Job? = null
     private var autoJoiningCall: Job? = null
     private var ringingTimerJob: Job? = null
-
     internal var acceptedOnThisDevice: Boolean = false
 
     /**
@@ -706,7 +757,8 @@ public class CallState(
      */
     val ccMode: StateFlow<ClosedCaptionMode> = closedCaptionManager.ccMode
 
-    private val pendingParticipantsJoined = ConcurrentHashMap<String, Participant>()
+    private val pendingParticipantsJoined =
+        ConcurrentHashMap<SessionId, Pair<Participant, IsPinned>>()
 
     /**
      * We re-create notification more than 1 times, so we don't want to
@@ -720,10 +772,30 @@ public class CallState(
     @InternalStreamVideoApi
     public val notificationIdFlow: StateFlow<Int?> = _notificationIdFlow
 
+    private var telecomHoldObserverJob: Job? = null
+    private val activeStateGate = ActiveStateGate(
+        scope,
+        previousRingingStates,
+        TransitionToRingingStateStrategy.PUBLISHER_CONNECTED,
+    )
+
     @InternalStreamVideoApi
     internal var jetpackTelecomRepository: JetpackTelecomRepository? = null
+        set(value) {
+            field = value
+            if (value != null) {
+                observeTelecomHold(value)
+            } else {
+                telecomHoldObserverJob?.cancel()
+                telecomHoldObserverJob = null
+            }
+        }
 
     internal var incomingNotificationData = IncomingNotificationData(emptyMap())
+    private val ringingLogger by taggedLogger("RingingState")
+
+    @Volatile
+    internal var callJoinInterceptor: CallJoinInterceptor? = null
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
@@ -736,7 +808,7 @@ public class CallState(
             }
 
             is PinsUpdatedEvent -> {
-                updateServerSidePins(event.pins)
+                pinManager.setServerPins(event.pins)
             }
 
             is UnblockedUserEvent -> {
@@ -834,10 +906,11 @@ public class CallState(
             }
 
             is CallEndedEvent -> {
-                call.state.cancelTimeout()
+                cancelTimeout()
                 updateFromResponse(event.call)
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
+                updateRingingState()
                 call.leave("CallEndedEvent")
             }
 
@@ -1005,7 +1078,7 @@ public class CallState(
             }
 
             is ChangePublishQualityEvent -> {
-                call.session?.handleEvent(event)
+                call.session.value?.handleEvent(event)
             }
 
             is ErrorEvent -> {
@@ -1023,12 +1096,12 @@ public class CallState(
             is JoinCallResponseEvent -> {
                 // time to update call state based on the join response
                 updateFromJoinResponse(event)
-                if (!ringingStateUpdatesStopped) {
+                if (!isJoinAndRingInProgress.get()) {
                     updateRingingState()
                 } else {
                     _ringingState.value = RingingState.Outgoing(acceptedByCallee = true)
                 }
-                updateServerSidePins(
+                pinManager.setServerPins(
                     event.callState.pins.map {
                         PinUpdate(it.user_id, it.session_id)
                     },
@@ -1039,13 +1112,17 @@ public class CallState(
                 try {
                     if (participants.value.size < 8) {
                         getOrCreateParticipant(event.participant)
+                        pinManager.onParticipantJoined(event)
                     } else {
-                        pendingParticipantsJoined[event.participant.session_id] = event.participant
+                        pendingParticipantsJoined[event.participant.session_id] = Pair(event.participant, event.isPinned)
                         participantsUpdate.schedule(scope, participantsUpdateConfig) {
                             logger.d {
                                 "[ParticipantJoinedEvent] #participants; #debounce; participants: ${participants.value.size}"
                             }
-                            getOrCreateParticipants(pendingParticipantsJoined.values.toList())
+                            val pendingParticipants = pendingParticipantsJoined.values.map { it.first }.toList()
+                            getOrCreateParticipants(pendingParticipants)
+                            val pendingParticipantsWithPin = pendingParticipantsJoined.values.toList()
+                            pinManager.onParticipantsJoined(pendingParticipantsWithPin)
                         }
                     }
                 } catch (e: Exception) {
@@ -1066,16 +1143,8 @@ public class CallState(
                 if (current?.participant?.sessionId == sessionId) {
                     _screenSharingSession.value = null
                 }
-                if (_localPins.value.containsKey(sessionId)) {
-                    // Remove any pins for the participant
-                    unpin(sessionId)
-                }
 
-                if (_serverPins.value.containsKey(sessionId)) {
-                    scope.launch {
-                        call.unpinForEveryone(sessionId, event.participant.user_id)
-                    }
-                }
+                pinManager.onParticipantLeft(sessionId)
             }
 
             is SubscriberOfferEvent -> {
@@ -1225,22 +1294,13 @@ public class CallState(
         }
     }
 
-    private fun updateServerSidePins(pins: List<PinUpdate>) {
-        // Update participants that are still in the call
-        val pinnedInCall = pins.filter {
-            internalParticipants.containsKey(it.sessionId)
-        }
-        _serverPins.value = pinnedInCall.associate {
-            Pair(
-                it.sessionId,
-                PinUpdateAtTime(it, OffsetDateTime.now(Clock.systemUTC()), PinType.Server),
-            )
-        }
-    }
-
     private fun updateRingingState(rejectReason: RejectReason? = null) {
-        if (ringingState.value == RingingState.RejectedByAll) {
-            return
+        when (ringingState.value) {
+            RingingState.TimeoutNoAnswer, RingingState.RejectedByAll -> {
+                return
+            }
+
+            else -> {}
         }
 
         // this is only true when we are in the session (we have accepted/joined the call)
@@ -1256,8 +1316,10 @@ public class CallState(
         val userIsParticipant =
             _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
+        val isCallEnded: Boolean = _endedAt.value != null
+        val createdBySelf = createdBy?.id == client.userId
 
-        Log.d("RingingState", "Current: ${_ringingState.value}, call_id: ${call.cid}")
+        ringingLogger.d { "Current: ${_ringingState.value}, call_id: ${call.cid}" }
 
         val ringingStateLogs = arrayListOf(
             ("acceptedByMe: $isAcceptedByMe"),
@@ -1266,17 +1328,21 @@ public class CallState(
             ("hasActiveCall: $hasActiveCall"),
             ("hasRingingCall: $hasRingingCall"),
             ("userIsParticipant: $userIsParticipant"),
+            ("isCallEnded: $isCallEnded"),
         ).joinToString("") { it + "\n" }
 
-        Log.d(
-            "RingingState",
-            "call_id: ${call.cid}, Flags: $ringingStateLogs",
-        )
+        ringingLogger.d { "call_id: ${call.cid}, Flags: $ringingStateLogs" }
 
         // no members - call is empty, we can join
-        val state: RingingState = if (hasActiveCall && !ringingStateUpdatesStopped) {
+        val state: RingingState = if (hasActiveCall && !isJoinAndRingInProgress.get()) {
+            /**
+             * Normal join, not joinAndRing
+             */
             cancelTimeout()
             RingingState.Active
+        } else if (hasRingingCall && isCallEnded) {
+            cancelTimeout()
+            RingingState.RejectedByAll
         } else if (isRejectedByMe) {
             call.leave("updateRingingState-rejected-self")
             cancelTimeout()
@@ -1303,7 +1369,7 @@ public class CallState(
             }
         } else if (hasRingingCall && createdBy?.id == client.userId) {
             // The call is created by us
-            logger.d { "acceptedBy: $acceptedBy, userIsParticipant: $userIsParticipant" }
+            ringingLogger.d { "acceptedBy: $acceptedBy, userIsParticipant: $userIsParticipant" }
             if (acceptedBy.isEmpty()) {
                 // no one accepted the call
                 RingingState.Outgoing(acceptedByCallee = false)
@@ -1311,8 +1377,11 @@ public class CallState(
                 // someone already accepted the call, but it's not us (client needs to do call.join)
                 RingingState.Outgoing(acceptedByCallee = true)
             } else {
-                // call is accepted and we are already in the call
-                ringingStateUpdatesStopped = false
+                /**
+                 * Executed when the callee accepts a join-and-ring call.
+                 * Call is accepted and we are already in the call
+                 */
+                isJoinAndRingInProgress.set(false)
                 cancelTimeout()
                 RingingState.Active
             }
@@ -1325,7 +1394,7 @@ public class CallState(
         }
 
         if (_ringingState.value != state) {
-            logger.d { "Updating ringing state ${_ringingState.value} -> $state" }
+            ringingLogger.d { "Updating ringing state ${_ringingState.value} -> $state" }
 
             // handle the auto-cancel for outgoing ringing calls
             if (state is RingingState.Outgoing && !state.acceptedByCallee) {
@@ -1338,9 +1407,23 @@ public class CallState(
 
             // stop the call ringing timer if it's running
         }
-        Log.d("RingingState", "Update: $state")
+        ringingLogger.d { "Update: $state" }
 
-        _ringingState.value = state
+        if (state is RingingState.Active) {
+            activeStateGate.awaitAndTransition(
+                ringingState.value,
+                call,
+                callJoinInterceptor,
+            ) {
+                _ringingState.value = state
+                activeStateGate.cleanup()
+                callJoinInterceptor = null
+            }
+        } else {
+            _ringingState.value = state
+            activeStateGate.cleanup()
+        }
+        previousRingingStates.add(state)
     }
 
     @InternalStreamVideoApi
@@ -1394,7 +1477,7 @@ public class CallState(
 
                 // double check that we are still in Outgoing call state and call is not active
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
-                    ringingStateUpdatesStopped = false
+                    isJoinAndRingInProgress.set(false)
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
                     call.leave("start-ringing-timeout")
                 }
@@ -1520,7 +1603,8 @@ public class CallState(
         _broadcasting.value = response.egress.broadcasting
         _session.value = response.session
         _rejectedBy.value = response.session?.rejectedBy?.keys?.toSet() ?: emptySet()
-        _acceptedBy.value = response.session?.acceptedBy?.keys?.toSet() ?: emptySet()
+        val serverAcceptedBy = response.session?.acceptedBy?.keys?.toSet() ?: emptySet()
+        _acceptedBy.value = acceptedBy.value + serverAcceptedBy
         _createdAt.value = response.createdAt
         _updatedAt.value = response.updatedAt
         _endedAt.value = response.endedAt
@@ -1532,6 +1616,7 @@ public class CallState(
         _settings.value = response.settings
         _transcribing.value = response.transcribing
         _team.value = response.team
+        _thumbnail.value = response.thumbnails?.imageUrl
         didUpdateSession(response.session)
 
         updateRingingState()
@@ -1602,19 +1687,11 @@ public class CallState(
     }
 
     fun pin(userId: String, sessionId: String) {
-        val pins = _localPins.value.toMutableMap()
-        pins[sessionId] = PinUpdateAtTime(
-            PinUpdate(userId, sessionId),
-            OffsetDateTime.now(Clock.systemUTC()),
-            PinType.Local,
-        )
-        _localPins.value = pins
+        pinManager.pin(userId, sessionId)
     }
 
     fun unpin(sessionId: String) {
-        val pins = _localPins.value.toMutableMap()
-        pins.remove(sessionId)
-        _localPins.value = pins
+        pinManager.unpin(sessionId)
     }
 
     fun updateFromResponse(result: StopLiveResponse) {
@@ -1643,10 +1720,10 @@ public class CallState(
         _broadcasting.value = true
     }
 
-    private var ringingStateUpdatesStopped = false
+    internal var isJoinAndRingInProgress = AtomicBoolean(false)
 
-    internal fun toggleRingingStateUpdates(stopped: Boolean) {
-        ringingStateUpdatesStopped = stopped
+    internal fun toggleJoinAndRingProgress(stopped: Boolean) {
+        isJoinAndRingInProgress.set(stopped)
     }
 
     /**
@@ -1748,6 +1825,40 @@ public class CallState(
     fun updateNotification(notificationId: Int, notification: Notification) {
         this._notificationIdFlow.value = notificationId
         this.atomicNotification.set(notification)
+    }
+
+    @InternalStreamVideoApi
+    fun setOwnCapabilities(ownCapability: List<OwnCapability>) {
+        this._ownCapabilities.value = ownCapability
+    }
+
+    /**
+     * [RingingState.Incoming] and [RingingState.Outgoing] are intentionally not observed.
+     * In Android Telecom, hold states are only applicable once a call is active (answered).
+     */
+    private fun observeTelecomHold(repo: JetpackTelecomRepository) {
+        telecomHoldObserverJob?.cancel()
+
+        telecomHoldObserverJob = scope.launch(Dispatchers.Default) {
+            repo.currentCall
+                .map { (it as? TelecomCall.Registered)?.isOnHold == true }
+                .distinctUntilChanged()
+                .filter { it }
+                .collect { isOnHold ->
+                    when (ringingState.value) {
+                        is RingingState.Active -> {
+                            call.leave("call-on-hold")
+                        }
+                        else -> {}
+                    }
+                }
+        }
+    }
+
+    internal fun cleanup() {
+        previousRingingStates.clear()
+        activeStateGate.cleanup()
+        cancelTimeout()
     }
 }
 

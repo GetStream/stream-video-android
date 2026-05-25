@@ -1,13 +1,14 @@
 syntax = "proto3";
 
 package stream.video.sfu.models;
+
 import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
 
+option csharp_namespace = "Stream.Video.v1.Sfu.Models";
 option go_package = "github.com/GetStream/protocol/protobuf/video/sfu/models";
 option java_multiple_files = true;
 option java_outer_classname = "SfuModelsV1";
-option csharp_namespace = "Stream.Video.v1.Sfu.Models";
 
 enum PeerType {
   // todo fix me (marcelo)
@@ -267,6 +268,7 @@ message ClientDetails {
   OS os = 2;
   Browser browser = 3;
   Device device = 4;
+  string webrtc_version = 5;
 }
 
 enum SdkType {
@@ -280,6 +282,8 @@ enum SdkType {
   SDK_TYPE_UNITY = 7;
   SDK_TYPE_GO = 8;
   SDK_TYPE_PLAIN_JAVASCRIPT = 9;
+  SDK_TYPE_PYTHON = 10;
+  SDK_TYPE_VISION_AGENTS = 11;
 }
 
 message Sdk {
@@ -307,9 +311,9 @@ message RTMPIngress {
   double frame_rate = 3;
 
   // Client info
-  string software = 4;  // e.g. "obs-studio"
-  string version = 5;   // e.g. "29.1.3"
-  string encoder = 6;   // e.g. "x264" or "NVIDIA NVENC"
+  string software = 4; // e.g. "obs-studio"
+  string version = 5; // e.g. "29.1.3"
+  string encoder = 6; // e.g. "x264" or "NVIDIA NVENC"
 
   // Connection info
   string remote_addr = 7;
@@ -389,7 +393,7 @@ enum WebsocketReconnectStrategy {
   WEBSOCKET_RECONNECT_STRATEGY_REJOIN = 3;
   // SDK should migrate to a new SFU instance
   WEBSOCKET_RECONNECT_STRATEGY_MIGRATE = 4;
-};
+}
 
 message InputDevices {
   repeated string available_devices = 1;
@@ -453,4 +457,69 @@ enum ClientCapability {
   CLIENT_CAPABILITY_UNSPECIFIED = 0;
   // Enables SFU pausing inbound video
   CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE = 1;
-};
+  // Instructs SFU that stats will be sent to the coordinator
+  CLIENT_CAPABILITY_COORDINATOR_STATS = 2;
+}
+
+// ===================================================================
+// BASE (shared by all RTP directions)
+// ===================================================================
+message RtpBase {
+  uint32 ssrc = 1; // raw stat["ssrc"]
+  string kind = 2; // stat["kind"] ("audio","video")
+  double timestamp_ms = 3; // stat["timestamp"] in milliseconds
+}
+
+// ===================================================================
+// INBOUND (SUBSCRIBER RECEIVING MEDIA)
+// ===================================================================
+message InboundRtp {
+  RtpBase base = 1;
+
+  double jitter_seconds = 2; // stat["jitter"]
+  uint64 packets_received = 3; // stat["packetsReceived"]
+  uint64 packets_lost = 4; // stat["packetsLost"]
+  double packet_loss_percent = 5; // (packets_lost / (packets_received + packets_lost)) * 100;skip if denominator <= 0 or counters decreased
+
+  // -------- AUDIO METRICS --------
+  uint32 concealment_events = 10; // stat["concealmentEvents"]
+  double concealment_percent = 11; // (concealedSamples / totalSamplesReceived) * 100 when totalSamplesReceived >= 96_000 (≈2 s @ 48 kHz)
+
+  // -------- VIDEO METRICS --------
+  double fps = 20; // use delta(framesDecoded)/delta(time) with prev sample
+  double freeze_duration_seconds = 21; // stat["totalFreezesDuration"]
+  double avg_decode_time_seconds = 22; // stat["totalDecodeTime"] / max(1, stat["framesDecoded"])
+  uint32 min_dimension_px = 23; // min(stat["frameWidth"], stat["frameHeight"]) for video-like tracks
+}
+
+// ===================================================================
+// OUTBOUND (PUBLISHER SENDING MEDIA)
+// ===================================================================
+message OutboundRtp {
+  RtpBase base = 1;
+
+  double fps = 10; // delta(framesEncoded)/delta(time) if missing
+  double avg_encode_time_seconds = 11; // stat["totalEncodeTime"] / max(1, stat["framesEncoded"])
+  double bitrate_bps = 12; // delta(bytesSent)*8 / delta(timeSeconds); requires prev bytes/timestamp; ignore if delta<=0
+  uint32 min_dimension_px = 13; // min(stat["frameWidth"], stat["frameHeight"])
+}
+
+// ===================================================================
+// SFU FEEDBACK: REMOTE-INBOUND (Publisher receives feedback)
+// ===================================================================
+message RemoteInboundRtp {
+  RtpBase base = 1;
+
+  double jitter_seconds = 2; // stat["jitter"]
+  double round_trip_time_s = 3; // stat["roundTripTime"]
+}
+
+// ===================================================================
+// SFU FEEDBACK: REMOTE-OUTBOUND (Subscriber receives feedback)
+// ===================================================================
+message RemoteOutboundRtp {
+  RtpBase base = 1;
+
+  double jitter_seconds = 2; // stat["jitter"] if provided
+  double round_trip_time_s = 3; // stat["roundTripTime"]
+}

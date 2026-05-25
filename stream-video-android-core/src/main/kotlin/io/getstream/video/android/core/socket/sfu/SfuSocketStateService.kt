@@ -36,25 +36,6 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
     }
 
     /**
-     * Require a reconnection.
-     *
-     * @param connectionConf The [SocketFactory.ConnectionConf] to be used to reconnect.
-     */
-    suspend fun onReconnect(
-        connectionConf: ConnectionConf.SfuConnectionConf,
-    ) {
-        logger.v {
-            "[onReconnect] user.id: '${connectionConf.user.id}', isReconnection: ${connectionConf.isReconnection}"
-        }
-        stateMachine.sendEvent(
-            SfuSocketStateEvent.Connect(
-                connectionConf,
-                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
-            ),
-        )
-    }
-
-    /**
      * Require connection.
      *
      * @param connectionConf The [VideoSocketFactory.ConnectionConf] to be used on the new connection.
@@ -139,14 +120,6 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
     }
 
     /**
-     * Notify that the network is available at the moment.
-     */
-    suspend fun onNetworkAvailable() {
-        logger.i { "[onNetworkAvailable] no args" }
-        stateMachine.sendEvent(SfuSocketStateEvent.NetworkAvailable)
-    }
-
-    /**
      * Notify that the connection should be resumed.
      */
     suspend fun onResume() {
@@ -182,38 +155,9 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                     }
 
                     else -> {
-                        logger.e { "Cannot handle event $event while being in inappropriate state $state" }
                         state
                     }
                 }
-            }
-
-            state<SfuSocketState.RestartConnection> {
-                onEvent<SfuSocketStateEvent.Connect> {
-                    SfuSocketState.Connecting(it.connectionConf, it.connectionType)
-                }
-                onEvent<SfuSocketStateEvent.ConnectionEstablished> {
-                    SfuSocketState.Connected(
-                        it.connectedEvent,
-                    )
-                }
-                onEvent<SfuSocketStateEvent.WebSocketEventLost> { SfuSocketState.Disconnected.WebSocketEventLost }
-                onEvent<SfuSocketStateEvent.NetworkNotAvailable> { SfuSocketState.Disconnected.NetworkDisconnected }
-                onEvent<SfuSocketStateEvent.UnrecoverableError> {
-                    SfuSocketState.Disconnected.DisconnectedPermanently(
-                        it.error,
-                    )
-                }
-                onEvent<SfuSocketStateEvent.NetworkError> {
-                    SfuSocketState.Disconnected.DisconnectedTemporarily(
-                        it.error,
-                        it.reconnectStrategy,
-                    )
-                }
-                onEvent<SfuSocketStateEvent.RequiredDisconnection> {
-                    SfuSocketState.Disconnected.DisconnectedByRequest
-                }
-                onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
             }
 
             state<SfuSocketState.Connecting> {
@@ -292,12 +236,10 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                         it.error,
                     )
                 }
-                onEvent<SfuSocketStateEvent.NetworkError> {
-                    SfuSocketState.Disconnected.DisconnectedTemporarily(
-                        it.error,
-                        it.reconnectStrategy,
-                    )
-                }
+                // Stay parked — socket errors are expected when the OS reports no network.
+                // The HealthMonitor is already stopped in this state; transitioning to
+                // DisconnectedTemporarily would restart it and cause futile retry loops.
+                onEvent<SfuSocketStateEvent.NetworkError> { currentState }
                 onEvent<SfuSocketStateEvent.RequiredDisconnection> {
                     SfuSocketState.Disconnected.DisconnectedByRequest
                 }

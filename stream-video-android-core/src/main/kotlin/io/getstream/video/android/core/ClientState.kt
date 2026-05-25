@@ -23,7 +23,9 @@ import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomIntegrationType
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
@@ -85,6 +87,9 @@ class ClientState(private val client: StreamVideo) {
 
     public val callConfigRegistry = (client as StreamVideoClient).callServiceConfigRegistry
     private val serviceLauncher = ServiceLauncher(client.context)
+
+    @InternalStreamVideoApi
+    public val rejectCallWhenBusy: Boolean = (client as StreamVideoClient).rejectCallWhenBusy
 
     /**
      * Returns true if there is an active or ringing call
@@ -170,17 +175,26 @@ class ClientState(private val client: StreamVideo) {
         val ringingState = call.state.ringingState.value
         when (ringingState) {
             is RingingState.Incoming -> {
+                transitionToAcceptCall(call)
                 call.scope.launch {
-                    transitionToAcceptCall(call)
                     delay(serviceTransitionDelayMs)
                     maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
                 }
             }
             is RingingState.Outgoing -> {
-                call.scope.launch {
+                if (!call.state.isJoinAndRingInProgress.get()) {
                     transitionToAcceptCall(call)
-                    delay(serviceTransitionDelayMs)
-                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                }
+                // Intentionally skipping maybeStartForegroundService because service should already be started
+                // when initiating outgoing-call
+                val callServiceConfig = callConfigRegistry.get(call.type)
+                val serviceClass = callServiceConfig.serviceClass
+                val isServiceRunning = ServiceIntentBuilder()
+                    .isServiceRunning(this.client.context, serviceClass)
+                if (callServiceConfig.runCallServiceInForeground) {
+                    if (!isServiceRunning) {
+                        logger.e { "Outgoing call service should already be running" }
+                    }
                 }
             }
             else -> {

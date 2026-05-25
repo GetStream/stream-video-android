@@ -118,7 +118,7 @@ internal class CallServiceNotificationUpdateObserver(
 
         when (ringingState) {
             is RingingState.Active -> {
-                showActiveCallNotification(context, callId, notification)
+                showActiveCallNotification(callId, notification)
             }
             is RingingState.Outgoing -> {
                 showOutgoingCallNotification(context, callId, notification)
@@ -133,19 +133,20 @@ internal class CallServiceNotificationUpdateObserver(
     }
 
     private fun showActiveCallNotification(
-        context: Context,
         callId: StreamCallId,
         notification: Notification,
     ) {
         logger.d { "[showActiveCallNotification] Showing active call notification" }
         val notificationId =
             call.state.notificationIdFlow.value ?: callId.getNotificationId(NotificationType.Ongoing)
-        startForegroundWithServiceType(
-            notificationId,
-            notification,
-            CallService.Companion.TRIGGER_ONGOING_CALL,
-            permissionManager.getServiceType(context, CallService.Companion.TRIGGER_ONGOING_CALL),
-        )
+
+        streamVideo
+            .getStreamNotificationDispatcher()
+            .notify(
+                callId,
+                notificationId,
+                notification,
+            )
     }
 
     private fun showOutgoingCallNotification(

@@ -82,6 +82,7 @@ fun defaultStreamMenu(
     onDeviceSelected: (StreamAudioDevice) -> Unit,
     onSfuRejoinClick: () -> Unit,
     onSfuFastReconnectClick: () -> Unit,
+    onSimulateSfuFullClick: () -> Unit,
     onSelectScaleType: (VideoScalingType) -> Unit,
     availableDevices: List<StreamAudioDevice>,
     loadRecordings: suspend () -> List<MenuItem>,
@@ -161,6 +162,7 @@ fun defaultStreamMenu(
                     onSwitchSfuClick,
                     onSfuRejoinClick,
                     onSfuFastReconnectClick,
+                    onSimulateSfuFullClick,
                     onSelectScaleType,
                     loadRecordings,
                     onShowFeedback,
@@ -234,6 +236,7 @@ fun reconnectMenu(
     onSwitchSfuClick: () -> Unit,
     onSfuRejoinClick: () -> Unit,
     onSfuFastReconnectClick: () -> Unit,
+    onSimulateSfuFullClick: () -> Unit,
 ) = listOf(
     ActionMenuItem(
         title = "Publisher - ICE restart",
@@ -259,6 +262,11 @@ fun reconnectMenu(
         title = "Reconnect SFU - fast",
         icon = Icons.Default.RestartAlt,
         action = onSfuFastReconnectClick,
+    ),
+    ActionMenuItem(
+        title = "Simulate SFU Full (700)",
+        icon = Icons.Default.Feedback,
+        action = onSimulateSfuFullClick,
     ),
 )
 
@@ -337,6 +345,7 @@ fun debugSubmenu(
     onSwitchSfuClick: () -> Unit,
     onSfuRejoinClick: () -> Unit,
     onSfuFastReconnectClick: () -> Unit,
+    onSimulateSfuFullClick: () -> Unit,
     onSelectScaleType: (VideoScalingType) -> Unit,
     loadRecordings: suspend () -> List<MenuItem>,
     onShowFeedback: () -> Unit,
@@ -459,6 +468,7 @@ fun debugSubmenu(
             onSwitchSfuClick,
             onSfuRejoinClick,
             onSfuFastReconnectClick,
+            onSimulateSfuFullClick,
         ),
     ),
 )

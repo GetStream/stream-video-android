@@ -21,6 +21,7 @@ import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.os.SystemClock
 import androidx.core.app.NotificationManagerCompat
 import androidx.media.session.MediaButtonReceiver
 import io.getstream.log.taggedLogger
@@ -53,9 +54,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import org.threeten.bp.Duration
-import org.threeten.bp.OffsetDateTime
-import kotlin.math.absoluteValue
+import java.util.concurrent.TimeUnit
 
 /**
  * A foreground service that is running when there is an active call.
@@ -117,7 +116,7 @@ internal open class CallService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        serviceStateController.setStartTime(OffsetDateTime.now())
+        serviceStateController.setStartTime(SystemClock.elapsedRealtime())
     }
 
     private fun shouldStopService(intent: Intent?): Boolean {
@@ -217,7 +216,12 @@ internal open class CallService : Service() {
          * Mandatory, if not called then it will throw exception if we directly decide to stop the service.
          * For example: it will stop the service if [verifyPermissions] is false
          */
-        promoteToFgServiceIfNoActiveCall(params.streamVideo, notificationId, params.trigger)
+        promoteToFgServiceIfNoActiveCall(
+            params.streamVideo,
+            notificationId,
+            params.trigger,
+            params.callId,
+        )
         val call = params.streamVideo.call(params.callId.type, params.callId.id)
 
         // Rendering incoming call does not need audio/video permissions
@@ -616,11 +620,10 @@ internal open class CallService : Service() {
             logger.w { "[stopServiceGracefully] source: $source" }
         }
 
-        serviceStateController.startTime?.let { startTime ->
+        serviceStateController.startTimeElapsedRealtime?.let { startTime ->
 
-            val currentTime = OffsetDateTime.now()
-            val duration = Duration.between(startTime, currentTime)
-            val differenceInSeconds = duration.seconds.absoluteValue
+            val elapsedMs = SystemClock.elapsedRealtime() - startTime
+            val differenceInSeconds = TimeUnit.MILLISECONDS.toSeconds(elapsedMs)
             val debouncerThresholdTimeInSeconds = SERVICE_DESTROY_THRESHOLD_TIME_MS / 1_000
             logger.d { "[stopServiceGracefully] differenceInSeconds: $differenceInSeconds" }
             if (differenceInSeconds >= debouncerThresholdTimeInSeconds) {
@@ -656,23 +659,15 @@ internal open class CallService : Service() {
         videoClient: StreamVideoClient,
         notificationId: Int,
         trigger: String,
+        callId: StreamCallId,
     ) {
-        val hasActiveCall = videoClient.state.activeCall.value != null
-        val not = if (hasActiveCall) " not" else ""
-
-        logger.d {
-            "[promoteToFgServiceIfNoActiveCall] hasActiveCall: $hasActiveCall. Will$not call startForeground early."
-        }
-
-        if (!hasActiveCall) {
-            videoClient.getSettingUpCallNotification()?.let { notification ->
-                startForegroundWithServiceType(
-                    notificationId,
-                    notification,
-                    trigger,
-                    permissionManager.getServiceType(baseContext, trigger),
-                )
-            }
+        videoClient.getSettingUpCallNotification(trigger, callId)?.let { notification ->
+            startForegroundWithServiceType(
+                notificationId,
+                notification,
+                trigger,
+                permissionManager.getServiceType(baseContext, trigger),
+            )
         }
     }
 

@@ -73,5 +73,23 @@ public fun User.Companion.builtInUsers(): List<User> {
             role = "user",
             image = "https://ca.slack-edge.com/T02RM6X6B-U034NG4FPNG-9a37493e25e0-512",
         ),
+        User(
+            id = "rahul",
+            name = "Rahul",
+            role = "user",
+            image = "https://ca.slack-edge.com/T02RM6X6B-U07V18H475W-18d720928862-512",
+        ),
+        User(
+            id = "pratim",
+            name = "Pratim",
+            role = "user",
+            image = "https://ca.slack-edge.com/T02RM6X6B-U09A3CPNKML-ff0e993bf1be-512",
+        ),
+        User(
+            id = "gian",
+            name = "Gian",
+            role = "user",
+            image = "https://ca.slack-edge.com/T02RM6X6B-U09645WUWQ3-a89200afc9fd-512",
+        ),
     )
 }

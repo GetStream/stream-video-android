@@ -9,9 +9,8 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  issues: write
 
 jobs:
   pr-clean-stale:
-    uses: GetStream/stream-build-conventions-android/.github/workflows/pr-clean-stale.yaml@v0.9.0
+    uses: GetStream/stream-build-conventions-android/.github/workflows/pr-clean-stale.yaml@v0.13.1
     secrets: inherit
