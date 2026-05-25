@@ -92,6 +92,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	public final fun enterPictureInPicture ()V
 	public fun get (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
 	protected fun getCallHandlerDelegate ()Lio/getstream/video/android/ui/common/IncomingCallHandlerDelegate;
+	protected fun getCallJoinInterceptor ()Lio/getstream/video/android/core/CallJoinInterceptor;
 	protected fun getCallTransitionTime ()J
 	protected final fun getConfig ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public fun getConfiguration ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;

@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
@@ -69,7 +70,12 @@ import java.util.UUID
 @Composable
 fun DirectCallJoinScreen(
     viewModel: DirectCallJoinViewModel = hiltViewModel(),
-    navigateToDirectCall: (cid: StreamCallId, memberList: String, joinAndRing: Boolean) -> Unit,
+    navigateToDirectCall: (
+        cid: StreamCallId,
+        memberList: String,
+        joinAndRing: Boolean,
+        useCallJoinInterceptor: Boolean,
+    ) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -98,7 +104,7 @@ private fun Header(user: User?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp) // Outer padding
+            .padding(start = 24.dp, end = 24.dp, top = 24.dp) // Outer padding
             .padding(vertical = 12.dp), // Inner padding
         verticalArrangement = Arrangement.Center,
     ) {
@@ -135,9 +141,15 @@ private fun Header(user: User?) {
 private fun Body(
     uiState: DirectCallUiState,
     toggleUserSelection: (Int) -> Unit,
-    onStartCallClick: (cid: StreamCallId, membersList: String, joinAndRing: Boolean) -> Unit,
+    onStartCallClick: (
+        cid: StreamCallId,
+        membersList: String,
+        joinAndRing: Boolean,
+        useCallJoinInterceptor: Boolean,
+    ) -> Unit,
 ) {
     var callerJoinsFirst by rememberSaveable { mutableStateOf(true) }
+    var useCallJoinInterceptor by rememberSaveable { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -161,11 +173,10 @@ private fun Body(
                     Row(
                         verticalAlignment = CenterVertically,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 10.dp),
+                            .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Join First", color = Color.White)
+                        Text(stringResource(id = R.string.join_first), color = Color.White)
                         Checkbox(
                             callerJoinsFirst,
                             modifier = Modifier.offset(x = 10.dp),
@@ -176,6 +187,27 @@ private fun Body(
                             ),
                             onCheckedChange = {
                                 callerJoinsFirst = !callerJoinsFirst
+                            },
+                        )
+                    }
+                    Row(
+                        verticalAlignment = CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(stringResource(id = R.string.use_call_join_interceptor), color = Color.White)
+                        Checkbox(
+                            useCallJoinInterceptor,
+                            modifier = Modifier.offset(x = 10.dp),
+                            colors = CheckboxDefaults.colors(
+                                uncheckedColor = Color.White, // Border color when unchecked
+                                checkedColor = Color.White, // Fill color when checked
+                                checkmarkColor = VideoTheme.colors.buttonBrandDefault, // Tick color
+                            ),
+                            onCheckedChange = {
+                                useCallJoinInterceptor = !useCallJoinInterceptor
                             },
                         )
                     }
@@ -204,11 +236,11 @@ private fun Body(
                         onClick = {
                             onStartCallClick(
                                 StreamCallId("audio_call", UUID.randomUUID().toString()),
-//                                StreamCallId("default", UUID.randomUUID().toString()),
                                 users
                                     .filter { it.isSelected }
                                     .joinToString(separator = ",") { it.user.id ?: "" },
                                 callerJoinsFirst,
+                                useCallJoinInterceptor,
                             )
                         },
                     )
@@ -230,6 +262,7 @@ private fun Body(
                                     .filter { it.isSelected }
                                     .joinToString(separator = ",") { it.user.id ?: "" },
                                 callerJoinsFirst,
+                                useCallJoinInterceptor,
                             )
                         },
                     )
@@ -326,7 +359,7 @@ private fun HeaderPreview() {
                 },
             ),
             toggleUserSelection = {},
-        ) { _, _, _ ->
+        ) { _, _, _, _ ->
         }
     }
 }

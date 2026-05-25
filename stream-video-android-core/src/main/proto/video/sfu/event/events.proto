@@ -5,10 +5,10 @@ package stream.video.sfu.event;
 import "video/sfu/models/models.proto";
 import "video/sfu/signal_rpc/signal.proto";
 
+option csharp_namespace = "Stream.Video.v1.Sfu.Events";
 option go_package = "github.com/GetStream/protocol/protobuf/video/sfu/event";
 option java_multiple_files = true;
 option java_outer_classname = "SfuEventsV1";
-option csharp_namespace = "Stream.Video.v1.Sfu.Events";
 
 // SFUEvent is a message that is sent from the SFU to the client.
 message SfuEvent {
@@ -92,7 +92,7 @@ message ChangePublishOptions {
 message ChangePublishOptionsComplete {
 }
 
-message ParticipantMigrationComplete{
+message ParticipantMigrationComplete {
 }
 
 message PinsChanged {
@@ -224,6 +224,7 @@ message JoinResponse {
 message ParticipantJoined {
   string call_cid = 1;
   models.Participant participant = 2;
+  bool is_pinned = 3;
 }
 
 // ParticipantJoined is fired when a user leaves a call
@@ -242,6 +243,7 @@ message ParticipantUpdated {
 message SubscriberOffer {
   bool ice_restart = 1;
   string sdp = 2;
+  uint32 negotiation_id = 3;
 }
 
 message PublisherAnswer {
@@ -266,7 +268,7 @@ message DominantSpeakerChanged {
   string session_id = 2;
 }
 
-message AudioLevel{
+message AudioLevel {
   string user_id = 1;
   string session_id = 2;
   // 0.0 means complete silence, 1.0 loudest

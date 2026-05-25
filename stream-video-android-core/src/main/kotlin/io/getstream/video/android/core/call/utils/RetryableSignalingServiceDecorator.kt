@@ -27,6 +27,8 @@ import stream.video.sfu.signal.ICERestartResponse
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.SendAnswerRequest
 import stream.video.sfu.signal.SendAnswerResponse
+import stream.video.sfu.signal.SendMetricsRequest
+import stream.video.sfu.signal.SendMetricsResponse
 import stream.video.sfu.signal.SendStatsRequest
 import stream.video.sfu.signal.SendStatsResponse
 import stream.video.sfu.signal.SetPublisherRequest
@@ -116,6 +118,9 @@ internal class RetryableSignalingServiceDecorator(
 
     override suspend fun sendStats(sendStatsRequest: SendStatsRequest): SendStatsResponse =
         retryCall({ it.error }) { decorated.sendStats(sendStatsRequest) }
+
+    override suspend fun sendMetrics(sendMetricsRequest: SendMetricsRequest): SendMetricsResponse =
+        retryCall({ null }) { decorated.sendMetrics(sendMetricsRequest) }
 
     override suspend fun startNoiseCancellation(startNoiseCancellationRequest: StartNoiseCancellationRequest): StartNoiseCancellationResponse =
         retryCall({ it.error }) { decorated.startNoiseCancellation(startNoiseCancellationRequest) }
