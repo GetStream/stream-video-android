@@ -71,6 +71,7 @@ import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.events.reporting.TelemetryModel
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceCandidate
@@ -879,6 +880,7 @@ public class RtcSession internal constructor(
     internal suspend fun connectInternal(
         reconnectDetails: ReconnectDetails? = null,
         options: List<PublishOption>? = null,
+        telemetryModel: TelemetryModel? = null,
     ): SfuConnectionResult {
         logger.i { "[connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
         val reporter = call.client.state.clientEventReporter
@@ -926,7 +928,7 @@ public class RtcSession internal constructor(
                 reporter.reportWsJoinCompleted(
                     telemetryWsEventSessionId,
                     success = false,
-                    retryCount = 0,
+                    retryCount = telemetryModel?.retryAttempt ?: 0,
                     failureReason = msg,
                     failureCode = "WS_DISCONNECTED",
                 )
@@ -938,7 +940,7 @@ public class RtcSession internal constructor(
                 reporter.reportWsJoinCompleted(
                     telemetryWsEventSessionId,
                     success = false,
-                    retryCount = 0,
+                    retryCount = telemetryModel?.retryAttempt ?: 0,
                     failureReason = "SFU connection timed out",
                     failureCode = "REQUEST_TIMEOUT",
                 )

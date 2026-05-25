@@ -77,7 +77,9 @@ import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
+import io.getstream.video.android.core.events.reporting.ClientEventReporterErrorMappers
 import io.getstream.video.android.core.events.reporting.PeerConnectionRole
+import io.getstream.video.android.core.events.reporting.TelemetryModel
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.AudioTrack
@@ -147,7 +149,7 @@ internal typealias CallSessionId = String
  * these instead of throwing, making the control flow in the reconnect loop
  * explicit and exhaustively checked by the compiler.
  */
-private sealed class ReconnectOutcome {
+internal sealed class ReconnectOutcome {
     /** Reconnect succeeded — exit the loop. */
     object Success : ReconnectOutcome()
 
@@ -555,9 +557,7 @@ public class Call(
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
-        val eventSessionId = UUID.randomUUID().toString()
-        client.state.clientEventReporter.reportCoordinatorJoinInitiated(
-            eventSessionId,
+        val eventSessionId = client.state.clientEventReporter.reportCoordinatorJoinInitiated(
             callType = this.type,
             callId = this.id,
         )
@@ -1021,12 +1021,38 @@ public class Call(
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
                         nonFastReconnectAttempts++
-                        reconnectRejoin(reason)
+                        val telemetrySessionId =
+                            client.state.clientEventReporter.reportCoordinatorJoinInitiated(
+                                this.id,
+                                this.type,
+                            )
+
+                        val result =
+                            reconnectRejoin(reason, TelemetryModel(nonFastReconnectAttempts))
+                        client.state.clientEventReporter.reportCoordinatorJoinCompleted(
+                            telemetrySessionId,
+                            result is ReconnectOutcome.Success,
+                            nonFastReconnectAttempts,
+                            ClientEventReporterErrorMappers().getFailureReason(result),
+                        )
+                        result
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
                         nonFastReconnectAttempts++
-                        reconnectMigrate()
+                        val telemetrySessionId =
+                            client.state.clientEventReporter.reportCoordinatorJoinInitiated(
+                                this.id,
+                                this.type,
+                            )
+                        val result = reconnectMigrate(TelemetryModel(nonFastReconnectAttempts))
+                        client.state.clientEventReporter.reportCoordinatorJoinCompleted(
+                            telemetrySessionId,
+                            result is ReconnectOutcome.Success,
+                            nonFastReconnectAttempts,
+                            ClientEventReporterErrorMappers().getFailureReason(result),
+                        )
+                        result
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT ->
@@ -1130,7 +1156,10 @@ public class Call(
      * previous_session_id is set so the SFU can transfer state (tracks,
      * subscriptions) from the old session to the new one.
      */
-    private suspend fun reconnectRejoin(reason: String): ReconnectOutcome {
+    private suspend fun reconnectRejoin(
+        reason: String,
+        telemetryModel: TelemetryModel? = null,
+    ): ReconnectOutcome {
         logger.d { "[reconnectRejoin] reconnectAttempts=$nonFastReconnectAttempts" }
         state._connection.value = RealtimeConnection.Reconnecting
         val loc = location
@@ -1178,7 +1207,13 @@ public class Call(
         )
         this.session.value = newSession
 
-        return when (val result = newSession.connectInternal(reconnectDetails, currentOptions)) {
+        return when (
+            val result = newSession.connectInternal(
+                reconnectDetails,
+                currentOptions,
+                telemetryModel,
+            )
+        ) {
             is SfuConnectionResult.Connected -> {
                 newSession.sfuTracer.trace("rejoin", reason)
                 monitorSession(joinResponse.value)
@@ -1192,7 +1227,7 @@ public class Call(
      * Migrate to another SFU. Reuses the same session ID — the SFU
      * identifies the participant via from_sfu_id, not previous_session_id.
      */
-    private suspend fun reconnectMigrate(): ReconnectOutcome {
+    private suspend fun reconnectMigrate(telemetryModel: TelemetryModel? = null): ReconnectOutcome {
         logger.d { "[reconnectMigrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         val loc = location
@@ -1247,7 +1282,11 @@ public class Call(
         this.session.value = newSession
 
         return try {
-            val result = newSession.connectInternal(reconnectDetails, currentOptions)
+            val result = newSession.connectInternal(
+                reconnectDetails,
+                currentOptions,
+                telemetryModel,
+            )
             when (result) {
                 is SfuConnectionResult.Connected -> {
                     monitorSession(joinResponse.value)
