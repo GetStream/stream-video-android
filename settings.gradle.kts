@@ -15,7 +15,6 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
-        maven { url = uri("https://central.sonatype.com/repository/maven-snapshots/") }
         mavenCentral()
         maven(url = "https://plugins.gradle.org/m2/")
     }
