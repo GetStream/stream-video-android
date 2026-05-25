@@ -27,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.getstream.video.android.CallActivity
+import io.getstream.video.android.core.faultinjector.FaultInjector
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
@@ -40,6 +41,7 @@ import io.getstream.video.android.ui.outgoing.DirectCallJoinScreen
 fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
+    faultInjector: FaultInjector,
     startDestination: String = AppScreens.Login.route,
     prefilledCallId: String? = null,
 ) {
@@ -62,6 +64,7 @@ fun AppNavHost(
         composable(AppScreens.CallJoin.route) {
             CallJoinScreen(
                 prefilledCallId = prefilledCallId,
+                faultInjector = faultInjector,
                 navigateToCallLobby = { cid ->
                     navController.navigate(AppScreens.CallLobby.routeWithArg(cid))
                 },

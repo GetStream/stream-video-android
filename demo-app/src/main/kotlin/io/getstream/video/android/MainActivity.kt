@@ -40,6 +40,7 @@ import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.ui.AppNavHost
 import io.getstream.video.android.ui.AppScreens
+import io.getstream.video.android.ui.FaultInjectorImpl
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.util.InAppUpdateHelper
@@ -85,6 +86,9 @@ class MainActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             val isLoggedIn = dataStore.user.firstOrNull() != null
+            val faultInjector = FaultInjectorImpl()
+            //TODO Rahul, remove before merge
+            StreamVideo.instance().state.faultInjector = faultInjector
 
             setContent {
                 VideoTheme {
@@ -98,6 +102,7 @@ class MainActivity : ComponentActivity() {
                             AppScreens.CallJoin.route
                         },
                         prefilledCallId = launchIntentCallId,
+                        faultInjector = faultInjector,
                     )
                 }
             }

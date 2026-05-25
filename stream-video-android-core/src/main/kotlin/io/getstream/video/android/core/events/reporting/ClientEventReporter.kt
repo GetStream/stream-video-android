@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
 import org.webrtc.PeerConnection
-import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.set
@@ -56,9 +55,6 @@ internal class ClientEventReporter(
     private val inFlightSessions = ConcurrentHashMap<EventSessionId, InFlightSession>()
     private val joinStageAttemptIdMap = ConcurrentHashMap<CallId, String>()
     private val callSessionIdMap = ConcurrentHashMap<CallId, String>()
-    private val batchEvents: MutableList<ClientEvent> = Collections.synchronizedList(
-        mutableListOf(),
-    ) // TODO Rahul, should be thread safe
 
     // Active event_session_id per PC role — drives the ICE state machine
     private val activePcSessionIds = ConcurrentHashMap<PeerConnectionRole, String>()
@@ -335,9 +331,7 @@ internal class ClientEventReporter(
     }
 
     internal fun sendAllPendingEvents() {
-        val batchEventsClone = batchEvents.toList()
-        batchEvents.clear()
-        sendEvents(batchEventsClone)
+//        batchNetworkRequest.sendBatchNetworkRequest()
     }
 
     internal fun abortAllInFlight(reason: AbortReason) {
@@ -416,7 +410,7 @@ internal class ClientEventReporter(
     private fun sendEvent(event: ClientEvent) {
         when (sendingStrategy) {
             TelemetrySendingStrategy.BATCH -> {
-                batchEvents.add(event)
+//                batchNetworkRequest.write(event)
             }
             TelemetrySendingStrategy.IN_PLACE -> {
                 scope.launch {
@@ -432,13 +426,8 @@ internal class ClientEventReporter(
     }
 
     private fun sendEvents(events: List<ClientEvent>) {
-        scope.launch {
-            // TODO: wrap with StreamRetryPolicy when retries are added
-            runCatching {
-                api.reportClientCallEvent(ReportClientEventRequest(events))
-            }.onFailure { e ->
-                logger.w { "[sendEvent] Failed to send client event: ${e.message}" }
-            }
+        events.map {
+//            batchNetworkRequest.write(it)
         }
     }
 }
