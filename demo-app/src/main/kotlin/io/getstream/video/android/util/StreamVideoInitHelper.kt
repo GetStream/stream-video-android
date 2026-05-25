@@ -63,7 +63,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
-import org.webrtc.Logging
+import io.getstream.webrtc.Logging
 
 public enum class InitializedState {
     NOT_STARTED, RUNNING, FINISHED, FAILED

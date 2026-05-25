@@ -17,49 +17,49 @@
 package io.getstream.video.android.core.audio
 
 import android.content.Context
-import com.twilio.audioswitch.AudioDevice
-import com.twilio.audioswitch.AudioDeviceChangeListener
-import com.twilio.audioswitch.AudioSwitch
-import io.getstream.video.android.core.audio.AudioSwitchHandler.Companion.onAudioFocusChangeListener
+import io.getstream.log.taggedLogger
+import kotlin.getValue
 
 internal class AudioSwitchController(
     private val context: Context,
-    private val preferredDeviceList: List<Class<out AudioDevice>>,
-    private val audioDeviceChangeListener: AudioDeviceChangeListener,
+    private val preferredDeviceList: List<Class<out StreamAudioDevice>>,
+    private val audioDeviceChangeListener: StreamAudioDeviceChangeListener,
+    private val onDeviceSelected: ((StreamAudioDevice) -> Unit)? = null,
 ) : AudioHandler {
-    private var audioSwitch: AudioSwitch? = null
-    private var isActivated = false
+    private val logger by taggedLogger(TAG)
+    private var streamAudioSwitch: StreamAudioSwitch? = null
+    private var isAudioSwitchInitScheduled = false
 
     override fun start() {
-        if (audioSwitch != null) return
+        if (!isAudioSwitchInitScheduled) {
+            isAudioSwitchInitScheduled = true
 
-        audioSwitch = getAudioSwitch()
-        isActivated = false
-        audioSwitch?.start(audioDeviceChangeListener)
-    }
-
-    override fun stop() {
-        audioSwitch?.stop()
-        audioSwitch = null
-        isActivated = false
-    }
-
-    fun selectDevice(device: AudioDevice?) {
-        val switch = audioSwitch ?: return
-
-        switch.selectDevice(device)
-
-        if (!isActivated) {
-            switch.activate()
-            isActivated = true
+            logger.d { "[start] AudioSwitch" }
+            val switch = StreamAudioSwitch(
+                context = context,
+                preferredDeviceList = preferredDeviceList,
+                onDeviceSelected = onDeviceSelected,
+            )
+            streamAudioSwitch = switch
+            switch.start(audioDeviceChangeListener)
         }
     }
 
-    fun getAudioSwitch(): AudioSwitch {
-        return AudioSwitch(
-            context = context,
-            audioFocusChangeListener = onAudioFocusChangeListener,
-            preferredDeviceList = preferredDeviceList,
-        )
+    override fun stop() {
+        logger.d { "[stop] AudioSwitch" }
+        streamAudioSwitch?.stop()
+        streamAudioSwitch = null
+        synchronized(this) {
+            isAudioSwitchInitScheduled = false
+        }
+    }
+
+    override fun selectDevice(audioDevice: StreamAudioDevice?) {
+        logger.d { "[selectDevice] AudioSwitch" }
+        streamAudioSwitch?.selectDevice(audioDevice)
+    }
+
+    companion object {
+        private const val TAG = "StreamAudioSwitchController"
     }
 }

@@ -83,7 +83,6 @@ import stream.video.sfu.models.VideoDimension
 import java.nio.ByteBuffer
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resumeWithException
 
 sealed class DeviceStatus {
@@ -987,7 +986,7 @@ class MicrophoneManager(
                             capturedOnAudioDevicesUpdate = null
                         },
                         onDeviceSelected = { device ->
-                            mediaManager.call.session?.sfuTracer?.trace(
+                            mediaManager.call.session.value?.sfuTracer?.trace(
                                 "audio-device-selected",
                                 mapOf(
                                     "device" to device.name,

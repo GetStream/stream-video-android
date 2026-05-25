@@ -130,11 +130,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
-import io.getstream.webrtc.MediaStreamTrack
-import io.getstream.webrtc.PeerConnection
-import io.getstream.webrtc.RTCStatsReport
-import io.getstream.webrtc.RtpTransceiver.RtpTransceiverDirection
-import io.getstream.webrtc.SessionDescription
 import stream.video.sfu.event.JoinRequest
 import stream.video.sfu.event.LeaveCallRequest
 import stream.video.sfu.event.ReconnectDetails

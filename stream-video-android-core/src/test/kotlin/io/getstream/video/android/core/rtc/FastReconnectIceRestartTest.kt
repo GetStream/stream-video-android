@@ -50,7 +50,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.webrtc.SessionDescription
+import io.getstream.webrtc.SessionDescription
 
 /**
  * Tests that [RtcSession.fastReconnect] proactively restarts ICE on both

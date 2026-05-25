@@ -55,7 +55,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import org.webrtc.AudioTrack
+import io.getstream.webrtc.AudioTrack
 import stream.video.sfu.models.AudioBitrateProfile
 
 @RunWith(RobolectricTestRunner::class)

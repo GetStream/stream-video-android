@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.audio
 
-import com.twilio.audioswitch.AudioDevice
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import kotlinx.coroutines.CoroutineScope
@@ -60,8 +59,8 @@ internal class AudioSwitchDecorator(private val controller: AudioSwitchControlle
         scope.launch { controller.stop() }
     }
 
-    fun selectDevice(device: AudioDevice?) {
+    override fun selectDevice(audioDevice: StreamAudioDevice?) {
         val scope = ensureScope() ?: return
-        scope.launch { controller.selectDevice(device) }
+        scope.launch { controller.selectDevice(audioDevice) }
     }
 }
