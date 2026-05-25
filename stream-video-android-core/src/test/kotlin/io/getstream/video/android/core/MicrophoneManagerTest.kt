@@ -29,6 +29,7 @@ import com.twilio.audioswitch.AudioDevice
 import io.getstream.android.video.generated.models.AudioSettingsResponse
 import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.UsbAudioInputDevice
 import io.getstream.video.android.core.call.RtcSession
@@ -36,8 +37,8 @@ import io.getstream.video.android.core.call.connection.StreamPeerConnectionFacto
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCallAction
+import io.getstream.webrtc.AudioTrack
 import io.mockk.clearMocks
-import io.getstream.video.android.core.audio.AudioHandler
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -55,7 +56,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import io.getstream.webrtc.AudioTrack
 import stream.video.sfu.models.AudioBitrateProfile
 
 @RunWith(RobolectricTestRunner::class)

@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import androidx.lifecycle.AtomicReference
 import io.getstream.log.taggedLogger
+import io.getstream.webrtc.PeerConnection.PeerConnectionState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -30,7 +31,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import io.getstream.webrtc.PeerConnection.PeerConnectionState
 
 private const val PEER_CONNECTION_OBSERVER_TIMEOUT = 5_000L
 private const val INTERCEPTOR_TIMEOUT_MS = 5_000L

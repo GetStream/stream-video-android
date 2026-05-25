@@ -45,9 +45,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.extractCause
 import io.getstream.video.android.core.audio.AudioSwitchController
 import io.getstream.video.android.core.audio.AudioSwitchDecorator
-import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
-import io.getstream.video.android.core.audio.StreamAudioSwitchHandler
 import io.getstream.video.android.core.audio.UsbAudioInputDevice
 import io.getstream.video.android.core.audio.UsbAudioInputDevice.Companion.isUsbInputDevice
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
@@ -973,13 +971,13 @@ class MicrophoneManager(
                 }
                 audioHandler = AudioSwitchDecorator(
                     AudioSwitchController(
-                    context = mediaManager.context,
-                    preferredDeviceList = preferredDeviceList,
-                    audioDeviceChangeListener = { devices, selected ->
-                        logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
+                        context = mediaManager.context,
+                        preferredDeviceList = preferredDeviceList,
+                        audioDeviceChangeListener = { devices, selected ->
+                            logger.i { "[audioSwitch] audio devices. selected $selected, available devices are $devices" }
 
-                        _devices.value = devices
-                        _selectedDevice.value = selected
+                            _devices.value = devices
+                            _selectedDevice.value = selected
 
                             setupCompleted.set(true)
                             capturedOnAudioDevicesUpdate?.invoke()

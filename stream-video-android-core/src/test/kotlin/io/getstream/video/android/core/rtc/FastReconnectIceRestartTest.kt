@@ -33,6 +33,7 @@ import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.IceServer
+import io.getstream.webrtc.SessionDescription
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -50,7 +51,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import io.getstream.webrtc.SessionDescription
 
 /**
  * Tests that [RtcSession.fastReconnect] proactively restarts ICE on both
