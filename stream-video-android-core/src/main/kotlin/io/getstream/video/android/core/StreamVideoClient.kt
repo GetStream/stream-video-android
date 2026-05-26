@@ -87,6 +87,7 @@ import io.getstream.video.android.core.audio.AudioExecutionContext
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.faultinjector.FaultKey
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
@@ -442,6 +443,9 @@ internal class StreamVideoClient internal constructor(
     var location: String? = null
 
     internal suspend fun getCachedLocation(): Result<String> {
+        if (state.faultInjector.isEnabled(FaultKey.FAIL_LOCATION)) {
+            return state.faultInjector.sendFailResult(FaultKey.FAIL_LOCATION)
+        }
         val job = loadLocationAsync()
         job.join()
         location?.let {

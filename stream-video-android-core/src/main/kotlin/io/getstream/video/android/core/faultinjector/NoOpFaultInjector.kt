@@ -16,17 +16,19 @@
 
 package io.getstream.video.android.core.faultinjector
 
+import io.getstream.result.Error
+
 internal class NoOpFaultInjector : FaultInjector {
 
     override fun enable(key: FaultKey) {}
-
     override fun disable(key: FaultKey) {}
-
     override fun setEnabled(key: FaultKey, enabled: Boolean) {}
-
     override fun isEnabled(key: FaultKey): Boolean = false
-
     override fun clear() {}
-
     override fun throwDebugFault(key: FaultKey) {}
+    override fun sendFailResult(key: FaultKey): io.getstream.result.Result.Failure {
+        return io.getstream.result.Result.Failure(
+            Error.GenericError("Fault injected: $key"),
+        )
+    }
 }

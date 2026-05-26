@@ -50,7 +50,7 @@ internal class ClientEventReporter(
     private val sendingStrategy: TelemetrySendingStrategy = TelemetrySendingStrategy.IN_PLACE,
     private val scope: CoroutineScope = UserScope(ClientScope()),
 ) {
-    private val logger by taggedLogger("CallEventReporter")
+    private val logger by taggedLogger("ClientEventReporter")
 
     private val inFlightSessions = ConcurrentHashMap<EventSessionId, InFlightSession>()
     private val joinStageAttemptIdMap = ConcurrentHashMap<CallId, String>()
@@ -87,7 +87,8 @@ internal class ClientEventReporter(
         NETWORK_OFFLINE("NETWORK_OFFLINE", "Device offline"),
         ICE_GATHERING_FAILED("ICE_GATHERING_FAILED", "ICE gathering failed"),
         ICE_CONNECTIVITY_FAILED("ICE_CONNECTIVITY_FAILED", "ICE connectivity failed"),
-//        REQUEST_TIMEOUT("REQUEST_TIMEOUT", "Device offline"),
+        REQUEST_TIMEOUT("REQUEST_TIMEOUT", "Device offline"),
+        SFU_REQUEST_TIMEOUT("REQUEST_TIMEOUT", "SFU connection timed out"),
     }
 
     // --- CoordinatorJoin ---
@@ -330,10 +331,6 @@ internal class ClientEventReporter(
         )
     }
 
-    internal fun sendAllPendingEvents() {
-//        batchNetworkRequest.sendBatchNetworkRequest()
-    }
-
     internal fun abortAllInFlight(reason: AbortReason) {
         val snapshot = inFlightSessions.values.toList()
         inFlightSessions.clear()
@@ -409,13 +406,12 @@ internal class ClientEventReporter(
 
     private fun sendEvent(event: ClientEvent) {
         when (sendingStrategy) {
-            TelemetrySendingStrategy.BATCH -> {
-//                batchNetworkRequest.write(event)
-            }
+            TelemetrySendingStrategy.BATCH -> { }
             TelemetrySendingStrategy.IN_PLACE -> {
                 scope.launch {
                     // TODO: wrap with StreamRetryPolicy when retries are added
                     runCatching {
+                        logger.d { event.toLog() }
                         api.reportClientCallEvent(ReportClientEventRequest(arrayListOf(event)))
                     }.onFailure { e ->
                         logger.w { "[sendEvent] Failed to send client event: ${e.message}" }
@@ -426,8 +422,14 @@ internal class ClientEventReporter(
     }
 
     private fun sendEvents(events: List<ClientEvent>) {
-        events.map {
-//            batchNetworkRequest.write(it)
+        scope.launch {
+            // TODO: wrap with StreamRetryPolicy when retries are added
+            runCatching {
+                logger.d { events.map { it.toLog() }.joinToString { "," } }
+                api.reportClientCallEvent(ReportClientEventRequest(events))
+            }.onFailure { e ->
+                logger.w { "[sendEvent] Failed to send client event: ${e.message}" }
+            }
         }
     }
 }

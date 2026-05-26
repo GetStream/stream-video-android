@@ -80,6 +80,7 @@ import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import io.getstream.video.android.core.events.reporting.ClientEventReporterErrorMappers
 import io.getstream.video.android.core.events.reporting.PeerConnectionRole
 import io.getstream.video.android.core.events.reporting.TelemetryModel
+import io.getstream.video.android.core.faultinjector.FaultKey
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.AudioTrack
@@ -1017,7 +1018,7 @@ public class Call(
                 val outcome = when (currentStrategy) {
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
-                    -> reconnectFast(reason)
+                    -> { reconnectFast(reason, TelemetryModel(loopIteration)) }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
                         nonFastReconnectAttempts++
@@ -1123,7 +1124,10 @@ public class Call(
      * Reuses the existing session ID — no previous_session_id needed since the
      * SFU already knows this participant.
      */
-    private suspend fun reconnectFast(reason: String): ReconnectOutcome {
+    private suspend fun reconnectFast(
+        reason: String,
+        telemetryModel: TelemetryModel? = null,
+    ): ReconnectOutcome {
         logger.d { "[reconnectFast] reconnectAttempts=$nonFastReconnectAttempts" }
         val currentSession = session.value
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for fast reconnect")
@@ -1144,7 +1148,7 @@ public class Call(
             reconnect_attempt = nonFastReconnectAttempts,
             reason = reason,
         )
-        return when (val result = currentSession.fastReconnect(reconnectDetails)) {
+        return when (val result = currentSession.fastReconnect(reconnectDetails, telemetryModel)) {
             is FastReconnectResult.Connected -> ReconnectOutcome.Success
             is FastReconnectResult.PeerConnectionStale -> ReconnectOutcome.PeerConnectionStale
             is FastReconnectResult.Failed -> ReconnectOutcome.Failed(result.error)
@@ -1372,7 +1376,6 @@ public class Call(
                     is CallLeaveReason.Backend -> ClientEventReporter.AbortReason.BACKEND_LEAVE
                     else -> ClientEventReporter.AbortReason.CLIENT_ABORTED
                 }
-                reporter.sendAllPendingEvents()
                 reporter.abortAllInFlight(abortReason)
             }
             safeCall {
@@ -1917,7 +1920,11 @@ public class Call(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<JoinCallResponse> {
-        val reporter = client.state.clientEventReporter
+        with(client.state.faultInjector) {
+            if (isEnabled(FaultKey.FAIL_JOIN_CALL)) {
+                return sendFailResult(FaultKey.FAIL_JOIN_CALL)
+            }
+        }
 
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
         val result = clientImpl.joinCall(

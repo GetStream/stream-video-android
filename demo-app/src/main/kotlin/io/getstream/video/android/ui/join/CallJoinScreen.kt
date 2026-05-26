@@ -99,7 +99,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
-import io.getstream.video.android.core.faultinjector.FaultInjector
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.defaultCallId
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
@@ -115,7 +115,6 @@ import io.getstream.video.android.util.config.types.StreamEnvironment
 fun CallJoinScreen(
     prefilledCallId: String? = null,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
-    faultInjector: FaultInjector,
     navigateToCallLobby: (callId: String) -> Unit,
     navigateUpToLogin: (autoLogIn: Boolean) -> Unit,
     navigateToDirectCallJoin: () -> Unit,
@@ -205,9 +204,12 @@ fun CallJoinScreen(
     }
 
     if (renderFaultInjectorUi) {
-        FaultInjectorUi(faultInjector = faultInjector, onClose = {
-            renderFaultInjectorUi = false
-        })
+        val faultInjector = StreamVideo.instanceOrNull()?.state?.faultInjector
+        faultInjector?.let {
+            FaultInjectorUi(faultInjector = it, onClose = {
+                renderFaultInjectorUi = false
+            })
+        }
     }
 }
 

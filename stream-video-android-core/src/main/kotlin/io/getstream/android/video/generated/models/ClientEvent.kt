@@ -101,4 +101,62 @@ data class ClientEvent (
 
     @Json(name = "was_previously_connected")
     val wasPreviouslyConnected: kotlin.Boolean? = null
-)
+) {
+
+    fun toLog(): String {
+        return buildString {
+            append("ClientEvent(")
+
+            appendIfNotNull("type", type)
+            appendIfNotNull("eventType", eventType)
+            appendIfNotNull("stage", stage)
+            appendIfNotNull("outcome", outcome)
+
+            appendIfNotNull("callSessionId", callSessionId)
+            appendIfNotNull("eventSessionId", eventSessionId)
+            appendIfNotNull("userSessionId", userSessionId)
+
+            appendIfNotNull("userId", userId)
+            appendIfNotNull("sfuId", sfuId)
+
+            appendIfNotNull("peerConnection", peerConnection)
+            appendIfNotNull("iceState", iceState)
+
+            appendIfNotNull("retryCountAttempt", retryCountAttempt)
+            appendIfNotNull("retryFailureCode", retryFailureCode)
+            appendIfNotNull("retryFailureReason", retryFailureReason)
+
+            appendIfNotNull("elapsedTime", elapsedTime)
+
+            appendIfNotNull(
+                "wasPreviouslyConnected",
+                wasPreviouslyConnected
+            )
+
+            appendIfNotNull(
+                "previouslyConnectedTimestamp",
+                previouslyConnectedTimestamp
+            )
+
+            appendIfNotNull("sdkVersion", sdkVersion)
+            appendIfNotNull("timestamp", timestamp)
+
+            append(")")
+        }
+    }
+
+    private fun StringBuilder.appendIfNotNull(
+        key: String,
+        value: Any?,
+    ) {
+        if (value == null) return
+
+        if (!endsWith("(")) {
+            append(",\n")
+        }
+
+        append(key)
+        append("=")
+        append(value)
+    }
+}

@@ -32,4 +32,6 @@ public interface FaultInjector {
     fun clear()
 
     fun throwDebugFault(key: FaultKey)
+
+    fun sendFailResult(key: FaultKey): io.getstream.result.Result.Failure
 }

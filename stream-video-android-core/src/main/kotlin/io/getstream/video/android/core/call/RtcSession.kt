@@ -71,6 +71,7 @@ import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import io.getstream.video.android.core.events.reporting.TelemetryModel
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.AudioTrack
@@ -941,8 +942,8 @@ public class RtcSession internal constructor(
                     telemetryWsEventSessionId,
                     success = false,
                     retryCount = telemetryModel?.retryAttempt ?: 0,
-                    failureReason = "SFU connection timed out",
-                    failureCode = "REQUEST_TIMEOUT",
+                    failureReason = ClientEventReporter.FailureCodes.SFU_REQUEST_TIMEOUT.message,
+                    failureCode = ClientEventReporter.FailureCodes.SFU_REQUEST_TIMEOUT.code,
                 )
 
                 sendCallStats()
@@ -1912,7 +1913,7 @@ public class RtcSession internal constructor(
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
 
-    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?): FastReconnectResult {
+    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?, telemetryModel: TelemetryModel? = null): FastReconnectResult {
         logger.d { "[fastReconnect] Starting fast reconnect." }
         sfuTracer.trace("fastReconnect", reconnectDetails.toString())
         val (_, _, publisherTracks) = currentSfuInfo()
@@ -1921,6 +1922,7 @@ public class RtcSession internal constructor(
         val connectResult = connectInternal(
             reconnectDetails,
             publisher.value?.currentOptions(),
+            telemetryModel,
         )
         if (connectResult is SfuConnectionResult.Failed) {
             return FastReconnectResult.Failed(connectResult.error)

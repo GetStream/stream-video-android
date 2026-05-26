@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.getstream.result.Error
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.faultinjector.FaultInjector
 import io.getstream.video.android.core.faultinjector.FaultKey
@@ -201,8 +202,14 @@ fun FaultInjectorUiDemo() {
                 override fun clear() {}
 
                 override fun throwDebugFault(key: FaultKey) {}
+                override fun sendFailResult(
+                    key: FaultKey,
+                ): io.getstream.result.Result.Failure {
+                    return io.getstream.result.Result.Failure(
+                        Error.GenericError("Fault injected: $key"),
+                    )
+                }
             },
-            {},
-        )
+        ) {}
     }
 }

@@ -23,16 +23,13 @@ public enum class FaultKey {
 
     // REST
     FAIL_JOIN_CALL,
-    FAIL_CREATE_CALL,
+    FAIL_LOCATION,
 
     // WebSocket
     FAIL_WS_CONNECT,
-    FAIL_WS_SEND,
 
-    // RTC
-    FAIL_PEER_CONNECTION_CREATE,
-    FAIL_SET_REMOTE_DESCRIPTION,
-
-    // MediaCodec
-    FAIL_VIDEO_ENCODER_INIT,
+    // Reconnect Strategy
+    FAIL_FAST_RECONNECT,
+    FAIL_FULL_REJOIN,
+    FAIL_MIGRATE,
 }

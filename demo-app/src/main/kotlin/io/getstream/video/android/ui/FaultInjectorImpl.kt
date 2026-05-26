@@ -16,8 +16,11 @@
 
 package io.getstream.video.android.ui
 
+import io.getstream.result.Error
 import io.getstream.video.android.core.faultinjector.FaultInjector
 import io.getstream.video.android.core.faultinjector.FaultKey
+import retrofit2.HttpException
+import retrofit2.Response
 
 internal class FaultInjectorImpl : FaultInjector {
     private val enabledFaults = mutableMapOf<FaultKey, Boolean>()
@@ -44,7 +47,21 @@ internal class FaultInjectorImpl : FaultInjector {
 
     override fun throwDebugFault(key: FaultKey) {
         if (enabledFaults[key] == true) {
-            throw RuntimeException("Fault injected: $key")
+            throw when (key) {
+                FaultKey.FAIL_LOCATION -> HttpException(
+                    Response.error<String>(
+                        100,
+                        okhttp3.ResponseBody.create(null, ""),
+                    ),
+                )
+                else -> RuntimeException("Fault injected: $key")
+            }
         }
+    }
+
+    override fun sendFailResult(key: FaultKey): io.getstream.result.Result.Failure {
+        return io.getstream.result.Result.Failure(
+            Error.GenericError("Fault injected: $key"),
+        )
     }
 }
