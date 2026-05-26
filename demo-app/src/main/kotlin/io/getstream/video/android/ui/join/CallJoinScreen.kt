@@ -212,9 +212,6 @@ fun CallJoinScreen(
             })
         }
     }
-
-    if (renderNetworkSettingsUi) {
-    }
 }
 
 @Composable
