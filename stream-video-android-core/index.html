@@ -1,79 +1,110 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>stream-video-android-core</title>
-<link href="../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+<link href="../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
-<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../scripts/sourceset_dependencies.js" async></script>
 <link href="../styles/style.css" rel="Stylesheet">
 <link href="../styles/main.css" rel="Stylesheet">
 <link href="../styles/prism.css" rel="Stylesheet">
 <link href="../styles/logo-styles.css" rel="Stylesheet">
-<link href="../styles/font-jb-sans-auto.css" rel="Stylesheet">
-<script type="text/javascript" src="../scripts/clipboard.js" async></script>
+<link href="../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../scripts/main.js" defer></script>
 <script type="text/javascript" src="../scripts/prism.js" async></script>
-<script type="text/javascript" src="../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<script type="text/javascript" src="../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
-    <div class="root">
-<nav class="navigation" id="navigation-wrapper">
-    <div class="navigation--inner">
-        <div class="navigation-title">
-            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
-            <div class="library-name">
-<a class="library-name--link" href="../index.html">
-                            stream-video-android
-                    </a>            </div>
-            <div class="library-version">1.23.1
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../index.html" tabindex="1">
+                    stream-video-android
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">1.24.0
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":stream-video-android-core/main">androidJvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":stream-video-android-core/main" data-filter=":stream-video-android-core/main">
+                                <span class="checkbox--icon"></span>
+                                androidJvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
             </div>
         </div>
-        <div class="filter-section" id="filter-section">
-                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":stream-video-android-core:dokkaHtmlPartial/release">androidJvm</button>
-        </div>
-    </div>
-    <div class="navigation-controls">
-        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
-        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
-    </div>
-</nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="sidebar--inner" id="sideMenu"></div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    stream-video-android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
-<div class="main-content" id="content" pageids="stream-video-android-core::////PointingToDeclaration//-1625990423">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" id="content" pageids="stream-video-android-core::////PointingToDeclaration//-224610753">
   <div class="breadcrumbs"></div>
   <div class="cover ">
     <h1 class="cover"><span><span>stream-video-android-core</span></span></h1>
   </div>
   <h2 class="">Packages</h2>
-  <div class="table"><a data-name="568137036%2FPackages%2F-1625990423" anchor-label="io.getstream.android.video.generated.apis" id="568137036%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+  <div class="table"><a data-name="568137036%2FPackages%2F-224610753" anchor-label="io.getstream.android.video.generated.apis" id="568137036%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.android.video.generated.apis/index.html">io.getstream.android.video.generated.apis</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="568137036%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="568137036%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -82,16 +113,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-115353706%2FPackages%2F-1625990423" anchor-label="io.getstream.android.video.generated.infrastructure" id="-115353706%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-115353706%2FPackages%2F-224610753" anchor-label="io.getstream.android.video.generated.infrastructure" id="-115353706%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.android.video.generated.infrastructure/index.html">io.getstream.android.video.generated.infrastructure</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-115353706%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-115353706%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -100,16 +131,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1877320349%2FPackages%2F-1625990423" anchor-label="io.getstream.android.video.generated.models" id="1877320349%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1877320349%2FPackages%2F-224610753" anchor-label="io.getstream.android.video.generated.models" id="1877320349%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.android.video.generated.models/index.html">io.getstream.android.video.generated.models</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1877320349%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1877320349%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -118,16 +149,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1593896531%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core" id="1593896531%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1593896531%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core" id="1593896531%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core/index.html">io.getstream.video.android.core</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1593896531%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1593896531%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -136,16 +167,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1026468859%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.audio" id="1026468859%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1026468859%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.audio" id="1026468859%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.audio/index.html">io.getstream.video.android.core.audio</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1026468859%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1026468859%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -154,16 +185,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1336090269%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.call" id="1336090269%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1336090269%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.call" id="1336090269%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.call/index.html">io.getstream.video.android.core.call</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1336090269%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1336090269%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -172,16 +203,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="570031301%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.call.audio" id="570031301%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="570031301%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.call.audio" id="570031301%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.call.audio/index.html">io.getstream.video.android.core.call.audio</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="570031301%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="570031301%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -190,16 +221,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="467945171%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.call.connection" id="467945171%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="467945171%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.call.connection" id="467945171%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.call.connection/index.html">io.getstream.video.android.core.call.connection</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="467945171%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="467945171%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -208,16 +239,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1431237636%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.call.connection.stats" id="1431237636%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1431237636%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.call.connection.stats" id="1431237636%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.call.connection.stats/index.html">io.getstream.video.android.core.call.connection.stats</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1431237636%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1431237636%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -226,16 +257,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1917122472%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.call.signal.socket" id="1917122472%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1917122472%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.call.signal.socket" id="1917122472%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.call.signal.socket/index.html">io.getstream.video.android.core.call.signal.socket</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1917122472%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1917122472%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -244,16 +275,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="965501376%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.call.state" id="965501376%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="965501376%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.call.state" id="965501376%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.call.state/index.html">io.getstream.video.android.core.call.state</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="965501376%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="965501376%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -262,16 +293,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1543195726%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.call.stats" id="1543195726%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1543195726%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.call.stats" id="1543195726%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.call.stats/index.html">io.getstream.video.android.core.call.stats</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1543195726%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1543195726%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -280,16 +311,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="529624905%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.call.stats.model" id="529624905%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="529624905%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.call.stats.model" id="529624905%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.call.stats.model/index.html">io.getstream.video.android.core.call.stats.model</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="529624905%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="529624905%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -298,16 +329,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-155585865%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.call.stats.model.discriminator" id="-155585865%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-155585865%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.call.stats.model.discriminator" id="-155585865%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.call.stats.model.discriminator/index.html">io.getstream.video.android.core.call.stats.model.discriminator</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-155585865%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-155585865%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -316,16 +347,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1237566944%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.call.utils" id="1237566944%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1237566944%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.call.utils" id="1237566944%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.call.utils/index.html">io.getstream.video.android.core.call.utils</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1237566944%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1237566944%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -334,16 +365,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="230048042%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.call.video" id="230048042%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="230048042%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.call.video" id="230048042%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.call.video/index.html">io.getstream.video.android.core.call.video</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="230048042%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="230048042%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -352,16 +383,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-1184716444%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.camera" id="-1184716444%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1184716444%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.camera" id="-1184716444%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.camera/index.html">io.getstream.video.android.core.camera</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1184716444%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1184716444%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -370,16 +401,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="697614584%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.closedcaptions" id="697614584%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="697614584%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.closedcaptions" id="697614584%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.closedcaptions/index.html">io.getstream.video.android.core.closedcaptions</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="697614584%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="697614584%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -388,16 +419,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="862154001%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.dispatchers" id="862154001%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="862154001%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.dispatchers" id="862154001%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.dispatchers/index.html">io.getstream.video.android.core.dispatchers</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="862154001%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="862154001%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -406,16 +437,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-714479062%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.errors" id="-714479062%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-714479062%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.errors" id="-714479062%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.errors/index.html">io.getstream.video.android.core.errors</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-714479062%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-714479062%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -424,16 +455,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-660963752%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.events" id="-660963752%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-660963752%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.events" id="-660963752%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.events/index.html">io.getstream.video.android.core.events</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-660963752%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-660963752%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -442,16 +473,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-134209545%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.filter" id="-134209545%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-134209545%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.filter" id="-134209545%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.filter/index.html">io.getstream.video.android.core.filter</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-134209545%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-134209545%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -460,16 +491,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="408147660%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.header" id="408147660%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="408147660%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.header" id="408147660%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.header/index.html">io.getstream.video.android.core.header</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="408147660%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="408147660%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -478,16 +509,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-275059780%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.internal" id="-275059780%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-275059780%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.internal" id="-275059780%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.internal/index.html">io.getstream.video.android.core.internal</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-275059780%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-275059780%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -496,16 +527,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1648004092%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.internal.network" id="1648004092%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1648004092%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.internal.network" id="1648004092%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.internal.network/index.html">io.getstream.video.android.core.internal.network</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1648004092%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1648004092%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -514,16 +545,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-1542820476%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.logging" id="-1542820476%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1542820476%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.logging" id="-1542820476%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.logging/index.html">io.getstream.video.android.core.logging</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1542820476%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1542820476%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -532,16 +563,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1736358272%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.mapper" id="1736358272%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1736358272%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.mapper" id="1736358272%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.mapper/index.html">io.getstream.video.android.core.mapper</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1736358272%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1736358272%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -550,16 +581,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-992691826%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.model" id="-992691826%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-992691826%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.model" id="-992691826%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.model/index.html">io.getstream.video.android.core.model</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-992691826%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-992691826%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -568,16 +599,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1953499954%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.moderations" id="1953499954%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1953499954%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.moderations" id="1953499954%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.moderations/index.html">io.getstream.video.android.core.moderations</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1953499954%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1953499954%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -586,16 +617,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1375739789%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.notifications" id="1375739789%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1375739789%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.notifications" id="1375739789%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.notifications/index.html">io.getstream.video.android.core.notifications</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1375739789%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1375739789%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -604,16 +635,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-1110403253%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.notifications.dispatchers" id="-1110403253%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1110403253%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.notifications.dispatchers" id="-1110403253%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.notifications.dispatchers/index.html">io.getstream.video.android.core.notifications.dispatchers</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1110403253%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1110403253%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -622,16 +653,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-1367420925%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.notifications.extractor" id="-1367420925%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1367420925%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.notifications.extractor" id="-1367420925%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.notifications.extractor/index.html">io.getstream.video.android.core.notifications.extractor</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1367420925%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1367420925%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -640,16 +671,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-2098870162%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.notifications.handlers" id="-2098870162%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-2098870162%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.notifications.handlers" id="-2098870162%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.notifications.handlers/index.html">io.getstream.video.android.core.notifications.handlers</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2098870162%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2098870162%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -658,16 +689,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-1318624200%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.notifications.internal.receivers" id="-1318624200%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1318624200%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.notifications.internal.receivers" id="-1318624200%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.notifications.internal.receivers/index.html">io.getstream.video.android.core.notifications.internal.receivers</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1318624200%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1318624200%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -676,16 +707,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1092876233%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.notifications.internal.service" id="1092876233%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1092876233%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.notifications.internal.service" id="1092876233%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.notifications.internal.service/index.html">io.getstream.video.android.core.notifications.internal.service</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1092876233%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1092876233%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -694,16 +725,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1384456235%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.notifications.internal.telecom" id="1384456235%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1384456235%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.notifications.internal.telecom" id="1384456235%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.notifications.internal.telecom/index.html">io.getstream.video.android.core.notifications.internal.telecom</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1384456235%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1384456235%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -712,16 +743,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="335376905%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.notifications.medianotifications" id="335376905%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="335376905%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.notifications.medianotifications" id="335376905%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.notifications.medianotifications/index.html">io.getstream.video.android.core.notifications.medianotifications</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="335376905%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="335376905%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -730,16 +761,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-1519307506%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.permission" id="-1519307506%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1519307506%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.permission" id="-1519307506%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.permission/index.html">io.getstream.video.android.core.permission</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1519307506%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1519307506%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -748,16 +779,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-287014833%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.permission.android" id="-287014833%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-287014833%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.permission.android" id="-287014833%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.permission.android/index.html">io.getstream.video.android.core.permission.android</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-287014833%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-287014833%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -766,16 +797,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-2043349188%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.pip" id="-2043349188%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-2043349188%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.pip" id="-2043349188%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.pip/index.html">io.getstream.video.android.core.pip</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2043349188%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2043349188%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -784,16 +815,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-1637828394%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.recording" id="-1637828394%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1637828394%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.recording" id="-1637828394%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.recording/index.html">io.getstream.video.android.core.recording</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1637828394%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1637828394%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -802,16 +833,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1487478834%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket" id="1487478834%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1487478834%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket" id="1487478834%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket/index.html">io.getstream.video.android.core.socket</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1487478834%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1487478834%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -820,16 +851,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="794577387%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.common" id="794577387%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="794577387%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.common" id="794577387%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.common/index.html">io.getstream.video.android.core.socket.common</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="794577387%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="794577387%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -838,16 +869,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-622792387%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.common.fsm" id="-622792387%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-622792387%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.common.fsm" id="-622792387%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.common.fsm/index.html">io.getstream.video.android.core.socket.common.fsm</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-622792387%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-622792387%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -856,16 +887,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-204605526%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.common.fsm.builder" id="-204605526%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-204605526%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.common.fsm.builder" id="-204605526%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.common.fsm.builder/index.html">io.getstream.video.android.core.socket.common.fsm.builder</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-204605526%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-204605526%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -874,16 +905,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-124986192%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.common.parser2" id="-124986192%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-124986192%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.common.parser2" id="-124986192%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.common.parser2/index.html">io.getstream.video.android.core.socket.common.parser2</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-124986192%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-124986192%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -892,16 +923,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-68387962%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.common.parser2.adapters" id="-68387962%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-68387962%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.common.parser2.adapters" id="-68387962%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.common.parser2.adapters/index.html">io.getstream.video.android.core.socket.common.parser2.adapters</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-68387962%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-68387962%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -910,16 +941,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-922777623%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.common.parser2.adapters.internal" id="-922777623%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-922777623%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.common.parser2.adapters.internal" id="-922777623%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.common.parser2.adapters.internal/index.html">io.getstream.video.android.core.socket.common.parser2.adapters.internal</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-922777623%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-922777623%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -928,16 +959,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-20938676%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.common.scope.user" id="-20938676%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-20938676%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.common.scope.user" id="-20938676%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.common.scope.user/index.html">io.getstream.video.android.core.socket.common.scope.user</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-20938676%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-20938676%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -946,16 +977,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="182574582%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.common.token" id="182574582%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="182574582%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.common.token" id="182574582%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.common.token/index.html">io.getstream.video.android.core.socket.common.token</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="182574582%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="182574582%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -964,16 +995,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="784559092%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.coordinator" id="784559092%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="784559092%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.coordinator" id="784559092%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.coordinator/index.html">io.getstream.video.android.core.socket.coordinator</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="784559092%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="784559092%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -982,16 +1013,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="2059211223%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.coordinator.state" id="2059211223%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="2059211223%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.coordinator.state" id="2059211223%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.coordinator.state/index.html">io.getstream.video.android.core.socket.coordinator.state</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2059211223%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2059211223%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -1000,16 +1031,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-223015738%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.sfu" id="-223015738%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-223015738%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.sfu" id="-223015738%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.sfu/index.html">io.getstream.video.android.core.socket.sfu</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-223015738%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-223015738%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -1018,16 +1049,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="265506089%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.socket.sfu.state" id="265506089%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="265506089%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.socket.sfu.state" id="265506089%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.socket.sfu.state/index.html">io.getstream.video.android.core.socket.sfu.state</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="265506089%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="265506089%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -1036,16 +1067,34 @@
         <div></div>
       </div>
     </div>
-<a data-name="-1231370557%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.sounds" id="-1231370557%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="62251881%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.sorting" id="62251881%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+      <div>
+        <div class="main-subrow ">
+          <div class=""><span class="inline-flex">
+              <div><a href="io.getstream.video.android.core.sorting/index.html">io.getstream.video.android.core.sorting</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="62251881%2FPackages%2F-224610753"></span>
+                <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+              </span></span></div>
+          <div class="pull-right platform-tags--wrapper">
+            <div class="platform-tags no-gutters">
+              <div class="platform-tag jvm-like">androidJvm</div>
+            </div>
+          </div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+<a data-name="-1231370557%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.sounds" id="-1231370557%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.sounds/index.html">io.getstream.video.android.core.sounds</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1231370557%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1231370557%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -1054,16 +1103,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1785660586%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.trace" id="1785660586%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1785660586%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.trace" id="1785660586%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.trace/index.html">io.getstream.video.android.core.trace</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1785660586%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1785660586%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -1072,16 +1121,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="1694004502%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.core.utils" id="1694004502%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1694004502%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.core.utils" id="1694004502%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.core.utils/index.html">io.getstream.video.android.core.utils</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1694004502%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1694004502%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -1090,16 +1139,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="-901609712%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.datastore.delegate" id="-901609712%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-901609712%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.datastore.delegate" id="-901609712%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.datastore.delegate/index.html">io.getstream.video.android.datastore.delegate</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-901609712%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-901609712%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -1108,16 +1157,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="561395330%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.datastore.model" id="561395330%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="561395330%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.datastore.model" id="561395330%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.datastore.model/index.html">io.getstream.video.android.datastore.model</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="561395330%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="561395330%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -1126,16 +1175,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="899110521%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.model" id="899110521%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="899110521%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.model" id="899110521%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.model/index.html">io.getstream.video.android.model</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="899110521%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="899110521%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -1144,16 +1193,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="30407322%2FPackages%2F-1625990423" anchor-label="io.getstream.video.android.model.mapper" id="30407322%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="30407322%2FPackages%2F-224610753" anchor-label="io.getstream.video.android.model.mapper" id="30407322%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.video.android.model.mapper/index.html">io.getstream.video.android.model.mapper</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="30407322%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="30407322%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -1162,16 +1211,16 @@
         <div></div>
       </div>
     </div>
-<a data-name="553853430%2FPackages%2F-1625990423" anchor-label="io.getstream.webrtc.android.ui" id="553853430%2FPackages%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-    <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="553853430%2FPackages%2F-224610753" anchor-label="io.getstream.webrtc.android.ui" id="553853430%2FPackages%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
       <div>
         <div class="main-subrow ">
           <div class=""><span class="inline-flex">
               <div><a href="io.getstream.webrtc.android.ui/index.html">io.getstream.webrtc.android.ui</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="553853430%2FPackages%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="553853430%2FPackages%2F-224610753"></span>
                 <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
               </span></span></div>
-          <div class="pull-right">
+          <div class="pull-right platform-tags--wrapper">
             <div class="platform-tags no-gutters">
               <div class="platform-tag jvm-like">androidJvm</div>
             </div>
@@ -1182,12 +1231,22 @@
     </div>
   </div>
 </div>
-      <div class="footer">
-        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2026 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
-      </div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
-

@@ -1,610 +1,641 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>Companion</title>
-<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
-<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
 <link href="../../../../styles/style.css" rel="Stylesheet">
 <link href="../../../../styles/main.css" rel="Stylesheet">
 <link href="../../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../../scripts/clipboard.js" async></script>
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../../../scripts/main.js" defer></script>
 <script type="text/javascript" src="../../../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
-    <div class="root">
-<nav class="navigation" id="navigation-wrapper">
-    <div class="navigation--inner">
-        <div class="navigation-title">
-            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
-            <div class="library-name">
-<a class="library-name--link" href="../../../../index.html">
-                            stream-video-android
-                    </a>            </div>
-            <div class="library-version">1.23.1
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    stream-video-android
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">1.24.0
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":stream-video-android-core/main">androidJvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":stream-video-android-core/main" data-filter=":stream-video-android-core/main">
+                                <span class="checkbox--icon"></span>
+                                androidJvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
             </div>
         </div>
-        <div class="filter-section" id="filter-section">
-                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":stream-video-android-core:dokkaHtmlPartial/release">androidJvm</button>
-        </div>
-    </div>
-    <div class="navigation-controls">
-        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
-        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
-    </div>
-</nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="sidebar--inner" id="sideMenu"></div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    stream-video-android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="stream-video-android-core::io.getstream.video.android.core.call.stats.model/RtcOutboundRtpVideoStreamStats.Companion///PointingToDeclaration//-1625990423">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="stream-video-android-core::io.getstream.video.android.core.call.stats.model/RtcOutboundRtpVideoStreamStats.Companion///PointingToDeclaration//-224610753">
   <div class="breadcrumbs"><a href="../../../index.html">stream-video-android-core</a><span class="delimiter">/</span><a href="../../index.html">io.getstream.video.android.core.call.stats.model</a><span class="delimiter">/</span><a href="../index.html">RtcOutboundRtpVideoStreamStats</a><span class="delimiter">/</span><span class="current">Companion</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Companion</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Companion</a></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Companion</a></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="PROPERTY">
-        <h2 class="">Properties</h2>
-        <div class="table"><a data-name="1179220623%2FProperties%2F-1625990423" anchor-label="ACTIVE" id="1179220623%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1179220623%2FProperties%2F-224610753" anchor-label="ACTIVE" id="1179220623%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-a-c-t-i-v-e.html"><span><span>ACTIVE</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1179220623%2FProperties%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1179220623%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-a-c-t-i-v-e.html">ACTIVE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-a-c-t-i-v-e.html">ACTIVE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="836756809%2FProperties%2F-1625990423" anchor-label="BYTES_SENT" id="836756809%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="836756809%2FProperties%2F-224610753" anchor-label="BYTES_SENT" id="836756809%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-b-y-t-e-s_-s-e-n-t.html"><span><span>BYTES_SENT</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="836756809%2FProperties%2F-1625990423"></span>
+                  <div><a href="-b-y-t-e-s_-s-e-n-t.html"><span>BYTES_</span><wbr><span>SENT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="836756809%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-b-y-t-e-s_-s-e-n-t.html">BYTES_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-b-y-t-e-s_-s-e-n-t.html">BYTES_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="939980625%2FProperties%2F-1625990423" anchor-label="CODEC_ID" id="939980625%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="939980625%2FProperties%2F-224610753" anchor-label="CODEC_ID" id="939980625%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-c-o-d-e-c_-i-d.html"><span><span>CODEC_ID</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="939980625%2FProperties%2F-1625990423"></span>
+                  <div><a href="-c-o-d-e-c_-i-d.html"><span>CODEC_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="939980625%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-c-o-d-e-c_-i-d.html">CODEC_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-c-o-d-e-c_-i-d.html">CODEC_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="274681632%2FProperties%2F-1625990423" anchor-label="ENCODER_IMPLEMENTATION" id="274681632%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="274681632%2FProperties%2F-224610753" anchor-label="ENCODER_IMPLEMENTATION" id="274681632%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-e-n-c-o-d-e-r_-i-m-p-l-e-m-e-n-t-a-t-i-o-n.html"><span><span>ENCODER_IMPLEMENTATION</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="274681632%2FProperties%2F-1625990423"></span>
+                  <div><a href="-e-n-c-o-d-e-r_-i-m-p-l-e-m-e-n-t-a-t-i-o-n.html"><span>ENCODER_</span><wbr><span><span>IMPLEMENTATION</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="274681632%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-n-c-o-d-e-r_-i-m-p-l-e-m-e-n-t-a-t-i-o-n.html">ENCODER_IMPLEMENTATION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-n-c-o-d-e-r_-i-m-p-l-e-m-e-n-t-a-t-i-o-n.html">ENCODER_IMPLEMENTATION</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="896760294%2FProperties%2F-1625990423" anchor-label="FIR_COUNT" id="896760294%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="896760294%2FProperties%2F-224610753" anchor-label="FIR_COUNT" id="896760294%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-f-i-r_-c-o-u-n-t.html"><span><span>FIR_COUNT</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="896760294%2FProperties%2F-1625990423"></span>
+                  <div><a href="-f-i-r_-c-o-u-n-t.html"><span>FIR_</span><wbr><span>COUNT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="896760294%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-i-r_-c-o-u-n-t.html">FIR_COUNT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-i-r_-c-o-u-n-t.html">FIR_COUNT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1580949860%2FProperties%2F-1625990423" anchor-label="FRAME_HEIGHT" id="-1580949860%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1580949860%2FProperties%2F-224610753" anchor-label="FRAME_HEIGHT" id="-1580949860%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-f-r-a-m-e_-h-e-i-g-h-t.html"><span><span>FRAME_HEIGHT</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1580949860%2FProperties%2F-1625990423"></span>
+                  <div><a href="-f-r-a-m-e_-h-e-i-g-h-t.html"><span>FRAME_</span><wbr><span>HEIGHT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1580949860%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-r-a-m-e_-h-e-i-g-h-t.html">FRAME_HEIGHT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-r-a-m-e_-h-e-i-g-h-t.html">FRAME_HEIGHT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1267556849%2FProperties%2F-1625990423" anchor-label="FRAME_WIDTH" id="1267556849%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1267556849%2FProperties%2F-224610753" anchor-label="FRAME_WIDTH" id="1267556849%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-f-r-a-m-e_-w-i-d-t-h.html"><span><span>FRAME_WIDTH</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1267556849%2FProperties%2F-1625990423"></span>
+                  <div><a href="-f-r-a-m-e_-w-i-d-t-h.html"><span>FRAME_</span><wbr><span>WIDTH</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1267556849%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-r-a-m-e_-w-i-d-t-h.html">FRAME_WIDTH</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-r-a-m-e_-w-i-d-t-h.html">FRAME_WIDTH</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="903983648%2FProperties%2F-1625990423" anchor-label="FRAMES_ENCODED" id="903983648%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="903983648%2FProperties%2F-224610753" anchor-label="FRAMES_ENCODED" id="903983648%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-f-r-a-m-e-s_-e-n-c-o-d-e-d.html"><span><span>FRAMES_ENCODED</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="903983648%2FProperties%2F-1625990423"></span>
+                  <div><a href="-f-r-a-m-e-s_-e-n-c-o-d-e-d.html"><span>FRAMES_</span><wbr><span>ENCODED</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="903983648%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-r-a-m-e-s_-e-n-c-o-d-e-d.html">FRAMES_ENCODED</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-r-a-m-e-s_-e-n-c-o-d-e-d.html">FRAMES_ENCODED</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="489979222%2FProperties%2F-1625990423" anchor-label="FRAMES_PER_SECOND" id="489979222%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="489979222%2FProperties%2F-224610753" anchor-label="FRAMES_PER_SECOND" id="489979222%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-f-r-a-m-e-s_-p-e-r_-s-e-c-o-n-d.html"><span><span>FRAMES_PER_SECOND</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="489979222%2FProperties%2F-1625990423"></span>
+                  <div><a href="-f-r-a-m-e-s_-p-e-r_-s-e-c-o-n-d.html"><span>FRAMES_</span><wbr><span>PER_</span><wbr><span>SECOND</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="489979222%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-r-a-m-e-s_-p-e-r_-s-e-c-o-n-d.html">FRAMES_PER_SECOND</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-r-a-m-e-s_-p-e-r_-s-e-c-o-n-d.html">FRAMES_PER_SECOND</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1572679372%2FProperties%2F-1625990423" anchor-label="FRAMES_SENT" id="-1572679372%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1572679372%2FProperties%2F-224610753" anchor-label="FRAMES_SENT" id="-1572679372%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-f-r-a-m-e-s_-s-e-n-t.html"><span><span>FRAMES_SENT</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1572679372%2FProperties%2F-1625990423"></span>
+                  <div><a href="-f-r-a-m-e-s_-s-e-n-t.html"><span>FRAMES_</span><wbr><span>SENT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1572679372%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-r-a-m-e-s_-s-e-n-t.html">FRAMES_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-r-a-m-e-s_-s-e-n-t.html">FRAMES_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1937202329%2FProperties%2F-1625990423" anchor-label="HEADER_BYTES_SENT" id="-1937202329%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1937202329%2FProperties%2F-224610753" anchor-label="HEADER_BYTES_SENT" id="-1937202329%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-h-e-a-d-e-r_-b-y-t-e-s_-s-e-n-t.html"><span><span>HEADER_BYTES_SENT</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1937202329%2FProperties%2F-1625990423"></span>
+                  <div><a href="-h-e-a-d-e-r_-b-y-t-e-s_-s-e-n-t.html"><span>HEADER_</span><wbr><span>BYTES_</span><wbr><span>SENT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1937202329%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-e-a-d-e-r_-b-y-t-e-s_-s-e-n-t.html">HEADER_BYTES_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-e-a-d-e-r_-b-y-t-e-s_-s-e-n-t.html">HEADER_BYTES_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1300982648%2FProperties%2F-1625990423" anchor-label="HUGE_FRAMES_SENT" id="1300982648%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1300982648%2FProperties%2F-224610753" anchor-label="HUGE_FRAMES_SENT" id="1300982648%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-h-u-g-e_-f-r-a-m-e-s_-s-e-n-t.html"><span><span>HUGE_FRAMES_SENT</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1300982648%2FProperties%2F-1625990423"></span>
+                  <div><a href="-h-u-g-e_-f-r-a-m-e-s_-s-e-n-t.html"><span>HUGE_</span><wbr><span>FRAMES_</span><wbr><span>SENT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1300982648%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-u-g-e_-f-r-a-m-e-s_-s-e-n-t.html">HUGE_FRAMES_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-h-u-g-e_-f-r-a-m-e-s_-s-e-n-t.html">HUGE_FRAMES_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="237666336%2FProperties%2F-1625990423" anchor-label="KEY_FRAMES_ENCODED" id="237666336%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="237666336%2FProperties%2F-224610753" anchor-label="KEY_FRAMES_ENCODED" id="237666336%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-k-e-y_-f-r-a-m-e-s_-e-n-c-o-d-e-d.html"><span><span>KEY_FRAMES_ENCODED</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="237666336%2FProperties%2F-1625990423"></span>
+                  <div><a href="-k-e-y_-f-r-a-m-e-s_-e-n-c-o-d-e-d.html"><span>KEY_</span><wbr><span>FRAMES_</span><wbr><span>ENCODED</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="237666336%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-k-e-y_-f-r-a-m-e-s_-e-n-c-o-d-e-d.html">KEY_FRAMES_ENCODED</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-k-e-y_-f-r-a-m-e-s_-e-n-c-o-d-e-d.html">KEY_FRAMES_ENCODED</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1817164737%2FProperties%2F-1625990423" anchor-label="KIND" id="1817164737%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1817164737%2FProperties%2F-224610753" anchor-label="KIND" id="1817164737%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-k-i-n-d.html"><span><span>KIND</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1817164737%2FProperties%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1817164737%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-k-i-n-d.html">KIND</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-k-i-n-d.html">KIND</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1157672737%2FProperties%2F-1625990423" anchor-label="MEDIA_SOURCE_ID" id="1157672737%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1157672737%2FProperties%2F-224610753" anchor-label="MEDIA_SOURCE_ID" id="1157672737%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-m-e-d-i-a_-s-o-u-r-c-e_-i-d.html"><span><span>MEDIA_SOURCE_ID</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1157672737%2FProperties%2F-1625990423"></span>
+                  <div><a href="-m-e-d-i-a_-s-o-u-r-c-e_-i-d.html"><span>MEDIA_</span><wbr><span>SOURCE_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1157672737%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-d-i-a_-s-o-u-r-c-e_-i-d.html">MEDIA_SOURCE_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-d-i-a_-s-o-u-r-c-e_-i-d.html">MEDIA_SOURCE_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1175115389%2FProperties%2F-1625990423" anchor-label="MID" id="1175115389%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1175115389%2FProperties%2F-224610753" anchor-label="MID" id="1175115389%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-m-i-d.html"><span><span>MID</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1175115389%2FProperties%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1175115389%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-i-d.html">MID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-i-d.html">MID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1857291306%2FProperties%2F-1625990423" anchor-label="NACK_COUNT" id="1857291306%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1857291306%2FProperties%2F-224610753" anchor-label="NACK_COUNT" id="1857291306%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-n-a-c-k_-c-o-u-n-t.html"><span><span>NACK_COUNT</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1857291306%2FProperties%2F-1625990423"></span>
+                  <div><a href="-n-a-c-k_-c-o-u-n-t.html"><span>NACK_</span><wbr><span>COUNT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1857291306%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-n-a-c-k_-c-o-u-n-t.html">NACK_COUNT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-n-a-c-k_-c-o-u-n-t.html">NACK_COUNT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="845981641%2FProperties%2F-1625990423" anchor-label="PACKETS_SENT" id="845981641%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="845981641%2FProperties%2F-224610753" anchor-label="PACKETS_SENT" id="845981641%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-p-a-c-k-e-t-s_-s-e-n-t.html"><span><span>PACKETS_SENT</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="845981641%2FProperties%2F-1625990423"></span>
+                  <div><a href="-p-a-c-k-e-t-s_-s-e-n-t.html"><span>PACKETS_</span><wbr><span>SENT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="845981641%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-p-a-c-k-e-t-s_-s-e-n-t.html">PACKETS_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-p-a-c-k-e-t-s_-s-e-n-t.html">PACKETS_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1216747592%2FProperties%2F-1625990423" anchor-label="PLI_COUNT" id="1216747592%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1216747592%2FProperties%2F-224610753" anchor-label="PLI_COUNT" id="1216747592%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-p-l-i_-c-o-u-n-t.html"><span><span>PLI_COUNT</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1216747592%2FProperties%2F-1625990423"></span>
+                  <div><a href="-p-l-i_-c-o-u-n-t.html"><span>PLI_</span><wbr><span>COUNT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1216747592%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-p-l-i_-c-o-u-n-t.html">PLI_COUNT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-p-l-i_-c-o-u-n-t.html">PLI_COUNT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-67188159%2FProperties%2F-1625990423" anchor-label="POWER_EFFICIENT_ENCODER" id="-67188159%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-67188159%2FProperties%2F-224610753" anchor-label="POWER_EFFICIENT_ENCODER" id="-67188159%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-p-o-w-e-r_-e-f-f-i-c-i-e-n-t_-e-n-c-o-d-e-r.html"><span><span>POWER_EFFICIENT_ENCODER</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-67188159%2FProperties%2F-1625990423"></span>
+                  <div><a href="-p-o-w-e-r_-e-f-f-i-c-i-e-n-t_-e-n-c-o-d-e-r.html"><span>POWER_</span><wbr><span>EFFICIENT_</span><wbr><span>ENCODER</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-67188159%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-p-o-w-e-r_-e-f-f-i-c-i-e-n-t_-e-n-c-o-d-e-r.html">POWER_EFFICIENT_ENCODER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-p-o-w-e-r_-e-f-f-i-c-i-e-n-t_-e-n-c-o-d-e-r.html">POWER_EFFICIENT_ENCODER</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1582474966%2FProperties%2F-1625990423" anchor-label="QP_SUM" id="-1582474966%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1582474966%2FProperties%2F-224610753" anchor-label="QP_SUM" id="-1582474966%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-q-p_-s-u-m.html"><span><span>QP_SUM</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1582474966%2FProperties%2F-1625990423"></span>
+                  <div><a href="-q-p_-s-u-m.html"><span>QP_</span><wbr><span>SUM</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1582474966%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-q-p_-s-u-m.html">QP_SUM</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-q-p_-s-u-m.html">QP_SUM</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1316327589%2FProperties%2F-1625990423" anchor-label="QUALITY_LIMITATION_DURATIONS" id="-1316327589%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1316327589%2FProperties%2F-224610753" anchor-label="QUALITY_LIMITATION_DURATIONS" id="-1316327589%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-d-u-r-a-t-i-o-n-s.html"><span><span>QUALITY_LIMITATION_DURATIONS</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1316327589%2FProperties%2F-1625990423"></span>
+                  <div><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-d-u-r-a-t-i-o-n-s.html"><span>QUALITY_</span><wbr><span>LIMITATION_</span><wbr><span>DURATIONS</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1316327589%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-d-u-r-a-t-i-o-n-s.html">QUALITY_LIMITATION_DURATIONS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-d-u-r-a-t-i-o-n-s.html">QUALITY_LIMITATION_DURATIONS</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="894668572%2FProperties%2F-1625990423" anchor-label="QUALITY_LIMITATION_REASON" id="894668572%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="894668572%2FProperties%2F-224610753" anchor-label="QUALITY_LIMITATION_REASON" id="894668572%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-r-e-a-s-o-n.html"><span><span>QUALITY_LIMITATION_REASON</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="894668572%2FProperties%2F-1625990423"></span>
+                  <div><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-r-e-a-s-o-n.html"><span>QUALITY_</span><wbr><span>LIMITATION_</span><wbr><span>REASON</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="894668572%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-r-e-a-s-o-n.html">QUALITY_LIMITATION_REASON</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-r-e-a-s-o-n.html">QUALITY_LIMITATION_REASON</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="985532496%2FProperties%2F-1625990423" anchor-label="QUALITY_LIMITATION_RESOLUTION_CHANGES" id="985532496%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="985532496%2FProperties%2F-224610753" anchor-label="QUALITY_LIMITATION_RESOLUTION_CHANGES" id="985532496%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-r-e-s-o-l-u-t-i-o-n_-c-h-a-n-g-e-s.html"><span><span>QUALITY_LIMITATION_RESOLUTION_CHANGES</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="985532496%2FProperties%2F-1625990423"></span>
+                  <div><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-r-e-s-o-l-u-t-i-o-n_-c-h-a-n-g-e-s.html"><span>QUALITY_</span><wbr><span>LIMITATION_</span><wbr><span>RESOLUTION_</span><wbr><span>CHANGES</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="985532496%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-r-e-s-o-l-u-t-i-o-n_-c-h-a-n-g-e-s.html">QUALITY_LIMITATION_RESOLUTION_CHANGES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-q-u-a-l-i-t-y_-l-i-m-i-t-a-t-i-o-n_-r-e-s-o-l-u-t-i-o-n_-c-h-a-n-g-e-s.html">QUALITY_LIMITATION_RESOLUTION_CHANGES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1100204943%2FProperties%2F-1625990423" anchor-label="REMOTE_ID" id="-1100204943%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1100204943%2FProperties%2F-224610753" anchor-label="REMOTE_ID" id="-1100204943%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-r-e-m-o-t-e_-i-d.html"><span><span>REMOTE_ID</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1100204943%2FProperties%2F-1625990423"></span>
+                  <div><a href="-r-e-m-o-t-e_-i-d.html"><span>REMOTE_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1100204943%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-r-e-m-o-t-e_-i-d.html">REMOTE_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-r-e-m-o-t-e_-i-d.html">REMOTE_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1629775430%2FProperties%2F-1625990423" anchor-label="RETRANSMITTED_BYTES_SENT" id="-1629775430%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1629775430%2FProperties%2F-224610753" anchor-label="RETRANSMITTED_BYTES_SENT" id="-1629775430%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-r-e-t-r-a-n-s-m-i-t-t-e-d_-b-y-t-e-s_-s-e-n-t.html"><span><span>RETRANSMITTED_BYTES_SENT</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1629775430%2FProperties%2F-1625990423"></span>
+                  <div><a href="-r-e-t-r-a-n-s-m-i-t-t-e-d_-b-y-t-e-s_-s-e-n-t.html"><span>RETRANSMITTED_</span><wbr><span>BYTES_</span><wbr><span>SENT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1629775430%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-r-e-t-r-a-n-s-m-i-t-t-e-d_-b-y-t-e-s_-s-e-n-t.html">RETRANSMITTED_BYTES_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-r-e-t-r-a-n-s-m-i-t-t-e-d_-b-y-t-e-s_-s-e-n-t.html">RETRANSMITTED_BYTES_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1330447354%2FProperties%2F-1625990423" anchor-label="RETRANSMITTED_PACKETS_SENT" id="1330447354%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1330447354%2FProperties%2F-224610753" anchor-label="RETRANSMITTED_PACKETS_SENT" id="1330447354%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-r-e-t-r-a-n-s-m-i-t-t-e-d_-p-a-c-k-e-t-s_-s-e-n-t.html"><span><span>RETRANSMITTED_PACKETS_SENT</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1330447354%2FProperties%2F-1625990423"></span>
+                  <div><a href="-r-e-t-r-a-n-s-m-i-t-t-e-d_-p-a-c-k-e-t-s_-s-e-n-t.html"><span>RETRANSMITTED_</span><wbr><span>PACKETS_</span><wbr><span>SENT</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1330447354%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-r-e-t-r-a-n-s-m-i-t-t-e-d_-p-a-c-k-e-t-s_-s-e-n-t.html">RETRANSMITTED_PACKETS_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-r-e-t-r-a-n-s-m-i-t-t-e-d_-p-a-c-k-e-t-s_-s-e-n-t.html">RETRANSMITTED_PACKETS_SENT</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-98567336%2FProperties%2F-1625990423" anchor-label="RID" id="-98567336%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-98567336%2FProperties%2F-224610753" anchor-label="RID" id="-98567336%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-r-i-d.html"><span><span>RID</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-98567336%2FProperties%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-98567336%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-r-i-d.html">RID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-r-i-d.html">RID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1099399483%2FProperties%2F-1625990423" anchor-label="RTX_SSRC" id="1099399483%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1099399483%2FProperties%2F-224610753" anchor-label="RTX_SSRC" id="1099399483%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-r-t-x_-s-s-r-c.html"><span><span>RTX_SSRC</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1099399483%2FProperties%2F-1625990423"></span>
+                  <div><a href="-r-t-x_-s-s-r-c.html"><span>RTX_</span><wbr><span>SSRC</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1099399483%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-r-t-x_-s-s-r-c.html">RTX_SSRC</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-r-t-x_-s-s-r-c.html">RTX_SSRC</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1477198206%2FProperties%2F-1625990423" anchor-label="SCALABILITY_MODE" id="-1477198206%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1477198206%2FProperties%2F-224610753" anchor-label="SCALABILITY_MODE" id="-1477198206%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-s-c-a-l-a-b-i-l-i-t-y_-m-o-d-e.html"><span><span>SCALABILITY_MODE</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1477198206%2FProperties%2F-1625990423"></span>
+                  <div><a href="-s-c-a-l-a-b-i-l-i-t-y_-m-o-d-e.html"><span>SCALABILITY_</span><wbr><span>MODE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1477198206%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-c-a-l-a-b-i-l-i-t-y_-m-o-d-e.html">SCALABILITY_MODE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-c-a-l-a-b-i-l-i-t-y_-m-o-d-e.html">SCALABILITY_MODE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="40114532%2FProperties%2F-1625990423" anchor-label="SSRC" id="40114532%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="40114532%2FProperties%2F-224610753" anchor-label="SSRC" id="40114532%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="-s-s-r-c.html"><span><span>SSRC</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="40114532%2FProperties%2F-1625990423"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="40114532%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-s-r-c.html">SSRC</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-s-r-c.html">SSRC</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-1599278826%2FProperties%2F-1625990423" anchor-label="TARGET_BITRATE" id="-1599278826%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-1599278826%2FProperties%2F-224610753" anchor-label="TARGET_BITRATE" id="-1599278826%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-t-a-r-g-e-t_-b-i-t-r-a-t-e.html"><span><span>TARGET_BITRATE</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1599278826%2FProperties%2F-1625990423"></span>
+                  <div><a href="-t-a-r-g-e-t_-b-i-t-r-a-t-e.html"><span>TARGET_</span><wbr><span>BITRATE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1599278826%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-a-r-g-e-t_-b-i-t-r-a-t-e.html">TARGET_BITRATE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-a-r-g-e-t_-b-i-t-r-a-t-e.html">TARGET_BITRATE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1626237770%2FProperties%2F-1625990423" anchor-label="TOTAL_ENCODE_TIME" id="1626237770%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1626237770%2FProperties%2F-224610753" anchor-label="TOTAL_ENCODE_TIME" id="1626237770%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-t-o-t-a-l_-e-n-c-o-d-e_-t-i-m-e.html"><span><span>TOTAL_ENCODE_TIME</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1626237770%2FProperties%2F-1625990423"></span>
+                  <div><a href="-t-o-t-a-l_-e-n-c-o-d-e_-t-i-m-e.html"><span>TOTAL_</span><wbr><span>ENCODE_</span><wbr><span>TIME</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1626237770%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-o-t-a-l_-e-n-c-o-d-e_-t-i-m-e.html">TOTAL_ENCODE_TIME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-o-t-a-l_-e-n-c-o-d-e_-t-i-m-e.html">TOTAL_ENCODE_TIME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1992662532%2FProperties%2F-1625990423" anchor-label="TOTAL_ENCODED_BYTES_TARGET" id="1992662532%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1992662532%2FProperties%2F-224610753" anchor-label="TOTAL_ENCODED_BYTES_TARGET" id="1992662532%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-t-o-t-a-l_-e-n-c-o-d-e-d_-b-y-t-e-s_-t-a-r-g-e-t.html"><span><span>TOTAL_ENCODED_BYTES_TARGET</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1992662532%2FProperties%2F-1625990423"></span>
+                  <div><a href="-t-o-t-a-l_-e-n-c-o-d-e-d_-b-y-t-e-s_-t-a-r-g-e-t.html"><span>TOTAL_</span><wbr><span>ENCODED_</span><wbr><span>BYTES_</span><wbr><span>TARGET</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1992662532%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-o-t-a-l_-e-n-c-o-d-e-d_-b-y-t-e-s_-t-a-r-g-e-t.html">TOTAL_ENCODED_BYTES_TARGET</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-o-t-a-l_-e-n-c-o-d-e-d_-b-y-t-e-s_-t-a-r-g-e-t.html">TOTAL_ENCODED_BYTES_TARGET</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="1106283261%2FProperties%2F-1625990423" anchor-label="TOTAL_PACKET_SEND_DELAY" id="1106283261%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="1106283261%2FProperties%2F-224610753" anchor-label="TOTAL_PACKET_SEND_DELAY" id="1106283261%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-t-o-t-a-l_-p-a-c-k-e-t_-s-e-n-d_-d-e-l-a-y.html"><span><span>TOTAL_PACKET_SEND_DELAY</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1106283261%2FProperties%2F-1625990423"></span>
+                  <div><a href="-t-o-t-a-l_-p-a-c-k-e-t_-s-e-n-d_-d-e-l-a-y.html"><span>TOTAL_</span><wbr><span>PACKET_</span><wbr><span>SEND_</span><wbr><span>DELAY</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1106283261%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-o-t-a-l_-p-a-c-k-e-t_-s-e-n-d_-d-e-l-a-y.html">TOTAL_PACKET_SEND_DELAY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-o-t-a-l_-p-a-c-k-e-t_-s-e-n-d_-d-e-l-a-y.html">TOTAL_PACKET_SEND_DELAY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
           </div>
-<a data-name="-370143260%2FProperties%2F-1625990423" anchor-label="TRANSPORT_ID" id="-370143260%2FProperties%2F-1625990423" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-filterable-current=":stream-video-android-core:dokkaHtmlPartial/release" data-filterable-set=":stream-video-android-core:dokkaHtmlPartial/release">
+<a data-name="-370143260%2FProperties%2F-224610753" anchor-label="TRANSPORT_ID" id="-370143260%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-t-r-a-n-s-p-o-r-t_-i-d.html"><span><span>TRANSPORT_ID</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-370143260%2FProperties%2F-1625990423"></span>
+                  <div><a href="-t-r-a-n-s-p-o-r-t_-i-d.html"><span>TRANSPORT_</span><wbr><span>ID</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-370143260%2FProperties%2F-224610753"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-r-a-n-s-p-o-r-t_-i-d.html">TRANSPORT_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-t-r-a-n-s-p-o-r-t_-i-d.html">TRANSPORT_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -614,12 +645,22 @@
     </div>
   </div>
 </div>
-      <div class="footer">
-        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2026 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
-      </div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
-

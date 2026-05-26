@@ -56,6 +56,7 @@ io.getstream.video.android.core.socket.coordinator
 io.getstream.video.android.core.socket.coordinator.state
 io.getstream.video.android.core.socket.sfu
 io.getstream.video.android.core.socket.sfu.state
+io.getstream.video.android.core.sorting
 io.getstream.video.android.core.sounds
 io.getstream.video.android.core.trace
 io.getstream.video.android.core.utils
