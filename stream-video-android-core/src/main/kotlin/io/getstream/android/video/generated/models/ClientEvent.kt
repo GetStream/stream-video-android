@@ -103,7 +103,7 @@ data class ClientEvent (
     val wasPreviouslyConnected: kotlin.Boolean? = null
 ) {
 
-    fun toLog(): String {
+    internal fun toLog(): String {
         return buildString {
             append("ClientEvent(")
 
