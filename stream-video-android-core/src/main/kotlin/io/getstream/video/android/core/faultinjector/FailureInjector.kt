@@ -19,17 +19,19 @@ package io.getstream.video.android.core.faultinjector
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
 @InternalStreamVideoApi
-public enum class FaultKey {
+public interface FailureInjector {
 
-    // REST
-    FAIL_JOIN_CALL,
-    FAIL_LOCATION,
+    fun enable(key: FailureKey)
 
-    // WebSocket
-    FAIL_WS_CONNECT,
+    fun disable(key: FailureKey)
 
-    // Reconnect Strategy
-    FAIL_FAST_RECONNECT,
-    FAIL_FULL_REJOIN,
-    FAIL_MIGRATE,
+    fun setEnabled(key: FailureKey, enabled: Boolean)
+
+    fun isEnabled(key: FailureKey): Boolean
+
+    fun clear()
+
+    fun throwDebugFault(key: FailureKey)
+
+    fun sendFailResult(key: FailureKey): io.getstream.result.Result.Failure
 }

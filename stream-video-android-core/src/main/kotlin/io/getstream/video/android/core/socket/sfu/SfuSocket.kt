@@ -30,7 +30,7 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.events.UnknownEvent
-import io.getstream.video.android.core.faultinjector.FaultKey
+import io.getstream.video.android.core.faultinjector.FailureKey
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.NoOpLifecycleHandler
 import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
@@ -223,26 +223,26 @@ internal open class SfuSocket(
     }
 
     private fun debugFaultInjectors(connectionConf: ConnectionConf.SfuConnectionConf) {
-        StreamVideo.instanceOrNull()?.state?.faultInjector?.let { faultInjector ->
-            if (faultInjector.isEnabled(FaultKey.FAIL_WS_CONNECT)) {
-                faultInjector.throwDebugFault(FaultKey.FAIL_WS_CONNECT)
+        StreamVideo.instanceOrNull()?.state?.failureInjector?.let { faultInjector ->
+            if (faultInjector.isEnabled(FailureKey.FAIL_WS_CONNECT)) {
+                faultInjector.throwDebugFault(FailureKey.FAIL_WS_CONNECT)
             }
             val isFastReconnect =
                 connectionConf.joinRequest.reconnect_details?.strategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST
-            if (isFastReconnect && faultInjector.isEnabled(FaultKey.FAIL_FAST_RECONNECT)) {
-                faultInjector.throwDebugFault(FaultKey.FAIL_FAST_RECONNECT)
+            if (isFastReconnect && faultInjector.isEnabled(FailureKey.FAIL_FAST_RECONNECT)) {
+                faultInjector.throwDebugFault(FailureKey.FAIL_FAST_RECONNECT)
             }
 
             val isFullRejoin =
                 connectionConf.joinRequest.reconnect_details?.strategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
-            if (isFullRejoin && faultInjector.isEnabled(FaultKey.FAIL_FULL_REJOIN)) {
-                faultInjector.throwDebugFault(FaultKey.FAIL_FULL_REJOIN)
+            if (isFullRejoin && faultInjector.isEnabled(FailureKey.FAIL_FULL_REJOIN)) {
+                faultInjector.throwDebugFault(FailureKey.FAIL_FULL_REJOIN)
             }
 
             val isMigrate =
                 connectionConf.joinRequest.reconnect_details?.strategy == WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
-            if (isMigrate && faultInjector.isEnabled(FaultKey.FAIL_MIGRATE)) {
-                faultInjector.throwDebugFault(FaultKey.FAIL_MIGRATE)
+            if (isMigrate && faultInjector.isEnabled(FailureKey.FAIL_MIGRATE)) {
+                faultInjector.throwDebugFault(FailureKey.FAIL_MIGRATE)
             }
         }
     }

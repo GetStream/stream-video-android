@@ -105,7 +105,7 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
-import io.getstream.video.android.ui.FaultInjectorUi
+import io.getstream.video.android.ui.FailureInjectorUi
 import io.getstream.video.android.ui.LogFilesScreen
 import io.getstream.video.android.ui.SingleButtonDialog
 import io.getstream.video.android.util.config.AppConfig
@@ -129,6 +129,7 @@ fun CallJoinScreen(
 
     var renderLogsFileUi by remember { mutableStateOf(false) }
     var renderFaultInjectorUi by remember { mutableStateOf(false) }
+    var renderNetworkSettingsUi by remember { mutableStateOf(false) }
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
@@ -204,12 +205,15 @@ fun CallJoinScreen(
     }
 
     if (renderFaultInjectorUi) {
-        val faultInjector = StreamVideo.instanceOrNull()?.state?.faultInjector
+        val faultInjector = StreamVideo.instanceOrNull()?.state?.failureInjector
         faultInjector?.let {
-            FaultInjectorUi(faultInjector = it, onClose = {
+            FailureInjectorUi(failureInjector = it, onClose = {
                 renderFaultInjectorUi = false
             })
         }
+    }
+
+    if (renderNetworkSettingsUi) {
     }
 }
 
@@ -363,7 +367,7 @@ private fun CallJoinHeader(
                                     .testTag("Stream_FaultInjectorButton"),
                                 icon = Icons.Filled.Warning,
                                 style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
-                                text = stringResource(id = R.string.fault_injector),
+                                text = stringResource(id = R.string.failure_injector),
                                 onClick = {
                                     showMenu = false
                                     onFaultInjectionClick()

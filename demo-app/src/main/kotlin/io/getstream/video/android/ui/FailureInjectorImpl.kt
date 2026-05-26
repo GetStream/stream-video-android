@@ -17,27 +17,27 @@
 package io.getstream.video.android.ui
 
 import io.getstream.result.Error
-import io.getstream.video.android.core.faultinjector.FaultInjector
-import io.getstream.video.android.core.faultinjector.FaultKey
+import io.getstream.video.android.core.faultinjector.FailureInjector
+import io.getstream.video.android.core.faultinjector.FailureKey
 import retrofit2.HttpException
 import retrofit2.Response
 
-internal class FaultInjectorImpl : FaultInjector {
-    private val enabledFaults = mutableMapOf<FaultKey, Boolean>()
+internal class FailureInjectorImpl : FailureInjector {
+    private val enabledFaults = mutableMapOf<FailureKey, Boolean>()
 
-    override fun enable(key: FaultKey) {
+    override fun enable(key: FailureKey) {
         enabledFaults[key] = true
     }
 
-    override fun disable(key: FaultKey) {
+    override fun disable(key: FailureKey) {
         enabledFaults[key] = false
     }
 
-    override fun setEnabled(key: FaultKey, enabled: Boolean) {
+    override fun setEnabled(key: FailureKey, enabled: Boolean) {
         enabledFaults[key] = enabled
     }
 
-    override fun isEnabled(key: FaultKey): Boolean {
+    override fun isEnabled(key: FailureKey): Boolean {
         return enabledFaults[key] == true
     }
 
@@ -45,23 +45,23 @@ internal class FaultInjectorImpl : FaultInjector {
         enabledFaults.clear()
     }
 
-    override fun throwDebugFault(key: FaultKey) {
+    override fun throwDebugFault(key: FailureKey) {
         if (enabledFaults[key] == true) {
             throw when (key) {
-                FaultKey.FAIL_LOCATION -> HttpException(
+                FailureKey.FAIL_LOCATION -> HttpException(
                     Response.error<String>(
                         100,
                         okhttp3.ResponseBody.create(null, ""),
                     ),
                 )
-                else -> RuntimeException("Fault injected: $key")
+                else -> RuntimeException("Failure injected: $key")
             }
         }
     }
 
-    override fun sendFailResult(key: FaultKey): io.getstream.result.Result.Failure {
+    override fun sendFailResult(key: FailureKey): io.getstream.result.Result.Failure {
         return io.getstream.result.Result.Failure(
-            Error.GenericError("Fault injected: $key"),
+            Error.GenericError("Failure injected: $key"),
         )
     }
 }

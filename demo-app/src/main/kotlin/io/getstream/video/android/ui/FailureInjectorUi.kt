@@ -37,30 +37,28 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.result.Error
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.faultinjector.FaultInjector
-import io.getstream.video.android.core.faultinjector.FaultKey
+import io.getstream.video.android.core.faultinjector.FailureInjector
+import io.getstream.video.android.core.faultinjector.FailureKey
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
 @OptIn(InternalStreamVideoApi::class)
 @Composable
-fun FaultInjectorUi(
+fun FailureInjectorUi(
     modifier: Modifier = Modifier,
-    faultInjector: FaultInjector,
+    failureInjector: FailureInjector,
     onClose: () -> Unit,
 ) {
     val checkedState = remember {
-        mutableStateMapOf<FaultKey, Boolean>().apply {
-            FaultKey.entries.forEach { key -> put(key, faultInjector.isEnabled(key)) }
+        mutableStateMapOf<FailureKey, Boolean>().apply {
+            FailureKey.entries.forEach { key -> put(key, failureInjector.isEnabled(key)) }
         }
     }
 
@@ -78,7 +76,7 @@ fun FaultInjectorUi(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Fault Injection",
+                text = "Failure Injection",
                 style = VideoTheme.typography.subtitleM,
                 color = VideoTheme.colors.basePrimary,
             )
@@ -90,8 +88,8 @@ fun FaultInjectorUi(
                 Text(
                     text = "Clear all",
                     modifier = Modifier.clickable {
-                        faultInjector.clear()
-                        FaultKey.entries.forEach { key -> checkedState[key] = false }
+                        failureInjector.clear()
+                        FailureKey.entries.forEach { key -> checkedState[key] = false }
                     },
                     style = VideoTheme.typography.bodyS,
                     color = VideoTheme.colors.brandPrimary,
@@ -122,7 +120,7 @@ fun FaultInjectorUi(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            items(FaultKey.entries) { key ->
+            items(FailureKey.entries) { key ->
                 val checked = checkedState[key] ?: false
                 Row(
                     modifier = Modifier
@@ -130,7 +128,7 @@ fun FaultInjectorUi(
                         .clickable {
                             val next = !checked
                             checkedState[key] = next
-                            faultInjector.setEnabled(key, next)
+                            failureInjector.setEnabled(key, next)
                         }
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -140,7 +138,7 @@ fun FaultInjectorUi(
                         checked = checked,
                         onCheckedChange = { next ->
                             checkedState[key] = next
-                            faultInjector.setEnabled(key, next)
+                            failureInjector.setEnabled(key, next)
                         },
                         colors = CheckboxDefaults.colors(
                             checkedColor = VideoTheme.colors.brandPrimary,
@@ -185,28 +183,28 @@ fun FaultInjectorUi(
 @Composable
 fun FaultInjectorUiDemo() {
     VideoTheme {
-        FaultInjectorUi(
+        FailureInjectorUi(
             Modifier,
-            object : FaultInjector {
-                override fun enable(key: FaultKey) {}
+            object : FailureInjector {
+                override fun enable(key: FailureKey) {}
 
-                override fun disable(key: FaultKey) {}
+                override fun disable(key: FailureKey) {}
 
                 override fun setEnabled(
-                    key: FaultKey,
+                    key: FailureKey,
                     enabled: Boolean,
                 ) {}
 
-                override fun isEnabled(key: FaultKey): Boolean = false
+                override fun isEnabled(key: FailureKey): Boolean = false
 
                 override fun clear() {}
 
-                override fun throwDebugFault(key: FaultKey) {}
+                override fun throwDebugFault(key: FailureKey) {}
                 override fun sendFailResult(
-                    key: FaultKey,
+                    key: FailureKey,
                 ): io.getstream.result.Result.Failure {
                     return io.getstream.result.Result.Failure(
-                        Error.GenericError("Fault injected: $key"),
+                        Error.GenericError("Failure injected: $key"),
                     )
                 }
             },

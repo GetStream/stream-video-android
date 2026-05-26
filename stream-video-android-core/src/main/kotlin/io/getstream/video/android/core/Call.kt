@@ -80,7 +80,7 @@ import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import io.getstream.video.android.core.events.reporting.ClientEventReporterErrorMappers
 import io.getstream.video.android.core.events.reporting.PeerConnectionRole
 import io.getstream.video.android.core.events.reporting.TelemetryModel
-import io.getstream.video.android.core.faultinjector.FaultKey
+import io.getstream.video.android.core.faultinjector.FailureKey
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.AudioTrack
@@ -1920,9 +1920,9 @@ public class Call(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<JoinCallResponse> {
-        with(client.state.faultInjector) {
-            if (isEnabled(FaultKey.FAIL_JOIN_CALL)) {
-                return sendFailResult(FaultKey.FAIL_JOIN_CALL)
+        with(client.state.failureInjector) {
+            if (isEnabled(FailureKey.FAIL_JOIN_CALL)) {
+                return sendFailResult(FailureKey.FAIL_JOIN_CALL)
             }
         }
 

@@ -24,8 +24,8 @@ import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
-import io.getstream.video.android.core.faultinjector.FaultInjector
-import io.getstream.video.android.core.faultinjector.NoOpFaultInjector
+import io.getstream.video.android.core.faultinjector.FailureInjector
+import io.getstream.video.android.core.faultinjector.NoOpFailureInjector
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.notifications.internal.service.CallService
@@ -99,7 +99,7 @@ class ClientState(private val client: StreamVideo) {
         )
 
     @InternalStreamVideoApi
-    public var faultInjector: FaultInjector = NoOpFaultInjector()
+    public var failureInjector: FailureInjector = NoOpFailureInjector()
 
     @InternalStreamVideoApi
     public val rejectCallWhenBusy: Boolean = (client as StreamVideoClient).rejectCallWhenBusy
