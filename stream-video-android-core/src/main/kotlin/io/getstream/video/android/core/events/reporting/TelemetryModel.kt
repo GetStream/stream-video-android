@@ -17,3 +17,7 @@
 package io.getstream.video.android.core.events.reporting
 
 internal data class TelemetryModel(val retryAttempt: Int)
+internal data class JoinRequestTelemetryModel(
+    val eventSessionId: EventSessionId,
+    val retryAttempt: Int,
+)

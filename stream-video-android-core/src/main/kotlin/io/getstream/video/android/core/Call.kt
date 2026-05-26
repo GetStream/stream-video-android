@@ -78,6 +78,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import io.getstream.video.android.core.events.reporting.ClientEventReporterErrorMappers
+import io.getstream.video.android.core.events.reporting.JoinRequestTelemetryModel
 import io.getstream.video.android.core.events.reporting.PeerConnectionRole
 import io.getstream.video.android.core.events.reporting.TelemetryModel
 import io.getstream.video.android.core.faultinjector.FailureKey
@@ -594,7 +595,14 @@ public class Call(
         atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
             val tempResult =
-                _join(create, createOptions, ring, notify, hintHighScaleLivestreamPublisher)
+                _join(
+                    create,
+                    createOptions,
+                    ring,
+                    notify,
+                    hintHighScaleLivestreamPublisher,
+                    JoinRequestTelemetryModel(eventSessionId, retryCount),
+                )
             if (tempResult is Success) {
                 // we initialise the camera, mic and other according to local + backend settings
                 // only when the call is joined to make sure we don't switch and override
@@ -608,12 +616,7 @@ public class Call(
                             "is joined. MediaManager will not be initialised with server settings."
                     }
                 }
-                client.state.clientEventReporter.reportCoordinatorJoinCompleted(
-                    eventSessionId = eventSessionId,
-                    success = true,
-                    retryCount = retryCount,
-                    callSessionId = tempResult.value.second,
-                )
+
                 result = Success<RtcSession>(tempResult.value.first)
                 return result
             }
@@ -689,6 +692,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
+        joinRequestTelemetryModel: JoinRequestTelemetryModel,
     ): Result<Pair<RtcSession, CallSessionId>> {
         nonFastReconnectAttempts = 0
         sfuEvents?.cancel()
@@ -723,6 +727,7 @@ public class Call(
                 ring = ring,
                 notify = notify,
                 hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
+                joinRequestTelemetryModel = joinRequestTelemetryModel,
             )
 
         if (result !is Success) {
@@ -1029,13 +1034,22 @@ public class Call(
                             )
 
                         val result =
-                            reconnectRejoin(reason, TelemetryModel(nonFastReconnectAttempts))
-                        client.state.clientEventReporter.reportCoordinatorJoinCompleted(
-                            telemetrySessionId,
-                            result is ReconnectOutcome.Success,
-                            nonFastReconnectAttempts,
-                            ClientEventReporterErrorMappers().getFailureReason(result),
-                        )
+                            reconnectRejoin(
+                                reason,
+                                JoinRequestTelemetryModel(
+                                    telemetrySessionId,
+                                    nonFastReconnectAttempts,
+                                ),
+                            )
+                        if (result !is ReconnectOutcome.Success) {
+                            client.state.clientEventReporter.reportCoordinatorJoinCompleted(
+                                telemetrySessionId,
+                                false,
+                                nonFastReconnectAttempts,
+                                ClientEventReporterErrorMappers().getFailureReason(result),
+                            )
+                        }
+
                         result
                     }
 
@@ -1046,7 +1060,13 @@ public class Call(
                                 this.id,
                                 this.type,
                             )
-                        val result = reconnectMigrate(TelemetryModel(nonFastReconnectAttempts))
+                        val result =
+                            reconnectMigrate(
+                                JoinRequestTelemetryModel(
+                                    telemetrySessionId,
+                                    nonFastReconnectAttempts,
+                                ),
+                            )
                         client.state.clientEventReporter.reportCoordinatorJoinCompleted(
                             telemetrySessionId,
                             result is ReconnectOutcome.Success,
@@ -1162,7 +1182,7 @@ public class Call(
      */
     private suspend fun reconnectRejoin(
         reason: String,
-        telemetryModel: TelemetryModel? = null,
+        joinRequestTelemetryModel: JoinRequestTelemetryModel,
     ): ReconnectOutcome {
         logger.d { "[reconnectRejoin] reconnectAttempts=$nonFastReconnectAttempts" }
         state._connection.value = RealtimeConnection.Reconnecting
@@ -1172,7 +1192,8 @@ public class Call(
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for rejoin")
         reconnectStartTime = System.currentTimeMillis()
 
-        val joinResponse = joinRequest(location = loc)
+        val joinResponse =
+            joinRequest(location = loc, joinRequestTelemetryModel = joinRequestTelemetryModel)
         if (joinResponse !is Success) {
             return ReconnectOutcome.Failed(
                 Exception("Failed to get join response: ${joinResponse.errorOrNull()}"),
@@ -1215,7 +1236,7 @@ public class Call(
             val result = newSession.connectInternal(
                 reconnectDetails,
                 currentOptions,
-                telemetryModel,
+                TelemetryModel(joinRequestTelemetryModel.retryAttempt),
             )
         ) {
             is SfuConnectionResult.Connected -> {
@@ -1231,7 +1252,9 @@ public class Call(
      * Migrate to another SFU. Reuses the same session ID — the SFU
      * identifies the participant via from_sfu_id, not previous_session_id.
      */
-    private suspend fun reconnectMigrate(telemetryModel: TelemetryModel? = null): ReconnectOutcome {
+    private suspend fun reconnectMigrate(
+        joinRequestTelemetryModel: JoinRequestTelemetryModel,
+    ): ReconnectOutcome {
         logger.d { "[reconnectMigrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         val loc = location
@@ -1241,7 +1264,12 @@ public class Call(
         reconnectStartTime = System.currentTimeMillis()
         addFailedSfuId(oldSession.sfuName)
 
-        val joinResponse = joinRequest(location = loc, migratingFrom = oldSession.sfuName)
+        val joinResponse =
+            joinRequest(
+                location = loc,
+                migratingFrom = oldSession.sfuName,
+                joinRequestTelemetryModel = joinRequestTelemetryModel,
+            )
         if (joinResponse !is Success) {
             return ReconnectOutcome.Failed(
                 Exception(
@@ -1289,7 +1317,7 @@ public class Call(
             val result = newSession.connectInternal(
                 reconnectDetails,
                 currentOptions,
-                telemetryModel,
+                TelemetryModel(joinRequestTelemetryModel.retryAttempt),
             )
             when (result) {
                 is SfuConnectionResult.Connected -> {
@@ -1919,6 +1947,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
+        joinRequestTelemetryModel: JoinRequestTelemetryModel,
     ): Result<JoinCallResponse> {
         with(client.state.failureInjector) {
             if (isEnabled(FailureKey.FAIL_JOIN_CALL)) {
@@ -1943,6 +1972,12 @@ public class Call(
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
         )
         result.onSuccess {
+            client.state.clientEventReporter.reportCoordinatorJoinCompleted(
+                eventSessionId = joinRequestTelemetryModel.eventSessionId,
+                success = true,
+                retryCount = joinRequestTelemetryModel.retryAttempt,
+                callSessionId = it.call.currentSessionId,
+            )
             state.updateFromResponse(it)
         }
         return result
