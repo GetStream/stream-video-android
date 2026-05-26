@@ -50,7 +50,7 @@ internal class FailureInjectorImpl : FailureInjector {
             throw when (key) {
                 FailureKey.FAIL_LOCATION -> HttpException(
                     Response.error<String>(
-                        100,
+                        499,
                         okhttp3.ResponseBody.create(null, ""),
                     ),
                 )
