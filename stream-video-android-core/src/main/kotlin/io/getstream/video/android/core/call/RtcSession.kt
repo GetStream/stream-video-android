@@ -884,13 +884,8 @@ public class RtcSession internal constructor(
         telemetryModel: TelemetryModel? = null,
     ): SfuConnectionResult {
         logger.i { "[connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
-        val reporter = call.client.state.clientEventReporter
-        val telemetryWsEventSessionId = reporter.reportWsJoinInitiated(
-            callId = call.id,
-            callType = call.type,
-            sfuId = sfuName,
-            wasPreviouslyConnected = reconnectDetails != null,
-        )
+        call.callAnalyticsHooks.wsHook.onWsInitiated(sfuName, reconnectDetails != null)
+
         val request = buildJoinRequest(reconnectDetails, options)
         sfuTracer.trace(
             PeerConnectionTraceKey.JOIN_REQUEST.value,
@@ -907,8 +902,7 @@ public class RtcSession internal constructor(
         }
         return when (terminalState) {
             is SfuSocketState.Connected -> {
-                reporter.reportWsJoinCompleted(
-                    telemetryWsEventSessionId,
+                call.callAnalyticsHooks.wsHook.onWsCompleted(
                     success = true,
                     retryCount = 0,
                 )
@@ -926,8 +920,7 @@ public class RtcSession internal constructor(
                 }
                 logger.w { "[connectInternal] $msg" }
                 sfuTracer.trace("connect-failed", msg)
-                reporter.reportWsJoinCompleted(
-                    telemetryWsEventSessionId,
+                call.callAnalyticsHooks.wsHook.onWsCompleted(
                     success = false,
                     retryCount = telemetryModel?.retryAttempt ?: 0,
                     failureReason = msg,
@@ -938,8 +931,7 @@ public class RtcSession internal constructor(
             }
             else -> {
                 sfuTracer.trace("connect-failed", "Connection timed out")
-                reporter.reportWsJoinCompleted(
-                    telemetryWsEventSessionId,
+                call.callAnalyticsHooks.wsHook.onWsCompleted(
                     success = false,
                     retryCount = telemetryModel?.retryAttempt ?: 0,
                     failureReason = ClientEventReporter.FailureCodes.SFU_REQUEST_TIMEOUT.message,
