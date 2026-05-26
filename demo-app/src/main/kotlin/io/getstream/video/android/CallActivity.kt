@@ -67,6 +67,7 @@ class CallActivity : ComposeStreamCallActivity() {
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
     var observeCallReadyToJoinJob: Job? = null
     var observeRingingJob: Job? = null
+    var isNavigatingBackToMainScreen = false
     private val previousRingingStates = ConcurrentHashMap.newKeySet<RingingState>()
     override val callJoinInterceptor = DemoCallJoinInterceptor(previousRingingStates)
 
@@ -194,6 +195,7 @@ class CallActivity : ComposeStreamCallActivity() {
 
         private fun StreamCallActivity.goBackToMainScreen() {
             if (!isFinishing) {
+                (this as CallActivity).isNavigatingBackToMainScreen = true
                 val intent = Intent(this, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }
@@ -208,5 +210,13 @@ class CallActivity : ComposeStreamCallActivity() {
         observeCallReadyToJoinJob?.cancel()
         observeRingingJob?.cancel()
         previousRingingStates.clear()
+
+        if (!isNavigatingBackToMainScreen) {
+            isNavigatingBackToMainScreen = true
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
+        }
     }
 }
