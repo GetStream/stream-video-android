@@ -41,9 +41,11 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.result.Error
+import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.failureinjector.FailureInjector
 import io.getstream.video.android.core.failureinjector.FailureKey
@@ -76,7 +78,7 @@ fun FailureInjectorUi(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Failure Injection",
+                text = stringResource(id = R.string.failure_injection),
                 style = VideoTheme.typography.subtitleM,
                 color = VideoTheme.colors.basePrimary,
             )
@@ -86,7 +88,7 @@ fun FailureInjectorUi(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Clear all",
+                    text = stringResource(id = R.string.clear_all),
                     modifier = Modifier.clickable {
                         failureInjector.clear()
                         FailureKey.entries.forEach { key -> checkedState[key] = false }
@@ -106,7 +108,7 @@ fun FailureInjectorUi(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(id = R.string.close),
                         tint = VideoTheme.colors.basePrimary,
                     )
                 }
@@ -171,7 +173,7 @@ fun FailureInjectorUi(
                 ),
             ) {
                 Text(
-                    text = "OK",
+                    text = stringResource(id = R.string.ok),
                     style = VideoTheme.typography.labelL,
                 )
             }

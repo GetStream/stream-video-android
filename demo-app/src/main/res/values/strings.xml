@@ -31,6 +31,10 @@
     <string name="sign_out">Sign out</string>
     <string name="logs">Share Logs</string>
     <string name="failure_injector">Fault Injector</string>
+    <string name="clear_all">Clear all</string>
+    <string name="failure_injection">Failure Injection</string>
+    <string name="close">Close</string>
+    <string name="ok">OK</string>
     <string name="join_description">Start a new call, join a meeting by \nentering the call ID or by scanning \na QR code.</string>
     <string name="join_call">Join Call</string>
     <string name="join_call_by_qr_code">Scan QR meeting code</string>
