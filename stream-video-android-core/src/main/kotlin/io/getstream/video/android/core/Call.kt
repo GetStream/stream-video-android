@@ -709,10 +709,9 @@ public class Call(
 
         // step 1. call the join endpoint to get a list of SFUs
         val locationResult = clientImpl.getCachedLocation()
-        if (locationResult !is Success) {
-            return locationResult as Failure
+        if (locationResult is Success) {
+            location = locationResult.value
         }
-        location = locationResult.value
 
         val options = createOptions
             ?: if (create) {
@@ -723,7 +722,7 @@ public class Call(
         val result =
             joinRequest(
                 options,
-                locationResult.value,
+                location ?: "auto",
                 ring = ring,
                 notify = notify,
                 hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
@@ -1186,8 +1185,8 @@ public class Call(
     ): ReconnectOutcome {
         logger.d { "[reconnectRejoin] reconnectAttempts=$nonFastReconnectAttempts" }
         state._connection.value = RealtimeConnection.Reconnecting
-        val loc = location
-            ?: return ReconnectOutcome.PreconditionNotMet("No location available for rejoin")
+        val loc = location ?: "auto"
+//            ?: return ReconnectOutcome.PreconditionNotMet("No location available for rejoin")
         val oldSession = session.value
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for rejoin")
         reconnectStartTime = System.currentTimeMillis()
@@ -1257,8 +1256,8 @@ public class Call(
     ): ReconnectOutcome {
         logger.d { "[reconnectMigrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
-        val loc = location
-            ?: return ReconnectOutcome.PreconditionNotMet("No location available for migrate")
+        val loc = location ?: "auto"
+//            ?: return ReconnectOutcome.PreconditionNotMet("No location available for migrate")
         val oldSession = session.value
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for migrate")
         reconnectStartTime = System.currentTimeMillis()
