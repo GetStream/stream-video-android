@@ -76,6 +76,7 @@ import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
+import io.getstream.video.android.core.failureinjector.FailureKey
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.AudioTrack
@@ -1801,6 +1802,11 @@ public class Call(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<JoinCallResponse> {
+        with(client.state.failureInjector) {
+            if (isEnabled(FailureKey.FAIL_JOIN_CALL)) {
+                return sendFailResult(FailureKey.FAIL_JOIN_CALL)
+            }
+        }
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
         val result = clientImpl.joinCall(
             type, id,

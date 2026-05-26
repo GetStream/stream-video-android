@@ -50,6 +50,7 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.VideoCall
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -98,11 +99,13 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.defaultCallId
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
+import io.getstream.video.android.ui.FailureInjectorUi
 import io.getstream.video.android.ui.LogFilesScreen
 import io.getstream.video.android.ui.SingleButtonDialog
 import io.getstream.video.android.util.config.AppConfig
@@ -125,6 +128,8 @@ fun CallJoinScreen(
     val isNetworkAvailable by callJoinViewModel.isNetworkAvailable.collectAsStateWithLifecycle()
 
     var renderLogsFileUi by remember { mutableStateOf(false) }
+    var renderFaultInjectorUi by remember { mutableStateOf(false) }
+    var renderNetworkSettingsUi by remember { mutableStateOf(false) }
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
@@ -150,6 +155,9 @@ fun CallJoinScreen(
             },
             onLogsClick = {
                 renderLogsFileUi = true
+            },
+            onFaultInjectionClick = {
+                renderFaultInjectorUi = true
             },
         )
 
@@ -195,6 +203,18 @@ fun CallJoinScreen(
             renderLogsFileUi = false
         })
     }
+
+    if (renderFaultInjectorUi) {
+        val faultInjector = StreamVideo.instanceOrNull()?.state?.failureInjector
+        faultInjector?.let {
+            FailureInjectorUi(failureInjector = it, onClose = {
+                renderFaultInjectorUi = false
+            })
+        }
+    }
+
+    if (renderNetworkSettingsUi) {
+    }
 }
 
 @Composable
@@ -224,6 +244,7 @@ private fun CallJoinHeader(
     onDirectCallClick: () -> Unit,
     onSignOutClick: () -> Unit,
     onLogsClick: () -> Unit,
+    onFaultInjectionClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -337,6 +358,19 @@ private fun CallJoinHeader(
                                 onClick = {
                                     showMenu = false
                                     onLogsClick()
+                                },
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_FaultInjectorButton"),
+                                icon = Icons.Filled.Warning,
+                                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                                text = stringResource(id = R.string.failure_injector),
+                                onClick = {
+                                    showMenu = false
+                                    onFaultInjectionClick()
                                 },
                             )
                             Spacer(modifier = Modifier.width(5.dp))
@@ -743,6 +777,6 @@ private fun CallJoinScreenLandscapePreview() {
 private fun CallJoinScreenHeader() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallJoinHeader(previewUsers[0], false, true, {}, {}, {}, {})
+        CallJoinHeader(previewUsers[0], false, true, {}, {}, {}, {}, {})
     }
 }

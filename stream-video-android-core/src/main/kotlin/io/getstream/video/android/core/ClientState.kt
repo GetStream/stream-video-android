@@ -23,6 +23,8 @@ import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.core.failureinjector.FailureInjector
+import io.getstream.video.android.core.failureinjector.NoOpFailureInjector
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
@@ -87,6 +89,9 @@ class ClientState(private val client: StreamVideo) {
 
     public val callConfigRegistry = (client as StreamVideoClient).callServiceConfigRegistry
     private val serviceLauncher = ServiceLauncher(client.context)
+
+    @InternalStreamVideoApi
+    public var failureInjector: FailureInjector = NoOpFailureInjector()
 
     @InternalStreamVideoApi
     public val rejectCallWhenBusy: Boolean = (client as StreamVideoClient).rejectCallWhenBusy

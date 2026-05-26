@@ -28,6 +28,7 @@ import io.getstream.video.android.core.moderations.CallModerationConstants
 import io.getstream.video.android.data.model.PolicyViolationUiData
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
+import io.getstream.video.android.ui.FailureInjectorImpl
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -80,6 +81,12 @@ class App : Application() {
 
         observePolicyViolation()
         observeCallReadyToJoin()
+        injectFault()
+    }
+
+    private fun injectFault() {
+        val faultInjector = FailureInjectorImpl()
+        StreamVideo.instanceOrNull()?.state?.failureInjector = faultInjector
     }
 
     private fun observeCallReadyToJoin() {
