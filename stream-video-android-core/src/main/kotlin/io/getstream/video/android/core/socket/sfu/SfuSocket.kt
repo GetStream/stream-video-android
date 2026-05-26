@@ -109,7 +109,7 @@ internal open class SfuSocket(
             streamWebSocket?.close("connectUser:cleanup")
             when (networkStateProvider.isConnected()) {
                 true -> {
-                    debugFaultInjectors(connectionConf)
+                    debugFailureInjectors(connectionConf)
                     streamWebSocket =
                         socketFactory.createSocket<SfuDataEvent>(connectionConf, "#sfu").apply {
                             listeners.forEach { it.onCreated() }
@@ -222,7 +222,7 @@ internal open class SfuSocket(
         }
     }
 
-    private fun debugFaultInjectors(connectionConf: ConnectionConf.SfuConnectionConf) {
+    private fun debugFailureInjectors(connectionConf: ConnectionConf.SfuConnectionConf) {
         StreamVideo.instanceOrNull()?.state?.failureInjector?.let { faultInjector ->
             if (faultInjector.isEnabled(FailureKey.FAIL_WS_CONNECT)) {
                 faultInjector.throwDebugFault(FailureKey.FAIL_WS_CONNECT)
