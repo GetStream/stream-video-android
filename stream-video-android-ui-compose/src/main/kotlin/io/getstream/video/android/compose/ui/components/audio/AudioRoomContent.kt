@@ -47,7 +47,9 @@ import io.getstream.video.android.compose.pip.enterPictureInPicture
 import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
@@ -139,7 +141,12 @@ public fun AudioRoomContent(
                 enterPictureInPicture(context = context, call = call, pictureInPictureConfiguration)
             } catch (e: Exception) {
                 StreamLog.e(tag = "AudioRoomContent") { e.stackTraceToString() }
-                call.leave()
+                call.leave(
+                    CallLeaveReason.SdkDriven(
+                        SdkCause.PIP_ERROR,
+                        "Error in Pip: ${e.message}",
+                    ),
+                )
             }
         } else {
             onBackPressed.invoke()

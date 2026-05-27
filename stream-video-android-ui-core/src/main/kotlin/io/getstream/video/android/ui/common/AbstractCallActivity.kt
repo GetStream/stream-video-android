@@ -30,6 +30,8 @@ import android.view.WindowInsetsController
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
+import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.call.state.ToggleScreenConfiguration
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.model.StreamCallId
@@ -125,7 +127,12 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         try {
             enterPictureInPicture()
         } catch (error: Throwable) {
-            call.leave()
+            call.leave(
+                CallLeaveReason.SdkDriven(
+                    SdkCause.PIP_ERROR,
+                    "Error in Pip: ${error.message}",
+                ),
+            )
         }
     }
 
@@ -171,14 +178,18 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         val isInPiP = isInPictureInPictureMode
 
         if (isInPiP) {
-            call.leave()
+            call.leave(CallLeaveReason.SdkDriven(SdkCause.PIP_STOPPED, "PIP stopped"))
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
-        call.leave()
+        call.leave(
+            CallLeaveReason.SdkDriven(
+                SdkCause.ACTIVITY_DESTROYED,
+                "${this.localClassName} destroyed",
+            ),
+        )
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

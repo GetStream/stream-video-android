@@ -666,7 +666,12 @@ public class Call(
             }.onError {
                 logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
                 state.toggleJoinAndRingProgress(false)
-                leave("ring-failed (${it.message})")
+                leave(
+                    CallLeaveReason.Backend(
+                        BackendCause.RING_FAILED,
+                        message = "ring-failed (${it.message})",
+                    ),
+                )
             }
         }
     }
@@ -1037,7 +1042,9 @@ public class Call(
 
                     is ReconnectOutcome.Disconnect -> {
                         logger.w { "[reconnect] DISCONNECT requested — leaving call" }
-                        leave("SFU:DISCONNECT")
+                        leave(
+                            CallLeaveReason.Backend(BackendCause.SFU_DISCONNECT, "SFU:DISCONNECT"),
+                        )
                         break
                     }
 
@@ -1079,7 +1086,13 @@ public class Call(
 
             if (state.connection.value is RealtimeConnection.ReconnectingFailed) {
                 logger.w { "[reconnect] All recovery attempts exhausted — leaving call ($reason)" }
-                leave("reconnect-failed:$reason")
+                leave(
+                    CallLeaveReason.RetryExhausted(
+                        loopIteration,
+                        "reconnect-failed",
+                        "All recovery attempts exhausted — leaving call ($reason)",
+                    ),
+                )
             }
         } finally {
             // Always release the mutex — even on exceptions or coroutine
@@ -1297,7 +1310,8 @@ public class Call(
     // endregion
 
     /** Leave the call, but don't end it for other users */
-    internal fun leave(reason: CallLeaveReason) {
+    @InternalStreamVideoApi
+    fun leave(reason: CallLeaveReason) {
         logger.d { "[leave] #ringing; call_cid:$cid" }
         internalLeave(reason)
     }

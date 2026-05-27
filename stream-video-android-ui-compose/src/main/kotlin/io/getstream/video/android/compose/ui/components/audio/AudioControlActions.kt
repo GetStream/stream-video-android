@@ -38,6 +38,8 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
+import io.getstream.video.android.core.UserActionCause
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 
@@ -69,7 +71,12 @@ public fun AudioControlActions(
         style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
         onClick = {
             onLeaveRoom?.invoke() ?: let {
-                call.leave()
+                call.leave(
+                    CallLeaveReason.UserAction(
+                        UserActionCause.CANCELLED_BY_SELF,
+                        "Cancelled the call",
+                    ),
+                )
                 activity?.onBackPressedDispatcher?.onBackPressed()
             }
         },

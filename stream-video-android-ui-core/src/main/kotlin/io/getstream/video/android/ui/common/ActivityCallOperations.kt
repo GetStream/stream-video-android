@@ -17,6 +17,7 @@
 package io.getstream.video.android.ui.common
 
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
@@ -45,6 +46,16 @@ public interface ActivityCallOperations {
         onSuccess: (suspend (Call) -> Unit)? = null,
         onError: (suspend (Exception) -> Unit)? = null,
     )
+
+//    @StreamCallActivityDelicateApi
+//    public fun leave(
+//        call: Call,
+//        callLeaveReason: CallLeaveReason,
+//        onSuccess: (suspend (Call) -> Unit)? = null,
+//        onError: (suspend (Exception) -> Unit)? = null,
+//    ) {
+//        // Do nothing
+//    }
 
     @StreamCallActivityDelicateApi
     public fun end(

@@ -16,7 +16,10 @@
 
 package io.getstream.video.android.core
 
-internal sealed interface CallLeaveReason {
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
+
+@InternalStreamVideoApi
+sealed interface CallLeaveReason {
 
     val message: String?
 
@@ -32,7 +35,6 @@ internal sealed interface CallLeaveReason {
     /** The backend ended or rejected the call (CallEndedEvent, SFU termination, etc.). */
     data class Backend(
         val cause: BackendCause,
-        val backendCode: String? = null,
         override val message: String?,
         override val metadata: Map<String, String> = emptyMap(),
     ) : CallLeaveReason
@@ -59,7 +61,8 @@ internal sealed interface CallLeaveReason {
     ) : CallLeaveReason
 }
 
-internal enum class SdkCause {
+@InternalStreamVideoApi
+enum class SdkCause {
     /** App was swiped from the recents screen. */
     TASK_REMOVED,
 
@@ -76,20 +79,29 @@ internal enum class SdkCause {
     LOCAL_CALL_MISSED_EVENT,
     REJECTED_BY_ALL,
     END_CALL,
+    PIP_ERROR,
+    PIP_STOPPED,
+    ACTIVITY_DESTROYED,
 }
 
-internal enum class UserActionCause {
+@InternalStreamVideoApi
+enum class UserActionCause {
     /** User rejected the call from a paired wearable device. */
     WEARABLE_REJECTED,
+    WEARABLE_CANCEL,
 
     /** A [io.getstream.video.android.core.CallJoinInterceptor] aborted the join sequence. */
     CALL_JOIN_ABORT,
     REJECTED_BY_SELF,
+    CANCELLED_BY_SELF,
     LEAVE_FROM_NOTIFICATION,
 }
 
-internal enum class BackendCause {
+@InternalStreamVideoApi
+enum class BackendCause {
     LEAVE_TIMEOUT_AFTER_DISCONNECT,
+    SFU_DISCONNECT,
     CALL_ENDED_EVENT,
     CALL_ENDED_SFU_EVENT,
+    RING_FAILED,
 }
