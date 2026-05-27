@@ -184,6 +184,9 @@ message PublishOption {
 
   // Audio bitrate profiles for different audio quality profiles.
   repeated AudioBitrate audio_bitrate_profiles = 10;
+
+  // The degradation preference for video encoding.
+  DegradationPreference degradation_preference = 11;
 }
 
 message Codec {
@@ -223,6 +226,7 @@ message TrackInfo {
   bool muted = 10;
   Codec codec = 11;
   int32 publish_option_id = 12;
+  bool self_sub_audio_video = 13;
 }
 
 enum ErrorCode {
@@ -459,6 +463,16 @@ enum ClientCapability {
   CLIENT_CAPABILITY_SUBSCRIBER_VIDEO_PAUSE = 1;
   // Instructs SFU that stats will be sent to the coordinator
   CLIENT_CAPABILITY_COORDINATOR_STATS = 2;
+}
+
+// DegradationPreference represents the RTCDegradationPreference from WebRTC.
+// See https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpSender/setParameters#degradationpreference
+enum DegradationPreference {
+  DEGRADATION_PREFERENCE_UNSPECIFIED = 0;
+  DEGRADATION_PREFERENCE_BALANCED = 1;
+  DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE = 2;
+  DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION = 3;
+  DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE_AND_RESOLUTION = 4;
 }
 
 // ===================================================================
