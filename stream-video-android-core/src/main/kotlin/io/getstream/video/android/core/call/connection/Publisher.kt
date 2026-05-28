@@ -29,6 +29,7 @@ import io.getstream.video.android.core.call.connection.utils.findOptimalVideoLay
 import io.getstream.video.android.core.call.connection.utils.isAudioTrackType
 import io.getstream.video.android.core.call.connection.utils.isSvcCodec
 import io.getstream.video.android.core.call.connection.utils.stringify
+import io.getstream.video.android.core.call.connection.utils.toRtcDegradationPreference
 import io.getstream.video.android.core.call.connection.utils.toVideoDimension
 import io.getstream.video.android.core.call.connection.utils.toVideoLayers
 import io.getstream.video.android.core.model.IceCandidate
@@ -377,6 +378,7 @@ internal class Publisher(
                     rtpParametersEncodings,
                 ),
             )
+            applyDegradationPreference(transceiver, publishOption)
             logger.d {
                 "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encodings: ${transceiver.sender?.parameters?.encodings?.joinToString { it.stringify() }})"
             }
@@ -472,6 +474,25 @@ internal class Publisher(
         )
     }
 
+    @VisibleForTesting
+    internal fun applyDegradationPreference(
+        transceiver: RtpTransceiver,
+        publishOption: PublishOption,
+    ) {
+        val preference = publishOption.degradation_preference.toRtcDegradationPreference()
+            ?: return
+        safeCall {
+            val sender = transceiver.sender ?: return@safeCall
+            val params = sender.parameters ?: return@safeCall
+            if (params.degradationPreference == preference) return@safeCall
+            params.degradationPreference = preference
+            sender.parameters = params
+            logger.d {
+                "Applied initial degradationPreference=$preference for ${publishOption.track_type} (publishOptionId=${publishOption.id})"
+            }
+        }
+    }
+
     suspend fun changePublishQuality(videoSender: VideoSender) {
         val (trackType, layers, publishOptionId) = videoSender.decompose()
         val enabledLayers = layers.filter { it.active }
@@ -496,7 +517,16 @@ internal class Publisher(
 
         val codecInUse = params.codecs.firstOrNull()
         val usesSvcCodec = codecInUse != null && isSvcCodec(codecInUse.name)
-        val changed = updateEncodings(params, usesSvcCodec, enabledLayers)
+        var changed = updateEncodings(params, usesSvcCodec, enabledLayers)
+
+        val degradationPreference = videoSender.degradation_preference.toRtcDegradationPreference()
+        if (degradationPreference != null && params.degradationPreference != degradationPreference) {
+            params.degradationPreference = degradationPreference
+            changed = true
+            logger.i {
+                "Update publish quality, applying degradationPreference=$degradationPreference"
+            }
+        }
 
         val activeLayers = params.encodings.filter { it.active }
         if (!changed) {
