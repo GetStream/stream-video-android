@@ -22,35 +22,52 @@ import io.getstream.video.android.core.events.reporting.TelemetryModel
 internal class JoinRequestHooks(val callId: String, val callType: String, val eventReporter: ClientEventReporter) {
 
     var eventSessionId = ""
+    var joinStage = Stage.NOT_STARTED
     fun onJoinRequestStart() {
-        eventSessionId = eventReporter.reportCoordinatorJoinInitiated(
-            callType = callType,
-            callId = callId,
-        )
+        if (joinStage == Stage.NOT_STARTED) {
+            eventSessionId = eventReporter.reportCoordinatorJoinInitiated(
+                callType = callType,
+                callId = callId,
+            )
+            joinStage = Stage.IN_PROGRESS
+        }
+
     }
     fun onJoinRequestSuccess(telemetryModel: TelemetryModel, currentSessionId: String) {
-        if (eventSessionId.isNotEmpty()) {
-            eventReporter.reportCoordinatorJoinCompleted(
-                eventSessionId = eventSessionId,
-                success = true,
-                retryCount = telemetryModel.retryAttempt,
-                callSessionId = currentSessionId,
-            )
+        if (joinStage == Stage.IN_PROGRESS) {
+            if (eventSessionId.isNotEmpty()) {
+                eventReporter.reportCoordinatorJoinCompleted(
+                    eventSessionId = eventSessionId,
+                    success = true,
+                    retryCount = telemetryModel.retryAttempt,
+                    callSessionId = currentSessionId,
+                )
+            }
+            resetStage()
         }
+
     }
 
     fun onJoinRequestPermanentError(retryCount: Int, message: String) {
-        if (eventSessionId.isNotEmpty()) {
-            eventReporter.reportCoordinatorJoinCompleted(
-                eventSessionId = eventSessionId,
-                success = false,
-                retryCount = retryCount,
-                failureReason = message,
-            )
+        if (joinStage == Stage.IN_PROGRESS) {
+            if (eventSessionId.isNotEmpty()) {
+                eventReporter.reportCoordinatorJoinCompleted(
+                    eventSessionId = eventSessionId,
+                    success = false,
+                    retryCount = retryCount,
+                    failureReason = message,
+                )
+            }
+            resetStage()
         }
+
     }
 
     fun onJoinRequestRetryExhausted(retryCount: Int, message: String) {
         onJoinRequestPermanentError(retryCount, message)
+    }
+
+    fun resetStage() {
+        joinStage = Stage.NOT_STARTED
     }
 }

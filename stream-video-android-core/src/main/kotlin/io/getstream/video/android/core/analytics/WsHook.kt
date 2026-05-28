@@ -20,13 +20,17 @@ import io.getstream.video.android.core.events.reporting.ClientEventReporter
 
 internal class WsHook(val callId: String, val callType: String, val reporter: ClientEventReporter) {
     var telemetryWsEventSessionId = ""
+    var wsStage = Stage.NOT_STARTED
     fun onWsInitiated(sfuName: String, wasPreviouslyConnected: Boolean) {
-        telemetryWsEventSessionId = reporter.reportWsJoinInitiated(
-            callId = callId,
-            callType = callType,
-            sfuId = sfuName,
-            wasPreviouslyConnected = wasPreviouslyConnected,
-        )
+        if (wsStage == Stage.NOT_STARTED) {
+            telemetryWsEventSessionId = reporter.reportWsJoinInitiated(
+                callId = callId,
+                callType = callType,
+                sfuId = sfuName,
+                wasPreviouslyConnected = wasPreviouslyConnected,
+            )
+            wsStage = Stage.IN_PROGRESS
+        }
     }
 
     fun onWsCompleted(
@@ -35,14 +39,21 @@ internal class WsHook(val callId: String, val callType: String, val reporter: Cl
         failureReason: String? = null,
         failureCode: String? = null,
     ) {
-        if (telemetryWsEventSessionId.isNotEmpty()) {
-            reporter.reportWsJoinCompleted(
-                eventSessionId = telemetryWsEventSessionId,
-                success = success,
-                retryCount = retryCount,
-                failureReason = failureReason,
-                failureCode = failureCode,
-            )
+        if (wsStage == Stage.IN_PROGRESS) {
+            if (telemetryWsEventSessionId.isNotEmpty()) {
+                reporter.reportWsJoinCompleted(
+                    eventSessionId = telemetryWsEventSessionId,
+                    success = success,
+                    retryCount = retryCount,
+                    failureReason = failureReason,
+                    failureCode = failureCode,
+                )
+            }
+            resetStage()
         }
+    }
+
+    fun resetStage() {
+        wsStage = Stage.NOT_STARTED
     }
 }

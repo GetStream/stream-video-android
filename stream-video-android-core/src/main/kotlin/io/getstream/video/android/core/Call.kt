@@ -1086,6 +1086,10 @@ public class Call(
 
             if (state.connection.value is RealtimeConnection.ReconnectingFailed) {
                 logger.w { "[reconnect] All recovery attempts exhausted — leaving call ($reason)" }
+                callAnalyticsHooks.joinRequestHooks.onJoinRequestRetryExhausted(
+                    loopIteration,
+                    "All recovery attempts exhausted — leaving call ($reason)",
+                )
                 leave(
                     CallLeaveReason.RetryExhausted(
                         loopIteration,
