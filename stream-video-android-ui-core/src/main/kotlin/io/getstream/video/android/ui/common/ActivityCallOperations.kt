@@ -17,7 +17,6 @@
 package io.getstream.video.android.ui.common
 
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi

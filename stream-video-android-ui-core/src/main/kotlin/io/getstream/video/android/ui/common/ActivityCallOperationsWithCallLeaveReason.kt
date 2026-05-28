@@ -20,7 +20,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 
-public interface ActivityCallOperationsWithCallLeaveReason: ActivityCallOperations {
+public interface ActivityCallOperationsWithCallLeaveReason : ActivityCallOperations {
 
     @StreamCallActivityDelicateApi
     public fun leave(
