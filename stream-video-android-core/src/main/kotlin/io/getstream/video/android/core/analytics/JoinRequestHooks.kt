@@ -31,7 +31,6 @@ internal class JoinRequestHooks(val callId: String, val callType: String, val ev
             )
             joinStage = Stage.IN_PROGRESS
         }
-
     }
     fun onJoinRequestSuccess(telemetryModel: TelemetryModel, currentSessionId: String) {
         if (joinStage == Stage.IN_PROGRESS) {
@@ -45,7 +44,6 @@ internal class JoinRequestHooks(val callId: String, val callType: String, val ev
             }
             resetStage()
         }
-
     }
 
     fun onJoinRequestPermanentError(retryCount: Int, message: String) {
@@ -60,7 +58,6 @@ internal class JoinRequestHooks(val callId: String, val callType: String, val ev
             }
             resetStage()
         }
-
     }
 
     fun onJoinRequestRetryExhausted(retryCount: Int, message: String) {
