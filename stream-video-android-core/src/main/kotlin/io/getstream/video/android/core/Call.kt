@@ -81,7 +81,6 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.events.reporting.PeerConnectionRole
 import io.getstream.video.android.core.events.reporting.TelemetryModel
-import io.getstream.video.android.core.faultinjector.FailureKey
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.AudioTrack
@@ -1911,11 +1910,6 @@ public class Call(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         telemetryModel: TelemetryModel,
     ): Result<JoinCallResponse> {
-        with(client.state.failureInjector) {
-            if (isEnabled(FailureKey.FAIL_JOIN_CALL)) {
-                return sendFailResult(FailureKey.FAIL_JOIN_CALL)
-            }
-        }
         callAnalyticsHooks.joinRequestHooks.onJoinRequestStart()
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
         val result = clientImpl.joinCall(

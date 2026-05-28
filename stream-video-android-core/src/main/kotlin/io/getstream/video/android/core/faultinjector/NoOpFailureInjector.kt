@@ -31,4 +31,11 @@ internal class NoOpFailureInjector : FailureInjector {
             Error.GenericError("Failure injected: $key"),
         )
     }
+
+    override fun setCount(
+        key: FailureKey,
+        count: Int,
+    ) {}
+
+    override fun getCount(key: FailureKey): Int = 0
 }

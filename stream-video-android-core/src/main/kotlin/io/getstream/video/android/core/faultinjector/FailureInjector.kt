@@ -34,4 +34,8 @@ public interface FailureInjector {
     fun throwDebugFault(key: FailureKey)
 
     fun sendFailResult(key: FailureKey): io.getstream.result.Result.Failure
+
+    fun setCount(key: FailureKey, count: Int)
+
+    fun getCount(key: FailureKey): Int
 }

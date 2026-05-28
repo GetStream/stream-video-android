@@ -815,6 +815,11 @@ internal class StreamVideoClient internal constructor(
         migratingFromList: List<String>? = null,
         hintHighScaleLivestreamPublisher: Boolean? = null,
     ): Result<JoinCallResponse> {
+        with(state.failureInjector) {
+            if (isEnabled(FailureKey.FAIL_JOIN_CALL)) {
+                return sendFailResult(FailureKey.FAIL_JOIN_CALL)
+            }
+        }
         val joinCallRequest = JoinCallRequest(
             create = create,
             data = CallRequest(

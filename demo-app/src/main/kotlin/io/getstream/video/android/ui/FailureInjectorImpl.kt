@@ -23,30 +23,40 @@ import retrofit2.HttpException
 import retrofit2.Response
 
 internal class FailureInjectorImpl : FailureInjector {
-    private val enabledFaults = mutableMapOf<FailureKey, Boolean>()
+    private val faultCounts = mutableMapOf<FailureKey, Int>()
 
     override fun enable(key: FailureKey) {
-        enabledFaults[key] = true
+        if ((faultCounts[key] ?: 0) == 0) faultCounts[key] = 1
     }
 
     override fun disable(key: FailureKey) {
-        enabledFaults[key] = false
+        faultCounts[key] = 0
     }
 
     override fun setEnabled(key: FailureKey, enabled: Boolean) {
-        enabledFaults[key] = enabled
+        if (enabled) enable(key) else disable(key)
     }
 
     override fun isEnabled(key: FailureKey): Boolean {
-        return enabledFaults[key] == true
+        return (faultCounts[key] ?: 0) > 0
+    }
+
+    override fun setCount(key: FailureKey, count: Int) {
+        faultCounts[key] = count
+    }
+
+    override fun getCount(key: FailureKey): Int {
+        return faultCounts[key] ?: 0
     }
 
     override fun clear() {
-        enabledFaults.clear()
+        faultCounts.clear()
     }
 
     override fun throwDebugFault(key: FailureKey) {
-        if (enabledFaults[key] == true) {
+        val count = faultCounts[key] ?: 0
+        if (count > 0) {
+            faultCounts[key] = count - 1
             throw when (key) {
                 FailureKey.FAIL_LOCATION -> HttpException(
                     Response.error<String>(
@@ -60,8 +70,19 @@ internal class FailureInjectorImpl : FailureInjector {
     }
 
     override fun sendFailResult(key: FailureKey): io.getstream.result.Result.Failure {
+        val count = faultCounts[key] ?: 0
+        if (count > 0) {
+            faultCounts[key] = count - 1
+        }
+        val message = when (key) {
+            FailureKey.FAIL_JOIN_CALL -> "Unable to resolve host"
+            else -> "Failure injected: $key"
+        }
         return io.getstream.result.Result.Failure(
-            Error.GenericError("Failure injected: $key"),
+            Error.ThrowableError(
+                message,
+                RuntimeException(message),
+            ),
         )
     }
 }

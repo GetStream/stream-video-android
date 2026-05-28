@@ -30,15 +30,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,6 +53,8 @@ import io.getstream.video.android.core.faultinjector.FailureInjector
 import io.getstream.video.android.core.faultinjector.FailureKey
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 
+private val countOptions = listOf(0, 1, 2, 3, 5, 10)
+
 @OptIn(InternalStreamVideoApi::class)
 @Composable
 fun FailureInjectorUi(
@@ -56,9 +62,9 @@ fun FailureInjectorUi(
     failureInjector: FailureInjector,
     onClose: () -> Unit,
 ) {
-    val checkedState = remember {
-        mutableStateMapOf<FailureKey, Boolean>().apply {
-            FailureKey.entries.forEach { key -> put(key, failureInjector.isEnabled(key)) }
+    val countState = remember {
+        mutableStateMapOf<FailureKey, Int>().apply {
+            FailureKey.entries.forEach { key -> put(key, failureInjector.getCount(key)) }
         }
     }
 
@@ -89,7 +95,7 @@ fun FailureInjectorUi(
                     text = "Clear all",
                     modifier = Modifier.clickable {
                         failureInjector.clear()
-                        FailureKey.entries.forEach { key -> checkedState[key] = false }
+                        FailureKey.entries.forEach { key -> countState[key] = 0 }
                     },
                     style = VideoTheme.typography.bodyS,
                     color = VideoTheme.colors.brandPrimary,
@@ -121,36 +127,68 @@ fun FailureInjectorUi(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             items(FailureKey.entries) { key ->
-                val checked = checkedState[key] ?: false
+                val count = countState[key] ?: 0
+                var expanded by remember { mutableStateOf(false) }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
-                            val next = !checked
-                            checkedState[key] = next
-                            failureInjector.setEnabled(key, next)
-                        }
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Checkbox(
-                        checked = checked,
-                        onCheckedChange = { next ->
-                            checkedState[key] = next
-                            failureInjector.setEnabled(key, next)
-                        },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = VideoTheme.colors.brandPrimary,
-                            uncheckedColor = VideoTheme.colors.baseSecondary,
-                            checkmarkColor = VideoTheme.colors.baseSheetPrimary,
-                        ),
-                    )
                     Text(
                         text = key.name,
                         style = VideoTheme.typography.bodyM,
                         color = VideoTheme.colors.basePrimary,
+                        modifier = Modifier.weight(1f),
                     )
+
+                    Box {
+                        Row(
+                            modifier = Modifier
+                                .background(
+                                    color = VideoTheme.colors.baseSheetTertiary,
+                                    shape = RoundedCornerShape(6.dp),
+                                )
+                                .clickable { expanded = true }
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Text(
+                                text = "$count",
+                                style = VideoTheme.typography.bodyM,
+                                color = if (count > 0) VideoTheme.colors.brandPrimary else VideoTheme.colors.baseSecondary,
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                                tint = VideoTheme.colors.baseSecondary,
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                        ) {
+                            countOptions.forEach { option ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        countState[key] = option
+                                        failureInjector.setCount(key, option)
+                                        expanded = false
+                                    },
+                                ) {
+                                    Text(
+                                        text = "$option",
+                                        style = VideoTheme.typography.bodyM,
+                                        color = if (option > 0) VideoTheme.colors.brandPrimary else VideoTheme.colors.basePrimary,
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -190,16 +228,18 @@ fun FaultInjectorUiDemo() {
 
                 override fun disable(key: FailureKey) {}
 
-                override fun setEnabled(
-                    key: FailureKey,
-                    enabled: Boolean,
-                ) {}
+                override fun setEnabled(key: FailureKey, enabled: Boolean) {}
 
                 override fun isEnabled(key: FailureKey): Boolean = false
+
+                override fun setCount(key: FailureKey, count: Int) {}
+
+                override fun getCount(key: FailureKey): Int = 0
 
                 override fun clear() {}
 
                 override fun throwDebugFault(key: FailureKey) {}
+
                 override fun sendFailResult(
                     key: FailureKey,
                 ): io.getstream.result.Result.Failure {
