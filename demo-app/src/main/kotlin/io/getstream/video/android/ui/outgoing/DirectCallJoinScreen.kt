@@ -31,14 +31,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.VideoCall
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -80,60 +87,170 @@ fun DirectCallJoinScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = Unit) { viewModel.getGoogleAccounts() }
+    var showAddUserPopup by rememberSaveable { mutableStateOf(false) }
+
+    if (showAddUserPopup) {
+        AddUserPopup(
+            onDismiss = { showAddUserPopup = false },
+            onAddClick = { userId, userName ->
+                viewModel.addUser(userId, userName)
+                showAddUserPopup = false
+            },
+        )
+    }
 
     VideoTheme {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(VideoTheme.colors.baseSheetPrimary),
-            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Header(user = uiState.currentUser)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(VideoTheme.colors.baseSheetPrimary),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Header(
+                    user = uiState.currentUser,
+                    onAddUserClick = { showAddUserPopup = true },
+                )
 
-            Body(
-                uiState = uiState,
-                toggleUserSelection = { viewModel.toggleGoogleAccountSelection(it) },
-                onStartCallClick = navigateToDirectCall,
-            )
+                Body(
+                    uiState = uiState,
+                    toggleUserSelection = { viewModel.toggleGoogleAccountSelection(it) },
+                    onStartCallClick = navigateToDirectCall,
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun Header(user: User?) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 24.dp, end = 24.dp, top = 24.dp) // Outer padding
-            .padding(vertical = 12.dp), // Inner padding
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Row {
-            user?.let {
-                UserAvatar(
-                    modifier = Modifier.size(24.dp),
-                    userImage = it.image,
-                    userName = it.userNameOrId,
+private fun AddUserPopup(
+    onDismiss: () -> Unit,
+    onAddClick: (userId: String, userName: String) -> Unit,
+) {
+    var userId by rememberSaveable { mutableStateOf("") }
+    var userName by rememberSaveable { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        backgroundColor = VideoTheme.colors.baseSheetPrimary,
+        title = {
+            Text(
+                text = stringResource(id = R.string.add_user),
+                color = Color.White,
+                fontSize = 18.sp,
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = userId,
+                    onValueChange = { userId = it },
+                    label = {
+                        Text(
+                            stringResource(id = R.string.user_id),
+                            color = Color(0xFF979797),
+                        )
+                    },
+                    singleLine = true,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = Color.White,
+                        focusedBorderColor = VideoTheme.colors.brandPrimary,
+                        unfocusedBorderColor = Color(0xFF979797),
+                        cursorColor = VideoTheme.colors.brandPrimary,
+                        focusedLabelColor = VideoTheme.colors.brandPrimary,
+                    ),
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                OutlinedTextField(
+                    value = userName,
+                    onValueChange = { userName = it },
+                    label = {
+                        Text(
+                            stringResource(id = R.string.user_name),
+                            color = Color(0xFF979797),
+                        )
+                    },
+                    singleLine = true,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = Color.White,
+                        focusedBorderColor = VideoTheme.colors.brandPrimary,
+                        unfocusedBorderColor = Color(0xFF979797),
+                        cursorColor = VideoTheme.colors.brandPrimary,
+                        focusedLabelColor = VideoTheme.colors.brandPrimary,
+                    ),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (userId.isNotBlank()) {
+                        onAddClick(userId.trim(), userName.trim())
+                    }
+                },
+            ) {
+                Text("Add", color = VideoTheme.colors.brandPrimary)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = Color(0xFF979797))
+            }
+        },
+    )
+}
+
+@Composable
+private fun Header(user: User?, onAddUserClick: () -> Unit) {
+    Row {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 24.dp, end = 24.dp, top = 24.dp) // Outer padding
+                .padding(vertical = 12.dp), // Inner padding
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Row {
+                user?.let {
+                    UserAvatar(
+                        modifier = Modifier.size(24.dp),
+                        userImage = it.image,
+                        userName = it.userNameOrId,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+
+                Text(
+                    modifier = Modifier.weight(1f),
+                    color = Color.White,
+                    text = user?.userNameOrId ?: "",
+                    maxLines = 1,
+                    fontSize = 16.sp,
+                )
             }
 
+            Spacer(modifier = Modifier.height(10.dp))
+
             Text(
-                modifier = Modifier.weight(1f),
-                color = Color.White,
-                text = user?.userNameOrId ?: "",
-                maxLines = 1,
-                fontSize = 16.sp,
+                text = stringResource(io.getstream.video.android.R.string.select_direct_call_users),
+                color = Color(0xFF979797),
+                fontSize = 13.sp,
             )
         }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Text(
-            text = stringResource(io.getstream.video.android.R.string.select_direct_call_users),
-            color = Color(0xFF979797),
-            fontSize = 13.sp,
-        )
+        IconButton(modifier = Modifier, onClick = onAddUserClick) {
+            Icon(
+                modifier = Modifier
+                    .padding(top = 18.dp)
+                    .size(36.dp),
+                imageVector = Icons.Default.Person,
+                contentDescription = "Add User",
+                tint = Color.White,
+            )
+        }
+        Spacer(Modifier.width(16.dp))
     }
 }
 
@@ -344,7 +461,7 @@ private fun UserRow(
 @Composable
 private fun HeaderPreview() {
     VideoTheme {
-        Header(user = User(name = "Very very very long user name here"))
+        Header(user = User(name = "Very very very long user name here"), onAddUserClick = {})
         Body(
             uiState = DirectCallUiState(
                 otherUsers =
