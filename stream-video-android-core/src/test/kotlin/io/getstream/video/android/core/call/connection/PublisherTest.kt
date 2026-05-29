@@ -842,6 +842,99 @@ class PublisherTest {
         }
 
     @Test
+    fun `changePublishQuality does not call setParameters when SFU preference equals current and layers unchanged`() =
+        runTest {
+            // Given
+            val mockRtpSender = mockk<RtpSender>(relaxed = true)
+            val singleEnc = buildRtpParams(
+                rid = "f",
+                active = true,
+                maxFramerate = 30,
+                scaleResolutionDownBy = 1.0,
+                scalabilityMode = "L3T2",
+                codec = vp9Codec(),
+                maxBitrate = 300_000,
+            )
+            // Sender already has BALANCED, and that's exactly what the SFU is asking for.
+            singleEnc.degradationPreference = RtpParameters.DegradationPreference.BALANCED
+            every { mockRtpSender.parameters } returns singleEnc
+            val mockTransceiver = mockk<TransceiverId>(relaxed = true)
+            every { mockTransceiver.transceiver.sender } returns mockRtpSender
+            every { mockTransceiverCache.get(any()) } returns mockTransceiver.transceiver
+            val matchingLayer = VideoLayerSetting(
+                name = "f",
+                active = true,
+                max_framerate = 30,
+                scale_resolution_down_by = 1.0f,
+                max_bitrate = 300_000,
+                scalability_mode = "L3T2",
+            )
+            val videoSender = VideoSender(
+                track_type = TrackType.TRACK_TYPE_VIDEO,
+                codec = Codec(98, "VP9", clock_rate = 9000, fmtp = ""),
+                layers = listOf(matchingLayer),
+                degradation_preference = DegradationPreference.DEGRADATION_PREFERENCE_BALANCED,
+            )
+
+            // When
+            publisher.changePublishQuality(videoSender)
+
+            // Then – preference already matches and layers are unchanged, so no write.
+            verify(exactly = 0) { mockRtpSender.parameters = any() }
+        }
+
+    @Test
+    fun `changePublishQuality still applies layer changes even when SFU preference equals current`() =
+        runTest {
+            // Given – preference matches, but a layer setting is different so we still update.
+            val mockRtpSender = mockk<RtpSender>(relaxed = true)
+            val singleEnc = buildRtpParams(
+                rid = "f",
+                active = true,
+                maxFramerate = 30,
+                scaleResolutionDownBy = 1.0,
+                scalabilityMode = "L3T2",
+                codec = vp9Codec(),
+                maxBitrate = 300_000,
+            )
+            singleEnc.degradationPreference =
+                RtpParameters.DegradationPreference.MAINTAIN_RESOLUTION
+            every { mockRtpSender.parameters } returns singleEnc
+            val mockTransceiver = mockk<TransceiverId>(relaxed = true)
+            every { mockTransceiver.transceiver.sender } returns mockRtpSender
+            every { mockTransceiverCache.get(any()) } returns mockTransceiver.transceiver
+            // Different bitrate vs. the current encoding → triggers a layer change.
+            val changedLayer = VideoLayerSetting(
+                name = "f",
+                active = true,
+                max_framerate = 30,
+                scale_resolution_down_by = 1.0f,
+                max_bitrate = 600_000,
+                scalability_mode = "L3T2",
+            )
+            val videoSender = VideoSender(
+                track_type = TrackType.TRACK_TYPE_VIDEO,
+                codec = Codec(98, "VP9", clock_rate = 9000, fmtp = ""),
+                layers = listOf(changedLayer),
+                degradation_preference =
+                DegradationPreference.DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION,
+            )
+
+            // When
+            publisher.changePublishQuality(videoSender)
+
+            // Then – setParameters is called for the layer change, and the (already matching)
+            // preference is preserved on the written params.
+            verify {
+                mockRtpSender.parameters = match {
+                    it.encodings[0].maxBitrateBps == 600_000 &&
+                        it.degradationPreference ==
+                        RtpParameters.DegradationPreference.MAINTAIN_RESOLUTION
+                }
+            }
+        }
+
+    @Test
     fun `applyDegradationPreference sets value from PublishOption when present`() = runTest {
         // Given
         val mockRtpSender = mockk<RtpSender>(relaxed = true)
@@ -873,6 +966,37 @@ class PublisherTest {
             }
         }
     }
+
+    @Test
+    fun `applyDegradationPreference is a no-op when PublishOption preference equals current`() =
+        runTest {
+            // Given – sender already has the same preference that the SFU is asking for.
+            val mockRtpSender = mockk<RtpSender>(relaxed = true)
+            val params = buildRtpParams(
+                rid = "f",
+                active = true,
+                maxFramerate = 30,
+                scaleResolutionDownBy = 1.0,
+                maxBitrate = 300_000,
+            )
+            params.degradationPreference =
+                RtpParameters.DegradationPreference.MAINTAIN_RESOLUTION
+            every { mockRtpSender.parameters } returns params
+            val mockTransceiver = mockk<RtpTransceiver>(relaxed = true)
+            every { mockTransceiver.sender } returns mockRtpSender
+
+            // When
+            publisher.applyDegradationPreference(
+                transceiver = mockTransceiver,
+                publishOption = videoPublishOption.copy(
+                    degradation_preference =
+                    DegradationPreference.DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION,
+                ),
+            )
+
+            // Then – no need to write parameters back.
+            verify(exactly = 0) { mockRtpSender.parameters = any() }
+        }
 
     @Test
     fun `applyDegradationPreference is a no-op when PublishOption preference is UNSPECIFIED`() =
