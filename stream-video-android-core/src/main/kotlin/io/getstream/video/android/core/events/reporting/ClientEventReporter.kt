@@ -220,12 +220,12 @@ internal class ClientEventReporter(
 
     // --- PeerConnectionConnect (ICE state machine) ---
 
-    internal fun onPeerConnectionIceStateChanged(
+    internal fun onPeerConnectionStateChanged(
         callId: String,
         callType: String,
         joinStageAttemptId: String,
         role: PeerConnectionRole,
-        iceState: PeerConnection.IceConnectionState,
+        iceState: PeerConnection.IceConnectionState?,
         peerConnectionState: PeerConnection.PeerConnectionState?,
     ) {
         when (iceState) {

@@ -27,14 +27,12 @@ internal class PeerConnectionHook(
     val getJoinStageAttemptId: () -> String,
 ) {
 
-    internal fun onPeerConnectionIceStateChanged(
-        callId: String,
-        callType: String,
+    internal fun onPeerConnectionStateChanged(
         role: PeerConnectionRole,
-        iceState: PeerConnection.IceConnectionState,
+        iceState: PeerConnection.IceConnectionState?,
         peerConnectionState: PeerConnection.PeerConnectionState?,
     ) {
-        reporter.onPeerConnectionIceStateChanged(
+        reporter.onPeerConnectionStateChanged(
             callId = callId,
             callType = callType,
             role = role,

@@ -77,7 +77,6 @@ import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
-import io.getstream.video.android.core.events.reporting.PeerConnectionRole
 import io.getstream.video.android.core.events.reporting.TelemetryModel
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -314,7 +313,7 @@ public class Call(
         }
 
     internal val callAnalyticsHooks =
-        CallAnalyticsHooks(this.id, this.type, client.state.clientEventReporter)
+        CallAnalyticsHooks(this.id, this.type, client.state.clientEventReporter, scope)
 
     /**
      * Checks if the audioBitrateProfile has changed since the factory was created,
@@ -784,7 +783,8 @@ public class Call(
             }
         }
         monitorPublisherPCStateJob?.cancel()
-
+        callAnalyticsHooks.peerConnectionAnalyticsObserver.stop()
+        callAnalyticsHooks.peerConnectionAnalyticsObserver.observePeerConnections(session)
         monitorPublisherPCStateJob = scope.launch {
             session
                 .filterNotNull()
@@ -792,24 +792,15 @@ public class Call(
                 .flatMapLatest { publisher ->
                     publisher.iceState.map { publisher to it }
                 }
-                .collect { (publisher, iceState) ->
-                    if (iceState != null) {
-                        callAnalyticsHooks.peerConnectionHook.onPeerConnectionIceStateChanged(
-                            callId = this@Call.id,
-                            callType = this@Call.type,
-                            role = PeerConnectionRole.PUBLISH,
-                            iceState = iceState,
-                            peerConnectionState = publisher.state.value,
-                        )
-                    }
-                    when (iceState) {
+                .collect { (publisher, state) ->
+                    when (state) {
                         PeerConnection.IceConnectionState.FAILED,
                         PeerConnection.IceConnectionState.DISCONNECTED,
                         -> {
-                            publisher.connection.restartIce()
+                            publisher.connection.restartIce() // TODO Rahul might send a request to the server
                         }
                         else -> {
-                            logger.d { "[monitorPubConnectionState] Ice connection state is $iceState" }
+                            logger.d { "[monitorPubConnectionState] Ice connection state is $state" }
                         }
                     }
                 }
@@ -817,33 +808,17 @@ public class Call(
 
         monitorSubscriberPCStateJob?.cancel()
         monitorSubscriberPCStateJob = scope.launch {
-            session
-                .filterNotNull()
-                .flatMapLatest { it.subscriber.filterNotNull() }
-                .flatMapLatest { subscriber ->
-                    subscriber.iceState.map { subscriber to it }
-                }
-                .collect { (subscriber, iceState) ->
-                    if (iceState != null) {
-                        callAnalyticsHooks.peerConnectionHook.onPeerConnectionIceStateChanged(
-                            callId = this@Call.id,
-                            callType = this@Call.type,
-                            role = PeerConnectionRole.SUBSCRIBE,
-                            iceState = iceState,
-                            peerConnectionState = subscriber.state.value,
-                        )
+            session.value?.subscriber?.value?.iceState?.collect {
+                when (it) {
+                    PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
+                        session.value?.requestSubscriberIceRestart() // TODO Rahul might send a request to the server
                     }
-                    when (iceState) {
-                        PeerConnection.IceConnectionState.FAILED,
-                        PeerConnection.IceConnectionState.DISCONNECTED,
-                        -> {
-                            session.value?.requestSubscriberIceRestart()
-                        }
-                        else -> {
-                            logger.d { "[monitorSubConnectionState] Ice connection state is $iceState" }
-                        }
+
+                    else -> {
+                        logger.d { "[monitorSubConnectionState] Ice connection state is $it" }
                     }
                 }
+            }
         }
         network.subscribe(listener)
     }
@@ -1323,6 +1298,7 @@ public class Call(
     private fun internalLeave(reason: CallLeaveReason) = atomicLeave {
         monitorSubscriberPCStateJob?.cancel()
         monitorPublisherPCStateJob?.cancel()
+        callAnalyticsHooks.stopObservers()
         monitorPublisherPCStateJob = null
         monitorSubscriberPCStateJob = null
         leaveTimeoutAfterDisconnect?.cancel()

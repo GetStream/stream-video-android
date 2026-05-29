@@ -18,8 +18,14 @@ package io.getstream.video.android.core.analytics
 
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
+import kotlinx.coroutines.CoroutineScope
 
-internal class CallAnalyticsHooks(val callId: String, val callType: String, val eventReporter: ClientEventReporter) {
+internal class CallAnalyticsHooks(
+    val callId: String,
+    val callType: String,
+    val eventReporter: ClientEventReporter,
+    val scope: CoroutineScope,
+) {
     val joinRequestHooks = JoinRequestHooks(callId, callType, eventReporter)
     val wsHook = WsHook(callId, callType, eventReporter) {
         joinRequestHooks.joinStageAttemptId
@@ -29,11 +35,17 @@ internal class CallAnalyticsHooks(val callId: String, val callType: String, val 
         joinRequestHooks.joinStageAttemptId
     }
 
+    val peerConnectionAnalyticsObserver = PeerConnectionAnalyticsObserver(scope, peerConnectionHook)
+
     fun onCallLeave(callLeaveReason: CallLeaveReason) {
         val abortReason = when (callLeaveReason) {
             is CallLeaveReason.Backend -> ClientEventReporter.AbortReason.BACKEND_LEAVE
             else -> ClientEventReporter.AbortReason.CLIENT_ABORTED
         }
         eventReporter.abortAllInFlight(abortReason)
+    }
+
+    fun stopObservers() {
+        peerConnectionAnalyticsObserver.stop()
     }
 }
