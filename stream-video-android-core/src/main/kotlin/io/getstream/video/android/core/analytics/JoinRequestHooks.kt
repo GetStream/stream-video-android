@@ -18,16 +18,20 @@ package io.getstream.video.android.core.analytics
 
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import io.getstream.video.android.core.events.reporting.TelemetryModel
+import java.util.UUID
 
 internal class JoinRequestHooks(val callId: String, val callType: String, val eventReporter: ClientEventReporter) {
 
     var eventSessionId = ""
     var joinStage = Stage.NOT_STARTED
+    var joinStageAttemptId = ""
     fun onJoinRequestStart() {
         if (joinStage == Stage.NOT_STARTED) {
+            joinStageAttemptId = UUID.randomUUID().toString()
             eventSessionId = eventReporter.reportCoordinatorJoinInitiated(
                 callType = callType,
                 callId = callId,
+                joinStageAttemptId = joinStageAttemptId
             )
             joinStage = Stage.IN_PROGRESS
         }

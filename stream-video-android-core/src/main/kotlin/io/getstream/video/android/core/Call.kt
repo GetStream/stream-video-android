@@ -61,8 +61,6 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.analytics.CallAnalyticsHooks
-import io.getstream.video.android.core.analytics.JoinRequestHooks
-import io.getstream.video.android.core.analytics.WsHook
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
@@ -315,10 +313,8 @@ public class Call(
             _peerConnectionFactory = value
         }
 
-    internal val callAnalyticsHooks = CallAnalyticsHooks(
-        JoinRequestHooks(this.id, this.type, client.state.clientEventReporter),
-        WsHook(this.id, this.type, client.state.clientEventReporter),
-    )
+    internal val callAnalyticsHooks =
+        CallAnalyticsHooks(this.id, this.type, client.state.clientEventReporter)
 
     /**
      * Checks if the audioBitrateProfile has changed since the factory was created,
@@ -798,7 +794,7 @@ public class Call(
                 }
                 .collect { (publisher, iceState) ->
                     if (iceState != null) {
-                        client.state.clientEventReporter.onPeerConnectionIceStateChanged(
+                        callAnalyticsHooks.peerConnectionHook.onPeerConnectionIceStateChanged(
                             callId = this@Call.id,
                             callType = this@Call.type,
                             role = PeerConnectionRole.PUBLISH,
@@ -829,7 +825,7 @@ public class Call(
                 }
                 .collect { (subscriber, iceState) ->
                     if (iceState != null) {
-                        client.state.clientEventReporter.onPeerConnectionIceStateChanged(
+                        callAnalyticsHooks.peerConnectionHook.onPeerConnectionIceStateChanged(
                             callId = this@Call.id,
                             callType = this@Call.type,
                             role = PeerConnectionRole.SUBSCRIBE,

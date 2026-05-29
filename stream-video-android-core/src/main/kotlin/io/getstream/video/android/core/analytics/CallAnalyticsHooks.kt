@@ -19,9 +19,16 @@ package io.getstream.video.android.core.analytics
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
 
-internal class CallAnalyticsHooks(val joinRequestHooks: JoinRequestHooks, val wsHook: WsHook) {
+internal class CallAnalyticsHooks(val callId: String, val callType: String, val eventReporter: ClientEventReporter) {
+    val joinRequestHooks = JoinRequestHooks(callId, callType, eventReporter)
+    val wsHook = WsHook(callId, callType, eventReporter) {
+        joinRequestHooks.joinStageAttemptId
+    }
 
-    val eventReporter = joinRequestHooks.eventReporter
+    val peerConnectionHook = PeerConnectionHook(callId, callType, eventReporter) {
+        joinRequestHooks.joinStageAttemptId
+    }
+
     fun onCallLeave(callLeaveReason: CallLeaveReason) {
         val abortReason = when (callLeaveReason) {
             is CallLeaveReason.Backend -> ClientEventReporter.AbortReason.BACKEND_LEAVE

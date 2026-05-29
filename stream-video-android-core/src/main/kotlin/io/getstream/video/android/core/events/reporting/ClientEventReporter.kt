@@ -96,8 +96,9 @@ internal class ClientEventReporter(
     internal fun reportCoordinatorJoinInitiated(
         callId: String,
         callType: String,
+        joinStageAttemptId:String
     ): String {
-        val joinStageAttemptId = UUID.randomUUID().toString()
+
         val eventSessionId = UUID.randomUUID().toString()
         joinStageAttemptIdMap[callId] = joinStageAttemptId
         val now = System.currentTimeMillis()
@@ -116,6 +117,7 @@ internal class ClientEventReporter(
                 stage = CallEventStage.COORDINATOR_JOIN,
                 eventType = CallEventType.INITIATED,
                 eventSessionId = eventSessionId,
+                joinStageAttemptId = joinStageAttemptId,
             ),
         )
         return eventSessionId
@@ -145,6 +147,7 @@ internal class ClientEventReporter(
                 retryFailureReason = if (!success) failureReason else null,
                 retryFailureCode = if (!success) failureCode else null,
                 callSessionId = callSessionId,
+                joinStageAttemptId = session.joinStageAttemptIdSnapshot,
             ),
         )
     }
@@ -155,6 +158,7 @@ internal class ClientEventReporter(
         sfuId: String,
         callId: String,
         callType: String,
+        joinStageAttemptId: String,
         wasPreviouslyConnected: Boolean,
     ): String {
         val eventSessionId = UUID.randomUUID().toString()
@@ -178,6 +182,7 @@ internal class ClientEventReporter(
                 stage = CallEventStage.WS_JOIN,
                 eventType = CallEventType.INITIATED,
                 eventSessionId = eventSessionId,
+                joinStageAttemptId = joinStageAttemptId,
                 sfuId = sfuId,
                 wasPreviouslyConnected = wasPreviouslyConnected,
             ),
@@ -187,6 +192,7 @@ internal class ClientEventReporter(
 
     internal fun reportWsJoinCompleted(
         eventSessionId: String,
+        joinStageAttemptId: String,
         success: Boolean,
         retryCount: Int,
         failureReason: String? = null,
@@ -208,6 +214,7 @@ internal class ClientEventReporter(
                 retryFailureCode = if (!success) failureCode else null,
                 sfuId = session.sfuId,
                 callSessionId = session.callSessionId,
+                joinStageAttemptId = joinStageAttemptId,
             ),
         )
     }
@@ -217,6 +224,7 @@ internal class ClientEventReporter(
     internal fun onPeerConnectionIceStateChanged(
         callId: String,
         callType: String,
+        joinStageAttemptId: String,
         role: PeerConnectionRole,
         iceState: PeerConnection.IceConnectionState,
         peerConnectionState: PeerConnection.PeerConnectionState?,
@@ -231,6 +239,7 @@ internal class ClientEventReporter(
                         callId = callId,
                         callType = callType,
                         eventSessionId = oldId,
+                        joinStageAttemptId = joinStageAttemptId,
                         success = false,
                         iceState = iceState,
                         peerConnectionState = peerConnectionState,
@@ -259,6 +268,7 @@ internal class ClientEventReporter(
                         stage = CallEventStage.PEER_CONNECTION_CONNECT,
                         eventType = CallEventType.INITIATED,
                         eventSessionId = eventSessionId,
+                        joinStageAttemptId = joinStageAttemptId,
                         peerConnection = role,
                         wasPreviouslyConnected = wasPrev,
                         callSessionId = callSessionIdMap[callId],
@@ -275,6 +285,7 @@ internal class ClientEventReporter(
                     callId = callId,
                     callType = callType,
                     eventSessionId = eventSessionId,
+                    joinStageAttemptId = joinStageAttemptId,
                     success = true,
                     iceState = iceState,
                     peerConnectionState = peerConnectionState,
@@ -287,6 +298,7 @@ internal class ClientEventReporter(
                     callId = callId,
                     callType = callType,
                     eventSessionId = eventSessionId,
+                    joinStageAttemptId = joinStageAttemptId,
                     success = false,
                     iceState = iceState,
                     peerConnectionState = peerConnectionState,
@@ -303,6 +315,7 @@ internal class ClientEventReporter(
         callId: String,
         callType: String,
         eventSessionId: String,
+        joinStageAttemptId: String,
         success: Boolean,
         iceState: PeerConnection.IceConnectionState,
         peerConnectionState: PeerConnection.PeerConnectionState?,
@@ -318,6 +331,7 @@ internal class ClientEventReporter(
                 stage = CallEventStage.PEER_CONNECTION_CONNECT,
                 eventType = CallEventType.COMPLETED,
                 eventSessionId = eventSessionId,
+                joinStageAttemptId = joinStageAttemptId,
                 elapsedTime = elapsedTime,
                 outcome = if (success) CallEventOutcome.SUCCESS else CallEventOutcome.FAILURE,
                 retryCountAttempt = 0,
@@ -353,6 +367,7 @@ internal class ClientEventReporter(
                 peerConnection = session.peerConnectionRole,
                 wasPreviouslyConnected = session.wasPreviouslyConnected,
                 userSessionId = session.userSessionId,
+                joinStageAttemptId = session.joinStageAttemptIdSnapshot,
             )
         }
         sendEvents(events)
@@ -366,6 +381,7 @@ internal class ClientEventReporter(
         stage: CallEventStage,
         eventType: CallEventType,
         eventSessionId: String,
+        joinStageAttemptId: String,
         elapsedTime: Long? = null,
         outcome: CallEventOutcome? = null,
         retryCountAttempt: Int? = null,
@@ -380,6 +396,7 @@ internal class ClientEventReporter(
         userSessionId: String? = null,
     ): ClientEvent = ClientEvent(
         eventSessionId = eventSessionId,
+        joinSuccessId = joinStageAttemptId,
         eventType = eventType.value,
         id = callId,
         sdkVersion = sdkVersion,

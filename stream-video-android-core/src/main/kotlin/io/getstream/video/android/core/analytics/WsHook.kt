@@ -18,7 +18,12 @@ package io.getstream.video.android.core.analytics
 
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
 
-internal class WsHook(val callId: String, val callType: String, val reporter: ClientEventReporter) {
+internal class WsHook(
+    val callId: String,
+    val callType: String,
+    val reporter: ClientEventReporter,
+    val getJoinStageAttemptId: () -> String,
+) {
     var telemetryWsEventSessionId = ""
     var wsStage = Stage.NOT_STARTED
     fun onWsInitiated(sfuName: String, wasPreviouslyConnected: Boolean) {
@@ -28,6 +33,7 @@ internal class WsHook(val callId: String, val callType: String, val reporter: Cl
                 callType = callType,
                 sfuId = sfuName,
                 wasPreviouslyConnected = wasPreviouslyConnected,
+                joinStageAttemptId = getJoinStageAttemptId.invoke(),
             )
             wsStage = Stage.IN_PROGRESS
         }
@@ -47,6 +53,7 @@ internal class WsHook(val callId: String, val callType: String, val reporter: Cl
                     retryCount = retryCount,
                     failureReason = failureReason,
                     failureCode = failureCode,
+                    joinStageAttemptId = getJoinStageAttemptId.invoke(),
                 )
             }
             resetStage()
