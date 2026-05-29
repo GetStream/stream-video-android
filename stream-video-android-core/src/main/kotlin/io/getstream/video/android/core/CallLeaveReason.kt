@@ -82,6 +82,7 @@ enum class SdkCause {
     PIP_ERROR,
     PIP_STOPPED,
     ACTIVITY_DESTROYED,
+    STREAM_CALL_ACTIVITY_EXCEPTION,
 }
 
 @InternalStreamVideoApi

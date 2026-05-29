@@ -245,6 +245,12 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 val configuration = configurationMap[error.call.id]
                 if (configuration?.closeScreenOnError == true) {
                     logger.e(error) { "Finishing the activity" }
+                    error.call.leave(
+                        CallLeaveReason.SdkDriven(
+                            SdkCause.STREAM_CALL_ACTIVITY_EXCEPTION,
+                            "${error.message}",
+                        ),
+                    )
                     safeFinish()
                 }
             } else {
