@@ -31,7 +31,7 @@ internal class JoinRequestHooks(val callId: String, val callType: String, val ev
             eventSessionId = eventReporter.reportCoordinatorJoinInitiated(
                 callType = callType,
                 callId = callId,
-                joinStageAttemptId = joinStageAttemptId
+                joinStageAttemptId = joinStageAttemptId,
             )
             joinStage = Stage.IN_PROGRESS
         }

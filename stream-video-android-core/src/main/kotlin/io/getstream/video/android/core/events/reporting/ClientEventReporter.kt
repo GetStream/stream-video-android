@@ -96,9 +96,8 @@ internal class ClientEventReporter(
     internal fun reportCoordinatorJoinInitiated(
         callId: String,
         callType: String,
-        joinStageAttemptId:String
+        joinStageAttemptId: String,
     ): String {
-
         val eventSessionId = UUID.randomUUID().toString()
         joinStageAttemptIdMap[callId] = joinStageAttemptId
         val now = System.currentTimeMillis()
