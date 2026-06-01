@@ -17,17 +17,20 @@
 package io.getstream.video.android.core.analytics
 
 import io.getstream.video.android.core.CallLeaveReason
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 
 internal class CallAnalyticsHooks(
     val callId: String,
     val callType: String,
+    val connectionFlow: StateFlow<RealtimeConnection>,
     val eventReporter: ClientEventReporter,
     val scope: CoroutineScope,
 ) {
     val joinRequestHooks = JoinRequestHooks(callId, callType, eventReporter)
-    val wsHook = WsHook(callId, callType, eventReporter) {
+    val wsHook = WsHook(callId, callType, connectionFlow, scope, eventReporter) {
         joinRequestHooks.joinStageAttemptId
     }
 

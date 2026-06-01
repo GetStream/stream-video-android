@@ -165,7 +165,7 @@ class SfuSocketConnection(
     }
 
     override suspend fun connect(connectData: JoinRequest) {
-        logger.d { "[connect] request: $connectData" }
+        logger.d { "noob [connect] request: $connectData" }
         internalSocket.connect(connectData)
     }
 

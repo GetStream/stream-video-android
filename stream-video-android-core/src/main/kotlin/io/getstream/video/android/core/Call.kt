@@ -313,7 +313,13 @@ public class Call(
         }
 
     internal val callAnalyticsHooks =
-        CallAnalyticsHooks(this.id, this.type, client.state.clientEventReporter, scope)
+        CallAnalyticsHooks(
+            this.id,
+            this.type,
+            state.connection,
+            client.state.clientEventReporter,
+            scope,
+        )
 
     /**
      * Checks if the audioBitrateProfile has changed since the factory was created,

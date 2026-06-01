@@ -681,7 +681,7 @@ public class RtcSession internal constructor(
         stateJob = coroutineScope.launch {
             sfuConnectionModule.socketConnection.state().collect { sfuSocketState ->
                 logger.d {
-                    "[stateJob] SFU socket: $sfuSocketState | " +
+                    "noob [stateJob] SFU socket: $sfuSocketState | " +
                         "connection: ${call.state.connection.value} ($sfuName)"
                 }
                 _sfuSfuSocketState.value = sfuSocketState
@@ -711,8 +711,8 @@ public class RtcSession internal constructor(
                     is SfuSocketState.Disconnected.DisconnectedTemporarily -> {
                         val strategy = sfuSocketState.reconnectStrategy
                         val reason = "SFU:${sfuSocketState.error.message}:$strategy"
-                        logger.w { "[stateJob] SFU sent $strategy for $sfuName" }
-                        coroutineScope.launch { call.reconnect(strategy, reason) }
+                        logger.w { "noob [stateJob] SFU sent $strategy for $sfuName" }
+                        call.scope.launch { call.reconnect(strategy, reason) }
                     }
 
                     is SfuSocketState.Disconnected.WebSocketEventLost -> {
@@ -883,7 +883,7 @@ public class RtcSession internal constructor(
         options: List<PublishOption>? = null,
         telemetryModel: TelemetryModel? = null,
     ): SfuConnectionResult {
-        logger.i { "[connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
+        logger.i { "noob [connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
         call.callAnalyticsHooks.wsHook.onWsInitiated(sfuName, reconnectDetails != null)
 
         val request = buildJoinRequest(reconnectDetails, options)
@@ -1131,7 +1131,7 @@ public class RtcSession internal constructor(
     private val atomicCleanup = AtomicUnitCall()
 
     fun cleanup() = atomicCleanup {
-        logger.i { "[cleanup] #sfu; #track; no args" }
+        logger.i { "noob [cleanup] #sfu; #track; no args" }
 
         coroutineScope.launch {
             serialProcessor.submit("cleanupSfuConnections") {
@@ -1351,7 +1351,7 @@ public class RtcSession internal constructor(
             rejoin = {
                 logger.d { "[createPublisher] rejoin attempt, connection state: ${call.state.connection.value}" }
                 if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
-                    coroutineScope.launch {
+                    call.scope.launch { // TODO Rahul, self cancelling coroutine code
                         serialProcessor.submit("publisherRejoin") {
                             logger.d {
                                 "[createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} "
@@ -1983,11 +1983,13 @@ public class RtcSession internal constructor(
     // Tears down the old session after migration is confirmed (or timed out).
     // No sendLeaveEvent — matches JS SDK behavior (just close WS, no explicit leave for migration).
     internal fun finalizeMigration() {
+        logger.d { "noob [finalizeMigration]" }
         eventJob?.cancel()
         cleanup()
     }
 
     internal suspend fun prepareRejoin(reason: String) {
+        logger.d { "noob [prepareRejoin] reason: $reason" }
         val stats = call.collectStats()
         sendCallStats(stats)
 

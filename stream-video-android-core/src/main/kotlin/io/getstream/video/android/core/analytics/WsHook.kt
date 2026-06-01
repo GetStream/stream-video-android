@@ -16,11 +16,16 @@
 
 package io.getstream.video.android.core.analytics
 
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 
 internal class WsHook(
     val callId: String,
     val callType: String,
+    val connectionFlow: StateFlow<RealtimeConnection>,
+    val scope: CoroutineScope,
     val reporter: ClientEventReporter,
     val getJoinStageAttemptId: () -> String,
 ) {
