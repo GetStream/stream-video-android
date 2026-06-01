@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.audio
 
-import com.twilio.audioswitch.AudioDevice
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.mockk.every
@@ -81,7 +80,7 @@ class AudioSwitchCoroutineDecoratorTest {
     fun `selectDevice should delegate to controller`() = runTest {
         every { audioExecutionContext.createChildScope() } returns this
 
-        val device = mockk<AudioDevice>()
+        val device = StreamAudioDevice.Speakerphone()
 
         handler.selectDevice(device)
 

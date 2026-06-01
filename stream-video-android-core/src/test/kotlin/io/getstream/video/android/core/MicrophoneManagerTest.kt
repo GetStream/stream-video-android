@@ -25,7 +25,6 @@ import android.os.Build
 import android.os.ParcelUuid
 import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallEndpointCompat
-import com.twilio.audioswitch.AudioDevice
 import io.getstream.android.video.generated.models.AudioSettingsResponse
 import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.OwnCapability
@@ -76,7 +75,9 @@ class MicrophoneManagerTest {
 
         val speakerManager = mockk<SpeakerManager>(relaxed = true)
         val isEnabledStateFlow = MutableStateFlow(true)
+        val speakerStatus = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
         every { speakerManager.isEnabled } returns isEnabledStateFlow
+        every { speakerManager._status } returns speakerStatus
         every { mediaManager.speaker } returns speakerManager
 
         val screenShareManager = mockk<ScreenShareManager>(relaxed = true)
@@ -95,20 +96,21 @@ class MicrophoneManagerTest {
 
         val mockCallState = mockk<CallState>(relaxed = true)
         every { mediaManager.call.state } returns mockCallState
+        every { mockCallState.jetpackTelecomRepository } returns null
         every { mockCallState.ownCapabilities.value } returns listOf(OwnCapability.SendAudio)
 
         // When
         microphoneManager.enable() // 1
-        microphoneManager.select(null) // 0
-        microphoneManager.resume() // 2, 3, Resume calls enable internally, thus two invocations
-        microphoneManager.disable() // 4
-        microphoneManager.pause() // 5
-        microphoneManager.setEnabled(true) // 6, 7, calls enable internally
-        microphoneManager.setEnabled(false) // 8, 9, calls disable internally
+        microphoneManager.select(null) // does not call setup
+        microphoneManager.resume() // 2 (no prior pause, so enable is not invoked internally)
+        microphoneManager.disable() // 3
+        microphoneManager.pause() // 4, 5 (pause calls disable internally)
+        microphoneManager.setEnabled(true) // 6
+        microphoneManager.setEnabled(false) // 7
 
         // Then
-        verify(exactly = 9) {
-            // Setup will be called exactly 9 times
+        verify(exactly = 7) {
+            // Setup will be called exactly 7 times
             microphoneManager.setup(any(), any())
         }
     }
@@ -292,7 +294,7 @@ class MicrophoneManagerTest {
         val speakerManager = mockSpeakerManager(isEnabled = false)
         every { mediaManager.speaker } returns speakerManager
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
-        val selectedDevice = StreamAudioDevice.Earpiece(audio = mockk<AudioDevice>())
+        val selectedDevice = StreamAudioDevice.Earpiece(audioDeviceInfo = mockk<AudioDeviceInfo>())
 
         microphoneManager.select(selectedDevice)
 
@@ -307,7 +309,7 @@ class MicrophoneManagerTest {
         every { mediaManager.speaker } returns speakerManager
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
 
-        microphoneManager.select(StreamAudioDevice.Speakerphone(audio = mockk<AudioDevice>()))
+        microphoneManager.select(StreamAudioDevice.Speakerphone(audioDeviceInfo = mockk<AudioDeviceInfo>()))
 
         assertEquals(DeviceStatus.Enabled, speakerStatus.value)
     }
@@ -318,7 +320,7 @@ class MicrophoneManagerTest {
         val speakerManager = mockSpeakerManager(isEnabled = false)
         every { mediaManager.speaker } returns speakerManager
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
-        val earpiece = StreamAudioDevice.Earpiece(audio = mockk<AudioDevice>())
+        val earpiece = StreamAudioDevice.Earpiece(audioDeviceInfo = mockk<AudioDeviceInfo>())
 
         microphoneManager.select(earpiece)
 
@@ -343,7 +345,7 @@ class MicrophoneManagerTest {
         val mediaManager = mockMediaManagerWithTelecom(telecomCall)
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
 
-        microphoneManager.select(StreamAudioDevice.Speakerphone(audio = mockk<AudioDevice>()))
+        microphoneManager.select(StreamAudioDevice.Speakerphone(audioDeviceInfo = mockk<AudioDeviceInfo>()))
 
         verify(exactly = 1) {
             telecomCall.processAction(TelecomCallAction.SwitchAudioEndpoint(endpointId))
@@ -365,7 +367,7 @@ class MicrophoneManagerTest {
         val mediaManager = mockMediaManagerWithTelecom(telecomCall)
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
 
-        microphoneManager.select(StreamAudioDevice.Earpiece(audio = mockk<AudioDevice>()))
+        microphoneManager.select(StreamAudioDevice.Earpiece(audioDeviceInfo = mockk<AudioDeviceInfo>()))
 
         assertNull(telecomCall.actionSource.tryReceive().getOrNull())
     }
@@ -384,7 +386,7 @@ class MicrophoneManagerTest {
         val mediaManager = mockMediaManagerWithTelecom(telecomCall)
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
 
-        microphoneManager.select(StreamAudioDevice.WiredHeadset(audio = mockk<AudioDevice>()))
+        microphoneManager.select(StreamAudioDevice.WiredHeadset(audioDeviceInfo = mockk<AudioDeviceInfo>()))
 
         assertNull(telecomCall.actionSource.tryReceive().getOrNull())
     }

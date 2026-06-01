@@ -17,37 +17,38 @@
 package io.getstream.video.android.core.audio
 
 import android.content.Context
-import com.twilio.audioswitch.AudioDevice
-import com.twilio.audioswitch.AudioDeviceChangeListener
-import com.twilio.audioswitch.AudioSwitch
 import io.mockk.every
-import io.mockk.mockk
-import io.mockk.spyk
+import io.mockk.just
+import io.mockk.mockkConstructor
+import io.mockk.runs
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Before
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
 class AudioSwitchControllerTest {
 
-    private val context = mockk<Context>(relaxed = true)
-    private val listener = mockk<AudioDeviceChangeListener>(relaxed = true)
-
+    private lateinit var context: Context
+    private lateinit var listener: StreamAudioDeviceChangeListener
     private lateinit var controller: AudioSwitchController
-    private lateinit var audioSwitch: AudioSwitch
 
     @Before
     fun setup() {
-        audioSwitch = mockk(relaxed = true)
+        context = RuntimeEnvironment.getApplication()
+        mockkConstructor(StreamAudioSwitch::class)
+        every { anyConstructed<StreamAudioSwitch>().start(any()) } just runs
+        every { anyConstructed<StreamAudioSwitch>().stop() } just runs
+        every { anyConstructed<StreamAudioSwitch>().selectDevice(any()) } just runs
 
-        controller = spyk(
-            AudioSwitchController(context, emptyList(), listener),
-        )
-
-        every { controller.getAudioSwitch() } returns audioSwitch
+        listener = { _, _ -> }
+        controller = AudioSwitchController(context, emptyList(), listener)
     }
 
     @After
@@ -56,59 +57,46 @@ class AudioSwitchControllerTest {
     }
 
     @Test
-    fun `start should create and start AudioSwitch`() {
+    fun `start should create and start StreamAudioSwitch`() {
         controller.start()
 
-        verify { audioSwitch.start(listener) }
+        verify { anyConstructed<StreamAudioSwitch>().start(listener) }
     }
 
     @Test
-    fun `start should not create AudioSwitch twice`() {
+    fun `start should not create StreamAudioSwitch twice`() {
         controller.start()
         controller.start()
 
-        verify(exactly = 1) { controller.getAudioSwitch() }
-        verify(exactly = 1) { audioSwitch.start(listener) }
+        verify(exactly = 1) { anyConstructed<StreamAudioSwitch>().start(any()) }
     }
 
     @Test
-    fun `stop should call stop on AudioSwitch`() {
+    fun `stop should call stop on StreamAudioSwitch`() {
         controller.start()
 
         controller.stop()
 
-        verify { audioSwitch.stop() }
+        verify { anyConstructed<StreamAudioSwitch>().stop() }
     }
 
     @Test
-    fun `selectDevice should delegate to AudioSwitch`() {
+    fun `selectDevice should delegate to StreamAudioSwitch`() {
         controller.start()
 
-        val device = mockk<AudioDevice>()
+        val device = StreamAudioDevice.Speakerphone()
 
         controller.selectDevice(device)
 
-        verify { audioSwitch.selectDevice(device) }
-    }
-
-    @Test
-    fun `selectDevice should activate only once`() {
-        controller.start()
-
-        val device = mockk<AudioDevice>()
-
-        controller.selectDevice(device)
-        controller.selectDevice(device)
-
-        verify(exactly = 1) { audioSwitch.activate() }
+        verify { anyConstructed<StreamAudioSwitch>().selectDevice(device) }
     }
 
     @Test
     fun `selectDevice should do nothing if not started`() {
-        val device = mockk<AudioDevice>()
+        val device = StreamAudioDevice.Speakerphone()
 
         controller.selectDevice(device)
 
-        verify(exactly = 0) { audioSwitch.selectDevice(any()) }
+        verify(exactly = 0) { anyConstructed<StreamAudioSwitch>().selectDevice(any()) }
     }
 }
