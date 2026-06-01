@@ -91,6 +91,23 @@ internal class ClientEventReporter(
         SFU_REQUEST_TIMEOUT("REQUEST_TIMEOUT", "SFU connection timed out"),
     }
 
+    internal fun reportSdkMethodJoinInitiated(
+        callId: String,
+        callType: String,
+        joinStageAttemptId: String,
+    ) {
+        joinStageAttemptIdMap[callId] = joinStageAttemptId
+        sendEvent(
+            buildRequest(
+                callId,
+                callType,
+                stage = CallEventStage.JOIN_INITIATED,
+                eventType = CallEventType.INITIATED,
+                joinStageAttemptId = joinStageAttemptId,
+            ),
+        )
+    }
+
     // --- CoordinatorJoin ---
 
     internal fun reportCoordinatorJoinInitiated(
@@ -379,7 +396,7 @@ internal class ClientEventReporter(
         callType: String,
         stage: CallEventStage,
         eventType: CallEventType,
-        eventSessionId: String,
+        eventSessionId: String? = null,
         joinStageAttemptId: String,
         elapsedTime: Long? = null,
         outcome: CallEventOutcome? = null,

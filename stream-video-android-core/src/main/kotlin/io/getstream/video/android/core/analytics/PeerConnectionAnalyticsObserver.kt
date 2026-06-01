@@ -54,9 +54,6 @@ internal class PeerConnectionAnalyticsObserver(
                                 peerConnectionState = state,
                             )
                         }
-                        if (publisherStage == Stage.NOT_STARTED) {
-                            publisherJob?.cancel()
-                        }
                     }
 
                 subscriberJob?.cancel()
@@ -73,9 +70,6 @@ internal class PeerConnectionAnalyticsObserver(
                                     peerConnectionState = state,
                                 )
                             }
-                            if (subscriberStage == Stage.NOT_STARTED) {
-                                subscriberJob?.cancel()
-                            }
                         }
                 }
             }
@@ -87,11 +81,19 @@ internal class PeerConnectionAnalyticsObserver(
             PeerConnection.PeerConnectionState.CONNECTING -> {
                 Stage.IN_PROGRESS
             }
-            else -> {
+
+            PeerConnection.PeerConnectionState.FAILED,
+            PeerConnection.PeerConnectionState.CONNECTED,
+            -> {
                 Stage.NOT_STARTED
+            }
+
+            else -> {
+                Stage.IN_PROGRESS
             }
         }
     }
+
     fun stop() {
         peerConnectionObserverJob?.cancel()
         peerConnectionObserverJob = null

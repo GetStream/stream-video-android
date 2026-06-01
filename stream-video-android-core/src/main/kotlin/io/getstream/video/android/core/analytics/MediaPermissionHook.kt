@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.events.reporting
+package io.getstream.video.android.core.analytics
 
-internal enum class CallEventStage(val value: String) {
-    JOIN_INITIATED("JoinInitiated"),
-    COORDINATOR_JOIN("CoordinatorJoin"),
-    WS_JOIN("WSJoin"),
-    PEER_CONNECTION_CONNECT("PeerConnectionConnect"),
-}
+import io.getstream.video.android.core.events.reporting.ClientEventReporter
 
-internal enum class CallEventType(val value: String) {
-    INITIATED("initiated"),
-    COMPLETED("completed"),
-}
+internal class MediaPermissionHook(val callId: String, val callType: String, val eventReporter: ClientEventReporter) {
+    var stage = Stage.NOT_STARTED
 
-internal enum class CallEventOutcome(val value: String) {
-    SUCCESS("success"),
-    FAILURE("failure"),
-}
-
-internal enum class PeerConnectionRole(val value: String) {
-    PUBLISH("publish"),
-    SUBSCRIBE("subscribe"),
+    fun mediaPermissionStatus() {
+    }
 }

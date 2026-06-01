@@ -1511,7 +1511,8 @@ public class CallState(
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
                     isJoinAndRingInProgress.set(false)
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
-                    call.leave(CallLeaveReason.SdkDriven(cause = SdkCause.RING_TIMEOUT, message = "Outgoing call timed out with no answer"))
+                    val leaveMessage = if (_ringingState.value is RingingState.Outgoing) "Outgoing call timed out with no answer" else "Incoming call timed out with no answer"
+                    call.leave(CallLeaveReason.SdkDriven(cause = SdkCause.RING_TIMEOUT, message = leaveMessage))
                 }
             } else {
                 logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }

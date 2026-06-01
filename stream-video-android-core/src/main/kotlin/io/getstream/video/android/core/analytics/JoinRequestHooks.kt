@@ -25,9 +25,17 @@ internal class JoinRequestHooks(val callId: String, val callType: String, val ev
     var eventSessionId = ""
     var joinStage = Stage.NOT_STARTED
     var joinStageAttemptId = ""
+
+    fun onJoinFunctionStart() {
+        joinStageAttemptId = UUID.randomUUID().toString()
+        eventReporter.reportSdkMethodJoinInitiated(
+            callType = callType,
+            callId = callId,
+            joinStageAttemptId = joinStageAttemptId,
+        )
+    }
     fun onJoinRequestStart() {
         if (joinStage == Stage.NOT_STARTED) {
-            joinStageAttemptId = UUID.randomUUID().toString()
             eventSessionId = eventReporter.reportCoordinatorJoinInitiated(
                 callType = callType,
                 callId = callId,

@@ -40,6 +40,8 @@ internal class CallAnalyticsHooks(
 
     val peerConnectionAnalyticsObserver = PeerConnectionAnalyticsObserver(scope, peerConnectionHook)
 
+    val mediaPermissionHook = MediaPermissionHook(callId, callType, eventReporter)
+
     fun onCallLeave(callLeaveReason: CallLeaveReason) {
         val isAnyStageInProgress =
             joinRequestHooks.joinStage == Stage.IN_PROGRESS ||
