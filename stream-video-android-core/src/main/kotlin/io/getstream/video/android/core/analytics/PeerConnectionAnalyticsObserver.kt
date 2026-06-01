@@ -83,7 +83,7 @@ internal class PeerConnectionAnalyticsObserver(
 
             PeerConnection.PeerConnectionState.FAILED,
             PeerConnection.PeerConnectionState.CONNECTED,
-                -> {
+            -> {
                 Stage.NOT_STARTED
             }
 
