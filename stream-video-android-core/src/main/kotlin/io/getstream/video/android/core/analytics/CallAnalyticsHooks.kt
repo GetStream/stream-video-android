@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.analytics
 
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
@@ -29,6 +30,7 @@ internal class CallAnalyticsHooks(
     val eventReporter: ClientEventReporter,
     val scope: CoroutineScope,
 ) {
+    val logger by taggedLogger("CallAnalyticsHooks")
     val joinRequestHooks = JoinRequestHooks(callId, callType, eventReporter)
     val wsHook = WsHook(callId, callType, connectionFlow, scope, eventReporter) {
         joinRequestHooks.joinStageAttemptId
@@ -48,6 +50,8 @@ internal class CallAnalyticsHooks(
                 wsHook.wsStage == Stage.IN_PROGRESS ||
                 peerConnectionAnalyticsObserver.publisherStage == Stage.IN_PROGRESS ||
                 peerConnectionAnalyticsObserver.subscriberStage == Stage.IN_PROGRESS
+        logger.d { "noob isAnyStageInProgress:$isAnyStageInProgress" }
+
         if (isAnyStageInProgress) {
             val abortReason = when (callLeaveReason) {
                 is CallLeaveReason.Backend -> ClientEventReporter.AbortReason.BACKEND_LEAVE
