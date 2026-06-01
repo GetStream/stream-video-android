@@ -55,23 +55,22 @@ internal class PeerConnectionAnalyticsObserver(
                             )
                         }
                     }
-
-                subscriberJob?.cancel()
-                subscriberJob = launch {
-                    session.filterNotNull()
-                        .flatMapLatest { it.subscriber.filterNotNull() }
-                        .flatMapLatest { it.state.filterNotNull() }
-                        .collect { state ->
-                            subscriberStage = getStage(state)
-                            scope.launch {
-                                hook.onPeerConnectionStateChanged(
-                                    role = PeerConnectionRole.SUBSCRIBE,
-                                    iceState = session.value?.subscriber?.value?.iceState?.value,
-                                    peerConnectionState = state,
-                                )
-                            }
+            }
+            subscriberJob?.cancel()
+            subscriberJob = launch {
+                session.filterNotNull()
+                    .flatMapLatest { it.subscriber.filterNotNull() }
+                    .flatMapLatest { it.state.filterNotNull() }
+                    .collect { state ->
+                        subscriberStage = getStage(state)
+                        scope.launch {
+                            hook.onPeerConnectionStateChanged(
+                                role = PeerConnectionRole.SUBSCRIBE,
+                                iceState = session.value?.subscriber?.value?.iceState?.value,
+                                peerConnectionState = state,
+                            )
                         }
-                }
+                    }
             }
         }
     }
@@ -84,7 +83,7 @@ internal class PeerConnectionAnalyticsObserver(
 
             PeerConnection.PeerConnectionState.FAILED,
             PeerConnection.PeerConnectionState.CONNECTED,
-            -> {
+                -> {
                 Stage.NOT_STARTED
             }
 
