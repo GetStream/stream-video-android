@@ -181,6 +181,7 @@ public class Call(
 ) {
     internal var location: String? = null
     private var subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
+    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
 
     /**
      * Increment this only for REJOIN and MIGRATION strategies
@@ -1623,8 +1624,6 @@ public class Call(
         val request = UpdateCallMembersRequest(updateMembers = memberRequests)
         return clientImpl.updateMembers(type, id, request)
     }
-
-    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
 
     fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
         subscriptions.forEach { sub ->
