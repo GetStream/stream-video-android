@@ -309,7 +309,9 @@ class MicrophoneManagerTest {
         every { mediaManager.speaker } returns speakerManager
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
 
-        microphoneManager.select(StreamAudioDevice.Speakerphone(audioDeviceInfo = mockk<AudioDeviceInfo>()))
+        microphoneManager.select(
+            StreamAudioDevice.Speakerphone(audioDeviceInfo = mockk<AudioDeviceInfo>()),
+        )
 
         assertEquals(DeviceStatus.Enabled, speakerStatus.value)
     }
@@ -345,7 +347,9 @@ class MicrophoneManagerTest {
         val mediaManager = mockMediaManagerWithTelecom(telecomCall)
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
 
-        microphoneManager.select(StreamAudioDevice.Speakerphone(audioDeviceInfo = mockk<AudioDeviceInfo>()))
+        microphoneManager.select(
+            StreamAudioDevice.Speakerphone(audioDeviceInfo = mockk<AudioDeviceInfo>()),
+        )
 
         verify(exactly = 1) {
             telecomCall.processAction(TelecomCallAction.SwitchAudioEndpoint(endpointId))
@@ -367,7 +371,9 @@ class MicrophoneManagerTest {
         val mediaManager = mockMediaManagerWithTelecom(telecomCall)
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
 
-        microphoneManager.select(StreamAudioDevice.Earpiece(audioDeviceInfo = mockk<AudioDeviceInfo>()))
+        microphoneManager.select(
+            StreamAudioDevice.Earpiece(audioDeviceInfo = mockk<AudioDeviceInfo>()),
+        )
 
         assertNull(telecomCall.actionSource.tryReceive().getOrNull())
     }
@@ -386,7 +392,9 @@ class MicrophoneManagerTest {
         val mediaManager = mockMediaManagerWithTelecom(telecomCall)
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
 
-        microphoneManager.select(StreamAudioDevice.WiredHeadset(audioDeviceInfo = mockk<AudioDeviceInfo>()))
+        microphoneManager.select(
+            StreamAudioDevice.WiredHeadset(audioDeviceInfo = mockk<AudioDeviceInfo>()),
+        )
 
         assertNull(telecomCall.actionSource.tryReceive().getOrNull())
     }
