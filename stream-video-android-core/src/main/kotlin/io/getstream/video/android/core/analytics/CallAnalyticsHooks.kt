@@ -41,11 +41,18 @@ internal class CallAnalyticsHooks(
     val peerConnectionAnalyticsObserver = PeerConnectionAnalyticsObserver(scope, peerConnectionHook)
 
     fun onCallLeave(callLeaveReason: CallLeaveReason) {
-        val abortReason = when (callLeaveReason) {
-            is CallLeaveReason.Backend -> ClientEventReporter.AbortReason.BACKEND_LEAVE
-            else -> ClientEventReporter.AbortReason.CLIENT_ABORTED
+        val isAnyStageInProgress =
+            joinRequestHooks.joinStage == Stage.IN_PROGRESS ||
+                wsHook.wsStage == Stage.IN_PROGRESS ||
+                peerConnectionAnalyticsObserver.publisherStage == Stage.IN_PROGRESS ||
+                peerConnectionAnalyticsObserver.subscriberStage == Stage.IN_PROGRESS
+        if (isAnyStageInProgress) {
+            val abortReason = when (callLeaveReason) {
+                is CallLeaveReason.Backend -> ClientEventReporter.AbortReason.BACKEND_LEAVE
+                else -> ClientEventReporter.AbortReason.CLIENT_ABORTED
+            }
+            eventReporter.abortAllInFlight(abortReason)
         }
-        eventReporter.abortAllInFlight(abortReason)
     }
 
     fun stopObservers() {

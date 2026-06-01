@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+import org.webrtc.PeerConnection
 
 internal class PeerConnectionAnalyticsObserver(
     private val scope: CoroutineScope,
@@ -31,36 +32,66 @@ internal class PeerConnectionAnalyticsObserver(
 ) {
 
     private var peerConnectionObserverJob: Job? = null
+    private var publisherJob: Job? = null
+    private var subscriberJob: Job? = null
+    var publisherStage = Stage.NOT_STARTED
+    var subscriberStage = Stage.NOT_STARTED
 
     fun observePeerConnections(session: StateFlow<RtcSession?>) {
         peerConnectionObserverJob?.cancel()
         peerConnectionObserverJob = scope.launch {
-            launch {
+            publisherJob?.cancel()
+            publisherJob = launch {
                 session.filterNotNull()
                     .flatMapLatest { it.publisher.filterNotNull() }
                     .flatMapLatest { it.state.filterNotNull() }
                     .collect { state ->
-                        hook.onPeerConnectionStateChanged(
-                            role = PeerConnectionRole.PUBLISH,
-                            iceState = session.value?.publisher?.value?.iceState?.value,
-                            peerConnectionState = state,
-                        )
+                        publisherStage = getStage(state)
+                        scope.launch {
+                            hook.onPeerConnectionStateChanged(
+                                role = PeerConnectionRole.PUBLISH,
+                                iceState = session.value?.publisher?.value?.iceState?.value,
+                                peerConnectionState = state,
+                            )
+                        }
+                        if (publisherStage == Stage.NOT_STARTED) {
+                            publisherJob?.cancel()
+                        }
                     }
 
-                session.filterNotNull()
-                    .flatMapLatest { it.subscriber.filterNotNull() }
-                    .flatMapLatest { it.state.filterNotNull() }
-                    .collect { state ->
-                        hook.onPeerConnectionStateChanged(
-                            role = PeerConnectionRole.SUBSCRIBE,
-                            iceState = session.value?.subscriber?.value?.iceState?.value,
-                            peerConnectionState = state,
-                        )
-                    }
+                subscriberJob?.cancel()
+                subscriberJob = launch {
+                    session.filterNotNull()
+                        .flatMapLatest { it.subscriber.filterNotNull() }
+                        .flatMapLatest { it.state.filterNotNull() }
+                        .collect { state ->
+                            subscriberStage = getStage(state)
+                            scope.launch {
+                                hook.onPeerConnectionStateChanged(
+                                    role = PeerConnectionRole.SUBSCRIBE,
+                                    iceState = session.value?.subscriber?.value?.iceState?.value,
+                                    peerConnectionState = state,
+                                )
+                            }
+                            if (subscriberStage == Stage.NOT_STARTED) {
+                                subscriberJob?.cancel()
+                            }
+                        }
+                }
             }
         }
     }
 
+    private fun getStage(peerConnectionState: PeerConnection.PeerConnectionState): Stage {
+        return when (peerConnectionState) {
+            PeerConnection.PeerConnectionState.CONNECTING -> {
+                Stage.IN_PROGRESS
+            }
+            else -> {
+                Stage.NOT_STARTED
+            }
+        }
+    }
     fun stop() {
         peerConnectionObserverJob?.cancel()
         peerConnectionObserverJob = null
