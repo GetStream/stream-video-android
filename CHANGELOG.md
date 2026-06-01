@@ -12,6 +12,7 @@
 
 ## stream-video-android
 ### 🐞 Fixed
+Fix `NullPointerException` logged from `SortedParticipantsState.init` on every `Call` construction. The internal sort coroutine read `Call.events` before the field was initialized, racing against the rest of `Call`'s constructor on production dispatchers. The error was captured by the call scope's exception handler — calls continued to work — but the call-event-driven resort path was effectively dead.
 
 ### ⬆️ Improved
 
