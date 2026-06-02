@@ -16,19 +16,27 @@
 
 package io.getstream.video.android.core.events.reporting
 
-internal enum class CallEventStage(val value: String) {
-    JOIN_INITIATED("JoinInitiated"),
-    COORDINATOR_JOIN("CoordinatorJoin"),
-    WS_JOIN("WSJoin"),
-    PEER_CONNECTION_CONNECT("PeerConnectionConnect"),
+internal sealed interface EventStage {
+    val value: String
+
+    data object CoordinatorWs : EventStage {
+        override val value = "CoordinatorWS"
+    }
+
+    enum class Call(override val value: String) : EventStage {
+        JOIN_INITIATED("JoinInitiated"),
+        COORDINATOR_JOIN("CoordinatorJoin"),
+        WS_JOIN("WSJoin"),
+        PEER_CONNECTION_CONNECT("PeerConnectionConnect"),
+    }
 }
 
-internal enum class CallEventType(val value: String) {
+internal enum class EventType(val value: String) {
     INITIATED("initiated"),
     COMPLETED("completed"),
 }
 
-internal enum class CallEventOutcome(val value: String) {
+internal enum class EventOutcome(val value: String) {
     SUCCESS("success"),
     FAILURE("failure"),
 }

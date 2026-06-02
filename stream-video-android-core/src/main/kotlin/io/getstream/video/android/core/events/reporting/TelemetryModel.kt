@@ -17,3 +17,45 @@
 package io.getstream.video.android.core.events.reporting
 
 internal data class TelemetryModel(val retryAttempt: Int)
+
+internal enum class AnalyticsCallAbortReason(val code: String, val message: String) {
+    CLIENT_ABORTED("CLIENT_ABORTED", "Aborted: user left during retry"),
+    BACKEND_LEAVE("BACKEND_LEAVE", "Aborted: backend ended call during connect"),
+}
+
+internal enum class AnalyticsFailureCodes(val code: String, val message: String) {
+    CLIENT_ABORTED("CLIENT_ABORTED", "Aborted: user left during retry"),
+    BACKEND_LEAVE("BACKEND_LEAVE", "Aborted: backend ended call during connect"),
+    NETWORK_OFFLINE("NETWORK_OFFLINE", "Device offline"),
+    ICE_GATHERING_FAILED("ICE_GATHERING_FAILED", "ICE gathering failed"),
+    ICE_CONNECTIVITY_FAILED("ICE_CONNECTIVITY_FAILED", "ICE connectivity failed"),
+    REQUEST_TIMEOUT("REQUEST_TIMEOUT", "Device offline"),
+    SFU_REQUEST_TIMEOUT("REQUEST_TIMEOUT", "SFU connection timed out"),
+}
+
+internal sealed class InFlightSession(
+    open val stage: EventStage.Call,
+    open val startedAtMs: Long,
+    open val eventSessionId: EventSessionId,
+)
+
+internal data class PostCallFlightSession(
+    val callId: String,
+    val callType: String,
+    override val eventSessionId: EventSessionId,
+    override val stage: EventStage.Call,
+    override val startedAtMs: Long,
+    val joinStageAttemptIdSnapshot: String,
+    val sfuId: String? = null,
+    val callSessionId: String? = null,
+    val userSessionId: String? = null,
+    val peerConnectionRole: PeerConnectionRole? = null,
+    val wasPreviouslyConnected: Boolean = false,
+) : InFlightSession(stage, startedAtMs, eventSessionId)
+
+internal data class PreCallInFlightSession(
+    override val stage: EventStage.Call,
+    override val startedAtMs: Long,
+    override val eventSessionId: EventSessionId,
+    val coordinatorConnectId: String,
+) : InFlightSession(stage, startedAtMs, eventSessionId)

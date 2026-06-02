@@ -60,6 +60,9 @@ data class ClientEvent (
     @Json(name = "join_success_id")
     val joinSuccessId: kotlin.String? = null,
 
+    @Json(name = "coordinator_connect_id")
+    val coordinatorConnectId: kotlin.String? = null,
+
     @Json(name = "outcome")
     val outcome: kotlin.String? = null,
 
@@ -119,6 +122,7 @@ data class ClientEvent (
             appendIfNotNull("eventSessionId", eventSessionId)
             appendIfNotNull("userSessionId", userSessionId)
             appendIfNotNull("joinSuccessId", joinSuccessId)
+            appendIfNotNull("coordinatorConnectId", coordinatorConnectId)
 
             appendIfNotNull("userId", userId)
             appendIfNotNull("sfuId", sfuId)

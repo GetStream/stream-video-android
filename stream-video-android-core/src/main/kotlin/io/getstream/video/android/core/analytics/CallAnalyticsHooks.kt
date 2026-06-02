@@ -19,6 +19,7 @@ package io.getstream.video.android.core.analytics
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.events.reporting.AnalyticsCallAbortReason
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -54,10 +55,10 @@ internal class CallAnalyticsHooks(
 
         if (isAnyStageInProgress) {
             val abortReason = when (callLeaveReason) {
-                is CallLeaveReason.Backend -> ClientEventReporter.AbortReason.BACKEND_LEAVE
-                else -> ClientEventReporter.AbortReason.CLIENT_ABORTED
+                is CallLeaveReason.Backend -> AnalyticsCallAbortReason.BACKEND_LEAVE
+                else -> AnalyticsCallAbortReason.CLIENT_ABORTED
             }
-            eventReporter.abortAllInFlight(abortReason)
+            eventReporter.abortAllPostCallInFlight(abortReason)
         }
     }
 

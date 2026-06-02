@@ -83,6 +83,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.analytics.CoordinatorAnalytics
 import io.getstream.video.android.core.audio.AudioExecutionContext
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.errors.VideoErrorCode
@@ -219,6 +220,64 @@ internal class StreamVideoClient internal constructor(
     internal fun getAudioContext(): AudioExecutionContext = audioExecutionContext
 
     val socketImpl = coordinatorConnectionModule.socketConnection
+    var location: String? = null
+    val coordinatorAnalytics = CoordinatorAnalytics(scope, state.clientEventReporter)
+
+    init {
+        // listen to socket events and errors
+        scope.launch(CoroutineName("init#coordinatorSocket.events.collect")) {
+            coordinatorConnectionModule.socketConnection.events().collect {
+                fireEvent(it)
+            }
+        }
+        scope.launch {
+            coordinatorConnectionModule.socketConnection.state().collect {
+                state.handleState(it)
+            }
+        }
+
+        scope.launch {
+            coordinatorAnalytics
+                .startObserver(coordinatorConnectionModule.socketConnection.state())
+        }
+
+        scope.launch(CoroutineName("init#coordinatorSocket.errors.collect")) {
+            coordinatorConnectionModule.socketConnection.errors().collect { error ->
+                state.handleError(error.streamError)
+            }
+        }
+
+        scope.launch(CoroutineName("init#coordinatorSocket.connectionState.collect")) {
+            coordinatorConnectionModule.socketConnection.state().collect { it ->
+                // If the socket is reconnected then we have a new connection ID.
+                // We need to re-watch every watched call with the new connection ID
+                // (otherwise the WS events will stop)
+                val watchedCalls = calls
+                if (it is VideoSocketState.Connected && watchedCalls.isNotEmpty()) {
+                    val filter = Filters.`in`("cid", watchedCalls.values.map { it.cid }).toMap()
+                    queryCalls(filters = filter, watch = true).also {
+                        if (it is Failure) {
+                            logger.e { "Failed to re-watch calls (${it.value}" }
+                        }
+                    }
+                }
+            }
+        }
+
+        scope.launch {
+            /**
+             * Invoke the reject API only when the busy check is triggered from the video client.
+             *
+             * Network calls initiated from background notification flows may be suspended
+             * by the OS, so API calls are intentionally avoided in those cases.
+             */
+            callBusyHandler.callBusyHandlerState.filterNotNull()
+                .filter { it.source == CallBusyHandler.CallBusyHandlerCheckerSource.VIDEO_CLIENT }
+                .map { it.streamCallId }.collect { streamCallId ->
+                    call(streamCallId.type, streamCallId.id).reject(RejectReason.Busy)
+                }
+        }
+    }
 
     fun onCallCleanUp(call: Call) {
         if (enableCallUpdatesAfterLeave) {
@@ -256,6 +315,7 @@ internal class StreamVideoClient internal constructor(
             CallLeaveReason.SdkDriven(cause = SdkCause.CLIENT_CLEANUP, message = "client-cleanup"),
         ) // SDK client cleanup
         audioExecutionContext.release()
+        coordinatorAnalytics.endObserver()
     }
 
     /**
@@ -388,59 +448,6 @@ internal class StreamVideoClient internal constructor(
     override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
         coordinatorConnectionModule.socketConnection.connect(user)
     }
-
-    init {
-        // listen to socket events and errors
-        scope.launch(CoroutineName("init#coordinatorSocket.events.collect")) {
-            coordinatorConnectionModule.socketConnection.events().collect {
-                fireEvent(it)
-            }
-        }
-        scope.launch {
-            coordinatorConnectionModule.socketConnection.state().collect {
-                state.handleState(it)
-            }
-        }
-
-        scope.launch(CoroutineName("init#coordinatorSocket.errors.collect")) {
-            coordinatorConnectionModule.socketConnection.errors().collect { error ->
-                state.handleError(error.streamError)
-            }
-        }
-
-        scope.launch(CoroutineName("init#coordinatorSocket.connectionState.collect")) {
-            coordinatorConnectionModule.socketConnection.state().collect { it ->
-                // If the socket is reconnected then we have a new connection ID.
-                // We need to re-watch every watched call with the new connection ID
-                // (otherwise the WS events will stop)
-                val watchedCalls = calls
-                if (it is VideoSocketState.Connected && watchedCalls.isNotEmpty()) {
-                    val filter = Filters.`in`("cid", watchedCalls.values.map { it.cid }).toMap()
-                    queryCalls(filters = filter, watch = true).also {
-                        if (it is Failure) {
-                            logger.e { "Failed to re-watch calls (${it.value}" }
-                        }
-                    }
-                }
-            }
-        }
-
-        scope.launch {
-            /**
-             * Invoke the reject API only when the busy check is triggered from the video client.
-             *
-             * Network calls initiated from background notification flows may be suspended
-             * by the OS, so API calls are intentionally avoided in those cases.
-             */
-            callBusyHandler.callBusyHandlerState.filterNotNull()
-                .filter { it.source == CallBusyHandler.CallBusyHandlerCheckerSource.VIDEO_CLIENT }
-                .map { it.streamCallId }.collect { streamCallId ->
-                    call(streamCallId.type, streamCallId.id).reject(RejectReason.Busy)
-                }
-        }
-    }
-
-    var location: String? = null
 
     internal suspend fun getCachedLocation(): Result<String> {
         if (state.failureInjector.isEnabled(FailureKey.FAIL_LOCATION)) {

@@ -78,13 +78,13 @@ internal class PeerConnectionAnalyticsObserver(
     private fun getStage(peerConnectionState: PeerConnection.PeerConnectionState): Stage {
         return when (peerConnectionState) {
             PeerConnection.PeerConnectionState.CONNECTING -> {
-                Stage.IN_PROGRESS
+                Stage.IN_PROGRESS // initiated
             }
 
             PeerConnection.PeerConnectionState.FAILED,
             PeerConnection.PeerConnectionState.CONNECTED,
             -> {
-                Stage.NOT_STARTED
+                Stage.NOT_STARTED // completed
             }
 
             else -> {

@@ -96,6 +96,7 @@ open class StreamPeerConnection(
     // see https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/iceConnectionState
     internal val state = MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
     internal val iceState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
+    internal val iceError = MutableStateFlow<IceCandidateErrorEvent?>(null)
 
     open suspend fun stats(): ComputedStats? = null
 
@@ -173,6 +174,7 @@ open class StreamPeerConnection(
         this.statsTracer = StatsTracer(connection, type.toPeerType())
         this.state.value = this.connection.connectionState()
         this.iceState.value = this.connection.iceConnectionState()
+        this.iceError.value = null
     }
 
     /**
@@ -539,6 +541,12 @@ open class StreamPeerConnection(
     override fun onConnectionChange(newState: PeerConnection.PeerConnectionState) {
         logger.i { "[onConnectionChange] #sfu; #$typeTag; newState: $newState" }
         state.value = newState
+        when (newState) {
+            PeerConnection.PeerConnectionState.CONNECTED -> {
+                iceError.value = null
+            }
+            else -> {}
+        }
         tracer.trace(PeerConnectionTraceKey.ON_CONNECTION_STATE_CHANGE.value, newState.name)
     }
 
@@ -613,6 +621,7 @@ open class StreamPeerConnection(
 
     override fun onIceCandidateError(event: IceCandidateErrorEvent?) {
         logger.e { "[onIceCandidateError] #sfu; #$typeTag; event: ${event?.stringify()}" }
+        iceError.value = event
     }
 
     override fun onSelectedCandidatePairChanged(event: CandidatePairChangeEvent?) {

@@ -30,6 +30,13 @@ import kotlinx.coroutines.flow.StateFlow
 internal class CoordinatorSocketStateService(initialState: VideoSocketState = VideoSocketState.Disconnected.Stopped) {
     private val logger by taggedLogger("Video:SocketState")
 
+    // TODO making it companion because CoordinatorSocketConnection has public constructor
+    // So we cannot inject CoordinatorSocketStateService from StreamBuilder without breaking apis
+    internal companion object {
+        var retryAttempts = 0
+        var lastRetryAttempts = 0
+    }
+
     suspend fun observer(onNewState: suspend (VideoSocketState) -> Unit) {
         stateMachine.stateFlow.collect(onNewState)
     }
@@ -43,6 +50,7 @@ internal class CoordinatorSocketStateService(initialState: VideoSocketState = Vi
         connectionConf: ConnectionConf,
         forceReconnection: Boolean,
     ) {
+        retryAttempts += 1
         logger.v {
             "[onReconnect] user.id: '${connectionConf.user.id}', isReconnection: ${connectionConf.isReconnection}"
         }
@@ -63,6 +71,8 @@ internal class CoordinatorSocketStateService(initialState: VideoSocketState = Vi
      * @param connectionConf The [VideoSocketFactory.ConnectionConf] to be used on the new connection.
      */
     suspend fun onConnect(connectionConf: ConnectionConf) {
+        lastRetryAttempts = retryAttempts
+        retryAttempts = 0
         logger.v {
             "[onConnect] user.id: '${connectionConf.user.id}', isReconnection: ${connectionConf.isReconnection}"
         }
@@ -88,6 +98,8 @@ internal class CoordinatorSocketStateService(initialState: VideoSocketState = Vi
      * @param connectedEvent The [ConnectedEvent] received within the WebSocket connection.
      */
     suspend fun onConnectionEstablished(connectedEvent: ConnectedEvent) {
+        lastRetryAttempts = retryAttempts
+        retryAttempts = 0
         logger.i {
             "[onConnected] user.id: '${connectedEvent.me.id}', connectionId: ${connectedEvent.connectionId}"
         }
@@ -100,6 +112,8 @@ internal class CoordinatorSocketStateService(initialState: VideoSocketState = Vi
      * @param error The [Error.NetworkError]
      */
     suspend fun onUnrecoverableError(error: Error.NetworkError) {
+        lastRetryAttempts = retryAttempts
+        retryAttempts = 0
         logger.e { "[onUnrecoverableError] error: $error" }
         stateMachine.sendEvent(VideoSocketStateEvent.UnrecoverableError(error))
     }

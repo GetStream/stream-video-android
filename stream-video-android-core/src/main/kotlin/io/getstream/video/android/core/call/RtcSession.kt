@@ -71,7 +71,7 @@ import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.events.reporting.ClientEventReporter
+import io.getstream.video.android.core.events.reporting.AnalyticsFailureCodes
 import io.getstream.video.android.core.events.reporting.TelemetryModel
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.AudioTrack
@@ -934,8 +934,8 @@ public class RtcSession internal constructor(
                 call.callAnalyticsHooks.wsHook.onWsCompleted(
                     success = false,
                     retryCount = telemetryModel?.retryAttempt ?: 0,
-                    failureReason = ClientEventReporter.FailureCodes.SFU_REQUEST_TIMEOUT.message,
-                    failureCode = ClientEventReporter.FailureCodes.SFU_REQUEST_TIMEOUT.code,
+                    failureReason = AnalyticsFailureCodes.SFU_REQUEST_TIMEOUT.message,
+                    failureCode = AnalyticsFailureCodes.SFU_REQUEST_TIMEOUT.code,
                 )
 
                 sendCallStats()
