@@ -61,9 +61,9 @@ internal class ClientEventReporter(
 
     // Whether each PC role has ever reached CONNECTED (for was_previously_connected)
     private val pcEverConnected = ConcurrentHashMap<PeerConnectionRole, Boolean>()
-
+    private var coordinatorConnectId = ""
     internal fun reportCoordinatorWSInitiated(): String {
-        val coordinatorConnectId = UUID.randomUUID().toString()
+        this.coordinatorConnectId = UUID.randomUUID().toString()
         val stageId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
         postCallFlightSessions[stageId] = PreCallInFlightSession(
@@ -541,6 +541,7 @@ internal class ClientEventReporter(
         microphonePermissionStatus = getPermissionStatusText(microphoneAllowed),
         cameraPermissionStatus = getPermissionStatusText(cameraAllowed),
         trackId = trackId,
+        coordinatorConnectId = this.coordinatorConnectId,
     )
 
     fun getPermissionStatusText(allowed: Boolean?): String? {

@@ -33,7 +33,7 @@ internal class CoordinatorAnalytics(
     private var job: Job? = null
     private var stageId = ""
 
-    fun startObserver(videoSocketStateFlow: StateFlow<VideoSocketState>) {
+    internal fun startObserver(videoSocketStateFlow: StateFlow<VideoSocketState>) {
         endObserver()
         job = scope.launch {
             videoSocketStateFlow.collect {
