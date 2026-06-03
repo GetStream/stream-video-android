@@ -126,9 +126,11 @@ import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
 import io.getstream.video.android.core.utils.toQueriedMembers
+import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -165,7 +167,7 @@ internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
 internal class StreamVideoClient internal constructor(
     override val context: Context,
     internal val scope: CoroutineScope = ClientScope(),
-    override val user: User,
+    override var user: User,
     internal val apiKey: ApiKey,
     internal var token: String,
     private val lifecycle: Lifecycle,
@@ -207,7 +209,8 @@ internal class StreamVideoClient internal constructor(
 
     internal var guestUserJob: Deferred<Unit>? = null
 
-    public override val userId = user.id
+    public override val userId: String
+        get() = user.id
 
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
@@ -547,6 +550,10 @@ internal class StreamVideoClient internal constructor(
             response.onSuccess {
                 coordinatorConnectionModule.updateAuthType("jwt")
                 coordinatorConnectionModule.updateToken(it.accessToken)
+                // Adopt the server-issued user identity so the SDK's local user.id
+                // can't drift from the JWT's user_id claim (parity with the JS SDK,
+                // which connects with response.user from createGuest).
+                this@StreamVideoClient.user = it.user.toUser().copy(type = UserType.Guest)
             }
         }
     }

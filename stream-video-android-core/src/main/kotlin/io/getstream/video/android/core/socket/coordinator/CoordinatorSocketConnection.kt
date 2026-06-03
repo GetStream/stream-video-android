@@ -71,8 +71,9 @@ public open class CoordinatorSocketConnection(
     private val apiKey: ApiKey,
     /** The URL to connect to */
     private val url: String,
-    /** The  user to connect. */
-    private val user: User,
+    /** The user to connect. Mutable so a guest user can be replaced with the server-issued
+     *  identity returned by createGuest before the WS auth payload is sent. */
+    private var user: User,
     /** The initial token. */
     @Deprecated(
         "token is not used",
@@ -233,10 +234,12 @@ public open class CoordinatorSocketConnection(
     override suspend fun sendEvent(event: VideoEvent): Boolean = internalSocket.sendEvent(event)
 
     override suspend fun connect(connectData: User) {
+        user = connectData
         internalSocket.connectUser(connectData, connectData.isAnonymous())
     }
 
     override suspend fun reconnect(data: User, force: Boolean) {
+        user = data
         internalSocket.reconnectUser(data, data.isAnonymous(), force)
     }
 
