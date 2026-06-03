@@ -136,13 +136,26 @@ internal class StreamNotificationManager private constructor(
      */
     suspend fun deleteDevice(device: Device): Result<Unit> {
         logger.d { "[deleteDevice] device: $device" }
-        return try {
+        val result = try {
             api.deleteDevice(device.id)
-            removeStoredDevice(device)
             Result.Success(Unit)
         } catch (e: Exception) {
             Result.Failure(Error.ThrowableError("Device couldn't be deleted", e))
         }
+        // Always purge the local cache — even when the server returns 404 or the
+        // network call fails. Keeping a stale token locally makes the next
+        // createDevice for a different user short-circuit on token equality and
+        // skip the API call, silently leaving the new user without a device row.
+        // Don't let local-cleanup failure mask the API call's outcome, and don't
+        // swallow CancellationException — structured concurrency depends on it.
+        try {
+            removeStoredDevice(device)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.e(e) { "[deleteDevice] failed to remove stored device locally" }
+        }
+        return result
     }
 
     private fun PushDevice.toDevice(): Device =
