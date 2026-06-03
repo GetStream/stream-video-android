@@ -414,6 +414,7 @@ internal class ClientEventReporter(
         callId: String,
         callType: String,
         joinStageAttemptId: String,
+        trackId: String,
     ): String {
         val eventSessionId = UUID.randomUUID().toString()
         val callSessionId = callSessionIdMap[callId]
@@ -427,6 +428,7 @@ internal class ClientEventReporter(
                 joinStageAttemptId = joinStageAttemptId,
                 callSessionId = callSessionId,
                 sfuId = sfuId,
+                trackId = trackId,
             ),
         )
         return eventSessionId
@@ -511,6 +513,7 @@ internal class ClientEventReporter(
         screenShareAllowed: Boolean? = null,
         microphoneAllowed: Boolean? = null,
         cameraAllowed: Boolean? = null,
+        trackId: String? = null,
     ): ClientEvent = ClientEvent(
         eventSessionId = eventSessionId,
         joinAttemptId = joinStageAttemptId,
@@ -537,6 +540,7 @@ internal class ClientEventReporter(
         screenShareGranted = screenShareAllowed,
         microphoneGranted = microphoneAllowed,
         cameraGranted = cameraAllowed,
+        trackId = trackId,
     )
 
     // --- Delivery ---

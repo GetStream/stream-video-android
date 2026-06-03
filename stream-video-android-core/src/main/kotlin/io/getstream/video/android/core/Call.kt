@@ -588,6 +588,7 @@ public class Call(
         peerConnectionFactory.setPlaybackSamplesReadyCallback {
             scope.launch {
                 callAnalyticsHooks.audioAnalytics.firstAudioFrameRendered()
+                peerConnectionFactory.setPlaybackSamplesReadyCallback(null)
             }
         }
 
@@ -1500,7 +1501,7 @@ public class Call(
                     val width = videoRenderer.measuredWidth
                     val height = videoRenderer.measuredHeight
                     logger.i {
-                        "[initRenderer.onFirstFrameRendered] #sfu; #track; " +
+                        "noob [initRenderer.onFirstFrameRendered] #sfu; #track; " +
                             "trackType: $trackType, dimension: ($width - $height), " +
                             "sessionId: $sessionId"
                     }
@@ -1514,7 +1515,14 @@ public class Call(
                         )
                     }
                     onRendered(videoRenderer)
-                    callAnalyticsHooks.videoAnalytics.firstVideoFrameRendered()
+                    val videoTrackId = session.value?.subscriber?.value?.getTrack(
+                        sessionId,
+                        TrackType.TRACK_TYPE_VIDEO,
+                    )?.asVideoTrack()?.video?.id()
+
+                    videoTrackId?.let {
+                        callAnalyticsHooks.videoAnalytics.firstVideoFrameRendered(videoTrackId)
+                    }
                 }
 
                 override fun onFrameResolutionChanged(

@@ -104,7 +104,9 @@ data class ClientEvent (
     @Json(name = "microphone")
     val microphoneGranted: kotlin.Boolean? = null,
     @Json(name = "camera")
-    val cameraGranted: kotlin.Boolean? = null
+    val cameraGranted: kotlin.Boolean? = null,
+    @Json(name = "trackId")
+    val trackId: String? = null
 ) {
 
     internal fun toLog(): String {
@@ -146,9 +148,10 @@ data class ClientEvent (
 
             appendIfNotNull("sdkVersion", sdkVersion)
             appendIfNotNull("timestamp", timestamp)
-            appendIfNotNull("camera", callSessionId)
+            appendIfNotNull("camera", cameraGranted)
             appendIfNotNull("microphone", microphoneGranted)
             appendIfNotNull("screenShare", screenShareGranted)
+            appendIfNotNull("trackId", trackId)
 
             append(")")
         }

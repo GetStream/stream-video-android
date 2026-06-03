@@ -108,7 +108,7 @@ public class StreamPeerConnectionFactory(
         audioSampleCallback = callback
     }
 
-    internal fun setPlaybackSamplesReadyCallback(callback: () -> Unit) {
+    internal fun setPlaybackSamplesReadyCallback(callback: (() -> Unit)?) {
         playbackSamplesReadyCallback = callback
     }
 

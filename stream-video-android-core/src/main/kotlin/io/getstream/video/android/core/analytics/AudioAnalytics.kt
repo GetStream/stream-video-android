@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.analytics
 
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal class AudioAnalytics(
     private val callId: String,
@@ -26,11 +27,11 @@ internal class AudioAnalytics(
     val getJoinStageAttemptId: () -> String,
 ) {
 
-    var eventSession: String = ""
+    var recordedFirstFrame: AtomicBoolean = AtomicBoolean(false)
 
     fun firstAudioFrameRendered() {
-        if (eventSession.isNotEmpty()) {
-            eventSession = clientEventReporter.reportFirstAudioFrameRendered(
+        if (recordedFirstFrame.compareAndSet(false, true)) {
+            clientEventReporter.reportFirstAudioFrameRendered(
                 onSfuId(),
                 callId,
                 callType,

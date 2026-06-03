@@ -28,13 +28,14 @@ internal class VideoAnalytics(
 
     var eventSession: String = ""
 
-    fun firstVideoFrameRendered() {
-        if (eventSession.isNotEmpty()) {
+    fun firstVideoFrameRendered(trackId: String) {
+        if (eventSession.isEmpty()) {
             eventSession = clientEventReporter.reportFirstVideoFrameRendered(
                 onSfuId(),
                 callId,
                 callType,
                 getJoinStageAttemptId(),
+                trackId,
             )
         }
     }
