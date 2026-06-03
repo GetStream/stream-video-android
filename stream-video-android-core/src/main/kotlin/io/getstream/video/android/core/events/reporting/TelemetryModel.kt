@@ -36,13 +36,13 @@ internal enum class AnalyticsFailureCodes(val code: String, val message: String)
 internal sealed class InFlightSession(
     open val stage: EventStage.Call,
     open val startedAtMs: Long,
-    open val eventSessionId: EventSessionId,
+    open val stageId: StageId,
 )
 
 internal data class PostCallFlightSession(
     val callId: String,
     val callType: String,
-    override val eventSessionId: EventSessionId,
+    override val stageId: StageId,
     override val stage: EventStage.Call,
     override val startedAtMs: Long,
     val joinStageAttemptIdSnapshot: String,
@@ -51,11 +51,11 @@ internal data class PostCallFlightSession(
     val userSessionId: String? = null,
     val peerConnectionRole: PeerConnectionRole? = null,
     val wasPreviouslyConnected: Boolean = false,
-) : InFlightSession(stage, startedAtMs, eventSessionId)
+) : InFlightSession(stage, startedAtMs, stageId)
 
 internal data class PreCallInFlightSession(
     override val stage: EventStage.Call,
     override val startedAtMs: Long,
-    override val eventSessionId: EventSessionId,
+    override val stageId: StageId,
     val coordinatorConnectId: String,
-) : InFlightSession(stage, startedAtMs, eventSessionId)
+) : InFlightSession(stage, startedAtMs, stageId)

@@ -31,7 +31,7 @@ internal class CoordinatorAnalytics(
 ) {
 
     private var job: Job? = null
-    private var eventSessionId = ""
+    private var stageId = ""
 
     fun startObserver(videoSocketStateFlow: StateFlow<VideoSocketState>) {
         endObserver()
@@ -41,7 +41,7 @@ internal class CoordinatorAnalytics(
                     is VideoSocketState.Connecting -> {
                         when (it.connectionType) {
                             VideoSocketConnectionType.INITIAL_CONNECTION -> {
-                                eventSessionId = eventReporter.reportCoordinatorWSInitiated()
+                                stageId = eventReporter.reportCoordinatorWSInitiated()
                             }
 
                             VideoSocketConnectionType.AUTOMATIC_RECONNECTION -> {}
@@ -50,9 +50,9 @@ internal class CoordinatorAnalytics(
                     }
 
                     is VideoSocketState.Connected -> {
-                        if (eventSessionId.isNotEmpty()) {
+                        if (stageId.isNotEmpty()) {
                             eventReporter.reportCoordinatorWSCompleted(
-                                eventSessionId,
+                                stageId,
                                 true,
                                 CoordinatorSocketStateService.lastRetryAttempts,
                             )
@@ -60,9 +60,9 @@ internal class CoordinatorAnalytics(
                     }
 
                     is VideoSocketState.Disconnected.DisconnectedPermanently -> {
-                        if (eventSessionId.isNotEmpty()) {
+                        if (stageId.isNotEmpty()) {
                             eventReporter.reportCoordinatorWSCompleted(
-                                eventSessionId,
+                                stageId,
                                 false,
                                 CoordinatorSocketStateService.lastRetryAttempts,
                             )

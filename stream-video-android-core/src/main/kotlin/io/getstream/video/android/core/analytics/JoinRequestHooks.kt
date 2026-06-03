@@ -22,7 +22,7 @@ import java.util.UUID
 
 internal class JoinRequestHooks(val callId: String, val callType: String, val eventReporter: ClientEventReporter) {
 
-    var eventSessionId = ""
+    var stageId = ""
     var joinStage = Stage.NOT_STARTED
     var joinStageAttemptId = ""
 
@@ -36,7 +36,7 @@ internal class JoinRequestHooks(val callId: String, val callType: String, val ev
     }
     fun onJoinRequestStart() {
         if (joinStage == Stage.NOT_STARTED) {
-            eventSessionId = eventReporter.reportCoordinatorJoinInitiated(
+            stageId = eventReporter.reportCoordinatorJoinInitiated(
                 callType = callType,
                 callId = callId,
                 joinStageAttemptId = joinStageAttemptId,
@@ -46,9 +46,9 @@ internal class JoinRequestHooks(val callId: String, val callType: String, val ev
     }
     fun onJoinRequestSuccess(telemetryModel: TelemetryModel, currentSessionId: String) {
         if (joinStage == Stage.IN_PROGRESS) {
-            if (eventSessionId.isNotEmpty()) {
+            if (stageId.isNotEmpty()) {
                 eventReporter.reportCoordinatorJoinCompleted(
-                    eventSessionId = eventSessionId,
+                    stageId = stageId,
                     success = true,
                     retryCount = telemetryModel.retryAttempt,
                     callSessionId = currentSessionId,
@@ -60,9 +60,9 @@ internal class JoinRequestHooks(val callId: String, val callType: String, val ev
 
     fun onJoinRequestPermanentError(retryCount: Int, message: String) {
         if (joinStage == Stage.IN_PROGRESS) {
-            if (eventSessionId.isNotEmpty()) {
+            if (stageId.isNotEmpty()) {
                 eventReporter.reportCoordinatorJoinCompleted(
-                    eventSessionId = eventSessionId,
+                    stageId = stageId,
                     success = false,
                     retryCount = retryCount,
                     failureReason = message,

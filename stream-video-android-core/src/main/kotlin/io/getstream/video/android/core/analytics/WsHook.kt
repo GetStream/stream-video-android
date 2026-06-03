@@ -29,14 +29,14 @@ internal class WsHook(
     val reporter: ClientEventReporter,
     val getJoinStageAttemptId: () -> String,
 ) {
-    var telemetryWsEventSessionId = ""
+    var telemetryWsEventStageId = ""
     var wsStage = Stage.NOT_STARTED
 
     var sfuName: String = ""
     fun onWsInitiated(sfuName: String, wasPreviouslyConnected: Boolean) {
         if (wsStage == Stage.NOT_STARTED) {
             this.sfuName = sfuName
-            telemetryWsEventSessionId = reporter.reportWsJoinInitiated(
+            telemetryWsEventStageId = reporter.reportWsJoinInitiated(
                 callId = callId,
                 callType = callType,
                 sfuId = sfuName,
@@ -54,9 +54,9 @@ internal class WsHook(
         failureCode: String? = null,
     ) {
         if (wsStage == Stage.IN_PROGRESS) {
-            if (telemetryWsEventSessionId.isNotEmpty()) {
+            if (telemetryWsEventStageId.isNotEmpty()) {
                 reporter.reportWsJoinCompleted(
-                    eventSessionId = telemetryWsEventSessionId,
+                    stageId = telemetryWsEventStageId,
                     success = success,
                     retryCount = retryCount,
                     failureReason = failureReason,
