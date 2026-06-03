@@ -72,6 +72,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import java.util.UUID
 
 @Composable
@@ -87,9 +88,10 @@ fun DirectCallJoinScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = Unit) { viewModel.getGoogleAccounts() }
+    val showAddUserFeature = StreamBuildFlavorUtil.isDevelopment
     var showAddUserPopup by rememberSaveable { mutableStateOf(false) }
 
-    if (showAddUserPopup) {
+    if (showAddUserFeature && showAddUserPopup) {
         AddUserPopup(
             onDismiss = { showAddUserPopup = false },
             onAddClick = { userId, userName ->
@@ -113,6 +115,7 @@ fun DirectCallJoinScreen(
             ) {
                 Header(
                     user = uiState.currentUser,
+                    showAddUserButton = showAddUserFeature,
                     onAddUserClick = { showAddUserPopup = true },
                 )
 
@@ -204,7 +207,11 @@ private fun AddUserPopup(
 }
 
 @Composable
-private fun Header(user: User?, onAddUserClick: () -> Unit) {
+private fun Header(
+    user: User?,
+    showAddUserButton: Boolean,
+    onAddUserClick: () -> Unit,
+) {
     Row {
         Column(
             modifier = Modifier
@@ -240,17 +247,19 @@ private fun Header(user: User?, onAddUserClick: () -> Unit) {
                 fontSize = 13.sp,
             )
         }
-        IconButton(modifier = Modifier, onClick = onAddUserClick) {
-            Icon(
-                modifier = Modifier
-                    .padding(top = 18.dp)
-                    .size(36.dp),
-                imageVector = Icons.Default.Person,
-                contentDescription = "Add User",
-                tint = Color.White,
-            )
+        if (showAddUserButton) {
+            IconButton(modifier = Modifier, onClick = onAddUserClick) {
+                Icon(
+                    modifier = Modifier
+                        .padding(top = 18.dp)
+                        .size(36.dp),
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Add User",
+                    tint = Color.White,
+                )
+            }
+            Spacer(Modifier.width(16.dp))
         }
-        Spacer(Modifier.width(16.dp))
     }
 }
 
@@ -461,7 +470,11 @@ private fun UserRow(
 @Composable
 private fun HeaderPreview() {
     VideoTheme {
-        Header(user = User(name = "Very very very long user name here"), onAddUserClick = {})
+        Header(
+            user = User(name = "Very very very long user name here"),
+            showAddUserButton = true,
+            onAddUserClick = {},
+        )
         Body(
             uiState = DirectCallUiState(
                 otherUsers =
