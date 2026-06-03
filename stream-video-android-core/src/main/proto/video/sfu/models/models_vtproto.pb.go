@@ -613,6 +613,11 @@ func (m *PublishOption) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
+	if m.DegradationPreference != 0 {
+		i = encodeVarint(dAtA, i, uint64(m.DegradationPreference))
+		i--
+		dAtA[i] = 0x58
+	}
 	if len(m.AudioBitrateProfiles) > 0 {
 		for iNdEx := len(m.AudioBitrateProfiles) - 1; iNdEx >= 0; iNdEx-- {
 			size, err := m.AudioBitrateProfiles[iNdEx].MarshalToSizedBufferVT(dAtA[:i])
@@ -878,6 +883,16 @@ func (m *TrackInfo) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m.unknownFields != nil {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
+	}
+	if m.SelfSubAudioVideo {
+		i--
+		if m.SelfSubAudioVideo {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x68
 	}
 	if m.PublishOptionId != 0 {
 		i = encodeVarint(dAtA, i, uint64(m.PublishOptionId))
@@ -2436,6 +2451,9 @@ func (m *PublishOption) SizeVT() (n int) {
 			n += 1 + l + sov(uint64(l))
 		}
 	}
+	if m.DegradationPreference != 0 {
+		n += 1 + sov(uint64(m.DegradationPreference))
+	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
 	}
@@ -2554,6 +2572,9 @@ func (m *TrackInfo) SizeVT() (n int) {
 	}
 	if m.PublishOptionId != 0 {
 		n += 1 + sov(uint64(m.PublishOptionId))
+	}
+	if m.SelfSubAudioVideo {
+		n += 2
 	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
@@ -4693,6 +4714,25 @@ func (m *PublishOption) UnmarshalVT(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 11:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DegradationPreference", wireType)
+			}
+			m.DegradationPreference = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.DegradationPreference |= DegradationPreference(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skip(dAtA[iNdEx:])
@@ -5404,6 +5444,26 @@ func (m *TrackInfo) UnmarshalVT(dAtA []byte) error {
 					break
 				}
 			}
+		case 13:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SelfSubAudioVideo", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.SelfSubAudioVideo = bool(v != 0)
 		default:
 			iNdEx = preIndex
 			skippy, err := skip(dAtA[iNdEx:])
