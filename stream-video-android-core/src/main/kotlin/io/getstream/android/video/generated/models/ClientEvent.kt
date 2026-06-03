@@ -23,16 +23,7 @@
 
 package io.getstream.android.video.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
-import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
-import com.squareup.moshi.ToJson
 
 /**
  * A single client-side telemetry event. When stage is CoordinatorJoin, WSJoin, or PeerConnectionConnect the event reports a join-lifecycle attempt; initiation and completion of a stage attempt share the same event_session_id. Other stage values denote generic client events.
@@ -57,8 +48,8 @@ data class ClientEvent (
     @Json(name = "id")
     val id: kotlin.String? = null,
 
-    @Json(name = "join_success_id")
-    val joinSuccessId: kotlin.String? = null,
+    @Json(name = "join_attempt_id")
+    val joinAttemptId: kotlin.String? = null,
 
     @Json(name = "coordinator_connect_id")
     val coordinatorConnectId: kotlin.String? = null,
@@ -106,7 +97,14 @@ data class ClientEvent (
     val userSessionId: kotlin.String? = null,
 
     @Json(name = "was_previously_connected")
-    val wasPreviouslyConnected: kotlin.Boolean? = null
+    val wasPreviouslyConnected: kotlin.Boolean? = null,
+
+    @Json(name = "screen_share")
+    val screenShareGranted: kotlin.Boolean? = null,
+    @Json(name = "microphone")
+    val microphoneGranted: kotlin.Boolean? = null,
+    @Json(name = "camera")
+    val cameraGranted: kotlin.Boolean? = null
 ) {
 
     internal fun toLog(): String {
@@ -121,7 +119,7 @@ data class ClientEvent (
             appendIfNotNull("callSessionId", callSessionId)
             appendIfNotNull("eventSessionId", eventSessionId)
             appendIfNotNull("userSessionId", userSessionId)
-            appendIfNotNull("joinSuccessId", joinSuccessId)
+            appendIfNotNull("joinAttemptId", joinAttemptId)
             appendIfNotNull("coordinatorConnectId", coordinatorConnectId)
 
             appendIfNotNull("userId", userId)
@@ -148,6 +146,9 @@ data class ClientEvent (
 
             appendIfNotNull("sdkVersion", sdkVersion)
             appendIfNotNull("timestamp", timestamp)
+            appendIfNotNull("camera", callSessionId)
+            appendIfNotNull("microphone", microphoneGranted)
+            appendIfNotNull("screenShare", screenShareGranted)
 
             append(")")
         }

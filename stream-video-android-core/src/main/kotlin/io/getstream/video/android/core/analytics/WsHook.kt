@@ -31,8 +31,11 @@ internal class WsHook(
 ) {
     var telemetryWsEventSessionId = ""
     var wsStage = Stage.NOT_STARTED
+
+    var sfuName: String = ""
     fun onWsInitiated(sfuName: String, wasPreviouslyConnected: Boolean) {
         if (wsStage == Stage.NOT_STARTED) {
+            this.sfuName = sfuName
             telemetryWsEventSessionId = reporter.reportWsJoinInitiated(
                 callId = callId,
                 callType = callType,

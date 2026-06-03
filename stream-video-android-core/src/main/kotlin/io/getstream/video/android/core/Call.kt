@@ -314,6 +314,7 @@ public class Call(
 
     internal val callAnalyticsHooks =
         CallAnalyticsHooks(
+            clientImpl.context,
             this.id,
             this.type,
             state.connection,
@@ -562,6 +563,7 @@ public class Call(
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
         callAnalyticsHooks.joinRequestHooks.onJoinFunctionStart()
+        callAnalyticsHooks.mediaPermissionHook.mediaPermissionStatus()
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
@@ -583,6 +585,11 @@ public class Call(
 
         // Ensure factory is created with the current audioBitrateProfile before joining
         ensureFactoryMatchesAudioProfile()
+        peerConnectionFactory.setPlaybackSamplesReadyCallback {
+            scope.launch {
+                callAnalyticsHooks.audioAnalytics.firstAudioFrameRendered()
+            }
+        }
 
         this.state.callJoinInterceptor = callJoinInterceptor
 
@@ -1507,6 +1514,7 @@ public class Call(
                         )
                     }
                     onRendered(videoRenderer)
+                    callAnalyticsHooks.videoAnalytics.firstVideoFrameRendered()
                 }
 
                 override fun onFrameResolutionChanged(

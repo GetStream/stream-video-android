@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.analytics
 
+import android.content.Context
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.RealtimeConnection
@@ -25,6 +26,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 internal class CallAnalyticsHooks(
+    val context: Context,
     val callId: String,
     val callType: String,
     val connectionFlow: StateFlow<RealtimeConnection>,
@@ -43,7 +45,15 @@ internal class CallAnalyticsHooks(
 
     val peerConnectionAnalyticsObserver = PeerConnectionAnalyticsObserver(scope, peerConnectionHook)
 
-    val mediaPermissionHook = MediaPermissionHook(callId, callType, eventReporter)
+    val mediaPermissionHook = MediaPermissionHook(context, callId, callType, eventReporter) {
+        joinRequestHooks.joinStageAttemptId
+    }
+    val audioAnalytics = AudioAnalytics(callId, callType, eventReporter, { wsHook.sfuName }) {
+        joinRequestHooks.joinStageAttemptId
+    }
+    val videoAnalytics = VideoAnalytics(callId, callType, eventReporter, { wsHook.sfuName }) {
+        joinRequestHooks.joinStageAttemptId
+    }
 
     fun onCallLeave(callLeaveReason: CallLeaveReason) {
         val isAnyStageInProgress =

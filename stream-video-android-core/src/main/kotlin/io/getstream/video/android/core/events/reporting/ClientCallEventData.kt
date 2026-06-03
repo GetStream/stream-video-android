@@ -28,6 +28,9 @@ internal sealed interface EventStage {
         COORDINATOR_JOIN("CoordinatorJoin"),
         WS_JOIN("WSJoin"),
         PEER_CONNECTION_CONNECT("PeerConnectionConnect"),
+        FIRST_AUDIO_FRAME_RENDERED("FirstAudioFrame"),
+        FIRST_VIDEO_FRAME_RENDERED("FirstVideoFrame"),
+        MEDIA_DEVICE_PERMISSION("MediaDevicePermission"),
     }
 }
 

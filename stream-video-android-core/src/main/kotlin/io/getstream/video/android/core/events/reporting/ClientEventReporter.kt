@@ -386,6 +386,77 @@ internal class ClientEventReporter(
         }
     }
 
+    internal fun reportFirstAudioFrameRendered(
+        sfuId: String,
+        callId: String,
+        callType: String,
+        joinStageAttemptId: String,
+    ): String {
+        val eventSessionId = UUID.randomUUID().toString()
+        val callSessionId = callSessionIdMap[callId]
+        sendEvent(
+            buildRequest(
+                callId = callId,
+                callType = callType,
+                stage = EventStage.Call.FIRST_AUDIO_FRAME_RENDERED,
+                eventType = EventType.INITIATED,
+                eventSessionId = eventSessionId,
+                joinStageAttemptId = joinStageAttemptId,
+                callSessionId = callSessionId,
+                sfuId = sfuId,
+            ),
+        )
+        return eventSessionId
+    }
+
+    internal fun reportFirstVideoFrameRendered(
+        sfuId: String,
+        callId: String,
+        callType: String,
+        joinStageAttemptId: String,
+    ): String {
+        val eventSessionId = UUID.randomUUID().toString()
+        val callSessionId = callSessionIdMap[callId]
+        sendEvent(
+            buildRequest(
+                callId = callId,
+                callType = callType,
+                stage = EventStage.Call.FIRST_VIDEO_FRAME_RENDERED,
+                eventType = EventType.INITIATED,
+                eventSessionId = eventSessionId,
+                joinStageAttemptId = joinStageAttemptId,
+                callSessionId = callSessionId,
+                sfuId = sfuId,
+            ),
+        )
+        return eventSessionId
+    }
+
+    internal fun reportMediaPermissionStatus(
+        callId: String,
+        callType: String,
+        joinStageAttemptId: String,
+        isCameraGranted: Boolean,
+        isMicrophoneGranted: Boolean,
+    ): String {
+        val eventSessionId = UUID.randomUUID().toString()
+        val callSessionId = callSessionIdMap[callId]
+        sendEvent(
+            buildRequest(
+                callId = callId,
+                callType = callType,
+                stage = EventStage.Call.MEDIA_DEVICE_PERMISSION,
+                eventType = EventType.INITIATED,
+                eventSessionId = eventSessionId,
+                joinStageAttemptId = joinStageAttemptId,
+                callSessionId = callSessionId,
+                cameraAllowed = isCameraGranted,
+                microphoneAllowed = isMicrophoneGranted,
+            ),
+        )
+        return eventSessionId
+    }
+
     internal fun abortAllPostCallInFlight(reason: AnalyticsCallAbortReason) {
         val snapshot: List<PostCallFlightSession> =
             postCallFlightSessions.values.filterIsInstance<PostCallFlightSession>().toList()
@@ -437,9 +508,12 @@ internal class ClientEventReporter(
         iceState: PeerConnection.IceConnectionState? = null,
         peerConnectionState: PeerConnection.PeerConnectionState? = null,
         userSessionId: String? = null,
+        screenShareAllowed: Boolean? = null,
+        microphoneAllowed: Boolean? = null,
+        cameraAllowed: Boolean? = null,
     ): ClientEvent = ClientEvent(
         eventSessionId = eventSessionId,
-        joinSuccessId = joinStageAttemptId,
+        joinAttemptId = joinStageAttemptId,
         eventType = eventType.value,
         id = callId,
         sdkVersion = sdkVersion,
@@ -460,6 +534,9 @@ internal class ClientEventReporter(
         sfuId = sfuId,
         userSessionId = userSessionId,
         wasPreviouslyConnected = wasPreviouslyConnected,
+        screenShareGranted = screenShareAllowed,
+        microphoneGranted = microphoneAllowed,
+        cameraGranted = cameraAllowed,
     )
 
     // --- Delivery ---

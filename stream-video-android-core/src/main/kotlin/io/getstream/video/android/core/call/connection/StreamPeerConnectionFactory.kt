@@ -88,6 +88,7 @@ public class StreamPeerConnectionFactory(
     private val audioLogger by taggedLogger("Call:AudioTrackCallback")
 
     private var audioSampleCallback: ((AudioSamples) -> Unit)? = null
+    private var playbackSamplesReadyCallback: (() -> Unit)? = null
     private var audioRecordDataCallback: (
         (audioFormat: Int, channelCount: Int, sampleRate: Int, sampleData: ByteBuffer) -> Unit
     )? = null
@@ -105,6 +106,10 @@ public class StreamPeerConnectionFactory(
      */
     public fun setAudioSampleCallback(callback: (AudioSamples) -> Unit) {
         audioSampleCallback = callback
+    }
+
+    internal fun setPlaybackSamplesReadyCallback(callback: () -> Unit) {
+        playbackSamplesReadyCallback = callback
     }
 
     /**
@@ -272,6 +277,9 @@ public class StreamPeerConnectionFactory(
                             .build(),
                     )
                 }
+            }
+            .setPlaybackSamplesReadyCallback {
+                playbackSamplesReadyCallback?.invoke()
             }
             .setUseHardwareNoiseSuppressor(useHardwareNoiseSuppressor)
             .setAudioRecordErrorCallback(object :

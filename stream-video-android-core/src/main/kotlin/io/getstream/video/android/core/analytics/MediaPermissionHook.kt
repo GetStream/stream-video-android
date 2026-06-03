@@ -16,11 +16,41 @@
 
 package io.getstream.video.android.core.analytics
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
 
-internal class MediaPermissionHook(val callId: String, val callType: String, val eventReporter: ClientEventReporter) {
-    var stage = Stage.NOT_STARTED
+internal class MediaPermissionHook(
+    val context: Context,
+    val callId: String,
+    val callType: String,
+    val eventReporter: ClientEventReporter,
+    val getJoinStageAttemptId: () -> String,
+) {
 
     fun mediaPermissionStatus() {
+        eventReporter.reportMediaPermissionStatus(
+            callId,
+            callType,
+            getJoinStageAttemptId(),
+            isCameraPermissionGranted(),
+            isMicrophonePermissionGranted(),
+        )
+    }
+
+    fun isMicrophonePermissionGranted(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO,
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun isCameraPermissionGranted(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA,
+        ) == PackageManager.PERMISSION_GRANTED
     }
 }
