@@ -17138,12 +17138,13 @@ public final class stream/video/sfu/event/VideoSender : com/squareup/wire/Messag
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/event/VideoSender$Companion;
 	public fun <init> ()V
-	public fun <init> (Lstream/video/sfu/models/Codec;Ljava/util/List;Lstream/video/sfu/models/TrackType;ILokio/ByteString;)V
-	public synthetic fun <init> (Lstream/video/sfu/models/Codec;Ljava/util/List;Lstream/video/sfu/models/TrackType;ILokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Lstream/video/sfu/models/Codec;Ljava/util/List;Lstream/video/sfu/models/TrackType;ILokio/ByteString;)Lstream/video/sfu/event/VideoSender;
-	public static synthetic fun copy$default (Lstream/video/sfu/event/VideoSender;Lstream/video/sfu/models/Codec;Ljava/util/List;Lstream/video/sfu/models/TrackType;ILokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/VideoSender;
+	public fun <init> (Lstream/video/sfu/models/Codec;Ljava/util/List;Lstream/video/sfu/models/TrackType;ILstream/video/sfu/models/DegradationPreference;Lokio/ByteString;)V
+	public synthetic fun <init> (Lstream/video/sfu/models/Codec;Ljava/util/List;Lstream/video/sfu/models/TrackType;ILstream/video/sfu/models/DegradationPreference;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lstream/video/sfu/models/Codec;Ljava/util/List;Lstream/video/sfu/models/TrackType;ILstream/video/sfu/models/DegradationPreference;Lokio/ByteString;)Lstream/video/sfu/event/VideoSender;
+	public static synthetic fun copy$default (Lstream/video/sfu/event/VideoSender;Lstream/video/sfu/models/Codec;Ljava/util/List;Lstream/video/sfu/models/TrackType;ILstream/video/sfu/models/DegradationPreference;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/event/VideoSender;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCodec ()Lstream/video/sfu/models/Codec;
+	public final fun getDegradation_preference ()Lstream/video/sfu/models/DegradationPreference;
 	public final fun getLayers ()Ljava/util/List;
 	public final fun getPublish_option_id ()I
 	public final fun getTrack_type ()Lstream/video/sfu/models/TrackType;
@@ -17460,6 +17461,25 @@ public final class stream/video/sfu/models/ConnectionQuality : java/lang/Enum, c
 
 public final class stream/video/sfu/models/ConnectionQuality$Companion {
 	public final fun fromValue (I)Lstream/video/sfu/models/ConnectionQuality;
+}
+
+public final class stream/video/sfu/models/DegradationPreference : java/lang/Enum, com/squareup/wire/WireEnum {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lstream/video/sfu/models/DegradationPreference$Companion;
+	public static final field DEGRADATION_PREFERENCE_BALANCED Lstream/video/sfu/models/DegradationPreference;
+	public static final field DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE Lstream/video/sfu/models/DegradationPreference;
+	public static final field DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE_AND_RESOLUTION Lstream/video/sfu/models/DegradationPreference;
+	public static final field DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION Lstream/video/sfu/models/DegradationPreference;
+	public static final field DEGRADATION_PREFERENCE_UNSPECIFIED Lstream/video/sfu/models/DegradationPreference;
+	public static final fun fromValue (I)Lstream/video/sfu/models/DegradationPreference;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lstream/video/sfu/models/DegradationPreference;
+	public static fun values ()[Lstream/video/sfu/models/DegradationPreference;
+}
+
+public final class stream/video/sfu/models/DegradationPreference$Companion {
+	public final fun fromValue (I)Lstream/video/sfu/models/DegradationPreference;
 }
 
 public final class stream/video/sfu/models/Device : com/squareup/wire/Message {
@@ -17807,14 +17827,15 @@ public final class stream/video/sfu/models/PublishOption : com/squareup/wire/Mes
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/models/PublishOption$Companion;
 	public fun <init> ()V
-	public fun <init> (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLjava/util/List;Lokio/ByteString;)V
-	public synthetic fun <init> (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLjava/util/List;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLjava/util/List;Lokio/ByteString;)Lstream/video/sfu/models/PublishOption;
-	public static synthetic fun copy$default (Lstream/video/sfu/models/PublishOption;Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLjava/util/List;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/models/PublishOption;
+	public fun <init> (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLjava/util/List;Lstream/video/sfu/models/DegradationPreference;Lokio/ByteString;)V
+	public synthetic fun <init> (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLjava/util/List;Lstream/video/sfu/models/DegradationPreference;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLjava/util/List;Lstream/video/sfu/models/DegradationPreference;Lokio/ByteString;)Lstream/video/sfu/models/PublishOption;
+	public static synthetic fun copy$default (Lstream/video/sfu/models/PublishOption;Lstream/video/sfu/models/TrackType;Lstream/video/sfu/models/Codec;IIIILstream/video/sfu/models/VideoDimension;IZLjava/util/List;Lstream/video/sfu/models/DegradationPreference;Lokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/models/PublishOption;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudio_bitrate_profiles ()Ljava/util/List;
 	public final fun getBitrate ()I
 	public final fun getCodec ()Lstream/video/sfu/models/Codec;
+	public final fun getDegradation_preference ()Lstream/video/sfu/models/DegradationPreference;
 	public final fun getFps ()I
 	public final fun getId ()I
 	public final fun getMax_spatial_layers ()I
@@ -18011,10 +18032,10 @@ public final class stream/video/sfu/models/TrackInfo : com/squareup/wire/Message
 	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
 	public static final field Companion Lstream/video/sfu/models/TrackInfo$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;ILokio/ByteString;)V
-	public synthetic fun <init> (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;ILokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;ILokio/ByteString;)Lstream/video/sfu/models/TrackInfo;
-	public static synthetic fun copy$default (Lstream/video/sfu/models/TrackInfo;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;ILokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/models/TrackInfo;
+	public fun <init> (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;IZLokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;IZLokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;IZLokio/ByteString;)Lstream/video/sfu/models/TrackInfo;
+	public static synthetic fun copy$default (Lstream/video/sfu/models/TrackInfo;Ljava/lang/String;Lstream/video/sfu/models/TrackType;Ljava/util/List;Ljava/lang/String;ZZZZLstream/video/sfu/models/Codec;IZLokio/ByteString;ILjava/lang/Object;)Lstream/video/sfu/models/TrackInfo;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCodec ()Lstream/video/sfu/models/Codec;
 	public final fun getDtx ()Z
@@ -18023,6 +18044,7 @@ public final class stream/video/sfu/models/TrackInfo : com/squareup/wire/Message
 	public final fun getMuted ()Z
 	public final fun getPublish_option_id ()I
 	public final fun getRed ()Z
+	public final fun getSelf_sub_audio_video ()Z
 	public final fun getStereo ()Z
 	public final fun getTrack_id ()Ljava/lang/String;
 	public final fun getTrack_type ()Lstream/video/sfu/models/TrackType;
