@@ -202,6 +202,10 @@ public class Call(
 
     internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
 
+    // Must be initialized before `state` — CallState → SortedParticipantsState
+    // launches a coroutine that reads `call.events` (leaking-this race).
+    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
+
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(client, this, user, scope)
 
@@ -1728,8 +1732,6 @@ public class Call(
         val request = UpdateCallMembersRequest(updateMembers = memberRequests)
         return clientImpl.updateMembers(type, id, request)
     }
-
-    val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
 
     fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
         subscriptions.forEach { sub ->

@@ -88,7 +88,6 @@ import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.CallEndedSfuEvent
-import io.getstream.video.android.core.events.ChangePublishQualityEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.ErrorEvent
@@ -1097,10 +1096,6 @@ public class CallState(
                     participant._networkQuality.value =
                         NetworkQuality.fromConnectionQuality(entry.connection_quality)
                 }
-            }
-
-            is ChangePublishQualityEvent -> {
-                call.session.value?.handleEvent(event)
             }
 
             is ErrorEvent -> {

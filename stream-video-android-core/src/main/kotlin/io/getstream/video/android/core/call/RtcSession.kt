@@ -1204,6 +1204,14 @@ public class RtcSession internal constructor(
      * - http calls failing here breaks the call. it should retry as long as the
      * -- error isn't permanent, SFU didn't change, the mute/publish state didn't change
      * -- we cap at 30 retries to prevent endless loops
+     *
+     * Only the mute state of [trackType] is sent. We must NOT send the mute states of the
+     * other tracks here: re-asserting an unchanged track (e.g. video muted=false while only the
+     * mic is being muted) makes the SFU re-emit a redundant TrackPublishedEvent for that track,
+     * which carries a potentially stale published_tracks snapshot and desyncs the renderer. This
+     * matches the web SDK, which only signals the track(s) that actually changed. On SFU
+     * (re)connect/migration each enabled track is re-signalled individually via
+     * [listenToMediaChanges], so the full state is still restored.
      */
     private fun setMuteState(isEnabled: Boolean, trackType: TrackType) {
         logger.d { "[setPublishState] #sfu; $trackType isEnabled: $isEnabled" }
@@ -1224,9 +1232,9 @@ public class RtcSession internal constructor(
             flow {
                 val request = UpdateMuteStatesRequest(
                     session_id = sessionId,
-                    mute_states = copy.map {
-                        TrackMuteState(track_type = it.key, muted = !it.value)
-                    },
+                    mute_states = listOf(
+                        TrackMuteState(track_type = trackType, muted = !isEnabled),
+                    ),
                 )
                 val response = updateMuteState(request).getOrThrow()
                 response.error?.let {

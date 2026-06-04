@@ -65,6 +65,9 @@
     <string name="moderation_warning_title">Warning</string>
     <string name="join_first">Join First</string>
     <string name="use_call_join_interceptor">Use Call Join Interceptor</string>
+    <string name="add_user">Add user</string>
+    <string name="user_id">User ID</string>
+    <string name="user_name">User Name</string>
 
     <plurals name="chat_typing">
         <item quantity="one">%s is typing</item>
