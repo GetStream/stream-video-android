@@ -20,13 +20,10 @@ import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.android.video.generated.models.ReportClientEventRequest
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.ZoneOffset
 import org.webrtc.PeerConnection
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -51,6 +48,9 @@ internal class ClientEventReporter(
     private val scope: CoroutineScope = UserScope(ClientScope()),
 ) {
     private val logger by taggedLogger("ClientEventReporter")
+    private val clientEventFactory = ClientEventFactory(sdkVersion, userAgent) {
+        this.coordinatorConnectId
+    }
 
     private val postCallFlightSessions = ConcurrentHashMap<StageId, InFlightSession>()
     private val joinStageAttemptIdMap = ConcurrentHashMap<CallId, String>()
@@ -73,7 +73,7 @@ internal class ClientEventReporter(
             startedAtMs = now,
         )
         sendEvent(
-            buildRequest(
+            clientEventFactory.buildRequest(
                 stageId = stageId,
                 coordinatorConnectId = coordinatorConnectId,
                 stage = EventStage.CoordinatorWs,
@@ -94,7 +94,7 @@ internal class ClientEventReporter(
         if (session is PreCallInFlightSession) {
             val elapsedTime = System.currentTimeMillis() - session.startedAtMs
             sendEvent(
-                buildRequest(
+                clientEventFactory.buildRequest(
                     coordinatorConnectId = session.coordinatorConnectId,
                     stage = EventStage.CoordinatorWs,
                     outcome = if (success) EventOutcome.SUCCESS else EventOutcome.FAILURE,
@@ -115,7 +115,7 @@ internal class ClientEventReporter(
     ) {
         joinStageAttemptIdMap[callId] = joinStageAttemptId
         sendEvent(
-            buildRequest(
+            clientEventFactory.buildRequest(
                 callId,
                 callType,
                 stage = EventStage.Call.JOIN_INITIATED,
@@ -144,7 +144,7 @@ internal class ClientEventReporter(
             joinStageAttemptIdSnapshot = joinStageAttemptId,
         )
         sendEvent(
-            buildRequest(
+            clientEventFactory.buildRequest(
                 callId,
                 callType,
                 stage = EventStage.Call.COORDINATOR_JOIN,
@@ -169,7 +169,7 @@ internal class ClientEventReporter(
             val elapsedTime = System.currentTimeMillis() - session.startedAtMs
             callSessionIdMap[session.callId] = callSessionId ?: ""
             sendEvent(
-                buildRequest(
+                clientEventFactory.buildRequest(
                     callId = session.callId,
                     callType = session.callType,
                     stage = EventStage.Call.COORDINATOR_JOIN,
@@ -211,7 +211,7 @@ internal class ClientEventReporter(
             callSessionId = callSessionId,
         )
         sendEvent(
-            buildRequest(
+            clientEventFactory.buildRequest(
                 callId = callId,
                 callType = callType,
                 stage = EventStage.Call.WS_JOIN,
@@ -237,7 +237,7 @@ internal class ClientEventReporter(
         val elapsedTime = System.currentTimeMillis() - session.startedAtMs
         if (session is PostCallFlightSession) {
             sendEvent(
-                buildRequest(
+                clientEventFactory.buildRequest(
                     callId = session.callId,
                     callType = session.callType,
                     stage = EventStage.Call.WS_JOIN,
@@ -299,7 +299,7 @@ internal class ClientEventReporter(
                 )
                 activePcSessionIds[role] = stageId
                 sendEvent(
-                    buildRequest(
+                    clientEventFactory.buildRequest(
                         callId = callId,
                         callType = callType,
                         stage = EventStage.Call.PEER_CONNECTION_CONNECT,
@@ -365,7 +365,7 @@ internal class ClientEventReporter(
         val elapsedTime = System.currentTimeMillis() - session.startedAtMs
         if (session is PostCallFlightSession) {
             sendEvent(
-                buildRequest(
+                clientEventFactory.buildRequest(
                     callId = callId,
                     callType = callType,
                     stage = EventStage.Call.PEER_CONNECTION_CONNECT,
@@ -395,7 +395,7 @@ internal class ClientEventReporter(
         val stageId = UUID.randomUUID().toString()
         val callSessionId = callSessionIdMap[callId]
         sendEvent(
-            buildRequest(
+            clientEventFactory.buildRequest(
                 callId = callId,
                 callType = callType,
                 stage = EventStage.Call.FIRST_AUDIO_FRAME_RENDERED,
@@ -419,7 +419,7 @@ internal class ClientEventReporter(
         val stageId = UUID.randomUUID().toString()
         val callSessionId = callSessionIdMap[callId]
         sendEvent(
-            buildRequest(
+            clientEventFactory.buildRequest(
                 callId = callId,
                 callType = callType,
                 stage = EventStage.Call.FIRST_VIDEO_FRAME_RENDERED,
@@ -444,7 +444,7 @@ internal class ClientEventReporter(
         val stageId = UUID.randomUUID().toString()
         val callSessionId = callSessionIdMap[callId]
         sendEvent(
-            buildRequest(
+            clientEventFactory.buildRequest(
                 callId = callId,
                 callType = callType,
                 stage = EventStage.Call.MEDIA_DEVICE_PERMISSION,
@@ -466,7 +466,7 @@ internal class ClientEventReporter(
         activePcSessionIds.clear()
         val now = System.currentTimeMillis()
         val events = snapshot.map { session ->
-            buildRequest(
+            clientEventFactory.buildRequest(
                 callId = session.callId,
                 callType = session.callType,
                 stage = session.stage,
@@ -489,64 +489,6 @@ internal class ClientEventReporter(
     }
 
     // --- Request builder ---
-
-    private fun buildRequest(
-        callId: String? = null,
-        callType: String? = null,
-        stage: EventStage,
-        eventType: EventType,
-        stageId: String? = null,
-        joinStageAttemptId: String? = null,
-        coordinatorConnectId: String? = null,
-        elapsedTime: Long? = null,
-        outcome: EventOutcome? = null,
-        retryCountAttempt: Int? = null,
-        retryFailureReason: String? = null,
-        retryFailureCode: String? = null,
-        callSessionId: String? = null,
-        sfuId: String? = null,
-        peerConnection: PeerConnectionRole? = null,
-        wasPreviouslyConnected: Boolean? = null,
-        iceState: PeerConnection.IceConnectionState? = null,
-        peerConnectionState: PeerConnection.PeerConnectionState? = null,
-        userSessionId: String? = null,
-        screenShareAllowed: Boolean? = null,
-        microphoneAllowed: Boolean? = null,
-        cameraAllowed: Boolean? = null,
-        trackId: String? = null,
-    ): ClientEvent = ClientEvent(
-        stageId = stageId,
-        joinAttemptId = joinStageAttemptId,
-        eventType = eventType.value,
-        id = callId,
-        sdkVersion = sdkVersion,
-        stage = stage.value,
-        timestamp = OffsetDateTime.now(ZoneOffset.UTC),
-        type = callType,
-        userAgent = userAgent.invoke().take(512),
-        userId = StreamVideo.instanceOrNull()?.userId,
-        callSessionId = callSessionId,
-        elapsedTime = elapsedTime?.toInt(),
-        iceState = iceState?.name,
-        outcome = outcome?.value,
-        peerConnection = peerConnection?.value,
-        previouslyConnectedTimestamp = null,
-        retryCountAttempt = retryCountAttempt,
-        retryFailureCode = retryFailureCode,
-        retryFailureReason = retryFailureReason,
-        sfuId = sfuId,
-        userSessionId = userSessionId,
-        wasPreviouslyConnected = wasPreviouslyConnected,
-        screenShareStatus = getPermissionStatusText(screenShareAllowed),
-        microphonePermissionStatus = getPermissionStatusText(microphoneAllowed),
-        cameraPermissionStatus = getPermissionStatusText(cameraAllowed),
-        trackId = trackId,
-        coordinatorConnectId = this.coordinatorConnectId,
-    )
-
-    fun getPermissionStatusText(allowed: Boolean?): String? {
-        return if (allowed == true) "GRANTED" else if (allowed == false) "NOT_GRANTED" else null
-    }
 
     // --- Delivery ---
 
