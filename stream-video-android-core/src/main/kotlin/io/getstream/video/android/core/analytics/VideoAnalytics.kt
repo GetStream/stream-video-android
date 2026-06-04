@@ -26,11 +26,11 @@ internal class VideoAnalytics(
     val getJoinStageAttemptId: () -> String,
 ) {
 
-    var eventSession: String = ""
+    var stageId: String = ""
 
     fun firstVideoFrameRendered(trackId: String) {
-        if (eventSession.isEmpty()) {
-            eventSession = clientEventReporter.reportFirstVideoFrameRendered(
+        if (stageId.isEmpty()) {
+            stageId = clientEventReporter.reportFirstVideoFrameRendered(
                 onSfuId(),
                 callId,
                 callType,
