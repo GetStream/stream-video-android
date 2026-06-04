@@ -475,5 +475,4 @@ internal class ClientEventReporter(
         }
         sender.sendAll(events)
     }
-
 }

@@ -45,23 +45,3 @@ internal class InMemoryPendingEventStore : PendingEventStore {
 
     override fun isEmpty(): Boolean = queue.isEmpty()
 }
-
-/**
- * File-based implementation placeholder.
- * Implement when disk persistence for failed events is required.
- */
-internal class FilePendingEventStore : PendingEventStore {
-    override fun save(events: List<ClientEvent>) {
-        // TODO: serialize events to disk
-    }
-
-    override fun loadAndClear(): List<ClientEvent> {
-        // TODO: deserialize from disk and delete the file
-        return emptyList()
-    }
-
-    override fun isEmpty(): Boolean {
-        // TODO: check if file exists and is non-empty
-        return true
-    }
-}
