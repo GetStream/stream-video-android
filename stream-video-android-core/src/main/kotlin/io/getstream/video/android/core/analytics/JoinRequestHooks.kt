@@ -24,7 +24,7 @@ internal class JoinRequestHooks(
     val callId: String,
     val callType: String,
     val eventReporter: ClientEventReporter,
-    val onJoinSuccess: () -> Unit
+    val onJoinSuccess: () -> Unit,
 ) {
 
     var stageId = ""

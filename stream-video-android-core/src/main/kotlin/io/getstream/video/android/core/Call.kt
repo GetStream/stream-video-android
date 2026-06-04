@@ -649,7 +649,10 @@ public class Call(
         session.value = null
         val errorMessage = "Join failed after 3 retries"
         state._connection.value = RealtimeConnection.Failed(errorMessage)
-        callAnalyticsCoordinator.joinRequestHooks.onJoinRequestRetryExhausted(retryCount, errorMessage)
+        callAnalyticsCoordinator.joinRequestHooks.onJoinRequestRetryExhausted(
+            retryCount,
+            errorMessage,
+        )
         return Failure(value = Error.GenericError(errorMessage))
     }
 

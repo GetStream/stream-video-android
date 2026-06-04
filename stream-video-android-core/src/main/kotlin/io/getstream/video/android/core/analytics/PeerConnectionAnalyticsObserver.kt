@@ -28,8 +28,8 @@ import kotlinx.coroutines.launch
 import org.webrtc.PeerConnection
 
 internal class PeerConnectionAnalyticsObserver(
-    val callId:String,
-    val callType:String,
+    val callId: String,
+    val callType: String,
     private val scope: CoroutineScope,
     val reporter: ClientEventReporter,
     val getJoinStageAttemptId: () -> String,

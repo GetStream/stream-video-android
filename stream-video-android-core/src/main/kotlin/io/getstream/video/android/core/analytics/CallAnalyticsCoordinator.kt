@@ -41,9 +41,10 @@ internal class CallAnalyticsCoordinator(
         joinRequestHooks.joinStageAttemptId
     }
 
-    val peerConnectionAnalyticsObserver = PeerConnectionAnalyticsObserver(callId, callType, scope,eventReporter){
-        joinRequestHooks.joinStageAttemptId
-    }
+    val peerConnectionAnalyticsObserver =
+        PeerConnectionAnalyticsObserver(callId, callType, scope, eventReporter) {
+            joinRequestHooks.joinStageAttemptId
+        }
 
     val mediaPermissionHook = MediaPermissionHook(context, callId, callType, eventReporter) {
         joinRequestHooks.joinStageAttemptId
