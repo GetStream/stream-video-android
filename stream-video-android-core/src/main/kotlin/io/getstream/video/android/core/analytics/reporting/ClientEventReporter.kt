@@ -75,7 +75,6 @@ internal class ClientEventReporter(
         sendEvent(
             clientEventFactory.buildRequest(
                 stageId = stageId,
-                coordinatorConnectId = coordinatorConnectId,
                 stage = EventStage.CoordinatorWs,
                 eventType = EventType.INITIATED,
             ),
@@ -95,7 +94,6 @@ internal class ClientEventReporter(
             val elapsedTime = System.currentTimeMillis() - session.startedAtMs
             sendEvent(
                 clientEventFactory.buildRequest(
-                    coordinatorConnectId = session.coordinatorConnectId,
                     stage = EventStage.CoordinatorWs,
                     outcome = if (success) EventOutcome.SUCCESS else EventOutcome.FAILURE,
                     retryCountAttempt = retryCount,

@@ -31,7 +31,6 @@ internal class ClientEventFactory(val sdkVersion: String, val userAgent: () -> S
         eventType: EventType,
         stageId: String? = null,
         joinStageAttemptId: String? = null,
-        coordinatorConnectId: String? = null,
         elapsedTime: Long? = null,
         outcome: EventOutcome? = null,
         retryCountAttempt: Int? = null,
