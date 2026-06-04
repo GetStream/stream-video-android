@@ -1517,6 +1517,8 @@ public class Call(
                     onRendered(videoRenderer)
                     callAnalyticsHooks.videoAnalytics.firstVideoFrameRendered(
                         trackType,
+                        width,
+                        height,
                         session.value,
                         sessionId,
                         this@Call.sessionId,

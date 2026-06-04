@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.analytics
 
+import android.util.Log
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import stream.video.sfu.models.TrackType
@@ -32,27 +33,37 @@ internal class VideoAnalytics(
 
     fun firstVideoFrameRendered(
         trackType: TrackType,
+        width: Int,
+        height: Int,
         rtcSession: RtcSession?,
         videoSessionId: String,
         callSessionId: String,
     ) {
-        if (trackType == TrackType.TRACK_TYPE_VIDEO && videoSessionId != callSessionId) {
-            val videoTrackId = rtcSession?.subscriber?.value?.getTrack(
-                videoSessionId,
-                TrackType.TRACK_TYPE_VIDEO,
-            )?.asVideoTrack()?.video?.id()
-
-            videoTrackId?.let {
-                if (stageId.isEmpty()) {
-                    stageId = clientEventReporter.reportFirstVideoFrameRendered(
-                        onSfuId(),
-                        callId,
-                        callType,
-                        getJoinStageAttemptId(),
-                        videoTrackId,
+        when (trackType) {
+            TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_SCREEN_SHARE -> {
+                if (videoSessionId != callSessionId) {
+                    val videoTrackId = rtcSession?.subscriber?.value?.getTrack(
+                        videoSessionId,
+                        TrackType.TRACK_TYPE_VIDEO,
+                    )?.asVideoTrack()?.video?.id()
+                    Log.d(
+                        "VideoAnalytics",
+                        "noob [firstVideoFrameRendered]: $trackType, w:$width, h:$height, videoTrackId:$videoTrackId, videoSessionId:$videoSessionId, callSessionId:$callSessionId",
                     )
+                    videoTrackId?.let {
+                        if (stageId.isEmpty()) {
+                            stageId = clientEventReporter.reportFirstVideoFrameRendered(
+                                onSfuId(),
+                                callId,
+                                callType,
+                                getJoinStageAttemptId(),
+                                videoTrackId,
+                            )
+                        }
+                    }
                 }
             }
+            else -> {}
         }
     }
 
