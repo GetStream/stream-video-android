@@ -351,10 +351,12 @@ internal class ClientEventReporter(
     ) {
         val session = postCallFlightSessions.remove(stageId) ?: return
         val elapsedTime = System.currentTimeMillis() - session.startedAtMs
+        val callSessionId = callSessionIdMap[callId]
         if (session is PostCallFlightSession) {
             sender.send(
                 clientEventFactory.buildRequest(
                     callId = callId,
+                    callSessionId = callSessionId,
                     callType = callType,
                     stage = EventStage.Call.PEER_CONNECTION_CONNECT,
                     eventType = EventType.COMPLETED,
