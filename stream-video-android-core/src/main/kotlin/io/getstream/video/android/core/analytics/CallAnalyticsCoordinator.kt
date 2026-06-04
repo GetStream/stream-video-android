@@ -19,6 +19,7 @@ package io.getstream.video.android.core.analytics
 import android.content.Context
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.CallLeaveReason
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.events.reporting.AnalyticsCallAbortReason
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
@@ -30,6 +31,7 @@ internal class CallAnalyticsCoordinator(
     val callId: String,
     val callType: String,
     val connectionFlow: StateFlow<RealtimeConnection>,
+    val participants: StateFlow<List<ParticipantState>>,
     val eventReporter: ClientEventReporter,
     val scope: CoroutineScope,
 ) {
@@ -59,6 +61,7 @@ internal class CallAnalyticsCoordinator(
     fun resetAfterJoinSuccess() {
         audioAnalytics.reset()
         videoAnalytics.reset()
+        audioAnalytics.observeParticipantsForFirstRemoteAudioFrame(participants, scope)
     }
 
     fun onCallLeave(callLeaveReason: CallLeaveReason) {

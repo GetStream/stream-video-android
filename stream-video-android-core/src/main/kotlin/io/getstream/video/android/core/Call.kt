@@ -322,6 +322,7 @@ public class Call(
             this.id,
             this.type,
             state.connection,
+            state.participants,
             client.state.clientEventReporter,
             scope,
         )
@@ -589,11 +590,6 @@ public class Call(
 
         // Ensure factory is created with the current audioBitrateProfile before joining
         ensureFactoryMatchesAudioProfile()
-        peerConnectionFactory.setPlaybackSamplesReadyCallback {
-            scope.launch {
-                callAnalyticsCoordinator.audioAnalytics.firstAudioFrameRendered()
-            }
-        }
 
         this.state.callJoinInterceptor = callJoinInterceptor
 
