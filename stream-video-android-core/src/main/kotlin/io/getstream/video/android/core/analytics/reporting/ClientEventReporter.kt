@@ -16,14 +16,8 @@
 
 package io.getstream.video.android.core.analytics.reporting
 
-import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.models.ClientEvent
-import io.getstream.android.video.generated.models.ReportClientEventRequest
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.scope.UserScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import org.webrtc.PeerConnection
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -38,14 +32,10 @@ internal typealias CallId = String
  * [ClientEvent.retryFailureCode] : Ask clarification
  */
 
-internal enum class TelemetrySendingStrategy { IN_PLACE, BATCH }
-
 internal class ClientEventReporter(
-    private val api: ProductvideoApi,
+    private val sender: EventSender,
     private val userAgent: () -> String,
     private val sdkVersion: String,
-    private val sendingStrategy: TelemetrySendingStrategy = TelemetrySendingStrategy.IN_PLACE,
-    private val scope: CoroutineScope = UserScope(ClientScope()),
 ) {
     private val logger by taggedLogger("ClientEventReporter")
     private val clientEventFactory = ClientEventFactory(sdkVersion, userAgent) {
@@ -72,7 +62,7 @@ internal class ClientEventReporter(
             stage = EventStage.Call.COORDINATOR_JOIN,
             startedAtMs = now,
         )
-        sendEvent(
+        sender.send(
             clientEventFactory.buildRequest(
                 stageId = stageId,
                 stage = EventStage.CoordinatorWs,
@@ -92,7 +82,7 @@ internal class ClientEventReporter(
         val session = postCallFlightSessions.remove(stageId) ?: return
         if (session is PreCallInFlightSession) {
             val elapsedTime = System.currentTimeMillis() - session.startedAtMs
-            sendEvent(
+            sender.send(
                 clientEventFactory.buildRequest(
                     stage = EventStage.CoordinatorWs,
                     outcome = if (success) EventOutcome.SUCCESS else EventOutcome.FAILURE,
@@ -112,7 +102,7 @@ internal class ClientEventReporter(
         joinStageAttemptId: String,
     ) {
         joinStageAttemptIdMap[callId] = joinStageAttemptId
-        sendEvent(
+        sender.send(
             clientEventFactory.buildRequest(
                 callId,
                 callType,
@@ -141,7 +131,7 @@ internal class ClientEventReporter(
             startedAtMs = now,
             joinStageAttemptIdSnapshot = joinStageAttemptId,
         )
-        sendEvent(
+        sender.send(
             clientEventFactory.buildRequest(
                 callId,
                 callType,
@@ -166,7 +156,7 @@ internal class ClientEventReporter(
         if (session is PostCallFlightSession) {
             val elapsedTime = System.currentTimeMillis() - session.startedAtMs
             callSessionIdMap[session.callId] = callSessionId ?: ""
-            sendEvent(
+            sender.send(
                 clientEventFactory.buildRequest(
                     callId = session.callId,
                     callType = session.callType,
@@ -208,7 +198,7 @@ internal class ClientEventReporter(
             wasPreviouslyConnected = wasPreviouslyConnected,
             callSessionId = callSessionId,
         )
-        sendEvent(
+        sender.send(
             clientEventFactory.buildRequest(
                 callId = callId,
                 callType = callType,
@@ -234,7 +224,7 @@ internal class ClientEventReporter(
         val session = postCallFlightSessions.remove(stageId) ?: return
         val elapsedTime = System.currentTimeMillis() - session.startedAtMs
         if (session is PostCallFlightSession) {
-            sendEvent(
+            sender.send(
                 clientEventFactory.buildRequest(
                     callId = session.callId,
                     callType = session.callType,
@@ -296,7 +286,7 @@ internal class ClientEventReporter(
                     callSessionId = callSessionIdMap[callId],
                 )
                 activePcSessionIds[role] = stageId
-                sendEvent(
+                sender.send(
                     clientEventFactory.buildRequest(
                         callId = callId,
                         callType = callType,
@@ -362,7 +352,7 @@ internal class ClientEventReporter(
         val session = postCallFlightSessions.remove(stageId) ?: return
         val elapsedTime = System.currentTimeMillis() - session.startedAtMs
         if (session is PostCallFlightSession) {
-            sendEvent(
+            sender.send(
                 clientEventFactory.buildRequest(
                     callId = callId,
                     callType = callType,
@@ -392,7 +382,7 @@ internal class ClientEventReporter(
     ): String {
         val stageId = UUID.randomUUID().toString()
         val callSessionId = callSessionIdMap[callId]
-        sendEvent(
+        sender.send(
             clientEventFactory.buildRequest(
                 callId = callId,
                 callType = callType,
@@ -416,7 +406,7 @@ internal class ClientEventReporter(
     ): String {
         val stageId = UUID.randomUUID().toString()
         val callSessionId = callSessionIdMap[callId]
-        sendEvent(
+        sender.send(
             clientEventFactory.buildRequest(
                 callId = callId,
                 callType = callType,
@@ -441,7 +431,7 @@ internal class ClientEventReporter(
     ): String {
         val stageId = UUID.randomUUID().toString()
         val callSessionId = callSessionIdMap[callId]
-        sendEvent(
+        sender.send(
             clientEventFactory.buildRequest(
                 callId = callId,
                 callType = callType,
@@ -483,39 +473,7 @@ internal class ClientEventReporter(
                 joinStageAttemptId = session.joinStageAttemptIdSnapshot,
             )
         }
-        sendEvents(events)
+        sender.sendAll(events)
     }
 
-    // --- Request builder ---
-
-    // --- Delivery ---
-
-    private fun sendEvent(event: ClientEvent) {
-        when (sendingStrategy) {
-            TelemetrySendingStrategy.BATCH -> {}
-            TelemetrySendingStrategy.IN_PLACE -> {
-                scope.launch {
-                    // TODO: wrap with StreamRetryPolicy when retries are added
-                    runCatching {
-                        logger.d { event.toLog() }
-                        api.reportClientCallEvent(ReportClientEventRequest(arrayListOf(event)))
-                    }.onFailure { e ->
-                        logger.w { "[sendEvent] Failed to send client event: ${e.message}" }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun sendEvents(events: List<ClientEvent>) {
-        scope.launch {
-            // TODO: wrap with StreamRetryPolicy when retries are added
-            runCatching {
-                logger.d { events.map { it.toLog() }.joinToString { "," } }
-                api.reportClientCallEvent(ReportClientEventRequest(events))
-            }.onFailure { e ->
-                logger.w { "[sendEvent] Failed to send client event: ${e.message}" }
-            }
-        }
-    }
 }
