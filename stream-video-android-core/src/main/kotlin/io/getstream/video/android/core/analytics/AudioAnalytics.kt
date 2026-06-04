@@ -67,22 +67,23 @@ internal class AudioAnalytics(
                 .collect { modelAudioTrack ->
                     if (trackSinks.containsKey(modelAudioTrack.streamId)) return@collect
                     val webRtcTrack = modelAudioTrack.audio
-                    val sink = AudioTrackSink { audioData, bitsPerSample, sampleRate, numberOfChannels, numberOfFrames, _ ->
-                        // onData fires on the WebRTC native audio thread every ~10ms.
-                        // Rules:
-                        //  - No logging (I/O on a real-time thread)
-                        //  - No removeSink (deadlocks the sink-list lock WebRTC holds here)
-                        //  - No blocking calls
-                        // CAS here so exactly ONE coroutine is ever launched, then
-                        // hand off all real work (reporting + cleanup) to the coroutine.
-                        if (numberOfFrames > 0 && sampleRate > 0 && numberOfChannels > 0 && audioData.hasRemaining()) {
-                            scope.launch {
-                                if (recordedFirstFrame.compareAndSet(false, true)) {
-                                    reportAndCleanup()
+                    val sink =
+                        AudioTrackSink { audioData, bitsPerSample, sampleRate, numberOfChannels, numberOfFrames, _ ->
+                            // onData fires on the WebRTC native audio thread every ~10ms.
+                            // Rules:
+                            //  - No logging (I/O on a real-time thread)
+                            //  - No removeSink (deadlocks the sink-list lock WebRTC holds here)
+                            //  - No blocking calls
+                            // CAS here so exactly ONE coroutine is ever launched, then
+                            // hand off all real work (reporting + cleanup) to the coroutine.
+                            if (numberOfFrames > 0 && sampleRate > 0 && numberOfChannels > 0 && audioData.hasRemaining()) {
+                                scope.launch {
+                                    if (recordedFirstFrame.compareAndSet(false, true)) {
+                                        reportAndCleanup()
+                                    }
                                 }
                             }
                         }
-                    }
                     trackSinks[modelAudioTrack.streamId] = Pair(webRtcTrack, sink)
                     webRtcTrack.addSink(sink)
                 }
