@@ -1515,13 +1515,15 @@ public class Call(
                         )
                     }
                     onRendered(videoRenderer)
-                    val videoTrackId = session.value?.subscriber?.value?.getTrack(
-                        sessionId,
-                        TrackType.TRACK_TYPE_VIDEO,
-                    )?.asVideoTrack()?.video?.id()
+                    if (trackType == TrackType.TRACK_TYPE_VIDEO && sessionId != this@Call.sessionId) {
+                        val videoTrackId = session.value?.subscriber?.value?.getTrack(
+                            sessionId,
+                            TrackType.TRACK_TYPE_VIDEO,
+                        )?.asVideoTrack()?.video?.id()
 
-                    videoTrackId?.let {
-                        callAnalyticsHooks.videoAnalytics.firstVideoFrameRendered(videoTrackId)
+                        videoTrackId?.let {
+                            callAnalyticsHooks.videoAnalytics.firstVideoFrameRendered(it)
+                        }
                     }
                 }
 
