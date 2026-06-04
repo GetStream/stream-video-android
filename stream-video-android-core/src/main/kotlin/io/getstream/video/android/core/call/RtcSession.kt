@@ -45,6 +45,8 @@ import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.reporting.AnalyticsFailureCodes
+import io.getstream.video.android.core.analytics.reporting.TelemetryModel
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.Subscriber
@@ -71,8 +73,6 @@ import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
-import io.getstream.video.android.core.events.reporting.AnalyticsFailureCodes
-import io.getstream.video.android.core.events.reporting.TelemetryModel
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceCandidate

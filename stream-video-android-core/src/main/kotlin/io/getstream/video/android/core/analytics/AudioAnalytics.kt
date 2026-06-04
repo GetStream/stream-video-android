@@ -18,7 +18,7 @@ package io.getstream.video.android.core.analytics
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.events.reporting.ClientEventReporter
+import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow

@@ -23,7 +23,7 @@ import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
-import io.getstream.video.android.core.events.reporting.ClientEventReporter
+import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.faultinjector.FailureInjector
 import io.getstream.video.android.core.faultinjector.NoOpFailureInjector
 import io.getstream.video.android.core.header.HeadersUtil

@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core.analytics
 
-import io.getstream.video.android.core.events.reporting.ClientEventReporter
-import io.getstream.video.android.core.events.reporting.TelemetryModel
+import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
+import io.getstream.video.android.core.analytics.reporting.TelemetryModel
 import java.util.UUID
 
 internal class JoinRequestHooks(

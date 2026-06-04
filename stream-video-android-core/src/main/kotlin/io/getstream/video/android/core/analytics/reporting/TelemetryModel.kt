@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.events.reporting
+package io.getstream.video.android.core.analytics.reporting
 
 internal data class TelemetryModel(val retryAttempt: Int)
 

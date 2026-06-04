@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core.analytics
 
+import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
+import io.getstream.video.android.core.analytics.reporting.PeerConnectionRole
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.events.reporting.ClientEventReporter
-import io.getstream.video.android.core.events.reporting.PeerConnectionRole
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow

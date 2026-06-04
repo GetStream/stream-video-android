@@ -17,8 +17,8 @@
 package io.getstream.video.android.core.analytics
 
 import android.util.Log
+import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import stream.video.sfu.models.TrackType
 
 internal class VideoAnalytics(

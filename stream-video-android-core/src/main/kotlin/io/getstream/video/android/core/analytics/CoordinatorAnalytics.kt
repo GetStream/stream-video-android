@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.analytics
 
-import io.getstream.video.android.core.events.reporting.ClientEventReporter
+import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketStateService
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketConnectionType
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
