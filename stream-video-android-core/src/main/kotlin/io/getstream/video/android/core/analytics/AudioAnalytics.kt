@@ -40,5 +40,7 @@ internal class AudioAnalytics(
         }
     }
 
-    fun reset() {}
+    fun reset() {
+        recordedFirstFrame.set(false)
+    }
 }

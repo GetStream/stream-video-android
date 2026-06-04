@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.analytics
 
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import io.getstream.video.android.core.events.reporting.PeerConnectionRole
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -27,8 +28,11 @@ import kotlinx.coroutines.launch
 import org.webrtc.PeerConnection
 
 internal class PeerConnectionAnalyticsObserver(
+    val callId:String,
+    val callType:String,
     private val scope: CoroutineScope,
-    private val hook: PeerConnectionHook,
+    val reporter: ClientEventReporter,
+    val getJoinStageAttemptId: () -> String,
 ) {
 
     private var peerConnectionObserverJob: Job? = null
@@ -48,7 +52,7 @@ internal class PeerConnectionAnalyticsObserver(
                     .collect { state ->
                         publisherStage = getStage(state)
                         scope.launch {
-                            hook.onPeerConnectionStateChanged(
+                            onPeerConnectionStateChanged(
                                 role = PeerConnectionRole.PUBLISH,
                                 iceState = session.value?.publisher?.value?.iceState?.value,
                                 peerConnectionState = state,
@@ -64,7 +68,7 @@ internal class PeerConnectionAnalyticsObserver(
                     .collect { state ->
                         subscriberStage = getStage(state)
                         scope.launch {
-                            hook.onPeerConnectionStateChanged(
+                            onPeerConnectionStateChanged(
                                 role = PeerConnectionRole.SUBSCRIBE,
                                 iceState = session.value?.subscriber?.value?.iceState?.value,
                                 peerConnectionState = state,
@@ -91,6 +95,21 @@ internal class PeerConnectionAnalyticsObserver(
                 Stage.IN_PROGRESS
             }
         }
+    }
+
+    internal fun onPeerConnectionStateChanged(
+        role: PeerConnectionRole,
+        iceState: PeerConnection.IceConnectionState?,
+        peerConnectionState: PeerConnection.PeerConnectionState?,
+    ) {
+        reporter.onPeerConnectionStateChanged(
+            callId = callId,
+            callType = callType,
+            role = role,
+            iceState = iceState,
+            peerConnectionState = peerConnectionState,
+            joinStageAttemptId = getJoinStageAttemptId.invoke(),
+        )
     }
 
     fun stop() {

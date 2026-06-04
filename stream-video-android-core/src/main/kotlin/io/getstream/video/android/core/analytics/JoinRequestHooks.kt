@@ -20,7 +20,12 @@ import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import io.getstream.video.android.core.events.reporting.TelemetryModel
 import java.util.UUID
 
-internal class JoinRequestHooks(val callId: String, val callType: String, val eventReporter: ClientEventReporter) {
+internal class JoinRequestHooks(
+    val callId: String,
+    val callType: String,
+    val eventReporter: ClientEventReporter,
+    val onJoinSuccess: () -> Unit
+) {
 
     var stageId = ""
     var joinStage = Stage.NOT_STARTED
@@ -53,6 +58,7 @@ internal class JoinRequestHooks(val callId: String, val callType: String, val ev
                     retryCount = telemetryModel.retryAttempt,
                     callSessionId = currentSessionId,
                 )
+                onJoinSuccess()
             }
             resetStage()
         }

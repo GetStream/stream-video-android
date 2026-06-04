@@ -34,16 +34,16 @@ internal class CallAnalyticsHooks(
     val scope: CoroutineScope,
 ) {
     val logger by taggedLogger("CallAnalyticsHooks")
-    val joinRequestHooks = JoinRequestHooks(callId, callType, eventReporter)
+    val joinRequestHooks = JoinRequestHooks(callId, callType, eventReporter) {
+        resetAfterJoinSuccess()
+    }
     val wsHook = WsHook(callId, callType, connectionFlow, scope, eventReporter) {
         joinRequestHooks.joinStageAttemptId
     }
 
-    val peerConnectionHook = PeerConnectionHook(callId, callType, eventReporter) {
+    val peerConnectionAnalyticsObserver = PeerConnectionAnalyticsObserver(callId, callType, scope,eventReporter){
         joinRequestHooks.joinStageAttemptId
     }
-
-    val peerConnectionAnalyticsObserver = PeerConnectionAnalyticsObserver(scope, peerConnectionHook)
 
     val mediaPermissionHook = MediaPermissionHook(context, callId, callType, eventReporter) {
         joinRequestHooks.joinStageAttemptId
@@ -53,6 +53,11 @@ internal class CallAnalyticsHooks(
     }
     val videoAnalytics = VideoAnalytics(callId, callType, eventReporter, { wsHook.sfuName }) {
         joinRequestHooks.joinStageAttemptId
+    }
+
+    fun resetAfterJoinSuccess() {
+        audioAnalytics.reset()
+        videoAnalytics.reset()
     }
 
     fun onCallLeave(callLeaveReason: CallLeaveReason) {

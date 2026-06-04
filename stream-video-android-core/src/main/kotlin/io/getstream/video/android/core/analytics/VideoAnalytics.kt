@@ -67,5 +67,7 @@ internal class VideoAnalytics(
         }
     }
 
-    fun reset() {}
+    fun reset() {
+        stageId = ""
+    }
 }

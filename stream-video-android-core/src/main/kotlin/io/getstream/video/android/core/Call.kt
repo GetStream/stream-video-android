@@ -588,7 +588,6 @@ public class Call(
         peerConnectionFactory.setPlaybackSamplesReadyCallback {
             scope.launch {
                 callAnalyticsHooks.audioAnalytics.firstAudioFrameRendered()
-                peerConnectionFactory.setPlaybackSamplesReadyCallback(null)
             }
         }
 
