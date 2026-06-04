@@ -25,7 +25,7 @@ import io.getstream.video.android.core.events.reporting.ClientEventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
-internal class CallAnalyticsHooks(
+internal class CallAnalyticsCoordinator(
     val context: Context,
     val callId: String,
     val callType: String,

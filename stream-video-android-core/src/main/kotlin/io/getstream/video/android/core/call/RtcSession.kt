@@ -884,7 +884,7 @@ public class RtcSession internal constructor(
         telemetryModel: TelemetryModel? = null,
     ): SfuConnectionResult {
         logger.i { "noob [connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
-        call.callAnalyticsHooks.wsHook.onWsInitiated(sfuName, reconnectDetails != null)
+        call.callAnalyticsCoordinator.wsHook.onWsInitiated(sfuName, reconnectDetails != null)
 
         val request = buildJoinRequest(reconnectDetails, options)
         sfuTracer.trace(
@@ -902,7 +902,7 @@ public class RtcSession internal constructor(
         }
         return when (terminalState) {
             is SfuSocketState.Connected -> {
-                call.callAnalyticsHooks.wsHook.onWsCompleted(
+                call.callAnalyticsCoordinator.wsHook.onWsCompleted(
                     success = true,
                     retryCount = 0,
                 )
@@ -920,7 +920,7 @@ public class RtcSession internal constructor(
                 }
                 logger.w { "[connectInternal] $msg" }
                 sfuTracer.trace("connect-failed", msg)
-                call.callAnalyticsHooks.wsHook.onWsCompleted(
+                call.callAnalyticsCoordinator.wsHook.onWsCompleted(
                     success = false,
                     retryCount = telemetryModel?.retryAttempt ?: 0,
                     failureReason = msg,
@@ -931,7 +931,7 @@ public class RtcSession internal constructor(
             }
             else -> {
                 sfuTracer.trace("connect-failed", "Connection timed out")
-                call.callAnalyticsHooks.wsHook.onWsCompleted(
+                call.callAnalyticsCoordinator.wsHook.onWsCompleted(
                     success = false,
                     retryCount = telemetryModel?.retryAttempt ?: 0,
                     failureReason = AnalyticsFailureCodes.SFU_REQUEST_TIMEOUT.message,
