@@ -16,7 +16,9 @@
 
 package io.getstream.video.android.core.analytics
 
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.reporting.ClientEventReporter
+import stream.video.sfu.models.TrackType
 
 internal class VideoAnalytics(
     private val callId: String,
@@ -28,15 +30,29 @@ internal class VideoAnalytics(
 
     var stageId: String = ""
 
-    fun firstVideoFrameRendered(trackId: String) {
-        if (stageId.isEmpty()) {
-            stageId = clientEventReporter.reportFirstVideoFrameRendered(
-                onSfuId(),
-                callId,
-                callType,
-                getJoinStageAttemptId(),
-                trackId,
-            )
+    fun firstVideoFrameRendered(
+        trackType: TrackType,
+        rtcSession: RtcSession?,
+        videoSessionId: String,
+        callSessionId: String,
+    ) {
+        if (trackType == TrackType.TRACK_TYPE_VIDEO && videoSessionId != callSessionId) {
+            val videoTrackId = rtcSession?.subscriber?.value?.getTrack(
+                videoSessionId,
+                TrackType.TRACK_TYPE_VIDEO,
+            )?.asVideoTrack()?.video?.id()
+
+            videoTrackId?.let {
+                if (stageId.isEmpty()) {
+                    stageId = clientEventReporter.reportFirstVideoFrameRendered(
+                        onSfuId(),
+                        callId,
+                        callType,
+                        getJoinStageAttemptId(),
+                        videoTrackId,
+                    )
+                }
+            }
         }
     }
 

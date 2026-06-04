@@ -1515,16 +1515,12 @@ public class Call(
                         )
                     }
                     onRendered(videoRenderer)
-                    if (trackType == TrackType.TRACK_TYPE_VIDEO && sessionId != this@Call.sessionId) {
-                        val videoTrackId = session.value?.subscriber?.value?.getTrack(
-                            sessionId,
-                            TrackType.TRACK_TYPE_VIDEO,
-                        )?.asVideoTrack()?.video?.id()
-
-                        videoTrackId?.let {
-                            callAnalyticsHooks.videoAnalytics.firstVideoFrameRendered(it)
-                        }
-                    }
+                    callAnalyticsHooks.videoAnalytics.firstVideoFrameRendered(
+                        trackType,
+                        session.value,
+                        sessionId,
+                        this@Call.sessionId,
+                    )
                 }
 
                 override fun onFrameResolutionChanged(
