@@ -215,6 +215,7 @@ internal class ClientEventReporter(
                 joinStageAttemptId = joinStageAttemptId,
                 sfuId = sfuId,
                 wasPreviouslyConnected = wasPreviouslyConnected,
+                callSessionId = callSessionId,
             ),
         )
         return stageId
