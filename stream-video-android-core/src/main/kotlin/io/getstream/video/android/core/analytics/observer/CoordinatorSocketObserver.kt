@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics
+package io.getstream.video.android.core.analytics.observer
 
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketStateService
@@ -25,7 +25,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-internal class CoordinatorAnalytics(
+internal class CoordinatorSocketObserver(
     private val scope: CoroutineScope,
     private val eventReporter: ClientEventReporter,
 ) {

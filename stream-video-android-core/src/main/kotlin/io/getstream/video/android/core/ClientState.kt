@@ -25,7 +25,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.ImmediateEventSender
-import io.getstream.video.android.core.analytics.reporting.InMemoryPendingEventStore
+import io.getstream.video.android.core.analytics.reporting.datasource.InMemoryPendingEventDataSource
 import io.getstream.video.android.core.faultinjector.FailureInjector
 import io.getstream.video.android.core.faultinjector.NoOpFailureInjector
 import io.getstream.video.android.core.header.HeadersUtil
@@ -97,7 +97,7 @@ class ClientState(private val client: StreamVideo) {
         ClientEventReporter(
             sender = ImmediateEventSender(
                 api = streamVideoClient.coordinatorConnectionModule.api,
-                pendingStore = InMemoryPendingEventStore(),
+                dataSource = InMemoryPendingEventDataSource(),
             ),
             userAgent = { HeadersUtil().buildSdkTrackingHeaders() },
             sdkVersion = BuildConfig.STREAM_VIDEO_VERSION,

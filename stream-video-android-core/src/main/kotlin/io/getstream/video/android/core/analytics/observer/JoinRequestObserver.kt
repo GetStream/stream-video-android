@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics
+package io.getstream.video.android.core.analytics.observer
 
+import io.getstream.video.android.core.analytics.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.TelemetryModel
 import java.util.UUID
 
-internal class JoinRequestHooks(
+internal class JoinRequestObserver(
     val callId: String,
     val callType: String,
     val eventReporter: ClientEventReporter,
@@ -39,6 +40,7 @@ internal class JoinRequestHooks(
             joinStageAttemptId = joinStageAttemptId,
         )
     }
+
     fun onJoinRequestStart() {
         if (joinStage == Stage.NOT_STARTED) {
             stageId = eventReporter.reportCoordinatorJoinInitiated(
@@ -49,6 +51,7 @@ internal class JoinRequestHooks(
             joinStage = Stage.IN_PROGRESS
         }
     }
+
     fun onJoinRequestSuccess(telemetryModel: TelemetryModel, currentSessionId: String) {
         if (joinStage == Stage.IN_PROGRESS) {
             if (stageId.isNotEmpty()) {

@@ -21,6 +21,12 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.analytics.observer.AudioObserver
+import io.getstream.video.android.core.analytics.observer.JoinRequestObserver
+import io.getstream.video.android.core.analytics.observer.MediaPermissionObserver
+import io.getstream.video.android.core.analytics.observer.PeerConnectionObserver
+import io.getstream.video.android.core.analytics.observer.SfuSocketObserver
+import io.getstream.video.android.core.analytics.observer.VideoObserver
 import io.getstream.video.android.core.analytics.reporting.AnalyticsCallAbortReason
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import kotlinx.coroutines.CoroutineScope
@@ -36,40 +42,42 @@ internal class CallAnalyticsCoordinator(
     val scope: CoroutineScope,
 ) {
     val logger by taggedLogger("CallAnalyticsHooks")
-    val joinRequestHooks = JoinRequestHooks(callId, callType, eventReporter) {
+
+    val joinRequestObserver = JoinRequestObserver(callId, callType, eventReporter) {
         resetAfterJoinSuccess()
     }
-    val wsHook = WsHook(callId, callType, connectionFlow, scope, eventReporter) {
-        joinRequestHooks.joinStageAttemptId
+    val sfuSocketObserver =
+        SfuSocketObserver(callId, callType, connectionFlow, scope, eventReporter) {
+            joinRequestObserver.joinStageAttemptId
+        }
+    val peerConnectionObserver = PeerConnectionObserver(callId, callType, scope, eventReporter) {
+        joinRequestObserver.joinStageAttemptId
     }
-
-    val peerConnectionAnalyticsObserver =
-        PeerConnectionAnalyticsObserver(callId, callType, scope, eventReporter) {
-            joinRequestHooks.joinStageAttemptId
+    val mediaPermissionObserver =
+        MediaPermissionObserver(context, callId, callType, eventReporter) {
+            joinRequestObserver.joinStageAttemptId
+        }
+    val audioObserver =
+        AudioObserver(callId, callType, eventReporter, { sfuSocketObserver.sfuName }) {
+            joinRequestObserver.joinStageAttemptId
+        }
+    val videoObserver =
+        VideoObserver(callId, callType, eventReporter, { sfuSocketObserver.sfuName }) {
+            joinRequestObserver.joinStageAttemptId
         }
 
-    val mediaPermissionHook = MediaPermissionHook(context, callId, callType, eventReporter) {
-        joinRequestHooks.joinStageAttemptId
-    }
-    val audioAnalytics = AudioAnalytics(callId, callType, eventReporter, { wsHook.sfuName }) {
-        joinRequestHooks.joinStageAttemptId
-    }
-    val videoAnalytics = VideoAnalytics(callId, callType, eventReporter, { wsHook.sfuName }) {
-        joinRequestHooks.joinStageAttemptId
-    }
-
     fun resetAfterJoinSuccess() {
-        audioAnalytics.reset()
-        videoAnalytics.reset()
-        audioAnalytics.observeParticipantsForFirstRemoteAudioFrame(participants, scope)
+        audioObserver.reset()
+        videoObserver.reset()
+        audioObserver.observeParticipantsForFirstRemoteAudioFrame(participants, scope)
     }
 
     fun onCallLeave(callLeaveReason: CallLeaveReason) {
         val isAnyStageInProgress =
-            joinRequestHooks.joinStage == Stage.IN_PROGRESS ||
-                wsHook.wsStage == Stage.IN_PROGRESS ||
-                peerConnectionAnalyticsObserver.publisherStage == Stage.IN_PROGRESS ||
-                peerConnectionAnalyticsObserver.subscriberStage == Stage.IN_PROGRESS
+            joinRequestObserver.joinStage == Stage.IN_PROGRESS ||
+                sfuSocketObserver.wsStage == Stage.IN_PROGRESS ||
+                peerConnectionObserver.publisherStage == Stage.IN_PROGRESS ||
+                peerConnectionObserver.subscriberStage == Stage.IN_PROGRESS
         logger.d { "noob isAnyStageInProgress:$isAnyStageInProgress" }
 
         if (isAnyStageInProgress) {
@@ -82,6 +90,6 @@ internal class CallAnalyticsCoordinator(
     }
 
     fun stopObservers() {
-        peerConnectionAnalyticsObserver.stop()
+        peerConnectionObserver.stop()
     }
 }

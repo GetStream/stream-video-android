@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics.reporting
+package io.getstream.video.android.core.analytics.reporting.datasource
 
 import io.getstream.android.video.generated.models.ClientEvent
 import java.util.concurrent.CopyOnWriteArrayList
@@ -24,7 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  * Implementations may store events in-memory (lost on process kill)
  * or on disk (survives process restarts).
  */
-internal interface PendingEventStore {
+internal interface PendingEventDataSource {
     fun save(events: List<ClientEvent>)
     fun loadAndClear(): List<ClientEvent>
     fun isEmpty(): Boolean
@@ -34,7 +34,7 @@ internal interface PendingEventStore {
  * In-memory implementation. Events are retained within the same process session
  * and lost if the process is killed before retry.
  */
-internal class InMemoryPendingEventStore : PendingEventStore {
+internal class InMemoryPendingEventDataSource : PendingEventDataSource {
     private val queue = CopyOnWriteArrayList<ClientEvent>()
 
     override fun save(events: List<ClientEvent>) {

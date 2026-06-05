@@ -20,6 +20,8 @@ import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.android.video.generated.models.ReportClientEventRequest
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.analytics.reporting.datasource.InMemoryPendingEventDataSource
+import io.getstream.video.android.core.analytics.reporting.datasource.PendingEventDataSource
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import kotlinx.coroutines.CoroutineScope
@@ -27,7 +29,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Responsible for delivering telemetry [ClientEvent]s to the backend.
- * Failed events are handed to a [PendingEventStore] and can be retried via [retryPending].
+ * Failed events are handed to a [PendingEventDataSource] and can be retried via [retryPending].
  */
 internal interface EventSender {
     fun send(event: ClientEvent)
@@ -42,12 +44,12 @@ internal interface EventSender {
 
 /**
  * Sends each event immediately in a coroutine.
- * On network failure the events are saved to [pendingStore] for later retry.
+ * On network failure the events are saved to [dataSource] for later retry.
  */
 internal class ImmediateEventSender(
     private val api: ProductvideoApi,
     private val scope: CoroutineScope = UserScope(ClientScope()),
-    private val pendingStore: PendingEventStore = InMemoryPendingEventStore(),
+    private val dataSource: PendingEventDataSource = InMemoryPendingEventDataSource(),
 ) : EventSender {
 
     private val logger by taggedLogger("ImmediateEventSender")
@@ -62,14 +64,14 @@ internal class ImmediateEventSender(
                 api.reportClientCallEvent(ReportClientEventRequest(events))
             }.onFailure { e ->
                 logger.w { "[sendAll] Failed — saving ${events.size} event(s) for retry: ${e.message}" }
-                pendingStore.save(events)
+                dataSource.save(events)
             }
         }
     }
 
     override fun retryPending() {
-        if (pendingStore.isEmpty()) return
-        val pending = pendingStore.loadAndClear()
+        if (dataSource.isEmpty()) return
+        val pending = dataSource.loadAndClear()
         sendAll(pending)
     }
 }

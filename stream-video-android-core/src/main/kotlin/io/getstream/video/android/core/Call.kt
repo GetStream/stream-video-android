@@ -567,8 +567,8 @@ public class Call(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
-        callAnalyticsCoordinator.joinRequestHooks.onJoinFunctionStart()
-        callAnalyticsCoordinator.mediaPermissionHook.mediaPermissionStatus()
+        callAnalyticsCoordinator.joinRequestObserver.onJoinFunctionStart()
+        callAnalyticsCoordinator.mediaPermissionObserver.mediaPermissionStatus()
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
@@ -635,7 +635,7 @@ public class Call(
                 logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
-                    callAnalyticsCoordinator.joinRequestHooks.onJoinRequestPermanentError(
+                    callAnalyticsCoordinator.joinRequestObserver.onJoinRequestPermanentError(
                         retryCount,
                         result.value.message,
                     )
@@ -649,7 +649,7 @@ public class Call(
         session.value = null
         val errorMessage = "Join failed after 3 retries"
         state._connection.value = RealtimeConnection.Failed(errorMessage)
-        callAnalyticsCoordinator.joinRequestHooks.onJoinRequestRetryExhausted(
+        callAnalyticsCoordinator.joinRequestObserver.onJoinRequestRetryExhausted(
             retryCount,
             errorMessage,
         )
@@ -800,8 +800,8 @@ public class Call(
             }
         }
         monitorPublisherPCStateJob?.cancel()
-        callAnalyticsCoordinator.peerConnectionAnalyticsObserver.stop()
-        callAnalyticsCoordinator.peerConnectionAnalyticsObserver.observePeerConnections(session)
+        callAnalyticsCoordinator.peerConnectionObserver.stop()
+        callAnalyticsCoordinator.peerConnectionObserver.observePeerConnections(session)
         monitorPublisherPCStateJob = scope.launch {
             session
                 .filterNotNull()
@@ -1073,7 +1073,7 @@ public class Call(
 
             if (state.connection.value is RealtimeConnection.ReconnectingFailed) {
                 logger.w { "[reconnect] All recovery attempts exhausted — leaving call ($reason)" }
-                callAnalyticsCoordinator.joinRequestHooks.onJoinRequestRetryExhausted(
+                callAnalyticsCoordinator.joinRequestObserver.onJoinRequestRetryExhausted(
                     loopIteration,
                     "All recovery attempts exhausted — leaving call ($reason)",
                 )
@@ -1517,7 +1517,7 @@ public class Call(
                         )
                     }
                     onRendered(videoRenderer)
-                    callAnalyticsCoordinator.videoAnalytics.firstVideoFrameRendered(
+                    callAnalyticsCoordinator.videoObserver.firstVideoFrameRendered(
                         trackType,
                         width,
                         height,
@@ -1905,7 +1905,7 @@ public class Call(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         telemetryModel: TelemetryModel,
     ): Result<JoinCallResponse> {
-        callAnalyticsCoordinator.joinRequestHooks.onJoinRequestStart()
+        callAnalyticsCoordinator.joinRequestObserver.onJoinRequestStart()
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
         val result = clientImpl.joinCall(
             type, id,
@@ -1923,7 +1923,7 @@ public class Call(
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
         )
         result.onSuccess {
-            callAnalyticsCoordinator.joinRequestHooks.onJoinRequestSuccess(
+            callAnalyticsCoordinator.joinRequestObserver.onJoinRequestSuccess(
                 telemetryModel,
                 it.call.currentSessionId,
             )

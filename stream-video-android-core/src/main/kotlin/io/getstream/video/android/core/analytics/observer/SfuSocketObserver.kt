@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics
+package io.getstream.video.android.core.analytics.observer
 
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.analytics.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
-internal class WsHook(
+internal class SfuSocketObserver(
     val callId: String,
     val callType: String,
     val connectionFlow: StateFlow<RealtimeConnection>,
@@ -33,6 +34,7 @@ internal class WsHook(
     var wsStage = Stage.NOT_STARTED
 
     var sfuName: String = ""
+
     fun onWsInitiated(sfuName: String, wasPreviouslyConnected: Boolean) {
         if (wsStage == Stage.NOT_STARTED) {
             this.sfuName = sfuName

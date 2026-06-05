@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics
+package io.getstream.video.android.core.analytics.observer
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.ParticipantState
@@ -32,7 +32,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 private typealias TrackId = String
-internal class AudioAnalytics(
+
+internal class AudioObserver(
     private val callId: String,
     private val callType: String,
     private val clientEventReporter: ClientEventReporter,
@@ -40,7 +41,7 @@ internal class AudioAnalytics(
     val getJoinStageAttemptId: () -> String,
 ) {
 
-    val logger by taggedLogger("AudioAnalytics")
+    val logger by taggedLogger("AudioObserver")
     var recordedFirstFrame: AtomicBoolean = AtomicBoolean(false)
 
     private val trackSinks =

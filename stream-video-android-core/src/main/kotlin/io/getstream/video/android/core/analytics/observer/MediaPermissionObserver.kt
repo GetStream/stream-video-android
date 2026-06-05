@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics
+package io.getstream.video.android.core.analytics.observer
 
 import android.Manifest
 import android.content.Context
@@ -22,7 +22,7 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 
-internal class MediaPermissionHook(
+internal class MediaPermissionObserver(
     val context: Context,
     val callId: String,
     val callType: String,
