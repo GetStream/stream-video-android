@@ -21,7 +21,7 @@ import io.getstream.video.android.core.analytics.observer.model.TelemetryModel
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import java.util.UUID
 
-internal class JoinRequestObserver(
+internal class JoinObserver(
     val callId: String,
     val callType: String,
     val eventReporter: ClientEventReporter,

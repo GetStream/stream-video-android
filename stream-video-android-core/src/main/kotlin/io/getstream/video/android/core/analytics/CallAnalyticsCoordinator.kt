@@ -22,7 +22,7 @@ import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.analytics.observer.AudioObserver
-import io.getstream.video.android.core.analytics.observer.JoinRequestObserver
+import io.getstream.video.android.core.analytics.observer.JoinObserver
 import io.getstream.video.android.core.analytics.observer.MediaPermissionObserver
 import io.getstream.video.android.core.analytics.observer.PeerConnectionObserver
 import io.getstream.video.android.core.analytics.observer.SfuSocketObserver
@@ -44,27 +44,27 @@ internal class CallAnalyticsCoordinator(
 ) {
     val logger by taggedLogger("CallAnalyticsHooks")
 
-    val joinRequestObserver = JoinRequestObserver(callId, callType, eventReporter) {
+    val joinObserver = JoinObserver(callId, callType, eventReporter) {
         resetAfterJoinSuccess()
     }
     val sfuSocketObserver =
         SfuSocketObserver(callId, callType, connectionFlow, scope, eventReporter) {
-            joinRequestObserver.joinStageAttemptId
+            joinObserver.joinStageAttemptId
         }
     val peerConnectionObserver = PeerConnectionObserver(callId, callType, scope, eventReporter) {
-        joinRequestObserver.joinStageAttemptId
+        joinObserver.joinStageAttemptId
     }
     val mediaPermissionObserver =
         MediaPermissionObserver(context, callId, callType, eventReporter) {
-            joinRequestObserver.joinStageAttemptId
+            joinObserver.joinStageAttemptId
         }
     val audioObserver =
         AudioObserver(callId, callType, eventReporter, { sfuSocketObserver.sfuName }) {
-            joinRequestObserver.joinStageAttemptId
+            joinObserver.joinStageAttemptId
         }
     val videoObserver =
         VideoObserver(callId, callType, eventReporter, { sfuSocketObserver.sfuName }) {
-            joinRequestObserver.joinStageAttemptId
+            joinObserver.joinStageAttemptId
         }
 
     fun resetAfterJoinSuccess() {
@@ -75,7 +75,7 @@ internal class CallAnalyticsCoordinator(
 
     fun onCallLeave(callLeaveReason: CallLeaveReason) {
         val isAnyStageInProgress =
-            joinRequestObserver.joinStage == Stage.IN_PROGRESS ||
+            joinObserver.joinStage == Stage.IN_PROGRESS ||
                 sfuSocketObserver.wsStage == Stage.IN_PROGRESS ||
                 peerConnectionObserver.publisherStage == Stage.IN_PROGRESS ||
                 peerConnectionObserver.subscriberStage == Stage.IN_PROGRESS

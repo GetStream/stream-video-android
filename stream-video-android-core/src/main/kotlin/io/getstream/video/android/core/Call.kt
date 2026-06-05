@@ -567,7 +567,7 @@ public class Call(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
-        callAnalyticsCoordinator.joinRequestObserver.onJoinFunctionStart()
+        callAnalyticsCoordinator.joinObserver.onJoinFunctionStart()
         callAnalyticsCoordinator.mediaPermissionObserver.mediaPermissionStatus()
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -635,7 +635,7 @@ public class Call(
                 logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
-                    callAnalyticsCoordinator.joinRequestObserver.onJoinRequestPermanentError(
+                    callAnalyticsCoordinator.joinObserver.onJoinRequestPermanentError(
                         retryCount,
                         result.value.message,
                     )
@@ -649,7 +649,7 @@ public class Call(
         session.value = null
         val errorMessage = "Join failed after 3 retries"
         state._connection.value = RealtimeConnection.Failed(errorMessage)
-        callAnalyticsCoordinator.joinRequestObserver.onJoinRequestRetryExhausted(
+        callAnalyticsCoordinator.joinObserver.onJoinRequestRetryExhausted(
             retryCount,
             errorMessage,
         )
@@ -1073,7 +1073,7 @@ public class Call(
 
             if (state.connection.value is RealtimeConnection.ReconnectingFailed) {
                 logger.w { "[reconnect] All recovery attempts exhausted — leaving call ($reason)" }
-                callAnalyticsCoordinator.joinRequestObserver.onJoinRequestRetryExhausted(
+                callAnalyticsCoordinator.joinObserver.onJoinRequestRetryExhausted(
                     loopIteration,
                     "All recovery attempts exhausted — leaving call ($reason)",
                 )
@@ -1905,7 +1905,7 @@ public class Call(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         telemetryModel: TelemetryModel,
     ): Result<JoinCallResponse> {
-        callAnalyticsCoordinator.joinRequestObserver.onJoinRequestStart()
+        callAnalyticsCoordinator.joinObserver.onJoinRequestStart()
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
         val result = clientImpl.joinCall(
             type, id,
@@ -1923,7 +1923,7 @@ public class Call(
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
         )
         result.onSuccess {
-            callAnalyticsCoordinator.joinRequestObserver.onJoinRequestSuccess(
+            callAnalyticsCoordinator.joinObserver.onJoinRequestSuccess(
                 telemetryModel,
                 it.call.currentSessionId,
             )
