@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics.reporting
+package io.getstream.video.android.core.analytics.reporting.model
 
-internal data class TelemetryModel(val retryAttempt: Int)
-
-internal enum class AnalyticsCallAbortReason(val code: String, val message: String) {
-    CLIENT_ABORTED("CLIENT_ABORTED", "Aborted: user left during retry"),
-    BACKEND_LEAVE("BACKEND_LEAVE", "Aborted: backend ended call during connect"),
-}
-
-internal enum class AnalyticsFailureCodes(val code: String, val message: String) {
-    CLIENT_ABORTED("CLIENT_ABORTED", "Aborted: user left during retry"),
-    BACKEND_LEAVE("BACKEND_LEAVE", "Aborted: backend ended call during connect"),
-    NETWORK_OFFLINE("NETWORK_OFFLINE", "Device offline"),
-    ICE_GATHERING_FAILED("ICE_GATHERING_FAILED", "ICE gathering failed"),
-    ICE_CONNECTIVITY_FAILED("ICE_CONNECTIVITY_FAILED", "ICE connectivity failed"),
-    REQUEST_TIMEOUT("REQUEST_TIMEOUT", "Device offline"),
-    SFU_REQUEST_TIMEOUT("REQUEST_TIMEOUT", "SFU connection timed out"),
-}
+internal typealias StageId = String
+internal typealias CallId = String
 
 internal sealed class InFlightSession(
     open val stage: EventStage.Call,

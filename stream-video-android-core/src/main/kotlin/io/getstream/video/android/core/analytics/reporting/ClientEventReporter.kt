@@ -18,13 +18,20 @@ package io.getstream.video.android.core.analytics.reporting
 
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
+import io.getstream.video.android.core.analytics.reporting.model.CallId
+import io.getstream.video.android.core.analytics.reporting.model.EventOutcome
+import io.getstream.video.android.core.analytics.reporting.model.EventStage
+import io.getstream.video.android.core.analytics.reporting.model.EventType
+import io.getstream.video.android.core.analytics.reporting.model.InFlightSession
+import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionRole
+import io.getstream.video.android.core.analytics.reporting.model.PostCallFlightSession
+import io.getstream.video.android.core.analytics.reporting.model.PreCallInFlightSession
+import io.getstream.video.android.core.analytics.reporting.model.StageId
 import org.webrtc.PeerConnection
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.set
-
-internal typealias StageId = String
-internal typealias CallId = String
 
 /**
  * TODO

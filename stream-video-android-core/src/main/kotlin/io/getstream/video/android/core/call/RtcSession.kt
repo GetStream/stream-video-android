@@ -45,8 +45,8 @@ import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.analytics.reporting.AnalyticsFailureCodes
-import io.getstream.video.android.core.analytics.reporting.TelemetryModel
+import io.getstream.video.android.core.analytics.observer.model.TelemetryModel
+import io.getstream.video.android.core.analytics.reporting.model.AnalyticsFailureCodes
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.Subscriber

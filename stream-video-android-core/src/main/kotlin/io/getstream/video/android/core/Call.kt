@@ -61,7 +61,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.analytics.CallAnalyticsCoordinator
-import io.getstream.video.android.core.analytics.reporting.TelemetryModel
+import io.getstream.video.android.core.analytics.observer.model.TelemetryModel
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession

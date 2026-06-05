@@ -18,6 +18,10 @@ package io.getstream.video.android.core.analytics.reporting
 
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.analytics.reporting.model.EventOutcome
+import io.getstream.video.android.core.analytics.reporting.model.EventStage
+import io.getstream.video.android.core.analytics.reporting.model.EventType
+import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionRole
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
 import org.webrtc.PeerConnection

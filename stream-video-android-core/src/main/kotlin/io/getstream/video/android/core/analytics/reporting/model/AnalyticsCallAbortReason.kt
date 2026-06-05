@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics
+package io.getstream.video.android.core.analytics.reporting.model
 
-enum class Stage { NOT_STARTED, IN_PROGRESS }
+internal enum class AnalyticsCallAbortReason(val code: String, val message: String) {
+    CLIENT_ABORTED("CLIENT_ABORTED", "Aborted: user left during retry"),
+    BACKEND_LEAVE("BACKEND_LEAVE", "Aborted: backend ended call during connect"),
+}

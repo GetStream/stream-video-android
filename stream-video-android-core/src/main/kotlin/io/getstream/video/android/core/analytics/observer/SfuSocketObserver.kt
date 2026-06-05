@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.analytics.observer
 
 import io.getstream.video.android.core.RealtimeConnection
-import io.getstream.video.android.core.analytics.Stage
+import io.getstream.video.android.core.analytics.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow

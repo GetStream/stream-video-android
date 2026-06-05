@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics.reporting
+package io.getstream.video.android.core.analytics.reporting.model
 
 internal sealed interface EventStage {
     val value: String
@@ -32,19 +32,4 @@ internal sealed interface EventStage {
         FIRST_VIDEO_FRAME_RENDERED("FirstVideoFrame"),
         MEDIA_DEVICE_PERMISSION("MediaDevicePermission"),
     }
-}
-
-internal enum class EventType(val value: String) {
-    INITIATED("initiated"),
-    COMPLETED("completed"),
-}
-
-internal enum class EventOutcome(val value: String) {
-    SUCCESS("success"),
-    FAILURE("failure"),
-}
-
-internal enum class PeerConnectionRole(val value: String) {
-    PUBLISH("publish"),
-    SUBSCRIBE("subscribe"),
 }

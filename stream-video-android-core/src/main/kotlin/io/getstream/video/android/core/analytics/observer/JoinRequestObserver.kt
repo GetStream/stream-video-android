@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core.analytics.observer
 
-import io.getstream.video.android.core.analytics.Stage
+import io.getstream.video.android.core.analytics.observer.model.Stage
+import io.getstream.video.android.core.analytics.observer.model.TelemetryModel
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
-import io.getstream.video.android.core.analytics.reporting.TelemetryModel
 import java.util.UUID
 
 internal class JoinRequestObserver(

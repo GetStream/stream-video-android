@@ -27,8 +27,9 @@ import io.getstream.video.android.core.analytics.observer.MediaPermissionObserve
 import io.getstream.video.android.core.analytics.observer.PeerConnectionObserver
 import io.getstream.video.android.core.analytics.observer.SfuSocketObserver
 import io.getstream.video.android.core.analytics.observer.VideoObserver
-import io.getstream.video.android.core.analytics.reporting.AnalyticsCallAbortReason
+import io.getstream.video.android.core.analytics.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
+import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
