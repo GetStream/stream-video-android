@@ -314,8 +314,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             coordinatorConnectionModule.updateAuthType("anonymous")
         }
 
-        // Establish a WS connection with the coordinator (we don't support this for anonymous users)
-        if (user.type == UserType.Authenticated) {
+        // Auto-register push and open the coordinator WS for any user with an
+        // identity. Anonymous users don't have one, so neither path applies.
+        // Guest setup runs asynchronously inside StreamVideoClient — both
+        // registerPushDevice() and connectAsync() await guestUserJob before
+        // touching the coordinator, so the auth headers are set by then.
+        if (user.type == UserType.Authenticated || user.type == UserType.Guest) {
             scope.launch {
                 try {
                     if (notificationConfig.autoRegisterPushDevice) {

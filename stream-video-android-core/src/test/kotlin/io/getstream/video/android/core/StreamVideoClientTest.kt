@@ -36,6 +36,7 @@ import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -357,6 +358,30 @@ class StreamVideoClientTest {
             result is io.getstream.result.Result.Failure,
             "expected Result.Failure, got $result",
         )
+    }
+
+    // Regression: StreamNotificationManager.createDevice() calls api.createDevice() directly
+    // instead of going through apiCall {}, so it doesn't inherit the guestUserJob await guard.
+    // registerPushDevice() must await guestUserJob itself — otherwise the push generator can
+    // kick off and fire createDevice() before the coordinator's auth headers flip from
+    // anonymous to JWT. AND-1202.
+    @Test
+    fun `registerPushDevice waits for guestUserJob to complete before delegating`() = runTest {
+        val notificationManager = client.streamNotificationManager
+        val guestJob = CompletableDeferred<Unit>()
+        client::class.java.getDeclaredField("guestUserJob").apply {
+            isAccessible = true
+            set(client, guestJob)
+        }
+
+        val registerJob = launch { client.registerPushDevice() }
+
+        runCurrent()
+        coVerify(exactly = 0) { notificationManager.registerPushDevice() }
+
+        guestJob.complete(Unit)
+        registerJob.join()
+        coVerify(exactly = 1) { notificationManager.registerPushDevice() }
     }
 
     // userId used to be captured at construction. After AND-1202 it reads through the
