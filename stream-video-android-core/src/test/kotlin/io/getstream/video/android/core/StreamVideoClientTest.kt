@@ -18,9 +18,12 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
+import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSessionStartedEvent
+import io.getstream.android.video.generated.models.CreateGuestResponse
+import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.call.RtcSession
@@ -30,6 +33,9 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -45,6 +51,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
+import org.threeten.bp.OffsetDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -350,5 +357,66 @@ class StreamVideoClientTest {
             result is io.getstream.result.Result.Failure,
             "expected Result.Failure, got $result",
         )
+    }
+
+    // userId used to be captured at construction. After AND-1202 it has to track the live
+    // user reference so the server-issued guest identity (adopted on createGuest success)
+    // is reflected everywhere the SDK reads client.userId.
+    @Test
+    fun `userId tracks the current user reference`() {
+        client.user = User(id = "server_issued_guest", type = UserType.Guest)
+        assertEquals("server_issued_guest", client.userId)
+
+        client.user = User(id = "another_user", type = UserType.Authenticated)
+        assertEquals("another_user", client.userId)
+    }
+
+    // setupGuestUser must adopt response.user from createGuest so the SDK's local user.id
+    // matches the JWT's user_id claim. JS does this via connectUser(response.user, ...).
+    // Without it the socket auth payload and the device-registration JWT could disagree.
+    @Test
+    fun `setupGuestUser adopts the server-issued user identity on success`() = runTest {
+        val context = mockk<Context>(relaxed = true)
+        val lifecycle = mockk<Lifecycle>(relaxed = true)
+        val coordinator = mockk<CoordinatorConnectionModule>(relaxed = true)
+        val api = mockk<ProductvideoApi>(relaxed = true)
+        every { coordinator.api } returns api
+        coEvery { api.createGuest(any()) } returns CreateGuestResponse(
+            accessToken = "guest-jwt",
+            duration = "1ms",
+            user = UserResponse(
+                createdAt = OffsetDateTime.MIN,
+                id = "server_normalized_id",
+                language = "en",
+                role = "guest",
+                updatedAt = OffsetDateTime.MIN,
+                name = "Guest",
+            ),
+        )
+        val client = StreamVideoClient(
+            context = context,
+            user = User(id = "local_input_id", type = UserType.Guest),
+            apiKey = "apikey",
+            token = "",
+            lifecycle = lifecycle,
+            coordinatorConnectionModule = coordinator,
+            tokenRepository = mockk(relaxed = true),
+            streamNotificationManager = mockk(relaxed = true),
+            enableCallNotificationUpdates = false,
+            sounds = mockk(relaxed = true),
+            vibrationConfig = mockk(relaxed = true),
+        )
+
+        client.setupGuestUser(client.user)
+        client.guestUserJob?.await()
+
+        assertEquals("server_normalized_id", client.user.id)
+        assertEquals("server_normalized_id", client.userId)
+        assertEquals(UserType.Guest, client.user.type)
+        // ClientState.user is snapshotted at construction from the integrator-supplied
+        // user; the adoption path must mirror the new identity into it as well, otherwise
+        // observers of state.user keep seeing the old id.
+        assertEquals("server_normalized_id", client.state.user.value?.id)
+        assertEquals(UserType.Guest, client.state.user.value?.type)
     }
 }
