@@ -62,19 +62,19 @@ public sealed interface RingingState {
 class ClientState(private val client: StreamVideo) {
     private val logger by taggedLogger("ClientState")
 
+    // Stream video client is used until full decoupling is archived between `CallState` and `StreamVideoClient (former StreamVideoImpl)
+    private val streamVideoClient: StreamVideoClient = client as StreamVideoClient
+
     // Internal data
-    private val _user: MutableStateFlow<User?> = MutableStateFlow(client.user)
     private val _connection: MutableStateFlow<ConnectionState> =
         MutableStateFlow(ConnectionState.PreConnect)
     internal val _ringingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
     private val _activeCall: MutableStateFlow<Call?> = MutableStateFlow(null)
 
-    // Stream video client is used until full decoupling is archived between `CallState` and `StreamVideoClient (former StreamVideoImpl)
-    private val streamVideoClient: StreamVideoClient = client as StreamVideoClient
-
     // API
-    /** Current user for the client. */
-    public val user: StateFlow<User?> = _user
+    /** Current user for the client. Sourced from the UserRepository so observers see
+     *  identity updates (e.g. the server-issued guest user) without a local mirror. */
+    public val user: StateFlow<User?> = streamVideoClient.userRepository.userFlow
 
     /** Coordinator connection state */
     public val connection: StateFlow<ConnectionState> = _connection
