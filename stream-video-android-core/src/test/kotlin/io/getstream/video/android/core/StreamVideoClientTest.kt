@@ -35,7 +35,14 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import kotlin.test.Test
@@ -265,5 +272,83 @@ class StreamVideoClientTest {
 
         verify(exactly = 1) { clientState.handleEvent(event) }
         unmockkAll()
+    }
+
+    // Regression: a guest user's createGuest call runs on a background `guestUserJob`.
+    // If an authenticated API request (e.g. createDevice) fires before that job completes,
+    // it leaves the SDK with no Authorization header and stream-auth-type "anonymous",
+    // so the backend silently associates the request with the wrong identity.
+    // apiCall must block until the guest setup is done. AND-1202.
+    @Test
+    fun `apiCall waits for guestUserJob to complete before invoking the block`() = runTest {
+        val guestJob = CompletableDeferred<Unit>()
+        client::class.java.getDeclaredField("guestUserJob").apply {
+            isAccessible = true
+            set(client, guestJob)
+        }
+
+        var blockRan = false
+        val apiCallJob = launch {
+            client.apiCall {
+                blockRan = true
+                "ok"
+            }
+        }
+
+        runCurrent()
+        assertFalse(blockRan, "apiCall must not run while guestUserJob is still pending")
+
+        guestJob.complete(Unit)
+        apiCallJob.join()
+        assertTrue(blockRan, "apiCall must run once guestUserJob completes")
+    }
+
+    // The guard inside apiCall must skip the await when apiCall is itself running inside
+    // the guest setup's coroutine — otherwise createGuestUser, which goes through apiCall,
+    // would await its own enclosing job and deadlock.
+    @Test
+    fun `apiCall does not deadlock when invoked from within guestUserJob`() = runTest {
+        var blockRan = false
+        val guestJob: Deferred<Unit> = async(start = CoroutineStart.LAZY) {
+            client.apiCall {
+                blockRan = true
+                "ok"
+            }
+            Unit
+        }
+        client::class.java.getDeclaredField("guestUserJob").apply {
+            isAccessible = true
+            set(client, guestJob)
+        }
+
+        guestJob.await()
+        assertTrue(blockRan, "apiCall inside the guest setup must run without deadlocking")
+    }
+
+    // If setupGuestUser fails the SDK has no valid guest session, so subsequent API
+    // calls must NOT proceed under anonymous/empty-token state. The bare await on
+    // guestUserJob lets the failure propagate; safeSuspendingCallWithResult then
+    // turns it into Result.Failure rather than silently re-issuing as anonymous.
+    @Test
+    fun `apiCall surfaces guestUserJob failure instead of swallowing it`() = runTest {
+        val failed = CompletableDeferred<Unit>().apply {
+            completeExceptionally(IllegalStateException("Failed to create guest user"))
+        }
+        client::class.java.getDeclaredField("guestUserJob").apply {
+            isAccessible = true
+            set(client, failed)
+        }
+
+        var blockRan = false
+        val result = client.apiCall {
+            blockRan = true
+            "should-not-run"
+        }
+
+        assertFalse(blockRan, "apiCall must not invoke the request block when guest setup failed")
+        assertTrue(
+            result is io.getstream.result.Result.Failure,
+            "expected Result.Failure, got $result",
+        )
     }
 }

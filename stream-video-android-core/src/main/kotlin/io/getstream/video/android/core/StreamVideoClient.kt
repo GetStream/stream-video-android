@@ -133,9 +133,11 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
@@ -282,6 +284,17 @@ internal class StreamVideoClient internal constructor(
     internal suspend fun <T : Any> apiCall(
         apiCall: suspend () -> T,
     ): Result<T> = safeSuspendingCallWithResult {
+        // Guest users have an asynchronous setup (createGuest) that fetches their JWT.
+        // Any authenticated request that fires before that completes goes out without
+        // an Authorization header and stream-auth-type "anonymous", so the backend
+        // can't associate it with the guest — push device registration silently lands
+        // on the wrong identity. Wait here so every API call sees the right auth.
+        // Skip the wait when this apiCall is itself running inside the guest setup,
+        // otherwise createGuestUser would await its own enclosing job. Let the
+        // await throw if setupGuestUser failed — safeSuspendingCallWithResult turns
+        // it into Result.Failure, which is the right outcome (the caller didn't get
+        // a valid guest session, so the request can't proceed).
+        guestUserJob?.takeIf { currentCoroutineContext()[Job] !== it }?.await()
         try {
             apiCall()
         } catch (e: HttpException) {
