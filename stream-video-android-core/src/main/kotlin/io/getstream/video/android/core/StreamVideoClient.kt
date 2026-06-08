@@ -1165,6 +1165,14 @@ internal class StreamVideoClient internal constructor(
     /**
      * @see StreamVideo.logOut
      */
+    @Deprecated(
+        message = "Kept for source compatibility; see StreamVideo.logOut for migration guidance.",
+        replaceWith = ReplaceWith(
+            expression = "StreamVideo.removeClient()",
+            imports = ["io.getstream.video.android.core.StreamVideo"],
+        ),
+        level = DeprecationLevel.WARNING,
+    )
     override fun logOut() {
         scope.launch(
             CoroutineName("logOut"),
