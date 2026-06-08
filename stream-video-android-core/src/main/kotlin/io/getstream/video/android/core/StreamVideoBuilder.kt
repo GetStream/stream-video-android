@@ -45,6 +45,7 @@ import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
 import io.getstream.video.android.core.sounds.disableVibrationConfig
 import io.getstream.video.android.core.sounds.toSounds
+import io.getstream.video.android.core.user.StreamUserRepositoryImpl
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -241,6 +242,10 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             "ws://${it.trimEnd('/')}/video/connect"
         } ?: wssUrl ?: "wss://$videoDomain/video/connect"
 
+        // Single source of truth for the SDK user — shared between the client (writer)
+        // and the coordinator socket / ClientState (readers).
+        val userRepository = StreamUserRepositoryImpl(user)
+
         val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
             scope = scope,
@@ -248,7 +253,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             wssUrl = resolvedWssUrl,
             connectionTimeoutInMs = connectionTimeoutInMs,
             loggingLevel = loggingLevel,
-            user = user,
+            userRepository = userRepository,
             apiKey = apiKey,
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
@@ -276,13 +281,14 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         val client = StreamVideoClient(
             context = context,
             scope = scope,
-            user = user,
+            initialUser = user,
             apiKey = apiKey,
             token = token,
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
             tokenProvider = tokenProvider,
             streamNotificationManager = streamNotificationManager,
+            userRepository = userRepository,
             enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
             callServiceConfigRegistry = callConfigRegistry,
             sounds = sounds,
