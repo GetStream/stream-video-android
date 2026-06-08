@@ -91,7 +91,6 @@ internal class ImmediateEventSender(
     }
 
     suspend fun retryInternal(maxAttempts: Int = 5, lambda: suspend () -> Unit): Result<Unit> {
-
         val baseDelayMs = 500L
 
         repeat(maxAttempts) { attempt ->
@@ -126,7 +125,8 @@ internal class ImmediateEventSender(
             is java.net.SocketTimeoutException,
             is java.net.ConnectException,
             is java.net.UnknownHostException,
-            is java.io.IOException -> {
+            is java.io.IOException,
+            -> {
                 true
             }
 
