@@ -413,5 +413,10 @@ class StreamVideoClientTest {
         assertEquals("server_normalized_id", client.user.id)
         assertEquals("server_normalized_id", client.userId)
         assertEquals(UserType.Guest, client.user.type)
+        // ClientState.user is snapshotted at construction from the integrator-supplied
+        // user; the adoption path must mirror the new identity into it as well, otherwise
+        // observers of state.user keep seeing the old id.
+        assertEquals("server_normalized_id", client.state.user.value?.id)
+        assertEquals(UserType.Guest, client.state.user.value?.type)
     }
 }

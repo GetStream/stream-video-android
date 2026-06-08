@@ -554,6 +554,9 @@ internal class StreamVideoClient internal constructor(
                 // can't drift from the JWT's user_id claim (parity with the JS SDK,
                 // which connects with response.user from createGuest).
                 this@StreamVideoClient.user = it.user.toUser().copy(type = UserType.Guest)
+                // Mirror into ClientState so observers of state.user (snapshotted at
+                // construction from the integrator-supplied user) see the adopted id.
+                state.setUser(this@StreamVideoClient.user)
             }
         }
     }

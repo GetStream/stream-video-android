@@ -76,6 +76,10 @@ class ClientState(private val client: StreamVideo) {
     /** Current user for the client. */
     public val user: StateFlow<User?> = _user
 
+    internal fun setUser(user: User?) {
+        _user.value = user
+    }
+
     /** Coordinator connection state */
     public val connection: StateFlow<ConnectionState> = _connection
 
