@@ -118,6 +118,8 @@ import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.user.StreamUserRepositoryImpl
+import io.getstream.video.android.core.user.WritableUserRepository
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.safeCall
@@ -167,7 +169,7 @@ internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
 internal class StreamVideoClient internal constructor(
     override val context: Context,
     internal val scope: CoroutineScope = ClientScope(),
-    override var user: User,
+    initialUser: User,
     internal val apiKey: ApiKey,
     internal var token: String,
     private val lifecycle: Lifecycle,
@@ -175,6 +177,7 @@ internal class StreamVideoClient internal constructor(
     internal val tokenRepository: TokenRepository,
     internal val tokenProvider: TokenProvider = RepositoryTokenProvider(tokenRepository),
     internal val streamNotificationManager: StreamNotificationManager,
+    internal val userRepository: WritableUserRepository = StreamUserRepositoryImpl(initialUser),
     internal val enableCallNotificationUpdates: Boolean,
     internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
     internal val sounds: Sounds,
@@ -195,6 +198,11 @@ internal class StreamVideoClient internal constructor(
 
     private var locationJob: Deferred<Result<String>>? = null
 
+    /** Reads through [userRepository] so callers always see the latest identity
+     *  (e.g. the server-issued guest user adopted by [setupGuestUser]). */
+    public override val user: User
+        get() = userRepository.user
+
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
     internal val callBusyHandler =
@@ -210,7 +218,7 @@ internal class StreamVideoClient internal constructor(
     internal var guestUserJob: Deferred<Unit>? = null
 
     public override val userId: String
-        get() = user.id
+        get() = userRepository.user.id
 
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
@@ -552,11 +560,10 @@ internal class StreamVideoClient internal constructor(
                 coordinatorConnectionModule.updateToken(it.accessToken)
                 // Adopt the server-issued user identity so the SDK's local user.id
                 // can't drift from the JWT's user_id claim (parity with the JS SDK,
-                // which connects with response.user from createGuest).
-                this@StreamVideoClient.user = it.user.toUser().copy(type = UserType.Guest)
-                // Mirror into ClientState so observers of state.user (snapshotted at
-                // construction from the integrator-supplied user) see the adopted id.
-                state.setUser(this@StreamVideoClient.user)
+                // which connects with response.user from createGuest). Writing through
+                // the repository propagates to every reader (socket, ClientState, …) at
+                // once — no further mirrors required.
+                userRepository.setUser(it.user.toUser().copy(type = UserType.Guest))
             }
         }
     }
@@ -570,6 +577,12 @@ internal class StreamVideoClient internal constructor(
     }
 
     internal suspend fun registerPushDevice() {
+        // createDevice() inside StreamNotificationManager calls api.createDevice() directly
+        // rather than going through apiCall {}, so it doesn't inherit the guestUserJob await
+        // guard. Wait here instead — once guestUserJob completes, the coordinator module's
+        // auth headers are set to JWT, so the later (async) createDevice request lands on
+        // the guest identity instead of !anon. AND-1202.
+        guestUserJob?.takeIf { currentCoroutineContext()[Job] !== it }?.await()
         streamNotificationManager.registerPushDevice()
     }
 

@@ -36,6 +36,7 @@ import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
@@ -91,7 +92,7 @@ class StreamVideoClientTest {
         return spyk(
             StreamVideoClient(
                 context = context,
-                user = mockk(relaxed = true),
+                initialUser = mockk(relaxed = true),
                 apiKey = "apikey",
                 token = "token",
                 lifecycle = lifecycle,
@@ -359,15 +360,39 @@ class StreamVideoClientTest {
         )
     }
 
-    // userId used to be captured at construction. After AND-1202 it has to track the live
-    // user reference so the server-issued guest identity (adopted on createGuest success)
+    // Regression: StreamNotificationManager.createDevice() calls api.createDevice() directly
+    // instead of going through apiCall {}, so it doesn't inherit the guestUserJob await guard.
+    // registerPushDevice() must await guestUserJob itself — otherwise the push generator can
+    // kick off and fire createDevice() before the coordinator's auth headers flip from
+    // anonymous to JWT. AND-1202.
+    @Test
+    fun `registerPushDevice waits for guestUserJob to complete before delegating`() = runTest {
+        val notificationManager = client.streamNotificationManager
+        val guestJob = CompletableDeferred<Unit>()
+        client::class.java.getDeclaredField("guestUserJob").apply {
+            isAccessible = true
+            set(client, guestJob)
+        }
+
+        val registerJob = launch { client.registerPushDevice() }
+
+        runCurrent()
+        coVerify(exactly = 0) { notificationManager.registerPushDevice() }
+
+        guestJob.complete(Unit)
+        registerJob.join()
+        coVerify(exactly = 1) { notificationManager.registerPushDevice() }
+    }
+
+    // userId used to be captured at construction. After AND-1202 it reads through the
+    // UserRepository so the server-issued guest identity (adopted on createGuest success)
     // is reflected everywhere the SDK reads client.userId.
     @Test
     fun `userId tracks the current user reference`() {
-        client.user = User(id = "server_issued_guest", type = UserType.Guest)
+        client.userRepository.setUser(User(id = "server_issued_guest", type = UserType.Guest))
         assertEquals("server_issued_guest", client.userId)
 
-        client.user = User(id = "another_user", type = UserType.Authenticated)
+        client.userRepository.setUser(User(id = "another_user", type = UserType.Authenticated))
         assertEquals("another_user", client.userId)
     }
 
@@ -395,7 +420,7 @@ class StreamVideoClientTest {
         )
         val client = StreamVideoClient(
             context = context,
-            user = User(id = "local_input_id", type = UserType.Guest),
+            initialUser = User(id = "local_input_id", type = UserType.Guest),
             apiKey = "apikey",
             token = "",
             lifecycle = lifecycle,
@@ -413,9 +438,8 @@ class StreamVideoClientTest {
         assertEquals("server_normalized_id", client.user.id)
         assertEquals("server_normalized_id", client.userId)
         assertEquals(UserType.Guest, client.user.type)
-        // ClientState.user is snapshotted at construction from the integrator-supplied
-        // user; the adoption path must mirror the new identity into it as well, otherwise
-        // observers of state.user keep seeing the old id.
+        // state.user is sourced from the UserRepository, so it should reflect the
+        // adopted identity automatically — no separate mirror to keep in sync.
         assertEquals("server_normalized_id", client.state.user.value?.id)
         assertEquals(UserType.Guest, client.state.user.value?.type)
     }
