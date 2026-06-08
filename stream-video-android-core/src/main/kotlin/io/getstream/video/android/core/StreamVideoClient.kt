@@ -577,6 +577,12 @@ internal class StreamVideoClient internal constructor(
     }
 
     internal suspend fun registerPushDevice() {
+        // createDevice() inside StreamNotificationManager calls api.createDevice() directly
+        // rather than going through apiCall {}, so it doesn't inherit the guestUserJob await
+        // guard. Wait here instead — once guestUserJob completes, the coordinator module's
+        // auth headers are set to JWT, so the later (async) createDevice request lands on
+        // the guest identity instead of !anon. AND-1202.
+        guestUserJob?.takeIf { currentCoroutineContext()[Job] !== it }?.await()
         streamNotificationManager.registerPushDevice()
     }
 
