@@ -47,4 +47,7 @@ internal class SynchronizedPendingEventDataSource(
     override fun loadAndClear(): List<ClientEvent> = lock.write { delegate.loadAndClear() }
 
     override fun isEmpty(): Boolean = lock.read { delegate.isEmpty() }
+    override fun clear() {
+        lock.write { delegate.clear() }
+    }
 }

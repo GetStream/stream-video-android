@@ -101,6 +101,9 @@ internal class ClientEventReporter(
                 ),
             )
         }
+        if (success) {
+            sender.retryPending()
+        }
     }
 
     internal fun reportSdkMethodJoinInitiated(
@@ -484,5 +487,9 @@ internal class ClientEventReporter(
             )
         }
         sender.sendAll(events)
+    }
+
+    fun deleteAll() {
+        sender.deleteAll()
     }
 }

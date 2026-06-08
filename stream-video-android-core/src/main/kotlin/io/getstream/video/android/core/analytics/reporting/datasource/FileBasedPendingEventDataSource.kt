@@ -75,6 +75,12 @@ internal class FileBasedPendingEventDataSource(
 
     override fun isEmpty(): Boolean = !file.exists() || file.length() == 0L
 
+    override fun clear() {
+        if (file.exists()) {
+            file.writeText("")
+        }
+    }
+
     companion object {
         const val DEFAULT_BATCH_SIZE = 10
     }

@@ -28,6 +28,7 @@ internal interface PendingEventDataSource {
     fun save(events: List<ClientEvent>)
     fun loadAndClear(): List<ClientEvent>
     fun isEmpty(): Boolean
+    fun clear()
 }
 
 /**
@@ -44,4 +45,5 @@ internal class InMemoryPendingEventDataSource : PendingEventDataSource {
     override fun loadAndClear(): List<ClientEvent> = queue.toList().also { queue.clear() }
 
     override fun isEmpty(): Boolean = queue.isEmpty()
+    override fun clear() = queue.clear()
 }

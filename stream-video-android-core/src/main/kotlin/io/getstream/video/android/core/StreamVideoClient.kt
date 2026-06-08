@@ -316,6 +316,7 @@ internal class StreamVideoClient internal constructor(
         ) // SDK client cleanup
         audioExecutionContext.release()
         coordinatorAnalytics.endObserver()
+        state.clientEventReporter.deleteAll()
     }
 
     /**
