@@ -91,7 +91,7 @@ class StreamVideoClientTest {
         return spyk(
             StreamVideoClient(
                 context = context,
-                user = mockk(relaxed = true),
+                initialUser = mockk(relaxed = true),
                 apiKey = "apikey",
                 token = "token",
                 lifecycle = lifecycle,
@@ -359,15 +359,15 @@ class StreamVideoClientTest {
         )
     }
 
-    // userId used to be captured at construction. After AND-1202 it has to track the live
-    // user reference so the server-issued guest identity (adopted on createGuest success)
+    // userId used to be captured at construction. After AND-1202 it reads through the
+    // UserRepository so the server-issued guest identity (adopted on createGuest success)
     // is reflected everywhere the SDK reads client.userId.
     @Test
     fun `userId tracks the current user reference`() {
-        client.user = User(id = "server_issued_guest", type = UserType.Guest)
+        client.userRepository.setUser(User(id = "server_issued_guest", type = UserType.Guest))
         assertEquals("server_issued_guest", client.userId)
 
-        client.user = User(id = "another_user", type = UserType.Authenticated)
+        client.userRepository.setUser(User(id = "another_user", type = UserType.Authenticated))
         assertEquals("another_user", client.userId)
     }
 
@@ -395,7 +395,7 @@ class StreamVideoClientTest {
         )
         val client = StreamVideoClient(
             context = context,
-            user = User(id = "local_input_id", type = UserType.Guest),
+            initialUser = User(id = "local_input_id", type = UserType.Guest),
             apiKey = "apikey",
             token = "",
             lifecycle = lifecycle,
@@ -413,9 +413,8 @@ class StreamVideoClientTest {
         assertEquals("server_normalized_id", client.user.id)
         assertEquals("server_normalized_id", client.userId)
         assertEquals(UserType.Guest, client.user.type)
-        // ClientState.user is snapshotted at construction from the integrator-supplied
-        // user; the adoption path must mirror the new identity into it as well, otherwise
-        // observers of state.user keep seeing the old id.
+        // state.user is sourced from the UserRepository, so it should reflect the
+        // adopted identity automatically — no separate mirror to keep in sync.
         assertEquals("server_normalized_id", client.state.user.value?.id)
         assertEquals(UserType.Guest, client.state.user.value?.type)
     }
