@@ -116,7 +116,6 @@ internal class AudioAnalytics(
 
     fun reset() {
         if (!isEnabled) return
-        logger.d { "noob [reset]" }
         recordedFirstFrame.set(false)
         trackSinks.forEach { (_, pair) -> pair.first.removeSink(pair.second) }
         trackSinks.clear()

@@ -85,6 +85,6 @@ internal data class JoinTelemetryState(
     val joinReason: JoinReason? = null,
     val joinStageAttemptId: String? = null,
     var stageId: String = "",
-    var joinStage: Stage = Stage.NOT_STARTED,
-    var callSessionId: String = "unknown",
+    val joinStage: Stage = Stage.NOT_STARTED,
+    val callSessionId: String = "unknown",
 )

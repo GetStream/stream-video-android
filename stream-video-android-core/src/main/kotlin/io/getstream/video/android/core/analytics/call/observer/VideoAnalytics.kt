@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.analytics.call.observer
 
-import android.util.Log
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.call.RtcSession
@@ -48,10 +47,7 @@ internal class VideoAnalytics(
                         videoSessionId,
                         TrackType.TRACK_TYPE_VIDEO,
                     )?.asVideoTrack()?.video?.id()
-                    Log.d(
-                        "VideoObserver",
-                        "noob [firstVideoFrameRendered]: $trackType, w:$width, h:$height, videoTrackId:$videoTrackId, videoSessionId:$videoSessionId, callSessionId:$callSessionId",
-                    )
+
                     videoTrackId?.let {
                         if (stageId.value.isEmpty()) {
                             stageId.value = clientEventReporter.reportFirstVideoFrameRendered(

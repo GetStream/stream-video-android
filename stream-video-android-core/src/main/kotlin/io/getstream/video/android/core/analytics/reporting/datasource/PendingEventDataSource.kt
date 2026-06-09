@@ -34,9 +34,14 @@ internal interface PendingEventDataSource {
 /**
  * In-memory implementation. Events are retained within the same process session
  * and lost if the process is killed before retry.
+ * For thread safety use it as
+ *
+ * ```
+ * SynchronizedPendingEventDataSource(InMemoryPendingEventDataSource())
+ * ```
  */
 internal class InMemoryPendingEventDataSource : PendingEventDataSource {
-    private val queue = CopyOnWriteArrayList<ClientEvent>()
+    private val queue = ArrayList<ClientEvent>()
 
     override fun save(events: List<ClientEvent>) {
         queue.addAll(events)

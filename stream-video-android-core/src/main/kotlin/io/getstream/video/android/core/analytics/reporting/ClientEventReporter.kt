@@ -23,6 +23,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.datasource.FileBasedPendingEventDataSource
+import io.getstream.video.android.core.analytics.reporting.datasource.PendingEventDataSource
 import io.getstream.video.android.core.analytics.reporting.datasource.SynchronizedPendingEventDataSource
 import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
 import io.getstream.video.android.core.analytics.reporting.dispatcher.ImmediateEventDispatcher
@@ -54,13 +55,17 @@ internal class ClientEventReporter(
 ) {
 
     companion object {
-        fun getDefault(context: Context, api: ProductvideoApi): ClientEventReporter {
+        fun getDefault(
+            context: Context,
+            api: ProductvideoApi,
+            dataSource: PendingEventDataSource = SynchronizedPendingEventDataSource(
+                FileBasedPendingEventDataSource(context.cacheDir),
+            ),
+        ): ClientEventReporter {
             return ClientEventReporter(
                 sender = ImmediateEventDispatcher(
                     api = api,
-                    dataSource = SynchronizedPendingEventDataSource(
-                        FileBasedPendingEventDataSource(context.cacheDir),
-                    ),
+                    dataSource = dataSource,
                 ),
                 userAgent = { HeadersUtil().buildSdkTrackingHeaders() },
                 sdkVersion = BuildConfig.STREAM_VIDEO_VERSION,
@@ -133,6 +138,7 @@ internal class ClientEventReporter(
             sender.send(
                 clientEventFactory.buildRequest(
                     stage = EventStage.CoordinatorWs,
+                    stageId = stageId,
                     outcome = if (success) EventOutcome.SUCCESS else EventOutcome.FAILURE,
                     retryCountAttempt = retryCount,
                     retryFailureCode = failureCode,
