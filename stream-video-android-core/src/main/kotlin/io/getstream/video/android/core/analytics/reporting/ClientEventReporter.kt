@@ -59,7 +59,26 @@ internal class ClientEventReporter(
 
     // Whether each PC role has ever reached CONNECTED (for was_previously_connected)
     private val pcEverConnected = ConcurrentHashMap<PeerConnectionRole, Boolean>()
+
+    @Volatile
     private var coordinatorConnectId = ""
+
+    private inline fun completePostCall(
+        stageId: String,
+        build: (session: PostCallFlightSession, elapsedMs: Long) -> ClientEvent?,
+    ) {
+        val session = postCallFlightSessions.remove(stageId) ?: return
+        if (session !is PostCallFlightSession) return
+        val elapsedMs = System.currentTimeMillis() - session.startedAtMs
+        build(session, elapsedMs)?.let(sender::send)
+    }
+
+    private fun callSessionId(callId: CallId): String? = callSessionIdMap[callId]
+
+    private fun rememberCallSession(callId: CallId, id: String?) {
+        callSessionIdMap[callId] = id ?: ""
+    }
+
     internal fun reportCoordinatorWSInitiated(): String {
         this.coordinatorConnectId = UUID.randomUUID().toString()
         val stageId = UUID.randomUUID().toString()
@@ -162,28 +181,22 @@ internal class ClientEventReporter(
         failureReason: String? = null,
         failureCode: String? = null, // TODO Rahul, ask tomorrow
         callSessionId: String? = null,
-    ) {
-        val session = postCallFlightSessions.remove(stageId) ?: return
-        if (session is PostCallFlightSession) {
-            val elapsedTime = System.currentTimeMillis() - session.startedAtMs
-            callSessionIdMap[session.callId] = callSessionId ?: ""
-            sender.send(
-                clientEventFactory.buildRequest(
-                    callId = session.callId,
-                    callType = session.callType,
-                    stage = EventStage.Call.COORDINATOR_JOIN,
-                    eventType = EventType.COMPLETED,
-                    stageId = stageId,
-                    elapsedTime = elapsedTime,
-                    outcome = if (success) EventOutcome.SUCCESS else EventOutcome.FAILURE,
-                    retryCountAttempt = retryCount,
-                    retryFailureReason = if (!success) failureReason else null,
-                    retryFailureCode = if (!success) failureCode else null,
-                    callSessionId = callSessionId,
-                    joinStageAttemptId = session.joinStageAttemptIdSnapshot,
-                ),
-            )
-        }
+    ) = completePostCall(stageId) { session, elapsedTime ->
+        rememberCallSession(session.callId, callSessionId)
+        clientEventFactory.buildRequest(
+            callId = session.callId,
+            callType = session.callType,
+            stage = EventStage.Call.COORDINATOR_JOIN,
+            eventType = EventType.COMPLETED,
+            stageId = stageId,
+            elapsedTime = elapsedTime,
+            outcome = if (success) EventOutcome.SUCCESS else EventOutcome.FAILURE,
+            retryCountAttempt = retryCount,
+            retryFailureReason = if (!success) failureReason else null,
+            retryFailureCode = if (!success) failureCode else null,
+            callSessionId = callSessionId,
+            joinStageAttemptId = session.joinStageAttemptIdSnapshot,
+        )
     }
 
     // --- WSJoin ---
@@ -232,28 +245,22 @@ internal class ClientEventReporter(
         retryCount: Int,
         failureReason: String? = null,
         failureCode: String? = null,
-    ) {
-        val session = postCallFlightSessions.remove(stageId) ?: return
-        val elapsedTime = System.currentTimeMillis() - session.startedAtMs
-        if (session is PostCallFlightSession) {
-            sender.send(
-                clientEventFactory.buildRequest(
-                    callId = session.callId,
-                    callType = session.callType,
-                    stage = EventStage.Call.WS_JOIN,
-                    eventType = EventType.COMPLETED,
-                    stageId = stageId,
-                    elapsedTime = elapsedTime,
-                    outcome = if (success) EventOutcome.SUCCESS else EventOutcome.FAILURE,
-                    retryCountAttempt = retryCount,
-                    retryFailureReason = if (!success) failureReason else null,
-                    retryFailureCode = if (!success) failureCode else null,
-                    sfuId = session.sfuId,
-                    callSessionId = session.callSessionId,
-                    joinStageAttemptId = joinStageAttemptId,
-                ),
-            )
-        }
+    ) = completePostCall(stageId) { session, elapsedTime ->
+        clientEventFactory.buildRequest(
+            callId = session.callId,
+            callType = session.callType,
+            stage = EventStage.Call.WS_JOIN,
+            eventType = EventType.COMPLETED,
+            stageId = stageId,
+            elapsedTime = elapsedTime,
+            outcome = if (success) EventOutcome.SUCCESS else EventOutcome.FAILURE,
+            retryCountAttempt = retryCount,
+            retryFailureReason = if (!success) failureReason else null,
+            retryFailureCode = if (!success) failureCode else null,
+            sfuId = session.sfuId,
+            callSessionId = session.callSessionId,
+            joinStageAttemptId = joinStageAttemptId,
+        )
     }
 
     // --- PeerConnectionConnect (ICE state machine) ---
@@ -360,32 +367,25 @@ internal class ClientEventReporter(
         peerConnectionState: PeerConnection.PeerConnectionState?,
         failureReason: String? = null,
         failureCode: String? = null,
-    ) {
-        val session = postCallFlightSessions.remove(stageId) ?: return
-        val elapsedTime = System.currentTimeMillis() - session.startedAtMs
-        val callSessionId = callSessionIdMap[callId]
-        if (session is PostCallFlightSession) {
-            sender.send(
-                clientEventFactory.buildRequest(
-                    callId = callId,
-                    callSessionId = callSessionId,
-                    callType = callType,
-                    stage = EventStage.Call.PEER_CONNECTION_CONNECT,
-                    eventType = EventType.COMPLETED,
-                    stageId = stageId,
-                    joinStageAttemptId = joinStageAttemptId,
-                    elapsedTime = elapsedTime,
-                    outcome = if (success) EventOutcome.SUCCESS else EventOutcome.FAILURE,
-                    retryCountAttempt = 0,
-                    retryFailureReason = if (!success) failureReason else null,
-                    retryFailureCode = if (!success) failureCode else null,
-                    peerConnection = session.peerConnectionRole,
-                    wasPreviouslyConnected = session.wasPreviouslyConnected,
-                    iceState = iceState,
-                    peerConnectionState = peerConnectionState,
-                ),
-            )
-        }
+    ) = completePostCall(stageId) { session, elapsedTime ->
+        clientEventFactory.buildRequest(
+            callId = callId,
+            callSessionId = callSessionId(callId),
+            callType = callType,
+            stage = EventStage.Call.PEER_CONNECTION_CONNECT,
+            eventType = EventType.COMPLETED,
+            stageId = stageId,
+            joinStageAttemptId = joinStageAttemptId,
+            elapsedTime = elapsedTime,
+            outcome = if (success) EventOutcome.SUCCESS else EventOutcome.FAILURE,
+            retryCountAttempt = 0,
+            retryFailureReason = if (!success) failureReason else null,
+            retryFailureCode = if (!success) failureCode else null,
+            peerConnection = session.peerConnectionRole,
+            wasPreviouslyConnected = session.wasPreviouslyConnected,
+            iceState = iceState,
+            peerConnectionState = peerConnectionState,
+        )
     }
 
     internal fun reportFirstAudioFrameRendered(
