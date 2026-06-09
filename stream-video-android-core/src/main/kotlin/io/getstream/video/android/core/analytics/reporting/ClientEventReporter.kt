@@ -328,6 +328,7 @@ internal class ClientEventReporter(
                         stage = EventStage.Call.PEER_CONNECTION_CONNECT,
                         eventType = EventType.INITIATED,
                         stageId = stageId,
+                        sfuId = sfuId,
                         joinStageAttemptId = joinStageAttemptId,
                         peerConnection = role,
                         wasPreviouslyConnected = wasPrev,
