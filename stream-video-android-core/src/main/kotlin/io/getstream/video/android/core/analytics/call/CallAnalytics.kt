@@ -26,8 +26,8 @@ import io.getstream.video.android.core.analytics.call.observer.JoinAnalyticsStat
 import io.getstream.video.android.core.analytics.call.observer.JoinObserver
 import io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver
 import io.getstream.video.android.core.analytics.call.observer.PeerConnectionObserver
-import io.getstream.video.android.core.analytics.call.observer.SfuSocketObserver
-import io.getstream.video.android.core.analytics.call.observer.SfuSocketStateHolder
+import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
+import io.getstream.video.android.core.analytics.call.observer.SfuAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.call.observer.VideoObserver
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
@@ -46,20 +46,21 @@ internal class CallAnalytics(
 ) {
     val logger by taggedLogger("CallAnalyticsHooks")
     val joinAnalyticsStateHolder = JoinAnalyticsStateHolder()
-    val sfuSocketStateHolder = SfuSocketStateHolder()
+    val sfuAnalyticsStateHolder = SfuAnalyticsStateHolder()
 
     val joinObserver = JoinObserver(callId, callType, eventReporter, joinAnalyticsStateHolder) {
         resetAfterJoinSuccess()
     }
-    val sfuSocketObserver =
-        SfuSocketObserver(
+    val sfuAnalytics =
+        SfuAnalytics(
+            true,
             callId,
             callType,
             connectionFlow,
             scope,
             eventReporter,
             joinAnalyticsStateHolder,
-            sfuSocketStateHolder,
+            sfuAnalyticsStateHolder,
         )
     val peerConnectionObserver =
         PeerConnectionObserver(
@@ -68,18 +69,26 @@ internal class CallAnalytics(
             scope,
             eventReporter,
             joinAnalyticsStateHolder,
-            sfuSocketStateHolder,
+            sfuAnalyticsStateHolder,
         )
     val mediaPermissionObserver =
         MediaPermissionObserver(context, callId, callType, eventReporter, joinAnalyticsStateHolder)
     val audioObserver =
-        AudioObserver(callId, callType, eventReporter, joinAnalyticsStateHolder, {
-            sfuSocketObserver.sfuName
-        })
+        AudioObserver(
+            callId,
+            callType,
+            eventReporter,
+            joinAnalyticsStateHolder,
+            sfuAnalyticsStateHolder,
+        )
     val videoObserver =
-        VideoObserver(callId, callType, eventReporter, joinAnalyticsStateHolder, {
-            sfuSocketObserver.sfuName
-        })
+        VideoObserver(
+            callId,
+            callType,
+            eventReporter,
+            joinAnalyticsStateHolder,
+            sfuAnalyticsStateHolder,
+        )
 
     fun resetAfterJoinSuccess() {
         audioObserver.reset()
@@ -90,7 +99,7 @@ internal class CallAnalytics(
     fun onCallLeave(callLeaveReason: CallLeaveReason) {
         val isAnyStageInProgress =
             joinObserver.joinStage == Stage.IN_PROGRESS ||
-                sfuSocketObserver.wsStage == Stage.IN_PROGRESS ||
+                sfuAnalytics.wsStage == Stage.IN_PROGRESS ||
                 peerConnectionObserver.publisherStage == Stage.IN_PROGRESS ||
                 peerConnectionObserver.subscriberStage == Stage.IN_PROGRESS
         logger.d { "noob isAnyStageInProgress:$isAnyStageInProgress" }

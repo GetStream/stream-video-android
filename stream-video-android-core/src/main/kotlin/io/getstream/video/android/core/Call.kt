@@ -763,6 +763,7 @@ public class Call(
                 sfuName = sfuName,
                 remoteIceServers = iceServers,
                 powerManager = powerManager,
+                sfuAnalytics = callAnalytics.sfuAnalytics,
             )
         }
         session.value = localSession
@@ -1191,6 +1192,7 @@ public class Call(
             cred.token,
             cred.server.edgeName,
             cred.iceServers.map { ice -> ice.toIceServer() },
+            sfuAnalytics = callAnalytics.sfuAnalytics,
         )
         this.session.value = newSession
 
@@ -1270,6 +1272,7 @@ public class Call(
             cred.token,
             cred.server.edgeName,
             cred.iceServers.map { ice -> ice.toIceServer() },
+            sfuAnalytics = callAnalytics.sfuAnalytics,
         )
         this.session.value = newSession
 

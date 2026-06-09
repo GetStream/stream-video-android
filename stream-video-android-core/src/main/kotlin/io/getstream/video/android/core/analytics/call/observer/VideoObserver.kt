@@ -27,7 +27,7 @@ internal class VideoObserver(
     private val callType: String,
     private val clientEventReporter: ClientEventReporter,
     private val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
-    private val onSfuId: () -> String,
+    private val sfuAnalyticsStateHolder: SfuAnalyticsStateHolder,
 ) {
 
     var stageId: String = ""
@@ -54,7 +54,7 @@ internal class VideoObserver(
                     videoTrackId?.let {
                         if (stageId.isEmpty()) {
                             stageId = clientEventReporter.reportFirstVideoFrameRendered(
-                                onSfuId(),
+                                sfuAnalyticsStateHolder.sfuId.value,
                                 callId,
                                 callType,
                                 joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",

@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class SfuSocketStateHolder {
+internal class SfuAnalyticsStateHolder {
     private val _sfuId = MutableStateFlow("")
     val sfuId: StateFlow<String> = _sfuId.asStateFlow()
 

@@ -35,7 +35,7 @@ internal class PeerConnectionObserver(
     private val scope: CoroutineScope,
     val reporter: ClientEventReporter,
     val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
-    val sfuSocketStateHolder: SfuSocketStateHolder,
+    val sfuAnalyticsStateHolder: SfuAnalyticsStateHolder,
 ) {
 
     private var peerConnectionObserverJob: Job? = null
@@ -113,7 +113,7 @@ internal class PeerConnectionObserver(
             peerConnectionState = peerConnectionState,
             joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
             joinReason = joinAnalyticsStateHolder.state.value.joinReason ?: JoinReason.Unknown,
-            sfuId = sfuSocketStateHolder.sfuId.value,
+            sfuId = sfuAnalyticsStateHolder.sfuId.value,
         )
     }
 

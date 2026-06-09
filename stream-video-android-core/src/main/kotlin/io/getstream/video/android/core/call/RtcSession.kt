@@ -45,6 +45,7 @@ import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.TelemetryModel
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsFailureCodes
 import io.getstream.video.android.core.call.connection.Publisher
@@ -261,6 +262,7 @@ public class RtcSession internal constructor(
             ).replace("/twirp", "")
         }",
     ),
+    private val sfuAnalytics: SfuAnalytics,
     private val sfuConnectionModuleProvider: () -> SfuConnectionModule = {
         SfuConnectionModule(
             context = clientImpl.context,
@@ -295,6 +297,7 @@ public class RtcSession internal constructor(
             },
             tracer = sfuTracer,
             tokenRepository = TokenRepository(sfuToken),
+            sfuAnalytics = sfuAnalytics,
         )
     },
 ) {
@@ -884,10 +887,7 @@ public class RtcSession internal constructor(
         telemetryModel: TelemetryModel? = null,
     ): SfuConnectionResult {
         logger.i { "noob [connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
-        call.callAnalytics.sfuSocketObserver.onSfuWsInitiated(
-            sfuName,
-            reconnectDetails != null,
-        )
+        call.callAnalytics.sfuAnalytics.sfuAnalyticsStateHolder.updateSfuId(sfuName)
 
         val request = buildJoinRequest(reconnectDetails, options)
         sfuTracer.trace(
@@ -905,7 +905,7 @@ public class RtcSession internal constructor(
         }
         return when (terminalState) {
             is SfuSocketState.Connected -> {
-                call.callAnalytics.sfuSocketObserver.onSfuWsCompleted(
+                call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
                     success = true,
                     retryCount = 0,
                 )
@@ -923,7 +923,7 @@ public class RtcSession internal constructor(
                 }
                 logger.w { "[connectInternal] $msg" }
                 sfuTracer.trace("connect-failed", msg)
-                call.callAnalytics.sfuSocketObserver.onSfuWsCompleted(
+                call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
                     success = false,
                     retryCount = telemetryModel?.retryAttempt ?: 0,
                     failureReason = msg,
@@ -934,7 +934,7 @@ public class RtcSession internal constructor(
             }
             else -> {
                 sfuTracer.trace("connect-failed", "Connection timed out")
-                call.callAnalytics.sfuSocketObserver.onSfuWsCompleted(
+                call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
                     success = false,
                     retryCount = telemetryModel?.retryAttempt ?: 0,
                     failureReason = AnalyticsFailureCodes.SFU_REQUEST_TIMEOUT.message,

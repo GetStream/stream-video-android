@@ -16,34 +16,85 @@
 
 package io.getstream.video.android.core.analytics.call.observer
 
+import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
+import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-internal class SfuSocketObserver(
+internal class SfuAnalytics(
+    val isEnabled: Boolean,
     val callId: String,
     val callType: String,
     val connectionFlow: StateFlow<RealtimeConnection>,
     val scope: CoroutineScope,
     val reporter: ClientEventReporter,
     val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
-    val sfuSocketStateHolder: SfuSocketStateHolder,
+    val sfuAnalyticsStateHolder: SfuAnalyticsStateHolder,
 ) {
+
+    companion object {
+        internal fun getFakeSfuAnalytics(): SfuAnalytics {
+            return SfuAnalytics(
+                false,
+                "",
+                "",
+                MutableStateFlow<RealtimeConnection>(
+                    RealtimeConnection.PreJoin,
+                ),
+                CoroutineScope(Dispatchers.Default),
+                ClientEventReporter(
+                    sender = object :
+                        EventDispatcher {
+                        override fun send(event: ClientEvent) {}
+
+                        override fun sendAll(events: List<ClientEvent>) {}
+
+                        override fun retryPending() {}
+
+                        override fun deleteAll() {}
+                    },
+                    userAgent = { "" },
+                    sdkVersion = "",
+                ),
+                JoinAnalyticsStateHolder(),
+                SfuAnalyticsStateHolder(),
+            )
+        }
+    }
     var telemetryWsEventStageId = ""
     var wsStage = Stage.NOT_STARTED
 
-    var sfuName: String = ""
-
     fun onSfuWsInitiated(sfuName: String, wasPreviouslyConnected: Boolean) {
+        if (!isEnabled) return
         if (wsStage == Stage.NOT_STARTED) {
-            sfuSocketStateHolder.updateSfuId(sfuName)
+            sfuAnalyticsStateHolder.updateSfuId(sfuName)
             telemetryWsEventStageId = reporter.reportSfuWsJoinInitiated(
                 callId = callId,
                 callType = callType,
                 sfuId = sfuName,
+                wasPreviouslyConnected = wasPreviouslyConnected,
+                joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
+                    ?: "unknown",
+                joinReason = joinAnalyticsStateHolder.state.value.joinReason
+                    ?: JoinReason.Unknown,
+            )
+            wsStage = Stage.IN_PROGRESS
+        }
+    }
+
+    fun onSfuWsInitiated2(wasPreviouslyConnected: Boolean) {
+        if (!isEnabled) return
+        if (wsStage == Stage.NOT_STARTED) {
+            telemetryWsEventStageId = reporter.reportSfuWsJoinInitiated(
+                callId = callId,
+                callType = callType,
+                sfuId = sfuAnalyticsStateHolder.sfuId.value,
                 wasPreviouslyConnected = wasPreviouslyConnected,
                 joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
                     ?: "unknown",
@@ -60,6 +111,7 @@ internal class SfuSocketObserver(
         failureReason: String? = null,
         failureCode: String? = null,
     ) {
+        if (!isEnabled) return
         if (wsStage == Stage.IN_PROGRESS) {
             if (telemetryWsEventStageId.isNotEmpty()) {
                 reporter.reportSfuWsJoinCompleted(

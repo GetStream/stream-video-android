@@ -40,7 +40,7 @@ internal class AudioObserver(
     private val callType: String,
     private val clientEventReporter: ClientEventReporter,
     private val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
-    private val onSfuId: () -> String,
+    private val sfuStateHolder: SfuAnalyticsStateHolder,
 ) {
 
     val logger by taggedLogger("AudioObserver")
@@ -96,7 +96,7 @@ internal class AudioObserver(
     // Called from a coroutine — safe to do I/O, removeSink, and job cancellation here.
     private fun reportAndCleanup() {
         clientEventReporter.reportFirstAudioFrameRendered(
-            onSfuId(),
+            sfuStateHolder.sfuId.value,
             callId,
             callType,
             joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
