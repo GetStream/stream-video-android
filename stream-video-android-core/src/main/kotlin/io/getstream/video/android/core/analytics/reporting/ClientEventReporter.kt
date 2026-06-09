@@ -224,7 +224,7 @@ internal class ClientEventReporter(
             stageId = stageId,
             stage = EventStage.Call.WS_JOIN,
             startedAtMs = now,
-            joinStageAttemptIdSnapshot = joinStageAttemptIdMap[callId] ?: "",
+            joinStageAttemptIdSnapshot = joinStageAttemptId,
             sfuId = sfuId,
             wasPreviouslyConnected = wasPreviouslyConnected,
             callSessionId = callSessionId,
