@@ -22,8 +22,8 @@ import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.analytics.call.observer.AudioObserver
-import io.getstream.video.android.core.analytics.call.observer.JoinObserver
 import io.getstream.video.android.core.analytics.call.observer.JoinAnalyticsRepository
+import io.getstream.video.android.core.analytics.call.observer.JoinObserver
 import io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver
 import io.getstream.video.android.core.analytics.call.observer.PeerConnectionObserver
 import io.getstream.video.android.core.analytics.call.observer.SfuSocketObserver
