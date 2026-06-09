@@ -28,15 +28,15 @@ internal class MediaPermissionObserver(
     val callId: String,
     val callType: String,
     val eventReporter: ClientEventReporter,
-    val joinTelemetryRepository: JoinTelemetryRepository,
+    val joinAnalyticsRepository: JoinAnalyticsRepository,
 ) {
 
     fun mediaPermissionStatus() {
         eventReporter.reportMediaPermissionStatus(
             callId,
             callType,
-            joinTelemetryRepository.state.value.joinStageAttemptId ?: "unknown",
-            joinTelemetryRepository.state.value.joinReason ?: JoinReason.Unknown,
+            joinAnalyticsRepository.state.value.joinStageAttemptId ?: "unknown",
+            joinAnalyticsRepository.state.value.joinReason ?: JoinReason.Unknown,
             isCameraPermissionGranted(),
             isMicrophonePermissionGranted(),
         )

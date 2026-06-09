@@ -34,7 +34,7 @@ internal class PeerConnectionObserver(
     val callType: String,
     private val scope: CoroutineScope,
     val reporter: ClientEventReporter,
-    val joinTelemetryRepository: JoinTelemetryRepository,
+    val joinAnalyticsRepository: JoinAnalyticsRepository,
 ) {
 
     private var peerConnectionObserverJob: Job? = null
@@ -110,8 +110,8 @@ internal class PeerConnectionObserver(
             role = role,
             iceState = iceState,
             peerConnectionState = peerConnectionState,
-            joinStageAttemptId = joinTelemetryRepository.state.value.joinStageAttemptId ?: "unknown",
-            joinReason = joinTelemetryRepository.state.value.joinReason ?: JoinReason.Unknown,
+            joinStageAttemptId = joinAnalyticsRepository.state.value.joinStageAttemptId ?: "unknown",
+            joinReason = joinAnalyticsRepository.state.value.joinReason ?: JoinReason.Unknown,
         )
     }
 

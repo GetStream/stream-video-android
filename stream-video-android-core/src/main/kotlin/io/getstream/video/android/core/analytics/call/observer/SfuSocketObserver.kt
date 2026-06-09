@@ -29,7 +29,7 @@ internal class SfuSocketObserver(
     val connectionFlow: StateFlow<RealtimeConnection>,
     val scope: CoroutineScope,
     val reporter: ClientEventReporter,
-    val joinTelemetryRepository: JoinTelemetryRepository,
+    val joinAnalyticsRepository: JoinAnalyticsRepository,
 ) {
     var telemetryWsEventStageId = ""
     var wsStage = Stage.NOT_STARTED
@@ -44,9 +44,9 @@ internal class SfuSocketObserver(
                 callType = callType,
                 sfuId = sfuName,
                 wasPreviouslyConnected = wasPreviouslyConnected,
-                joinStageAttemptId = joinTelemetryRepository.state.value.joinStageAttemptId
+                joinStageAttemptId = joinAnalyticsRepository.state.value.joinStageAttemptId
                     ?: "unknown",
-                joinReason = joinTelemetryRepository.state.value.joinReason
+                joinReason = joinAnalyticsRepository.state.value.joinReason
                     ?: JoinReason.Unknown,
             )
             wsStage = Stage.IN_PROGRESS
@@ -67,7 +67,7 @@ internal class SfuSocketObserver(
                     retryCount = retryCount,
                     failureReason = failureReason,
                     failureCode = failureCode,
-                    joinStageAttemptId = joinTelemetryRepository.state.value.joinStageAttemptId ?: "unknown",
+                    joinStageAttemptId = joinAnalyticsRepository.state.value.joinStageAttemptId ?: "unknown",
                 )
             }
             resetStage()

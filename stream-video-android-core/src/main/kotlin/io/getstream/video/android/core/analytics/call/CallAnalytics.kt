@@ -23,7 +23,7 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.analytics.call.observer.AudioObserver
 import io.getstream.video.android.core.analytics.call.observer.JoinObserver
-import io.getstream.video.android.core.analytics.call.observer.JoinTelemetryRepository
+import io.getstream.video.android.core.analytics.call.observer.JoinAnalyticsRepository
 import io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver
 import io.getstream.video.android.core.analytics.call.observer.PeerConnectionObserver
 import io.getstream.video.android.core.analytics.call.observer.SfuSocketObserver
@@ -44,9 +44,9 @@ internal class CallAnalytics(
     val scope: CoroutineScope,
 ) {
     val logger by taggedLogger("CallAnalyticsHooks")
-    val joinTelemetryRepository = JoinTelemetryRepository()
+    val joinAnalyticsRepository = JoinAnalyticsRepository()
 
-    val joinObserver = JoinObserver(callId, callType, eventReporter, joinTelemetryRepository) {
+    val joinObserver = JoinObserver(callId, callType, eventReporter, joinAnalyticsRepository) {
         resetAfterJoinSuccess()
     }
     val sfuSocketObserver =
@@ -56,18 +56,18 @@ internal class CallAnalytics(
             connectionFlow,
             scope,
             eventReporter,
-            joinTelemetryRepository,
+            joinAnalyticsRepository,
         )
     val peerConnectionObserver =
-        PeerConnectionObserver(callId, callType, scope, eventReporter, joinTelemetryRepository)
+        PeerConnectionObserver(callId, callType, scope, eventReporter, joinAnalyticsRepository)
     val mediaPermissionObserver =
-        MediaPermissionObserver(context, callId, callType, eventReporter, joinTelemetryRepository)
+        MediaPermissionObserver(context, callId, callType, eventReporter, joinAnalyticsRepository)
     val audioObserver =
-        AudioObserver(callId, callType, eventReporter, joinTelemetryRepository, {
+        AudioObserver(callId, callType, eventReporter, joinAnalyticsRepository, {
             sfuSocketObserver.sfuName
         })
     val videoObserver =
-        VideoObserver(callId, callType, eventReporter, joinTelemetryRepository, {
+        VideoObserver(callId, callType, eventReporter, joinAnalyticsRepository, {
             sfuSocketObserver.sfuName
         })
 

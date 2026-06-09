@@ -26,7 +26,7 @@ internal class JoinObserver(
     val callId: String,
     val callType: String,
     val eventReporter: ClientEventReporter,
-    val joinTelemetryRepository: JoinTelemetryRepository,
+    val joinAnalyticsRepository: JoinAnalyticsRepository,
     val onJoinSuccess: () -> Unit,
 ) {
 
@@ -35,7 +35,7 @@ internal class JoinObserver(
 
     fun onJoinFunctionStart() {
         val stageAttemptId = UUID.randomUUID().toString()
-        joinTelemetryRepository.updateJoinStageAttemptId(stageAttemptId)
+        joinAnalyticsRepository.updateJoinStageAttemptId(stageAttemptId)
         eventReporter.reportSdkMethodJoinInitiated(
             callType = callType,
             callId = callId,
@@ -45,11 +45,11 @@ internal class JoinObserver(
 
     fun onJoinRequestStart(joinReason: JoinReason?) {
         if (joinStage == Stage.NOT_STARTED) {
-            joinTelemetryRepository.updateJoinReason(joinReason)
+            joinAnalyticsRepository.updateJoinReason(joinReason)
             stageId = eventReporter.reportCoordinatorJoinInitiated(
                 callType = callType,
                 callId = callId,
-                joinStageAttemptId = joinTelemetryRepository.state.value.joinStageAttemptId
+                joinStageAttemptId = joinAnalyticsRepository.state.value.joinStageAttemptId
                     ?: "unknown",
                 joinReason = joinReason ?: JoinReason.Unknown,
             )

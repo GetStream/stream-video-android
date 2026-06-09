@@ -39,7 +39,7 @@ internal class AudioObserver(
     private val callId: String,
     private val callType: String,
     private val clientEventReporter: ClientEventReporter,
-    private val joinTelemetryRepository: JoinTelemetryRepository,
+    private val joinAnalyticsRepository: JoinAnalyticsRepository,
     private val onSfuId: () -> String,
 ) {
 
@@ -99,8 +99,8 @@ internal class AudioObserver(
             onSfuId(),
             callId,
             callType,
-            joinTelemetryRepository.state.value.joinStageAttemptId ?: "unknown",
-            joinTelemetryRepository.state.value.joinReason ?: JoinReason.Unknown,
+            joinAnalyticsRepository.state.value.joinStageAttemptId ?: "unknown",
+            joinAnalyticsRepository.state.value.joinReason ?: JoinReason.Unknown,
         )
         trackSinks.forEach { (_, pair) -> pair.first.removeSink(pair.second) }
         trackSinks.clear()
