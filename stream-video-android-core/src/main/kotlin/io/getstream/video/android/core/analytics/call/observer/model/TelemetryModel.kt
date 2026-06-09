@@ -22,11 +22,11 @@ internal sealed class JoinReason {
     abstract val message: String
 
     data object FirstAttempt : JoinReason() {
-        override val message: String = "first"
+        override val message: String = "first-attempt"
     }
 
     data object ReJoin : JoinReason() {
-        override val message: String = "rejoin"
+        override val message: String = "full-rejoin"
     }
 
     data object Migrate : JoinReason() {
