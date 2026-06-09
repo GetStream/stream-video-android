@@ -46,7 +46,7 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
-import io.getstream.video.android.core.analytics.call.observer.model.TelemetryModel
+import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsFailureCodes
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
@@ -887,7 +887,7 @@ public class RtcSession internal constructor(
     internal suspend fun connectInternal(
         reconnectDetails: ReconnectDetails? = null,
         options: List<PublishOption>? = null,
-        telemetryModel: TelemetryModel? = null,
+        joinAnalyticsModel: JoinAnalyticsModel? = null,
     ): SfuConnectionResult {
         logger.i { "[connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
         val request = buildJoinRequest(reconnectDetails, options)
@@ -922,7 +922,7 @@ public class RtcSession internal constructor(
                 sendCallStats()
                 call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
                     success = false,
-                    retryCount = telemetryModel?.retryAttempt ?: 0,
+                    retryCount = joinAnalyticsModel?.retryAttempt ?: 0,
                     failureReason = msg,
                     failureCode = "WS_DISCONNECTED",
                 )
@@ -933,7 +933,7 @@ public class RtcSession internal constructor(
                 sendCallStats()
                 call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
                     success = false,
-                    retryCount = telemetryModel?.retryAttempt ?: 0,
+                    retryCount = joinAnalyticsModel?.retryAttempt ?: 0,
                     failureReason = AnalyticsFailureCodes.SFU_REQUEST_TIMEOUT.message,
                     failureCode = AnalyticsFailureCodes.SFU_REQUEST_TIMEOUT.code,
                 )
@@ -1911,7 +1911,7 @@ public class RtcSession internal constructor(
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
 
-    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?, telemetryModel: TelemetryModel? = null): FastReconnectResult {
+    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?, joinAnalyticsModel: JoinAnalyticsModel? = null): FastReconnectResult {
         logger.d { "[fastReconnect] Starting fast reconnect." }
         sfuTracer.trace("fastReconnect", reconnectDetails.toString())
         val (_, _, publisherTracks) = currentSfuInfo()
@@ -1920,7 +1920,7 @@ public class RtcSession internal constructor(
         val connectResult = connectInternal(
             reconnectDetails,
             publisher.value?.currentOptions(),
-            telemetryModel,
+            joinAnalyticsModel,
         )
         if (connectResult is SfuConnectionResult.Failed) {
             return FastReconnectResult.Failed(connectResult.error)

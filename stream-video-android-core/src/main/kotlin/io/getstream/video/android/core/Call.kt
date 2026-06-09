@@ -62,7 +62,7 @@ import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
-import io.getstream.video.android.core.analytics.call.observer.model.TelemetryModel
+import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
@@ -607,7 +607,7 @@ public class Call(
                 ring,
                 notify,
                 hintHighScaleLivestreamPublisher,
-                TelemetryModel(retryCount, JoinReason.FirstAttempt),
+                JoinAnalyticsModel(retryCount, JoinReason.FirstAttempt),
             )
             if (result is Success) {
                 // we initialise the camera, mic and other according to local + backend settings
@@ -696,7 +696,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
-        telemetryModel: TelemetryModel,
+        joinAnalyticsModel: JoinAnalyticsModel,
     ): Result<RtcSession> {
         nonFastReconnectAttempts = 0
         sfuEvents?.cancel()
@@ -731,7 +731,7 @@ public class Call(
                 ring = ring,
                 notify = notify,
                 hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
-                telemetryModel = telemetryModel,
+                joinAnalyticsModel = joinAnalyticsModel,
             )
 
         if (result !is Success) {
@@ -1013,14 +1013,14 @@ public class Call(
                         nonFastReconnectAttempts++
                         reconnectRejoin(
                             reason,
-                            TelemetryModel(nonFastReconnectAttempts, JoinReason.ReJoin),
+                            JoinAnalyticsModel(nonFastReconnectAttempts, JoinReason.ReJoin),
                         )
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
                         nonFastReconnectAttempts++
                         reconnectMigrate(
-                            TelemetryModel(nonFastReconnectAttempts, JoinReason.Migrate),
+                            JoinAnalyticsModel(nonFastReconnectAttempts, JoinReason.Migrate),
                         )
                     }
 
@@ -1140,7 +1140,7 @@ public class Call(
      */
     private suspend fun reconnectRejoin(
         reason: String,
-        telemetryModel: TelemetryModel,
+        joinAnalyticsModel: JoinAnalyticsModel,
     ): ReconnectOutcome {
         logger.d { "[reconnectRejoin] reconnectAttempts=$nonFastReconnectAttempts" }
         state._connection.value = RealtimeConnection.Reconnecting
@@ -1150,7 +1150,7 @@ public class Call(
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for rejoin")
         reconnectStartTime = System.currentTimeMillis()
 
-        val joinResponse = joinRequest(location = loc, telemetryModel = telemetryModel)
+        val joinResponse = joinRequest(location = loc, joinAnalyticsModel = joinAnalyticsModel)
         if (joinResponse !is Success) {
             return ReconnectOutcome.Failed(
                 Exception("Failed to get join response: ${joinResponse.errorOrNull()}"),
@@ -1198,7 +1198,7 @@ public class Call(
             val result = newSession.connectInternal(
                 reconnectDetails,
                 currentOptions,
-                TelemetryModel(telemetryModel.retryAttempt),
+                JoinAnalyticsModel(joinAnalyticsModel.retryAttempt),
             )
         ) {
             is SfuConnectionResult.Connected -> {
@@ -1214,7 +1214,7 @@ public class Call(
      * Migrate to another SFU. Reuses the same session ID — the SFU
      * identifies the participant via from_sfu_id, not previous_session_id.
      */
-    private suspend fun reconnectMigrate(telemetryModel: TelemetryModel): ReconnectOutcome {
+    private suspend fun reconnectMigrate(joinAnalyticsModel: JoinAnalyticsModel): ReconnectOutcome {
         logger.d { "[reconnectMigrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         val loc = location
@@ -1228,7 +1228,7 @@ public class Call(
             joinRequest(
                 location = loc,
                 migratingFrom = oldSession.sfuName,
-                telemetryModel = telemetryModel,
+                joinAnalyticsModel = joinAnalyticsModel,
             )
         if (joinResponse !is Success) {
             return ReconnectOutcome.Failed(
@@ -1282,7 +1282,7 @@ public class Call(
             val result = newSession.connectInternal(
                 reconnectDetails,
                 currentOptions,
-                TelemetryModel(telemetryModel.retryAttempt),
+                JoinAnalyticsModel(joinAnalyticsModel.retryAttempt),
             )
             when (result) {
                 is SfuConnectionResult.Connected -> {
@@ -1912,10 +1912,10 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
-        telemetryModel: TelemetryModel,
+        joinAnalyticsModel: JoinAnalyticsModel,
     ): Result<JoinCallResponse> {
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
-        callAnalytics.joinAnalytics.onJoinRequestStart(telemetryModel.joinReason)
+        callAnalytics.joinAnalytics.onJoinRequestStart(joinAnalyticsModel.joinReason)
         val result = clientImpl.joinCall(
             type, id,
             create = create != null,
@@ -1933,7 +1933,7 @@ public class Call(
         )
         result.onSuccess {
             callAnalytics.joinAnalytics.onJoinRequestSuccess(
-                telemetryModel,
+                joinAnalyticsModel,
                 it.call.currentSessionId,
             )
             state.updateFromResponse(it)

@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.analytics.call.observer.model
 
-internal data class TelemetryModel(val retryAttempt: Int, val joinReason: JoinReason? = null) // Todo Rahul use better naming
+internal data class JoinAnalyticsModel(val retryAttempt: Int, val joinReason: JoinReason? = null)
 internal sealed class JoinReason {
 
     abstract val message: String
