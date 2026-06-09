@@ -65,7 +65,7 @@ internal class ClientEventReporter(
         val stageId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
         postCallFlightSessions[stageId] = PreCallInFlightSession(
-            stageId = coordinatorConnectId,
+            stageId = stageId,
             coordinatorConnectId = coordinatorConnectId,
             stage = EventStage.Call.COORDINATOR_JOIN,
             startedAtMs = now,
