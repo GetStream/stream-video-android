@@ -18,7 +18,7 @@ package io.getstream.video.android.core.analytics.call.observer
 
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
-import io.getstream.video.android.core.analytics.call.observer.model.TelemetryModel
+import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import java.util.UUID
 
@@ -59,14 +59,14 @@ internal class JoinAnalytics(
         }
     }
 
-    fun onJoinRequestSuccess(telemetryModel: TelemetryModel, currentSessionId: String) {
+    fun onJoinRequestSuccess(joinAnalyticsModel: JoinAnalyticsModel, currentSessionId: String) {
         if (joinAnalyticsStateHolder.state.value.joinStage == Stage.IN_PROGRESS) {
             joinAnalyticsStateHolder.updateCallSessionId(currentSessionId)
             if (joinAnalyticsStateHolder.state.value.stageId.isNotEmpty()) {
                 eventReporter.reportCoordinatorJoinCompleted(
                     stageId = joinAnalyticsStateHolder.state.value.stageId,
                     success = true,
-                    retryCount = telemetryModel.retryAttempt,
+                    retryCount = joinAnalyticsModel.retryAttempt,
                     callSessionId = currentSessionId,
                 )
                 onJoinSuccess()
