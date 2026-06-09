@@ -54,6 +54,9 @@ data class CallEndedEvent (
     @Json(name = "reason")
     val reason: kotlin.String? = null,
 
+    @Json(name = "members")
+    val members: kotlin.collections.List<io.getstream.android.video.generated.models.MemberResponse>? = emptyList(),
+
     @Json(name = "user")
     val user: io.getstream.android.video.generated.models.UserResponse? = null
 )

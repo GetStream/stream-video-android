@@ -45,14 +45,14 @@ data class JoinCallRequest (
     @Json(name = "create")
     val create: kotlin.Boolean? = null,
 
+    @Json(name = "hint_high_scale_livestream_publisher")
+    val hintHighScaleLivestreamPublisher: kotlin.Boolean? = null,
+
     @Json(name = "members_limit")
     val membersLimit: kotlin.Int? = null,
 
     @Json(name = "migrating_from")
     val migratingFrom: kotlin.String? = null,
-
-    @Json(name = "migrating_from_list")
-    val migratingFromList: kotlin.collections.List<kotlin.String>? = null,
 
     @Json(name = "notify")
     val notify: kotlin.Boolean? = null,
@@ -63,9 +63,9 @@ data class JoinCallRequest (
     @Json(name = "video")
     val video: kotlin.Boolean? = null,
 
-    @Json(name = "data")
-    val data: io.getstream.android.video.generated.models.CallRequest? = null,
+    @Json(name = "migrating_from_list")
+    val migratingFromList: kotlin.collections.List<kotlin.String>? = emptyList(),
 
-    @Json(name = "hint_high_scale_livestream_publisher")
-    val hintHighScaleLivestreamPublisher: kotlin.Boolean? = null
+    @Json(name = "data")
+    val data: io.getstream.android.video.generated.models.CallRequest? = null
 )

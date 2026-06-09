@@ -35,10 +35,16 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Geographic location metadata
  */
 
-data class TypingIndicators (
-    @Json(name = "enabled")
-    val enabled: kotlin.Boolean
+data class LocationResponse (
+    @Json(name = "continent_code")
+    val continentCode: kotlin.String,
+
+    @Json(name = "country_iso_code")
+    val countryIsoCode: kotlin.String,
+
+    @Json(name = "subdivision_iso_code")
+    val subdivisionIsoCode: kotlin.String
 )

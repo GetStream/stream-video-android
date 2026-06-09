@@ -35,34 +35,47 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * Response for Device
+ * This event is sent when a user gets deleted. The event contains information about the user that was deleted and the deletion options that were used.
  */
 
-data class DeviceResponse (
+data class UserDeletedEvent (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "id")
-    val id: kotlin.String,
+    @Json(name = "delete_conversation")
+    val deleteConversation: kotlin.String,
 
-    @Json(name = "push_provider")
-    val pushProvider: kotlin.String,
+    @Json(name = "delete_conversation_channels")
+    val deleteConversationChannels: kotlin.Boolean,
 
-    @Json(name = "user_id")
-    val userId: kotlin.String,
+    @Json(name = "delete_messages")
+    val deleteMessages: kotlin.String,
 
-    @Json(name = "disabled")
-    val disabled: kotlin.Boolean? = null,
+    @Json(name = "delete_user")
+    val deleteUser: kotlin.String,
 
-    @Json(name = "disabled_reason")
-    val disabledReason: kotlin.String? = null,
+    @Json(name = "hard_delete")
+    val hardDelete: kotlin.Boolean,
 
-    @Json(name = "hardware_id")
-    val hardwareId: kotlin.String? = null,
+    @Json(name = "mark_messages_deleted")
+    val markMessagesDeleted: kotlin.Boolean,
 
-    @Json(name = "push_provider_name")
-    val pushProviderName: kotlin.String? = null,
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
 
-    @Json(name = "voip")
-    val voip: kotlin.Boolean? = null
+    @Json(name = "user")
+    val user: io.getstream.android.video.generated.models.UserResponseCommonFields,
+
+    @Json(name = "type")
+    val type: kotlin.String,
+
+    @Json(name = "received_at")
+    val receivedAt: org.threeten.bp.OffsetDateTime? = null
 )
+: io.getstream.android.video.generated.models.VideoEvent()
+{
+    
+    override fun getEventType(): kotlin.String {
+        return type
+    }    
+}

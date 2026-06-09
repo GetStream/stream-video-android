@@ -60,6 +60,9 @@ data class SIPTrunkResponse (
     @Json(name = "username")
     val username: kotlin.String,
 
+    @Json(name = "allowed_ips")
+    val allowedIps: kotlin.collections.List<kotlin.String> = emptyList(),
+
     @Json(name = "numbers")
     val numbers: kotlin.collections.List<kotlin.String> = emptyList()
 )

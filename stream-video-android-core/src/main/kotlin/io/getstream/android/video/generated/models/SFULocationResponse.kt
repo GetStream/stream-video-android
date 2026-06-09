@@ -46,10 +46,10 @@ data class SFULocationResponse (
     val id: kotlin.String,
 
     @Json(name = "coordinates")
-    val coordinates: io.getstream.android.video.generated.models.Coordinates,
+    val coordinates: io.getstream.android.video.generated.models.CoordinatesResponse,
 
     @Json(name = "location")
-    val location: io.getstream.android.video.generated.models.Location,
+    val location: io.getstream.android.video.generated.models.LocationResponse,
 
     @Json(name = "count")
     val count: kotlin.Int? = null

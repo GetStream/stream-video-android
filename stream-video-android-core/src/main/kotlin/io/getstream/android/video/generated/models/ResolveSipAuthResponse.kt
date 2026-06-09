@@ -35,10 +35,22 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Response containing the pre-authentication decision for a SIP trunk
  */
 
-data class DeliveryReceipts (
-    @Json(name = "enabled")
-    val enabled: kotlin.Boolean
+data class ResolveSipAuthResponse (
+    @Json(name = "auth_result")
+    val authResult: kotlin.String,
+
+    @Json(name = "duration")
+    val duration: kotlin.String,
+
+    @Json(name = "password")
+    val password: kotlin.String? = null,
+
+    @Json(name = "trunk_id")
+    val trunkId: kotlin.String? = null,
+
+    @Json(name = "username")
+    val username: kotlin.String? = null
 )
