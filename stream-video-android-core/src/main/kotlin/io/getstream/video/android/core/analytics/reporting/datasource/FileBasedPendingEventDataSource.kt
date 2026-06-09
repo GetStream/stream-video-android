@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.analytics.reporting.datasource
 
+import androidx.annotation.IntRange
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import io.getstream.android.video.generated.infrastructure.Serializer
@@ -35,6 +36,7 @@ import java.io.File
 internal class FileBasedPendingEventDataSource(
     storageDir: File,
     moshi: Moshi = Serializer.moshi,
+    @IntRange(5, 10)
     private val batchSize: Int = DEFAULT_BATCH_SIZE,
 ) : PendingEventDataSource {
 
@@ -59,14 +61,21 @@ internal class FileBasedPendingEventDataSource(
         return try {
             val allLines = file.readLines().filter { it.isNotBlank() }
             val batch = allLines.take(batchSize)
-            val remaining = allLines.drop(batchSize)
+            val parsed = batch.map {
+                runCatching { adapter.fromJson(it) }.getOrNull()
+            }
+            if (parsed.any { it == null }) {
+                logger.w { "[loadAndClear] Parse failure in pending batch; keeping file intact." }
+                return emptyList()
+            }
+            val remaining = allLines.drop(batch.size)
             if (remaining.isEmpty()) {
                 file.delete()
             } else {
                 file.writeText(remaining.joinToString(separator = "\n", postfix = "\n"))
             }
             logger.d { "[loadAndClear] batch=${batch.size}, remaining=${remaining.size}" }
-            batch.mapNotNull { line -> runCatching { adapter.fromJson(line) }.getOrNull() }
+            parsed.filterNotNull()
         } catch (e: Exception) {
             logger.w { "[loadAndClear] Failed: ${e.message}" }
             emptyList()

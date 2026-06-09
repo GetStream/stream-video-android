@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.analytics.reporting.datasource
 
 import io.getstream.android.video.generated.models.ClientEvent
-import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Storage for telemetry events that failed to send.

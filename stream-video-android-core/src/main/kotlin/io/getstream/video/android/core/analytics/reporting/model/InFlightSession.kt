@@ -22,7 +22,6 @@ internal typealias StageId = String
 internal typealias CallId = String
 
 internal sealed class InFlightSession(
-    open val stage: EventStage.Call,
     open val startedAtMs: Long,
     open val stageId: StageId,
 )
@@ -31,7 +30,7 @@ internal data class PostCallFlightSession(
     val callId: String,
     val callType: String,
     override val stageId: StageId,
-    override val stage: EventStage.Call,
+    val stage: EventStage.Call,
     override val startedAtMs: Long,
     val joinStageAttemptIdSnapshot: String,
     val joinReason: JoinReason,
@@ -41,11 +40,11 @@ internal data class PostCallFlightSession(
     val peerConnectionRole: PeerConnectionRole? = null,
     val wasPreviouslyConnected: Boolean = false,
 
-) : InFlightSession(stage, startedAtMs, stageId)
+) : InFlightSession(startedAtMs, stageId)
 
 internal data class PreCallInFlightSession(
-    override val stage: EventStage.Call,
+    val stage: EventStage.CoordinatorWs,
     override val startedAtMs: Long,
     override val stageId: StageId,
     val coordinatorConnectId: String,
-) : InFlightSession(stage, startedAtMs, stageId)
+) : InFlightSession(startedAtMs, stageId)
