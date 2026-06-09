@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics.observer
+package io.getstream.video.android.core.analytics.call.observer
 
 import android.util.Log
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter

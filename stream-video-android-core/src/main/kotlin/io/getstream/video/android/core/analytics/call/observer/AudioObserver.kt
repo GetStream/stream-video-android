@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics.observer
+package io.getstream.video.android.core.analytics.call.observer
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.ParticipantState
@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
+import org.webrtc.AudioTrack
 import org.webrtc.AudioTrackSink
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -45,7 +46,7 @@ internal class AudioObserver(
     var recordedFirstFrame: AtomicBoolean = AtomicBoolean(false)
 
     private val trackSinks =
-        ConcurrentHashMap<TrackId, Pair<org.webrtc.AudioTrack, AudioTrackSink>>()
+        ConcurrentHashMap<TrackId, Pair<AudioTrack, AudioTrackSink>>()
     private var observeJob: Job? = null
 
     fun observeParticipantsForFirstRemoteAudioFrame(

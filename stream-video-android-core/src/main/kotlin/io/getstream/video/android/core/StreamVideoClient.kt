@@ -83,7 +83,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.analytics.observer.CoordinatorSocketObserver
+import io.getstream.video.android.core.analytics.coordinator.CoordinatorAnalytics
 import io.getstream.video.android.core.audio.AudioExecutionContext
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.errors.VideoErrorCode
@@ -221,7 +221,7 @@ internal class StreamVideoClient internal constructor(
 
     val socketImpl = coordinatorConnectionModule.socketConnection
     var location: String? = null
-    val coordinatorAnalytics = CoordinatorSocketObserver(scope, state.clientEventReporter)
+    val coordinatorAnalytics = CoordinatorAnalytics(scope, state.clientEventReporter)
 
     init {
         // listen to socket events and errors

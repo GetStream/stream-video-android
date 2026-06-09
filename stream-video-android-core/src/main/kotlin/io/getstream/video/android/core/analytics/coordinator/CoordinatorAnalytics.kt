@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics.observer
+package io.getstream.video.android.core.analytics.coordinator
 
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketStateService
@@ -25,7 +25,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-internal class CoordinatorSocketObserver(
+internal class CoordinatorAnalytics(
     private val scope: CoroutineScope,
     private val eventReporter: ClientEventReporter,
 ) {
@@ -54,7 +54,7 @@ internal class CoordinatorSocketObserver(
                             eventReporter.reportCoordinatorWSCompleted(
                                 stageId,
                                 true,
-                                CoordinatorSocketStateService.lastRetryAttempts,
+                                CoordinatorSocketStateService.Companion.lastRetryAttempts,
                             )
                         }
                     }
@@ -64,7 +64,7 @@ internal class CoordinatorSocketObserver(
                             eventReporter.reportCoordinatorWSCompleted(
                                 stageId,
                                 false,
-                                CoordinatorSocketStateService.lastRetryAttempts,
+                                CoordinatorSocketStateService.Companion.lastRetryAttempts,
                             )
                         }
                     }

@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics.observer.model
+package io.getstream.video.android.core.analytics.call.observer.model
 
 internal data class TelemetryModel(val retryAttempt: Int)

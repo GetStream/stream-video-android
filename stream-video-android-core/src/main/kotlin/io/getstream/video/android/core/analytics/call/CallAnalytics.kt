@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics
+package io.getstream.video.android.core.analytics.call
 
 import android.content.Context
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
-import io.getstream.video.android.core.analytics.observer.AudioObserver
-import io.getstream.video.android.core.analytics.observer.JoinObserver
-import io.getstream.video.android.core.analytics.observer.MediaPermissionObserver
-import io.getstream.video.android.core.analytics.observer.PeerConnectionObserver
-import io.getstream.video.android.core.analytics.observer.SfuSocketObserver
-import io.getstream.video.android.core.analytics.observer.VideoObserver
-import io.getstream.video.android.core.analytics.observer.model.Stage
+import io.getstream.video.android.core.analytics.call.observer.AudioObserver
+import io.getstream.video.android.core.analytics.call.observer.JoinObserver
+import io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver
+import io.getstream.video.android.core.analytics.call.observer.PeerConnectionObserver
+import io.getstream.video.android.core.analytics.call.observer.SfuSocketObserver
+import io.getstream.video.android.core.analytics.call.observer.VideoObserver
+import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
-internal class CallAnalyticsCoordinator(
+internal class CallAnalytics(
     val context: Context,
     val callId: String,
     val callType: String,

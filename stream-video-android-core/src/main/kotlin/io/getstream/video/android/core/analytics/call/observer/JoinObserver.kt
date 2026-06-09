@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics.observer
+package io.getstream.video.android.core.analytics.call.observer
 
-import io.getstream.video.android.core.analytics.observer.model.Stage
-import io.getstream.video.android.core.analytics.observer.model.TelemetryModel
+import io.getstream.video.android.core.analytics.call.observer.model.Stage
+import io.getstream.video.android.core.analytics.call.observer.model.TelemetryModel
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import java.util.UUID
 
