@@ -101,7 +101,7 @@ internal class CallServiceLifecycleManager {
                         call.leave(
                             CallLeaveReason.SdkDriven(
                                 cause = SdkCause.TASK_REMOVED,
-                                message = "App removed from recents for ringing state: $ringingState",
+                                message = "${SdkCause.TASK_REMOVED.defaultMessage} for ringing state: $ringingState",
                             ),
                         )
                         logger.i { "[onTaskRemoved] Ended ongoing call for me" }
@@ -124,7 +124,7 @@ internal class CallServiceLifecycleManager {
             call.leave(
                 CallLeaveReason.SdkDriven(
                     cause = SdkCause.TASK_REMOVED,
-                    message = "App removed from recents (incoming call)",
+                    message = "${SdkCause.TASK_REMOVED.defaultMessage} for (incoming call)",
                 ),
             )
             logger.i { "[handleIncomingCallTaskRemoved] Ended incoming call for me" }

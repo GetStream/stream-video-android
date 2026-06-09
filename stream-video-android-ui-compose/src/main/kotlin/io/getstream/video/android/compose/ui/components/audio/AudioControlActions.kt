@@ -74,7 +74,6 @@ public fun AudioControlActions(
                 call.leave(
                     CallLeaveReason.UserAction(
                         UserActionCause.CANCELLED_BY_SELF,
-                        "Cancelled the call",
                     ),
                 )
                 activity?.onBackPressedDispatcher?.onBackPressed()

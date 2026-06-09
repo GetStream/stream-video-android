@@ -229,7 +229,6 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                 call.leave(
                                     CallLeaveReason.UserAction(
                                         UserActionCause.CANCELLED_BY_SELF,
-                                        "Cancelled the call",
                                     ),
                                 )
                                 safeFinish()

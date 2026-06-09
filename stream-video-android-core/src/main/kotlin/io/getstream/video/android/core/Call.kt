@@ -991,7 +991,7 @@ public class Call(
                     is ReconnectOutcome.Disconnect -> {
                         logger.w { "[reconnect] DISCONNECT requested — leaving call" }
                         leave(
-                            CallLeaveReason.Backend(BackendCause.SFU_DISCONNECT, "SFU:DISCONNECT"),
+                            CallLeaveReason.Backend(BackendCause.SFU_DISCONNECT),
                         )
                         break
                     }

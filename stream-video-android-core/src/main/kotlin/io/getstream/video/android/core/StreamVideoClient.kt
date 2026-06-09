@@ -265,7 +265,7 @@ internal class StreamVideoClient internal constructor(
             }
         }
         activeCall?.leave(
-            CallLeaveReason.SdkDriven(cause = SdkCause.CLIENT_CLEANUP, message = "client-cleanup"),
+            CallLeaveReason.SdkDriven(cause = SdkCause.CLIENT_CLEANUP),
         )
         audioExecutionContext.release()
     }

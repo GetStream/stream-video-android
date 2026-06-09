@@ -783,7 +783,10 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     public open fun onBackPressed(call: Call) {
         leave(
             call,
-            CallLeaveReason.UserAction(UserActionCause.CANCELLED_BY_SELF, "on back press"),
+            CallLeaveReason.UserAction(
+                UserActionCause.CANCELLED_BY_SELF,
+                "Cancelled the call on back press",
+            ),
             onSuccessFinish,
             onErrorFinish,
         )
@@ -1158,7 +1161,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                     call,
                     CallLeaveReason.UserAction(
                         UserActionCause.CANCELLED_BY_SELF,
-                        "cancelling the call",
                     ),
                     onSuccessFinish,
                     onErrorFinish,

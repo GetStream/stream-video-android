@@ -42,7 +42,6 @@ internal class LeaveCallBroadcastReceiver : GenericCallActionBroadcastReceiver()
         call.leave(
             CallLeaveReason.UserAction(
                 UserActionCause.LEAVE_FROM_NOTIFICATION,
-                message = "User left via notification action",
             ),
         )
         val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)

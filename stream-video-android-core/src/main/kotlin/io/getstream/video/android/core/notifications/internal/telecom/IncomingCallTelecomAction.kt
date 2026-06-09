@@ -53,7 +53,6 @@ internal class IncomingCallTelecomAction(private val streamVideo: StreamVideo) {
                 streamVideo.call(callId.type, callId.id).leave(
                     CallLeaveReason.UserAction(
                         UserActionCause.WEARABLE_CANCEL,
-                        "cancel from wearable",
                     ),
                 )
             }

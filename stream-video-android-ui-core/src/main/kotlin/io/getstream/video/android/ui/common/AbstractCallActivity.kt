@@ -178,7 +178,7 @@ public abstract class AbstractCallActivity : ComponentActivity() {
         val isInPiP = isInPictureInPictureMode
 
         if (isInPiP) {
-            call.leave(CallLeaveReason.SdkDriven(SdkCause.PIP_STOPPED, "PIP stopped"))
+            call.leave(CallLeaveReason.SdkDriven(SdkCause.PIP_STOPPED))
         }
     }
 
