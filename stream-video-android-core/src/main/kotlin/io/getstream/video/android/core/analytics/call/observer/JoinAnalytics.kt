@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core.analytics.call.observer
 
+import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
-import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import java.util.UUID
 
