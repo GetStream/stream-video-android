@@ -16,4 +16,28 @@
 
 package io.getstream.video.android.core.analytics.call.observer.model
 
-internal data class TelemetryModel(val retryAttempt: Int)
+internal data class TelemetryModel(val retryAttempt: Int, val joinReason: JoinReason? = null)
+internal sealed class JoinReason {
+
+    abstract val message: String
+
+    data object FirstAttempt : JoinReason() {
+        override val message: String = "first"
+    }
+
+    data object ReJoin : JoinReason() {
+        override val message: String = "rejoin"
+    }
+
+    data object Migrate : JoinReason() {
+        override val message: String = "migrate"
+    }
+
+    data object Unknown : JoinReason() {
+        override val message: String = "unknown"
+    }
+
+    data class Custom(
+        override val message: String,
+    ) : JoinReason()
+}

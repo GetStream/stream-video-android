@@ -18,6 +18,7 @@ package io.getstream.video.android.core.analytics.reporting
 
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.analytics.reporting.model.CallId
@@ -149,6 +150,7 @@ internal class ClientEventReporter(
         callId: String,
         callType: String,
         joinStageAttemptId: String,
+        joinReason: JoinReason,
     ): String {
         val stageId = UUID.randomUUID().toString()
         joinStageAttemptIdMap[callId] = joinStageAttemptId
@@ -160,6 +162,7 @@ internal class ClientEventReporter(
             stage = EventStage.Call.COORDINATOR_JOIN,
             startedAtMs = now,
             joinStageAttemptIdSnapshot = joinStageAttemptId,
+            joinReason = joinReason,
         )
         sender.send(
             clientEventFactory.buildRequest(
@@ -169,6 +172,7 @@ internal class ClientEventReporter(
                 eventType = EventType.INITIATED,
                 stageId = stageId,
                 joinStageAttemptId = joinStageAttemptId,
+                joinReason = joinReason,
             ),
         )
         return stageId
@@ -196,6 +200,8 @@ internal class ClientEventReporter(
             retryFailureCode = if (!success) failureCode else null,
             callSessionId = callSessionId,
             joinStageAttemptId = session.joinStageAttemptIdSnapshot,
+            joinReason = session.joinReason,
+
         )
     }
 
@@ -206,6 +212,7 @@ internal class ClientEventReporter(
         callId: String,
         callType: String,
         joinStageAttemptId: String,
+        joinReason: JoinReason,
         wasPreviouslyConnected: Boolean,
     ): String {
         val stageId = UUID.randomUUID().toString()
@@ -221,6 +228,7 @@ internal class ClientEventReporter(
             sfuId = sfuId,
             wasPreviouslyConnected = wasPreviouslyConnected,
             callSessionId = callSessionId,
+            joinReason = joinReason,
         )
         sender.send(
             clientEventFactory.buildRequest(
@@ -233,6 +241,7 @@ internal class ClientEventReporter(
                 sfuId = sfuId,
                 wasPreviouslyConnected = wasPreviouslyConnected,
                 callSessionId = callSessionId,
+                joinReason = joinReason,
             ),
         )
         return stageId
@@ -260,6 +269,7 @@ internal class ClientEventReporter(
             sfuId = session.sfuId,
             callSessionId = session.callSessionId,
             joinStageAttemptId = joinStageAttemptId,
+            joinReason = session.joinReason,
         )
     }
 
@@ -269,6 +279,7 @@ internal class ClientEventReporter(
         callId: String,
         callType: String,
         joinStageAttemptId: String,
+        joinReason: JoinReason,
         role: PeerConnectionRole,
         iceState: PeerConnection.IceConnectionState?,
         peerConnectionState: PeerConnection.PeerConnectionState?,
@@ -289,6 +300,7 @@ internal class ClientEventReporter(
                         peerConnectionState = peerConnectionState,
                         failureReason = "ICE restart superseded previous attempt",
                         failureCode = "ICE_CONNECTIVITY_FAILED",
+                        joinReason = joinReason,
                     )
                 }
                 val stageId = UUID.randomUUID().toString()
@@ -303,6 +315,7 @@ internal class ClientEventReporter(
                     peerConnectionRole = role,
                     wasPreviouslyConnected = wasPrev,
                     callSessionId = callSessionIdMap[callId],
+                    joinReason = joinReason,
                 )
                 activePcSessionIds[role] = stageId
                 sender.send(
@@ -318,6 +331,7 @@ internal class ClientEventReporter(
                         callSessionId = callSessionIdMap[callId],
                         iceState = iceState,
                         peerConnectionState = peerConnectionState,
+                        joinReason = joinReason,
                     ),
                 )
             }
@@ -333,6 +347,7 @@ internal class ClientEventReporter(
                     success = true,
                     iceState = iceState,
                     peerConnectionState = peerConnectionState,
+                    joinReason = joinReason,
                 )
             }
 
@@ -348,6 +363,7 @@ internal class ClientEventReporter(
                     peerConnectionState = peerConnectionState,
                     failureReason = "ICE connectivity checks failed",
                     failureCode = "ICE_CONNECTIVITY_FAILED",
+                    joinReason = joinReason,
                 )
             }
 
@@ -362,6 +378,7 @@ internal class ClientEventReporter(
         callType: String,
         stageId: String,
         joinStageAttemptId: String,
+        joinReason: JoinReason,
         success: Boolean,
         iceState: PeerConnection.IceConnectionState,
         peerConnectionState: PeerConnection.PeerConnectionState?,
@@ -385,6 +402,7 @@ internal class ClientEventReporter(
             wasPreviouslyConnected = session.wasPreviouslyConnected,
             iceState = iceState,
             peerConnectionState = peerConnectionState,
+            joinReason = joinReason,
         )
     }
 
@@ -393,6 +411,7 @@ internal class ClientEventReporter(
         callId: String,
         callType: String,
         joinStageAttemptId: String,
+        joinReason: JoinReason,
     ): String {
         val stageId = UUID.randomUUID().toString()
         val callSessionId = callSessionIdMap[callId]
@@ -406,6 +425,7 @@ internal class ClientEventReporter(
                 joinStageAttemptId = joinStageAttemptId,
                 callSessionId = callSessionId,
                 sfuId = sfuId,
+                joinReason = joinReason,
             ),
         )
         return stageId
@@ -416,6 +436,7 @@ internal class ClientEventReporter(
         callId: String,
         callType: String,
         joinStageAttemptId: String,
+        joinReason: JoinReason,
         trackId: String,
     ): String {
         val stageId = UUID.randomUUID().toString()
@@ -431,6 +452,7 @@ internal class ClientEventReporter(
                 callSessionId = callSessionId,
                 sfuId = sfuId,
                 trackId = trackId,
+                joinReason = joinReason,
             ),
         )
         return stageId
@@ -440,6 +462,7 @@ internal class ClientEventReporter(
         callId: String,
         callType: String,
         joinStageAttemptId: String,
+        joinReason: JoinReason,
         isCameraGranted: Boolean,
         isMicrophoneGranted: Boolean,
     ): String {
@@ -456,6 +479,7 @@ internal class ClientEventReporter(
                 callSessionId = callSessionId,
                 cameraAllowed = isCameraGranted,
                 microphoneAllowed = isMicrophoneGranted,
+                joinReason = joinReason,
             ),
         )
         return stageId
@@ -485,6 +509,7 @@ internal class ClientEventReporter(
                 wasPreviouslyConnected = session.wasPreviouslyConnected,
                 userSessionId = session.userSessionId,
                 joinStageAttemptId = session.joinStageAttemptIdSnapshot,
+                joinReason = session.joinReason,
             )
         }
         sender.sendAll(events)

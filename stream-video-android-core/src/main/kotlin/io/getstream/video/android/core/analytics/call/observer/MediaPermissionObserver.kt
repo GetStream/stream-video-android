@@ -20,6 +20,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 
 internal class MediaPermissionObserver(
@@ -27,14 +28,15 @@ internal class MediaPermissionObserver(
     val callId: String,
     val callType: String,
     val eventReporter: ClientEventReporter,
-    val getJoinStageAttemptId: () -> String,
+    val joinTelemetryRepository: JoinTelemetryRepository,
 ) {
 
     fun mediaPermissionStatus() {
         eventReporter.reportMediaPermissionStatus(
             callId,
             callType,
-            getJoinStageAttemptId(),
+            joinTelemetryRepository.state.value.joinStageAttemptId ?: "unknown",
+            joinTelemetryRepository.state.value.joinReason ?: JoinReason.Unknown,
             isCameraPermissionGranted(),
             isMicrophonePermissionGranted(),
         )

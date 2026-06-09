@@ -18,6 +18,7 @@ package io.getstream.video.android.core.analytics.reporting
 
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.model.EventOutcome
 import io.getstream.video.android.core.analytics.reporting.model.EventStage
 import io.getstream.video.android.core.analytics.reporting.model.EventType
@@ -34,6 +35,7 @@ internal class ClientEventFactory(val sdkVersion: String, val userAgent: () -> S
         stage: EventStage,
         eventType: EventType,
         stageId: String? = null,
+        joinReason: JoinReason? = null,
         joinStageAttemptId: String? = null,
         elapsedTime: Long? = null,
         outcome: EventOutcome? = null,
@@ -79,6 +81,7 @@ internal class ClientEventFactory(val sdkVersion: String, val userAgent: () -> S
         cameraPermissionStatus = getPermissionStatusText(cameraAllowed),
         trackId = trackId,
         coordinatorConnectId = getCoordinatorId(),
+        joinReason = joinReason?.message,
     )
 
     fun getPermissionStatusText(allowed: Boolean?): String? {

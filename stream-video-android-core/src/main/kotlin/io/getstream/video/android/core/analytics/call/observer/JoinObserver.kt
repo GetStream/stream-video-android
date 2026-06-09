@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.analytics.call.observer
 
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.call.observer.model.TelemetryModel
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
@@ -25,28 +26,32 @@ internal class JoinObserver(
     val callId: String,
     val callType: String,
     val eventReporter: ClientEventReporter,
+    val joinTelemetryRepository: JoinTelemetryRepository,
     val onJoinSuccess: () -> Unit,
 ) {
 
     var stageId = ""
     var joinStage = Stage.NOT_STARTED
-    var joinStageAttemptId = ""
 
     fun onJoinFunctionStart() {
-        joinStageAttemptId = UUID.randomUUID().toString()
+        val stageAttemptId = UUID.randomUUID().toString()
+        joinTelemetryRepository.updateJoinStageAttemptId(stageAttemptId)
         eventReporter.reportSdkMethodJoinInitiated(
             callType = callType,
             callId = callId,
-            joinStageAttemptId = joinStageAttemptId,
+            joinStageAttemptId = stageAttemptId,
         )
     }
 
-    fun onJoinRequestStart() {
+    fun onJoinRequestStart(joinReason: JoinReason?) {
         if (joinStage == Stage.NOT_STARTED) {
+            joinTelemetryRepository.updateJoinReason(joinReason)
             stageId = eventReporter.reportCoordinatorJoinInitiated(
                 callType = callType,
                 callId = callId,
-                joinStageAttemptId = joinStageAttemptId,
+                joinStageAttemptId = joinTelemetryRepository.state.value.joinStageAttemptId
+                    ?: "unknown",
+                joinReason = joinReason ?: JoinReason.Unknown,
             )
             joinStage = Stage.IN_PROGRESS
         }

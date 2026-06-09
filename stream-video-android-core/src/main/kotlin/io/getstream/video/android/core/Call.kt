@@ -61,6 +61,7 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.analytics.call.CallAnalytics
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.TelemetryModel
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.FastReconnectResult
@@ -610,7 +611,7 @@ public class Call(
                     ring,
                     notify,
                     hintHighScaleLivestreamPublisher,
-                    TelemetryModel(retryCount),
+                    TelemetryModel(retryCount, JoinReason.FirstAttempt),
                 )
             if (tempResult is Success) {
                 // we initialise the camera, mic and other according to local + backend settings
@@ -1012,12 +1013,17 @@ public class Call(
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
                         nonFastReconnectAttempts++
-                        reconnectRejoin(reason, TelemetryModel(nonFastReconnectAttempts))
+                        reconnectRejoin(
+                            reason,
+                            TelemetryModel(nonFastReconnectAttempts, JoinReason.ReJoin),
+                        )
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
                         nonFastReconnectAttempts++
-                        reconnectMigrate(TelemetryModel(nonFastReconnectAttempts))
+                        reconnectMigrate(
+                            TelemetryModel(nonFastReconnectAttempts, JoinReason.Migrate),
+                        )
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT ->
@@ -1905,7 +1911,7 @@ public class Call(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         telemetryModel: TelemetryModel,
     ): Result<JoinCallResponse> {
-        callAnalytics.joinObserver.onJoinRequestStart()
+        callAnalytics.joinObserver.onJoinRequestStart(telemetryModel.joinReason)
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
         val result = clientImpl.joinCall(
             type, id,

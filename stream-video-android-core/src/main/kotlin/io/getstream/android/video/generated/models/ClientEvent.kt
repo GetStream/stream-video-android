@@ -48,6 +48,9 @@ data class ClientEvent (
     @Json(name = "coordinator_connect_id")
     val coordinatorConnectId: kotlin.String? = null,
 
+    @Json(name = "join_reason")
+    val joinReason: kotlin.String? = null,
+
     @Json(name = "elapsed_time")
     val elapsedTime: kotlin.Int? = null,
 

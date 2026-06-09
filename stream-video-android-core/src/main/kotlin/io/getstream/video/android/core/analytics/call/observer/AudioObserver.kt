@@ -18,6 +18,7 @@ package io.getstream.video.android.core.analytics.call.observer
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -38,8 +39,8 @@ internal class AudioObserver(
     private val callId: String,
     private val callType: String,
     private val clientEventReporter: ClientEventReporter,
+    private val joinTelemetryRepository: JoinTelemetryRepository,
     private val onSfuId: () -> String,
-    val getJoinStageAttemptId: () -> String,
 ) {
 
     val logger by taggedLogger("AudioObserver")
@@ -98,7 +99,8 @@ internal class AudioObserver(
             onSfuId(),
             callId,
             callType,
-            getJoinStageAttemptId(),
+            joinTelemetryRepository.state.value.joinStageAttemptId ?: "unknown",
+            joinTelemetryRepository.state.value.joinReason ?: JoinReason.Unknown,
         )
         trackSinks.forEach { (_, pair) -> pair.first.removeSink(pair.second) }
         trackSinks.clear()

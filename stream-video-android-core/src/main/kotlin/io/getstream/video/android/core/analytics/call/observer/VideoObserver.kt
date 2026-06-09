@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.analytics.call.observer
 
 import android.util.Log
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.call.RtcSession
 import stream.video.sfu.models.TrackType
@@ -25,8 +26,8 @@ internal class VideoObserver(
     private val callId: String,
     private val callType: String,
     private val clientEventReporter: ClientEventReporter,
+    private val joinTelemetryRepository: JoinTelemetryRepository,
     private val onSfuId: () -> String,
-    val getJoinStageAttemptId: () -> String,
 ) {
 
     var stageId: String = ""
@@ -56,7 +57,8 @@ internal class VideoObserver(
                                 onSfuId(),
                                 callId,
                                 callType,
-                                getJoinStageAttemptId(),
+                                joinTelemetryRepository.state.value.joinStageAttemptId ?: "unknown",
+                                joinTelemetryRepository.state.value.joinReason ?: JoinReason.Unknown,
                                 videoTrackId,
                             )
                         }

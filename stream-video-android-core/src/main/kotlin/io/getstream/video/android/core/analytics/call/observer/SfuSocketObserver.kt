@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.analytics.call.observer
 
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +29,7 @@ internal class SfuSocketObserver(
     val connectionFlow: StateFlow<RealtimeConnection>,
     val scope: CoroutineScope,
     val reporter: ClientEventReporter,
-    val getJoinStageAttemptId: () -> String,
+    val joinTelemetryRepository: JoinTelemetryRepository,
 ) {
     var telemetryWsEventStageId = ""
     var wsStage = Stage.NOT_STARTED
@@ -43,7 +44,10 @@ internal class SfuSocketObserver(
                 callType = callType,
                 sfuId = sfuName,
                 wasPreviouslyConnected = wasPreviouslyConnected,
-                joinStageAttemptId = getJoinStageAttemptId.invoke(),
+                joinStageAttemptId = joinTelemetryRepository.state.value.joinStageAttemptId
+                    ?: "unknown",
+                joinReason = joinTelemetryRepository.state.value.joinReason
+                    ?: JoinReason.Unknown,
             )
             wsStage = Stage.IN_PROGRESS
         }
@@ -63,7 +67,7 @@ internal class SfuSocketObserver(
                     retryCount = retryCount,
                     failureReason = failureReason,
                     failureCode = failureCode,
-                    joinStageAttemptId = getJoinStageAttemptId.invoke(),
+                    joinStageAttemptId = joinTelemetryRepository.state.value.joinStageAttemptId ?: "unknown",
                 )
             }
             resetStage()

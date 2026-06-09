@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.analytics.call.observer
 
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionRole
@@ -33,7 +34,7 @@ internal class PeerConnectionObserver(
     val callType: String,
     private val scope: CoroutineScope,
     val reporter: ClientEventReporter,
-    val getJoinStageAttemptId: () -> String,
+    val joinTelemetryRepository: JoinTelemetryRepository,
 ) {
 
     private var peerConnectionObserverJob: Job? = null
@@ -109,7 +110,8 @@ internal class PeerConnectionObserver(
             role = role,
             iceState = iceState,
             peerConnectionState = peerConnectionState,
-            joinStageAttemptId = getJoinStageAttemptId.invoke(),
+            joinStageAttemptId = joinTelemetryRepository.state.value.joinStageAttemptId ?: "unknown",
+            joinReason = joinTelemetryRepository.state.value.joinReason ?: JoinReason.Unknown,
         )
     }
 

@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.analytics.reporting.model
 
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
+
 internal typealias StageId = String
 internal typealias CallId = String
 
@@ -32,11 +34,13 @@ internal data class PostCallFlightSession(
     override val stage: EventStage.Call,
     override val startedAtMs: Long,
     val joinStageAttemptIdSnapshot: String,
+    val joinReason: JoinReason,
     val sfuId: String? = null,
     val callSessionId: String? = null,
     val userSessionId: String? = null,
     val peerConnectionRole: PeerConnectionRole? = null,
     val wasPreviouslyConnected: Boolean = false,
+
 ) : InFlightSession(stage, startedAtMs, stageId)
 
 internal data class PreCallInFlightSession(
