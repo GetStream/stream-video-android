@@ -180,7 +180,9 @@ fi
 
 # Step 4: Run the Go program with OpenAPI arguments
 echo "⚙️ Running OpenAPI Spec Generation..."
-go run ./cmd/chat-manager openapi generate-spec \
+make openapi
+
+./build/chat-manager openapi generate-spec \
   -products video \
   -version v1 \
   -clientside \
@@ -188,7 +190,7 @@ go run ./cmd/chat-manager openapi generate-spec \
 
 # Step 5: Generating Kt files
 echo "⚙️ Running OpenAPI Client Generation..."
-go run ./cmd/chat-manager openapi generate-client \
+./build/chat-manager openapi generate-client \
   --language kotlin \
   --spec "$OUTPUT_SPEC_PATH.yaml" \
   --api-service-class-name "$API_SERVICE_CLASS_NAME" \
