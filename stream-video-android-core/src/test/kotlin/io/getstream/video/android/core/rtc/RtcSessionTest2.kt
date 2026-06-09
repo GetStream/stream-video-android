@@ -25,6 +25,7 @@ import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.connection.Publisher
@@ -160,6 +161,7 @@ class RtcSessionTest2 {
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
                 sfuConnectionModuleProvider = { mockk(relaxed = true) },
+                sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
             ),
         )
 
@@ -212,6 +214,7 @@ class RtcSessionTest2 {
                     coroutineScope = testScope,
                     remoteIceServers = remoteIceServers,
                     sfuConnectionModuleProvider = { sfuSocketModule },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -262,6 +265,7 @@ class RtcSessionTest2 {
                     coroutineScope = testScope,
                     remoteIceServers = emptyList(),
                     sfuConnectionModuleProvider = { sfuSocketModule },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -309,6 +313,7 @@ class RtcSessionTest2 {
                     coroutineScope = testScope,
                     remoteIceServers = emptyList(),
                     sfuConnectionModuleProvider = { sfuSocketModule },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -363,6 +368,7 @@ class RtcSessionTest2 {
                     coroutineScope = testScope,
                     remoteIceServers = remoteIceServers,
                     sfuConnectionModuleProvider = { mockk(relaxed = true) },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
             val subscriber = rtcSession.subscriber
@@ -424,6 +430,7 @@ class RtcSessionTest2 {
             rtcSessionScope = testScope,
             remoteIceServers = emptyList(),
             sfuConnectionModuleProvider = { mockModule },
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
         )
         // Confirm publisher is null
         assertNull(rtcSession.publisher.value)
@@ -472,6 +479,7 @@ class RtcSessionTest2 {
                 coroutineScope = testScope,
                 remoteIceServers = emptyList(),
                 sfuConnectionModuleProvider = { mockk(relaxed = true) },
+                sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
             )
             val mockPublisher = mockk<Publisher>(relaxed = true)
             rtcSession.publisher.value = mockPublisher
@@ -519,6 +527,7 @@ class RtcSessionTest2 {
             coroutineScope = testScope,
             remoteIceServers = emptyList(),
             sfuConnectionModuleProvider = { mockk(relaxed = true) },
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
         )
         val subscriber = rtcSession.subscriber.value
         assertNotNull(subscriber)
@@ -617,6 +626,7 @@ class RtcSessionTest2 {
                 rtcSessionScope = testScope,
                 remoteIceServers = emptyList(),
                 sfuConnectionModuleProvider = { mockModule },
+                sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
             ),
             recordPrivateCalls = true,
         )

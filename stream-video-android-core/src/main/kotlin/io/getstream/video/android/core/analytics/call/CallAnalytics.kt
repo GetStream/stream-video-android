@@ -103,7 +103,6 @@ internal class CallAnalytics(
                 sfuAnalytics.sfuAnalyticsStateHolder.wsStage.value == Stage.IN_PROGRESS ||
                 peerConnectionAnalytics.stateHolder.state.value.publisherStage == Stage.IN_PROGRESS ||
                 peerConnectionAnalytics.stateHolder.state.value.subscriberStage == Stage.IN_PROGRESS
-        logger.d { "noob isAnyStageInProgress:$isAnyStageInProgress" }
 
         if (isAnyStageInProgress) {
             val abortReason = when (callLeaveReason) {

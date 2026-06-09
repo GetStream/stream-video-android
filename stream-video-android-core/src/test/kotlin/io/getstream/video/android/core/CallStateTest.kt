@@ -21,6 +21,7 @@ import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.MemberRequest
 import io.getstream.android.video.generated.models.ScreensharingSettingsRequest
 import io.getstream.result.Result
+import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
 import io.getstream.video.android.core.events.PinUpdate
@@ -101,6 +102,7 @@ class CallStateTest : IntegrationTestBase() {
         val response = call.joinRequest(
             create = CreateCallOptions(custom = mapOf("color" to "green")),
             location = "AMS",
+            joinAnalyticsModel = JoinAnalyticsModel(0),
         )
         assertSuccess(response)
         assertThat(call.state.settings.value).isNotNull()

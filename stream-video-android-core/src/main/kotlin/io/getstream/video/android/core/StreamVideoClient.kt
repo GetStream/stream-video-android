@@ -84,6 +84,7 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.analytics.coordinator.CoordinatorAnalytics
+import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.audio.AudioExecutionContext
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.errors.VideoErrorCode
@@ -195,6 +196,10 @@ internal class StreamVideoClient internal constructor(
     internal val enableStereoForSubscriber: Boolean = true,
     internal val telecomConfig: TelecomConfig? = null,
     internal val rejectCallWhenBusy: Boolean = false,
+    internal val clientEventReporter: ClientEventReporter = ClientEventReporter.getDefault(
+        context,
+        coordinatorConnectionModule.api,
+    ),
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null

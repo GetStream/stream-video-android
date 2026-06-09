@@ -26,6 +26,7 @@ import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectionResult
@@ -139,6 +140,7 @@ class FastReconnectIceRestartTest {
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
                 sfuConnectionModuleProvider = { sfuConnectionModule },
+                sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
             ),
         )
     }
