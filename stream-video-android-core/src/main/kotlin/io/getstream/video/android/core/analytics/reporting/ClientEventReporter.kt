@@ -207,7 +207,7 @@ internal class ClientEventReporter(
 
     // --- WSJoin ---
 
-    internal fun reportWsJoinInitiated(
+    internal fun reportSfuWsJoinInitiated(
         sfuId: String,
         callId: String,
         callType: String,
@@ -247,7 +247,7 @@ internal class ClientEventReporter(
         return stageId
     }
 
-    internal fun reportWsJoinCompleted(
+    internal fun reportSfuWsJoinCompleted(
         stageId: String,
         joinStageAttemptId: String,
         success: Boolean,

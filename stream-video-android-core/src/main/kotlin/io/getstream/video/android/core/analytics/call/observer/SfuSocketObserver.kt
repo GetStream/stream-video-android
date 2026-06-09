@@ -36,10 +36,10 @@ internal class SfuSocketObserver(
 
     var sfuName: String = ""
 
-    fun onWsInitiated(sfuName: String, wasPreviouslyConnected: Boolean) {
+    fun onSfuWsInitiated(sfuName: String, wasPreviouslyConnected: Boolean) {
         if (wsStage == Stage.NOT_STARTED) {
             this.sfuName = sfuName
-            telemetryWsEventStageId = reporter.reportWsJoinInitiated(
+            telemetryWsEventStageId = reporter.reportSfuWsJoinInitiated(
                 callId = callId,
                 callType = callType,
                 sfuId = sfuName,
@@ -53,7 +53,7 @@ internal class SfuSocketObserver(
         }
     }
 
-    fun onWsCompleted(
+    fun onSfuWsCompleted(
         success: Boolean,
         retryCount: Int,
         failureReason: String? = null,
@@ -61,7 +61,7 @@ internal class SfuSocketObserver(
     ) {
         if (wsStage == Stage.IN_PROGRESS) {
             if (telemetryWsEventStageId.isNotEmpty()) {
-                reporter.reportWsJoinCompleted(
+                reporter.reportSfuWsJoinCompleted(
                     stageId = telemetryWsEventStageId,
                     success = success,
                     retryCount = retryCount,
