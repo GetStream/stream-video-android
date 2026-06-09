@@ -43,6 +43,7 @@ internal class AudioAnalytics(
     private val sfuStateHolder: SfuAnalyticsStateHolder,
 ) {
 
+    private val isEnabled = false
     val logger by taggedLogger("AudioObserver")
     var recordedFirstFrame: AtomicBoolean = AtomicBoolean(false)
 
@@ -54,6 +55,8 @@ internal class AudioAnalytics(
         participants: StateFlow<List<ParticipantState>>,
         scope: CoroutineScope,
     ) {
+        if (!isEnabled) return
+
         observeJob?.cancel()
         observeJob = scope.launch {
             participants
@@ -95,6 +98,8 @@ internal class AudioAnalytics(
 
     // Called from a coroutine — safe to do I/O, removeSink, and job cancellation here.
     private fun reportAndCleanup() {
+        if (!isEnabled) return
+
         clientEventReporter.reportFirstAudioFrameRendered(
             sfuStateHolder.sfuId.value,
             callId,
@@ -109,6 +114,7 @@ internal class AudioAnalytics(
     }
 
     fun reset() {
+        if (!isEnabled) return
         logger.d { "noob [reset]" }
         recordedFirstFrame.set(false)
         trackSinks.forEach { (_, pair) -> pair.first.removeSink(pair.second) }
