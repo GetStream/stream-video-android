@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.analytics.call.observer
 
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
+import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,6 +52,22 @@ internal class JoinAnalyticsStateHolder {
         }
     }
 
+    fun updateStageId(stageId: String) {
+        _state.update {
+            it.copy(
+                stageId = stageId,
+            )
+        }
+    }
+
+    fun updateStage(stage: Stage) {
+        _state.update {
+            it.copy(
+                joinStage = stage,
+            )
+        }
+    }
+
     fun reset() {
         _state.value = JoinTelemetryState()
     }
@@ -59,4 +76,6 @@ internal class JoinAnalyticsStateHolder {
 internal data class JoinTelemetryState(
     val joinReason: JoinReason? = null,
     val joinStageAttemptId: String? = null,
+    var stageId: String = "",
+    var joinStage: Stage = Stage.NOT_STARTED,
 )

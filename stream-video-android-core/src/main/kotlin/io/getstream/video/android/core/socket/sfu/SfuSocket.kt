@@ -112,7 +112,7 @@ internal open class SfuSocket(
             when (networkStateProvider.isConnected()) {
                 true -> {
                     debugFaultInjectors(connectionConf)
-                    sfuAnalytics.onSfuWsInitiated2(
+                    sfuAnalytics.onSfuWsInitiated(
                         wasPreviouslyConnected = connectionConf.joinRequest.reconnect_details != null,
                     )
                     streamWebSocket =

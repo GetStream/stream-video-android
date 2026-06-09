@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 private typealias TrackId = String
 
-internal class AudioObserver(
+internal class AudioAnalytics(
     private val callId: String,
     private val callType: String,
     private val clientEventReporter: ClientEventReporter,

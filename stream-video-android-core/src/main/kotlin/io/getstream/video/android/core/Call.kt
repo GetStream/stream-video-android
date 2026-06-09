@@ -806,8 +806,8 @@ public class Call(
             }
         }
         monitorPublisherPCStateJob?.cancel()
-        callAnalytics.peerConnectionObserver.stop()
-        callAnalytics.peerConnectionObserver.observePeerConnections(session)
+        callAnalytics.peerConnectionAnalytics.stop()
+        callAnalytics.peerConnectionAnalytics.observePeerConnections(session)
         monitorPublisherPCStateJob = scope.launch {
             session
                 .filterNotNull()
@@ -1538,7 +1538,7 @@ public class Call(
                         )
                     }
                     onRendered(videoRenderer)
-                    callAnalytics.videoObserver.firstVideoFrameRendered(
+                    callAnalytics.videoAnalytics.firstVideoFrameRendered(
                         trackType,
                         width,
                         height,

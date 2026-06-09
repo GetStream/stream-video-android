@@ -20,9 +20,10 @@ import android.util.Log
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.call.RtcSession
+import kotlinx.coroutines.flow.MutableStateFlow
 import stream.video.sfu.models.TrackType
 
-internal class VideoObserver(
+internal class VideoAnalytics(
     private val callId: String,
     private val callType: String,
     private val clientEventReporter: ClientEventReporter,
@@ -30,7 +31,7 @@ internal class VideoObserver(
     private val sfuAnalyticsStateHolder: SfuAnalyticsStateHolder,
 ) {
 
-    var stageId: String = ""
+    val stageId = MutableStateFlow<String>("")
 
     fun firstVideoFrameRendered(
         trackType: TrackType,
@@ -52,8 +53,8 @@ internal class VideoObserver(
                         "noob [firstVideoFrameRendered]: $trackType, w:$width, h:$height, videoTrackId:$videoTrackId, videoSessionId:$videoSessionId, callSessionId:$callSessionId",
                     )
                     videoTrackId?.let {
-                        if (stageId.isEmpty()) {
-                            stageId = clientEventReporter.reportFirstVideoFrameRendered(
+                        if (stageId.value.isEmpty()) {
+                            stageId.value = clientEventReporter.reportFirstVideoFrameRendered(
                                 sfuAnalyticsStateHolder.sfuId.value,
                                 callId,
                                 callType,
@@ -70,6 +71,6 @@ internal class VideoObserver(
     }
 
     fun reset() {
-        stageId = ""
+        stageId.value = ""
     }
 }

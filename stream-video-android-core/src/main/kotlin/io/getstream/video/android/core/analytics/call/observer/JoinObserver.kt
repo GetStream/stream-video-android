@@ -30,9 +30,6 @@ internal class JoinObserver(
     val onJoinSuccess: () -> Unit,
 ) {
 
-    var stageId = ""
-    var joinStage = Stage.NOT_STARTED
-
     fun onJoinFunctionStart() {
         val stageAttemptId = UUID.randomUUID().toString()
         joinAnalyticsStateHolder.updateJoinStageAttemptId(stageAttemptId)
@@ -44,24 +41,25 @@ internal class JoinObserver(
     }
 
     fun onJoinRequestStart(joinReason: JoinReason?) {
-        if (joinStage == Stage.NOT_STARTED) {
+        if (joinAnalyticsStateHolder.state.value.joinStage == Stage.NOT_STARTED) {
             joinAnalyticsStateHolder.updateJoinReason(joinReason)
-            stageId = eventReporter.reportCoordinatorJoinInitiated(
+            val stageId = eventReporter.reportCoordinatorJoinInitiated(
                 callType = callType,
                 callId = callId,
                 joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
                     ?: "unknown",
                 joinReason = joinReason ?: JoinReason.Unknown,
             )
-            joinStage = Stage.IN_PROGRESS
+            joinAnalyticsStateHolder.updateStageId(stageId)
+            joinAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)
         }
     }
 
     fun onJoinRequestSuccess(telemetryModel: TelemetryModel, currentSessionId: String) {
-        if (joinStage == Stage.IN_PROGRESS) {
-            if (stageId.isNotEmpty()) {
+        if (joinAnalyticsStateHolder.state.value.joinStage == Stage.IN_PROGRESS) {
+            if (joinAnalyticsStateHolder.state.value.stageId.isNotEmpty()) {
                 eventReporter.reportCoordinatorJoinCompleted(
-                    stageId = stageId,
+                    stageId = joinAnalyticsStateHolder.state.value.stageId,
                     success = true,
                     retryCount = telemetryModel.retryAttempt,
                     callSessionId = currentSessionId,
@@ -73,10 +71,10 @@ internal class JoinObserver(
     }
 
     fun onJoinRequestPermanentError(retryCount: Int, message: String) {
-        if (joinStage == Stage.IN_PROGRESS) {
-            if (stageId.isNotEmpty()) {
+        if (joinAnalyticsStateHolder.state.value.joinStage == Stage.IN_PROGRESS) {
+            if (joinAnalyticsStateHolder.state.value.stageId.isNotEmpty()) {
                 eventReporter.reportCoordinatorJoinCompleted(
-                    stageId = stageId,
+                    stageId = joinAnalyticsStateHolder.state.value.stageId,
                     success = false,
                     retryCount = retryCount,
                     failureReason = message,
@@ -91,6 +89,6 @@ internal class JoinObserver(
     }
 
     fun resetStage() {
-        joinStage = Stage.NOT_STARTED
+        joinAnalyticsStateHolder.updateStage(Stage.NOT_STARTED)
     }
 }

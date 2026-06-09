@@ -22,38 +22,33 @@ import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionRole
 import io.getstream.video.android.core.call.RtcSession
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import org.webrtc.PeerConnection
 
-internal class PeerConnectionObserver(
+internal class PeerConnectionAnalytics(
     val callId: String,
     val callType: String,
     private val scope: CoroutineScope,
     val reporter: ClientEventReporter,
     val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
     val sfuAnalyticsStateHolder: SfuAnalyticsStateHolder,
+    val stateHolder: PeerConnectionAnalyticsStateHolder = PeerConnectionAnalyticsStateHolder(),
 ) {
 
-    private var peerConnectionObserverJob: Job? = null
-    private var publisherJob: Job? = null
-    private var subscriberJob: Job? = null
-    var publisherStage = Stage.NOT_STARTED
-    var subscriberStage = Stage.NOT_STARTED
-
     fun observePeerConnections(session: StateFlow<RtcSession?>) {
-        peerConnectionObserverJob?.cancel()
-        peerConnectionObserverJob = scope.launch {
-            publisherJob?.cancel()
-            publisherJob = launch {
+        stateHolder.state.value.peerConnectionObserverJob?.cancel()
+        val peerConnectionObserverJob = scope.launch {
+            stateHolder.state.value.publisherJob?.cancel()
+            val publisherJob = launch {
                 session.filterNotNull()
                     .flatMapLatest { it.publisher.filterNotNull() }
                     .flatMapLatest { it.state.filterNotNull() }
                     .collect { state ->
-                        publisherStage = getStage(state)
+                        val publisherStage = getStage(state)
+                        stateHolder.updatePublisherStage(publisherStage)
                         scope.launch {
                             onPeerConnectionStateChanged(
                                 role = PeerConnectionRole.PUBLISH,
@@ -63,13 +58,14 @@ internal class PeerConnectionObserver(
                         }
                     }
             }
-            subscriberJob?.cancel()
-            subscriberJob = launch {
+            stateHolder.updatePublisherJob(publisherJob)
+            stateHolder.state.value.subscriberJob?.cancel()
+            val subscriberJob = launch {
                 session.filterNotNull()
                     .flatMapLatest { it.subscriber.filterNotNull() }
                     .flatMapLatest { it.state.filterNotNull() }
                     .collect { state ->
-                        subscriberStage = getStage(state)
+                        stateHolder.updateSubscriberStage(getStage(state))
                         scope.launch {
                             onPeerConnectionStateChanged(
                                 role = PeerConnectionRole.SUBSCRIBE,
@@ -79,7 +75,9 @@ internal class PeerConnectionObserver(
                         }
                     }
             }
+            stateHolder.updateSubscriberJob(subscriberJob)
         }
+        stateHolder.updatePeerConnectionObserverJob(peerConnectionObserverJob)
     }
 
     private fun getStage(peerConnectionState: PeerConnection.PeerConnectionState): Stage {
@@ -118,7 +116,7 @@ internal class PeerConnectionObserver(
     }
 
     fun stop() {
-        peerConnectionObserverJob?.cancel()
-        peerConnectionObserverJob = null
+        stateHolder.state.value.peerConnectionObserverJob?.cancel()
+        stateHolder.updatePeerConnectionObserverJob(null)
     }
 }

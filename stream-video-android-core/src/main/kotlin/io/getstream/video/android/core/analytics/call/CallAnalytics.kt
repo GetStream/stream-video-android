@@ -21,14 +21,14 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
-import io.getstream.video.android.core.analytics.call.observer.AudioObserver
+import io.getstream.video.android.core.analytics.call.observer.AudioAnalytics
 import io.getstream.video.android.core.analytics.call.observer.JoinAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.call.observer.JoinObserver
 import io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver
-import io.getstream.video.android.core.analytics.call.observer.PeerConnectionObserver
+import io.getstream.video.android.core.analytics.call.observer.PeerConnectionAnalytics
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalyticsStateHolder
-import io.getstream.video.android.core.analytics.call.observer.VideoObserver
+import io.getstream.video.android.core.analytics.call.observer.VideoAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
@@ -62,8 +62,8 @@ internal class CallAnalytics(
             joinAnalyticsStateHolder,
             sfuAnalyticsStateHolder,
         )
-    val peerConnectionObserver =
-        PeerConnectionObserver(
+    val peerConnectionAnalytics =
+        PeerConnectionAnalytics(
             callId,
             callType,
             scope,
@@ -73,16 +73,16 @@ internal class CallAnalytics(
         )
     val mediaPermissionObserver =
         MediaPermissionObserver(context, callId, callType, eventReporter, joinAnalyticsStateHolder)
-    val audioObserver =
-        AudioObserver(
+    val audioAnalytics =
+        AudioAnalytics(
             callId,
             callType,
             eventReporter,
             joinAnalyticsStateHolder,
             sfuAnalyticsStateHolder,
         )
-    val videoObserver =
-        VideoObserver(
+    val videoAnalytics =
+        VideoAnalytics(
             callId,
             callType,
             eventReporter,
@@ -91,17 +91,17 @@ internal class CallAnalytics(
         )
 
     fun resetAfterJoinSuccess() {
-        audioObserver.reset()
-        videoObserver.reset()
-        audioObserver.observeParticipantsForFirstRemoteAudioFrame(participants, scope)
+        audioAnalytics.reset()
+        videoAnalytics.reset()
+        audioAnalytics.observeParticipantsForFirstRemoteAudioFrame(participants, scope)
     }
 
     fun onCallLeave(callLeaveReason: CallLeaveReason) {
         val isAnyStageInProgress =
-            joinObserver.joinStage == Stage.IN_PROGRESS ||
-                sfuAnalytics.wsStage == Stage.IN_PROGRESS ||
-                peerConnectionObserver.publisherStage == Stage.IN_PROGRESS ||
-                peerConnectionObserver.subscriberStage == Stage.IN_PROGRESS
+            joinObserver.joinAnalyticsStateHolder.state.value.joinStage == Stage.IN_PROGRESS ||
+                sfuAnalytics.sfuAnalyticsStateHolder.wsStage.value == Stage.IN_PROGRESS ||
+                peerConnectionAnalytics.stateHolder.state.value.publisherStage == Stage.IN_PROGRESS ||
+                peerConnectionAnalytics.stateHolder.state.value.subscriberStage == Stage.IN_PROGRESS
         logger.d { "noob isAnyStageInProgress:$isAnyStageInProgress" }
 
         if (isAnyStageInProgress) {
@@ -114,6 +114,6 @@ internal class CallAnalytics(
     }
 
     fun stopObservers() {
-        peerConnectionObserver.stop()
+        peerConnectionAnalytics.stop()
     }
 }

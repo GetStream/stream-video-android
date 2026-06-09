@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.analytics.call.observer
 
+import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +25,21 @@ internal class SfuAnalyticsStateHolder {
     private val _sfuId = MutableStateFlow("")
     val sfuId: StateFlow<String> = _sfuId.asStateFlow()
 
+    private val _wsStage = MutableStateFlow(Stage.NOT_STARTED)
+    val wsStage: StateFlow<Stage> = _wsStage.asStateFlow()
+
+    private val _wsEventStageId = MutableStateFlow("")
+    val wsEventStageId: StateFlow<String> = _wsEventStageId.asStateFlow()
+
     fun updateSfuId(sfuId: String) {
         _sfuId.value = sfuId
+    }
+
+    fun updateStage(stage: Stage) {
+        _wsStage.value = stage
+    }
+
+    fun updateStageId(eventStageId: String) {
+        _wsEventStageId.value = eventStageId
     }
 }

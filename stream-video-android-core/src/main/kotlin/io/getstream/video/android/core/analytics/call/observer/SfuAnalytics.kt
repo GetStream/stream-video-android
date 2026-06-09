@@ -67,30 +67,11 @@ internal class SfuAnalytics(
             )
         }
     }
-    var telemetryWsEventStageId = ""
-    var wsStage = Stage.NOT_STARTED
 
-    fun onSfuWsInitiated(sfuName: String, wasPreviouslyConnected: Boolean) {
+    fun onSfuWsInitiated(wasPreviouslyConnected: Boolean) {
         if (!isEnabled) return
-        if (wsStage == Stage.NOT_STARTED) {
-            telemetryWsEventStageId = reporter.reportSfuWsJoinInitiated(
-                callId = callId,
-                callType = callType,
-                sfuId = sfuName,
-                wasPreviouslyConnected = wasPreviouslyConnected,
-                joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
-                    ?: "unknown",
-                joinReason = joinAnalyticsStateHolder.state.value.joinReason
-                    ?: JoinReason.Unknown,
-            )
-            wsStage = Stage.IN_PROGRESS
-        }
-    }
-
-    fun onSfuWsInitiated2(wasPreviouslyConnected: Boolean) {
-        if (!isEnabled) return
-        if (wsStage == Stage.NOT_STARTED) {
-            telemetryWsEventStageId = reporter.reportSfuWsJoinInitiated(
+        if (sfuAnalyticsStateHolder.wsStage.value == Stage.NOT_STARTED) {
+            val wsEventStageId = reporter.reportSfuWsJoinInitiated(
                 callId = callId,
                 callType = callType,
                 sfuId = sfuAnalyticsStateHolder.sfuId.value,
@@ -100,7 +81,8 @@ internal class SfuAnalytics(
                 joinReason = joinAnalyticsStateHolder.state.value.joinReason
                     ?: JoinReason.Unknown,
             )
-            wsStage = Stage.IN_PROGRESS
+            sfuAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)
+            sfuAnalyticsStateHolder.updateStageId(wsEventStageId)
         }
     }
 
@@ -111,10 +93,10 @@ internal class SfuAnalytics(
         failureCode: String? = null,
     ) {
         if (!isEnabled) return
-        if (wsStage == Stage.IN_PROGRESS) {
-            if (telemetryWsEventStageId.isNotEmpty()) {
+        if (sfuAnalyticsStateHolder.wsStage.value == Stage.IN_PROGRESS) {
+            if (sfuAnalyticsStateHolder.wsEventStageId.value.isNotEmpty()) {
                 reporter.reportSfuWsJoinCompleted(
-                    stageId = telemetryWsEventStageId,
+                    stageId = sfuAnalyticsStateHolder.wsEventStageId.value,
                     success = success,
                     retryCount = retryCount,
                     failureReason = failureReason,
@@ -127,6 +109,6 @@ internal class SfuAnalytics(
     }
 
     fun resetStage() {
-        wsStage = Stage.NOT_STARTED
+        sfuAnalyticsStateHolder.updateStage(Stage.NOT_STARTED)
     }
 }
