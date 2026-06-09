@@ -73,7 +73,6 @@ internal class SfuAnalytics(
     fun onSfuWsInitiated(sfuName: String, wasPreviouslyConnected: Boolean) {
         if (!isEnabled) return
         if (wsStage == Stage.NOT_STARTED) {
-            sfuAnalyticsStateHolder.updateSfuId(sfuName)
             telemetryWsEventStageId = reporter.reportSfuWsJoinInitiated(
                 callId = callId,
                 callType = callType,

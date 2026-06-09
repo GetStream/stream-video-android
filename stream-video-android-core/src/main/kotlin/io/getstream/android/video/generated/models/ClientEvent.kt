@@ -136,6 +136,7 @@ data class ClientEvent (
             appendIfNotNull("stageId", stageId)
             appendIfNotNull("userSessionId", userSessionId)
             appendIfNotNull("joinAttemptId", joinAttemptId)
+            appendIfNotNull("joinReason", joinReason)
             appendIfNotNull("coordinatorConnectId", coordinatorConnectId)
 
             appendIfNotNull("userId", userId)

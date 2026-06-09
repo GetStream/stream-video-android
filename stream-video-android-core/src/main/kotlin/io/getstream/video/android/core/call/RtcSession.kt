@@ -239,10 +239,10 @@ public class RtcSession internal constructor(
     private val sessionId: String,
     private val apiKey: String,
     private val lifecycle: Lifecycle,
-    internal var sfuUrl: String,
-    internal var sfuWsUrl: String,
-    internal var sfuToken: String,
-    internal var sfuName: String,
+    internal val sfuUrl: String,
+    internal val sfuWsUrl: String,
+    internal val sfuToken: String,
+    internal val sfuName: String,
     internal var remoteIceServers: List<IceServer>,
     internal val clientImpl: StreamVideoClient = client as StreamVideoClient,
     private val supervisorJob: CompletableJob = SupervisorJob(),
@@ -887,7 +887,6 @@ public class RtcSession internal constructor(
         telemetryModel: TelemetryModel? = null,
     ): SfuConnectionResult {
         logger.i { "noob [connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
-        call.callAnalytics.sfuAnalytics.sfuAnalyticsStateHolder.updateSfuId(sfuName)
 
         val request = buildJoinRequest(reconnectDetails, options)
         sfuTracer.trace(
