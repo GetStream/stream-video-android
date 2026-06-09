@@ -68,6 +68,14 @@ internal class JoinAnalyticsStateHolder {
         }
     }
 
+    fun updateCallSessionId(callSessionId: String) {
+        _state.update {
+            it.copy(
+                callSessionId = callSessionId,
+            )
+        }
+    }
+
     fun reset() {
         _state.value = JoinTelemetryState()
     }
@@ -78,4 +86,5 @@ internal data class JoinTelemetryState(
     val joinStageAttemptId: String? = null,
     var stageId: String = "",
     var joinStage: Stage = Stage.NOT_STARTED,
+    var callSessionId: String = "unknown",
 )

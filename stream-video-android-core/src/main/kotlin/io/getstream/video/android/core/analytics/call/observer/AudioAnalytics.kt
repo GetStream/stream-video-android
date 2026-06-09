@@ -104,8 +104,9 @@ internal class AudioAnalytics(
             sfuStateHolder.sfuId.value,
             callId,
             callType,
-            joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
-            joinAnalyticsStateHolder.state.value.joinReason ?: JoinReason.Unknown,
+            joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
+            joinReason = joinAnalyticsStateHolder.state.value.joinReason ?: JoinReason.Unknown,
+            callSessionId = joinAnalyticsStateHolder.state.value.callSessionId,
         )
         trackSinks.forEach { (_, pair) -> pair.first.removeSink(pair.second) }
         trackSinks.clear()

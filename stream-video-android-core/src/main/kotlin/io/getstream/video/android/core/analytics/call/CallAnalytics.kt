@@ -22,8 +22,8 @@ import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.analytics.call.observer.AudioAnalytics
+import io.getstream.video.android.core.analytics.call.observer.JoinAnalytics
 import io.getstream.video.android.core.analytics.call.observer.JoinAnalyticsStateHolder
-import io.getstream.video.android.core.analytics.call.observer.JoinObserver
 import io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver
 import io.getstream.video.android.core.analytics.call.observer.PeerConnectionAnalytics
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
@@ -48,7 +48,7 @@ internal class CallAnalytics(
     val joinAnalyticsStateHolder = JoinAnalyticsStateHolder()
     val sfuAnalyticsStateHolder = SfuAnalyticsStateHolder()
 
-    val joinObserver = JoinObserver(callId, callType, eventReporter, joinAnalyticsStateHolder) {
+    val joinAnalytics = JoinAnalytics(callId, callType, eventReporter, joinAnalyticsStateHolder) {
         resetAfterJoinSuccess()
     }
     val sfuAnalytics =
@@ -98,7 +98,7 @@ internal class CallAnalytics(
 
     fun onCallLeave(callLeaveReason: CallLeaveReason) {
         val isAnyStageInProgress =
-            joinObserver.joinAnalyticsStateHolder.state.value.joinStage == Stage.IN_PROGRESS ||
+            joinAnalytics.joinAnalyticsStateHolder.state.value.joinStage == Stage.IN_PROGRESS ||
                 sfuAnalytics.sfuAnalyticsStateHolder.wsStage.value == Stage.IN_PROGRESS ||
                 peerConnectionAnalytics.stateHolder.state.value.publisherStage == Stage.IN_PROGRESS ||
                 peerConnectionAnalytics.stateHolder.state.value.subscriberStage == Stage.IN_PROGRESS

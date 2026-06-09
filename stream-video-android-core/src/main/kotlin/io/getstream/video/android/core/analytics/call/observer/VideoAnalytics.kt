@@ -58,9 +58,11 @@ internal class VideoAnalytics(
                                 sfuAnalyticsStateHolder.sfuId.value,
                                 callId,
                                 callType,
-                                joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
-                                joinAnalyticsStateHolder.state.value.joinReason ?: JoinReason.Unknown,
-                                videoTrackId,
+                                joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
+                                joinReason = joinAnalyticsStateHolder.state.value.joinReason ?: JoinReason.Unknown,
+                                trackId = videoTrackId,
+                                callSessionId = joinAnalyticsStateHolder.state.value.callSessionId,
+
                             )
                         }
                     }

@@ -80,6 +80,7 @@ internal class SfuAnalytics(
                     ?: "unknown",
                 joinReason = joinAnalyticsStateHolder.state.value.joinReason
                     ?: JoinReason.Unknown,
+                callSessionId = joinAnalyticsStateHolder.state.value.callSessionId,
             )
             sfuAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)
             sfuAnalyticsStateHolder.updateStageId(wsEventStageId)

@@ -22,7 +22,7 @@ import io.getstream.video.android.core.analytics.call.observer.model.TelemetryMo
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import java.util.UUID
 
-internal class JoinObserver(
+internal class JoinAnalytics(
     val callId: String,
     val callType: String,
     val eventReporter: ClientEventReporter,
@@ -41,6 +41,10 @@ internal class JoinObserver(
     }
 
     fun onJoinRequestStart(joinReason: JoinReason?) {
+        if (joinReason != JoinReason.FirstAttempt) {
+            val stageAttemptId = UUID.randomUUID().toString()
+            joinAnalyticsStateHolder.updateJoinStageAttemptId(stageAttemptId)
+        }
         if (joinAnalyticsStateHolder.state.value.joinStage == Stage.NOT_STARTED) {
             joinAnalyticsStateHolder.updateJoinReason(joinReason)
             val stageId = eventReporter.reportCoordinatorJoinInitiated(
@@ -57,6 +61,7 @@ internal class JoinObserver(
 
     fun onJoinRequestSuccess(telemetryModel: TelemetryModel, currentSessionId: String) {
         if (joinAnalyticsStateHolder.state.value.joinStage == Stage.IN_PROGRESS) {
+            joinAnalyticsStateHolder.updateCallSessionId(currentSessionId)
             if (joinAnalyticsStateHolder.state.value.stageId.isNotEmpty()) {
                 eventReporter.reportCoordinatorJoinCompleted(
                     stageId = joinAnalyticsStateHolder.state.value.stageId,

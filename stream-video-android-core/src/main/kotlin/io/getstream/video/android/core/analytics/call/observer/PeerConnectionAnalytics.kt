@@ -112,6 +112,7 @@ internal class PeerConnectionAnalytics(
             joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
             joinReason = joinAnalyticsStateHolder.state.value.joinReason ?: JoinReason.Unknown,
             sfuId = sfuAnalyticsStateHolder.sfuId.value,
+            callSessionId = joinAnalyticsStateHolder.state.value.callSessionId,
         )
     }
 
