@@ -42,10 +42,11 @@ internal class VideoAnalytics(
     ) {
         when (trackType) {
             TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_SCREEN_SHARE -> {
-                if (videoSessionId != callSessionId) {
+                val isRemoteUser = videoSessionId != callSessionId
+                if (isRemoteUser) {
                     val videoTrackId = rtcSession?.subscriber?.value?.getTrack(
                         videoSessionId,
-                        TrackType.TRACK_TYPE_VIDEO,
+                        trackType,
                     )?.asVideoTrack()?.video?.id()
 
                     videoTrackId?.let {

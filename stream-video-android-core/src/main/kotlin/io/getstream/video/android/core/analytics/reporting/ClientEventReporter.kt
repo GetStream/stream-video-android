@@ -99,12 +99,7 @@ internal class ClientEventReporter(
         build(session, elapsedMs)?.let(sender::send)
     }
 
-//    private fun callSessionId(callId: CallId): String? = callSessionIdMap[callId]
-//
-//    private fun rememberCallSession(callId: CallId, id: String?) {
-//        callSessionIdMap[callId] = id ?: ""
-//    }
-
+    // --- Coordinator WS ---
     internal fun reportCoordinatorWSInitiated(): String {
         this.coordinatorConnectId = UUID.randomUUID().toString()
         val stageId = UUID.randomUUID().toString()
@@ -112,7 +107,7 @@ internal class ClientEventReporter(
         postCallFlightSessions[stageId] = PreCallInFlightSession(
             stageId = stageId,
             coordinatorConnectId = coordinatorConnectId,
-            stage = EventStage.Call.COORDINATOR_JOIN,
+            stage = EventStage.CoordinatorWs,
             startedAtMs = now,
         )
         sender.send(
@@ -169,7 +164,7 @@ internal class ClientEventReporter(
         )
     }
 
-    // --- CoordinatorJoin ---
+    // --- Coordinator Join ---
 
     internal fun reportCoordinatorJoinInitiated(
         callId: String,
@@ -210,7 +205,6 @@ internal class ClientEventReporter(
         failureCode: String? = null, // TODO Rahul, ask tomorrow
         callSessionId: String? = null,
     ) = completePostCall(stageId) { session, elapsedTime ->
-//        rememberCallSession(session.callId, callSessionId)
         clientEventFactory.buildRequest(
             callId = session.callId,
             callType = session.callType,
@@ -229,7 +223,7 @@ internal class ClientEventReporter(
         )
     }
 
-    // --- WSJoin ---
+    // --- SFU Join ---
 
     internal fun reportSfuWsJoinInitiated(
         sfuId: String,

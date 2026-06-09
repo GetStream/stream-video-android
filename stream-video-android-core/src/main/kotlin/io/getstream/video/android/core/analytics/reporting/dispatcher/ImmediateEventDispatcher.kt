@@ -45,6 +45,11 @@ internal class ImmediateEventDispatcher(
     private val dataSource: PendingEventDataSource = InMemoryPendingEventDataSource(),
 ) : EventDispatcher {
 
+    private companion object {
+        const val RETRY_MAX_ATTEMPT = 5
+        const val BASE_RETRY_DELAY_MS = 500L
+    }
+
     private val logger by taggedLogger("ImmediateEventSender")
 
     override fun send(event: ClientEvent) = sendAll(listOf(event))
@@ -52,12 +57,12 @@ internal class ImmediateEventDispatcher(
     override fun sendAll(events: List<ClientEvent>) {
         if (events.isEmpty()) return
         scope.launch {
-            retryNetworkCall {
+            retryWithBackoff {
                 logger.d { events.joinToString(",") { it.toLog() } }
                 api.reportClientCallEvent(ReportClientEventRequest(events))
             }.onFailure { e ->
                 logger.w { "[sendAll] Failed — saving ${events.size} event(s) for retry: ${e.message}" }
-                if (e.message != WONT_RETRY) {
+                if (e !is NonRetryableException) {
                     dataSource.save(events)
                 }
             }
@@ -65,8 +70,8 @@ internal class ImmediateEventDispatcher(
     }
 
     override fun retryPending() {
-        if (dataSource.isEmpty()) return
         val pending = dataSource.loadAndClear()
+        if (pending.isEmpty()) return
         sendAll(pending)
     }
 
@@ -75,12 +80,8 @@ internal class ImmediateEventDispatcher(
         dataSource.clear()
     }
 
-    suspend fun retryNetworkCall(lambda: suspend () -> Unit): Result<Unit> {
-        return retryInternal(5, lambda)
-    }
-
-    suspend fun retryInternal(maxAttempts: Int = 5, lambda: suspend () -> Unit): Result<Unit> {
-        val baseDelayMs = 500L
+    suspend fun retryWithBackoff(maxAttempts: Int = RETRY_MAX_ATTEMPT, lambda: suspend () -> Unit): Result<Unit> {
+        val baseDelayMs = BASE_RETRY_DELAY_MS
 
         repeat(maxAttempts) { attempt ->
 
@@ -93,7 +94,7 @@ internal class ImmediateEventDispatcher(
             val exception = result.exceptionOrNull()
 
             if (!shouldRetry(exception)) {
-                return Result.failure(exception ?: Exception("Unknown error"))
+                return Result.failure(NonRetryableException(exception))
             }
 
             if (attempt < maxAttempts - 1) {
@@ -102,7 +103,7 @@ internal class ImmediateEventDispatcher(
             }
         }
 
-        return Result.failure(Exception("Retry attempts exhausted"))
+        return Result.failure(RetryExhaustedException(null))
     }
 
     fun shouldRetry(throwable: Throwable?): Boolean {
@@ -122,6 +123,23 @@ internal class ImmediateEventDispatcher(
             else -> false
         }
     }
-
-    val WONT_RETRY = "Won't retry"
 }
+
+private sealed class RetryException(
+    message: String? = null,
+    cause: Throwable? = null,
+) : Exception(message, cause)
+
+private class NonRetryableException(
+    cause: Throwable?,
+) : RetryException(
+    message = "Failure is not retryable",
+    cause = cause,
+)
+
+private class RetryExhaustedException(
+    cause: Throwable?,
+) : RetryException(
+    message = "Retry attempts exhausted",
+    cause = cause,
+)
