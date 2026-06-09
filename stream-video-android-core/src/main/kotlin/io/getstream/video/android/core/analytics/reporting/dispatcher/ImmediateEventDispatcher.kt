@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.analytics.reporting
+package io.getstream.video.android.core.analytics.reporting.dispatcher
 
 import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.models.ClientEvent
@@ -28,33 +28,22 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-/**
- * Responsible for delivering telemetry [ClientEvent]s to the backend.
- * Failed events are handed to a [PendingEventDataSource] and can be retried via [retryPending].
- */
-internal interface EventSender {
-    fun send(event: ClientEvent)
-    fun sendAll(events: List<ClientEvent>)
-
-    /**
-     * Retries any events that previously failed to send.
-     * Call this when connectivity is restored or on a suitable recovery point.
-     */
-    fun retryPending()
-
-    fun deleteAll()
-}
+import retrofit2.HttpException
+import java.io.IOException
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import kotlin.getValue
 
 /**
  * Sends each event immediately in a coroutine.
  * On network failure the events are saved to [dataSource] for later retry.
  */
-internal class ImmediateEventSender(
+internal class ImmediateEventDispatcher(
     private val api: ProductvideoApi,
     private val scope: CoroutineScope = UserScope(ClientScope()),
     private val dataSource: PendingEventDataSource = InMemoryPendingEventDataSource(),
-) : EventSender {
+) : EventDispatcher {
 
     private val logger by taggedLogger("ImmediateEventSender")
 
@@ -118,14 +107,14 @@ internal class ImmediateEventSender(
 
     fun shouldRetry(throwable: Throwable?): Boolean {
         return when (throwable) {
-            is retrofit2.HttpException -> {
+            is HttpException -> {
                 throwable.code() in 500..599
             }
 
-            is java.net.SocketTimeoutException,
-            is java.net.ConnectException,
-            is java.net.UnknownHostException,
-            is java.io.IOException,
+            is SocketTimeoutException,
+            is ConnectException,
+            is UnknownHostException,
+            is IOException,
             -> {
                 true
             }

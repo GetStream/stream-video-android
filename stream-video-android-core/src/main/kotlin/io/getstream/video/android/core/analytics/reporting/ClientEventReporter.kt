@@ -18,6 +18,7 @@ package io.getstream.video.android.core.analytics.reporting
 
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.analytics.reporting.model.CallId
 import io.getstream.video.android.core.analytics.reporting.model.EventOutcome
@@ -40,7 +41,7 @@ import kotlin.collections.set
  */
 
 internal class ClientEventReporter(
-    private val sender: EventSender,
+    private val sender: EventDispatcher,
     private val userAgent: () -> String,
     private val sdkVersion: String,
 ) {
