@@ -20,6 +20,7 @@ package io.getstream.video.android.core.socket.sfu
 
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
+import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoErrorCode
@@ -72,6 +73,7 @@ internal open class SfuSocket(
     private val userScope: UserScope,
     private val lifecycleObserver: StreamLifecycleObserver,
     private val networkStateProvider: NetworkStateProvider,
+    private val sfuAnalytics: SfuAnalytics,
 ) {
     private var streamWebSocket: StreamWebSocket<SfuDataRequest, SfuParser>? = null
     open val logger by taggedLogger(TAG)
@@ -107,6 +109,9 @@ internal open class SfuSocket(
             streamWebSocket?.close("connectUser:cleanup")
             when (networkStateProvider.isConnected()) {
                 true -> {
+                    sfuAnalytics.onSfuWsInitiated(
+                        wasPreviouslyConnected = connectionConf.joinRequest.reconnect_details != null,
+                    )
                     streamWebSocket =
                         socketFactory.createSocket<SfuDataEvent>(connectionConf, "#sfu").apply {
                             listeners.forEach { it.onCreated() }
