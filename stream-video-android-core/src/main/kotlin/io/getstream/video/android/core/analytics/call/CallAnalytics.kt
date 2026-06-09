@@ -22,11 +22,12 @@ import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.analytics.call.observer.AudioObserver
-import io.getstream.video.android.core.analytics.call.observer.JoinAnalyticsRepository
+import io.getstream.video.android.core.analytics.call.observer.JoinAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.call.observer.JoinObserver
 import io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver
 import io.getstream.video.android.core.analytics.call.observer.PeerConnectionObserver
 import io.getstream.video.android.core.analytics.call.observer.SfuSocketObserver
+import io.getstream.video.android.core.analytics.call.observer.SfuSocketStateHolder
 import io.getstream.video.android.core.analytics.call.observer.VideoObserver
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
@@ -44,9 +45,10 @@ internal class CallAnalytics(
     val scope: CoroutineScope,
 ) {
     val logger by taggedLogger("CallAnalyticsHooks")
-    val joinAnalyticsRepository = JoinAnalyticsRepository()
+    val joinAnalyticsStateHolder = JoinAnalyticsStateHolder()
+    val sfuSocketStateHolder = SfuSocketStateHolder()
 
-    val joinObserver = JoinObserver(callId, callType, eventReporter, joinAnalyticsRepository) {
+    val joinObserver = JoinObserver(callId, callType, eventReporter, joinAnalyticsStateHolder) {
         resetAfterJoinSuccess()
     }
     val sfuSocketObserver =
@@ -56,18 +58,26 @@ internal class CallAnalytics(
             connectionFlow,
             scope,
             eventReporter,
-            joinAnalyticsRepository,
+            joinAnalyticsStateHolder,
+            sfuSocketStateHolder,
         )
     val peerConnectionObserver =
-        PeerConnectionObserver(callId, callType, scope, eventReporter, joinAnalyticsRepository)
+        PeerConnectionObserver(
+            callId,
+            callType,
+            scope,
+            eventReporter,
+            joinAnalyticsStateHolder,
+            sfuSocketStateHolder,
+        )
     val mediaPermissionObserver =
-        MediaPermissionObserver(context, callId, callType, eventReporter, joinAnalyticsRepository)
+        MediaPermissionObserver(context, callId, callType, eventReporter, joinAnalyticsStateHolder)
     val audioObserver =
-        AudioObserver(callId, callType, eventReporter, joinAnalyticsRepository, {
+        AudioObserver(callId, callType, eventReporter, joinAnalyticsStateHolder, {
             sfuSocketObserver.sfuName
         })
     val videoObserver =
-        VideoObserver(callId, callType, eventReporter, joinAnalyticsRepository, {
+        VideoObserver(callId, callType, eventReporter, joinAnalyticsStateHolder, {
             sfuSocketObserver.sfuName
         })
 

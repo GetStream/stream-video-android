@@ -279,6 +279,7 @@ internal class ClientEventReporter(
         callId: String,
         callType: String,
         joinStageAttemptId: String,
+        sfuId: String,
         joinReason: JoinReason,
         role: PeerConnectionRole,
         iceState: PeerConnection.IceConnectionState?,
@@ -301,6 +302,7 @@ internal class ClientEventReporter(
                         failureReason = "ICE restart superseded previous attempt",
                         failureCode = "ICE_CONNECTIVITY_FAILED",
                         joinReason = joinReason,
+                        sfuId = sfuId,
                     )
                 }
                 val stageId = UUID.randomUUID().toString()
@@ -316,6 +318,7 @@ internal class ClientEventReporter(
                     wasPreviouslyConnected = wasPrev,
                     callSessionId = callSessionIdMap[callId],
                     joinReason = joinReason,
+                    sfuId = sfuId,
                 )
                 activePcSessionIds[role] = stageId
                 sender.send(
@@ -348,6 +351,7 @@ internal class ClientEventReporter(
                     iceState = iceState,
                     peerConnectionState = peerConnectionState,
                     joinReason = joinReason,
+                    sfuId = sfuId,
                 )
             }
 
@@ -364,6 +368,7 @@ internal class ClientEventReporter(
                     failureReason = "ICE connectivity checks failed",
                     failureCode = "ICE_CONNECTIVITY_FAILED",
                     joinReason = joinReason,
+                    sfuId = sfuId,
                 )
             }
 
@@ -377,6 +382,7 @@ internal class ClientEventReporter(
         callId: String,
         callType: String,
         stageId: String,
+        sfuId: String,
         joinStageAttemptId: String,
         joinReason: JoinReason,
         success: Boolean,
@@ -392,6 +398,7 @@ internal class ClientEventReporter(
             stage = EventStage.Call.PEER_CONNECTION_CONNECT,
             eventType = EventType.COMPLETED,
             stageId = stageId,
+            sfuId = sfuId,
             joinStageAttemptId = joinStageAttemptId,
             elapsedTime = elapsedTime,
             outcome = if (success) EventOutcome.SUCCESS else EventOutcome.FAILURE,

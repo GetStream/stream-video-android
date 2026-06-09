@@ -26,7 +26,7 @@ internal class VideoObserver(
     private val callId: String,
     private val callType: String,
     private val clientEventReporter: ClientEventReporter,
-    private val joinAnalyticsRepository: JoinAnalyticsRepository,
+    private val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
     private val onSfuId: () -> String,
 ) {
 
@@ -57,8 +57,8 @@ internal class VideoObserver(
                                 onSfuId(),
                                 callId,
                                 callType,
-                                joinAnalyticsRepository.state.value.joinStageAttemptId ?: "unknown",
-                                joinAnalyticsRepository.state.value.joinReason ?: JoinReason.Unknown,
+                                joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
+                                joinAnalyticsStateHolder.state.value.joinReason ?: JoinReason.Unknown,
                                 videoTrackId,
                             )
                         }

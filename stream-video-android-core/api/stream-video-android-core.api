@@ -9891,6 +9891,12 @@ public final class io/getstream/video/android/core/StreamVideoConfigDefault : io
 	public fun getJoinOnAcceptedByCallee ()Z
 }
 
+public final class io/getstream/video/android/core/analytics/call/observer/SfuSocketStateHolder {
+	public fun <init> ()V
+	public final fun getSfuId ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun updateSfuId (Ljava/lang/String;)V
+}
+
 public abstract interface class io/getstream/video/android/core/api/SignalServerService {
 	public abstract fun iceRestart (Lstream/video/sfu/signal/ICERestartRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun iceTrickle (Lstream/video/sfu/models/ICETrickle;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

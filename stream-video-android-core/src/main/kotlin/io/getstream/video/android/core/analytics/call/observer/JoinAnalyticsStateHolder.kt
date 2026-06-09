@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-internal class JoinAnalyticsRepository {
+internal class JoinAnalyticsStateHolder {
 
     private val _state = MutableStateFlow(JoinTelemetryState())
     val state: StateFlow<JoinTelemetryState> = _state.asStateFlow()

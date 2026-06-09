@@ -29,7 +29,8 @@ internal class SfuSocketObserver(
     val connectionFlow: StateFlow<RealtimeConnection>,
     val scope: CoroutineScope,
     val reporter: ClientEventReporter,
-    val joinAnalyticsRepository: JoinAnalyticsRepository,
+    val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
+    val sfuSocketStateHolder: SfuSocketStateHolder,
 ) {
     var telemetryWsEventStageId = ""
     var wsStage = Stage.NOT_STARTED
@@ -38,15 +39,15 @@ internal class SfuSocketObserver(
 
     fun onSfuWsInitiated(sfuName: String, wasPreviouslyConnected: Boolean) {
         if (wsStage == Stage.NOT_STARTED) {
-            this.sfuName = sfuName
+            sfuSocketStateHolder.updateSfuId(sfuName)
             telemetryWsEventStageId = reporter.reportSfuWsJoinInitiated(
                 callId = callId,
                 callType = callType,
                 sfuId = sfuName,
                 wasPreviouslyConnected = wasPreviouslyConnected,
-                joinStageAttemptId = joinAnalyticsRepository.state.value.joinStageAttemptId
+                joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
                     ?: "unknown",
-                joinReason = joinAnalyticsRepository.state.value.joinReason
+                joinReason = joinAnalyticsStateHolder.state.value.joinReason
                     ?: JoinReason.Unknown,
             )
             wsStage = Stage.IN_PROGRESS
@@ -67,7 +68,7 @@ internal class SfuSocketObserver(
                     retryCount = retryCount,
                     failureReason = failureReason,
                     failureCode = failureCode,
-                    joinStageAttemptId = joinAnalyticsRepository.state.value.joinStageAttemptId ?: "unknown",
+                    joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
                 )
             }
             resetStage()
