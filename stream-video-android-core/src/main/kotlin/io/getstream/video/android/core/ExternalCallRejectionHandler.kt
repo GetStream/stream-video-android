@@ -68,7 +68,12 @@ internal class ExternalCallRejectionHandler() {
                  *         onSuccess: (suspend (Call) -> Unit)?,
                  *         onError: (suspend (Exception) -> Unit)?,)
                  */
-                call.leave("rejected-on-wearable")
+                call.leave(
+                    CallLeaveReason.UserAction(
+                        cause = UserActionCause.WEARABLE_REJECTED,
+                        message = "Call rejected on wearable",
+                    ),
+                )
             }
         }
     }

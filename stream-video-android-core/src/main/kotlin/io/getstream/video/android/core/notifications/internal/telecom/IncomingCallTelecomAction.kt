@@ -16,10 +16,12 @@
 
 package io.getstream.video.android.core.notifications.internal.telecom
 
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ExternalCallRejectionHandler
 import io.getstream.video.android.core.ExternalCallRejectionSource
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.UserActionCause
 import io.getstream.video.android.core.notifications.IncomingNotificationAction
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
@@ -48,7 +50,12 @@ internal class IncomingCallTelecomAction(private val streamVideo: StreamVideo) {
             }
 
             is RingingState.Active -> {
-                streamVideo.call(callId.type, callId.id).leave()
+                streamVideo.call(callId.type, callId.id).leave(
+                    CallLeaveReason.UserAction(
+                        UserActionCause.WEARABLE_CANCEL,
+                        "cancel from wearable",
+                    ),
+                )
             }
             is RingingState.Incoming -> {
                 val pendingIntentMap = streamVideo.call(callId.type, callId.id)
