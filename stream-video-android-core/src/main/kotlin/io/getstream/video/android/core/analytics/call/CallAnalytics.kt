@@ -39,6 +39,7 @@ internal class CallAnalytics(
     val context: Context,
     val callId: String,
     val callType: String,
+    val myParticipantState: StateFlow<ParticipantState?>,
     val connectionFlow: StateFlow<RealtimeConnection>,
     val participants: StateFlow<List<ParticipantState>>,
     val eventReporter: ClientEventReporter,
@@ -86,6 +87,7 @@ internal class CallAnalytics(
         VideoAnalytics(
             callId,
             callType,
+            myParticipantState,
             eventReporter,
             joinAnalyticsStateHolder,
             sfuAnalyticsStateHolder,
@@ -100,7 +102,7 @@ internal class CallAnalytics(
     fun onCallLeave(callLeaveReason: CallLeaveReason) {
         val isAnyStageInProgress =
             joinAnalytics.joinAnalyticsStateHolder.state.value.joinStage == Stage.IN_PROGRESS ||
-                sfuAnalytics.sfuAnalyticsStateHolder.wsStage.value == Stage.IN_PROGRESS ||
+                sfuAnalytics.sfuAnalyticsStateHolder.stage.value == Stage.IN_PROGRESS ||
                 peerConnectionAnalytics.stateHolder.state.value.publisherStage == Stage.IN_PROGRESS ||
                 peerConnectionAnalytics.stateHolder.state.value.subscriberStage == Stage.IN_PROGRESS
 

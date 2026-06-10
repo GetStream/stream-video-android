@@ -45,47 +45,57 @@ internal class JoinAnalytics(
             val stageAttemptId = UUID.randomUUID().toString()
             joinAnalyticsStateHolder.updateJoinStageAttemptId(stageAttemptId)
         }
-        if (joinAnalyticsStateHolder.state.value.joinStage == Stage.NOT_STARTED) {
-            joinAnalyticsStateHolder.updateJoinReason(joinReason)
-            val stageId = eventReporter.reportCoordinatorJoinInitiated(
-                callType = callType,
-                callId = callId,
-                joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
-                    ?: "unknown",
-                joinReason = joinReason ?: JoinReason.Unknown,
-            )
-            joinAnalyticsStateHolder.updateStageId(stageId)
-            joinAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)
+        when (joinAnalyticsStateHolder.state.value.joinStage) {
+            Stage.NOT_STARTED, Stage.COMPLETED -> {
+                joinAnalyticsStateHolder.updateJoinReason(joinReason)
+                val stageId = eventReporter.reportCoordinatorJoinInitiated(
+                    callType = callType,
+                    callId = callId,
+                    joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
+                        ?: "unknown",
+                    joinReason = joinReason ?: JoinReason.Unknown,
+                )
+                joinAnalyticsStateHolder.updateStageId(stageId)
+                joinAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)
+            }
+
+            else -> {}
         }
     }
 
     fun onJoinRequestSuccess(joinAnalyticsModel: JoinAnalyticsModel, currentSessionId: String) {
-        if (joinAnalyticsStateHolder.state.value.joinStage == Stage.IN_PROGRESS) {
-            joinAnalyticsStateHolder.updateCallSessionId(currentSessionId)
-            if (joinAnalyticsStateHolder.state.value.stageId.isNotEmpty()) {
-                eventReporter.reportCoordinatorJoinCompleted(
-                    stageId = joinAnalyticsStateHolder.state.value.stageId,
-                    success = true,
-                    retryCount = joinAnalyticsModel.retryAttempt,
-                    callSessionId = currentSessionId,
-                )
-                onJoinSuccess()
+        when (joinAnalyticsStateHolder.state.value.joinStage) {
+            Stage.IN_PROGRESS -> {
+                joinAnalyticsStateHolder.updateCallSessionId(currentSessionId)
+                if (joinAnalyticsStateHolder.state.value.stageId.isNotEmpty()) {
+                    eventReporter.reportCoordinatorJoinCompleted(
+                        stageId = joinAnalyticsStateHolder.state.value.stageId,
+                        success = true,
+                        retryCount = joinAnalyticsModel.retryAttempt,
+                        callSessionId = currentSessionId,
+                    )
+                    onJoinSuccess()
+                }
+                joinAnalyticsStateHolder.updateStage(Stage.COMPLETED)
             }
-            resetStage()
+            else -> {}
         }
     }
 
     fun onJoinRequestPermanentError(retryCount: Int, message: String) {
-        if (joinAnalyticsStateHolder.state.value.joinStage == Stage.IN_PROGRESS) {
-            if (joinAnalyticsStateHolder.state.value.stageId.isNotEmpty()) {
-                eventReporter.reportCoordinatorJoinCompleted(
-                    stageId = joinAnalyticsStateHolder.state.value.stageId,
-                    success = false,
-                    retryCount = retryCount,
-                    failureReason = message,
-                )
+        when (joinAnalyticsStateHolder.state.value.joinStage) {
+            Stage.IN_PROGRESS -> {
+                if (joinAnalyticsStateHolder.state.value.stageId.isNotEmpty()) {
+                    eventReporter.reportCoordinatorJoinCompleted(
+                        stageId = joinAnalyticsStateHolder.state.value.stageId,
+                        success = false,
+                        retryCount = retryCount,
+                        failureReason = message,
+                    )
+                }
+                joinAnalyticsStateHolder.updateStage(Stage.COMPLETED)
             }
-            resetStage()
+            else -> {}
         }
     }
 

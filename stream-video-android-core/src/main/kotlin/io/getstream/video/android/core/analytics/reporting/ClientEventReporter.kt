@@ -117,25 +117,11 @@ internal class ClientEventReporter(
     }
 
     private val postCallFlightSessions = ConcurrentHashMap<StageId, InFlightSession>()
-
-    // Active event_session_id per PC role — drives the ICE state machine
-    private val activePcSessionIds = ConcurrentHashMap<PeerConnectionRole, String>()
-
-    // Whether each PC role has ever reached CONNECTED (for was_previously_connected)
-    private val pcEverConnected = ConcurrentHashMap<PeerConnectionRole, Long?>()
+    private val pcEverConnected = ConcurrentHashMap<PeerConnectionRole, PcConnected>()
+    private val pcEventReporterStateHolder = PeerConnectionEventReporterStateHolder()
 
     @Volatile
     private var coordinatorConnectId = ""
-
-    private inline fun completePostCall(
-        stageId: String,
-        build: (session: PostCallFlightSession, elapsedMs: Long) -> ClientEvent?,
-    ) {
-        val session = postCallFlightSessions.remove(stageId) ?: return
-        if (session !is PostCallFlightSession) return
-        val elapsedMs = System.currentTimeMillis() - session.startedAtMs
-        build(session, elapsedMs)?.let(sender::send)
-    }
 
     // --- Coordinator WS ---
     internal fun reportCoordinatorWSInitiated(): String {
@@ -332,6 +318,7 @@ internal class ClientEventReporter(
     // --- PeerConnectionConnect (ICE state machine) ---
 
     internal fun onPeerConnectionStateChanged(
+        peerConnectionHashCode: Int,
         callId: String,
         callType: String,
         joinStageAttemptId: String,
@@ -342,83 +329,166 @@ internal class ClientEventReporter(
         iceState: PeerConnection.IceConnectionState?,
         peerConnectionState: PeerConnection.PeerConnectionState?,
     ) {
-        when (iceState) {
-            PeerConnection.IceConnectionState.CHECKING -> {
-                val wasPrev = pcEverConnected[role] != null
-                val stageId = UUID.randomUUID().toString()
-                val now = System.currentTimeMillis()
-                postCallFlightSessions[stageId] = PostCallFlightSession(
-                    callId = callId,
-                    callType = callType,
-                    stageId = stageId,
-                    stage = EventStage.Call.PEER_CONNECTION_CONNECT,
-                    startedAtMs = now,
-                    joinStageAttemptIdSnapshot = joinStageAttemptId,
-                    peerConnectionRole = role,
-                    wasPreviouslyConnected = wasPrev,
-                    callSessionId = callSessionId,
-                    joinReason = joinReason,
-                    sfuId = sfuId,
-                )
-                activePcSessionIds[role] = stageId
-                sender.send(
-                    clientEventFactory.buildRequest(
-                        callId = callId,
-                        callType = callType,
-                        stage = EventStage.Call.PEER_CONNECTION_CONNECT,
-                        eventType = EventType.INITIATED,
-                        stageId = stageId,
-                        sfuId = sfuId,
-                        joinStageAttemptId = joinStageAttemptId,
-                        peerConnection = role,
-                        wasPreviouslyConnected = wasPrev,
-                        callSessionId = callSessionId,
-                        iceState = iceState,
-                        peerConnectionState = peerConnectionState,
-                        joinReason = joinReason,
-                    ),
+        when (peerConnectionState) {
+            PeerConnection.PeerConnectionState.CONNECTING -> {
+                handleOnPeerConnectionConnectingState(
+                    peerConnectionHashCode,
+                    callId,
+                    callType,
+                    joinStageAttemptId,
+                    callSessionId,
+                    sfuId,
+                    joinReason,
+                    role,
+                    iceState,
+                    peerConnectionState,
                 )
             }
-
-            PeerConnection.IceConnectionState.CONNECTED -> {
-                val stageId = activePcSessionIds.remove(role) ?: return
-                pcEverConnected[role] = System.currentTimeMillis()
-                completePeerConnectionSession(
-                    callId = callId,
-                    callType = callType,
-                    stageId = stageId,
-                    joinStageAttemptId = joinStageAttemptId,
-                    success = true,
-                    iceState = iceState,
-                    peerConnectionState = peerConnectionState,
-                    joinReason = joinReason,
-                    sfuId = sfuId,
-                    callSessionId = callSessionId,
-                )
+            PeerConnection.PeerConnectionState.CONNECTED -> {
+                iceState?.let {
+                    handleOnPeerConnectionConnectedState(
+                        peerConnectionHashCode,
+                        callId,
+                        callType,
+                        joinStageAttemptId,
+                        callSessionId,
+                        sfuId,
+                        joinReason,
+                        role,
+                        iceState,
+                        peerConnectionState,
+                    )
+                }
             }
-
-            PeerConnection.IceConnectionState.FAILED -> {
-                val stageId = activePcSessionIds.remove(role) ?: return
-                completePeerConnectionSession(
-                    callId = callId,
-                    callType = callType,
-                    stageId = stageId,
-                    joinStageAttemptId = joinStageAttemptId,
-                    success = false,
-                    iceState = iceState,
-                    peerConnectionState = peerConnectionState,
-                    failureReason = "ICE connectivity checks failed",
-                    failureCode = "ICE_CONNECTIVITY_FAILED",
-                    joinReason = joinReason,
-                    sfuId = sfuId,
-                    callSessionId = callSessionId,
-                )
+            PeerConnection.PeerConnectionState.FAILED -> {
+                iceState?.let {
+                    handleOnPeerConnectionFailedState(
+                        peerConnectionHashCode,
+                        callId,
+                        callType,
+                        joinStageAttemptId,
+                        callSessionId,
+                        sfuId,
+                        joinReason,
+                        role,
+                        iceState,
+                        peerConnectionState,
+                    )
+                }
             }
-
-            else -> {
-                /* DISCONNECTED handled by ICE restart → CHECKING */
-            }
+            else -> {}
         }
+    }
+
+    fun handleOnPeerConnectionConnectingState(
+        peerConnectionHashCode: Int,
+        callId: String,
+        callType: String,
+        joinStageAttemptId: String,
+        callSessionId: String,
+        sfuId: String,
+        joinReason: JoinReason,
+        role: PeerConnectionRole,
+        iceState: PeerConnection.IceConnectionState?,
+        peerConnectionState: PeerConnection.PeerConnectionState,
+    ) {
+        val wasPrevConnected = pcEverConnected[role] != null
+        val stageId = UUID.randomUUID().toString()
+        val now = System.currentTimeMillis()
+        postCallFlightSessions[stageId] = PostCallFlightSession(
+            callId = callId,
+            callType = callType,
+            stageId = stageId,
+            stage = EventStage.Call.PEER_CONNECTION_CONNECT,
+            startedAtMs = now,
+            joinStageAttemptIdSnapshot = joinStageAttemptId,
+            peerConnectionRole = role,
+            wasPreviouslyConnected = wasPrevConnected,
+            callSessionId = callSessionId,
+            joinReason = joinReason,
+            sfuId = sfuId,
+        )
+        pcEventReporterStateHolder.map[peerConnectionHashCode] =
+            PeerConnectionEventReporterState(stageId, role)
+
+        sender.send(
+            clientEventFactory.buildRequest(
+                callId = callId,
+                callType = callType,
+                stage = EventStage.Call.PEER_CONNECTION_CONNECT,
+                eventType = EventType.INITIATED,
+                stageId = stageId,
+                sfuId = sfuId,
+                joinStageAttemptId = joinStageAttemptId,
+                peerConnection = role,
+                wasPreviouslyConnected = wasPrevConnected,
+                callSessionId = callSessionId,
+                iceState = iceState,
+                peerConnectionState = peerConnectionState,
+                joinReason = joinReason,
+            ),
+        )
+    }
+
+    fun handleOnPeerConnectionConnectedState(
+        peerConnectionHashCode: Int,
+        callId: String,
+        callType: String,
+        joinStageAttemptId: String,
+        callSessionId: String,
+        sfuId: String,
+        joinReason: JoinReason,
+        role: PeerConnectionRole,
+        iceState: PeerConnection.IceConnectionState,
+        peerConnectionState:
+        PeerConnection.PeerConnectionState,
+    ) {
+        pcEverConnected[role] = PcConnected(System.currentTimeMillis())
+        val pcState = pcEventReporterStateHolder.map.remove(peerConnectionHashCode) ?: return
+        val stageId = pcState.stageId
+
+        completePeerConnectionSession(
+            callId = callId,
+            callType = callType,
+            stageId = stageId,
+            joinStageAttemptId = joinStageAttemptId,
+            success = true,
+            iceState = iceState,
+            peerConnectionState = peerConnectionState,
+            joinReason = joinReason,
+            sfuId = sfuId,
+            callSessionId = callSessionId,
+        )
+    }
+
+    fun handleOnPeerConnectionFailedState(
+        peerConnectionHashCode: Int,
+        callId: String,
+        callType: String,
+        joinStageAttemptId: String,
+        callSessionId: String,
+        sfuId: String,
+        joinReason: JoinReason,
+        role: PeerConnectionRole,
+        iceState: PeerConnection.IceConnectionState,
+        peerConnectionState: PeerConnection.PeerConnectionState,
+    ) {
+        val pcState = pcEventReporterStateHolder.map.remove(peerConnectionHashCode) ?: return
+        val stageId = pcState.stageId
+        completePeerConnectionSession(
+            callId = callId,
+            callType = callType,
+            stageId = stageId,
+            joinStageAttemptId = joinStageAttemptId,
+            success = false,
+            iceState = iceState,
+            peerConnectionState = peerConnectionState,
+            failureReason = "ICE connectivity checks failed",
+            failureCode = "ICE_CONNECTIVITY_FAILED",
+            joinReason = joinReason,
+            sfuId = sfuId,
+            callSessionId = callSessionId,
+        )
     }
 
     private fun completePeerConnectionSession(
@@ -457,6 +527,16 @@ internal class ClientEventReporter(
         )
     }
 
+    private inline fun completePostCall(
+        stageId: String,
+        build: (session: PostCallFlightSession, elapsedMs: Long) -> ClientEvent?,
+    ) {
+        val session = postCallFlightSessions.remove(stageId) ?: return
+        if (session !is PostCallFlightSession) return
+        val elapsedMs = System.currentTimeMillis() - session.startedAtMs
+        build(session, elapsedMs)?.let(sender::send)
+    }
+
     internal fun reportFirstAudioFrameRendered(
         sfuId: String,
         callId: String,
@@ -482,7 +562,7 @@ internal class ClientEventReporter(
         return stageId
     }
 
-    internal fun reportFirstVideoFrameRendered(
+    internal fun reportFirstRemoteVideoFrameRendered(
         sfuId: String,
         callId: String,
         callType: String,
@@ -538,7 +618,6 @@ internal class ClientEventReporter(
         val snapshot: List<PostCallFlightSession> =
             postCallFlightSessions.values.filterIsInstance<PostCallFlightSession>().toList()
         postCallFlightSessions.clear()
-        activePcSessionIds.clear()
         val now = System.currentTimeMillis()
         val events = snapshot.map { session ->
             clientEventFactory.buildRequest(
@@ -568,3 +647,13 @@ internal class ClientEventReporter(
         sender.deleteAll()
     }
 }
+
+internal typealias ObjectHashCode = Int
+internal class PeerConnectionEventReporterStateHolder {
+    val map = ConcurrentHashMap<ObjectHashCode, PeerConnectionEventReporterState>()
+}
+internal class PeerConnectionEventReporterState(
+    var stageId: String,
+    val peerConnectionRole: PeerConnectionRole,
+)
+internal class PcConnected(val lastConnectedTime: Long)
