@@ -79,10 +79,10 @@ class SfuSocketConnection internal constructor(
         url: String,
         httpClient: OkHttpClient,
         networkStateProvider: NetworkStateProvider,
+        scope: CoroutineScope = UserScope(ClientScope()),
         lifecycle: Lifecycle,
         tokenProvider: TokenProvider,
         tokenRepository: TokenRepository,
-        scope: CoroutineScope = UserScope(ClientScope()),
     ) : this(
         apiKey = apiKey,
         url = url,
