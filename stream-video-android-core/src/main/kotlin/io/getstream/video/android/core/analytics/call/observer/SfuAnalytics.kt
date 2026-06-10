@@ -32,7 +32,7 @@ internal class SfuAnalytics(
     val callId: String,
     val callType: String,
     val connectionFlow: StateFlow<RealtimeConnection>,
-    val scope: CoroutineScope,
+    val observerScope: CoroutineScope,
     val reporter: ClientEventReporter,
     val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
     val sfuAnalyticsStateHolder: SfuAnalyticsStateHolder,

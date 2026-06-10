@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 internal class CoordinatorAnalytics(
-    private val scope: CoroutineScope,
+    private val observerScope: CoroutineScope,
     private val eventReporter: ClientEventReporter,
 ) {
 
@@ -36,7 +36,7 @@ internal class CoordinatorAnalytics(
 
     internal fun startObserver(videoSocketStateFlow: StateFlow<VideoSocketState>) {
         endObserver()
-        job = scope.launch {
+        job = observerScope.launch {
             videoSocketStateFlow.collect {
                 when (it) {
                     is VideoSocketState.Connecting -> {
