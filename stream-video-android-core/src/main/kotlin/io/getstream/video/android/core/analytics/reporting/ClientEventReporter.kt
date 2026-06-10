@@ -122,7 +122,7 @@ internal class ClientEventReporter(
     private val activePcSessionIds = ConcurrentHashMap<PeerConnectionRole, String>()
 
     // Whether each PC role has ever reached CONNECTED (for was_previously_connected)
-    private val pcEverConnected = ConcurrentHashMap<PeerConnectionRole, Boolean>()
+    private val pcEverConnected = ConcurrentHashMap<PeerConnectionRole, Long?>()
 
     @Volatile
     private var coordinatorConnectId = ""
@@ -344,7 +344,7 @@ internal class ClientEventReporter(
     ) {
         when (iceState) {
             PeerConnection.IceConnectionState.CHECKING -> {
-                val wasPrev = pcEverConnected[role] == true
+                val wasPrev = pcEverConnected[role] != null
                 // TODO Rahul, maybe this `completePeerConnectionSession` is not needed
                 // If an existing session is still in-flight, close it as failed first
                 activePcSessionIds.remove(role)?.let { oldId ->
@@ -400,7 +400,7 @@ internal class ClientEventReporter(
 
             PeerConnection.IceConnectionState.CONNECTED -> {
                 val stageId = activePcSessionIds.remove(role) ?: return
-                pcEverConnected[role] = true
+                pcEverConnected[role] = System.currentTimeMillis()
                 completePeerConnectionSession(
                     callId = callId,
                     callType = callType,
