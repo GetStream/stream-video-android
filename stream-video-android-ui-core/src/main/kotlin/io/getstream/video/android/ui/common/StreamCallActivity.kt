@@ -45,9 +45,9 @@ import io.getstream.result.extractCause
 import io.getstream.result.flatMap
 import io.getstream.result.onErrorSuspend
 import io.getstream.result.onSuccessSuspend
+import io.getstream.video.android.core.BackendCause
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallJoinInterceptor
-import io.getstream.video.android.core.BackendCause
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.RealtimeConnection
@@ -1228,7 +1228,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                     ),
                     onSuccess = onSuccessFinish,
                     onError = onErrorFinish,
-
+                )
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
