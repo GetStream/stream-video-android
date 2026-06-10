@@ -345,24 +345,6 @@ internal class ClientEventReporter(
         when (iceState) {
             PeerConnection.IceConnectionState.CHECKING -> {
                 val wasPrev = pcEverConnected[role] != null
-                // TODO Rahul, maybe this `completePeerConnectionSession` is not needed
-                // If an existing session is still in-flight, close it as failed first
-                activePcSessionIds.remove(role)?.let { oldId ->
-                    completePeerConnectionSession(
-                        callId = callId,
-                        callType = callType,
-                        stageId = oldId,
-                        joinStageAttemptId = joinStageAttemptId,
-                        success = false,
-                        iceState = iceState,
-                        peerConnectionState = peerConnectionState,
-                        failureReason = "ICE restart superseded previous attempt",
-                        failureCode = "ICE_CONNECTIVITY_FAILED",
-                        joinReason = joinReason,
-                        sfuId = sfuId,
-                        callSessionId = callSessionId,
-                    )
-                }
                 val stageId = UUID.randomUUID().toString()
                 val now = System.currentTimeMillis()
                 postCallFlightSessions[stageId] = PostCallFlightSession(
