@@ -22,8 +22,6 @@ import io.getstream.android.video.generated.models.ReportClientEventRequest
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.analytics.reporting.datasource.InMemoryPendingEventDataSource
 import io.getstream.video.android.core.analytics.reporting.datasource.PendingEventDataSource
-import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.scope.UserScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -41,7 +39,7 @@ import kotlin.getValue
  */
 internal class ImmediateEventDispatcher(
     private val api: ProductvideoApi,
-    private val scope: CoroutineScope = UserScope(ClientScope()),
+    private val scope: CoroutineScope,
     private val dataSource: PendingEventDataSource = InMemoryPendingEventDataSource(),
 ) : EventDispatcher {
 
