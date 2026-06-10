@@ -47,7 +47,7 @@ sealed interface CallLeaveReason {
     data class RetryExhausted(
         val retryCount: Int,
         val failureCode: String?,
-        override val message: String = "TODO",
+        override val message: String = "Retry exhausted after $retryCount attempts (${failureCode ?: "unknown"})",
     ) : CallLeaveReason
 
     /** A platform/system event (task removal, hold, wearable, interceptor, etc.) caused the leave. */
