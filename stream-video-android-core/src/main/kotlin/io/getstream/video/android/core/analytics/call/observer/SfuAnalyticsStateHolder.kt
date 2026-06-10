@@ -25,21 +25,21 @@ internal class SfuAnalyticsStateHolder {
     private val _sfuId = MutableStateFlow("")
     val sfuId: StateFlow<String> = _sfuId.asStateFlow()
 
-    private val _wsStage = MutableStateFlow(Stage.NOT_STARTED)
-    val wsStage: StateFlow<Stage> = _wsStage.asStateFlow()
+    private val _stage = MutableStateFlow(Stage.NOT_STARTED)
+    val stage: StateFlow<Stage> = _stage.asStateFlow()
 
-    private val _wsEventStageId = MutableStateFlow("")
-    val wsEventStageId: StateFlow<String> = _wsEventStageId.asStateFlow()
+    private val _stageId = MutableStateFlow("")
+    val stageId: StateFlow<String> = _stageId.asStateFlow()
 
     fun updateSfuId(sfuId: String) {
         _sfuId.value = sfuId
     }
 
     fun updateStage(stage: Stage) {
-        _wsStage.value = stage
+        _stage.value = stage
     }
 
     fun updateStageId(eventStageId: String) {
-        _wsEventStageId.value = eventStageId
+        _stageId.value = eventStageId
     }
 }

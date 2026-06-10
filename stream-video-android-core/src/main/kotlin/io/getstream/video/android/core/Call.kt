@@ -321,6 +321,7 @@ public class Call(
             clientImpl.context,
             this.id,
             this.type,
+            state.me,
             state.connection,
             state.participants,
             client.state.clientEventReporter,
@@ -1527,10 +1528,11 @@ public class Call(
                     }
                     onRendered(videoRenderer)
                     callAnalytics.videoAnalytics.firstVideoFrameRendered(
+
                         trackType,
                         width,
                         height,
-                        session.value,
+                        rtcSession = session.value,
                         sessionId,
                         this@Call.sessionId,
                     )

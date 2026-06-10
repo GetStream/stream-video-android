@@ -16,4 +16,4 @@
 
 package io.getstream.video.android.core.analytics.call.observer.model
 
-internal enum class Stage { NOT_STARTED, IN_PROGRESS }
+internal enum class Stage { NOT_STARTED, IN_PROGRESS, COMPLETED }

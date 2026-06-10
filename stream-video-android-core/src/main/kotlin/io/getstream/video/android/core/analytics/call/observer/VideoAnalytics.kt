@@ -16,15 +16,18 @@
 
 package io.getstream.video.android.core.analytics.call.observer
 
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.call.RtcSession
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import stream.video.sfu.models.TrackType
 
 internal class VideoAnalytics(
     private val callId: String,
     private val callType: String,
+    private val myParticipantState: StateFlow<ParticipantState?>,
     private val clientEventReporter: ClientEventReporter,
     private val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
     private val sfuAnalyticsStateHolder: SfuAnalyticsStateHolder,
@@ -42,29 +45,32 @@ internal class VideoAnalytics(
     ) {
         when (trackType) {
             TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_SCREEN_SHARE -> {
-                val isRemoteUser = videoSessionId != callSessionId
-                if (isRemoteUser) {
-                    val videoTrackId = rtcSession?.subscriber?.value?.getTrack(
-                        videoSessionId,
-                        trackType,
-                    )?.asVideoTrack()?.video?.id()
+                val isSelf = videoSessionId == myParticipantState.value?.sessionId
+                if (isSelf) return
 
-                    videoTrackId?.let {
-                        if (stageId.value.isEmpty()) {
-                            stageId.value = clientEventReporter.reportFirstVideoFrameRendered(
-                                sfuAnalyticsStateHolder.sfuId.value,
-                                callId,
-                                callType,
-                                joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
-                                joinReason = joinAnalyticsStateHolder.state.value.joinReason ?: JoinReason.Unknown,
-                                trackId = videoTrackId,
-                                callSessionId = joinAnalyticsStateHolder.state.value.callSessionId,
+                val videoTrackId = rtcSession?.subscriber?.value?.getTrack(
+                    videoSessionId,
+                    trackType,
+                )?.asVideoTrack()?.video?.id()
 
-                            )
-                        }
+                videoTrackId?.let {
+                    if (stageId.value.isEmpty()) {
+                        stageId.value = clientEventReporter.reportFirstRemoteVideoFrameRendered(
+                            sfuAnalyticsStateHolder.sfuId.value,
+                            callId,
+                            callType,
+                            joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
+                                ?: "unknown",
+                            joinReason = joinAnalyticsStateHolder.state.value.joinReason
+                                ?: JoinReason.Unknown,
+                            trackId = videoTrackId,
+                            callSessionId = joinAnalyticsStateHolder.state.value.callSessionId,
+
+                        )
                     }
                 }
             }
+
             else -> {}
         }
     }

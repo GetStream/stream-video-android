@@ -70,20 +70,22 @@ internal class SfuAnalytics(
 
     fun onSfuWsInitiated(wasPreviouslyConnected: Boolean) {
         if (!isEnabled) return
-        if (sfuAnalyticsStateHolder.wsStage.value == Stage.NOT_STARTED) {
-            val wsEventStageId = reporter.reportSfuWsJoinInitiated(
-                callId = callId,
-                callType = callType,
-                sfuId = sfuAnalyticsStateHolder.sfuId.value,
-                wasPreviouslyConnected = wasPreviouslyConnected,
-                joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
-                    ?: "unknown",
-                joinReason = joinAnalyticsStateHolder.state.value.joinReason
-                    ?: JoinReason.Unknown,
-                callSessionId = joinAnalyticsStateHolder.state.value.callSessionId,
-            )
-            sfuAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)
-            sfuAnalyticsStateHolder.updateStageId(wsEventStageId)
+        when (sfuAnalyticsStateHolder.stage.value) {
+            Stage.NOT_STARTED, Stage.COMPLETED -> {
+                val wsEventStageId = reporter.reportSfuWsJoinInitiated(
+                    callId = callId,
+                    callType = callType,
+                    sfuId = sfuAnalyticsStateHolder.sfuId.value,
+                    wasPreviouslyConnected = wasPreviouslyConnected,
+                    joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
+                        ?: "unknown",
+                    joinReason = joinAnalyticsStateHolder.state.value.joinReason
+                        ?: JoinReason.Unknown,
+                    callSessionId = joinAnalyticsStateHolder.state.value.callSessionId,
+                )
+                sfuAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)
+                sfuAnalyticsStateHolder.updateStageId(wsEventStageId)
+            } else -> {}
         }
     }
 
@@ -94,10 +96,10 @@ internal class SfuAnalytics(
         failureCode: String? = null,
     ) {
         if (!isEnabled) return
-        if (sfuAnalyticsStateHolder.wsStage.value == Stage.IN_PROGRESS) {
-            if (sfuAnalyticsStateHolder.wsEventStageId.value.isNotEmpty()) {
+        if (sfuAnalyticsStateHolder.stage.value == Stage.IN_PROGRESS) {
+            if (sfuAnalyticsStateHolder.stageId.value.isNotEmpty()) {
                 reporter.reportSfuWsJoinCompleted(
-                    stageId = sfuAnalyticsStateHolder.wsEventStageId.value,
+                    stageId = sfuAnalyticsStateHolder.stageId.value,
                     success = success,
                     retryCount = retryCount,
                     failureReason = failureReason,
@@ -105,7 +107,7 @@ internal class SfuAnalytics(
                     joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
                 )
             }
-            resetStage()
+            sfuAnalyticsStateHolder.updateStage(Stage.COMPLETED)
         }
     }
 
