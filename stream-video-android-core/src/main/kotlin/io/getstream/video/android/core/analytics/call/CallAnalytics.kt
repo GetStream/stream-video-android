@@ -42,7 +42,7 @@ internal class CallAnalytics(
     val connectionFlow: StateFlow<RealtimeConnection>,
     val participants: StateFlow<List<ParticipantState>>,
     val eventReporter: ClientEventReporter,
-    val scope: CoroutineScope,
+    val observerScope: CoroutineScope,
 ) {
     val logger by taggedLogger("CallAnalyticsHooks")
 
@@ -58,7 +58,7 @@ internal class CallAnalytics(
             callId,
             callType,
             connectionFlow,
-            scope,
+            observerScope,
             eventReporter,
             joinAnalyticsStateHolder,
             sfuAnalyticsStateHolder,
@@ -67,7 +67,7 @@ internal class CallAnalytics(
         PeerConnectionAnalytics(
             callId,
             callType,
-            scope,
+            observerScope,
             eventReporter,
             joinAnalyticsStateHolder,
             sfuAnalyticsStateHolder,
@@ -94,7 +94,7 @@ internal class CallAnalytics(
     fun resetAfterJoinSuccess() {
         audioAnalytics.reset()
         videoAnalytics.reset()
-        audioAnalytics.observeParticipantsForFirstRemoteAudioFrame(participants, scope)
+        audioAnalytics.observeParticipantsForFirstRemoteAudioFrame(participants, observerScope)
     }
 
     fun onCallLeave(callLeaveReason: CallLeaveReason) {

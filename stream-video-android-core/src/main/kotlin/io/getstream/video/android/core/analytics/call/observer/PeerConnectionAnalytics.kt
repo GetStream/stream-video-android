@@ -31,7 +31,7 @@ import org.webrtc.PeerConnection
 internal class PeerConnectionAnalytics(
     val callId: String,
     val callType: String,
-    private val scope: CoroutineScope,
+    private val observerScope: CoroutineScope,
     val reporter: ClientEventReporter,
     val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
     val sfuAnalyticsStateHolder: SfuAnalyticsStateHolder,
@@ -40,7 +40,7 @@ internal class PeerConnectionAnalytics(
 
     fun observePeerConnections(session: StateFlow<RtcSession?>) {
         stateHolder.state.value.peerConnectionObserverJob?.cancel()
-        val peerConnectionObserverJob = scope.launch {
+        val peerConnectionObserverJob = observerScope.launch {
             stateHolder.state.value.publisherJob?.cancel()
             val publisherJob = launch {
                 session.filterNotNull()
@@ -49,7 +49,7 @@ internal class PeerConnectionAnalytics(
                     .collect { state ->
                         val publisherStage = getStage(state)
                         stateHolder.updatePublisherStage(publisherStage)
-                        scope.launch {
+                        observerScope.launch {
                             onPeerConnectionStateChanged(
                                 role = PeerConnectionRole.PUBLISH,
                                 iceState = session.value?.publisher?.value?.iceState?.value,
@@ -66,7 +66,7 @@ internal class PeerConnectionAnalytics(
                     .flatMapLatest { it.state.filterNotNull() }
                     .collect { state ->
                         stateHolder.updateSubscriberStage(getStage(state))
-                        scope.launch {
+                        observerScope.launch {
                             onPeerConnectionStateChanged(
                                 role = PeerConnectionRole.SUBSCRIBE,
                                 iceState = session.value?.subscriber?.value?.iceState?.value,
