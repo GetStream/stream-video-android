@@ -29,13 +29,13 @@ import io.getstream.video.android.core.analytics.reporting.datasource.Synchroniz
 import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
 import io.getstream.video.android.core.analytics.reporting.dispatcher.ImmediateEventDispatcher
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
+import io.getstream.video.android.core.analytics.reporting.model.CoordinatorFlightSession
 import io.getstream.video.android.core.analytics.reporting.model.EventOutcome
 import io.getstream.video.android.core.analytics.reporting.model.EventStage
 import io.getstream.video.android.core.analytics.reporting.model.EventType
 import io.getstream.video.android.core.analytics.reporting.model.InFlightSession
 import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionRole
 import io.getstream.video.android.core.analytics.reporting.model.PostCallFlightSession
-import io.getstream.video.android.core.analytics.reporting.model.PreCallInFlightSession
 import io.getstream.video.android.core.analytics.reporting.model.StageId
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.socket.common.scope.UserScope
@@ -130,7 +130,7 @@ internal class ClientEventReporter(
         this.coordinatorConnectId = UUID.randomUUID().toString()
         val stageId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
-        postCallFlightSessions[stageId] = PreCallInFlightSession(
+        postCallFlightSessions[stageId] = CoordinatorFlightSession(
             stageId = stageId,
             coordinatorConnectId = coordinatorConnectId,
             stage = EventStage.CoordinatorWs,
@@ -154,7 +154,7 @@ internal class ClientEventReporter(
         failureReason: String? = null,
     ) {
         val session = postCallFlightSessions.remove(stageId) ?: return
-        if (session is PreCallInFlightSession) {
+        if (session is CoordinatorFlightSession) {
             val elapsedTime = System.currentTimeMillis() - session.startedAtMs
             sender.send(
                 clientEventFactory.buildRequest(
