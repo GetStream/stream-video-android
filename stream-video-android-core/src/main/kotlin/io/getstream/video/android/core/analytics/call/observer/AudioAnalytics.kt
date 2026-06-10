@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.analytics.call.observer
 
-import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
@@ -43,8 +42,7 @@ internal class AudioAnalytics(
     private val sfuStateHolder: SfuAnalyticsStateHolder,
 ) {
 
-    private val isEnabled = false
-    val logger by taggedLogger("AudioObserver")
+    private val isEnabled = true
     var recordedFirstFrame: AtomicBoolean = AtomicBoolean(false)
 
     private val trackSinks =
