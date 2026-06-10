@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.analytics.reporting
 
 import android.content.Context
+import android.util.Log
 import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.log.taggedLogger
@@ -37,6 +38,12 @@ import io.getstream.video.android.core.analytics.reporting.model.PostCallFlightS
 import io.getstream.video.android.core.analytics.reporting.model.PreCallInFlightSession
 import io.getstream.video.android.core.analytics.reporting.model.StageId
 import io.getstream.video.android.core.header.HeadersUtil
+import io.getstream.video.android.core.socket.common.scope.UserScope
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import org.webrtc.PeerConnection
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -66,6 +73,15 @@ internal class ClientEventReporter(
                 sender = ImmediateEventDispatcher(
                     api = api,
                     dataSource = dataSource,
+                    scope = CoroutineScope(
+                        SupervisorJob(UserScope().coroutineContext[Job]) +
+                            Dispatchers.IO +
+                            CoroutineExceptionHandler(handler = { _, throwable ->
+                                {
+                                    Log.e("ClientEvent", "Error in ClientEventReporter: $throwable")
+                                }
+                            }),
+                    ),
                 ),
                 userAgent = { HeadersUtil().buildSdkTrackingHeaders() },
                 sdkVersion = BuildConfig.STREAM_VIDEO_VERSION,
@@ -74,6 +90,16 @@ internal class ClientEventReporter(
     }
 
     private val logger by taggedLogger("ClientEventReporter")
+
+    private val deliveryScope = CoroutineScope(
+        SupervisorJob(UserScope().coroutineContext[Job]) +
+            Dispatchers.IO +
+            CoroutineExceptionHandler(handler = { _, throwable ->
+                {
+                    logger.e { "Error in ClientEventReporter: $throwable" }
+                }
+            }),
+    )
     private val clientEventFactory = ClientEventFactory(sdkVersion, userAgent) {
         this.coordinatorConnectId
     }
