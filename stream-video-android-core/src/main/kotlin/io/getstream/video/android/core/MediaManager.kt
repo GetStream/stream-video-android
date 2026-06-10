@@ -615,7 +615,7 @@ class MicrophoneManager(
             if (fromUser) {
                 _status.value = DeviceStatus.Enabled
             }
-            mediaManager.audioTrack.trySetEnabled(true)
+            mediaManager.runOnAudioTrackIfAvailable { it.trySetEnabled(true) }
         }
     }
 
@@ -644,7 +644,7 @@ class MicrophoneManager(
             if (fromUser) {
                 _status.value = DeviceStatus.Disabled
             }
-            mediaManager.audioTrack.trySetEnabled(false)
+            mediaManager.runOnAudioTrackIfAvailable { it.trySetEnabled(false) }
         }
     }
 
@@ -1082,7 +1082,7 @@ class CameraManager(
         if (fromUser) {
             _status.value = DeviceStatus.Enabled
         }
-        mediaManager.videoTrack.trySetEnabled(true)
+        mediaManager.runOnVideoTrackIfAvailable { it.trySetEnabled(true) }
         startCapture()
     }
 
@@ -1115,7 +1115,7 @@ class CameraManager(
             // 1. update our local state
             // 2. update the track enabled status
             // 3. Rtc listens and sends the update mute state request
-            mediaManager.videoTrack.trySetEnabled(false)
+            mediaManager.runOnVideoTrackIfAvailable { it.trySetEnabled(false) }
             videoCapturer.stopCapture()
             isCapturingVideo = false
         }
@@ -1479,6 +1479,8 @@ class MediaManagerImpl(
     internal val speaker = SpeakerManager(this, microphone, audioUsageProvider = audioUsageProvider)
     internal val screenShare = ScreenShareManager(this, eglBaseContext)
 
+    private val logger by taggedLogger("Media:MediaManagerImpl")
+
     private val filterVideoProcessor =
         FilterVideoProcessor({ call.videoFilter }, { camera.surfaceTextureHelper })
     private val screenShareFilterVideoProcessor =
@@ -1490,50 +1492,121 @@ class MediaManagerImpl(
     private var _videoTrack: VideoTrack? = null
     private var _screenShareTrack: VideoTrack? = null
 
-    val videoSource: VideoSource
-        get() {
-            if (_videoSource == null) {
-                _videoSource = call.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
-            }
-            return _videoSource!!
-        }
+    /**
+     * Guards lazy creation and disposal of the audio/video sources and tracks below.
+     *
+     * Sources and tracks can be disposed and recreated concurrently: [disposeTracksAndSources]
+     * (called from factory recreation before joining, and from [cleanup] on call teardown) may run
+     * while the AudioSwitch device-change callback triggers [MicrophoneManager.disable], which
+     * accesses [audioTrack]/[audioSource] on a different thread. Without a lock, a getter could
+     * observe a source that has already been disposed but not yet nulled out and pass it to WebRTC,
+     * leading to "MediaSource has been disposed" crashes. The lock is reentrant so the track getters
+     * can safely access their source getters.
+     */
+    private val mediaLock = Any()
 
-    val screenShareVideoSource: VideoSource
-        get() {
-            if (_screenShareVideoSource == null) {
-                _screenShareVideoSource = call.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
-            }
-            return _screenShareVideoSource!!
-        }
+    /**
+     * Marks that the owning call has been torn down via [cleanup]. Guarded by [mediaLock].
+     *
+     * The [mediaLock] alone prevents observing a disposed-but-not-yet-nulled source (the crash). But
+     * it does not stop the mic/camera mute paths from lazily rebuilding a track *after* a terminal
+     * cleanup — which would also resurrect the [Call.peerConnectionFactory] via its lazy getter and
+     * leak those native objects (nothing disposes them post-teardown).
+     *
+     * Once released, [runOnAudioTrackIfAvailable] / [runOnVideoTrackIfAvailable] become no-ops. Set
+     * only on the terminal [cleanup] path and NOT in [disposeTracksAndSources], because
+     * [Call.recreateFactoryAndAudioTracks] disposes and then deliberately recreates before joining.
+     */
+    private var released = false
 
-    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
-    // Todo : make videoTrack val in next major release and also move it out of MediaManager
-    var videoTrack: VideoTrack
-        get() {
+    /**
+     * Runs [block] on the audio track when one exists or can be created. After [cleanup], does not
+     * lazy-create a new track — a no-op if none exists (e.g. deferred mic-disable after leave).
+     */
+    internal fun runOnAudioTrackIfAvailable(block: (AudioTrack) -> Unit) {
+        synchronized(mediaLock) {
+            if (released) {
+                logger.e {
+                    "[runOnAudioTrackIfAvailable] MediaManager already cleaned up; skipping audio track operation"
+                }
+                return
+            }
+            if (_audioTrack == null) {
+                _audioTrack = call.peerConnectionFactory.makeAudioTrack(
+                    source = audioSource,
+                    trackId = UUID.randomUUID().toString(),
+                )
+            }
+            block(_audioTrack!!)
+        }
+    }
+
+    /**
+     * Runs [block] on the video track when one exists or can be created. After [cleanup], does not
+     * lazy-create a new track — a no-op if none exists.
+     */
+    internal fun runOnVideoTrackIfAvailable(block: (VideoTrack) -> Unit) {
+        synchronized(mediaLock) {
+            if (released) {
+                logger.e {
+                    "[runOnVideoTrackIfAvailable] MediaManager already cleaned up; skipping video track operation"
+                }
+                return
+            }
             if (_videoTrack == null) {
                 _videoTrack = call.peerConnectionFactory.makeVideoTrack(
                     source = videoSource,
                     trackId = UUID.randomUUID().toString(),
                 )
             }
-            return _videoTrack!!
+            block(_videoTrack!!)
         }
-        set(value) {
+    }
+
+    val videoSource: VideoSource
+        get() = synchronized(mediaLock) {
+            if (_videoSource == null) {
+                _videoSource = call.peerConnectionFactory.makeVideoSource(false, filterVideoProcessor)
+            }
+            _videoSource!!
+        }
+
+    val screenShareVideoSource: VideoSource
+        get() = synchronized(mediaLock) {
+            if (_screenShareVideoSource == null) {
+                _screenShareVideoSource = call.peerConnectionFactory.makeVideoSource(true, screenShareFilterVideoProcessor)
+            }
+            _screenShareVideoSource!!
+        }
+
+    // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
+    // Todo : make videoTrack val in next major release and also move it out of MediaManager
+    var videoTrack: VideoTrack
+        get() = synchronized(mediaLock) {
+            if (_videoTrack == null) {
+                _videoTrack = call.peerConnectionFactory.makeVideoTrack(
+                    source = videoSource,
+                    trackId = UUID.randomUUID().toString(),
+                )
+            }
+            _videoTrack!!
+        }
+        set(value) = synchronized(mediaLock) {
             _videoTrack = value
         }
 
     // Todo : make screenShareTrack val in next major release and also move it out of MediaManager
     var screenShareTrack: VideoTrack
-        get() {
+        get() = synchronized(mediaLock) {
             if (_screenShareTrack == null) {
                 _screenShareTrack = call.peerConnectionFactory.makeVideoTrack(
                     source = screenShareVideoSource,
                     trackId = UUID.randomUUID().toString(),
                 )
             }
-            return _screenShareTrack!!
+            _screenShareTrack!!
         }
-        set(value) {
+        set(value) = synchronized(mediaLock) {
             _screenShareTrack = value
         }
 
@@ -1542,36 +1615,41 @@ class MediaManagerImpl(
     private var _audioTrack: AudioTrack? = null
 
     val audioSource: AudioSource
-        get() {
+        get() = synchronized(mediaLock) {
             if (_audioSource == null) {
                 _audioSource = call.peerConnectionFactory.makeAudioSource(
                     buildAudioConstraints { microphone.audioBitrateProfile.value },
                 )
             }
-            return _audioSource!!
+            _audioSource!!
         }
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing
     // Todo : make audioTrack val in next major release and also move it out of MediaManager
     var audioTrack: AudioTrack
-        get() {
+        get() = synchronized(mediaLock) {
             if (_audioTrack == null) {
                 _audioTrack = call.peerConnectionFactory.makeAudioTrack(
                     source = audioSource,
                     trackId = UUID.randomUUID().toString(),
                 )
             }
-            return _audioTrack!!
+            _audioTrack!!
         }
-        set(value) {
+        set(value) = synchronized(mediaLock) {
             _audioTrack = value
         }
 
     /**
      * Disposes all tracks and sources without cleaning up camera/microphone infrastructure.
-     * This is used when recreating the factory before joining.
+     * This is used when recreating the factory before joining, so it intentionally does NOT mark
+     * the manager as [released] — the caller is expected to recreate the tracks afterwards.
+     *
+     * Disposes and nulls references atomically under [mediaLock], so a racing getter can never
+     * observe a disposed-but-non-null source (it either runs before disposal and gets a valid
+     * source, or after and lazily recreates a fresh one).
      */
-    internal fun disposeTracksAndSources() {
+    internal fun disposeTracksAndSources() = synchronized(mediaLock) {
         _audioTrack?.dispose()
         _audioSource?.dispose()
         _videoTrack?.dispose()
@@ -1589,8 +1667,13 @@ class MediaManagerImpl(
     }
 
     fun cleanup() {
-        // Dispose all tracks and sources
-        disposeTracksAndSources()
+        // Terminal teardown: dispose tracks/sources and mark released so the mic/camera mute paths
+        // ([runOnAudioTrackIfAvailable]/[runOnVideoTrackIfAvailable]) no-op afterwards instead of
+        // lazily recreating native tracks/sources that nothing would dispose (leak).
+        synchronized(mediaLock) {
+            released = true
+            disposeTracksAndSources()
+        }
         // Cleanup camera and microphone infrastructure
         camera.cleanup()
         microphone.cleanup()
