@@ -59,7 +59,7 @@ internal class ClientEventReporter(
             context: Context,
             api: ProductvideoApi,
             dataSource: PendingEventDataSource = SynchronizedPendingEventDataSource(
-                FileBasedPendingEventDataSource(context.cacheDir),
+                FileBasedPendingEventDataSource(context.filesDir),
             ),
         ): ClientEventReporter {
             return ClientEventReporter(
