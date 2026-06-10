@@ -29,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -51,7 +52,13 @@ class ImmediateEventDispatcherTest {
     private val dataSource = mockk<PendingEventDataSource>(relaxed = true)
     private val response = mockk<ReportClientEventResponse>()
 
-    private fun TestScope.dispatcher() = ImmediateEventDispatcher(api, backgroundScope, dataSource)
+    // Not backgroundScope: advanceUntilIdle() stops once no foreground tasks remain,
+    // so coroutines launched into backgroundScope would never run before verification.
+    private fun TestScope.dispatcher() = ImmediateEventDispatcher(
+        api,
+        CoroutineScope(StandardTestDispatcher(testScheduler)),
+        dataSource,
+    )
 
     private fun event(id: String) = ClientEvent(id = id)
 
