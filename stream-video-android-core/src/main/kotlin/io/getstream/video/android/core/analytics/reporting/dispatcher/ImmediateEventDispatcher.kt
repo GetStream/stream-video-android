@@ -59,7 +59,8 @@ internal class ImmediateEventDispatcher(
                 logger.d { events.joinToString(",") { it.toLog() } }
                 api.reportClientCallEvent(ReportClientEventRequest(events))
             }.onFailure { e ->
-                logger.w { "[sendAll] Failed — saving ${events.size} event(s) for retry: ${e.message}" }
+                logger.w { "[sendAll] Failed — sending ${events.size} event(s) for retry: ${e.message}" }
+                logger.w { events.joinToString(",") { it.toLog() } }
                 if (e !is NonRetryableException) {
                     dataSource.save(events)
                 }
