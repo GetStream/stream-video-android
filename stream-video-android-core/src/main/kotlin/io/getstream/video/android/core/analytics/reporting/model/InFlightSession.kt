@@ -42,7 +42,7 @@ internal data class PostCallFlightSession(
 
 ) : InFlightSession(startedAtMs, stageId)
 
-internal data class PreCallInFlightSession(
+internal data class CoordinatorFlightSession(
     val stage: EventStage.CoordinatorWs,
     override val startedAtMs: Long,
     override val stageId: StageId,
