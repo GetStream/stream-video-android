@@ -24,6 +24,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.datasource.FileBasedPendingEventDataSource
+import io.getstream.video.android.core.analytics.reporting.datasource.InMemoryPendingEventDataSource
 import io.getstream.video.android.core.analytics.reporting.datasource.PendingEventDataSource
 import io.getstream.video.android.core.analytics.reporting.datasource.SynchronizedPendingEventDataSource
 import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
@@ -62,12 +63,23 @@ internal class ClientEventReporter(
 ) {
 
     companion object {
+
+        // Useful for paparazzi
+        fun getSafeDataSource(context: Context): PendingEventDataSource {
+            return try {
+                SynchronizedPendingEventDataSource(
+                    FileBasedPendingEventDataSource(context.filesDir),
+                )
+            } catch (ex: Exception) {
+                SynchronizedPendingEventDataSource(
+                    InMemoryPendingEventDataSource(),
+                )
+            }
+        }
         fun getDefault(
             context: Context,
             api: ProductvideoApi,
-            dataSource: PendingEventDataSource = SynchronizedPendingEventDataSource(
-                FileBasedPendingEventDataSource(context.filesDir),
-            ),
+            dataSource: PendingEventDataSource = getSafeDataSource(context),
         ): ClientEventReporter {
             return ClientEventReporter(
                 sender = ImmediateEventDispatcher(
