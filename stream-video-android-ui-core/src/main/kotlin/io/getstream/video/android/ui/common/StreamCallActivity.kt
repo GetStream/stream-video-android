@@ -47,6 +47,7 @@ import io.getstream.result.onErrorSuspend
 import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallJoinInterceptor
+import io.getstream.video.android.core.BackendCause
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.RealtimeConnection
@@ -1208,17 +1209,26 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     @CallSuper
     public open fun onCallEvent(call: Call, event: VideoEvent) {
         when (event) {
-            is CallEndedEvent, is CallEndedSfuEvent, is CallSessionEndedEvent, is LocalCallMissedEvent -> {
-                // In any case finish the activity, the call is done for
+            is CallEndedEvent, is CallEndedSfuEvent, is LocalCallMissedEvent -> {
+                // CallState already called leave() for these events with the correct structured
+                // reason. Just finish the activity — re-leaving here would race with CallState's
+                // leave and risk locking in the wrong reason via atomicLeave ordering.
+                lifecycleScope.launch {
+                    onSuccessFinish.invoke(call)
+                }
+            }
+
+            is CallSessionEndedEvent -> {
+                // CallState does NOT call leave() for CallSessionEndedEvent, so we must do it
+                // here. The event is backend-driven, so use the correct Backend category.
                 leave(
                     call,
-                    CallLeaveReason.SdkDriven(
-                        SdkCause.END_CALL,
-                        "received event: ${event.javaClass.name}",
+                    CallLeaveReason.Backend(
+                        BackendCause.CALL_SESSION_ENDED_EVENT,
                     ),
                     onSuccess = onSuccessFinish,
                     onError = onErrorFinish,
-                )
+
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {

@@ -119,5 +119,6 @@ enum class BackendCause(
     SFU_DISCONNECT("SFU:DISCONNECT"),
     CALL_ENDED_EVENT("CallEndedEvent"),
     CALL_ENDED_SFU_EVENT("CallEndedSfuEvent"),
+    CALL_SESSION_ENDED_EVENT("CallSessionEndedEvent"),
     RING_FAILED("Ring failed"),
 }
