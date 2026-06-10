@@ -71,9 +71,9 @@ internal class PeerConnectionAnalyticsStateHolder {
 }
 
 internal data class PeerConnectionAnalyticsState(
-    var peerConnectionObserverJob: Job? = null,
-    var publisherJob: Job? = null,
-    var subscriberJob: Job? = null,
+    val peerConnectionObserverJob: Job? = null,
+    val publisherJob: Job? = null,
+    val subscriberJob: Job? = null,
     val publisherStage: Stage = Stage.NOT_STARTED,
     val subscriberStage: Stage = Stage.NOT_STARTED,
 )
