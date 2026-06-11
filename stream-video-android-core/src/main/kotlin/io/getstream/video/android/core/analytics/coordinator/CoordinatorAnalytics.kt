@@ -55,6 +55,7 @@ internal class CoordinatorAnalytics(
                                 true,
                                 CoordinatorSocketStateService.Companion.lastRetryAttempts,
                             )
+                            stageId.value = ""
                         }
                     }
 
@@ -65,6 +66,7 @@ internal class CoordinatorAnalytics(
                                 false,
                                 CoordinatorSocketStateService.Companion.lastRetryAttempts,
                             )
+                            stageId.value = ""
                         }
                     }
 
