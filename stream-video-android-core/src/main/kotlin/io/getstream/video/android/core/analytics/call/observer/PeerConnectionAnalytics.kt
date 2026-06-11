@@ -59,7 +59,7 @@ internal class PeerConnectionAnalytics(
                             )
                         }.filterNotNull()
                     }.filter {
-                        val existingStage = stateHolder.state.value.subscriberStage
+                        val existingStage = stateHolder.state.value.publisherStage
                         val newStage = getStage(it)
                         val isExistingStageAndNewStageAreCompleted = (existingStage == Stage.COMPLETED && newStage == Stage.COMPLETED)
                         !isExistingStageAndNewStageAreCompleted

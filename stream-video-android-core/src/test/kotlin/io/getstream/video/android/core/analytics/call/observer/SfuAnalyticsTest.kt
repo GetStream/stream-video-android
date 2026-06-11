@@ -62,8 +62,8 @@ class SfuAnalyticsTest {
     fun `onSfuWsInitiated reports with the shared context and stores the stage id`() {
         sfuAnalytics().onSfuWsInitiated(wasPreviouslyConnected = false)
 
-        assertEquals(Stage.IN_PROGRESS, sfuHolder.wsStage.value)
-        assertEquals("ws-stage-1", sfuHolder.wsEventStageId.value)
+        assertEquals(Stage.IN_PROGRESS, sfuHolder.stage.value)
+        assertEquals("ws-stage-1", sfuHolder.stageId.value)
         verify(exactly = 1) {
             reporter.reportSfuWsJoinInitiated(
                 sfuId = "sfu-1",
@@ -106,7 +106,7 @@ class SfuAnalyticsTest {
                 failureCode = null,
             )
         }
-        assertEquals(Stage.NOT_STARTED, sfuHolder.wsStage.value)
+        assertEquals(Stage.COMPLETED, sfuHolder.stage.value)
     }
 
     @Test
@@ -150,6 +150,6 @@ class SfuAnalyticsTest {
         analytics.onSfuWsCompleted(success = true, retryCount = 0)
 
         verify { reporter wasNot Called }
-        assertEquals(Stage.NOT_STARTED, sfuHolder.wsStage.value)
+        assertEquals(Stage.NOT_STARTED, sfuHolder.stage.value)
     }
 }

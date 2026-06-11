@@ -40,7 +40,7 @@ internal class AudioAnalytics(
     private val clientEventReporter: ClientEventReporter,
     private val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
     private val sfuStateHolder: SfuAnalyticsStateHolder,
-    private val isEnabled: Boolean = true,
+    private val isEnabled: Boolean = false,
 ) {
 
     var recordedFirstFrame: AtomicBoolean = AtomicBoolean(false)
