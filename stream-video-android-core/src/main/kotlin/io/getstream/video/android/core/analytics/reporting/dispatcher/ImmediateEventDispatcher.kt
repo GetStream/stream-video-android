@@ -34,7 +34,7 @@ import java.net.UnknownHostException
  */
 internal class ImmediateEventDispatcher(
     private val api: ProductvideoApi,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
 ) : EventDispatcher {
 
     private companion object {
