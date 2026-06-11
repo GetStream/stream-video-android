@@ -43,6 +43,9 @@ internal class VideoAnalytics(
         videoSessionId: String,
         callSessionId: String,
     ) {
+        // early return
+        if (!stageId.value.isEmpty()) return
+
         when (trackType) {
             TrackType.TRACK_TYPE_VIDEO, TrackType.TRACK_TYPE_SCREEN_SHARE -> {
                 val isSelf = videoSessionId == myParticipantState.value?.sessionId
