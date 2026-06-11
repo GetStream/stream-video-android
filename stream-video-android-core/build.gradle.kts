@@ -148,7 +148,7 @@ dependencies {
     // webrtc
     api(libs.stream.webrtc)
 
-    implementation(":audioswitch-release-v1.2.0-internal-1@aar")
+    implementation(libs.audioswitch)
 
     // video filter dependencies
     implementation(libs.libyuv)
