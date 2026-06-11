@@ -43,12 +43,6 @@ import org.webrtc.PeerConnection
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-/**
- * TODO
- * [ClientEvent.previouslyConnectedTimestamp] : Ask clarification
- * [ClientEvent.retryFailureCode] : Ask clarification
- */
-
 internal class ClientEventReporter(
     private val sender: EventDispatcher,
     private val userAgent: () -> String,
