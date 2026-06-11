@@ -17,13 +17,21 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.CallParticipantResponse
+import io.getstream.android.video.generated.models.CallSessionParticipantCountsUpdatedEvent
+import io.getstream.android.video.generated.models.CallSessionParticipantJoinedEvent
+import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
+import io.getstream.android.video.generated.models.CallSessionResponse
 import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.MemberRequest
 import io.getstream.android.video.generated.models.ScreensharingSettingsRequest
+import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.DominantSpeakerChangedEvent
+import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.events.PinUpdate
+import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.pinning.PinEntry
 import io.getstream.video.android.core.pinning.PinType
@@ -293,6 +301,176 @@ class CallStateTest : IntegrationTestBase() {
         assertSuccess(queryResult2)
         assertEquals(queryResult2.getOrThrow().members.size, 1)
         assertEquals(queryResult2.getOrThrow().members[0].userId, "thierry")
+    }
+
+    @Test
+    fun `participantCount stays at SFU healthcheck value when coordinator participant_joined arrives post-join`() = runTest {
+        // AND-926: post-join, only SFU healthcheck should drive participantCount.
+        // Coordinator session events (counts_updated / participant_joined / participant_left)
+        // must NOT clobber it — they carry a smaller, stale snapshot at scale.
+        val call = client.call("default", randomUUID())
+
+        // Steady post-join state: RTC is up. This is the state for ~all of an active call.
+        call.state._connection.value = RealtimeConnection.Connected
+
+        // Server gives us a tiny session snapshot (participants list is capped ~250)
+        call.state._session.value = CallSessionResponse(
+            anonymousParticipantCount = 0,
+            id = "session-1",
+            participants = emptyList(),
+            participantsCountByRole = mapOf("user" to 1),
+        )
+
+        // SFU healthcheck delivers the authoritative live count (e.g. a livestream with 25k viewers)
+        call.state.handleEvent(SFUHealthCheckEvent(ParticipantCount(total = 25_000, anonymous = 0)))
+        assertThat(call.state.totalParticipants.value).isEqualTo(25_000)
+
+        // A coordinator participant_joined event arrives. Today this recomputes the count
+        // from the session snapshot and the display drops from 25k to ~2. That's the bug.
+        val joinedEvent = CallSessionParticipantJoinedEvent(
+            callCid = call.cid,
+            createdAt = nowUtc,
+            sessionId = "session-1",
+            participant = CallParticipantResponse(
+                joinedAt = nowUtc,
+                role = "user",
+                userSessionId = "u2-session",
+                user = UserResponse(
+                    createdAt = nowUtc,
+                    id = "u2",
+                    language = "en",
+                    role = "user",
+                    updatedAt = nowUtc,
+                ),
+            ),
+            type = "call.session_participant_joined",
+        )
+        call.state.handleEvent(joinedEvent)
+
+        assertThat(call.state.totalParticipants.value).isEqualTo(25_000)
+    }
+
+    @Test
+    fun `participantCount stays at SFU healthcheck value when coordinator counts_updated event arrives post-join`() = runTest {
+        // AND-926: same invariant, different entry point. CallSessionParticipantCountsUpdatedEvent
+        // re-writes the role map on the session — it must not propagate to participantCount once joined.
+        val call = client.call("default", randomUUID())
+        call.state._connection.value = RealtimeConnection.Connected
+        call.state._session.value = CallSessionResponse(
+            anonymousParticipantCount = 0,
+            id = "session-1",
+            participants = emptyList(),
+            participantsCountByRole = mapOf("user" to 1),
+        )
+
+        call.state.handleEvent(SFUHealthCheckEvent(ParticipantCount(total = 25_000, anonymous = 0)))
+        assertThat(call.state.totalParticipants.value).isEqualTo(25_000)
+
+        // Coordinator pushes a stale count snapshot
+        call.state.handleEvent(
+            CallSessionParticipantCountsUpdatedEvent(
+                anonymousParticipantCount = 0,
+                callCid = call.cid,
+                createdAt = nowUtc,
+                sessionId = "session-1",
+                participantsCountByRole = mapOf("user" to 17),
+                type = "call.session_participant_count_updated",
+            ),
+        )
+
+        assertThat(call.state.totalParticipants.value).isEqualTo(25_000)
+    }
+
+    @Test
+    fun `participantCount stays at SFU healthcheck value when coordinator participant_left arrives post-join`() = runTest {
+        // AND-926: participant_left mutates the local session map too. Same guard must hold.
+        val call = client.call("default", randomUUID())
+        call.state._connection.value = RealtimeConnection.Connected
+
+        val existingParticipant = CallParticipantResponse(
+            joinedAt = nowUtc,
+            role = "user",
+            userSessionId = "u1-session",
+            user = UserResponse(
+                createdAt = nowUtc,
+                id = "u1",
+                language = "en",
+                role = "user",
+                updatedAt = nowUtc,
+            ),
+        )
+        call.state._session.value = CallSessionResponse(
+            anonymousParticipantCount = 0,
+            id = "session-1",
+            participants = listOf(existingParticipant),
+            participantsCountByRole = mapOf("user" to 1),
+        )
+
+        call.state.handleEvent(SFUHealthCheckEvent(ParticipantCount(total = 25_000, anonymous = 0)))
+        assertThat(call.state.totalParticipants.value).isEqualTo(25_000)
+
+        call.state.handleEvent(
+            CallSessionParticipantLeftEvent(
+                callCid = call.cid,
+                createdAt = nowUtc,
+                sessionId = "session-1",
+                participant = existingParticipant,
+                durationSeconds = 0,
+                type = "call.session_participant_left",
+            ),
+        )
+
+        assertThat(call.state.totalParticipants.value).isEqualTo(25_000)
+    }
+
+    @Test
+    fun `participantCount uses session snapshot with max(byRole, participants size) before joining the call`() = runTest {
+        // Pre-join (lobby / ringing / inProgress join), SFU healthcheck hasn't arrived yet —
+        // session-derived count IS the source of truth. Parity with React's
+        // updateParticipantCountFromSession when callingState !== JOINED, including the
+        // Math.max(byRoleCount, participants.length) guard for monotonicity during fast joins.
+        val call = client.call("default", randomUUID())
+        // Connection stays at the default PreJoin — we are NOT in the call yet.
+
+        // byRoleSum=1 but the participants list already has 3 entries — the local list got
+        // ahead of the role map (the case React's Math.max protects against). The displayed
+        // count must follow the larger value, not the stale byRoleSum.
+        val now = nowUtc
+        val participantsList = listOf("a", "b", "c").map { id ->
+            CallParticipantResponse(
+                joinedAt = now,
+                role = "user",
+                userSessionId = "$id-session",
+                user = UserResponse(
+                    createdAt = now,
+                    id = id,
+                    language = "en",
+                    role = "user",
+                    updatedAt = now,
+                ),
+            )
+        }
+        call.state._session.value = CallSessionResponse(
+            anonymousParticipantCount = 5,
+            id = "session-1",
+            participants = participantsList,
+            participantsCountByRole = mapOf("user" to 1),
+        )
+
+        call.state.handleEvent(
+            CallSessionParticipantCountsUpdatedEvent(
+                anonymousParticipantCount = 5,
+                callCid = call.cid,
+                createdAt = now,
+                sessionId = "session-1",
+                participantsCountByRole = mapOf("user" to 1),
+                type = "call.session_participant_count_updated",
+            ),
+        )
+
+        // total = anonymous (5) + max(byRoleSum=1, participants.size=3) = 8
+        // Without max(): would be 5 + 1 = 6.
+        assertThat(call.state.totalParticipants.value).isEqualTo(8)
     }
 
     @Test

@@ -40,6 +40,8 @@ import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
+import io.getstream.video.android.core.user.StreamUserRepositoryImpl
+import io.getstream.video.android.core.user.UserRepository
 import io.getstream.video.android.core.utils.isWhitespaceOnly
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.model.ApiKey
@@ -67,12 +69,15 @@ import okhttp3.OkHttpClient
  *
  * This should be internal
  */
-public open class CoordinatorSocketConnection(
+public open class CoordinatorSocketConnection internal constructor(
     private val apiKey: ApiKey,
     /** The URL to connect to */
     private val url: String,
-    /** The  user to connect. */
-    private val user: User,
+    /** Single source of truth for the current user. The WS auth payload (built in
+     *  [onCreated]) reads through this, so a guest user replaced mid-flight by
+     *  `setupGuestUser` is reflected automatically without any local copy to keep
+     *  in sync. */
+    private val userRepository: UserRepository,
     /** The initial token. */
     @Deprecated(
         "token is not used",
@@ -92,6 +97,41 @@ public open class CoordinatorSocketConnection(
     private val tokenRepository: TokenRepository,
 ) : SocketListener<VideoEvent, ConnectedEvent>(),
     SocketActions<VideoEvent, VideoEvent, StreamWebSocketEvent.Error, VideoSocketState, UserToken, User> {
+
+    /**
+     * Backwards-compatible constructor for callers that still pass a fixed [User].
+     * Internally wraps [user] in a fresh repository — identity updates made elsewhere
+     * (e.g. `setupGuestUser`) will NOT propagate to this socket. Prefer the
+     * [UserRepository]-based primary constructor for that.
+     */
+    @Deprecated(
+        message = "Pass a UserRepository so the WS auth payload picks up identity updates " +
+            "(e.g. an adopted guest user).",
+        level = DeprecationLevel.WARNING,
+    )
+    public constructor(
+        apiKey: ApiKey,
+        url: String,
+        user: User,
+        token: String,
+        httpClient: OkHttpClient,
+        networkStateProvider: NetworkStateProvider,
+        scope: CoroutineScope = UserScope(ClientScope()),
+        lifecycle: Lifecycle,
+        tokenProvider: TokenProvider,
+        tokenRepository: TokenRepository,
+    ) : this(
+        apiKey = apiKey,
+        url = url,
+        userRepository = StreamUserRepositoryImpl(user),
+        token = token,
+        httpClient = httpClient,
+        networkStateProvider = networkStateProvider,
+        scope = scope,
+        lifecycle = lifecycle,
+        tokenProvider = tokenProvider,
+        tokenRepository = tokenRepository,
+    )
 
     // Private state
     private val parser: VideoParser = MoshiVideoParser()
@@ -137,7 +177,8 @@ public open class CoordinatorSocketConnection(
         super.onCreated()
         logger.d { "[onCreated] Socket is created" }
         scope.launch {
-            logger.d { "[onConnected] Video socket created, user: $user" }
+            val currentUser = userRepository.user
+            logger.d { "[onConnected] Video socket created, user: $currentUser" }
             if (tokenManager.getToken().isEmpty()) {
                 logger.e { "[onConnected] Token is empty. Disconnecting." }
                 disconnect()
@@ -145,10 +186,10 @@ public open class CoordinatorSocketConnection(
                 val authRequest = WSAuthMessageRequest(
                     token = tokenManager.getToken().ifEmpty { tokenRepository.getToken() },
                     userDetails = ConnectUserDetailsRequest(
-                        id = user.id,
-                        name = user.name.takeUnless { it.isWhitespaceOnly() },
-                        image = user.image.takeUnless { it.isWhitespaceOnly() },
-                        custom = user.custom,
+                        id = currentUser.id,
+                        name = currentUser.name.takeUnless { it.isWhitespaceOnly() },
+                        image = currentUser.image.takeUnless { it.isWhitespaceOnly() },
+                        custom = currentUser.custom,
                     ),
                 )
 

@@ -35,7 +35,12 @@ internal class DeviceTokenStorage(val context: Context) {
         context.dataStore.data.map { it?.userDevice }
 
     suspend fun updateUserDevice(device: Device?) {
-        context.dataStore.updateData { preferences ->
+        // Assigning the result to a local forces this suspend function to be compiled as a
+        // state machine that returns Unit. Otherwise the compiler tail-call-optimizes the
+        // updateData() call and propagates its DevicePreferences result up the suspend chain,
+        // surfacing as "DevicePreferences cannot be cast to kotlin.Unit" at the caller.
+        @Suppress("UNUSED_VARIABLE")
+        val updated = context.dataStore.updateData { preferences ->
             (preferences ?: DevicePreferences()).copy(userDevice = device)
         }
     }

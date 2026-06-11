@@ -118,6 +118,8 @@ import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.user.StreamUserRepositoryImpl
+import io.getstream.video.android.core.user.WritableUserRepository
 import io.getstream.video.android.core.utils.LatencyResult
 import io.getstream.video.android.core.utils.getLatencyMeasurementsOKHttp
 import io.getstream.video.android.core.utils.safeCall
@@ -126,16 +128,20 @@ import io.getstream.video.android.core.utils.safeSuspendingCallWithResult
 import io.getstream.video.android.core.utils.toEdge
 import io.getstream.video.android.core.utils.toQueriedCalls
 import io.getstream.video.android.core.utils.toQueriedMembers
+import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
@@ -163,7 +169,7 @@ internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
 internal class StreamVideoClient internal constructor(
     override val context: Context,
     internal val scope: CoroutineScope = ClientScope(),
-    override val user: User,
+    initialUser: User,
     internal val apiKey: ApiKey,
     internal var token: String,
     private val lifecycle: Lifecycle,
@@ -171,6 +177,7 @@ internal class StreamVideoClient internal constructor(
     internal val tokenRepository: TokenRepository,
     internal val tokenProvider: TokenProvider = RepositoryTokenProvider(tokenRepository),
     internal val streamNotificationManager: StreamNotificationManager,
+    internal val userRepository: WritableUserRepository = StreamUserRepositoryImpl(initialUser),
     internal val enableCallNotificationUpdates: Boolean,
     internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
     internal val sounds: Sounds,
@@ -191,6 +198,11 @@ internal class StreamVideoClient internal constructor(
 
     private var locationJob: Deferred<Result<String>>? = null
 
+    /** Reads through [userRepository] so callers always see the latest identity
+     *  (e.g. the server-issued guest user adopted by [setupGuestUser]). */
+    public override val user: User
+        get() = userRepository.user
+
     /** the state for the client, includes the current user */
     override val state = ClientState(this)
     internal val callBusyHandler =
@@ -205,7 +217,8 @@ internal class StreamVideoClient internal constructor(
 
     internal var guestUserJob: Deferred<Unit>? = null
 
-    public override val userId = user.id
+    public override val userId: String
+        get() = userRepository.user.id
 
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
@@ -282,6 +295,17 @@ internal class StreamVideoClient internal constructor(
     internal suspend fun <T : Any> apiCall(
         apiCall: suspend () -> T,
     ): Result<T> = safeSuspendingCallWithResult {
+        // Guest users have an asynchronous setup (createGuest) that fetches their JWT.
+        // Any authenticated request that fires before that completes goes out without
+        // an Authorization header and stream-auth-type "anonymous", so the backend
+        // can't associate it with the guest — push device registration silently lands
+        // on the wrong identity. Wait here so every API call sees the right auth.
+        // Skip the wait when this apiCall is itself running inside the guest setup,
+        // otherwise createGuestUser would await its own enclosing job. Let the
+        // await throw if setupGuestUser failed — safeSuspendingCallWithResult turns
+        // it into Result.Failure, which is the right outcome (the caller didn't get
+        // a valid guest session, so the request can't proceed).
+        guestUserJob?.takeIf { currentCoroutineContext()[Job] !== it }?.await()
         try {
             apiCall()
         } catch (e: HttpException) {
@@ -534,6 +558,12 @@ internal class StreamVideoClient internal constructor(
             response.onSuccess {
                 coordinatorConnectionModule.updateAuthType("jwt")
                 coordinatorConnectionModule.updateToken(it.accessToken)
+                // Adopt the server-issued user identity so the SDK's local user.id
+                // can't drift from the JWT's user_id claim (parity with the JS SDK,
+                // which connects with response.user from createGuest). Writing through
+                // the repository propagates to every reader (socket, ClientState, …) at
+                // once — no further mirrors required.
+                userRepository.setUser(it.user.toUser().copy(type = UserType.Guest))
             }
         }
     }
@@ -547,6 +577,12 @@ internal class StreamVideoClient internal constructor(
     }
 
     internal suspend fun registerPushDevice() {
+        // createDevice() inside StreamNotificationManager calls api.createDevice() directly
+        // rather than going through apiCall {}, so it doesn't inherit the guestUserJob await
+        // guard. Wait here instead — once guestUserJob completes, the coordinator module's
+        // auth headers are set to JWT, so the later (async) createDevice request lands on
+        // the guest identity instead of !anon. AND-1202.
+        guestUserJob?.takeIf { currentCoroutineContext()[Job] !== it }?.await()
         streamNotificationManager.registerPushDevice()
     }
 
@@ -1165,6 +1201,14 @@ internal class StreamVideoClient internal constructor(
     /**
      * @see StreamVideo.logOut
      */
+    @Deprecated(
+        message = "Kept for source compatibility; see StreamVideo.logOut for migration guidance.",
+        replaceWith = ReplaceWith(
+            expression = "StreamVideo.removeClient()",
+            imports = ["io.getstream.video.android.core.StreamVideo"],
+        ),
+        level = DeprecationLevel.WARNING,
+    )
     override fun logOut() {
         scope.launch(
             CoroutineName("logOut"),

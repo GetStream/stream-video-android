@@ -30,8 +30,8 @@ import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.getstream.video.android.core.trace.Tracer
+import io.getstream.video.android.core.user.UserRepository
 import io.getstream.video.android.model.ApiKey
-import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +49,7 @@ internal class CoordinatorConnectionModule(
     // Coordinator API
     context: Context,
     tokenProvider: TokenProvider,
-    user: User,
+    userRepository: UserRepository,
     val tokenRepository: TokenRepository,
     override val scope: CoroutineScope,
     // Common API
@@ -98,7 +98,7 @@ internal class CoordinatorConnectionModule(
     override val socketConnection: CoordinatorSocketConnection = CoordinatorSocketConnection(
         apiKey = apiKey,
         url = wssUrl,
-        user = user,
+        userRepository = userRepository,
         token = tokenRepository.getToken(),
         httpClient = http,
         networkStateProvider = networkStateProvider,
