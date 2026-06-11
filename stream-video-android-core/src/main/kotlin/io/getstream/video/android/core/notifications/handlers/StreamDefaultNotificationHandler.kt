@@ -538,6 +538,18 @@ constructor(
     )
     override fun getSettingUpCallNotification(): Notification? {
         logger.d { "[getSettingUpCallNotification]" }
+        return buildSettingUpCallNotification()
+    }
+
+    /**
+     * Builds the default "setting up call" foreground-service notification (used for outgoing /
+     * livestream calls and as the fallback for any non-incoming trigger).
+     *
+     * A small icon is mandatory for foreground-service notifications. Without it Android 13+ rejects
+     * the notification with [android.app.RemoteServiceException.CannotPostForegroundServiceNotificationException]
+     * when this notification is used to start the call foreground service.
+     */
+    private fun buildSettingUpCallNotification(): Notification? {
         val channelId = notificationChannels.outgoingCallChannel.id
         val title = application.getString(R.string.stream_video_call_setup_notification_title)
         val description =
@@ -545,6 +557,7 @@ constructor(
         return ensureChannelAndBuildNotification(notificationChannels.outgoingCallChannel) {
             setContentTitle(title)
             setContentText(description)
+            setSmallIcon(R.drawable.stream_video_ic_call)
             setChannelId(channelId)
             setCategory(NotificationCompat.CATEGORY_CALL)
             setOngoing(true)
@@ -598,7 +611,7 @@ constructor(
                 }
             }
 
-            else -> getSettingUpCallNotification()
+            else -> buildSettingUpCallNotification()
         }
     }
 
