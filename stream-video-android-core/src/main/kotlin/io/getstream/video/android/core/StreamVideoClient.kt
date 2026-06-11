@@ -197,7 +197,6 @@ internal class StreamVideoClient internal constructor(
     internal val telecomConfig: TelecomConfig? = null,
     internal val rejectCallWhenBusy: Boolean = false,
     internal val clientEventReporter: ClientEventReporter = ClientEventReporter.getDefault(
-        context,
         coordinatorConnectionModule.api,
     ),
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
@@ -275,7 +274,6 @@ internal class StreamVideoClient internal constructor(
         )
         audioExecutionContext.release()
         coordinatorAnalytics.endObserver()
-        state.clientEventReporter.deleteAll()
     }
 
     /**

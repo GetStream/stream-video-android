@@ -17,21 +17,11 @@
 package io.getstream.video.android.core.analytics.reporting.dispatcher
 
 import io.getstream.android.video.generated.models.ClientEvent
-import io.getstream.video.android.core.analytics.reporting.datasource.PendingEventDataSource
 
 /**
  * Responsible for delivering telemetry [ClientEvent]s to the backend.
- * Failed events are handed to a [PendingEventDataSource] and can be retried via [retryPending].
  */
 internal interface EventDispatcher {
     fun send(event: ClientEvent)
     fun sendAll(events: List<ClientEvent>)
-
-    /**
-     * Retries any events that previously failed to send.
-     * Call this when connectivity is restored or on a suitable recovery point.
-     */
-    fun retryPending()
-
-    fun deleteAll()
 }

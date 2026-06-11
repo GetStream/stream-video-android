@@ -55,9 +55,6 @@ internal class SfuAnalytics(
 
                         override fun sendAll(events: List<ClientEvent>) {}
 
-                        override fun retryPending() {}
-
-                        override fun deleteAll() {}
                     },
                     userAgent = { "" },
                     sdkVersion = "",
