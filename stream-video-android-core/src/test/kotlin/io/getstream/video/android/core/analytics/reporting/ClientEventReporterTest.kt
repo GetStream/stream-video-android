@@ -36,8 +36,6 @@ class ClientEventReporterTest {
     private class RecordingEventDispatcher : EventDispatcher {
         val sent = mutableListOf<ClientEvent>()
         val batches = mutableListOf<List<ClientEvent>>()
-        var retryPendingCount = 0
-        var deleteAllCount = 0
 
         override fun send(event: ClientEvent) {
             sent += event
@@ -46,14 +44,6 @@ class ClientEventReporterTest {
         override fun sendAll(events: List<ClientEvent>) {
             batches += events
             sent += events
-        }
-
-        override fun retryPending() {
-            retryPendingCount++
-        }
-
-        override fun deleteAll() {
-            deleteAllCount++
         }
     }
 
@@ -134,7 +124,6 @@ class ClientEventReporterTest {
         assertEquals(EventOutcome.SUCCESS.value, completed.outcome)
         assertEquals(2, completed.retryCountAttempt)
         assertNotNull(completed.elapsedTime)
-        assertEquals(1, dispatcher.retryPendingCount)
     }
 
     @Test
@@ -153,7 +142,6 @@ class ClientEventReporterTest {
         assertEquals(EventOutcome.FAILURE.value, completed.outcome)
         assertEquals("WS_FAILED", completed.retryFailureCode)
         assertEquals("socket closed", completed.retryFailureReason)
-        assertEquals(0, dispatcher.retryPendingCount)
     }
 
     @Test
@@ -465,12 +453,5 @@ class ClientEventReporterTest {
         assertEquals(EventStage.Call.MEDIA_DEVICE_PERMISSION.value, event.stage)
         assertEquals("GRANTED", event.cameraPermissionStatus)
         assertEquals("NOT_GRANTED", event.microphonePermissionStatus)
-    }
-
-    @Test
-    fun `deleteAll delegates to the dispatcher`() {
-        reporter.deleteAll()
-
-        assertEquals(1, dispatcher.deleteAllCount)
     }
 }

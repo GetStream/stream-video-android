@@ -20,10 +20,7 @@ import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.android.video.generated.models.ReportClientEventRequest
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.analytics.reporting.datasource.InMemoryPendingEventDataSource
-import io.getstream.video.android.core.analytics.reporting.datasource.PendingEventDataSource
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -31,16 +28,13 @@ import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import kotlin.getValue
 
 /**
  * Sends each event immediately in a coroutine.
- * On network failure the events are saved to [dataSource] for later retry.
  */
 internal class ImmediateEventDispatcher(
     private val api: ProductvideoApi,
     private val scope: CoroutineScope,
-    private val dataSource: PendingEventDataSource = InMemoryPendingEventDataSource(),
 ) : EventDispatcher {
 
     private companion object {
@@ -61,22 +55,8 @@ internal class ImmediateEventDispatcher(
             }.onFailure { e ->
                 logger.w { "[sendAll] Failed — sending ${events.size} event(s) for retry: ${e.message}" }
                 logger.w { events.joinToString(",") { it.toLog() } }
-                if (e !is NonRetryableException) {
-                    dataSource.save(events)
-                }
             }
         }
-    }
-
-    override fun retryPending() {
-        val pending = dataSource.loadAndClear()
-        if (pending.isEmpty()) return
-        sendAll(pending)
-    }
-
-    override fun deleteAll() {
-        scope.cancel()
-        dataSource.clear()
     }
 
     suspend fun retryWithBackoff(maxAttempts: Int = RETRY_MAX_ATTEMPT, lambda: suspend () -> Unit): Result<Unit> {

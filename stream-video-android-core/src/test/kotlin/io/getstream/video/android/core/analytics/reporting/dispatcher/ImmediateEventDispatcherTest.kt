@@ -19,16 +19,12 @@ package io.getstream.video.android.core.analytics.reporting.dispatcher
 import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.android.video.generated.models.ReportClientEventResponse
-import io.getstream.video.android.core.analytics.reporting.datasource.PendingEventDataSource
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -49,7 +45,6 @@ import java.net.UnknownHostException
 class ImmediateEventDispatcherTest {
 
     private val api = mockk<ProductvideoApi>()
-    private val dataSource = mockk<PendingEventDataSource>(relaxed = true)
     private val response = mockk<ReportClientEventResponse>()
 
     // Not backgroundScope: advanceUntilIdle() stops once no foreground tasks remain,
@@ -57,7 +52,6 @@ class ImmediateEventDispatcherTest {
     private fun TestScope.dispatcher() = ImmediateEventDispatcher(
         api,
         CoroutineScope(StandardTestDispatcher(testScheduler)),
-        dataSource,
     )
 
     private fun event(id: String) = ClientEvent(id = id)
@@ -77,7 +71,6 @@ class ImmediateEventDispatcherTest {
         coVerify(exactly = 1) {
             api.reportClientCallEvent(match { it.events == listOf(pendingEvent) })
         }
-        verify(exactly = 0) { dataSource.save(any()) }
     }
 
     @Test
@@ -97,7 +90,6 @@ class ImmediateEventDispatcherTest {
         advanceUntilIdle()
 
         coVerify(exactly = 5) { api.reportClientCallEvent(any()) }
-        verify(exactly = 1) { dataSource.save(listOf(pendingEvent)) }
     }
 
     @Test
@@ -110,7 +102,6 @@ class ImmediateEventDispatcherTest {
         advanceUntilIdle()
 
         coVerify(exactly = 3) { api.reportClientCallEvent(any()) }
-        verify(exactly = 0) { dataSource.save(any()) }
     }
 
     @Test
@@ -121,7 +112,6 @@ class ImmediateEventDispatcherTest {
         advanceUntilIdle()
 
         coVerify(exactly = 5) { api.reportClientCallEvent(any()) }
-        verify(exactly = 1) { dataSource.save(any()) }
     }
 
     @Test
@@ -132,57 +122,18 @@ class ImmediateEventDispatcherTest {
         advanceUntilIdle()
 
         coVerify(exactly = 1) { api.reportClientCallEvent(any()) }
-        verify(exactly = 0) { dataSource.save(any()) }
-    }
-
-    @Test
-    fun `retryPending resends previously failed events as one batch`() = runTest {
-        val pending = listOf(event("p1"), event("p2"))
-        every { dataSource.loadAndClear() } returns pending
-        coEvery { api.reportClientCallEvent(any()) } returns response
-
-        dispatcher().retryPending()
-        advanceUntilIdle()
-
-        coVerify(exactly = 1) { api.reportClientCallEvent(match { it.events == pending }) }
     }
 
     @Test
     fun `retryPending with an empty store does nothing`() = runTest {
-        every { dataSource.loadAndClear() } returns emptyList()
-
-        dispatcher().retryPending()
         advanceUntilIdle()
 
         coVerify(exactly = 0) { api.reportClientCallEvent(any()) }
     }
 
     @Test
-    fun `a replayed batch that fails again is re-persisted`() = runTest {
-        val pending = listOf(event("p1"))
-        every { dataSource.loadAndClear() } returns pending
-        coEvery { api.reportClientCallEvent(any()) } throws IOException("still down")
-
-        dispatcher().retryPending()
-        advanceUntilIdle()
-
-        verify(exactly = 1) { dataSource.save(pending) }
-    }
-
-    @Test
-    fun `deleteAll cancels the scope and clears the store`() {
-        val scope = CoroutineScope(Job())
-        val dispatcher = ImmediateEventDispatcher(api, scope, dataSource)
-
-        dispatcher.deleteAll()
-
-        verify(exactly = 1) { dataSource.clear() }
-        assertFalse(scope.isActive)
-    }
-
-    @Test
     fun `shouldRetry classifies transient and permanent failures`() {
-        val dispatcher = ImmediateEventDispatcher(api, CoroutineScope(Job()), dataSource)
+        val dispatcher = ImmediateEventDispatcher(api, CoroutineScope(Job()))
 
         assertTrue(dispatcher.shouldRetry(IOException()))
         assertTrue(dispatcher.shouldRetry(SocketTimeoutException()))
