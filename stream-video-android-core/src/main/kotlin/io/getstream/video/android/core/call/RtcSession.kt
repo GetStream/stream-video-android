@@ -922,7 +922,8 @@ public class RtcSession internal constructor(
                 sendCallStats()
                 when (terminalState) {
                     is SfuSocketState.Disconnected.DisconnectedTemporarily,
-                    is SfuSocketState.Disconnected.DisconnectedPermanently -> {
+                    is SfuSocketState.Disconnected.DisconnectedPermanently,
+                    -> {
                         call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
                             success = false,
                             retryCount = joinAnalyticsModel?.retryAttempt ?: 0,
