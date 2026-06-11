@@ -43,6 +43,7 @@ class CallAnalyticsTest {
         context = mockk(relaxed = true),
         callId = "call-1",
         callType = "default",
+        myParticipantState = MutableStateFlow<ParticipantState?>(null),
         connectionFlow = MutableStateFlow(RealtimeConnection.PreJoin),
         participants = MutableStateFlow<List<ParticipantState>>(emptyList()),
         eventReporter = reporter,

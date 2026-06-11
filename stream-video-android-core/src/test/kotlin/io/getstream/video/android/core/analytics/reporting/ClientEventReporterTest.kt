@@ -88,10 +88,12 @@ class ClientEventReporterTest {
     )
 
     private fun pcStateChanged(
+        pcState: PeerConnection.PeerConnectionState?,
+        iceState: PeerConnection.IceConnectionState? = null,
         role: PeerConnectionRole = PeerConnectionRole.PUBLISH,
-        iceState: PeerConnection.IceConnectionState,
-        pcState: PeerConnection.PeerConnectionState? = null,
+        pcHashCode: Int = 100,
     ) = reporter.onPeerConnectionStateChanged(
+        peerConnectionHashCode = pcHashCode,
         callId = "call-1",
         callType = "default",
         joinStageAttemptId = "attempt-1",
@@ -247,13 +249,13 @@ class ClientEventReporterTest {
         assertEquals("session-1", completed.callSessionId)
     }
 
-    // --- Peer connection ICE state machine ---
+    // --- Peer connection state machine ---
 
     @Test
-    fun `ICE CHECKING opens a session and CONNECTED completes it as success`() {
+    fun `CONNECTING opens a session and CONNECTED completes it as success`() {
         pcStateChanged(
-            iceState = PeerConnection.IceConnectionState.CHECKING,
             pcState = PeerConnection.PeerConnectionState.CONNECTING,
+            iceState = PeerConnection.IceConnectionState.CHECKING,
         )
 
         assertEquals(1, dispatcher.sent.size)
@@ -264,8 +266,8 @@ class ClientEventReporterTest {
         assertEquals(false, initiated.wasPreviouslyConnected)
 
         pcStateChanged(
-            iceState = PeerConnection.IceConnectionState.CONNECTED,
             pcState = PeerConnection.PeerConnectionState.CONNECTED,
+            iceState = PeerConnection.IceConnectionState.CONNECTED,
         )
 
         assertEquals(2, dispatcher.sent.size)
@@ -276,10 +278,16 @@ class ClientEventReporterTest {
     }
 
     @Test
-    fun `ICE FAILED completes the session as a connectivity failure`() {
-        pcStateChanged(iceState = PeerConnection.IceConnectionState.CHECKING)
+    fun `FAILED completes the session as a connectivity failure`() {
+        pcStateChanged(
+            pcState = PeerConnection.PeerConnectionState.CONNECTING,
+            iceState = PeerConnection.IceConnectionState.CHECKING,
+        )
 
-        pcStateChanged(iceState = PeerConnection.IceConnectionState.FAILED)
+        pcStateChanged(
+            pcState = PeerConnection.PeerConnectionState.FAILED,
+            iceState = PeerConnection.IceConnectionState.FAILED,
+        )
 
         val completed = dispatcher.sent.last()
         assertEquals(EventOutcome.FAILURE.value, completed.outcome)
@@ -288,25 +296,35 @@ class ClientEventReporterTest {
     }
 
     @Test
-    fun `a second CHECKING supersedes the first in-flight session as failure`() {
-        pcStateChanged(iceState = PeerConnection.IceConnectionState.CHECKING)
+    fun `CONNECTED with a null ice state is ignored`() {
+        pcStateChanged(
+            pcState = PeerConnection.PeerConnectionState.CONNECTING,
+            iceState = PeerConnection.IceConnectionState.CHECKING,
+        )
 
-        pcStateChanged(iceState = PeerConnection.IceConnectionState.CHECKING)
+        pcStateChanged(pcState = PeerConnection.PeerConnectionState.CONNECTED, iceState = null)
 
-        assertEquals(3, dispatcher.sent.size)
-        val superseded = dispatcher.sent[1]
-        assertEquals(EventType.COMPLETED.value, superseded.eventType)
-        assertEquals(EventOutcome.FAILURE.value, superseded.outcome)
-        assertEquals("ICE restart superseded previous attempt", superseded.retryFailureReason)
-        assertEquals(EventType.INITIATED.value, dispatcher.sent[2].eventType)
+        assertEquals(1, dispatcher.sent.size)
     }
 
     @Test
     fun `a reconnect after CONNECTED is flagged as previously connected`() {
-        pcStateChanged(iceState = PeerConnection.IceConnectionState.CHECKING)
-        pcStateChanged(iceState = PeerConnection.IceConnectionState.CONNECTED)
+        pcStateChanged(
+            pcState = PeerConnection.PeerConnectionState.CONNECTING,
+            iceState = PeerConnection.IceConnectionState.CHECKING,
+            pcHashCode = 1,
+        )
+        pcStateChanged(
+            pcState = PeerConnection.PeerConnectionState.CONNECTED,
+            iceState = PeerConnection.IceConnectionState.CONNECTED,
+            pcHashCode = 1,
+        )
 
-        pcStateChanged(iceState = PeerConnection.IceConnectionState.CHECKING)
+        pcStateChanged(
+            pcState = PeerConnection.PeerConnectionState.CONNECTING,
+            iceState = PeerConnection.IceConnectionState.CHECKING,
+            pcHashCode = 2,
+        )
 
         val reconnectInitiated = dispatcher.sent.last()
         assertEquals(EventType.INITIATED.value, reconnectInitiated.eventType)
@@ -315,20 +333,53 @@ class ClientEventReporterTest {
 
     @Test
     fun `CONNECTED without an open session sends nothing`() {
-        pcStateChanged(iceState = PeerConnection.IceConnectionState.CONNECTED)
+        pcStateChanged(
+            pcState = PeerConnection.PeerConnectionState.CONNECTED,
+            iceState = PeerConnection.IceConnectionState.CONNECTED,
+        )
 
         assertTrue(dispatcher.sent.isEmpty())
     }
 
     @Test
-    fun `publisher and subscriber sessions are tracked independently`() {
+    fun `sessions are completed per peer connection instance`() {
         pcStateChanged(
-            role = PeerConnectionRole.PUBLISH,
+            pcState = PeerConnection.PeerConnectionState.CONNECTING,
             iceState = PeerConnection.IceConnectionState.CHECKING,
+            pcHashCode = 1,
         )
         pcStateChanged(
-            role = PeerConnectionRole.SUBSCRIBE,
+            pcState = PeerConnection.PeerConnectionState.CONNECTING,
             iceState = PeerConnection.IceConnectionState.CHECKING,
+            pcHashCode = 2,
+        )
+        val firstStageId = dispatcher.sent.first().stageId
+
+        pcStateChanged(
+            pcState = PeerConnection.PeerConnectionState.CONNECTED,
+            iceState = PeerConnection.IceConnectionState.CONNECTED,
+            pcHashCode = 1,
+        )
+
+        assertEquals(3, dispatcher.sent.size)
+        val completed = dispatcher.sent.last()
+        assertEquals(EventType.COMPLETED.value, completed.eventType)
+        assertEquals(firstStageId, completed.stageId)
+    }
+
+    @Test
+    fun `publisher and subscriber sessions are tracked independently`() {
+        pcStateChanged(
+            pcState = PeerConnection.PeerConnectionState.CONNECTING,
+            iceState = PeerConnection.IceConnectionState.CHECKING,
+            role = PeerConnectionRole.PUBLISH,
+            pcHashCode = 1,
+        )
+        pcStateChanged(
+            pcState = PeerConnection.PeerConnectionState.CONNECTING,
+            iceState = PeerConnection.IceConnectionState.CHECKING,
+            role = PeerConnectionRole.SUBSCRIBE,
+            pcHashCode = 2,
         )
 
         assertEquals(2, dispatcher.sent.size)
@@ -367,7 +418,7 @@ class ClientEventReporterTest {
 
     @Test
     fun `first video frame sends an initiated event with the track id`() {
-        reporter.reportFirstVideoFrameRendered(
+        reporter.reportFirstRemoteVideoFrameRendered(
             sfuId = "sfu-1",
             callId = "call-1",
             callType = "default",

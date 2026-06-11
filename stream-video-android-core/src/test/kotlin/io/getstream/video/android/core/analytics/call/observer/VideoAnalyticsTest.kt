@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.analytics.call.observer
 
+import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Subscriber
@@ -38,20 +39,29 @@ class VideoAnalyticsTest {
     private val webRtcTrack = mockk<org.webrtc.VideoTrack>()
     private val remoteSubscriber = mockk<Subscriber>()
     private val rtcSession = mockk<RtcSession>()
+    private val myParticipant = mockk<ParticipantState>()
 
     private lateinit var videoAnalytics: VideoAnalytics
 
     @Before
     fun setup() {
         every { webRtcTrack.id() } returns "track-1"
+        every { myParticipant.sessionId } returns "local-session"
         every { remoteSubscriber.getTrack(any(), any()) } returns
             VideoTrack(streamId = "remote-session", video = webRtcTrack)
         every { rtcSession.subscriber } returns MutableStateFlow<Subscriber?>(remoteSubscriber)
         every {
-            reporter.reportFirstVideoFrameRendered(any(), any(), any(), any(), any(), any(), any())
+            reporter.reportFirstRemoteVideoFrameRendered(any(), any(), any(), any(), any(), any(), any())
         } returns "video-stage-1"
 
-        videoAnalytics = VideoAnalytics("call-1", "default", reporter, joinHolder, sfuHolder)
+        videoAnalytics = VideoAnalytics(
+            "call-1",
+            "default",
+            MutableStateFlow<ParticipantState?>(myParticipant),
+            reporter,
+            joinHolder,
+            sfuHolder,
+        )
     }
 
     private fun render(
@@ -74,7 +84,7 @@ class VideoAnalyticsTest {
 
         assertEquals("video-stage-1", videoAnalytics.stageId.value)
         verify(exactly = 1) {
-            reporter.reportFirstVideoFrameRendered(
+            reporter.reportFirstRemoteVideoFrameRendered(
                 any(),
                 any(),
                 any(),
@@ -92,7 +102,15 @@ class VideoAnalyticsTest {
         render()
 
         verify(exactly = 1) {
-            reporter.reportFirstVideoFrameRendered(any(), any(), any(), any(), any(), any(), any())
+            reporter.reportFirstRemoteVideoFrameRendered(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
         }
     }
 
@@ -101,7 +119,15 @@ class VideoAnalyticsTest {
         render(trackType = TrackType.TRACK_TYPE_SCREEN_SHARE)
 
         verify(exactly = 1) {
-            reporter.reportFirstVideoFrameRendered(any(), any(), any(), any(), any(), any(), any())
+            reporter.reportFirstRemoteVideoFrameRendered(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
         }
     }
 
@@ -110,7 +136,15 @@ class VideoAnalyticsTest {
         render(videoSessionId = "local-session", callSessionId = "local-session")
 
         verify(exactly = 0) {
-            reporter.reportFirstVideoFrameRendered(any(), any(), any(), any(), any(), any(), any())
+            reporter.reportFirstRemoteVideoFrameRendered(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
         }
         assertEquals("", videoAnalytics.stageId.value)
     }
@@ -120,7 +154,15 @@ class VideoAnalyticsTest {
         render(trackType = TrackType.TRACK_TYPE_AUDIO)
 
         verify(exactly = 0) {
-            reporter.reportFirstVideoFrameRendered(any(), any(), any(), any(), any(), any(), any())
+            reporter.reportFirstRemoteVideoFrameRendered(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
         }
     }
 
@@ -129,7 +171,15 @@ class VideoAnalyticsTest {
         render(session = null)
 
         verify(exactly = 0) {
-            reporter.reportFirstVideoFrameRendered(any(), any(), any(), any(), any(), any(), any())
+            reporter.reportFirstRemoteVideoFrameRendered(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
         }
     }
 
@@ -140,7 +190,15 @@ class VideoAnalyticsTest {
         render()
 
         verify(exactly = 2) {
-            reporter.reportFirstVideoFrameRendered(any(), any(), any(), any(), any(), any(), any())
+            reporter.reportFirstRemoteVideoFrameRendered(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
         }
     }
 }

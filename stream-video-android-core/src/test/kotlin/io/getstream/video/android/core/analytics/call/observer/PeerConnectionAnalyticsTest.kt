@@ -86,6 +86,7 @@ class PeerConnectionAnalyticsTest {
         sfuHolder.updateSfuId("sfu-7")
 
         analytics(CoroutineScope(Dispatchers.Unconfined)).onPeerConnectionStateChanged(
+            peerConnectionHashCode = 42,
             role = PeerConnectionRole.SUBSCRIBE,
             iceState = PeerConnection.IceConnectionState.CHECKING,
             peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
@@ -93,6 +94,7 @@ class PeerConnectionAnalyticsTest {
 
         verify(exactly = 1) {
             reporter.onPeerConnectionStateChanged(
+                peerConnectionHashCode = 42,
                 callId = "call-1",
                 callType = "default",
                 joinStageAttemptId = "attempt-7",
@@ -120,6 +122,7 @@ class PeerConnectionAnalyticsTest {
         assertEquals(Stage.IN_PROGRESS, stateHolder.state.value.publisherStage)
         verify {
             reporter.onPeerConnectionStateChanged(
+                peerConnectionHashCode = any(),
                 callId = "call-1",
                 callType = "default",
                 joinStageAttemptId = any(),
@@ -145,7 +148,7 @@ class PeerConnectionAnalyticsTest {
         analytics(scope).observePeerConnections(MutableStateFlow<RtcSession?>(session))
         runCurrent()
 
-        assertEquals(Stage.NOT_STARTED, stateHolder.state.value.publisherStage)
+        assertEquals(Stage.COMPLETED, stateHolder.state.value.publisherStage)
         scope.cancel()
     }
 

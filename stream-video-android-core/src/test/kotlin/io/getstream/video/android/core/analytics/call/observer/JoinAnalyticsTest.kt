@@ -106,7 +106,7 @@ class JoinAnalyticsTest {
             reporter.reportCoordinatorJoinCompleted("stage-1", true, 2, null, null, "session-9")
         }
         assertEquals(1, joinSuccessCount)
-        assertEquals(Stage.NOT_STARTED, stateHolder.state.value.joinStage)
+        assertEquals(Stage.COMPLETED, stateHolder.state.value.joinStage)
         assertEquals("session-9", stateHolder.state.value.callSessionId)
     }
 
@@ -129,7 +129,7 @@ class JoinAnalyticsTest {
         verify(exactly = 1) {
             reporter.reportCoordinatorJoinCompleted("stage-1", false, 3, "boom", null, null)
         }
-        assertEquals(Stage.NOT_STARTED, stateHolder.state.value.joinStage)
+        assertEquals(Stage.COMPLETED, stateHolder.state.value.joinStage)
         assertEquals(0, joinSuccessCount)
     }
 
@@ -142,6 +142,6 @@ class JoinAnalyticsTest {
         verify(exactly = 1) {
             reporter.reportCoordinatorJoinCompleted("stage-1", false, 5, "exhausted", null, null)
         }
-        assertEquals(Stage.NOT_STARTED, stateHolder.state.value.joinStage)
+        assertEquals(Stage.COMPLETED, stateHolder.state.value.joinStage)
     }
 }
