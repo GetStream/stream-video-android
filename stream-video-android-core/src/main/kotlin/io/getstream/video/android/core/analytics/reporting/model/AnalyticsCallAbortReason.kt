@@ -16,7 +16,14 @@
 
 package io.getstream.video.android.core.analytics.reporting.model
 
-internal enum class AnalyticsCallAbortReason(val code: String, val message: String) {
-    CLIENT_ABORTED("CLIENT_ABORTED", "Aborted: user left during retry"),
-    BACKEND_LEAVE("BACKEND_LEAVE", "Aborted: backend ended call during connect"),
+internal enum class AnalyticsCallAbortReason(val code: String) {
+    CLIENT_ABORTED("CLIENT_ABORTED"),
+    BACKEND_LEAVE("BACKEND_LEAVE"),
+    NETWORK_OFFLINE("NETWORK_OFFLINE"),
+    RETRY_EXHAUSTED("RETRY_EXHAUSTED"),
+    SDK_DRIVEN_ANDROID("SDK_DRIVEN_ANDROID"),
+    REQUEST_TIMEOUT("REQUEST_TIMEOUT"),
+    SFU_ERROR("SFU_ERROR"),
+    SERVER_ERROR("SERVER_ERROR"),
+    CUSTOM("CUSTOM"),
 }

@@ -63,6 +63,7 @@ import io.getstream.result.flatMap
 import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
+import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
@@ -632,6 +633,7 @@ public class Call(
                     state._connection.value = RealtimeConnection.Failed(result.value)
                     callAnalytics.joinAnalytics.onJoinRequestPermanentError(
                         retryCount,
+                        AnalyticsCallAbortReason.SERVER_ERROR.name,
                         result.value.message,
                     )
                     return result
@@ -646,6 +648,7 @@ public class Call(
         state._connection.value = RealtimeConnection.Failed(errorMessage)
         callAnalytics.joinAnalytics.onJoinRequestRetryExhausted(
             retryCount,
+            AnalyticsCallAbortReason.RETRY_EXHAUSTED.name,
             errorMessage,
         )
         return Failure(value = Error.GenericError(errorMessage))
@@ -1081,6 +1084,7 @@ public class Call(
                 logger.w { message }
                 callAnalytics.joinAnalytics.onJoinRequestRetryExhausted(
                     loopIteration,
+                    AnalyticsCallAbortReason.RETRY_EXHAUSTED.name,
                     message,
                 )
                 leave(

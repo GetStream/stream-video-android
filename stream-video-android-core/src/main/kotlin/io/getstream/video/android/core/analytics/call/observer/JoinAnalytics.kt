@@ -82,7 +82,7 @@ internal class JoinAnalytics(
         }
     }
 
-    fun onJoinRequestPermanentError(retryCount: Int, message: String) {
+    fun onJoinRequestPermanentError(retryCount: Int, failureCode: String, message: String) {
         when (joinAnalyticsStateHolder.state.value.joinStage) {
             Stage.IN_PROGRESS -> {
                 if (joinAnalyticsStateHolder.state.value.stageId.isNotEmpty()) {
@@ -91,6 +91,7 @@ internal class JoinAnalytics(
                         success = false,
                         retryCount = retryCount,
                         failureReason = message,
+                        failureCode = failureCode,
                     )
                 }
                 joinAnalyticsStateHolder.updateStage(Stage.COMPLETED)
@@ -99,8 +100,8 @@ internal class JoinAnalytics(
         }
     }
 
-    fun onJoinRequestRetryExhausted(retryCount: Int, message: String) {
-        onJoinRequestPermanentError(retryCount, message)
+    fun onJoinRequestRetryExhausted(retryCount: Int, failureCode: String, message: String) {
+        onJoinRequestPermanentError(retryCount, failureCode, message)
     }
 
     fun resetStage() {

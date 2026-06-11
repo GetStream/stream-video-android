@@ -44,9 +44,7 @@ internal class CoordinatorAnalytics(
                             VideoSocketConnectionType.INITIAL_CONNECTION -> {
                                 stageId.value = eventReporter.reportCoordinatorWSInitiated()
                             }
-
-                            VideoSocketConnectionType.AUTOMATIC_RECONNECTION -> {}
-                            VideoSocketConnectionType.FORCE_RECONNECTION -> {}
+                            else -> {}
                         }
                     }
 

@@ -47,7 +47,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
-import io.getstream.video.android.core.analytics.reporting.model.AnalyticsFailureCodes
+import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.Subscriber
@@ -924,7 +924,7 @@ public class RtcSession internal constructor(
                     success = false,
                     retryCount = joinAnalyticsModel?.retryAttempt ?: 0,
                     failureReason = msg,
-                    failureCode = "WS_DISCONNECTED",
+                    failureCode = AnalyticsCallAbortReason.SFU_ERROR.name,
                 )
                 SfuConnectionResult.Failed(Exception(msg))
             }
@@ -934,8 +934,8 @@ public class RtcSession internal constructor(
                 call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
                     success = false,
                     retryCount = joinAnalyticsModel?.retryAttempt ?: 0,
-                    failureReason = AnalyticsFailureCodes.SFU_REQUEST_TIMEOUT.message,
-                    failureCode = AnalyticsFailureCodes.SFU_REQUEST_TIMEOUT.code,
+                    failureReason = "SFU connection timed out",
+                    failureCode = AnalyticsCallAbortReason.REQUEST_TIMEOUT.name,
                 )
                 SfuConnectionResult.Failed(Exception("SFU connection timed out"))
             }

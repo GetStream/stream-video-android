@@ -24,7 +24,6 @@ import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
 import io.getstream.video.android.core.analytics.reporting.dispatcher.ImmediateEventDispatcher
-import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.analytics.reporting.model.CoordinatorFlightSession
 import io.getstream.video.android.core.analytics.reporting.model.EventOutcome
 import io.getstream.video.android.core.analytics.reporting.model.EventStage
@@ -68,9 +67,7 @@ internal class ClientEventReporter(
                         SupervisorJob(UserScope().coroutineContext[Job]) +
                             Dispatchers.IO +
                             CoroutineExceptionHandler(handler = { _, throwable ->
-                                {
-                                    Log.e("ClientEvent", "Error in ClientEventReporter: $throwable")
-                                }
+                                Log.e("ClientEvent", "Error in ClientEventReporter: $throwable")
                             }),
                     ),
                 ),
@@ -82,15 +79,6 @@ internal class ClientEventReporter(
 
     private val logger by taggedLogger("ClientEventReporter")
 
-    private val deliveryScope = CoroutineScope(
-        SupervisorJob(UserScope().coroutineContext[Job]) +
-            Dispatchers.IO +
-            CoroutineExceptionHandler(handler = { _, throwable ->
-                {
-                    logger.e { "Error in ClientEventReporter: $throwable" }
-                }
-            }),
-    )
     private val clientEventFactory = ClientEventFactory(sdkVersion, userAgent) {
         this.coordinatorConnectId
     }
@@ -202,7 +190,7 @@ internal class ClientEventReporter(
         success: Boolean,
         retryCount: Int,
         failureReason: String? = null,
-        failureCode: String? = null, // TODO Rahul, ask tomorrow
+        failureCode: String? = null,
         callSessionId: String? = null,
     ) = completePostCall(stageId) { session, elapsedTime ->
         clientEventFactory.buildRequest(
@@ -590,10 +578,13 @@ internal class ClientEventReporter(
         return stageId
     }
 
-    internal fun abortAllPostCallInFlight(reason: AnalyticsCallAbortReason) {
-        val snapshot: List<PostCallFlightSession> =
-            postCallFlightSessions.values.filterIsInstance<PostCallFlightSession>().toList()
-        postCallFlightSessions.clear()
+    internal fun abortAllPostCallInFlight(failCode: String, failMessage: String) {
+        val snapshot = mutableListOf<PostCallFlightSession>()
+        postCallFlightSessions.entries.forEach { (stageId, session) ->
+            if (session is PostCallFlightSession && postCallFlightSessions.remove(stageId, session)) {
+                snapshot += session
+            }
+        }
         val now = System.currentTimeMillis()
         val events = snapshot.map { session ->
             clientEventFactory.buildRequest(
@@ -605,8 +596,8 @@ internal class ClientEventReporter(
                 elapsedTime = now - session.startedAtMs,
                 outcome = EventOutcome.FAILURE,
                 retryCountAttempt = 0,
-                retryFailureReason = reason.message,
-                retryFailureCode = reason.code,
+                retryFailureReason = failMessage,
+                retryFailureCode = failCode,
                 sfuId = session.sfuId,
                 callSessionId = session.callSessionId,
                 peerConnection = session.peerConnectionRole,

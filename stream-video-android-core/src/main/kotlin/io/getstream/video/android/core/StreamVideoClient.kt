@@ -236,7 +236,7 @@ internal class StreamVideoClient internal constructor(
     internal fun getAudioContext(): AudioExecutionContext = audioExecutionContext
 
     val socketImpl = coordinatorConnectionModule.socketConnection
-    val coordinatorAnalytics = CoordinatorAnalytics(scope, state.clientEventReporter)
+    val coordinatorAnalytics = CoordinatorAnalytics(scope, clientEventReporter)
     fun onCallCleanUp(call: Call) {
         if (enableCallUpdatesAfterLeave) {
             logger.d { "[cleanup] Call updates are required, preserve the instance: ${call.cid}" }

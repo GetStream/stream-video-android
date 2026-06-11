@@ -16,12 +16,6 @@
 
 package io.getstream.video.android.core.analytics.reporting.model
 
-internal enum class AnalyticsFailureCodes(val code: String, val message: String) {
-    CLIENT_ABORTED("CLIENT_ABORTED", "Aborted: user left during retry"),
-    BACKEND_LEAVE("BACKEND_LEAVE", "Aborted: backend ended call during connect"),
-    NETWORK_OFFLINE("NETWORK_OFFLINE", "Device offline"),
-    ICE_GATHERING_FAILED("ICE_GATHERING_FAILED", "ICE gathering failed"),
-    ICE_CONNECTIVITY_FAILED("ICE_CONNECTIVITY_FAILED", "ICE connectivity failed"),
-    REQUEST_TIMEOUT("REQUEST_TIMEOUT", "Device offline"),
-    SFU_REQUEST_TIMEOUT("REQUEST_TIMEOUT", "SFU connection timed out"),
-}
+// internal enum class AnalyticsFailureCodes(val code: String, val message: String) {
+//    SFU_REQUEST_TIMEOUT("REQUEST_TIMEOUT", "SFU connection timed out"),
+// }

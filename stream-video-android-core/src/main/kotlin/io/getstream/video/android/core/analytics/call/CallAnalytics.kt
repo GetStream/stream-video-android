@@ -97,11 +97,31 @@ internal class CallAnalytics(
                 peerConnectionAnalytics.stateHolder.state.value.subscriberStage == Stage.IN_PROGRESS
 
         if (isAnyStageInProgress) {
-            val abortReason = when (callLeaveReason) {
-                is CallLeaveReason.Backend -> AnalyticsCallAbortReason.BACKEND_LEAVE
-                else -> AnalyticsCallAbortReason.CLIENT_ABORTED
+            val pairCodeWithMessage = when (callLeaveReason) {
+                is CallLeaveReason.Backend -> {
+                    if (callLeaveReason.cause == io.getstream.video.android.core.BackendCause.LEAVE_TIMEOUT_AFTER_DISCONNECT) {
+                        Pair(AnalyticsCallAbortReason.NETWORK_OFFLINE, callLeaveReason.message)
+                    } else {
+                        Pair(AnalyticsCallAbortReason.BACKEND_LEAVE, callLeaveReason.message)
+                    }
+                }
+                is CallLeaveReason.UserAction -> {
+                    Pair(AnalyticsCallAbortReason.CLIENT_ABORTED, callLeaveReason.message)
+                }
+                is CallLeaveReason.RetryExhausted -> {
+                    Pair(AnalyticsCallAbortReason.RETRY_EXHAUSTED, callLeaveReason.message)
+                }
+                is CallLeaveReason.SdkDriven -> {
+                    Pair(AnalyticsCallAbortReason.SDK_DRIVEN_ANDROID, callLeaveReason.message)
+                }
+                is CallLeaveReason.Custom -> {
+                    Pair(AnalyticsCallAbortReason.CUSTOM, callLeaveReason.message)
+                }
             }
-            eventReporter.abortAllPostCallInFlight(abortReason)
+            eventReporter.abortAllPostCallInFlight(
+                pairCodeWithMessage.first.name,
+                pairCodeWithMessage.second,
+            )
         }
     }
 
