@@ -920,12 +920,20 @@ public class RtcSession internal constructor(
                 logger.w { "[connectInternal] $msg" }
                 sfuTracer.trace("connect-failed", msg)
                 sendCallStats()
-                call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
-                    success = false,
-                    retryCount = joinAnalyticsModel?.retryAttempt ?: 0,
-                    failureReason = msg,
-                    failureCode = AnalyticsCallAbortReason.SFU_ERROR.name,
-                )
+                when (terminalState) {
+                    is SfuSocketState.Disconnected.DisconnectedTemporarily,
+                    is SfuSocketState.Disconnected.DisconnectedPermanently -> {
+                        call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
+                            success = false,
+                            retryCount = joinAnalyticsModel?.retryAttempt ?: 0,
+                            failureReason = msg,
+                            failureCode = AnalyticsCallAbortReason.SFU_ERROR.name,
+                        )
+                    }
+
+                    else -> {}
+                }
+
                 SfuConnectionResult.Failed(Exception(msg))
             }
             else -> {
