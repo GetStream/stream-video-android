@@ -85,6 +85,6 @@ internal class ClientEventFactory(val sdkVersion: String, val userAgent: () -> S
     )
 
     fun getPermissionStatusText(allowed: Boolean?): String? {
-        return if (allowed == true) "GRANTED" else if (allowed == false) "NOT_GRANTED" else null
+        return if (allowed == true) "GRANTED" else if (allowed == false) "FAILED" else null
     }
 }
