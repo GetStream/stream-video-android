@@ -20,6 +20,7 @@ import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyti
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
+import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -124,10 +125,21 @@ class JoinAnalyticsTest {
     fun `onJoinRequestPermanentError completes the stage as failure`() {
         joinAnalytics.onJoinRequestStart(JoinReason.FirstAttempt)
 
-        joinAnalytics.onJoinRequestPermanentError(retryCount = 3, message = "boom")
+        joinAnalytics.onJoinRequestPermanentError(
+            retryCount = 3,
+            AnalyticsCallAbortReason.SERVER_ERROR.name,
+            message = "boom",
+        )
 
         verify(exactly = 1) {
-            reporter.reportCoordinatorJoinCompleted("stage-1", false, 3, "boom", null, null)
+            reporter.reportCoordinatorJoinCompleted(
+                "stage-1",
+                false,
+                3,
+                "boom",
+                AnalyticsCallAbortReason.SERVER_ERROR.name,
+                null,
+            )
         }
         assertEquals(Stage.COMPLETED, stateHolder.state.value.joinStage)
         assertEquals(0, joinSuccessCount)
@@ -137,10 +149,21 @@ class JoinAnalyticsTest {
     fun `onJoinRequestRetryExhausted behaves like a permanent error`() {
         joinAnalytics.onJoinRequestStart(JoinReason.FirstAttempt)
 
-        joinAnalytics.onJoinRequestRetryExhausted(retryCount = 5, message = "exhausted")
+        joinAnalytics.onJoinRequestRetryExhausted(
+            retryCount = 5,
+            AnalyticsCallAbortReason.RETRY_EXHAUSTED.name,
+            message = "exhausted",
+        )
 
         verify(exactly = 1) {
-            reporter.reportCoordinatorJoinCompleted("stage-1", false, 5, "exhausted", null, null)
+            reporter.reportCoordinatorJoinCompleted(
+                "stage-1",
+                false,
+                5,
+                "exhausted",
+                AnalyticsCallAbortReason.RETRY_EXHAUSTED.name,
+                null,
+            )
         }
         assertEquals(Stage.COMPLETED, stateHolder.state.value.joinStage)
     }

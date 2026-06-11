@@ -16,9 +16,11 @@
 
 package io.getstream.video.android.core.analytics.call
 
+import io.getstream.video.android.core.BackendCause
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.UserActionCause
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
@@ -36,8 +38,8 @@ import org.junit.Test
 class CallAnalyticsTest {
 
     private val reporter = mockk<ClientEventReporter>(relaxed = true)
-    private val userLeave = mockk<CallLeaveReason.UserAction>()
-    private val backendLeave = mockk<CallLeaveReason.Backend>()
+    private val userLeave = CallLeaveReason.UserAction(UserActionCause.CANCELLED_BY_SELF)
+    private val backendLeave = CallLeaveReason.Backend(BackendCause.CALL_ENDED_EVENT)
 
     private fun callAnalytics(scope: CoroutineScope) = CallAnalytics(
         context = mockk(relaxed = true),
@@ -54,7 +56,7 @@ class CallAnalyticsTest {
     fun `onCallLeave without any stage in progress does not abort`() = runTest {
         callAnalytics(backgroundScope).onCallLeave(userLeave)
 
-        verify(exactly = 0) { reporter.abortAllPostCallInFlight(any()) }
+        verify(exactly = 0) { reporter.abortAllPostCallInFlight(any(), any()) }
     }
 
     @Test
@@ -65,7 +67,7 @@ class CallAnalyticsTest {
         analytics.onCallLeave(userLeave)
 
         verify(exactly = 1) {
-            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED)
+            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED.name, any())
         }
     }
 
@@ -77,7 +79,7 @@ class CallAnalyticsTest {
         analytics.onCallLeave(backendLeave)
 
         verify(exactly = 1) {
-            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.BACKEND_LEAVE)
+            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.BACKEND_LEAVE.name, any())
         }
     }
 
@@ -89,7 +91,7 @@ class CallAnalyticsTest {
         analytics.onCallLeave(userLeave)
 
         verify(exactly = 1) {
-            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED)
+            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED.name, any())
         }
     }
 
@@ -101,7 +103,7 @@ class CallAnalyticsTest {
         analytics.onCallLeave(userLeave)
 
         verify(exactly = 1) {
-            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED)
+            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED.name, any())
         }
     }
 
@@ -113,7 +115,7 @@ class CallAnalyticsTest {
         analytics.onCallLeave(userLeave)
 
         verify(exactly = 1) {
-            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED)
+            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED.name, any())
         }
     }
 

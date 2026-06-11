@@ -383,7 +383,10 @@ class ClientEventReporterTest {
         openSfuWsJoin()
         dispatcher.sent.clear()
 
-        reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED)
+        reporter.abortAllPostCallInFlight(
+            AnalyticsCallAbortReason.CLIENT_ABORTED.name,
+            "user left the call",
+        )
 
         assertEquals(1, dispatcher.batches.size)
         val aborted = dispatcher.batches.first()
@@ -394,7 +397,7 @@ class ClientEventReporterTest {
             aborted.all { it.retryFailureCode == AnalyticsCallAbortReason.CLIENT_ABORTED.code },
         )
         assertTrue(
-            aborted.all { it.retryFailureReason == AnalyticsCallAbortReason.CLIENT_ABORTED.message },
+            aborted.all { it.retryFailureReason == "user left the call" },
         )
 
         dispatcher.sent.clear()
