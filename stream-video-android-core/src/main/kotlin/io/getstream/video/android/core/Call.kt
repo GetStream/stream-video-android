@@ -805,6 +805,10 @@ public class Call(
         }
         monitorPublisherPCStateJob?.cancel()
         callAnalytics.peerConnectionAnalytics.stopAndObservePeerConnections(session)
+        callAnalytics.audioAnalytics.observeFirstRemoteParticipantAudioMuteState(
+            session,
+            state.participants,
+        )
         monitorPublisherPCStateJob = scope.launch {
             session
                 .filterNotNull()

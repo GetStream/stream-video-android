@@ -21,6 +21,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.analytics.call.observer.AudioAnalytics
 import io.getstream.video.android.core.analytics.call.observer.JoinAnalytics
 import io.getstream.video.android.core.analytics.call.observer.JoinAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver
@@ -75,6 +76,15 @@ internal class CallAnalytics(
     val mediaPermissionObserver =
         MediaPermissionObserver(context, callId, callType, eventReporter, joinAnalyticsStateHolder)
 
+    val audioAnalytics =
+        AudioAnalytics(
+            callId,
+            callType,
+            eventReporter,
+            joinAnalyticsStateHolder,
+            sfuAnalyticsStateHolder,
+            observerScope,
+        )
     val videoAnalytics =
         VideoAnalytics(
             callId,
@@ -87,6 +97,7 @@ internal class CallAnalytics(
 
     fun resetAfterJoinSuccess() {
         videoAnalytics.reset()
+        audioAnalytics.reset()
     }
 
     fun onCallLeave(callLeaveReason: CallLeaveReason) {

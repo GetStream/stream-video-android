@@ -455,6 +455,6 @@ class ClientEventReporterTest {
         val event = dispatcher.sent.single()
         assertEquals(EventStage.Call.MEDIA_DEVICE_PERMISSION.value, event.stage)
         assertEquals("GRANTED", event.cameraPermissionStatus)
-        assertEquals("NOT_GRANTED", event.microphonePermissionStatus)
+        assertEquals("FAILED", event.microphonePermissionStatus)
     }
 }
