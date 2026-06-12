@@ -45,11 +45,15 @@ import io.getstream.result.extractCause
 import io.getstream.result.flatMap
 import io.getstream.result.onErrorSuspend
 import io.getstream.result.onSuccessSuspend
+import io.getstream.video.android.core.BackendCause
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallJoinInterceptor
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.UserActionCause
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.state.AcceptCall
 import io.getstream.video.android.core.call.state.CallAction
@@ -92,7 +96,7 @@ import kotlinx.coroutines.withContext
 import java.util.Locale
 
 @OptIn(StreamCallActivityDelicateApi::class)
-public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOperations {
+public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOperationsWithCallLeaveReason {
     // Factory and creation
     public companion object {
         // Extra keys
@@ -242,6 +246,12 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                 val configuration = configurationMap[error.call.id]
                 if (configuration?.closeScreenOnError == true) {
                     logger.e(error) { "Finishing the activity" }
+                    error.call.leave(
+                        CallLeaveReason.SdkDriven(
+                            SdkCause.STREAM_CALL_ACTIVITY_EXCEPTION,
+                            "${error.message}",
+                        ),
+                    )
                     safeFinish()
                 }
             } else {
@@ -473,7 +483,15 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
                     participantCountJob = null
 
                     // We want to leave the ongoing active call
-                    leave(activeCall, onSuccessFinish, onErrorFinish)
+                    leave(
+                        activeCall,
+                        CallLeaveReason.UserAction(
+                            UserActionCause.CANCELLED_BY_SELF,
+                            "Leaving current ongoing call to pick incoming-call with call_cid:$newCallCid",
+                        ),
+                        onSuccessFinish,
+                        onErrorFinish,
+                    )
                     lifecycleScope.launch(Dispatchers.Default) {
                         delay(
                             getCallTransitionTime(),
@@ -764,7 +782,15 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * @param call the call.
      */
     public open fun onBackPressed(call: Call) {
-        leave(call, onSuccessFinish, onErrorFinish)
+        leave(
+            call,
+            CallLeaveReason.UserAction(
+                UserActionCause.CANCELLED_BY_SELF,
+                "Cancelled the call on back press",
+            ),
+            onSuccessFinish,
+            onErrorFinish,
+        )
     }
 
     // Decision making
@@ -1037,7 +1063,12 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             }
 
             // Leave regardless of outcome
-            call.leave()
+            call.leave(
+                CallLeaveReason.UserAction(
+                    UserActionCause.REJECTED_BY_SELF,
+                    "Rejected the call",
+                ),
+            )
         }
     }
 
@@ -1072,11 +1103,20 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         onSuccess: (suspend (Call) -> Unit)?,
         onError: (suspend (Exception) -> Unit)?,
     ) {
+        leave(call, CallLeaveReason.Custom(""), onSuccess, onError)
+    }
+
+    override fun leave(
+        call: Call,
+        callLeaveReason: CallLeaveReason,
+        onSuccess: (suspend (Call) -> Unit)?,
+        onError: (suspend (Exception) -> Unit)?,
+    ) {
         logger.d { "Leave call, ${call.cid}" }
         lifecycleScope.launch(Dispatchers.IO) {
             // Will quietly leave the call, leaving it intact for the other participants.
             try {
-                call.leave()
+                call.leave(callLeaveReason)
                 onSuccess?.invoke(call)
             } catch (e: Exception) {
                 onError?.invoke(e)
@@ -1099,7 +1139,9 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     ) {
         lifecycleScope.launch(Dispatchers.IO) {
             val result = call.end()
-            result.onOutcome(call, { leave(call, onSuccess, onError) }, onError)
+            result.onOutcome(call, {
+                leave(call, CallLeaveReason.Custom("Ending the call"), onSuccess, onError)
+            }, onError)
         }
     }
 
@@ -1116,7 +1158,14 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         logger.i { "[onCallAction] #ringing; action: $action, call.cid: ${call.cid}" }
         when (action) {
             is LeaveCall -> {
-                leave(call, onSuccessFinish, onErrorFinish)
+                leave(
+                    call,
+                    CallLeaveReason.UserAction(
+                        UserActionCause.CANCELLED_BY_SELF,
+                    ),
+                    onSuccessFinish,
+                    onErrorFinish,
+                )
             }
 
             is DeclineCall -> {
@@ -1160,9 +1209,26 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     @CallSuper
     public open fun onCallEvent(call: Call, event: VideoEvent) {
         when (event) {
-            is CallEndedEvent, is CallEndedSfuEvent, is CallSessionEndedEvent, is LocalCallMissedEvent -> {
-                // In any case finish the activity, the call is done for
-                leave(call, onSuccess = onSuccessFinish, onError = onErrorFinish)
+            is CallEndedEvent, is CallEndedSfuEvent, is LocalCallMissedEvent -> {
+                // CallState already called leave() for these events with the correct structured
+                // reason. Just finish the activity — re-leaving here would race with CallState's
+                // leave and risk locking in the wrong reason via atomicLeave ordering.
+                lifecycleScope.launch {
+                    onSuccessFinish.invoke(call)
+                }
+            }
+
+            is CallSessionEndedEvent -> {
+                // CallState does NOT call leave() for CallSessionEndedEvent, so we must do it
+                // here. The event is backend-driven, so use the correct Backend category.
+                leave(
+                    call,
+                    CallLeaveReason.Backend(
+                        BackendCause.CALL_SESSION_ENDED_EVENT,
+                    ),
+                    onSuccess = onSuccessFinish,
+                    onError = onErrorFinish,
+                )
             }
 
             is ParticipantLeftEvent, is CallSessionParticipantLeftEvent -> {
@@ -1339,7 +1405,12 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
             if (activeCall != null) {
                 if (activeCall.id != call.id) {
                     // If the call id is different leave the previous call
-                    activeCall.leave()
+                    activeCall.leave(
+                        CallLeaveReason.SdkDriven(
+                            SdkCause.LEAVE_PREVIOUS_CALL_TO_ACCEPT_NEW_CALL,
+                            "Leaving previous call with cid: ${activeCall.cid} to accept new call with cid:${call.cid}",
+                        ),
+                    )
                     logger.d { "Leave active call, ${call.cid}" }
                     // Join the call, only if accept succeeds
                     val result = what(call)

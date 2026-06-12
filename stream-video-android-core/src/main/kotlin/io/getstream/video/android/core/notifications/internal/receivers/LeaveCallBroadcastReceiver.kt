@@ -21,6 +21,8 @@ import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
+import io.getstream.video.android.core.UserActionCause
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LEAVE_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
 
@@ -37,7 +39,11 @@ internal class LeaveCallBroadcastReceiver : GenericCallActionBroadcastReceiver()
     override suspend fun onReceive(call: Call, context: Context, intent: Intent) {
         logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
 
-        call.leave("LeaveCallBroadcastReceiver")
+        call.leave(
+            CallLeaveReason.UserAction(
+                UserActionCause.LEAVE_FROM_NOTIFICATION,
+            ),
+        )
         val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
         logger.d { "[onReceive], notificationId: $notificationId" }
         NotificationManagerCompat.from(context).cancel(notificationId)

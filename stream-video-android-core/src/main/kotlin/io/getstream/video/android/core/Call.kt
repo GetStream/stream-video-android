@@ -430,10 +430,11 @@ public class Call(
                     }
                     return@launch
                 }
+                val message = "Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds}"
                 logger.d {
                     "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds} (connection=$conn)"
                 }
-                leave()
+                leave(CallLeaveReason.Backend(cause = BackendCause.LEAVE_TIMEOUT_AFTER_DISCONNECT, message = message))
             }
             logger.d { "[NetworkStateListener#onDisconnected] #network; at $lastDisconnect" }
         }
@@ -639,7 +640,12 @@ public class Call(
             }.onError {
                 logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
                 state.toggleJoinAndRingProgress(false)
-                leave("ring-failed (${it.message})")
+                leave(
+                    CallLeaveReason.Backend(
+                        BackendCause.RING_FAILED,
+                        message = "ring-failed (${it.message})",
+                    ),
+                )
             }
         }
     }
@@ -984,7 +990,9 @@ public class Call(
 
                     is ReconnectOutcome.Disconnect -> {
                         logger.w { "[reconnect] DISCONNECT requested — leaving call" }
-                        leave("SFU:DISCONNECT")
+                        leave(
+                            CallLeaveReason.Backend(BackendCause.SFU_DISCONNECT),
+                        )
                         break
                     }
 
@@ -1026,7 +1034,13 @@ public class Call(
 
             if (state.connection.value is RealtimeConnection.ReconnectingFailed) {
                 logger.w { "[reconnect] All recovery attempts exhausted — leaving call ($reason)" }
-                leave("reconnect-failed:$reason")
+                leave(
+                    CallLeaveReason.RetryExhausted(
+                        loopIteration,
+                        "reconnect-failed",
+                        "All recovery attempts exhausted — leaving call ($reason)",
+                    ),
+                )
             }
         } finally {
             // Always release the mutex — even on exceptions or coroutine
@@ -1221,13 +1235,18 @@ public class Call(
 
     // endregion
 
-    /** Leave the call, but don't end it for other users */
-    fun leave(reason: String = "user") {
-        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
-        internalLeave(null, reason)
+    @InternalStreamVideoApi
+    fun leave(reason: CallLeaveReason) {
+        logger.d { "[leave] #ringing; call_cid:$cid" }
+        internalLeave(reason)
     }
 
-    private fun internalLeave(disconnectionReason: Throwable?, reason: String) = atomicLeave {
+    fun leave(reason: String = "user") {
+        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
+        internalLeave(CallLeaveReason.Custom(reason))
+    }
+
+    private fun internalLeave(reason: CallLeaveReason) = atomicLeave {
         monitorSubscriberPCStateJob?.cancel()
         monitorPublisherPCStateJob?.cancel()
         monitorPublisherPCStateJob = null
@@ -1237,7 +1256,7 @@ public class Call(
         sfuListener?.cancel()
         sfuEvents?.cancel()
         state._connection.value = RealtimeConnection.Disconnected
-        logger.v { "[leave] #ringing; disconnectionReason: $disconnectionReason, call_id = $id" }
+        logger.v { "[leave] #ringing; call_id = $id" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
             return@atomicLeave
@@ -1267,7 +1286,7 @@ public class Call(
         (client as StreamVideoClient).onCallCleanUp(this)
 
         clientImpl.scope.launch {
-            val leaveReason = "[reason=$reason, error=${disconnectionReason?.message}]"
+            val leaveReason = "[reason=${reason::class.simpleName}, message=${reason.message}]"
             safeCall {
                 session.value?.sfuTracer?.trace("leave-call", leaveReason)
                 val stats = collectStats()
@@ -1284,7 +1303,12 @@ public class Call(
         // end the call for everyone
         val result = clientImpl.endCall(type, id)
         // cleanup
-        leave("call-ended")
+        leave(
+            CallLeaveReason.SdkDriven(
+                cause = SdkCause.END_CALL,
+                message = "CALL_ENDED", // Call ended by local user
+            ),
+        )
         return result
     }
 

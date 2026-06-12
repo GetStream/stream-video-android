@@ -76,7 +76,9 @@ import io.getstream.video.android.compose.ui.components.call.renderer.VideoRende
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LocalVideoContentSize
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
@@ -189,7 +191,12 @@ public fun CallContent(
                 enterPictureInPicture(context = context, call = call, pictureInPictureConfiguration)
             } catch (e: Exception) {
                 StreamLog.e(tag = "CallContent") { e.stackTraceToString() }
-                call.leave()
+                call.leave(
+                    CallLeaveReason.SdkDriven(
+                        SdkCause.PIP_ERROR,
+                        "Error in Pip: ${e.message}",
+                    ),
+                )
             }
         } else {
             onBackPressed.invoke()

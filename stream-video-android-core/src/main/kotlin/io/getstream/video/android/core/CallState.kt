@@ -837,7 +837,13 @@ public class CallState(
                 } else if (callRingState is RingingState.Incoming && event.user.id == client.userId) {
                     // Call accepted by me + this device is Incoming => I accepted on another device
                     // Then leave the call on this device
-                    if (!acceptedOnThisDevice) call.leave("accepted-on-another-device")
+                    if (!acceptedOnThisDevice) {
+                        call.leave(
+                            CallLeaveReason.SdkDriven(
+                                SdkCause.ACCEPTED_ON_OTHER_DEVICE,
+                            ),
+                        )
+                    }
                 }
                 call.fireEvent(
                     LocalCallAcceptedPostEvent(
@@ -889,7 +895,11 @@ public class CallState(
                     }
                     _rejectedBy.value = newRejectedBySet.toSet()
                     _ringingState.value = RingingState.RejectedByAll
-                    call.leave("LocalCallMissedEvent")
+                    call.leave(
+                        CallLeaveReason.SdkDriven(
+                            SdkCause.LOCAL_CALL_MISSED_EVENT,
+                        ),
+                    )
 
                     val activeCallExists = client.state.activeCall.value != null
                     if (activeCallExists) {
@@ -910,12 +920,20 @@ public class CallState(
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
                 _endedByUser.value = event.user?.toUser()
                 updateRingingState()
-                call.leave("CallEndedEvent")
+                call.leave(
+                    CallLeaveReason.Backend(
+                        cause = BackendCause.CALL_ENDED_EVENT,
+                    ),
+                ) // Call ended by backend
             }
 
             is CallEndedSfuEvent -> {
                 _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
-                call.leave("CallEndedSfuEvent")
+                call.leave(
+                    CallLeaveReason.Backend(
+                        cause = BackendCause.CALL_ENDED_SFU_EVENT,
+                    ),
+                ) // Call ended by SFU
             }
 
             is CallMemberUpdatedEvent -> {
@@ -1339,13 +1357,18 @@ public class CallState(
             cancelTimeout()
             RingingState.RejectedByAll
         } else if (isRejectedByMe) {
-            call.leave("updateRingingState-rejected-self")
+            call.leave(
+                CallLeaveReason.UserAction(
+                    UserActionCause.REJECTED_BY_SELF,
+                    message = "updateRingingState-rejected-self",
+                ),
+            ) // User rejected the call
             cancelTimeout()
             RingingState.RejectedByAll
         } else if ((rejectedBy.isNotEmpty() && rejectedBy.size >= outgoingMembersCount) ||
             (rejectedBy.contains(createdBy?.id) && hasRingingCall)
         ) {
-            call.leave("updateRingingState-rejected")
+            call.leave(CallLeaveReason.SdkDriven(cause = SdkCause.REJECTED_BY_ALL))
             cancelTimeout()
 
             if (rejectReason?.alias == REJECT_REASON_TIMEOUT) {
@@ -1487,7 +1510,8 @@ public class CallState(
                 if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
                     isJoinAndRingInProgress.set(false)
                     call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
-                    call.leave("start-ringing-timeout")
+                    val leaveMessage = if (_ringingState.value is RingingState.Outgoing) "Outgoing call timed out with no answer" else "Incoming call timed out with no answer"
+                    call.leave(CallLeaveReason.SdkDriven(cause = SdkCause.RING_TIMEOUT, message = leaveMessage))
                 }
             } else {
                 logger.w { "[startRingingTimer] No autoCancelTimeoutMs set - call ring with no timeout" }
@@ -1855,7 +1879,7 @@ public class CallState(
                 .collect { isOnHold ->
                     when (ringingState.value) {
                         is RingingState.Active -> {
-                            call.leave("call-on-hold")
+                            call.leave(CallLeaveReason.SdkDriven(cause = SdkCause.CALL_ON_HOLD))
                         }
                         else -> {}
                     }
