@@ -35,16 +35,10 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Response for reporting client-side telemetry events
  */
 
-data class Location (
-    @Json(name = "continent_code")
-    val continentCode: kotlin.String,
-
-    @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String,
-
-    @Json(name = "subdivision_iso_code")
-    val subdivisionIsoCode: kotlin.String
+data class ReportClientEventResponse (
+    @Json(name = "duration")
+    val duration: kotlin.String
 )

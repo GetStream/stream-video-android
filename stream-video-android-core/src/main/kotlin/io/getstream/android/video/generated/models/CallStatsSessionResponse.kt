@@ -38,13 +38,25 @@ import com.squareup.moshi.ToJson
  * 
  */
 
-data class PrivacySettings (
-    @Json(name = "delivery_receipts")
-    val deliveryReceipts: io.getstream.android.video.generated.models.DeliveryReceipts? = null,
+data class CallStatsSessionResponse (
+    @Json(name = "call_id")
+    val callId: kotlin.String,
 
-    @Json(name = "read_receipts")
-    val readReceipts: io.getstream.android.video.generated.models.ReadReceipts? = null,
+    @Json(name = "call_session_id")
+    val callSessionId: kotlin.String,
 
-    @Json(name = "typing_indicators")
-    val typingIndicators: io.getstream.android.video.generated.models.TypingIndicators? = null
+    @Json(name = "call_type")
+    val callType: kotlin.String,
+
+    @Json(name = "generated_at")
+    val generatedAt: org.threeten.bp.OffsetDateTime,
+
+    @Json(name = "counts")
+    val counts: io.getstream.android.video.generated.models.CallStatsParticipantCounts,
+
+    @Json(name = "call_ended_at")
+    val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
+
+    @Json(name = "call_started_at")
+    val callStartedAt: org.threeten.bp.OffsetDateTime? = null
 )

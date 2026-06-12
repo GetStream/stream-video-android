@@ -35,25 +35,13 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * Request to resolve SIP inbound routing using challenge authentication
+ * Geographic coordinates
  */
 
-data class ResolveSipInboundRequest (
-    @Json(name = "sip_caller_number")
-    val sipCallerNumber: kotlin.String,
+data class CoordinatesResponse (
+    @Json(name = "latitude")
+    val latitude: kotlin.Float,
 
-    @Json(name = "sip_trunk_number")
-    val sipTrunkNumber: kotlin.String,
-
-    @Json(name = "routing_number")
-    val routingNumber: kotlin.String? = null,
-
-    @Json(name = "trunk_id")
-    val trunkId: kotlin.String? = null,
-
-    @Json(name = "challenge")
-    val challenge: io.getstream.android.video.generated.models.SIPChallengeRequest? = null,
-
-    @Json(name = "sip_headers")
-    val sipHeaders: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()
+    @Json(name = "longitude")
+    val longitude: kotlin.Float
 )

@@ -35,13 +35,10 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * Reports a batch of client-side telemetry events. Each event is validated and processed independently; one invalid event does not block the rest of the batch.
  */
 
-data class Coordinates (
-    @Json(name = "latitude")
-    val latitude: kotlin.Float,
-
-    @Json(name = "longitude")
-    val longitude: kotlin.Float
+data class ReportClientEventRequest (
+    @Json(name = "events")
+    val events: kotlin.collections.List<io.getstream.android.video.generated.models.ClientEvent> = emptyList()
 )
