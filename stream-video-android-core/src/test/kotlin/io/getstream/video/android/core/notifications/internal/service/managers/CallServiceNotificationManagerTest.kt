@@ -143,6 +143,8 @@ class CallServiceNotificationManagerTest {
         every { StreamVideo.instanceOrNull() } returns streamVideoClient
 
         every { streamVideoClient.scope } returns TestScope()
+        every { streamVideoClient.state } returns mockk(relaxed = true)
+        every { streamVideoClient.context } returns mockk(relaxed = true)
 
         val call = Call(streamVideoClient, callId.type, callId.id, mockk())
         every { streamVideoClient.call(callId.type, callId.id) } returns call
@@ -172,6 +174,8 @@ class CallServiceNotificationManagerTest {
 
         val streamVideoClient = mockk<StreamVideoClient> {
             every { this@mockk.streamNotificationManager } returns streamNotificationManager
+            every { this@mockk.state } returns mockk(relaxed = true)
+            every { this@mockk.context } returns mockk(relaxed = true)
         }
 
         every { streamVideoClient.scope } returns TestScope()

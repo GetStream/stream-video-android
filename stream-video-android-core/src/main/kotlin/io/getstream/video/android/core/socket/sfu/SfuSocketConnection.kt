@@ -18,6 +18,7 @@ package io.getstream.video.android.core.socket.sfu
 
 import androidx.lifecycle.Lifecycle
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.SfuDataEvent
@@ -50,7 +51,7 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import stream.video.sfu.event.JoinRequest
 
-class SfuSocketConnection(
+class SfuSocketConnection internal constructor(
     private val apiKey: ApiKey,
     /** The URL to connect to */
     private val url: String,
@@ -65,9 +66,34 @@ class SfuSocketConnection(
     /** Token provider */
     private val tokenProvider: TokenProvider,
     private val tokenRepository: TokenRepository,
+    private val sfuAnalytics: SfuAnalytics,
 ) : SocketListener<SfuDataEvent, JoinCallResponseEvent>(),
     SocketActions<SfuDataRequest, SfuDataEvent, StreamWebSocketEvent.Error, SfuSocketState, SfuToken, JoinRequest> {
 
+    @Deprecated(
+        message = "Pass a SfuAnalytics which is needed to trace sfu join events. ",
+        level = DeprecationLevel.WARNING,
+    )
+    public constructor(
+        apiKey: ApiKey,
+        url: String,
+        httpClient: OkHttpClient,
+        networkStateProvider: NetworkStateProvider,
+        scope: CoroutineScope = UserScope(ClientScope()),
+        lifecycle: Lifecycle,
+        tokenProvider: TokenProvider,
+        tokenRepository: TokenRepository,
+    ) : this(
+        apiKey = apiKey,
+        url = url,
+        httpClient = httpClient,
+        networkStateProvider = networkStateProvider,
+        scope = scope,
+        lifecycle = lifecycle,
+        tokenProvider = tokenProvider,
+        tokenRepository = tokenRepository,
+        sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+    )
     companion object {
         internal const val DEFAULT_SFU_SOCKET_TIMEOUT: Long = 10000L
     }
@@ -85,6 +111,7 @@ class SfuSocketConnection(
         lifecycleObserver = StreamLifecycleObserver(scope, lifecycle),
         networkStateProvider = networkStateProvider,
         userScope = scope as? UserScope ?: UserScope(ClientScope()),
+        sfuAnalytics = sfuAnalytics,
     ).also {
         it.addListener(this)
     }

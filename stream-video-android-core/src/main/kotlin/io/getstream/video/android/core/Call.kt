@@ -60,6 +60,10 @@ import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
+import io.getstream.video.android.core.analytics.call.CallAnalytics
+import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
+import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
@@ -313,6 +317,18 @@ public class Call(
             _peerConnectionFactory = value
         }
 
+    internal val callAnalytics =
+        CallAnalytics(
+            clientImpl.context,
+            this.id,
+            this.type,
+            state.me,
+            state.connection,
+            state.participants,
+            client.state.clientEventReporter,
+            scope,
+        )
+
     /**
      * Checks if the audioBitrateProfile has changed since the factory was created,
      * and recreates the factory if needed. This should only be called before joining.
@@ -551,6 +567,8 @@ public class Call(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
+        callAnalytics.joinAnalytics.onJoinFunctionStart()
+        callAnalytics.mediaPermissionObserver.mediaPermissionStatus()
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
@@ -585,7 +603,14 @@ public class Call(
 
         atomicLeave = AtomicUnitCall()
         while (retryCount < 3) {
-            result = _join(create, createOptions, ring, notify, hintHighScaleLivestreamPublisher)
+            result = _join(
+                create,
+                createOptions,
+                ring,
+                notify,
+                hintHighScaleLivestreamPublisher,
+                JoinAnalyticsModel(retryCount, JoinReason.FirstAttempt),
+            )
             if (result is Success) {
                 // we initialise the camera, mic and other according to local + backend settings
                 // only when the call is joined to make sure we don't switch and override
@@ -606,6 +631,11 @@ public class Call(
                 logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
+                    callAnalytics.joinAnalytics.onJoinRequestPermanentError(
+                        retryCount,
+                        AnalyticsCallAbortReason.SERVER_ERROR.name,
+                        result.value.message,
+                    )
                     return result
                 } else {
                     retryCount += 1
@@ -616,6 +646,11 @@ public class Call(
         session.value = null
         val errorMessage = "Join failed after 3 retries"
         state._connection.value = RealtimeConnection.Failed(errorMessage)
+        callAnalytics.joinAnalytics.onJoinRequestRetryExhausted(
+            retryCount,
+            AnalyticsCallAbortReason.RETRY_EXHAUSTED.name,
+            errorMessage,
+        )
         return Failure(value = Error.GenericError(errorMessage))
     }
 
@@ -665,6 +700,7 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
+        joinAnalyticsModel: JoinAnalyticsModel,
     ): Result<RtcSession> {
         nonFastReconnectAttempts = 0
         sfuEvents?.cancel()
@@ -699,6 +735,7 @@ public class Call(
                 ring = ring,
                 notify = notify,
                 hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
+                joinAnalyticsModel = joinAnalyticsModel,
             )
 
         if (result !is Success) {
@@ -724,6 +761,11 @@ public class Call(
                 sfuName = sfuName,
                 remoteIceServers = iceServers,
                 powerManager = powerManager,
+                sfuAnalytics = callAnalytics.sfuAnalytics.apply {
+                    sfuAnalyticsStateHolder.updateSfuId(
+                        sfuName,
+                    )
+                },
             )
         }
         session.value = localSession
@@ -762,7 +804,11 @@ public class Call(
             }
         }
         monitorPublisherPCStateJob?.cancel()
-
+        callAnalytics.peerConnectionAnalytics.stopAndObservePeerConnections(session)
+        callAnalytics.audioAnalytics.observeFirstRemoteParticipantAudioMuteState(
+            session,
+            state.participants,
+        )
         monitorPublisherPCStateJob = scope.launch {
             session
                 .filterNotNull()
@@ -973,12 +1019,17 @@ public class Call(
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
                         nonFastReconnectAttempts++
-                        reconnectRejoin(reason)
+                        reconnectRejoin(
+                            reason,
+                            JoinAnalyticsModel(nonFastReconnectAttempts, JoinReason.ReJoin),
+                        )
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
                         nonFastReconnectAttempts++
-                        reconnectMigrate()
+                        reconnectMigrate(
+                            JoinAnalyticsModel(nonFastReconnectAttempts, JoinReason.Migrate),
+                        )
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT ->
@@ -1033,12 +1084,18 @@ public class Call(
             }
 
             if (state.connection.value is RealtimeConnection.ReconnectingFailed) {
-                logger.w { "[reconnect] All recovery attempts exhausted — leaving call ($reason)" }
+                val message = "[reconnect] All recovery attempts exhausted — leaving call ($reason)"
+                logger.w { message }
+                callAnalytics.joinAnalytics.onJoinRequestRetryExhausted(
+                    loopIteration,
+                    AnalyticsCallAbortReason.RETRY_EXHAUSTED.name,
+                    message,
+                )
                 leave(
                     CallLeaveReason.RetryExhausted(
                         loopIteration,
                         "reconnect-failed",
-                        "All recovery attempts exhausted — leaving call ($reason)",
+                        message,
                     ),
                 )
             }
@@ -1090,7 +1147,10 @@ public class Call(
      * previous_session_id is set so the SFU can transfer state (tracks,
      * subscriptions) from the old session to the new one.
      */
-    private suspend fun reconnectRejoin(reason: String): ReconnectOutcome {
+    private suspend fun reconnectRejoin(
+        reason: String,
+        joinAnalyticsModel: JoinAnalyticsModel,
+    ): ReconnectOutcome {
         logger.d { "[reconnectRejoin] reconnectAttempts=$nonFastReconnectAttempts" }
         state._connection.value = RealtimeConnection.Reconnecting
         val loc = location
@@ -1099,7 +1159,7 @@ public class Call(
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for rejoin")
         reconnectStartTime = System.currentTimeMillis()
 
-        val joinResponse = joinRequest(location = loc)
+        val joinResponse = joinRequest(location = loc, joinAnalyticsModel = joinAnalyticsModel)
         if (joinResponse !is Success) {
             return ReconnectOutcome.Failed(
                 Exception("Failed to get join response: ${joinResponse.errorOrNull()}"),
@@ -1135,10 +1195,21 @@ public class Call(
             cred.token,
             cred.server.edgeName,
             cred.iceServers.map { ice -> ice.toIceServer() },
+            sfuAnalytics = callAnalytics.sfuAnalytics.apply {
+                sfuAnalyticsStateHolder.updateSfuId(
+                    cred.server.edgeName,
+                )
+            },
         )
         this.session.value = newSession
 
-        return when (val result = newSession.connectInternal(reconnectDetails, currentOptions)) {
+        return when (
+            val result = newSession.connectInternal(
+                reconnectDetails,
+                currentOptions,
+                JoinAnalyticsModel(joinAnalyticsModel.retryAttempt),
+            )
+        ) {
             is SfuConnectionResult.Connected -> {
                 newSession.sfuTracer.trace("rejoin", reason)
                 monitorSession(joinResponse.value)
@@ -1152,7 +1223,7 @@ public class Call(
      * Migrate to another SFU. Reuses the same session ID — the SFU
      * identifies the participant via from_sfu_id, not previous_session_id.
      */
-    private suspend fun reconnectMigrate(): ReconnectOutcome {
+    private suspend fun reconnectMigrate(joinAnalyticsModel: JoinAnalyticsModel): ReconnectOutcome {
         logger.d { "[reconnectMigrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
         val loc = location
@@ -1162,7 +1233,12 @@ public class Call(
         reconnectStartTime = System.currentTimeMillis()
         addFailedSfuId(oldSession.sfuName)
 
-        val joinResponse = joinRequest(location = loc, migratingFrom = oldSession.sfuName)
+        val joinResponse =
+            joinRequest(
+                location = loc,
+                migratingFrom = oldSession.sfuName,
+                joinAnalyticsModel = joinAnalyticsModel,
+            )
         if (joinResponse !is Success) {
             return ReconnectOutcome.Failed(
                 Exception(
@@ -1203,11 +1279,20 @@ public class Call(
             cred.token,
             cred.server.edgeName,
             cred.iceServers.map { ice -> ice.toIceServer() },
+            sfuAnalytics = callAnalytics.sfuAnalytics.apply {
+                sfuAnalyticsStateHolder.updateSfuId(
+                    cred.server.edgeName,
+                )
+            },
         )
         this.session.value = newSession
 
         return try {
-            val result = newSession.connectInternal(reconnectDetails, currentOptions)
+            val result = newSession.connectInternal(
+                reconnectDetails,
+                currentOptions,
+                JoinAnalyticsModel(joinAnalyticsModel.retryAttempt),
+            )
             when (result) {
                 is SfuConnectionResult.Connected -> {
                     monitorSession(joinResponse.value)
@@ -1249,6 +1334,7 @@ public class Call(
     private fun internalLeave(reason: CallLeaveReason) = atomicLeave {
         monitorSubscriberPCStateJob?.cancel()
         monitorPublisherPCStateJob?.cancel()
+        callAnalytics.stopObservers()
         monitorPublisherPCStateJob = null
         monitorSubscriberPCStateJob = null
         leaveTimeoutAfterDisconnect?.cancel()
@@ -1287,6 +1373,7 @@ public class Call(
 
         clientImpl.scope.launch {
             val leaveReason = "[reason=${reason::class.simpleName}, message=${reason.message}]"
+            callAnalytics.onCallLeave(session, reason)
             safeCall {
                 session.value?.sfuTracer?.trace("leave-call", leaveReason)
                 val stats = collectStats()
@@ -1448,6 +1535,15 @@ public class Call(
                         )
                     }
                     onRendered(videoRenderer)
+                    callAnalytics.videoAnalytics.firstVideoFrameRendered(
+
+                        trackType,
+                        width,
+                        height,
+                        rtcSession = session.value,
+                        sessionId,
+                        this@Call.sessionId,
+                    )
                 }
 
                 override fun onFrameResolutionChanged(
@@ -1826,8 +1922,10 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
+        joinAnalyticsModel: JoinAnalyticsModel,
     ): Result<JoinCallResponse> {
         val migratingFromList = migratingFromList ?: getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
+        callAnalytics.joinAnalytics.onJoinRequestStart(joinAnalyticsModel.joinReason)
         val result = clientImpl.joinCall(
             type, id,
             create = create != null,
@@ -1844,6 +1942,10 @@ public class Call(
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
         )
         result.onSuccess {
+            callAnalytics.joinAnalytics.onJoinRequestSuccess(
+                joinAnalyticsModel,
+                it.call.currentSessionId,
+            )
             state.updateFromResponse(it)
         }
         return result

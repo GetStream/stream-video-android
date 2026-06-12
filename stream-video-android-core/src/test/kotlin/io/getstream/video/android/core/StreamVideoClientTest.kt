@@ -102,6 +102,7 @@ class StreamVideoClientTest {
                 enableCallNotificationUpdates = false,
                 sounds = sounds,
                 vibrationConfig = vibration,
+                clientEventReporter = mockk(relaxed = true),
             ),
             recordPrivateCalls = true,
         )
@@ -430,6 +431,7 @@ class StreamVideoClientTest {
             enableCallNotificationUpdates = false,
             sounds = mockk(relaxed = true),
             vibrationConfig = mockk(relaxed = true),
+            clientEventReporter = mockk(relaxed = true),
         )
 
         client.setupGuestUser(client.user)

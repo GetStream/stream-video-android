@@ -45,6 +45,9 @@ import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
+import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
+import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.Subscriber
@@ -258,6 +261,7 @@ public class RtcSession internal constructor(
             ).replace("/twirp", "")
         }",
     ),
+    private val sfuAnalytics: SfuAnalytics,
     private val sfuConnectionModuleProvider: () -> SfuConnectionModule = {
         SfuConnectionModule(
             context = clientImpl.context,
@@ -292,6 +296,7 @@ public class RtcSession internal constructor(
             },
             tracer = sfuTracer,
             tokenRepository = TokenRepository(sfuToken),
+            sfuAnalytics = sfuAnalytics,
         )
     },
 ) {
@@ -694,6 +699,10 @@ public class RtcSession internal constructor(
                         pendingTrickleEvents.forEach {
                             sendIceCandidate(it.first, it.second)
                         }
+                        call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
+                            success = true,
+                            retryCount = 0,
+                        )
                     }
 
                     is SfuSocketState.Connecting -> {
@@ -878,6 +887,7 @@ public class RtcSession internal constructor(
     internal suspend fun connectInternal(
         reconnectDetails: ReconnectDetails? = null,
         options: List<PublishOption>? = null,
+        joinAnalyticsModel: JoinAnalyticsModel? = null,
     ): SfuConnectionResult {
         logger.i { "[connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
         val request = buildJoinRequest(reconnectDetails, options)
@@ -910,11 +920,32 @@ public class RtcSession internal constructor(
                 logger.w { "[connectInternal] $msg" }
                 sfuTracer.trace("connect-failed", msg)
                 sendCallStats()
+                when (terminalState) {
+                    is SfuSocketState.Disconnected.DisconnectedTemporarily,
+                    is SfuSocketState.Disconnected.DisconnectedPermanently,
+                    -> {
+                        call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
+                            success = false,
+                            retryCount = joinAnalyticsModel?.retryAttempt ?: 0,
+                            failureReason = msg,
+                            failureCode = AnalyticsCallAbortReason.SFU_ERROR.name,
+                        )
+                    }
+
+                    else -> {}
+                }
+
                 SfuConnectionResult.Failed(Exception(msg))
             }
             else -> {
                 sfuTracer.trace("connect-failed", "Connection timed out")
                 sendCallStats()
+                call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
+                    success = false,
+                    retryCount = joinAnalyticsModel?.retryAttempt ?: 0,
+                    failureReason = "SFU connection timed out",
+                    failureCode = AnalyticsCallAbortReason.REQUEST_TIMEOUT.name,
+                )
                 SfuConnectionResult.Failed(Exception("SFU connection timed out"))
             }
         }
@@ -1889,7 +1920,7 @@ public class RtcSession internal constructor(
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
 
-    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?): FastReconnectResult {
+    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?, joinAnalyticsModel: JoinAnalyticsModel? = null): FastReconnectResult {
         logger.d { "[fastReconnect] Starting fast reconnect." }
         sfuTracer.trace("fastReconnect", reconnectDetails.toString())
         val (_, _, publisherTracks) = currentSfuInfo()
@@ -1898,6 +1929,7 @@ public class RtcSession internal constructor(
         val connectResult = connectInternal(
             reconnectDetails,
             publisher.value?.currentOptions(),
+            joinAnalyticsModel,
         )
         if (connectResult is SfuConnectionResult.Failed) {
             return FastReconnectResult.Failed(connectResult.error)
