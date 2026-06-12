@@ -709,12 +709,12 @@ public class RtcSession internal constructor(
                         val strategy = sfuSocketState.reconnectStrategy
                         val reason = "SFU:${sfuSocketState.error.message}:$strategy"
                         logger.w { "[stateJob] SFU sent $strategy for $sfuName" }
-                        coroutineScope.launch { call.reconnect(strategy, reason) }
+                        call.scope.launch { call.reconnect(strategy, reason) }
                     }
 
                     is SfuSocketState.Disconnected.WebSocketEventLost -> {
                         logger.w { "[stateJob] HealthMonitor detected event loss for $sfuName — triggering reconnect" }
-                        coroutineScope.launch {
+                        call.scope.launch {
                             call.reconnect(
                                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                                 "SFU:healthcheck-timeout",
@@ -1335,7 +1335,7 @@ public class RtcSession internal constructor(
             rejoin = {
                 logger.d { "[createPublisher] rejoin attempt, connection state: ${call.state.connection.value}" }
                 if (call.state.connection.value !is RealtimeConnection.Reconnecting) {
-                    coroutineScope.launch {
+                    call.scope.launch {
                         serialProcessor.submit("publisherRejoin") {
                             logger.d {
                                 "[createPublisher] rejoin attempt EXECUTE, connection state: ${call.state.connection.value} "
