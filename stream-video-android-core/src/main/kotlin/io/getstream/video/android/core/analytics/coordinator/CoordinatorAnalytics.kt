@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.analytics.coordinator
 
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketStateService
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketConnectionType
@@ -38,39 +39,44 @@ internal class CoordinatorAnalytics(
         endObserver()
         job = observerScope.launch {
             videoSocketStateFlow.collect {
-                when (it) {
-                    is VideoSocketState.Connecting -> {
-                        when (it.connectionType) {
-                            VideoSocketConnectionType.INITIAL_CONNECTION -> {
-                                stageId.value = eventReporter.reportCoordinatorWSInitiated()
+                // because demo-app invokes coordinator join before user id is ready
+                val userIdIsNotNull = StreamVideo.instanceOrNull()?.userId != null
+                if (userIdIsNotNull) {
+                    when (it) {
+                        is VideoSocketState.Connecting -> {
+                            when (it.connectionType) {
+                                VideoSocketConnectionType.INITIAL_CONNECTION -> {
+                                    stageId.value = eventReporter.reportCoordinatorWSInitiated()
+                                }
+
+                                else -> {}
                             }
-                            else -> {}
                         }
-                    }
 
-                    is VideoSocketState.Connected -> {
-                        if (stageId.value.isNotEmpty()) {
-                            eventReporter.reportCoordinatorWSCompleted(
-                                stageId.value,
-                                true,
-                                CoordinatorSocketStateService.Companion.lastRetryAttempts,
-                            )
-                            stageId.value = ""
+                        is VideoSocketState.Connected -> {
+                            if (stageId.value.isNotEmpty()) {
+                                eventReporter.reportCoordinatorWSCompleted(
+                                    stageId.value,
+                                    true,
+                                    CoordinatorSocketStateService.Companion.lastRetryAttempts,
+                                )
+                                stageId.value = ""
+                            }
                         }
-                    }
 
-                    is VideoSocketState.Disconnected.DisconnectedPermanently -> {
-                        if (stageId.value.isNotEmpty()) {
-                            eventReporter.reportCoordinatorWSCompleted(
-                                stageId.value,
-                                false,
-                                CoordinatorSocketStateService.Companion.lastRetryAttempts,
-                            )
-                            stageId.value = ""
+                        is VideoSocketState.Disconnected.DisconnectedPermanently -> {
+                            if (stageId.value.isNotEmpty()) {
+                                eventReporter.reportCoordinatorWSCompleted(
+                                    stageId.value,
+                                    false,
+                                    CoordinatorSocketStateService.Companion.lastRetryAttempts,
+                                )
+                                stageId.value = ""
+                            }
                         }
-                    }
 
-                    else -> {}
+                        else -> {}
+                    }
                 }
             }
         }
