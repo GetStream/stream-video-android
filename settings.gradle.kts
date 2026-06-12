@@ -17,10 +17,6 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven(url = "https://plugins.gradle.org/m2/")
-
-        flatDir {
-            dirs("$rootDir/libs")
-        }
     }
 }
 

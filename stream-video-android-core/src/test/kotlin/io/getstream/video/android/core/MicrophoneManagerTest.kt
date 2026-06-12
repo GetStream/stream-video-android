@@ -423,6 +423,11 @@ class MicrophoneManagerTest {
         audioTrack: AudioTrack = mockk(relaxed = true),
     ): MicrophoneManager {
         every { mediaManager.audioTrack } returns audioTrack
+        // enable()/disable() route through runOnAudioTrackIfAvailable; invoke the block with the
+        // mock track so the trySetEnabled verifications still apply.
+        every { mediaManager.runOnAudioTrackIfAvailable(any()) } answers {
+            firstArg<(AudioTrack) -> Unit>().invoke(audioTrack)
+        }
         every { mediaManager.speaker } returns mockSpeakerManager(isEnabled = false)
 
         val microphoneManager =

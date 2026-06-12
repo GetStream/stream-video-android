@@ -714,7 +714,7 @@ public class RtcSession internal constructor(
 
                     is SfuSocketState.Disconnected.WebSocketEventLost -> {
                         logger.w { "[stateJob] HealthMonitor detected event loss for $sfuName — triggering reconnect" }
-                        coroutineScope.launch {
+                        call.scope.launch {
                             call.reconnect(
                                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                                 "SFU:healthcheck-timeout",

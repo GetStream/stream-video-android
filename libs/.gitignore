@@ -1,3 +1,0 @@
-# The root .gitignore excludes all *.aar files.
-# This folder intentionally tracks local AARs that are not published to any Maven repository.
-!*.aar

@@ -289,7 +289,7 @@ dependencies {
     // Http
     implementation(libs.okhttp)
 
-    implementation(":audioswitch-release-v1.2.0-internal-1@aar")
+    implementation(libs.audioswitch)
 
     // Logging
     implementation(libs.okhttp.logging)

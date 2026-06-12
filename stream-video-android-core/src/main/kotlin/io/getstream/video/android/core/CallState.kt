@@ -1464,16 +1464,29 @@ public class CallState(
         session: CallSessionResponse? = null,
         sfuHealthCheckEvent: SFUHealthCheckEvent? = null,
     ) {
-        // When in JOINED state, we should use the participant from SFU health check event, as it's more accurate.
-
+        // Once we're in the call, the SFU health check is the single source of truth for
+        // participant counts. Coordinator session snapshots (counts_updated, participant_joined/left,
+        // and any event carrying a CallSessionResponse) carry a smaller, stale view at scale and
+        // must NOT clobber the SFU value — that produces wild fluctuations in livestreams.
         if (sfuHealthCheckEvent != null) {
             _participantCounts.value = sfuHealthCheckEvent.participantCount
-        } else if (session != null && connection.value !is RealtimeConnection.Joined) {
+        } else if (session != null && !isInCall()) {
+            val byRoleCount = session.participantsCountByRole.values.sum()
+            val nonAnonymous = maxOf(byRoleCount, session.participants.size)
             _participantCounts.value = ParticipantCount(
-                total = session.anonymousParticipantCount + session.participantsCountByRole.values.sum(),
+                total = session.anonymousParticipantCount + nonAnonymous,
                 anonymous = session.anonymousParticipantCount,
             )
         }
+    }
+
+    private fun isInCall(): Boolean = when (connection.value) {
+        is RealtimeConnection.Joined,
+        is RealtimeConnection.Connected,
+        is RealtimeConnection.Reconnecting,
+        is RealtimeConnection.Migrating,
+        -> true
+        else -> false
     }
 
     fun markSpeakingAsMuted() {

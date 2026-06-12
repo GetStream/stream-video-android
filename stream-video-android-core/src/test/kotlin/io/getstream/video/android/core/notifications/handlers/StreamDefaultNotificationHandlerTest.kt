@@ -34,6 +34,7 @@ import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.model.StreamCallId
@@ -1118,5 +1119,35 @@ class StreamDefaultNotificationHandlerTest {
                 payload = payload,
             )
         }
+    }
+
+    @Test
+    fun `getSettingUpCallNotification sets a small icon for non-incoming trigger so startForeground does not crash`() {
+        // Given
+        val mockkApp = mockk<Application>(relaxed = true)
+        every { mockkApp.applicationContext } returns mockkApp
+        every { mockkApp.getString(any()) } returns "Test String"
+
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockkApp,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
+        )
+
+        // When - the non-incoming path (e.g. livestream/outgoing) is used to start the call
+        // foreground service; without a small icon Android rejects it on startForeground.
+        val result = testHandler.getSettingUpCallNotification(
+            CallService.TRIGGER_OUTGOING_CALL,
+            testCallId,
+        )
+
+        // Then
+        assertNotNull(result)
+        verify { anyConstructed<NotificationCompat.Builder>().setSmallIcon(any<Int>()) }
     }
 }
