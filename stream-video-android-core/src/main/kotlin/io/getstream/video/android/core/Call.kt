@@ -1373,7 +1373,7 @@ public class Call(
 
         clientImpl.scope.launch {
             val leaveReason = "[reason=${reason::class.simpleName}, message=${reason.message}]"
-            callAnalytics.onCallLeave(reason)
+            callAnalytics.onCallLeave(session, reason)
             safeCall {
                 session.value?.sfuTracer?.trace("leave-call", leaveReason)
                 val stats = collectStats()

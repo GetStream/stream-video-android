@@ -24,6 +24,10 @@ import io.getstream.video.android.core.UserActionCause
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
+import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.connection.Publisher
+import io.getstream.video.android.core.call.connection.Subscriber
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
@@ -34,12 +38,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.webrtc.PeerConnection
 
 class CallAnalyticsTest {
 
     private val reporter = mockk<ClientEventReporter>(relaxed = true)
     private val userLeave = CallLeaveReason.UserAction(UserActionCause.CANCELLED_BY_SELF)
     private val backendLeave = CallLeaveReason.Backend(BackendCause.CALL_ENDED_EVENT)
+    private val noSession = MutableStateFlow<RtcSession?>(null)
 
     private fun callAnalytics(scope: CoroutineScope) = CallAnalytics(
         context = mockk(relaxed = true),
@@ -54,9 +60,9 @@ class CallAnalyticsTest {
 
     @Test
     fun `onCallLeave without any stage in progress does not abort`() = runTest {
-        callAnalytics(backgroundScope).onCallLeave(userLeave)
+        callAnalytics(backgroundScope).onCallLeave(noSession, userLeave)
 
-        verify(exactly = 0) { reporter.abortAllPostCallInFlight(any(), any()) }
+        verify(exactly = 0) { reporter.abortAllPostCallInFlight(any(), any(), any(), any()) }
     }
 
     @Test
@@ -64,10 +70,15 @@ class CallAnalyticsTest {
         val analytics = callAnalytics(backgroundScope)
         analytics.joinAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)
 
-        analytics.onCallLeave(userLeave)
+        analytics.onCallLeave(noSession, userLeave)
 
         verify(exactly = 1) {
-            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED.name, any())
+            reporter.abortAllPostCallInFlight(
+                any(),
+                any(),
+                AnalyticsCallAbortReason.CLIENT_ABORTED.name,
+                any(),
+            )
         }
     }
 
@@ -76,10 +87,15 @@ class CallAnalyticsTest {
         val analytics = callAnalytics(backgroundScope)
         analytics.joinAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)
 
-        analytics.onCallLeave(backendLeave)
+        analytics.onCallLeave(noSession, backendLeave)
 
         verify(exactly = 1) {
-            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.BACKEND_LEAVE.name, any())
+            reporter.abortAllPostCallInFlight(
+                any(),
+                any(),
+                AnalyticsCallAbortReason.BACKEND_LEAVE.name,
+                any(),
+            )
         }
     }
 
@@ -88,10 +104,15 @@ class CallAnalyticsTest {
         val analytics = callAnalytics(backgroundScope)
         analytics.sfuAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)
 
-        analytics.onCallLeave(userLeave)
+        analytics.onCallLeave(noSession, userLeave)
 
         verify(exactly = 1) {
-            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED.name, any())
+            reporter.abortAllPostCallInFlight(
+                any(),
+                any(),
+                AnalyticsCallAbortReason.CLIENT_ABORTED.name,
+                any(),
+            )
         }
     }
 
@@ -100,10 +121,15 @@ class CallAnalyticsTest {
         val analytics = callAnalytics(backgroundScope)
         analytics.peerConnectionAnalytics.stateHolder.updatePublisherStage(Stage.IN_PROGRESS)
 
-        analytics.onCallLeave(userLeave)
+        analytics.onCallLeave(noSession, userLeave)
 
         verify(exactly = 1) {
-            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED.name, any())
+            reporter.abortAllPostCallInFlight(
+                any(),
+                any(),
+                AnalyticsCallAbortReason.CLIENT_ABORTED.name,
+                any(),
+            )
         }
     }
 
@@ -112,10 +138,43 @@ class CallAnalyticsTest {
         val analytics = callAnalytics(backgroundScope)
         analytics.peerConnectionAnalytics.stateHolder.updateSubscriberStage(Stage.IN_PROGRESS)
 
-        analytics.onCallLeave(userLeave)
+        analytics.onCallLeave(noSession, userLeave)
 
         verify(exactly = 1) {
-            reporter.abortAllPostCallInFlight(AnalyticsCallAbortReason.CLIENT_ABORTED.name, any())
+            reporter.abortAllPostCallInFlight(
+                any(),
+                any(),
+                AnalyticsCallAbortReason.CLIENT_ABORTED.name,
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `an abort forwards the publisher and subscriber ice states from the session`() = runTest {
+        val analytics = callAnalytics(backgroundScope)
+        analytics.joinAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)
+        val publisher = mockk<Publisher>()
+        every { publisher.iceState } returns MutableStateFlow<PeerConnection.IceConnectionState?>(
+            PeerConnection.IceConnectionState.CONNECTED,
+        )
+        val subscriber = mockk<Subscriber>()
+        every { subscriber.iceState } returns MutableStateFlow<PeerConnection.IceConnectionState?>(
+            PeerConnection.IceConnectionState.DISCONNECTED,
+        )
+        val session = mockk<RtcSession>()
+        every { session.publisher } returns MutableStateFlow<Publisher?>(publisher)
+        every { session.subscriber } returns MutableStateFlow<Subscriber?>(subscriber)
+
+        analytics.onCallLeave(MutableStateFlow<RtcSession?>(session), userLeave)
+
+        verify(exactly = 1) {
+            reporter.abortAllPostCallInFlight(
+                PeerConnection.IceConnectionState.CONNECTED,
+                PeerConnection.IceConnectionState.DISCONNECTED,
+                AnalyticsCallAbortReason.CLIENT_ABORTED.name,
+                any(),
+            )
         }
     }
 

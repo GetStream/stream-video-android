@@ -32,6 +32,7 @@ import io.getstream.video.android.core.analytics.call.observer.VideoAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
+import io.getstream.video.android.core.call.RtcSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -100,7 +101,7 @@ internal class CallAnalytics(
         audioAnalytics.reset()
     }
 
-    fun onCallLeave(callLeaveReason: CallLeaveReason) {
+    fun onCallLeave(session: StateFlow<RtcSession?>, callLeaveReason: CallLeaveReason) {
         val isAnyStageInProgress =
             joinAnalytics.joinAnalyticsStateHolder.state.value.joinStage == Stage.IN_PROGRESS ||
                 sfuAnalytics.sfuAnalyticsStateHolder.stage.value == Stage.IN_PROGRESS ||
@@ -129,7 +130,11 @@ internal class CallAnalytics(
                     Pair(AnalyticsCallAbortReason.CUSTOM, callLeaveReason.message)
                 }
             }
+            val publisherIceState = session.value?.publisher?.value?.iceState?.value
+            val subscriberIceState = session.value?.subscriber?.value?.iceState?.value
             eventReporter.abortAllPostCallInFlight(
+                publisherIceState,
+                subscriberIceState,
                 pairCodeWithMessage.first.name,
                 pairCodeWithMessage.second,
             )

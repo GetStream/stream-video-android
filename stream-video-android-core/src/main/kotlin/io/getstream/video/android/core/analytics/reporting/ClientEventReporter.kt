@@ -572,7 +572,12 @@ internal class ClientEventReporter(
         return stageId
     }
 
-    internal fun abortAllPostCallInFlight(failCode: String, failMessage: String) {
+    internal fun abortAllPostCallInFlight(
+        publisherIceState: PeerConnection.IceConnectionState?,
+        subscriberIceState: PeerConnection.IceConnectionState?,
+        failCode: String,
+        failMessage: String,
+    ) {
         val snapshot = mutableListOf<PostCallFlightSession>()
         postCallFlightSessions.entries.forEach { (stageId, session) ->
             if (session is PostCallFlightSession && postCallFlightSessions.remove(stageId, session)) {
@@ -581,6 +586,18 @@ internal class ClientEventReporter(
         }
         val now = System.currentTimeMillis()
         val events = snapshot.map { session ->
+            val iceState = when (session.peerConnectionRole) {
+                PeerConnectionRole.PUBLISH -> {
+                    publisherIceState
+                }
+
+                PeerConnectionRole.SUBSCRIBE -> {
+                    subscriberIceState
+                }
+
+                else -> null
+            }
+
             clientEventFactory.buildRequest(
                 callId = session.callId,
                 callType = session.callType,
@@ -595,6 +612,7 @@ internal class ClientEventReporter(
                 sfuId = session.sfuId,
                 callSessionId = session.callSessionId,
                 peerConnection = session.peerConnectionRole,
+                iceState = iceState,
                 wasPreviouslyConnected = session.wasPreviouslyConnected,
                 userSessionId = session.userSessionId,
                 joinStageAttemptId = session.joinStageAttemptIdSnapshot,

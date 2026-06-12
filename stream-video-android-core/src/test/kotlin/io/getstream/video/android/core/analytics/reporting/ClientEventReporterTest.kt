@@ -384,6 +384,8 @@ class ClientEventReporterTest {
         dispatcher.sent.clear()
 
         reporter.abortAllPostCallInFlight(
+            publisherIceState = null,
+            subscriberIceState = null,
             AnalyticsCallAbortReason.CLIENT_ABORTED.name,
             "user left the call",
         )

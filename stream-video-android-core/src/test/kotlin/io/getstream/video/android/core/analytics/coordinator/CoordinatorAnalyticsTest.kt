@@ -16,12 +16,15 @@
 
 package io.getstream.video.android.core.analytics.coordinator
 
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketStateService
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketConnectionType
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +47,11 @@ class CoordinatorAnalyticsTest {
 
     @Before
     fun setup() {
+        mockkObject(StreamVideo)
+        val streamVideo = mockk<StreamVideo>(relaxed = true)
+        every { streamVideo.userId } returns "user-1"
+        every { StreamVideo.instanceOrNull() } returns streamVideo
+
         every { reporter.reportCoordinatorWSInitiated() } returns "ws-stage-1"
         previousRetryAttempts = CoordinatorSocketStateService.lastRetryAttempts
         CoordinatorSocketStateService.lastRetryAttempts = 2
@@ -51,6 +59,7 @@ class CoordinatorAnalyticsTest {
 
     @After
     fun tearDown() {
+        unmockkObject(StreamVideo)
         CoordinatorSocketStateService.lastRetryAttempts = previousRetryAttempts
     }
 
@@ -74,6 +83,17 @@ class CoordinatorAnalyticsTest {
         runCurrent()
 
         verify(exactly = 1) { reporter.reportCoordinatorWSInitiated() }
+    }
+
+    @Test
+    fun `nothing is reported while the user id is not available`() = runTest {
+        every { StreamVideo.instanceOrNull() } returns null
+        startedAnalytics()
+
+        socketState.value = connecting(VideoSocketConnectionType.INITIAL_CONNECTION)
+        runCurrent()
+
+        verify(exactly = 0) { reporter.reportCoordinatorWSInitiated() }
     }
 
     @Test
