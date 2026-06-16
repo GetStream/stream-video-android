@@ -30,6 +30,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,7 +53,9 @@ import io.getstream.video.android.compose.ui.components.call.controls.ControlAct
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.indicator.MicrophoneIndicator
+import io.getstream.video.android.compose.ui.components.video.DefaultVideoRendererPlaceholderContent
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
@@ -195,15 +201,42 @@ private fun OnRenderedContent(
     video: ParticipantState.Video,
     onRendered: (View) -> Unit = {},
 ) {
-    VideoRenderer(
+    var isVideoRendered by remember { mutableStateOf(false) }
+
+    LaunchedEffect(video.track?.streamId) {
+        isVideoRendered = false
+    }
+
+    val videoRendererConfig = remember {
+        videoRenderConfig {
+            // Loading UI is shown as an overlay until the first frame is rendered.
+            fallbackContent = {}
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(VideoTheme.colors.baseSheetTertiary)
             .testTag("on_rendered_content"),
-        call = call,
-        video = video,
-        onRendered = onRendered,
-    )
+    ) {
+        VideoRenderer(
+            modifier = Modifier.fillMaxSize(),
+            call = call,
+            video = video,
+            videoRendererConfig = videoRendererConfig,
+            onRendered = {
+                isVideoRendered = true
+                onRendered(it)
+            },
+        )
+        if (!isVideoRendered) {
+            DefaultVideoRendererPlaceholderContent(
+                modifier = Modifier.fillMaxSize(),
+                call = call,
+            )
+        }
+    }
 }
 
 @Composable

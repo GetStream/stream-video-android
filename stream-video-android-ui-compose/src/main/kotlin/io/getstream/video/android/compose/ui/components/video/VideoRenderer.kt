@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -96,7 +98,7 @@ public fun VideoRenderer(
             return
         }
 
-        // Show avatar always behind the video.
+        // Neutral placeholder rendered behind the video while the track is loading.
         videoRendererConfig.fallbackContent.invoke(call)
 
         if (video?.paused == true) {
@@ -214,7 +216,7 @@ public fun VideoRenderer(
     modifier: Modifier = Modifier,
     videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
     videoFallbackContent: @Composable (Call) -> Unit = {
-        DefaultMediaTrackFallbackContent(
+        DefaultVideoRendererPlaceholderContent(
             modifier,
             call,
         )
@@ -269,6 +271,25 @@ private fun setupVideo(
 }
 
 @Composable
+internal fun DefaultVideoRendererPlaceholderContent(
+    modifier: Modifier,
+    @Suppress("UNUSED_PARAMETER") call: Call,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(VideoTheme.colors.baseSheetTertiary)
+            .testTag("video_renderer_fallback"),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(48.dp),
+            color = VideoTheme.colors.basePrimary,
+        )
+    }
+}
+
+@Composable
 internal fun DefaultMediaTrackFallbackContent(
     modifier: Modifier,
     call: Call,
@@ -277,7 +298,7 @@ internal fun DefaultMediaTrackFallbackContent(
         modifier = modifier
             .fillMaxSize()
             .background(VideoTheme.colors.baseSheetTertiary)
-            .testTag("video_renderer_fallback"),
+            .testTag("video_renderer_fallback_error"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -382,6 +403,6 @@ private fun VideoRendererPausedPreview2() {
 private fun VideoRendererFallbackPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        DefaultMediaTrackFallbackContent(modifier = Modifier, call = previewCall)
+        DefaultVideoRendererPlaceholderContent(modifier = Modifier, call = previewCall)
     }
 }
