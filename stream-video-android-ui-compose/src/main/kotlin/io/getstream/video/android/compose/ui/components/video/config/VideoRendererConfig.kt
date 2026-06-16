@@ -23,7 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import io.getstream.video.android.compose.ui.components.video.DefaultVideoRendererPlaceholderContent
+import io.getstream.video.android.compose.ui.components.video.DefaultMediaTrackFallbackContent
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.common.util.StreamVideoExperimentalApi
@@ -105,7 +105,7 @@ public data class VideoRendererConfigCreationScope(
     public var videoScalingType: VideoScalingType = defaultScalingType,
     public var updateVisibility: Boolean = defaultUpdateVisibility,
     public var fallbackContent: @Composable (Call) -> Unit = {
-        DefaultVideoRendererPlaceholderContent(
+        DefaultMediaTrackFallbackContent(
             modifier = Modifier,
             call = it,
         )

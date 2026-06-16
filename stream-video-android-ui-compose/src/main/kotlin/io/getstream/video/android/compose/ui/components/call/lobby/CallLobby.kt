@@ -53,7 +53,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.ControlAct
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.indicator.MicrophoneIndicator
-import io.getstream.video.android.compose.ui.components.video.DefaultVideoRendererPlaceholderContent
+import io.getstream.video.android.compose.ui.components.video.DefaultMediaTrackFallbackContent
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
@@ -231,7 +231,7 @@ private fun OnRenderedContent(
             },
         )
         if (!isVideoRendered) {
-            DefaultVideoRendererPlaceholderContent(
+            DefaultMediaTrackFallbackContent(
                 modifier = Modifier.fillMaxSize(),
                 call = call,
             )

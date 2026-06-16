@@ -22,7 +22,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -216,7 +215,7 @@ public fun VideoRenderer(
     modifier: Modifier = Modifier,
     videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
     videoFallbackContent: @Composable (Call) -> Unit = {
-        DefaultVideoRendererPlaceholderContent(
+        DefaultMediaTrackFallbackContent(
             modifier,
             call,
         )
@@ -271,7 +270,7 @@ private fun setupVideo(
 }
 
 @Composable
-internal fun DefaultVideoRendererPlaceholderContent(
+internal fun DefaultMediaTrackFallbackContent(
     modifier: Modifier,
     @Suppress("UNUSED_PARAMETER") call: Call,
 ) {
@@ -285,32 +284,6 @@ internal fun DefaultVideoRendererPlaceholderContent(
         CircularProgressIndicator(
             modifier = Modifier.size(48.dp),
             color = VideoTheme.colors.basePrimary,
-        )
-    }
-}
-
-@Composable
-internal fun DefaultMediaTrackFallbackContent(
-    modifier: Modifier,
-    call: Call,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetTertiary)
-            .testTag("video_renderer_fallback_error"),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            modifier = Modifier.padding(30.dp),
-            text = stringResource(
-                id = io.getstream.video.android.ui.common.R.string.stream_video_call_rendering_failed,
-                call.sessionId,
-            ),
-            color = VideoTheme.colors.basePrimary,
-            textAlign = TextAlign.Center,
-            fontSize = 14.sp,
         )
     }
 }
@@ -403,6 +376,6 @@ private fun VideoRendererPausedPreview2() {
 private fun VideoRendererFallbackPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        DefaultVideoRendererPlaceholderContent(modifier = Modifier, call = previewCall)
+        DefaultMediaTrackFallbackContent(modifier = Modifier, call = previewCall)
     }
 }
