@@ -12654,13 +12654,13 @@ public final class io/getstream/video/android/core/model/IceCandidate {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/model/IceCandidate$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class io/getstream/video/android/core/model/IceCandidate$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/core/model/IceCandidate$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/model/IceCandidate;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/model/IceCandidate;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/model/IceCandidate;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/model/IceCandidate;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -13848,13 +13848,13 @@ public final class io/getstream/video/android/core/pip/PictureInPictureConfigura
 	public final fun component2 ()Z
 	public final fun copy (ZZ)Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
 	public static synthetic fun copy$default (Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;ZZILjava/lang/Object;)Lio/getstream/video/android/core/pip/PictureInPictureConfiguration;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAutoEnterEnabled ()Z
 	public final fun getEnable ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class io/getstream/video/android/core/pip/PictureInPictureConfiguration$Creator : android/os/Parcelable$Creator {
@@ -13912,13 +13912,13 @@ public final class io/getstream/video/android/core/socket/ErrorResponse : java/l
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/socket/ErrorResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class io/getstream/video/android/core/socket/ErrorResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/core/socket/ErrorResponse$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/socket/ErrorResponse;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/socket/ErrorResponse;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/socket/ErrorResponse;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/socket/ErrorResponse;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -13939,13 +13939,13 @@ public final class io/getstream/video/android/core/socket/SocketError {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/socket/SocketError$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class io/getstream/video/android/core/socket/SocketError$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/core/socket/SocketError$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/socket/SocketError;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/core/socket/SocketError;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/socket/SocketError;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/core/socket/SocketError;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -16084,13 +16084,13 @@ public final class io/getstream/video/android/datastore/model/StreamUserPreferen
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/datastore/model/StreamUserPreferences$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class io/getstream/video/android/datastore/model/StreamUserPreferences$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/datastore/model/StreamUserPreferences$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/datastore/model/StreamUserPreferences;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/datastore/model/StreamUserPreferences;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/datastore/model/StreamUserPreferences;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/datastore/model/StreamUserPreferences;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -16115,13 +16115,13 @@ public final class io/getstream/video/android/model/Device {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/model/Device$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class io/getstream/video/android/model/Device$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/model/Device$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/Device;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/Device;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/Device;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/Device;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -16150,7 +16150,7 @@ public final class io/getstream/video/android/model/StreamCallId : android/os/Pa
 	public final fun component4 ()Z
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lio/getstream/video/android/model/StreamCallId;
 	public static synthetic fun copy$default (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lio/getstream/video/android/model/StreamCallId;
-	public fun describeContents ()I
+	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCid ()Ljava/lang/String;
 	public final fun getId ()Ljava/lang/String;
@@ -16159,16 +16159,16 @@ public final class io/getstream/video/android/model/StreamCallId : android/os/Pa
 	public fun hashCode ()I
 	public final fun isValid ()Z
 	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class io/getstream/video/android/model/StreamCallId$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class io/getstream/video/android/model/StreamCallId$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/model/StreamCallId$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/StreamCallId;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/StreamCallId;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/StreamCallId;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/StreamCallId;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -16226,13 +16226,13 @@ public final class io/getstream/video/android/model/User {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/model/User$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class io/getstream/video/android/model/User$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/model/User$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/User;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/User;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/User;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/User;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
@@ -16273,13 +16273,13 @@ public final class io/getstream/video/android/model/UserDevices {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/model/UserDevices$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class io/getstream/video/android/model/UserDevices$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lio/getstream/video/android/model/UserDevices$$serializer;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/UserDevices;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/getstream/video/android/model/UserDevices;
 	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/UserDevices;)V
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/getstream/video/android/model/UserDevices;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
