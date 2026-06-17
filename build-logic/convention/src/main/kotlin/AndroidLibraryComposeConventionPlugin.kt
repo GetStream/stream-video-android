@@ -11,6 +11,7 @@ class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.apply("io.getstream.android.library")
+            pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
             pluginManager.apply("org.jetbrains.kotlin.android")
             pluginManager.apply("binary-compatibility-validator")
             pluginManager.apply("androidx.baselineprofile")
