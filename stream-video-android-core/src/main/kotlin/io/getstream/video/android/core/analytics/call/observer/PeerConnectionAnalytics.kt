@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.webrtc.PeerConnection
 
@@ -78,24 +78,18 @@ internal class PeerConnectionAnalytics(
     /**
      * Observes a single peer connection ([connectionOf]) for analytics.
      *
+     * Each allowed peer-connection state ([allowedPcStates]) is reported together with the ICE
+     * state as it stands at that moment ([StreamPeerConnection.iceState] value, mapped via
+     * [toVideoAnalyticsIceState]). So a CONNECTED peer connection reports CONNECTED only when its
+     * ICE is already connected, otherwise NOT_CONNECTED. The upstream filter drops a transition
+     * that would merely repeat an already-completed stage (e.g. CONNECTED after FAILED), and
+     * [distinctUntilChanged] avoids emitting the same combination twice.
+     *
      * The stage is updated in lockstep with the reported event (in the terminal collector), not
      * when the raw peer-connection state changes. It therefore stays IN_PROGRESS while the
      * peer-connection session is open and only flips to COMPLETED once the completed event is
-     * actually emitted. This keeps the call-leave flow's "is a stage still in progress?" check
-     * correct during the CONNECTED grace wait, so leaving mid-grace still aborts the open session
-     * instead of treating it as already completed.
-     *
-     * Once the peer connection enters an allowed state, the ICE state reported alongside it depends
-     * on the peer-connection state:
-     * - [PeerConnection.PeerConnectionState.CONNECTING] / [PeerConnection.PeerConnectionState.FAILED]:
-     *   report the current ICE state immediately.
-     * - [PeerConnection.PeerConnectionState.CONNECTED]: wait up to [ICE_CONNECTED_GRACE_MILLIS] for
-     *   the ICE state to become [PeerConnection.IceConnectionState.CONNECTED]; if it does not, report
-     *   whatever the ICE state is when the grace period elapses.
-     *
-     * [mapLatest] makes the ICE resolution follow the latest peer-connection state (a newer
-     * peer-connection state cancels an in-progress grace wait), and [distinctUntilChanged] avoids
-     * emitting the same combination twice.
+     * actually emitted, which keeps the call-leave flow's "is a stage still in progress?" check
+     * correct.
      */
     private fun CoroutineScope.observeConnection(
         session: StateFlow<RtcSession?>,
@@ -112,14 +106,14 @@ internal class PeerConnectionAnalytics(
                     .filterNotNull()
                     .filter {
                         // Skip a peer-connection state that would only repeat an already-completed
-                        // stage (e.g. a CONNECTED after a FAILED). Gating here — before the grace
-                        // wait and the collector — means we don't do any work for such transitions.
+                        // stage (e.g. a CONNECTED after a FAILED). Gating here — before the ICE read
+                        // and the collector — means we don't do any work for such transitions.
                         val existingStage = currentStage()
                         val newStage = getStage(it)
                         val isExistingStageAndNewStageAreCompleted = (existingStage == Stage.COMPLETED && newStage == Stage.COMPLETED)
                         !isExistingStageAndNewStageAreCompleted
                     }
-                    .mapLatest { pcState ->
+                    .map { pcState ->
                         PeerConnectionSnapshot(
                             connection.hashCode(),
                             pcState,
