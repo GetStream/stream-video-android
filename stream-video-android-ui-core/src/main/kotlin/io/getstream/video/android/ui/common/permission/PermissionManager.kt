@@ -168,8 +168,8 @@ public interface PermissionManager {
  */
 private class StreamPermissionManagerImpl(
     private val activity: ComponentActivity,
-    private inline val onPermissionResult: (String, Boolean) -> Unit,
-    private inline val onShowRequestPermissionRationale: (String) -> Unit,
+    private val onPermissionResult: (String, Boolean) -> Unit,
+    private val onShowRequestPermissionRationale: (String) -> Unit,
 ) : PermissionManager {
 
     /**
