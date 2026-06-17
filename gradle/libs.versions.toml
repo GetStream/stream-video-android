@@ -80,7 +80,7 @@ installReferrer = "2.2"
 playAuth = "20.7.0"
 playAppUpdate = "2.1.0"
 
-hilt = "2.52"
+hilt = "2.56.2"
 leakCanary = "2.13"
 binaryCompatabilityValidator = "0.16.3"
 playPublisher = "3.12.1"
