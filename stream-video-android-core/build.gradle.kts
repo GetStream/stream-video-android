@@ -185,6 +185,7 @@ dependencies {
     compileOnly(libs.compose.stable.marker)
 
     // Stream
+    api(libs.stream.android.core)
     api(libs.stream.result)
     api(libs.stream.result.call)
     api(libs.stream.log)
