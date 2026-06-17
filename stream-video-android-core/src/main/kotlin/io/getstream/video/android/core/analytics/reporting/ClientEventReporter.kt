@@ -288,10 +288,6 @@ internal class ClientEventReporter(
         iceState: VideoAnalyticsIceState,
         peerConnectionState: PeerConnection.PeerConnectionState?,
     ) {
-        Log.d(
-            "Noob",
-            "[onPeerConnectionStateChanged], iceState: $iceState, peerConnectionState: $peerConnectionState, role: $role",
-        )
         when (peerConnectionState) {
             PeerConnection.PeerConnectionState.CONNECTING -> {
                 handleOnPeerConnectionConnectingState(
