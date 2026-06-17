@@ -28,11 +28,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import org.webrtc.PeerConnection
 
 internal class PeerConnectionAnalytics(
@@ -45,13 +43,6 @@ internal class PeerConnectionAnalytics(
     val stateHolder: PeerConnectionAnalyticsStateHolder = PeerConnectionAnalyticsStateHolder(),
 ) {
 
-    companion object {
-        /**
-         * How long a CONNECTED peer connection waits for its ICE state to reach
-         * [PeerConnection.IceConnectionState.CONNECTED] before reporting the current ICE state.
-         */
-        private const val ICE_CONNECTED_GRACE_MILLIS = 2_000L
-    }
     val allowedPcStates = listOf(
         PeerConnection.PeerConnectionState.CONNECTING,
         PeerConnection.PeerConnectionState.FAILED,
@@ -129,23 +120,10 @@ internal class PeerConnectionAnalytics(
                         !isExistingStageAndNewStageAreCompleted
                     }
                     .mapLatest { pcState ->
-                        val iceState = if (pcState == PeerConnection.PeerConnectionState.CONNECTED) {
-                            // Give ICE a grace period to reach CONNECTED before reporting the
-                            // connected peer connection; otherwise report the current ICE state.
-                            withTimeoutOrNull(ICE_CONNECTED_GRACE_MILLIS) {
-                                connection.iceState.first {
-                                    it == PeerConnection.IceConnectionState.CONNECTED ||
-                                        it == PeerConnection.IceConnectionState.COMPLETED
-                                }
-                            } ?: connection.iceState.value
-                        } else {
-                            // CONNECTING / FAILED: report the current ICE state immediately.
-                            connection.iceState.value
-                        }
                         PeerConnectionSnapshot(
                             connection.hashCode(),
                             pcState,
-                            iceState.toVideoAnalyticsIceState(),
+                            connection.iceState.value.toVideoAnalyticsIceState(),
                         )
                     }
             }

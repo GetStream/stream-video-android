@@ -32,7 +32,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -139,50 +138,16 @@ class PeerConnectionAnalyticsTest {
     }
 
     @Test
-    fun `a connected publisher whose ice never connects reports the current ice after the grace period`() = runTest {
-        val publisher = mockk<Publisher>()
-        every { publisher.state } returns
-            MutableStateFlow<PeerConnection.PeerConnectionState?>(PeerConnection.PeerConnectionState.CONNECTED)
-        // ICE stays DISCONNECTED (never reaches CONNECTED), so the grace period will elapse.
-        every { publisher.iceState } returns
-            MutableStateFlow<PeerConnection.IceConnectionState?>(PeerConnection.IceConnectionState.DISCONNECTED)
-
-        val subscriber = mockk<Subscriber>()
-        every { subscriber.state } returns
-            MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
-        every { subscriber.iceState } returns
-            MutableStateFlow<PeerConnection.IceConnectionState?>(null)
-
-        val session = mockk<RtcSession>()
-        every { session.publisher } returns MutableStateFlow<Publisher?>(publisher)
-        every { session.subscriber } returns MutableStateFlow<Subscriber?>(subscriber)
-
+    fun `a connected publisher whose ice is not connected reports not connected immediately`() = runTest {
+        val session = mockSession(
+            publisherState = PeerConnection.PeerConnectionState.CONNECTED,
+            // ICE has not reached CONNECTED, so the reported ICE is the current (non-connected) one.
+            publisherIceState = PeerConnection.IceConnectionState.DISCONNECTED,
+        )
         val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
+
         analytics(scope).observePeerConnections(MutableStateFlow<RtcSession?>(session))
         runCurrent()
-
-        // While the grace period is running nothing is reported, and the stage is NOT yet marked
-        // completed: the stage flips only when the completed event is actually emitted, so a leave
-        // mid-grace still sees the session as in progress.
-        assertEquals(Stage.NOT_STARTED, stateHolder.state.value.publisherStage)
-        verify(exactly = 0) {
-            reporter.onPeerConnectionStateChanged(
-                peerConnectionHashCode = any(),
-                callId = any(),
-                callType = any(),
-                joinStageAttemptId = any(),
-                callSessionId = any(),
-                sfuId = any(),
-                joinReason = any(),
-                role = PeerConnectionRole.PUBLISH,
-                iceState = any(),
-                peerConnectionState = any(),
-            )
-        }
-
-        // Once the grace period elapses, the current (non-connected) ICE state is reported and the
-        // stage is marked completed in lockstep.
-        advanceUntilIdle()
 
         assertEquals(Stage.COMPLETED, stateHolder.state.value.publisherStage)
         verify(exactly = 1) {
@@ -196,67 +161,6 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.NOT_CONNECTED,
-                peerConnectionState = PeerConnection.PeerConnectionState.CONNECTED,
-            )
-        }
-        scope.cancel()
-    }
-
-    @Test
-    fun `a connected publisher reports connected when ice connects within the grace period`() = runTest {
-        val publisher = mockk<Publisher>()
-        // ICE has not reached CONNECTED yet, so the connected peer connection keeps waiting.
-        val iceState =
-            MutableStateFlow<PeerConnection.IceConnectionState?>(
-                PeerConnection.IceConnectionState.DISCONNECTED,
-            )
-        every { publisher.state } returns
-            MutableStateFlow<PeerConnection.PeerConnectionState?>(PeerConnection.PeerConnectionState.CONNECTED)
-        every { publisher.iceState } returns iceState
-
-        val subscriber = mockk<Subscriber>()
-        every { subscriber.state } returns
-            MutableStateFlow<PeerConnection.PeerConnectionState?>(null)
-        every { subscriber.iceState } returns
-            MutableStateFlow<PeerConnection.IceConnectionState?>(null)
-
-        val session = mockk<RtcSession>()
-        every { session.publisher } returns MutableStateFlow<Publisher?>(publisher)
-        every { session.subscriber } returns MutableStateFlow<Subscriber?>(subscriber)
-
-        val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
-        analytics(scope).observePeerConnections(MutableStateFlow<RtcSession?>(session))
-        runCurrent()
-
-        verify(exactly = 0) {
-            reporter.onPeerConnectionStateChanged(
-                peerConnectionHashCode = any(),
-                callId = any(),
-                callType = any(),
-                joinStageAttemptId = any(),
-                callSessionId = any(),
-                sfuId = any(),
-                joinReason = any(),
-                role = PeerConnectionRole.PUBLISH,
-                iceState = any(),
-                peerConnectionState = any(),
-            )
-        }
-
-        iceState.value = PeerConnection.IceConnectionState.CONNECTED
-        runCurrent()
-
-        verify(exactly = 1) {
-            reporter.onPeerConnectionStateChanged(
-                peerConnectionHashCode = any(),
-                callId = "call-1",
-                callType = "default",
-                joinStageAttemptId = any(),
-                callSessionId = any(),
-                sfuId = any(),
-                joinReason = any(),
-                role = PeerConnectionRole.PUBLISH,
-                iceState = VideoAnalyticsIceState.CONNECTED,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTED,
             )
         }
@@ -360,7 +264,7 @@ class PeerConnectionAnalyticsTest {
     }
 
     @Test
-    fun `a connected publisher with ice already connected reports connected without waiting`() = runTest {
+    fun `a connected publisher with connected ice reports connected`() = runTest {
         val session = mockSession(
             publisherState = PeerConnection.PeerConnectionState.CONNECTED,
             publisherIceState = PeerConnection.IceConnectionState.CONNECTED,
@@ -368,7 +272,6 @@ class PeerConnectionAnalyticsTest {
         val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler))
 
         analytics(scope).observePeerConnections(MutableStateFlow<RtcSession?>(session))
-        // No time is advanced: the grace period must not delay an already-connected ICE.
         runCurrent()
 
         verify(exactly = 1) {
