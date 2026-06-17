@@ -175,7 +175,7 @@ androidComponents {
                     .filterKeys { "$it".startsWith(buildConfigKeyPrefix) }
                     .forEach {
                         val key: String = it.key.toString().replace(buildConfigKeyPrefix, "")
-                        applicationVariant.buildConfigFields.put(
+                        applicationVariant.buildConfigFields?.put(
                             key,
                             BuildConfigField("String", "\"${it.value}\"", null),
                         )
@@ -186,7 +186,7 @@ androidComponents {
                         val key: String = it.key.toString()
                             .replace(resConfigKeyPrefix, "")
                             .toLowerCase()
-                        applicationVariant.resValues.put(
+                        applicationVariant.resValues?.put(
                             applicationVariant.makeResValueKey("string", key),
                             ResValue("${it.value}"),
                         )
