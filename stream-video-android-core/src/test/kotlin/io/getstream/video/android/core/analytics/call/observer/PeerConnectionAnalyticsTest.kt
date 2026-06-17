@@ -161,8 +161,10 @@ class PeerConnectionAnalyticsTest {
         analytics(scope).observePeerConnections(MutableStateFlow<RtcSession?>(session))
         runCurrent()
 
-        // Stage is tracked immediately, but nothing is reported while the grace period is running.
-        assertEquals(Stage.COMPLETED, stateHolder.state.value.publisherStage)
+        // While the grace period is running nothing is reported, and the stage is NOT yet marked
+        // completed: the stage flips only when the completed event is actually emitted, so a leave
+        // mid-grace still sees the session as in progress.
+        assertEquals(Stage.NOT_STARTED, stateHolder.state.value.publisherStage)
         verify(exactly = 0) {
             reporter.onPeerConnectionStateChanged(
                 peerConnectionHashCode = any(),
@@ -178,9 +180,11 @@ class PeerConnectionAnalyticsTest {
             )
         }
 
-        // Once the grace period elapses, the current (non-connected) ICE state is reported.
+        // Once the grace period elapses, the current (non-connected) ICE state is reported and the
+        // stage is marked completed in lockstep.
         advanceUntilIdle()
 
+        assertEquals(Stage.COMPLETED, stateHolder.state.value.publisherStage)
         verify(exactly = 1) {
             reporter.onPeerConnectionStateChanged(
                 peerConnectionHashCode = any(),

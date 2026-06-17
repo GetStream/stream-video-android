@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.webrtc.PeerConnection
@@ -88,9 +87,12 @@ internal class PeerConnectionAnalytics(
     /**
      * Observes a single peer connection ([connectionOf]) for analytics.
      *
-     * The peer-connection [StreamPeerConnection.state] drives the stage tracking: whenever it
-     * enters one of the [allowedPcStates], the stage is updated (this is independent of the ICE
-     * state, since the stage is also consumed by the call-leave flow).
+     * The stage is updated in lockstep with the reported event (in the terminal collector), not
+     * when the raw peer-connection state changes. It therefore stays IN_PROGRESS while the
+     * peer-connection session is open and only flips to COMPLETED once the completed event is
+     * actually emitted. This keeps the call-leave flow's "is a stage still in progress?" check
+     * correct during the CONNECTED grace wait, so leaving mid-grace still aborts the open session
+     * instead of treating it as already completed.
      *
      * Once the peer connection enters an allowed state, the ICE state reported alongside it depends
      * on the peer-connection state:
@@ -117,13 +119,14 @@ internal class PeerConnectionAnalytics(
                 connection.state
                     .filter { allowedPcStates.contains(it) }
                     .filterNotNull()
-                    .onEach { pcState ->
+                    .filter {
+                        // Skip a peer-connection state that would only repeat an already-completed
+                        // stage (e.g. a CONNECTED after a FAILED). Gating here — before the grace
+                        // wait and the collector — means we don't do any work for such transitions.
                         val existingStage = currentStage()
-                        val newStage = getStage(pcState)
+                        val newStage = getStage(it)
                         val isExistingStageAndNewStageAreCompleted = (existingStage == Stage.COMPLETED && newStage == Stage.COMPLETED)
-                        if (newStage != null && !isExistingStageAndNewStageAreCompleted) {
-                            updateStage(newStage)
-                        }
+                        !isExistingStageAndNewStageAreCompleted
                     }
                     .mapLatest { pcState ->
                         val iceState = if (pcState == PeerConnection.PeerConnectionState.CONNECTED) {
@@ -131,7 +134,8 @@ internal class PeerConnectionAnalytics(
                             // connected peer connection; otherwise report the current ICE state.
                             withTimeoutOrNull(ICE_CONNECTED_GRACE_MILLIS) {
                                 connection.iceState.first {
-                                    it == PeerConnection.IceConnectionState.CONNECTED
+                                    it == PeerConnection.IceConnectionState.CONNECTED ||
+                                        it == PeerConnection.IceConnectionState.COMPLETED
                                 }
                             } ?: connection.iceState.value
                         } else {
@@ -147,20 +151,22 @@ internal class PeerConnectionAnalytics(
             }
             .distinctUntilChanged()
             .collect { snapshot ->
-                onPeerConnectionStateChanged(
-                    peerConnectionHashCode = snapshot.peerConnectionHashCode,
-                    role = role,
-                    iceState = snapshot.iceState,
-                    peerConnectionState = snapshot.peerConnectionState,
-                )
+                // Update the stage in lockstep with the reported event (not when the raw
+                // peer-connection state changed), so it only flips to COMPLETED once the completed
+                // event is actually emitted. The COMPLETED -> COMPLETED case is already dropped by
+                // the upstream filter, so no extra guard is needed here.
+                val pcAnalyticsStage = getStage(snapshot.peerConnectionState)
+                pcAnalyticsStage?.let {
+                    updateStage(pcAnalyticsStage)
+                    onPeerConnectionStateChanged(
+                        peerConnectionHashCode = snapshot.peerConnectionHashCode,
+                        role = role,
+                        iceState = snapshot.iceState,
+                        peerConnectionState = snapshot.peerConnectionState,
+                    )
+                }
             }
     }
-
-    private data class PeerConnectionSnapshot(
-        val peerConnectionHashCode: Int,
-        val peerConnectionState: PeerConnection.PeerConnectionState,
-        val iceState: VideoAnalyticsIceState,
-    )
 
     private fun getStage(peerConnectionState: PeerConnection.PeerConnectionState): Stage? {
         return when (peerConnectionState) {
@@ -219,6 +225,12 @@ internal fun PeerConnection.IceConnectionState?.toVideoAnalyticsIceState(): Vide
         else -> VideoAnalyticsIceState.NOT_CONNECTED
     }
 }
+
+private data class PeerConnectionSnapshot(
+    val peerConnectionHashCode: Int,
+    val peerConnectionState: PeerConnection.PeerConnectionState,
+    val iceState: VideoAnalyticsIceState,
+)
 
 internal enum class VideoAnalyticsIceState(val text: String) {
     CONNECTED("CONNECTED"), FAILED("FAILED"), NOT_CONNECTED("NOT_CONNECTED")
