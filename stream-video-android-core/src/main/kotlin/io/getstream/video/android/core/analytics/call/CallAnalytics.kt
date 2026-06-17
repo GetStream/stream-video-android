@@ -29,7 +29,9 @@ import io.getstream.video.android.core.analytics.call.observer.PeerConnectionAna
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.call.observer.VideoAnalytics
+import io.getstream.video.android.core.analytics.call.observer.VideoAnalyticsIceState
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
+import io.getstream.video.android.core.analytics.call.observer.toVideoAnalyticsIceState
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.RtcSession
@@ -130,8 +132,12 @@ internal class CallAnalytics(
                     Pair(AnalyticsCallAbortReason.CUSTOM, callLeaveReason.message)
                 }
             }
-            val publisherIceState = session.value?.publisher?.value?.iceState?.value
-            val subscriberIceState = session.value?.subscriber?.value?.iceState?.value
+            val publisherIceState =
+                session.value?.publisher?.value?.iceState?.value?.toVideoAnalyticsIceState()
+                    ?: VideoAnalyticsIceState.NOT_CONNECTED
+            val subscriberIceState =
+                session.value?.subscriber?.value?.iceState?.value?.toVideoAnalyticsIceState()
+                    ?: VideoAnalyticsIceState.NOT_CONNECTED
             eventReporter.abortAllPostCallInFlight(
                 publisherIceState,
                 subscriberIceState,
