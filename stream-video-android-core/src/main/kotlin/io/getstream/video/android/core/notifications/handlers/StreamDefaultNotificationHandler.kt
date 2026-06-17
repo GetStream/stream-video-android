@@ -31,10 +31,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationCompat.CallStyle
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.Person
-import androidx.core.graphics.drawable.IconCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
@@ -48,6 +45,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import io.getstream.video.android.core.notifications.BatteryRestrictionsDetector
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.IncomingNotificationAction
@@ -61,6 +59,7 @@ import io.getstream.video.android.core.notifications.dispatchers.NotificationDis
 import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
+import io.getstream.video.android.core.notifications.style.StyleProvider
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
@@ -151,6 +150,8 @@ constructor(
 
     private val logger by taggedLogger("Video:StreamNotificationHandler")
     private val serviceLauncher = ServiceLauncher(application)
+    private val styleProvider = StyleProvider(application)
+    private val batteryRestrictionsDetector = BatteryRestrictionsDetector(application)
 
     internal fun shouldShowIncomingCallNotification(
         callBusyHandler: CallBusyHandler,
@@ -1088,28 +1089,11 @@ constructor(
         logger.d {
             "[addHangUpAction] Adding hang up action for $callDisplayName (remoteParticipantCount=$remoteParticipantCount)"
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && batteryRestrictionsDetector.isRestricted()) {
             setStyle(
-                CallStyle.forOngoingCall(
-                    Person.Builder().setName(callDisplayName).apply {
-                        if (remoteParticipantCount == 0) {
-                            // Just one user in the call
-                            setIcon(
-                                IconCompat.createWithResource(
-                                    application,
-                                    R.drawable.stream_video_ic_user,
-                                ),
-                            )
-                        } else if (remoteParticipantCount > 1) {
-                            // More than one user in the call
-                            setIcon(
-                                IconCompat.createWithResource(
-                                    application,
-                                    R.drawable.stream_video_ic_user_group,
-                                ),
-                            )
-                        }
-                    }.build(),
+                styleProvider.getOutgoingCallStyle(
+                    callDisplayName,
+                    remoteParticipantCount,
                     hangUpIntent,
                 ),
             )
@@ -1124,19 +1108,10 @@ constructor(
         callDisplayName: String?,
     ): NotificationCompat.Builder = apply {
         logger.d { "[addCallActions] callDisplayName: $callDisplayName" }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && batteryRestrictionsDetector.isRestricted()) {
             setStyle(
-                CallStyle.forIncomingCall(
-                    Person.Builder().setName(callDisplayName ?: "Unknown").apply {
-                        if (callDisplayName == null) {
-                            setIcon(
-                                IconCompat.createWithResource(
-                                    application,
-                                    R.drawable.stream_video_ic_user,
-                                ),
-                            )
-                        }
-                    }.build(),
+                styleProvider.getIncomingCallStyle(
+                    callDisplayName,
                     rejectCallPendingIntent,
                     acceptCallPendingIntent,
                 ),
