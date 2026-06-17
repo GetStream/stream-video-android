@@ -73,11 +73,13 @@ streamProject {
 
 subprojects {
   if (name.startsWith("stream-video-android")) {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-      kotlinOptions.freeCompilerArgs += listOf(
-        "-Xjvm-default=all",
-        "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi"
-      )
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+      compilerOptions {
+        freeCompilerArgs.addAll(
+          "-Xjvm-default=all",
+          "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi"
+        )
+      }
     }
   }
 
@@ -85,10 +87,12 @@ subprojects {
   if (name.startsWith("stream-video-android")
       && !name.startsWith("stream-video-android-core")
       && !name.contains("metrics")) {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-      kotlinOptions.freeCompilerArgs += listOf(
-        "-Xexplicit-api=strict"
-      )
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+      compilerOptions {
+        freeCompilerArgs.addAll(
+          "-Xexplicit-api=strict"
+        )
+      }
     }
   }
 }

@@ -2,8 +2,9 @@ package io.getstream.video
 
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
  * Configure base Kotlin with Android options
@@ -12,25 +13,28 @@ internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
+        lint {
+            abortOnError = false
+        }
+    }
 
-        kotlinOptions {
-            // Treat all Kotlin warnings as errors (disabled by default)
-            allWarningsAsErrors = properties["warningsAsErrors"] as? Boolean ?: false
+    val warningsAsErrors = properties["warningsAsErrors"] as? Boolean ?: false
 
-            freeCompilerArgs = freeCompilerArgs + listOf(
+    tasks.withType<KotlinCompile>().configureEach {
+        compilerOptions {
+            allWarningsAsErrors.set(warningsAsErrors)
+            freeCompilerArgs.addAll(
                 "-Xjvm-default=all",
                 "-opt-in=kotlin.RequiresOptIn",
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi",
             )
         }
-
-        lint {
-            abortOnError = false
-        }
     }
 }
 
-fun CommonExtension<*, *, *, *, *, *>.kotlinOptions(block: KotlinJvmOptions.() -> Unit) {
-    (this as ExtensionAware).extensions.configure("kotlinOptions", block)
+fun Project.kotlinCompilerOptions(block: KotlinJvmCompilerOptions.() -> Unit) {
+    tasks.withType<KotlinCompile>().configureEach {
+        compilerOptions(block)
+    }
 }
