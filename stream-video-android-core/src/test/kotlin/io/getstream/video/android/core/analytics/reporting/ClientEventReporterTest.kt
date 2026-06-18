@@ -49,16 +49,18 @@ class ClientEventReporterTest {
     }
 
     private lateinit var dispatcher: RecordingEventDispatcher
+    private lateinit var coordinatorAnalyticsStateHolder: CoordinatorAnalyticsStateHolder
     private lateinit var reporter: ClientEventReporter
 
     @Before
     fun setup() {
         dispatcher = RecordingEventDispatcher()
+        coordinatorAnalyticsStateHolder = CoordinatorAnalyticsStateHolder()
         reporter = ClientEventReporter(
             sender = dispatcher,
             userAgent = { "test-agent" },
             sdkVersion = "1.0.0",
-            coordinatorAnalyticsStateHolder = CoordinatorAnalyticsStateHolder(),
+            coordinatorAnalyticsStateHolder = coordinatorAnalyticsStateHolder,
         )
     }
 
@@ -101,6 +103,10 @@ class ClientEventReporterTest {
 
     @Test
     fun `coordinator ws initiated sends an initiated event and returns its stage id`() {
+        // The connect id is produced by the writer (CoordinatorAnalytics) and read back
+        // by the reporter through the shared state holder.
+        coordinatorAnalyticsStateHolder.updateCoordinatorConnectId("coordinator-connect-1")
+
         val stageId = reporter.reportCoordinatorWSInitiated()
 
         assertEquals(1, dispatcher.sent.size)
@@ -111,7 +117,7 @@ class ClientEventReporterTest {
         assertEquals(EventType.INITIATED.value, event.eventType)
         assertEquals("test-agent", event.userAgent)
         assertEquals("1.0.0", event.sdkVersion)
-        assertTrue(event.coordinatorConnectId.orEmpty().isNotEmpty())
+        assertEquals("coordinator-connect-1", event.coordinatorConnectId)
     }
 
     @Test
