@@ -67,6 +67,7 @@ class CoordinatorAnalyticsTest {
         val analytics = CoordinatorAnalytics(
             CoroutineScope(UnconfinedTestDispatcher(testScheduler)),
             reporter,
+            CoordinatorAnalyticsStateHolder(),
         )
         analytics.startObserver(socketState)
         return analytics

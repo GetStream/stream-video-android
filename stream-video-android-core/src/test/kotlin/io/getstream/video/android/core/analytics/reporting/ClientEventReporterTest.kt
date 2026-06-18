@@ -18,6 +18,7 @@ package io.getstream.video.android.core.analytics.reporting
 
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
+import io.getstream.video.android.core.analytics.coordinator.CoordinatorAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.analytics.reporting.model.EventOutcome
@@ -57,6 +58,7 @@ class ClientEventReporterTest {
             sender = dispatcher,
             userAgent = { "test-agent" },
             sdkVersion = "1.0.0",
+            coordinatorAnalyticsStateHolder = CoordinatorAnalyticsStateHolder(),
         )
     }
 

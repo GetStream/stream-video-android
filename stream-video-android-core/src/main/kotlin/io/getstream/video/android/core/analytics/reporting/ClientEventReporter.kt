@@ -22,6 +22,7 @@ import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
+import io.getstream.video.android.core.analytics.coordinator.CoordinatorAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
 import io.getstream.video.android.core.analytics.reporting.dispatcher.ImmediateEventDispatcher
 import io.getstream.video.android.core.analytics.reporting.model.CoordinatorFlightSession
@@ -47,12 +48,14 @@ internal class ClientEventReporter(
     private val sender: EventDispatcher,
     private val userAgent: () -> String,
     private val sdkVersion: String,
+    private val coordinatorAnalyticsStateHolder: CoordinatorAnalyticsStateHolder,
 ) {
 
     companion object {
 
         fun getDefault(
             api: ProductvideoApi,
+            coordinatorAnalyticsStateHolder: CoordinatorAnalyticsStateHolder,
         ): ClientEventReporter {
             return ClientEventReporter(
                 sender = ImmediateEventDispatcher(
@@ -67,31 +70,27 @@ internal class ClientEventReporter(
                 ),
                 userAgent = { HeadersUtil().buildSdkTrackingHeaders() },
                 sdkVersion = BuildConfig.STREAM_VIDEO_VERSION,
+                coordinatorAnalyticsStateHolder = coordinatorAnalyticsStateHolder,
             )
         }
     }
 
     private val logger by taggedLogger("ClientEventReporter")
 
-    private val clientEventFactory = ClientEventFactory(sdkVersion, userAgent) {
-        this.coordinatorConnectId
-    }
+    private val clientEventFactory =
+        ClientEventFactory(sdkVersion, userAgent, coordinatorAnalyticsStateHolder)
 
     private val postCallFlightSessions = ConcurrentHashMap<StageId, InFlightSession>()
     private val pcEverConnected = ConcurrentHashMap<PeerConnectionRole, PcConnected>()
     private val pcEventReporterStateHolder = PeerConnectionEventReporterStateHolder()
 
-    @Volatile
-    private var coordinatorConnectId = ""
-
     // --- Coordinator WS ---
     internal fun reportCoordinatorWSInitiated(): String {
-        this.coordinatorConnectId = UUID.randomUUID().toString()
         val stageId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
         postCallFlightSessions[stageId] = CoordinatorFlightSession(
             stageId = stageId,
-            coordinatorConnectId = coordinatorConnectId,
+            coordinatorConnectId = coordinatorAnalyticsStateHolder.coordinatorConnectId.value,
             stage = EventStage.CoordinatorWs,
             startedAtMs = now,
         )
