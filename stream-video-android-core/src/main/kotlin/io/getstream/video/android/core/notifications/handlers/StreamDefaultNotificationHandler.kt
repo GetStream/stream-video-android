@@ -174,22 +174,26 @@ constructor(
                 callId.cid,
             )
         ) {
-            serviceLauncher.showIncomingCall(
-                application,
-                callId,
-                callDisplayName,
-                streamVideo.state.callConfigRegistry.get(callId.type),
-                isVideo = isVideoCall(callId, payload),
-                payload = payload,
-                streamVideo,
-                notification = getRingingCallNotification(
-                    RingingState.Incoming(),
+            val canRunService =
+                streamVideo.callServiceConfigRegistry.get(callId.type).runCallServiceInForeground
+            if (canRunService) {
+                serviceLauncher.showIncomingCall(
+                    application,
                     callId,
                     callDisplayName,
-                    shouldHaveContentIntent = true,
-                    payload,
-                ),
-            )
+                    streamVideo.state.callConfigRegistry.get(callId.type),
+                    isVideo = isVideoCall(callId, payload),
+                    payload = payload,
+                    streamVideo,
+                    notification = getRingingCallNotification(
+                        RingingState.Incoming(),
+                        callId,
+                        callDisplayName,
+                        shouldHaveContentIntent = true,
+                        payload,
+                    ),
+                )
+            }
         }
     }
 
