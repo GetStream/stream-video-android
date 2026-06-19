@@ -155,7 +155,7 @@ fun CallJoinScreen(
             },
             onCallSettingsClink = {
                 renderCallSettingsUi = true
-            }
+            },
         )
 
         CallJoinBody(

@@ -208,7 +208,12 @@ private fun CallSettingsContent(
             items(items, key = { it.callType.name }) { item ->
                 CallTypeConfigCard(
                     item = item,
-                    onForegroundChanged = { enabled -> onForegroundChanged(item.callType, enabled) },
+                    onForegroundChanged = { enabled ->
+                        onForegroundChanged(
+                            item.callType,
+                            enabled,
+                        )
+                    },
                     onTelecomChanged = { enabled -> onTelecomChanged(item.callType, enabled) },
                     onAudioUsageChanged = { usage -> onAudioUsageChanged(item.callType, usage) },
                 )
