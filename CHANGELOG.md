@@ -29,8 +29,10 @@ On CallContent make sure to pass onBackPressed to CallAppBar in order to make th
 ### ⬆️ Improved
 
 ### ✅ Added
+Add `participantLabelContent` slot to `CallLobby` so the lobby participant label can be hidden (`{}`) or fully customized. Brings the Compose API in line with React's `VideoPreview` slot overrides.
 
 ### ⚠️ Changed
+Deprecate the `CallLobby` overload that takes `labelPosition: Alignment`. Migrate to the new `participantLabelContent` slot; pass `{}` to hide the label or supply a composable to customize content and positioning.
 
 ### ❌ Removed
 
