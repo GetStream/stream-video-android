@@ -186,24 +186,9 @@ internal class PeerConnectionAnalytics(
         observePeerConnections(session)
     }
 }
-internal fun PeerConnection.IceConnectionState?.toVideoAnalyticsIceState(): VideoAnalyticsIceState {
-    return when (this) {
-        PeerConnection.IceConnectionState.CONNECTED,
-        PeerConnection.IceConnectionState.COMPLETED,
-        -> VideoAnalyticsIceState.CONNECTED
-
-        PeerConnection.IceConnectionState.FAILED -> VideoAnalyticsIceState.FAILED
-
-        else -> VideoAnalyticsIceState.NOT_CONNECTED
-    }
-}
 
 private data class PeerConnectionSnapshot(
     val peerConnectionHashCode: Int,
     val peerConnectionState: PeerConnection.PeerConnectionState,
     val iceState: VideoAnalyticsIceState,
 )
-
-internal enum class VideoAnalyticsIceState(val text: String) {
-    CONNECTED("CONNECTED"), FAILED("FAILED"), NOT_CONNECTED("NOT_CONNECTED")
-}
