@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.VideocamOff
@@ -25,8 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleCamera
@@ -66,20 +62,4 @@ public fun ToggleCameraAction(
     iconOnOff = Pair(Icons.Default.Videocam, Icons.Default.VideocamOff),
 ) {
     onCallAction(ToggleCamera(isCameraEnabled.not()))
-}
-
-@Preview
-@Composable
-public fun ToggleCameraActionPreview() {
-    VideoTheme {
-        Column {
-            Row {
-                ToggleCameraAction(isCameraEnabled = false) {
-                }
-
-                ToggleCameraAction(isCameraEnabled = true) {
-                }
-            }
-        }
-    }
 }

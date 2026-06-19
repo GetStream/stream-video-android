@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
-import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -35,8 +34,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.log.StreamLog
@@ -51,8 +48,6 @@ import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 
 /**
  * Represents audio room content based on the call state provided from the [call].
@@ -264,19 +259,5 @@ private fun DefaultPermissionHandler(
 
     LaunchedEffect(key1 = videoPermission) {
         videoPermission.launchPermissionRequest()
-    }
-}
-
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
-@Composable
-private fun AudioRoomPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        AudioRoomContent(
-            modifier = Modifier.fillMaxSize(),
-            call = previewCall,
-        )
     }
 }

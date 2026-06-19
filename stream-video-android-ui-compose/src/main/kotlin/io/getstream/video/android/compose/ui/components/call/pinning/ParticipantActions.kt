@@ -18,7 +18,6 @@ package io.getstream.video.android.compose.ui.components.call.pinning
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
@@ -40,10 +39,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.state.ToggleableState
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -56,9 +53,6 @@ import io.getstream.video.android.compose.ui.components.indicator.GenericIndicat
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -160,7 +154,7 @@ public fun BoxScope.ParticipantActions(
 }
 
 @Composable
-private fun BoxScope.ParticipantActionsWithoutState(
+internal fun BoxScope.ParticipantActionsWithoutState(
     actions: List<ParticipantAction>,
     call: Call,
     participant: ParticipantState,
@@ -244,59 +238,6 @@ internal fun BoxScope.ParticipantActionsDialog(
                         onDismiss()
                     }
                 }
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun ParticipantActionDialogPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        Box {
-            ParticipantActionsDialog(
-                call = previewCall,
-                participant = previewParticipant,
-                actions = participantActions,
-                offset = IntOffset(
-                    x = 0,
-                    y = 50,
-                ),
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun ParticipantActionsPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        Box {
-            ParticipantActionsWithoutState(
-                actions = participantActions,
-                call = previewCall,
-                participant = previewParticipant,
-                showDialog = true,
-            ) {
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun ParticipantActionsKickPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        Box {
-            ParticipantActionsWithoutState(
-                actions = participantActions,
-                call = previewCall,
-                participant = previewParticipant,
-                showDialog = true,
-            ) {
             }
         }
     }

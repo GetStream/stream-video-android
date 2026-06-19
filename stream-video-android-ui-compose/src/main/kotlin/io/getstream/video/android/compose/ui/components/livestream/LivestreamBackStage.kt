@@ -17,8 +17,6 @@
 package io.getstream.video.android.compose.ui.components.livestream
 
 import android.annotation.SuppressLint
-import android.content.res.Configuration
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -34,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -139,42 +136,4 @@ internal fun CountDownTimerUi(targetUtcTime: String) {
         fontWeight = FontWeight.Bold,
         color = VideoTheme.colors.basePrimary,
     )
-}
-
-@Preview(
-    name = "Portrait Preview",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_TYPE_NORMAL,
-    device = "spec:width=411dp,height=891dp,dpi=420",
-)
-@Composable
-private fun LivestreamBackstagePortraitPreview() {
-    VideoTheme {
-        Box {
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = stringResource(
-                        id = R.string.stream_video_livestreaming_on_backstage,
-                    ),
-                    fontSize = 14.sp,
-                    color = VideoTheme.colors.basePrimary,
-                )
-                Text(
-                    modifier = Modifier,
-                    text = "2:00",
-                    fontSize = 16.sp,
-                    color = VideoTheme.colors.basePrimary,
-                )
-                Text(
-                    modifier = Modifier,
-                    text = "2 participants have joined the call",
-                    fontSize = 12.sp,
-                    color = VideoTheme.colors.baseSecondary,
-                )
-            }
-        }
-    }
 }

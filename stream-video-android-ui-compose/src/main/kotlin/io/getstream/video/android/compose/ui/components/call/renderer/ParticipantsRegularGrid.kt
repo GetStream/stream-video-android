@@ -23,16 +23,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.OrientationVideoRenderer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 
 /**
  * Renders the participants are joining in a call when there are no screen sharing sessions, based on the orientation.
@@ -75,17 +71,5 @@ public fun ParticipantsRegularGrid(
                 floatingVideoRenderer = floatingVideoRenderer,
             )
         }
-    }
-}
-
-@Preview
-@Composable
-private fun RegularCallVideoRendererPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        ParticipantsRegularGrid(
-            call = previewCall,
-            modifier = Modifier.fillMaxSize(),
-        )
     }
 }

@@ -19,11 +19,8 @@ package io.getstream.video.android.compose.ui.components.avatar
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -92,30 +88,5 @@ internal fun InitialsAvatar(
                 }
             },
         )
-    }
-}
-
-@Preview
-@Composable
-private fun InitialsAvatarPreview() {
-    VideoTheme {
-        Column {
-            Avatar(
-                fallbackText = "Jaewoong Eum",
-            )
-            Spacer(modifier = Modifier.size(24.dp))
-            Avatar(
-                fallbackText = "Aleksandar Apostolov",
-            )
-            Spacer(modifier = Modifier.size(24.dp))
-            Avatar(
-                fallbackText = "Danie",
-            )
-            Spacer(modifier = Modifier.size(24.dp))
-            Avatar(
-                fallbackText = "Jaewoong Eum",
-            )
-            Spacer(modifier = Modifier.size(24.dp))
-        }
     }
 }

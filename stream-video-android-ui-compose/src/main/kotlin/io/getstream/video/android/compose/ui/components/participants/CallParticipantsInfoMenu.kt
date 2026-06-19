@@ -29,8 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.state.ui.internal.CallParticipantInfoMode
 import io.getstream.video.android.compose.state.ui.internal.ParticipantListMode
@@ -42,8 +40,6 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.InviteUsersToCall
 import io.getstream.video.android.core.call.state.ToggleMicrophone
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 
 /**
  * Represents a menu that shows information on the current call participants, while allowing the user
@@ -112,16 +108,5 @@ public fun CallParticipantsInfoMenu(
                 )
             }
         }
-    }
-}
-
-@Preview
-@Composable
-private fun CallParticipantsInfoMenuPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        CallParticipantsInfoMenu(
-            call = previewCall,
-        )
     }
 }

@@ -34,11 +34,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
@@ -56,8 +54,6 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
@@ -220,26 +216,6 @@ private fun OnDisabledContent(user: User) {
                 .align(Alignment.Center),
             userImage = user.image,
             userName = user.name.takeUnless { it.isNullOrBlank() } ?: user.id,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun CallLobbyPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        CallLobby(
-            call = previewCall,
-            video = ParticipantState.Video(
-                sessionId = previewCall.sessionId,
-                track = VideoTrack(
-                    streamId = previewCall.sessionId,
-                    video = org.webrtc.VideoTrack(1000L),
-                ),
-                enabled = true,
-                paused = false,
-            ),
         )
     }
 }

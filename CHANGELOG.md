@@ -24,6 +24,8 @@ Fix `NullPointerException` logged from `SortedParticipantsState.init` on every `
 
 ## stream-video-android-ui-compose
 ### 🐞 Fixed
+Fix R8/minified release builds failing with `Missing class io.getstream.video.android.mock.StreamPreviewDataUtils` (and related preview-data classes). All `@Preview` composables were moved out of the published artifact into a `debug`-only source set, so the `stream-video-android-previewdata` utilities are no longer referenced from release code. Consumers no longer need to add the preview module or extra ProGuard rules. Fixes [#1448](https://github.com/GetStream/stream-video-android/issues/1448).
+Declare `kotlinx-datetime` as an explicit dependency so the livestream countdown UI no longer relies on a transitive dependency, fixing `Missing class kotlinx.datetime.*` R8 errors.
 On CallContent make sure to pass onBackPressed to CallAppBar in order to make the back button work.
 
 ### ⬆️ Improved
