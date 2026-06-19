@@ -201,9 +201,17 @@ class ClientState(private val client: StreamVideo) {
             }
             else -> {
                 removeRingingCall(call)
-                call.scope.launch {
-                    delay(serviceTransitionDelayMs)
-                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                val callServiceConfig = callConfigRegistry.get(call.type)
+                if (callServiceConfig.runCallServiceInForeground) {
+                    call.scope.launch {
+                        delay(serviceTransitionDelayMs)
+                        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                    }
+                } else {
+                    // So that we can transition to Active State for non-ringing calls
+                    if (ringingState is RingingState.Idle) {
+                        call.state.updateRingingState()
+                    }
                 }
             }
         }
