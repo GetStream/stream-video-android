@@ -22,10 +22,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -92,7 +93,7 @@ public fun VideoRenderer(
             return
         }
 
-        // Show avatar always behind the video.
+        // Neutral placeholder rendered behind the video while the track is loading.
         videoRendererConfig.fallbackContent.invoke(call)
 
         if (video?.paused == true) {
@@ -267,25 +268,18 @@ private fun setupVideo(
 @Composable
 internal fun DefaultMediaTrackFallbackContent(
     modifier: Modifier,
-    call: Call,
+    @Suppress("UNUSED_PARAMETER") call: Call,
 ) {
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(VideoTheme.colors.baseSheetTertiary)
             .testTag("video_renderer_fallback"),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        contentAlignment = Alignment.Center,
     ) {
-        Text(
-            modifier = Modifier.padding(30.dp),
-            text = stringResource(
-                id = io.getstream.video.android.ui.common.R.string.stream_video_call_rendering_failed,
-                call.sessionId,
-            ),
+        CircularProgressIndicator(
+            modifier = Modifier.size(48.dp),
             color = VideoTheme.colors.basePrimary,
-            textAlign = TextAlign.Center,
-            fontSize = 14.sp,
         )
     }
 }

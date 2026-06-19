@@ -20,6 +20,7 @@ import android.content.res.Configuration
 import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +31,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,7 +52,9 @@ import io.getstream.video.android.compose.ui.components.call.controls.ControlAct
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.indicator.MicrophoneIndicator
+import io.getstream.video.android.compose.ui.components.video.DefaultMediaTrackFallbackContent
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
@@ -64,11 +71,13 @@ import io.getstream.video.android.ui.common.R
  * @param modifier Modifier for styling.
  * @param call The call includes states and will be rendered with participants.
  * @param user A user to display their name and avatar image on the preview.
- * @param labelPosition The position of the user audio state label.
  * @param video A participant video to render on the preview renderer.
  * @param permissions Android permissions that should be required to render a video call properly.
  * @param onRenderedContent A video renderer, which renders a local video track before joining a call.
  * @param onDisabledContent Content is shown that a local camera is disabled. It displays user avatar by default.
+ * @param participantLabelContent Slot for the participant label overlaid on the preview. Defaults to a
+ * label showing the user's name and microphone state at [Alignment.BottomStart]. Pass `{}` to hide the
+ * label entirely, or override to provide custom positioning and content (use [BoxScope.align] inside).
  * @param onCallAction Handler when the user triggers a Call Control Action.
  * @param lobbyControlsContent Content is shown that allows users to trigger different actions to control a preview call.
  * @param onRendered An interface that will be invoked when the video is rendered.
@@ -78,7 +87,108 @@ public fun CallLobby(
     modifier: Modifier = Modifier,
     call: Call,
     user: User = StreamVideo.instance().user,
-    labelPosition: Alignment = Alignment.BottomStart,
+    isCameraEnabled: Boolean = if (LocalInspectionMode.current) {
+        true
+    } else {
+        call.camera.isEnabled.value
+    },
+    isMicrophoneEnabled: Boolean = if (LocalInspectionMode.current) {
+        true
+    } else {
+        call.microphone.isEnabled.value
+    },
+    video: ParticipantState.Video = ParticipantState.Video(
+        sessionId = call.sessionId,
+        track = VideoTrack(
+            streamId = call.sessionId,
+            video = if (LocalInspectionMode.current) {
+                org.webrtc.VideoTrack(1000L)
+            } else {
+                call.camera.mediaManager.videoTrack
+            },
+        ),
+        enabled = isCameraEnabled,
+        paused = false,
+    ),
+    permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
+    onRendered: (View) -> Unit = {},
+    onRenderedContent: @Composable (video: ParticipantState.Video) -> Unit = {
+        OnRenderedContent(call = call, video = it, onRendered = onRendered)
+    },
+    onDisabledContent: @Composable () -> Unit = {
+        OnDisabledContent(user = user)
+    },
+    participantLabelContent: @Composable BoxScope.() -> Unit = {
+        DefaultParticipantLabel(
+            user = user,
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            labelPosition = Alignment.BottomStart,
+        )
+    },
+    onCallAction: (CallAction) -> Unit = {
+        DefaultOnCallActionHandler.onCallAction(call, it)
+    },
+    lobbyControlsContent: @Composable (modifier: Modifier, call: Call) -> Unit = { modifier, call ->
+        ControlActions(
+            modifier = modifier,
+            call = call,
+            actions = buildDefaultLobbyControlActions(
+                call = call,
+                onCallAction = onCallAction,
+                isCameraEnabled = isCameraEnabled,
+                isMicrophoneEnabled = isMicrophoneEnabled,
+            ),
+        )
+    },
+) {
+    DefaultPermissionHandler(videoPermission = permissions)
+
+    MediaPiPLifecycle(call = call, PictureInPictureConfiguration(false, false))
+    val configuration = LocalConfiguration.current
+    val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+    val screenHeightDp = configuration.screenHeightDp
+
+    val boxModifier = Modifier
+        .responsiveHeight(isPortrait, screenHeightDp)
+        .fillMaxWidth()
+        .clip(RoundedCornerShape(12.dp))
+
+    Column(modifier = modifier) {
+        Box(
+            modifier = boxModifier,
+        ) {
+            if (isCameraEnabled) {
+                onRenderedContent.invoke(video)
+            } else {
+                onDisabledContent.invoke()
+            }
+
+            participantLabelContent()
+        }
+
+        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
+
+        lobbyControlsContent.invoke(Modifier.align(Alignment.Start), call)
+    }
+}
+
+@Deprecated(
+    message = "Use CallLobby with the participantLabelContent slot for full control over the lobby " +
+        "label. Pass `{}` to hide it, or override to customize content and position.",
+    replaceWith = ReplaceWith(
+        "CallLobby(modifier = modifier, call = call, user = user, " +
+            "isCameraEnabled = isCameraEnabled, isMicrophoneEnabled = isMicrophoneEnabled, " +
+            "video = video, permissions = permissions, onRendered = onRendered, " +
+            "onRenderedContent = onRenderedContent, onDisabledContent = onDisabledContent, " +
+            "onCallAction = onCallAction, lobbyControlsContent = lobbyControlsContent)",
+    ),
+)
+@Composable
+public fun CallLobby(
+    modifier: Modifier = Modifier,
+    call: Call,
+    user: User = StreamVideo.instance().user,
+    labelPosition: Alignment,
     isCameraEnabled: Boolean = if (LocalInspectionMode.current) {
         true
     } else {
@@ -126,54 +236,55 @@ public fun CallLobby(
         )
     },
 ) {
-    DefaultPermissionHandler(videoPermission = permissions)
-
-    MediaPiPLifecycle(call = call, PictureInPictureConfiguration(false, false))
-    val configuration = LocalConfiguration.current
-    val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-    val screenHeightDp = configuration.screenHeightDp
-
-    val boxModifier = Modifier
-        .responsiveHeight(isPortrait, screenHeightDp)
-        .fillMaxWidth()
-        .clip(RoundedCornerShape(12.dp))
-
-    Column(modifier = modifier) {
-        Box(
-            modifier = boxModifier,
-        ) {
-            if (isCameraEnabled) {
-                onRenderedContent.invoke(video)
-            } else {
-                onDisabledContent.invoke()
-            }
-
-            val nameLabel = if (user.id == StreamVideo.instance().user.id) {
-                stringResource(id = R.string.stream_video_myself)
-            } else {
-                user.userNameOrId
-            }
-
-            ParticipantLabel(
-                nameLabel = nameLabel,
+    CallLobby(
+        modifier = modifier,
+        call = call,
+        user = user,
+        isCameraEnabled = isCameraEnabled,
+        isMicrophoneEnabled = isMicrophoneEnabled,
+        video = video,
+        permissions = permissions,
+        onRendered = onRendered,
+        onRenderedContent = onRenderedContent,
+        onDisabledContent = onDisabledContent,
+        participantLabelContent = {
+            DefaultParticipantLabel(
+                user = user,
+                isMicrophoneEnabled = isMicrophoneEnabled,
                 labelPosition = labelPosition,
-                hasAudio = isMicrophoneEnabled,
-                soundIndicatorContent = {
-                    MicrophoneIndicator(
-                        modifier = Modifier
-                            .padding(horizontal = VideoTheme.dimens.spacingM)
-                            .testTag("Stream_UserMicrophone_Enabled_$isMicrophoneEnabled"),
-                        isMicrophoneEnabled = isMicrophoneEnabled,
-                    )
-                },
-                isSpeaking = false,
             )
-        }
+        },
+        onCallAction = onCallAction,
+        lobbyControlsContent = lobbyControlsContent,
+    )
+}
 
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
-
-        lobbyControlsContent.invoke(Modifier.align(Alignment.Start), call)
+@Composable
+private fun BoxScope.DefaultParticipantLabel(
+    user: User,
+    isMicrophoneEnabled: Boolean,
+    labelPosition: Alignment,
+) {
+    val nameLabel = if (user.id == StreamVideo.instance().user.id) {
+        stringResource(id = R.string.stream_video_myself)
+    } else {
+        user.userNameOrId
     }
+
+    ParticipantLabel(
+        nameLabel = nameLabel,
+        labelPosition = labelPosition,
+        hasAudio = isMicrophoneEnabled,
+        soundIndicatorContent = {
+            MicrophoneIndicator(
+                modifier = Modifier
+                    .padding(horizontal = VideoTheme.dimens.spacingM)
+                    .testTag("Stream_UserMicrophone_Enabled_$isMicrophoneEnabled"),
+                isMicrophoneEnabled = isMicrophoneEnabled,
+            )
+        },
+        isSpeaking = false,
+    )
 }
 
 @Composable
@@ -191,15 +302,42 @@ private fun OnRenderedContent(
     video: ParticipantState.Video,
     onRendered: (View) -> Unit = {},
 ) {
-    VideoRenderer(
+    var isVideoRendered by remember { mutableStateOf(false) }
+
+    LaunchedEffect(video.track?.streamId) {
+        isVideoRendered = false
+    }
+
+    val videoRendererConfig = remember {
+        videoRenderConfig {
+            // Loading UI is shown as an overlay until the first frame is rendered.
+            fallbackContent = {}
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(VideoTheme.colors.baseSheetTertiary)
             .testTag("on_rendered_content"),
-        call = call,
-        video = video,
-        onRendered = onRendered,
-    )
+    ) {
+        VideoRenderer(
+            modifier = Modifier.fillMaxSize(),
+            call = call,
+            video = video,
+            videoRendererConfig = videoRendererConfig,
+            onRendered = {
+                isVideoRendered = true
+                onRendered(it)
+            },
+        )
+        if (!isVideoRendered) {
+            DefaultMediaTrackFallbackContent(
+                modifier = Modifier.fillMaxSize(),
+                call = call,
+            )
+        }
+    }
 }
 
 @Composable
