@@ -63,8 +63,13 @@ dependencies {
     // telephoto
     implementation(libs.telephoto)
 
+    // datetime (used by livestream countdown UI in production code)
+    implementation(libs.kotlinx.datetime)
+
     // preview
-    compileOnly(project(":stream-video-android-previewdata"))
+    // Preview composables live in the debug source set so the preview-data utilities are never
+    // referenced from the published (release) artifact. See issue #1448.
+    debugImplementation(project(":stream-video-android-previewdata"))
     testImplementation(project(":stream-video-android-previewdata"))
 
     // unit tests

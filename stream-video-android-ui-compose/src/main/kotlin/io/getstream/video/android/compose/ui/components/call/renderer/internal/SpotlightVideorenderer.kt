@@ -39,9 +39,6 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
@@ -49,10 +46,6 @@ import io.getstream.video.android.compose.ui.components.call.renderer.SpotlightV
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipant
-import io.getstream.video.android.mock.previewParticipantsList
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 import java.lang.Integer.max
@@ -208,68 +201,6 @@ private fun Modifier.fillHeightIfParticipantsCount(
         else -> this.size(
             VideoTheme.dimens.genericMax * 1.5f,
             VideoTheme.dimens.genericMax,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SpotlightParticipantsPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        SpotlightVideoRenderer(
-            call = previewCall,
-            speaker = previewParticipant,
-            participants = previewParticipantsList,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun SpotlightTwoParticipantsPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        SpotlightVideoRenderer(
-            call = previewCall,
-            speaker = previewParticipant,
-            participants = previewParticipantsList.take(3),
-        )
-    }
-}
-
-@Preview(
-    device = Devices.AUTOMOTIVE_1024p,
-    widthDp = 1440,
-    heightDp = 720,
-)
-@Composable
-private fun SpotlightParticipantsLandscapePreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        SpotlightVideoRenderer(
-            call = previewCall,
-            orientation = ORIENTATION_LANDSCAPE,
-            speaker = previewParticipant,
-            participants = previewParticipantsList,
-        )
-    }
-}
-
-@Preview(
-    device = Devices.AUTOMOTIVE_1024p,
-    widthDp = 1440,
-    heightDp = 720,
-)
-@Composable
-private fun SpotlightThreeParticipantsLandscapePreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        SpotlightVideoRenderer(
-            call = previewCall,
-            orientation = ORIENTATION_LANDSCAPE,
-            speaker = previewParticipant,
-            participants = previewParticipantsList.take(3),
         )
     }
 }

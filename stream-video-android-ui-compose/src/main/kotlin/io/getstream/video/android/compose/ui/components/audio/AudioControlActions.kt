@@ -18,7 +18,6 @@ package io.getstream.video.android.compose.ui.components.audio
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
@@ -31,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -40,8 +38,6 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.To
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.UserActionCause
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
@@ -88,16 +84,4 @@ public fun AudioControlActions(
         isMicrophoneEnabled = isMicrophoneEnabled,
         onCallAction = { callAction -> call.microphone.setEnabled(callAction.isEnabled) },
     )
-}
-
-@Preview
-@Composable
-private fun AudioControlActionsPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        AudioControlActions(
-            modifier = Modifier.fillMaxWidth(),
-            call = previewCall,
-        )
-    }
 }
