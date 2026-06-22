@@ -36,6 +36,7 @@ import io.getstream.android.push.permissions.DefaultNotificationPermissionHandle
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.BackgroundRestrictions
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
@@ -150,6 +151,7 @@ constructor(
     private val logger by taggedLogger("Video:StreamNotificationHandler")
     private val serviceLauncher = ServiceLauncher(application)
     private val styleProvider = StyleProvider(application)
+    private val batteryRestrictions = BackgroundRestrictions(application)
 
     internal fun shouldShowIncomingCallNotification(
         callBusyHandler: CallBusyHandler,
@@ -1091,7 +1093,12 @@ constructor(
         logger.d {
             "[addHangUpAction] Adding hang up action for $callDisplayName (remoteParticipantCount=$remoteParticipantCount)"
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        /**
+         * CallStyle notifications can trigger
+         * CannotPostForegroundServiceNotificationException ("Bad notification for startForeground")
+         * on Android 12+ when the app is background-restricted. Fall back to a standard notification.
+         */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !batteryRestrictions.isRestricted()) {
             setStyle(
                 styleProvider.getOutgoingCallStyle(
                     callDisplayName,
@@ -1110,7 +1117,12 @@ constructor(
         callDisplayName: String?,
     ): NotificationCompat.Builder = apply {
         logger.d { "[addCallActions] callDisplayName: $callDisplayName" }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        /**
+         * CallStyle notifications can trigger
+         * CannotPostForegroundServiceNotificationException ("Bad notification for startForeground")
+         * on Android 12+ when the app is background-restricted. Fall back to a standard notification.
+         */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !batteryRestrictions.isRestricted()) {
             setStyle(
                 styleProvider.getIncomingCallStyle(
                     callDisplayName,
