@@ -20,10 +20,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -38,13 +36,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -54,11 +50,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.recording.RecordingType
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.R
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.ExperimentalTime
 
 /**
  * Represents the default AppBar that's shown in calls. Exposes handlers for the two default slot
@@ -154,7 +146,7 @@ internal fun RowScope.DefaultCallAppBarCenterContent(call: Call, title: String) 
 }
 
 @Composable
-private fun CalLCenterContent(
+internal fun CalLCenterContent(
     modifier: Modifier = Modifier,
     text: String,
     isRecording: Boolean,
@@ -195,57 +187,6 @@ private fun CalLCenterContent(
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Start,
             )
-        }
-    }
-}
-
-@Preview
-@Composable
-@ExperimentalTime
-private fun CallTopAppbarPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        Column {
-            CallAppBar(call = previewCall, centerContent = {
-                CalLCenterContent(
-                    text = 100000000L.milliseconds.toString(),
-                    isRecording = false,
-                    isReconnecting = false,
-                )
-            })
-            Spacer(modifier = Modifier.size(16.dp))
-            CallAppBar(call = previewCall, centerContent = {
-                CalLCenterContent(
-                    text = 100000000L.milliseconds.toString(),
-                    isRecording = true,
-                    isReconnecting = false,
-                )
-            })
-            Spacer(modifier = Modifier.size(16.dp))
-            CallAppBar(call = previewCall, centerContent = {
-                CalLCenterContent(
-                    text = 100000000L.milliseconds.toString(),
-                    isRecording = false,
-                    isReconnecting = false,
-                )
-            })
-            Spacer(modifier = Modifier.size(16.dp))
-            CallAppBar(call = previewCall, centerContent = {
-                CalLCenterContent(
-                    text = 100000000L.milliseconds.toString(),
-                    isRecording = false,
-                    isReconnecting = true,
-                )
-            })
-            Spacer(modifier = Modifier.size(16.dp))
-            CallAppBar(call = previewCall, centerContent = {
-                CalLCenterContent(
-                    text = 100000000L.milliseconds.toString(),
-                    isRecording = true,
-                    isReconnecting = false,
-                )
-            })
-            Spacer(modifier = Modifier.size(16.dp))
         }
     }
 }

@@ -19,7 +19,6 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,13 +41,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -59,9 +55,6 @@ import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPrevie
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipant
 
 /**
  * Represents a floating item used to feature a participant video, usually the local participant.
@@ -235,24 +228,4 @@ public fun BoxScope.DefaultFloatingParticipantVideo(
         style = style.copy(isShowingConnectionQualityIndicator = false),
         parentBounds = parentSize,
     )
-}
-
-@Preview
-@Composable
-private fun LocalVideoContentPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp
-    val screenHeight = configuration.screenHeightDp
-
-    VideoTheme {
-        Box {
-            FloatingParticipantVideo(
-                call = previewCall,
-                modifier = Modifier.fillMaxSize(),
-                participant = previewParticipant,
-                parentBounds = IntSize(screenWidth, screenHeight),
-            )
-        }
-    }
 }

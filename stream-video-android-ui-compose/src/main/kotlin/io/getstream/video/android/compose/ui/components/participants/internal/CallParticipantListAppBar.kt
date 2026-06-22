@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.ui.common.R
@@ -73,17 +72,6 @@ internal fun CallParticipantListAppBar(
             onClick = onBackPressed,
             icon = Icons.Default.Close,
             style = VideoTheme.styles.buttonStyles.onlyIconIconButtonStyle(),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun CallParticipantsInfoAppBarPreview() {
-    VideoTheme {
-        CallParticipantListAppBar(
-            numberOfParticipants = 10,
-            onBackPressed = {},
         )
     }
 }

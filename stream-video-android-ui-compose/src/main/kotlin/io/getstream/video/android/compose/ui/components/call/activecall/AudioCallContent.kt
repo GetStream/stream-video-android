@@ -32,9 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -55,8 +53,6 @@ import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.CallStatus
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 
 /**
  * Audio call content represents the UI of an active audio only call.
@@ -276,33 +272,6 @@ public fun AudioOnlyCallControls(
             modifier = Modifier.testTag("Stream_HangUpButton"),
             onCallAction = onCallAction,
             style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun AudioCallContentPreview() {
-    val context = LocalContext.current
-    StreamPreviewDataUtils.initializeStreamVideo(context)
-    VideoTheme {
-        AudioCallContent(
-            call = previewCall,
-            isMicrophoneEnabled = false,
-            durationPlaceholder = "11:45",
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun AudioOnlyCallContentPreview() {
-    val context = LocalContext.current
-    StreamPreviewDataUtils.initializeStreamVideo(context)
-    VideoTheme {
-        AudioOnlyCallContent(
-            call = previewCall,
-            isMicrophoneEnabled = false,
         )
     }
 }

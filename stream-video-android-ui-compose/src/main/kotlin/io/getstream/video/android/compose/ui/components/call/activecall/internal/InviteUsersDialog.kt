@@ -20,10 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
-import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
@@ -59,13 +57,4 @@ internal fun InviteUsersDialog(
         contentText = stringResource(R.string.stream_video_invite_users_message, users.size),
         style = VideoTheme.styles.dialogStyles.defaultDialogStyle(),
     )
-}
-
-@Preview
-@Composable
-private fun InviteUsersDialogPreview() {
-    VideoTheme {
-        InviteUsersDialog(users = previewUsers, onDismiss = { }) {
-        }
-    }
 }

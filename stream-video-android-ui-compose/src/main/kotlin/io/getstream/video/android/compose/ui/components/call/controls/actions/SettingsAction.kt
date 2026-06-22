@@ -16,15 +16,12 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.Settings
@@ -56,20 +53,4 @@ public fun ToggleSettingsAction(
     onStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
 ) {
     onCallAction(Settings(!isShowingSettings))
-}
-
-@Preview
-@Composable
-public fun ToggleSettingsActionPreview() {
-    VideoTheme {
-        Column {
-            Row {
-                ToggleSettingsAction(isShowingSettings = false) {
-                }
-
-                ToggleSettingsAction(isShowingSettings = true) {
-                }
-            }
-        }
-    }
 }
