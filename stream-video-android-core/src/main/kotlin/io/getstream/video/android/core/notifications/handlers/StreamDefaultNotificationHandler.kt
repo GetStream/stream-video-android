@@ -45,7 +45,6 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
-import io.getstream.video.android.core.notifications.BatteryRestrictionsDetector
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.IncomingNotificationAction
@@ -151,7 +150,6 @@ constructor(
     private val logger by taggedLogger("Video:StreamNotificationHandler")
     private val serviceLauncher = ServiceLauncher(application)
     private val styleProvider = StyleProvider(application)
-    private val batteryRestrictionsDetector = BatteryRestrictionsDetector(application)
 
     internal fun shouldShowIncomingCallNotification(
         callBusyHandler: CallBusyHandler,
@@ -1093,7 +1091,7 @@ constructor(
         logger.d {
             "[addHangUpAction] Adding hang up action for $callDisplayName (remoteParticipantCount=$remoteParticipantCount)"
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && batteryRestrictionsDetector.isRestricted()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             setStyle(
                 styleProvider.getOutgoingCallStyle(
                     callDisplayName,
@@ -1112,7 +1110,7 @@ constructor(
         callDisplayName: String?,
     ): NotificationCompat.Builder = apply {
         logger.d { "[addCallActions] callDisplayName: $callDisplayName" }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && batteryRestrictionsDetector.isRestricted()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             setStyle(
                 styleProvider.getIncomingCallStyle(
                     callDisplayName,
