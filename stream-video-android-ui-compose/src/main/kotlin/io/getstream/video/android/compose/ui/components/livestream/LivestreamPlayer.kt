@@ -27,10 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.livestream.state.LivestreamState
 import io.getstream.video.android.compose.ui.components.video.config.VideoRendererConfig
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
@@ -38,8 +35,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.sorting.bySourcePriority
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -325,15 +320,6 @@ private fun wrapOverlayContent(
         }
     } else {
         overlayContent
-    }
-}
-
-@Preview
-@Composable
-private fun LivestreamPlayerPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        LivestreamPlayer(call = previewCall)
     }
 }
 

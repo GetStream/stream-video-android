@@ -34,19 +34,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 
 @Composable
 public fun BoxScope.LivestreamPlayerOverlay(
@@ -153,15 +149,4 @@ private fun BoxScope.LiveControls(
             onAudioToggle(callAction.isEnabled)
         },
     )
-}
-
-@Preview
-@Composable
-private fun LivestreamPlayerOverlayPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        Box {
-            LivestreamPlayerOverlay(call = previewCall)
-        }
-    }
 }

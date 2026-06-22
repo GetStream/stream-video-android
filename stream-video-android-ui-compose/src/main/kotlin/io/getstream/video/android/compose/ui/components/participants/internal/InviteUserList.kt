@@ -31,16 +31,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -130,18 +126,5 @@ internal fun InviteUserItem(
         }
 
         Spacer(modifier = Modifier.width(16.dp))
-    }
-}
-
-@Preview
-@Composable
-private fun InviteUserListPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        InviteUserList(
-            previewParticipantsList,
-            onUserSelected = {},
-            onUserUnSelected = {},
-        )
     }
 }

@@ -60,14 +60,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -91,9 +89,6 @@ import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.ReactionState
 import io.getstream.video.android.core.model.VisibilityOnScreenState
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.ui.common.R
 import io.getstream.video.android.ui.common.util.StreamVideoUiDelicateApi
 import kotlinx.coroutines.delay
@@ -569,85 +564,4 @@ private fun updateParticipantVisibility(
         sessionId,
         visibilityOnScreenState,
     )
-}
-
-@Preview
-@Composable
-private fun CallParticipantPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        ParticipantVideo(
-            call = previewCall,
-            participant = previewParticipantsList[1],
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun ParticipantLabelPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        Box {
-            ParticipantLabel(
-                nameLabel = "The name",
-                isPinned = true,
-                labelPosition = BottomStart,
-                hasAudio = true,
-                isSpeaking = true,
-                audioLevel = 0f,
-                soundIndicatorContent = {
-                    SoundIndicator(
-                        isSpeaking = true,
-                        isAudioEnabled = true,
-                        audioLevel = 0.8f,
-                        modifier = Modifier
-                            .align(CenterVertically)
-                            .padding(horizontal = VideoTheme.dimens.spacingS),
-                    )
-                },
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun ParticipantLabelPausedPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        Box {
-            ParticipantLabel(
-                nameLabel = "The name",
-                isPinned = true,
-                labelPosition = BottomStart,
-                hasAudio = true,
-                isSpeaking = true,
-                isPaused = true,
-                audioLevel = 0f,
-                soundIndicatorContent = {
-                    SoundIndicator(
-                        isSpeaking = true,
-                        isAudioEnabled = true,
-                        audioLevel = 0.8f,
-                        modifier = Modifier
-                            .align(CenterVertically)
-                            .padding(horizontal = VideoTheme.dimens.spacingS),
-                    )
-                },
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun ParticipantVideoPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        ParticipantVideoRenderer(
-            call = previewCall,
-            participant = previewParticipantsList[1],
-        )
-    }
 }
