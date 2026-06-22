@@ -25,7 +25,7 @@ internal class BackgroundRestrictions(private val context: Context) {
     fun isRestricted(): Boolean {
         val am = context.getSystemService(ActivityManager::class.java)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            am.isBackgroundRestricted
+            am.isBackgroundRestricted ?: false
         } else {
             false
         }
