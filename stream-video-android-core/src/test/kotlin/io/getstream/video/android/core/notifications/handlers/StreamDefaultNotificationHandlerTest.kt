@@ -120,7 +120,9 @@ class StreamDefaultNotificationHandlerTest {
         every { StreamVideo.instance() } returns mockStreamVideo
         every { mockStreamVideo.state } returns mockState
         every { mockState.callConfigRegistry } returns mockCallConfigRegistry
+        every { mockStreamVideo.callServiceConfigRegistry } returns mockCallConfigRegistry
         every { mockCallConfigRegistry.get(any()) } returns mockCallServiceConfig
+        every { mockCallServiceConfig.runCallServiceInForeground } returns true
         every { mockStreamVideo.callBusyHandler } returns callBusyHandler
 
         // Mock NotificationCompat.Builder to avoid Android framework issues
