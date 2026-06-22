@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
@@ -25,8 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleMicrophone
@@ -66,20 +62,4 @@ public fun ToggleMicrophoneAction(
     iconOnOff = Pair(Icons.Default.Mic, Icons.Default.MicOff),
 ) {
     onCallAction(ToggleMicrophone(isMicrophoneEnabled.not()))
-}
-
-@Preview
-@Composable
-public fun ToggleMicrophoneActionPreview() {
-    VideoTheme {
-        Column {
-            Row {
-                ToggleMicrophoneAction(isMicrophoneEnabled = false) {
-                }
-
-                ToggleMicrophoneAction(isMicrophoneEnabled = true) {
-                }
-            }
-        }
-    }
 }

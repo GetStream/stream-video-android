@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui.components.indicator
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -26,7 +25,6 @@ import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 
 /**
@@ -58,17 +56,6 @@ public fun MicrophoneIndicator(
                 tint = VideoTheme.colors.basePrimary,
                 contentDescription = Icons.Default.MicOff.name,
             )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun SoundIndicatorPreview() {
-    VideoTheme {
-        Row {
-            MicrophoneIndicator(isMicrophoneEnabled = true)
-            MicrophoneIndicator(isMicrophoneEnabled = false)
         }
     }
 }

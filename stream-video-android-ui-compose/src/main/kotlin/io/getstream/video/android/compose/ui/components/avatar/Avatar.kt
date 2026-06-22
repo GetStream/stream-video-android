@@ -21,7 +21,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
@@ -34,7 +33,6 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -44,7 +42,6 @@ import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.placeholder.placeholder.PlaceholderPlugin
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.ui.common.R
 
 /**
  * An avatar that renders an image or a fallback text. In case the image URL
@@ -139,29 +136,6 @@ internal fun Avatar(
             )
         },
     )
-}
-
-@Preview
-@Composable
-private fun AvatarInitialPreview() {
-    VideoTheme {
-        Avatar(
-            modifier = Modifier.size(72.dp),
-            fallbackText = "Thierry",
-        )
-    }
-}
-
-@Preview
-@Composable
-internal fun AvatarImagePreview() {
-    VideoTheme {
-        Avatar(
-            modifier = Modifier.size(72.dp),
-            fallbackText = null,
-            previewModePlaceholder = R.drawable.stream_video_call_sample,
-        )
-    }
 }
 
 internal const val DEFAULT_IMAGE_SIZE = -1

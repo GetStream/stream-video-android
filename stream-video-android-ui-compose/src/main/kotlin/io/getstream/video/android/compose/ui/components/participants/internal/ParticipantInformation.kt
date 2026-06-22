@@ -34,16 +34,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.utils.toCallUser
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewMemberListState
-import io.getstream.video.android.mock.previewThreeMembers
-import io.getstream.video.android.mock.previewTwoMembers
 import io.getstream.video.android.ui.common.util.buildLargeCallText
 import io.getstream.video.android.ui.common.util.buildSmallCallText
 
@@ -186,45 +181,6 @@ public fun ParticipantInformation(
             },
             style = VideoTheme.typography.bodyM,
             textAlign = TextAlign.Center,
-        )
-    }
-}
-
-@Preview("2 users")
-@Composable
-private fun ParticipantInformationTwoUsersPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        ParticipantInformation(
-            isVideoType = true,
-            callStatus = CallStatus.Incoming,
-            members = previewTwoMembers,
-        )
-    }
-}
-
-@Preview("3 users")
-@Composable
-private fun ParticipantInformationThreeUsersPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        ParticipantInformation(
-            isVideoType = true,
-            callStatus = CallStatus.Incoming,
-            members = previewThreeMembers,
-        )
-    }
-}
-
-@Preview("More than 3 users")
-@Composable
-private fun ParticipantInformationPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        ParticipantInformation(
-            isVideoType = true,
-            callStatus = CallStatus.Incoming,
-            members = previewMemberListState,
         )
     }
 }
