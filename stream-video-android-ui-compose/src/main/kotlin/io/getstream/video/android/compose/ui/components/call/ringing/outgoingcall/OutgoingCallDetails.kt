@@ -22,16 +22,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallStatus
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewMemberListState
 
 /**
  * Component that displays details for an outgoing call.
@@ -55,18 +50,6 @@ public fun OutgoingCallDetails(
             isVideoType = isVideoType,
             callStatus = CallStatus.Outgoing,
             members = participants,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun OutgoingCallDetailsPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        OutgoingCallDetails(
-            isVideoType = false,
-            participants = previewMemberListState,
         )
     }
 }

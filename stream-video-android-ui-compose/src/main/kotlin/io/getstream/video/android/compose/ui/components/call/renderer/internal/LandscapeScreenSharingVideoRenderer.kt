@@ -28,8 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -40,9 +38,6 @@ import io.getstream.video.android.compose.ui.components.call.renderer.VideoRende
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipantsList
 
 /**
  * Represents the landscape screen sharing content.
@@ -120,26 +115,6 @@ internal fun LandscapeScreenSharingVideoRenderer(
             dominantSpeaker = dominantSpeaker,
             style = style,
             videoRenderer = videoRenderer,
-        )
-    }
-}
-
-@Preview(
-    widthDp = 1440,
-    heightDp = 720,
-)
-@Composable
-private fun LandscapeScreenSharingMyContentPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        LandscapeScreenSharingVideoRenderer(
-            call = previewCall,
-            session = ScreenSharingSession(
-                participant = previewParticipantsList[0],
-            ),
-            participants = previewParticipantsList,
-            dominantSpeaker = previewParticipantsList[0],
-            modifier = Modifier.fillMaxSize(),
         )
     }
 }

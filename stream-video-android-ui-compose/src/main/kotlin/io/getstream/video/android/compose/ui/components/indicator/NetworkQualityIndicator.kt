@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.model.NetworkQuality
 import stream.video.sfu.models.ConnectionQuality
@@ -115,26 +114,5 @@ internal fun ConnectionBars(modifier: Modifier = Modifier, colors: Triple<Color,
                     shape = shape,
                 ),
         )
-    }
-}
-
-@Preview
-@Composable
-private fun ConnectionQualityIndicatorPreview() {
-    VideoTheme {
-        Row {
-            NetworkQualityIndicator(
-                networkQuality = NetworkQuality.UnSpecified(),
-            )
-            NetworkQualityIndicator(
-                networkQuality = NetworkQuality.Poor(),
-            )
-            NetworkQualityIndicator(
-                networkQuality = NetworkQuality.Good(),
-            )
-            NetworkQualityIndicator(
-                networkQuality = NetworkQuality.Excellent(),
-            )
-        }
     }
 }
