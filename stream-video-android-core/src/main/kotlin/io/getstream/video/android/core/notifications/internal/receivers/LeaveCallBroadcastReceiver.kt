@@ -24,7 +24,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.UserActionCause
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LEAVE_CALL
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
+import io.getstream.video.android.model.StreamCallId
 
 /**
  * Used to process any pending intents that feature the [ACTION_LEAVE_CALL] action. By consuming this
@@ -39,13 +39,23 @@ internal class LeaveCallBroadcastReceiver : GenericCallActionBroadcastReceiver()
     override suspend fun onReceive(call: Call, context: Context, intent: Intent) {
         logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
 
+        // A call has at most one notification; its id is stored at creation time in
+        // CallState.notificationIdFlow (the source of truth, replacing the deprecated
+        // INTENT_EXTRA_NOTIFICATION_ID extra).
+        val notificationId = call.state.notificationIdFlow.value
+        // TODO: remove this legacy notification id once nothing posts under StreamCallId.hashCode().
+        val legacyNotificationId = StreamCallId.fromCallCid(call.cid).hashCode()
+
         call.leave(
             CallLeaveReason.UserAction(
                 UserActionCause.LEAVE_FROM_NOTIFICATION,
             ),
         )
-        val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
-        logger.d { "[onReceive], notificationId: $notificationId" }
-        NotificationManagerCompat.from(context).cancel(notificationId)
+        logger.d {
+            "[onReceive], notificationId: $notificationId, legacyNotificationId: $legacyNotificationId"
+        }
+        val notificationManager = NotificationManagerCompat.from(context)
+        notificationId?.let { notificationManager.cancel(it) }
+        notificationManager.cancel(legacyNotificationId)
     }
 }
