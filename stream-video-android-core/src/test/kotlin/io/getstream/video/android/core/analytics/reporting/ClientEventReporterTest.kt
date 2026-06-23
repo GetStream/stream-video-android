@@ -17,7 +17,9 @@
 package io.getstream.video.android.core.analytics.reporting
 
 import io.getstream.android.video.generated.models.ClientEvent
+import io.getstream.video.android.core.analytics.call.observer.VideoAnalyticsIceState
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
+import io.getstream.video.android.core.analytics.coordinator.CoordinatorAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.analytics.reporting.model.EventOutcome
@@ -48,15 +50,18 @@ class ClientEventReporterTest {
     }
 
     private lateinit var dispatcher: RecordingEventDispatcher
+    private lateinit var coordinatorAnalyticsStateHolder: CoordinatorAnalyticsStateHolder
     private lateinit var reporter: ClientEventReporter
 
     @Before
     fun setup() {
         dispatcher = RecordingEventDispatcher()
+        coordinatorAnalyticsStateHolder = CoordinatorAnalyticsStateHolder()
         reporter = ClientEventReporter(
             sender = dispatcher,
             userAgent = { "test-agent" },
             sdkVersion = "1.0.0",
+            coordinatorAnalyticsStateHolder = coordinatorAnalyticsStateHolder,
         )
     }
 
@@ -79,7 +84,7 @@ class ClientEventReporterTest {
 
     private fun pcStateChanged(
         pcState: PeerConnection.PeerConnectionState?,
-        iceState: PeerConnection.IceConnectionState? = null,
+        iceState: VideoAnalyticsIceState,
         role: PeerConnectionRole = PeerConnectionRole.PUBLISH,
         pcHashCode: Int = 100,
     ) = reporter.onPeerConnectionStateChanged(
@@ -99,6 +104,10 @@ class ClientEventReporterTest {
 
     @Test
     fun `coordinator ws initiated sends an initiated event and returns its stage id`() {
+        // The connect id is produced by the writer (CoordinatorAnalytics) and read back
+        // by the reporter through the shared state holder.
+        coordinatorAnalyticsStateHolder.updateCoordinatorConnectId("coordinator-connect-1")
+
         val stageId = reporter.reportCoordinatorWSInitiated()
 
         assertEquals(1, dispatcher.sent.size)
@@ -109,7 +118,7 @@ class ClientEventReporterTest {
         assertEquals(EventType.INITIATED.value, event.eventType)
         assertEquals("test-agent", event.userAgent)
         assertEquals("1.0.0", event.sdkVersion)
-        assertTrue(event.coordinatorConnectId.orEmpty().isNotEmpty())
+        assertEquals("coordinator-connect-1", event.coordinatorConnectId)
     }
 
     @Test
@@ -243,7 +252,7 @@ class ClientEventReporterTest {
     fun `CONNECTING opens a session and CONNECTED completes it as success`() {
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTING,
-            iceState = PeerConnection.IceConnectionState.CHECKING,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
         )
 
         assertEquals(1, dispatcher.sent.size)
@@ -255,7 +264,7 @@ class ClientEventReporterTest {
 
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTED,
-            iceState = PeerConnection.IceConnectionState.CONNECTED,
+            iceState = VideoAnalyticsIceState.CONNECTED,
         )
 
         assertEquals(2, dispatcher.sent.size)
@@ -269,12 +278,12 @@ class ClientEventReporterTest {
     fun `FAILED completes the session as a connectivity failure`() {
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTING,
-            iceState = PeerConnection.IceConnectionState.CHECKING,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
         )
 
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.FAILED,
-            iceState = PeerConnection.IceConnectionState.FAILED,
+            iceState = VideoAnalyticsIceState.FAILED,
         )
 
         val completed = dispatcher.sent.last()
@@ -284,33 +293,41 @@ class ClientEventReporterTest {
     }
 
     @Test
-    fun `CONNECTED with a null ice state is ignored`() {
+    fun `CONNECTED completes the session as success even when ice is not connected`() {
+        // NOTE: the reporter routes purely on the peer-connection state, so a CONNECTED peer
+        // connection is reported as a success regardless of its ICE state (including NOT_CONNECTED).
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTING,
-            iceState = PeerConnection.IceConnectionState.CHECKING,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
         )
 
-        pcStateChanged(pcState = PeerConnection.PeerConnectionState.CONNECTED, iceState = null)
+        pcStateChanged(
+            pcState = PeerConnection.PeerConnectionState.CONNECTED,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+        )
 
-        assertEquals(1, dispatcher.sent.size)
+        assertEquals(2, dispatcher.sent.size)
+        val completed = dispatcher.sent.last()
+        assertEquals(EventType.COMPLETED.value, completed.eventType)
+        assertEquals(EventOutcome.SUCCESS.value, completed.outcome)
     }
 
     @Test
     fun `a reconnect after CONNECTED is flagged as previously connected`() {
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTING,
-            iceState = PeerConnection.IceConnectionState.CHECKING,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
             pcHashCode = 1,
         )
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTED,
-            iceState = PeerConnection.IceConnectionState.CONNECTED,
+            iceState = VideoAnalyticsIceState.CONNECTED,
             pcHashCode = 1,
         )
 
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTING,
-            iceState = PeerConnection.IceConnectionState.CHECKING,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
             pcHashCode = 2,
         )
 
@@ -323,7 +340,7 @@ class ClientEventReporterTest {
     fun `CONNECTED without an open session sends nothing`() {
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTED,
-            iceState = PeerConnection.IceConnectionState.CONNECTED,
+            iceState = VideoAnalyticsIceState.CONNECTED,
         )
 
         assertTrue(dispatcher.sent.isEmpty())
@@ -333,19 +350,19 @@ class ClientEventReporterTest {
     fun `sessions are completed per peer connection instance`() {
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTING,
-            iceState = PeerConnection.IceConnectionState.CHECKING,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
             pcHashCode = 1,
         )
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTING,
-            iceState = PeerConnection.IceConnectionState.CHECKING,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
             pcHashCode = 2,
         )
         val firstStageId = dispatcher.sent.first().stageId
 
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTED,
-            iceState = PeerConnection.IceConnectionState.CONNECTED,
+            iceState = VideoAnalyticsIceState.CONNECTED,
             pcHashCode = 1,
         )
 
@@ -359,13 +376,13 @@ class ClientEventReporterTest {
     fun `publisher and subscriber sessions are tracked independently`() {
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTING,
-            iceState = PeerConnection.IceConnectionState.CHECKING,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
             role = PeerConnectionRole.PUBLISH,
             pcHashCode = 1,
         )
         pcStateChanged(
             pcState = PeerConnection.PeerConnectionState.CONNECTING,
-            iceState = PeerConnection.IceConnectionState.CHECKING,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
             role = PeerConnectionRole.SUBSCRIBE,
             pcHashCode = 2,
         )
@@ -384,8 +401,8 @@ class ClientEventReporterTest {
         dispatcher.sent.clear()
 
         reporter.abortAllPostCallInFlight(
-            publisherIceState = null,
-            subscriberIceState = null,
+            publisherIceState = VideoAnalyticsIceState.NOT_CONNECTED,
+            subscriberIceState = VideoAnalyticsIceState.NOT_CONNECTED,
             AnalyticsCallAbortReason.CLIENT_ABORTED.name,
             "user left the call",
         )

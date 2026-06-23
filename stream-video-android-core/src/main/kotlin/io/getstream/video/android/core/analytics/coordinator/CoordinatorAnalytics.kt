@@ -26,10 +26,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 internal class CoordinatorAnalytics(
     private val observerScope: CoroutineScope,
     private val eventReporter: ClientEventReporter,
+    private val stateHolder: CoordinatorAnalyticsStateHolder,
 ) {
 
     private var job: Job? = null
@@ -46,6 +48,7 @@ internal class CoordinatorAnalytics(
                         is VideoSocketState.Connecting -> {
                             when (it.connectionType) {
                                 VideoSocketConnectionType.INITIAL_CONNECTION -> {
+                                    stateHolder.updateCoordinatorConnectId(UUID.randomUUID().toString())
                                     stageId.value = eventReporter.reportCoordinatorWSInitiated()
                                 }
 

@@ -36,7 +36,6 @@ import io.getstream.android.push.permissions.DefaultNotificationPermissionHandle
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.BackgroundRestrictions
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
@@ -60,6 +59,7 @@ import io.getstream.video.android.core.notifications.extractor.DefaultNotificati
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.notifications.style.StyleProvider
+import io.getstream.video.android.core.utils.BackgroundRestrictions
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
