@@ -21,6 +21,7 @@ import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.BuildConfig
+import io.getstream.video.android.core.analytics.call.observer.VideoAnalyticsIceState
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
 import io.getstream.video.android.core.analytics.reporting.dispatcher.ImmediateEventDispatcher
@@ -284,7 +285,7 @@ internal class ClientEventReporter(
         sfuId: String,
         joinReason: JoinReason,
         role: PeerConnectionRole,
-        iceState: PeerConnection.IceConnectionState?,
+        iceState: VideoAnalyticsIceState,
         peerConnectionState: PeerConnection.PeerConnectionState?,
     ) {
         when (peerConnectionState) {
@@ -302,38 +303,37 @@ internal class ClientEventReporter(
                     peerConnectionState,
                 )
             }
+
             PeerConnection.PeerConnectionState.CONNECTED -> {
-                iceState?.let {
-                    handleOnPeerConnectionConnectedState(
-                        peerConnectionHashCode,
-                        callId,
-                        callType,
-                        joinStageAttemptId,
-                        callSessionId,
-                        sfuId,
-                        joinReason,
-                        role,
-                        iceState,
-                        peerConnectionState,
-                    )
-                }
+                handleOnPeerConnectionConnectedState(
+                    peerConnectionHashCode,
+                    callId,
+                    callType,
+                    joinStageAttemptId,
+                    callSessionId,
+                    sfuId,
+                    joinReason,
+                    role,
+                    iceState,
+                    peerConnectionState,
+                )
             }
+
             PeerConnection.PeerConnectionState.FAILED -> {
-                iceState?.let {
-                    handleOnPeerConnectionFailedState(
-                        peerConnectionHashCode,
-                        callId,
-                        callType,
-                        joinStageAttemptId,
-                        callSessionId,
-                        sfuId,
-                        joinReason,
-                        role,
-                        iceState,
-                        peerConnectionState,
-                    )
-                }
+                handleOnPeerConnectionFailedState(
+                    peerConnectionHashCode,
+                    callId,
+                    callType,
+                    joinStageAttemptId,
+                    callSessionId,
+                    sfuId,
+                    joinReason,
+                    role,
+                    iceState,
+                    peerConnectionState,
+                )
             }
+
             else -> {}
         }
     }
@@ -347,7 +347,7 @@ internal class ClientEventReporter(
         sfuId: String,
         joinReason: JoinReason,
         role: PeerConnectionRole,
-        iceState: PeerConnection.IceConnectionState?,
+        iceState: VideoAnalyticsIceState,
         peerConnectionState: PeerConnection.PeerConnectionState,
     ) {
         val wasPrevConnected = pcEverConnected[role] != null
@@ -397,7 +397,7 @@ internal class ClientEventReporter(
         sfuId: String,
         joinReason: JoinReason,
         role: PeerConnectionRole,
-        iceState: PeerConnection.IceConnectionState,
+        iceState: VideoAnalyticsIceState,
         peerConnectionState:
         PeerConnection.PeerConnectionState,
     ) {
@@ -428,7 +428,7 @@ internal class ClientEventReporter(
         sfuId: String,
         joinReason: JoinReason,
         role: PeerConnectionRole,
-        iceState: PeerConnection.IceConnectionState,
+        iceState: VideoAnalyticsIceState,
         peerConnectionState: PeerConnection.PeerConnectionState,
     ) {
         val pcState = pcEventReporterStateHolder.map.remove(peerConnectionHashCode) ?: return
@@ -458,7 +458,7 @@ internal class ClientEventReporter(
         callSessionId: String,
         joinReason: JoinReason,
         success: Boolean,
-        iceState: PeerConnection.IceConnectionState,
+        iceState: VideoAnalyticsIceState,
         peerConnectionState: PeerConnection.PeerConnectionState?,
         failureReason: String? = null,
         failureCode: String? = null,
@@ -573,8 +573,8 @@ internal class ClientEventReporter(
     }
 
     internal fun abortAllPostCallInFlight(
-        publisherIceState: PeerConnection.IceConnectionState?,
-        subscriberIceState: PeerConnection.IceConnectionState?,
+        publisherIceState: VideoAnalyticsIceState,
+        subscriberIceState: VideoAnalyticsIceState,
         failCode: String,
         failMessage: String,
     ) {
