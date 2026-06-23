@@ -203,6 +203,7 @@ constructor(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onLiveCall] callId: ${callId.id}, callDisplayName: $callDisplayName" }
+        // TODO: Replace StreamCallId.hashCode with StreamCallId.getNotificationId(appropriateType)
         val notificationId = callId.hashCode()
         val liveCallPendingIntent =
             intentResolver.searchLiveCallPendingIntent(callId, notificationId, payload)
@@ -253,6 +254,7 @@ constructor(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onNotification] callId: ${callId.id}, callDisplayName: $callDisplayName" }
+        // TODO: Replace StreamCallId.hashCode with StreamCallId.getNotificationId(appropriateType)
         val notificationId = callId.hashCode()
         val intent = intentResolver.searchNotificationCallPendingIntent(
             callId,
@@ -745,6 +747,7 @@ constructor(
         logger.d {
             "[getSimpleOngoingCallNotification] callId: ${callId.id}, callDisplayName: $callDisplayName, isOutgoingCall: $isOutgoingCall, remoteParticipantCount: $remoteParticipantCount"
         }
+        // TODO: Replace StreamCallId.hashCode with StreamCallId.getNotificationId(appropriateType)
         val notificationId = callId.hashCode() // Notification ID
 
         // Intents
@@ -1180,6 +1183,7 @@ constructor(
         },
     ): Notification {
         logger.d { "[getMinimalMediaStyleNotification] callId: ${callId.id}" }
+        // TODO: Replace StreamCallId.hashCode with StreamCallId.getNotificationId(appropriateType)
         val notificationId = callId.hashCode() // Notification ID
         // Intents
         val onClickIntent = intentResolver.searchOngoingCallPendingIntent(
