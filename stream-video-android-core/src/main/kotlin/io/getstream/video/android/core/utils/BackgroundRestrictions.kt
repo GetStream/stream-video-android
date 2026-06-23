@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+package io.getstream.video.android.core.utils
 
 import android.app.ActivityManager
 import android.content.Context
