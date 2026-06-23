@@ -32,6 +32,7 @@ On CallContent make sure to pass onBackPressed to CallAppBar in order to make th
 
 ### ✅ Added
 Add `participantLabelContent` slot to `CallLobby` so the lobby participant label can be hidden (`{}`) or fully customized. Brings the Compose API in line with React's `VideoPreview` slot overrides.
+Add `videoPreviewModifier` parameter to `CallLobby` so callers can override the size, shape, padding, and background of the local video preview box. Defaults preserve the previous responsive height + 12dp rounded corner clip, matching iOS (parent-driven sizing in `GeometryReader`) and React (`className`-driven sizing on `VideoPreview`).
 
 ### ⚠️ Changed
 Deprecate the `CallLobby` overload that takes `labelPosition: Alignment`. Migrate to the new `participantLabelContent` slot; pass `{}` to hide the label or supply a composable to customize content and positioning.
