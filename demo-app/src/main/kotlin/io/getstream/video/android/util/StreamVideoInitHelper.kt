@@ -130,6 +130,15 @@ object StreamVideoInitHelper {
     public val initializedState: StateFlow<InitializedState> = _initState
     private var testNotificationConfig: NotificationConfig? = null
 
+    /**
+     * The [CallServiceConfigRegistry] passed to the active [StreamVideo] client.
+     *
+     * It is exposed here so debug UI (e.g. the in-app Call Settings screen) can read and mutate
+     * the live registry.
+     */
+    var callServiceConfigRegistry: CallServiceConfigRegistry? = null
+        private set
+
     fun init(appContext: Context, testNotificationConfig: NotificationConfig? = null) {
         context = appContext.applicationContext
         this.testNotificationConfig = testNotificationConfig
@@ -390,6 +399,7 @@ object StreamVideoInitHelper {
                 )
             }
         }
+        this.callServiceConfigRegistry = callServiceConfigRegistry
 
         return StreamVideoBuilder(
             context = context,
