@@ -59,6 +59,7 @@ import io.getstream.video.android.core.notifications.extractor.DefaultNotificati
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.notifications.style.StyleProvider
+import io.getstream.video.android.core.utils.BackgroundRestrictions
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
@@ -150,6 +151,7 @@ constructor(
     private val logger by taggedLogger("Video:StreamNotificationHandler")
     private val serviceLauncher = ServiceLauncher(application)
     private val styleProvider = StyleProvider(application)
+    private val batteryRestrictions = BackgroundRestrictions(application)
 
     internal fun shouldShowIncomingCallNotification(
         callBusyHandler: CallBusyHandler,
@@ -1091,7 +1093,12 @@ constructor(
         logger.d {
             "[addHangUpAction] Adding hang up action for $callDisplayName (remoteParticipantCount=$remoteParticipantCount)"
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        /**
+         * CallStyle notifications can trigger
+         * CannotPostForegroundServiceNotificationException ("Bad notification for startForeground")
+         * on Android 12+ when the app is background-restricted. Fall back to a standard notification.
+         */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !batteryRestrictions.isRestricted()) {
             setStyle(
                 styleProvider.getOutgoingCallStyle(
                     callDisplayName,
@@ -1110,7 +1117,12 @@ constructor(
         callDisplayName: String?,
     ): NotificationCompat.Builder = apply {
         logger.d { "[addCallActions] callDisplayName: $callDisplayName" }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        /**
+         * CallStyle notifications can trigger
+         * CannotPostForegroundServiceNotificationException ("Bad notification for startForeground")
+         * on Android 12+ when the app is background-restricted. Fall back to a standard notification.
+         */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !batteryRestrictions.isRestricted()) {
             setStyle(
                 styleProvider.getIncomingCallStyle(
                     callDisplayName,
