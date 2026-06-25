@@ -46,9 +46,12 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
     private fun Call.injectMockNetwork(connected: Boolean = true) {
         val mockNetwork = mockk<NetworkStateProvider>(relaxed = true)
         every { mockNetwork.isConnected() } returns connected
-        val field = Call::class.java.getDeclaredField("network\$delegate")
+        val monitorField = Call::class.java.getDeclaredField("connectivityMonitor")
+        monitorField.isAccessible = true
+        val monitor = monitorField.get(this)
+        val field = monitor.javaClass.getDeclaredField("network\$delegate")
         field.isAccessible = true
-        field.set(this, lazyOf(mockNetwork))
+        field.set(monitor, lazyOf(mockNetwork))
     }
 
     private fun stubSessionForReconnect(sessionMock: RtcSession) {
