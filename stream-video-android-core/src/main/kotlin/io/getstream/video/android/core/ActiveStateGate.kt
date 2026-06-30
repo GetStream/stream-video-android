@@ -153,10 +153,6 @@ internal class ActiveStateGate(
             withTimeoutOrNull(interceptorTimeoutMs) {
                 interceptor.callReadyToJoin(call)
             }
-
-            if (interceptor is CallJoinLifecycleInterceptor) {
-                interceptor.callDidJoin(call)
-            }
             logger.d { "[invokeInterceptor] finish at ${(System.currentTimeMillis() - startTime) / 1000}s " }
             true
         } catch (e: CancellationException) {
