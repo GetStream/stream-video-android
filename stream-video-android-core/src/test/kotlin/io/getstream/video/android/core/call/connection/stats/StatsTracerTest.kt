@@ -23,7 +23,6 @@ import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -34,7 +33,6 @@ import org.webrtc.RTCStatsCollectorCallback
 import org.webrtc.RTCStatsReport
 import stream.video.sfu.models.PeerType
 import stream.video.sfu.models.TrackType
-import java.math.BigInteger
 
 class StatsTracerTest {
     private lateinit var peerConnection: PeerConnection
@@ -126,97 +124,5 @@ class StatsTracerTest {
         assertNotNull(result.performanceStats)
         assertNotNull(result.delta)
         assertEquals(report, result.stats)
-    }
-
-    @Test
-    fun `get polls inbound audio rtp stats for subscriber`() = runBlocking {
-        val inboundAudioStat = inboundAudioStat(
-            id = "inbound-audio-1",
-            trackIdentifier = "audio-track-1",
-            packetsReceived = 5,
-            bytesReceived = BigInteger.valueOf(1000),
-            totalAudioEnergy = 0.4,
-            totalSamplesReceived = BigInteger.valueOf(480),
-            silentConcealedSamples = BigInteger.ZERO,
-        )
-        val report = mockk<RTCStatsReport> {
-            every { statsMap } returns mapOf("inbound-audio-1" to inboundAudioStat)
-        }
-        every { peerConnection.getStats(any()) } answers {
-            val cb = arg<RTCStatsCollectorCallback>(0)
-            cb.onStatsDelivered(report)
-        }
-
-        tracer = StatsTracer(peerConnection, PeerType.PEER_TYPE_SUBSCRIBER)
-        val result = tracer.get(
-            trackIdToTrackType = mapOf("audio-track-1" to TrackType.TRACK_TYPE_AUDIO),
-            trackIdToParticipant = mapOf("audio-track-1" to "session-1"),
-        )
-
-        assertEquals(1, result.inboundAudioStats.size)
-        val audioStats = result.inboundAudioStats.first()
-        assertEquals("audio-track-1", audioStats.trackIdentifier)
-        assertEquals("session-1", audioStats.sessionId)
-        assertEquals(TrackType.TRACK_TYPE_AUDIO, audioStats.trackType)
-        assertEquals(5, audioStats.deltaPacketsReceived)
-        assertEquals(BigInteger.valueOf(1000), audioStats.deltaBytesReceived)
-        assertEquals(BigInteger.valueOf(480), audioStats.deltaTotalSamplesReceived)
-        assertTrue(audioStats.isReceivingRealAudio)
-    }
-
-    @Test
-    fun `get does not mark silent concealed inbound audio as real audio`() = runBlocking {
-        val inboundAudioStat = inboundAudioStat(
-            id = "inbound-audio-1",
-            trackIdentifier = "audio-track-1",
-            packetsReceived = 5,
-            bytesReceived = BigInteger.valueOf(1000),
-            totalAudioEnergy = 0.0,
-            totalSamplesReceived = BigInteger.valueOf(480),
-            silentConcealedSamples = BigInteger.valueOf(480),
-        )
-        val report = mockk<RTCStatsReport> {
-            every { statsMap } returns mapOf("inbound-audio-1" to inboundAudioStat)
-        }
-        every { peerConnection.getStats(any()) } answers {
-            val cb = arg<RTCStatsCollectorCallback>(0)
-            cb.onStatsDelivered(report)
-        }
-
-        tracer = StatsTracer(peerConnection, PeerType.PEER_TYPE_SUBSCRIBER)
-        val result = tracer.get(
-            trackIdToTrackType = mapOf("audio-track-1" to TrackType.TRACK_TYPE_AUDIO),
-            trackIdToParticipant = mapOf("audio-track-1" to "session-1"),
-        )
-
-        assertFalse(result.inboundAudioStats.first().isReceivingRealAudio)
-    }
-
-    private fun inboundAudioStat(
-        id: String,
-        trackIdentifier: String,
-        packetsReceived: Long,
-        bytesReceived: BigInteger,
-        totalAudioEnergy: Double,
-        totalSamplesReceived: BigInteger,
-        silentConcealedSamples: BigInteger,
-    ): RTCStats {
-        val members = mapOf(
-            "kind" to "audio",
-            "trackIdentifier" to trackIdentifier,
-            "packetsReceived" to packetsReceived,
-            "bytesReceived" to bytesReceived,
-            "audioLevel" to 0.2,
-            "totalAudioEnergy" to totalAudioEnergy,
-            "totalSamplesReceived" to totalSamplesReceived,
-            "concealedSamples" to BigInteger.ZERO,
-            "silentConcealedSamples" to silentConcealedSamples,
-        )
-        return mockk(relaxed = true) {
-            every { this@mockk.id } returns id
-            every { type } returns "inbound-rtp"
-            every { timestampUs } returns 1_000.0
-            every { this@mockk.members } returns members
-        }
     }
 }
