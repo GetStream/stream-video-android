@@ -19,10 +19,14 @@ package io.getstream.video.android
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.CallActivity.Companion.USE_CALL_JOIN_INTERCEPTOR
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.CallJoinInterceptor
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.call.interceptor.CallJoinLifecycleInterceptor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 /**
  * Do the following changes before testing this flow
@@ -31,12 +35,19 @@ import kotlinx.coroutines.flow.first
  */
 class DemoCallJoinInterceptor(
     private val previousRingingStates: Set<RingingState>,
-) : CallJoinInterceptor {
+) : CallJoinLifecycleInterceptor {
     private val logger by taggedLogger("DemoCallJoinInterceptor")
 
     companion object {
         const val CALLER_READY_TO_JOIN_EVENT_TYPE = "caller_ready_join"
         const val CALLEE_READY_TO_JOIN_EVENT_TYPE = "callee_ready_join"
+    }
+    var observeJob: Job? = null
+    val observerScope = CoroutineScope(Dispatchers.Default)
+    override suspend fun callWillJoin(call: Call) {
+        observeJob = observerScope.launch {
+            call.setIncomingAudioMuted(false)
+        }
     }
 
     override suspend fun callReadyToJoin(call: Call) {
@@ -80,5 +91,10 @@ class DemoCallJoinInterceptor(
                 logger.d { "[callReadyToJoin] calleeReadyToJoinFlow finish" }
             }
         }
+    }
+
+    override suspend fun callDidJoin(call: Call) {
+        observeJob?.cancel()
+        call.setIncomingAudioMuted(true)
     }
 }

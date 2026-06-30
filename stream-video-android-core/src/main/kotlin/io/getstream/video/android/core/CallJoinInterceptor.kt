@@ -25,6 +25,7 @@ import kotlin.jvm.Throws
  * the publisher peer connection becoming ready and the call going active.
  * Has no effect on non-ringing joins (livestream, direct join).
  */
+@Deprecated("Use CallJoinLifecycleInterceptor instead")
 public interface CallJoinInterceptor {
 
     /**
@@ -34,7 +35,7 @@ public interface CallJoinInterceptor {
      * Throw [CallJoinInterceptionException] to abort the join — the SDK will leave
      * the call cleanly
      *
-     * The SDK enforces a 5-second maximum — the transition proceeds automatically on timeout.
+     * The SDK enforces a 5-second maximum [INTERCEPTOR_TIMEOUT_MS] — the transition proceeds automatically on timeout.
      */
     @Throws(CallJoinInterceptionException::class)
     public suspend fun callReadyToJoin(call: Call)

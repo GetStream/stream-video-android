@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import androidx.lifecycle.AtomicReference
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.call.interceptor.CallJoinLifecycleInterceptor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -33,7 +34,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.webrtc.PeerConnection.PeerConnectionState
 
 private const val PEER_CONNECTION_OBSERVER_TIMEOUT = 5_000L
-private const val INTERCEPTOR_TIMEOUT_MS = 5_000L
+private const val INTERCEPTOR_TIMEOUT_MS = 8_000L
 
 internal class ActiveStateGate(
     private val coroutineScope: CoroutineScope,
@@ -141,6 +142,10 @@ internal class ActiveStateGate(
         return try {
             withTimeoutOrNull(interceptorTimeoutMs) {
                 interceptor.callReadyToJoin(call)
+            }
+
+            if (interceptor is CallJoinLifecycleInterceptor) {
+                interceptor.callDidJoin(call)
             }
             logger.d { "[invokeInterceptor] finish at ${(System.currentTimeMillis() - startTime) / 1000}s " }
             true

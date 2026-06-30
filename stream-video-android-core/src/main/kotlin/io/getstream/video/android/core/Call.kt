@@ -71,6 +71,7 @@ import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.video.android.core.call.interceptor.CallJoinLifecycleInterceptor
 import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
@@ -112,6 +113,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -624,6 +626,11 @@ public class Call(
                             "is joined. MediaManager will not be initialised with server settings."
                     }
                 }
+
+                if (callJoinInterceptor is CallJoinLifecycleInterceptor) {
+                    callJoinInterceptor.callReadyToJoin(this)
+                }
+
                 return result
             }
             if (result is Failure) {
@@ -1445,6 +1452,17 @@ public class Call(
             screenShare = screenShare,
         )
         return clientImpl.muteUsers(type, id, request)
+    }
+
+    suspend fun setIncomingAudioMuted(audio: Boolean) {
+        val subscriber = session.filterNotNull()
+            .flatMapLatest { it.subscriber.filterNotNull() }
+            .first() // wait until a subscriber exists, take it once
+
+        val volume = if (audio) 1.0 else 0.0 // gain range is 0..10; 0 = silence
+        subscriber.tracks.values
+            .mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as? AudioTrack }
+            .forEach { it.audio.setVolume(volume) } // org.webrtc.AudioTrack.setVolume(double)
     }
 
     fun setVisibility(
