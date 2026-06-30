@@ -8928,7 +8928,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun setAudioProcessingEnabled (Z)V
 	public final fun setIncomingAudioEnabled (ZLjava/util/List;)V
 	public static synthetic fun setIncomingAudioEnabled$default (Lio/getstream/video/android/core/Call;ZLjava/util/List;ILjava/lang/Object;)V
-	public final fun setIncomingAudioMuted (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setIncomingVideoEnabled (Ljava/lang/Boolean;Ljava/util/List;)V
 	public static synthetic fun setIncomingVideoEnabled$default (Lio/getstream/video/android/core/Call;Ljava/lang/Boolean;Ljava/util/List;ILjava/lang/Object;)V
 	public final fun setPreferredIncomingVideoResolution (Lio/getstream/video/android/core/model/PreferredVideoResolution;Ljava/util/List;)V

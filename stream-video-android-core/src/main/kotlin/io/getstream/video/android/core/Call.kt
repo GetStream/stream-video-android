@@ -1454,17 +1454,6 @@ public class Call(
         return clientImpl.muteUsers(type, id, request)
     }
 
-    suspend fun setIncomingAudioMuted(audio: Boolean) {
-        val subscriber = session.filterNotNull()
-            .flatMapLatest { it.subscriber.filterNotNull() }
-            .first() // wait until a subscriber exists, take it once
-
-        val volume = if (audio) 1.0 else 0.0 // gain range is 0..10; 0 = silence
-        subscriber.tracks.values
-            .mapNotNull { it[TrackType.TRACK_TYPE_AUDIO] as? AudioTrack }
-            .forEach { it.audio.setVolume(volume) } // org.webrtc.AudioTrack.setVolume(double)
-    }
-
     fun setVisibility(
         sessionId: String,
         trackType: TrackType,

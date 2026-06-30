@@ -46,7 +46,12 @@ class DemoCallJoinInterceptor(
     val observerScope = CoroutineScope(Dispatchers.Default)
     override suspend fun callWillJoin(call: Call) {
         observeJob = observerScope.launch {
-            call.setIncomingAudioMuted(false)
+            call.state.participants.collect { participants ->
+                participants.forEach { participant ->
+                    val audioTrack = participant.audioTrack.value
+                    audioTrack?.audio?.setEnabled(false)
+                }
+            }
         }
     }
 
@@ -95,6 +100,9 @@ class DemoCallJoinInterceptor(
 
     override suspend fun callDidJoin(call: Call) {
         observeJob?.cancel()
-        call.setIncomingAudioMuted(true)
+        call.state.participants.value.forEach {
+            val audioTrack = it.audioTrack.value
+            audioTrack?.audio?.setEnabled(false)
+        }
     }
 }
