@@ -628,7 +628,7 @@ public class Call(
                 }
 
                 if (callJoinInterceptor is CallJoinLifecycleInterceptor) {
-                    callJoinInterceptor.callReadyToJoin(this)
+                    callJoinInterceptor.callWillJoin(this)
                 }
 
                 return result

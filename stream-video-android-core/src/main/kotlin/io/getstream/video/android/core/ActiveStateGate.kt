@@ -34,7 +34,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.webrtc.PeerConnection.PeerConnectionState
 
 private const val PEER_CONNECTION_OBSERVER_TIMEOUT = 5_000L
-private const val INTERCEPTOR_TIMEOUT_MS = 8_000L
+private const val INTERCEPTOR_TIMEOUT_MS = 5_000L
 
 internal class ActiveStateGate(
     private val coroutineScope: CoroutineScope,
