@@ -19,7 +19,17 @@ package io.getstream.video.android.core.call.interceptor
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallJoinInterceptor
 
+/**
+ * Extends [CallJoinInterceptor] with hooks around the join lifecycle.
+ *
+ * Order: [callWillJoin] → [callReadyToJoin] → [callDidJoin].
+ * Only affects ringing joins.
+ */
 public interface CallJoinLifecycleInterceptor : CallJoinInterceptor {
+
+    /** Called right after the [io.getstream.video.android.core.call.RtcSession] is created, before the call goes [io.getstream.video.android.core.RingingState.Active]. */
     public suspend fun callWillJoin(call: Call)
+
+    /** Called right after [CallJoinInterceptor.callReadyToJoin]. */
     public suspend fun callDidJoin(call: Call)
 }

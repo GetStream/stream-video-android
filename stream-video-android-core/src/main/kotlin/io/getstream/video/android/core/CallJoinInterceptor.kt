@@ -25,7 +25,13 @@ import kotlin.jvm.Throws
  * the publisher peer connection becoming ready and the call going active.
  * Has no effect on non-ringing joins (livestream, direct join).
  */
-@Deprecated("Use CallJoinLifecycleInterceptor instead")
+@Deprecated(
+    message = "Use CallJoinLifecycleInterceptor instead",
+    replaceWith = ReplaceWith(
+        "CallJoinLifecycleInterceptor",
+        "io.getstream.video.android.core.call.interceptor.CallJoinLifecycleInterceptor",
+    ),
+)
 public interface CallJoinInterceptor {
 
     /**

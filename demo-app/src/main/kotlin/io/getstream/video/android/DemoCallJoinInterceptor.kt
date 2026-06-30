@@ -24,8 +24,12 @@ import io.getstream.video.android.core.call.interceptor.CallJoinLifecycleInterce
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.launch
 
 /**
@@ -46,12 +50,19 @@ class DemoCallJoinInterceptor(
     val observerScope = CoroutineScope(Dispatchers.Default)
     override suspend fun callWillJoin(call: Call) {
         observeJob = observerScope.launch {
-            call.state.participants.collect { participants ->
-                participants.forEach { participant ->
-                    val audioTrack = participant.audioTrack.value
-                    audioTrack?.audio?.setEnabled(false)
+            call.state.participants
+                .flatMapLatest { participants ->
+                    participants
+                        .filter { !it.isLocal }
+                        .asFlow()
+                        .flatMapMerge { participant ->
+                            participant.audioTrack.filterNotNull()
+                        }
                 }
-            }
+                .collect { track ->
+                    logger.d { "noob [callWillJoin] disabling audio tracks" }
+                    track.audio.setEnabled(false)
+                }
         }
     }
 
@@ -100,9 +111,10 @@ class DemoCallJoinInterceptor(
 
     override suspend fun callDidJoin(call: Call) {
         observeJob?.cancel()
-        call.state.participants.value.forEach {
-            val audioTrack = it.audioTrack.value
-            audioTrack?.audio?.setEnabled(false)
-        }
+        call.state.participants.value.filter { !it.isLocal }
+            .forEach {
+                val audioTrack = it.audioTrack.value
+                audioTrack?.audio?.setEnabled(true)
+            }
     }
 }
