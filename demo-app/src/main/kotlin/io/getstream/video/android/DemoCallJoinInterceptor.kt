@@ -60,7 +60,6 @@ class DemoCallJoinInterceptor(
                         }
                 }
                 .collect { track ->
-                    logger.d { "noob [callWillJoin] disabling audio tracks" }
                     track.audio.setEnabled(false)
                 }
         }
