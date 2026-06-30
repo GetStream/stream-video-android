@@ -84,7 +84,12 @@ internal class ActiveStateGate(
                 val shouldProceed = invokeInterceptor(call, interceptor)
                 if (!isActive) return@launch
 
-                if (shouldProceed) onReady()
+                if (shouldProceed) {
+                    onReady()
+                    if (interceptor is CallJoinLifecycleInterceptor) {
+                        interceptor.callDidJoin(call)
+                    }
+                }
                 cancelInterceptorJob()
             },
         )
@@ -108,7 +113,12 @@ internal class ActiveStateGate(
                 val shouldProceed = invokeInterceptor(call, interceptor)
                 if (!isActive) return@launch
 
-                if (shouldProceed) onReady()
+                if (shouldProceed) {
+                    onReady()
+                    if (interceptor is CallJoinLifecycleInterceptor) {
+                        interceptor.callDidJoin(call)
+                    }
+                }
                 cleanup()
             },
         )
