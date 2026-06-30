@@ -86,8 +86,14 @@ internal class ActiveStateGate(
 
                 if (shouldProceed) {
                     onReady()
-                    if (interceptor is CallJoinLifecycleInterceptor) {
-                        interceptor.callDidJoin(call)
+                    try {
+                        if (interceptor is CallJoinLifecycleInterceptor) {
+                            interceptor.callDidJoin(call)
+                        }
+                    } catch (ex: CancellationException) {
+                        throw ex
+                    } catch (ex: Exception) {
+                        logger.e(ex) { "[callDidJoin] interceptor threw, proceeding" }
                     }
                 }
                 cancelInterceptorJob()
@@ -115,8 +121,14 @@ internal class ActiveStateGate(
 
                 if (shouldProceed) {
                     onReady()
-                    if (interceptor is CallJoinLifecycleInterceptor) {
-                        interceptor.callDidJoin(call)
+                    try {
+                        if (interceptor is CallJoinLifecycleInterceptor) {
+                            interceptor.callDidJoin(call)
+                        }
+                    } catch (ex: CancellationException) {
+                        throw ex
+                    } catch (ex: Exception) {
+                        logger.e(ex) { "[callDidJoin] interceptor threw, proceeding" }
                     }
                 }
                 cleanup()
