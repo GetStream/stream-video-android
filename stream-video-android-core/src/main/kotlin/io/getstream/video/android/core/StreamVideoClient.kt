@@ -188,6 +188,7 @@ internal class StreamVideoClient internal constructor(
     internal val appName: String? = null,
     internal val audioProcessing: ManagedAudioProcessingFactory? = null,
     internal val loggingLevel: LoggingLevel = LoggingLevel(),
+    internal val connectionTimeoutInMs: Long = 10_000,
     internal val leaveAfterDisconnectSeconds: Long = 30,
     internal val appVersion: String? = null,
     internal val enableCallUpdatesAfterLeave: Boolean = false,

@@ -32,6 +32,12 @@ public sealed class SfuSocketStateEvent {
     ) : SfuSocketStateEvent()
 
     /**
+     * Event to notify that the transport WebSocket has opened (HTTP→WS upgrade
+     * completed), but before the SFU JoinCallResponse has been received.
+     */
+    object WebSocketConnected : SfuSocketStateEvent() { override fun toString() = "WebSocketConnected" }
+
+    /**
      * Event to notify the connection was established.
      */
     data class ConnectionEstablished(

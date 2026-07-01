@@ -84,7 +84,10 @@ import java.net.ConnectException
  * @property loggingLevel Represents and wraps SDK logging levels for Stream logger, HTTP interceptor and native WebRTC logging.
  * @property notificationConfig The configurations for handling push notification.
  * @property ringNotification Overwrite the default notification logic for incoming calls.
- * @property connectionTimeoutInMs Connection timeout in seconds.
+ * @property connectionTimeoutInMs Connection timeout in milliseconds. Applies both to the
+ * coordinator/SFU OkHttp clients (HTTP and WebSocket upgrade) and to the SFU join-response
+ * wait (time allowed for the SFU to deliver its JoinCallResponse after the socket opens).
+ * Defaults to 10s.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig]. (Deprecated) Use `callServiceConfigRegistry` instead.
@@ -127,7 +130,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
-    private val connectionTimeoutInMs: Long = 10_000,
+    private val connectionTimeoutInMs: Long = 5_000,
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
     @Deprecated(
@@ -297,6 +300,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             appName = appName,
             audioProcessing = audioProcessing,
             loggingLevel = loggingLevel,
+            connectionTimeoutInMs = connectionTimeoutInMs,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
             enableStatsCollection = enableStatsReporting,

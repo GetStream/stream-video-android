@@ -115,6 +115,12 @@ internal open class CoordinatorSocket(
 
                         socketListenerJob = listen().onEach {
                             when (it) {
+                                is StreamWebSocketEvent.Open -> {
+                                    // Coordinator connection is considered established only
+                                    // once the ConnectedEvent arrives (a VideoMessage), so the
+                                    // raw transport-open signal is informational here.
+                                    logger.v { "[onSocketEvent] coordinator transport WS opened" }
+                                }
                                 is StreamWebSocketEvent.Error -> handleError(it)
                                 is StreamWebSocketEvent.VideoMessage -> when (
                                     val event =

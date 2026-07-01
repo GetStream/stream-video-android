@@ -112,6 +112,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -770,22 +771,79 @@ public class Call(
         }
         session.value = localSession
 
+        if (session.value == null) {
+            return Failure(Error.GenericError("RtcSession was null during connection to sfu"))
+        }
+
         session.value?.let {
             state._connection.value = RealtimeConnection.Joined(it)
         }
 
-        when (val result = session.value?.connectInternal()) {
-            is SfuConnectionResult.Connected -> Unit
-            is SfuConnectionResult.Failed ->
-                return Failure(
-                    Error.GenericError(result.error.message ?: "RtcSession error occurred."),
-                )
-            null ->
-                return Failure(Error.GenericError("RtcSession was null during connect"))
+        // This is the SFU ws connection
+        val sfuConnectionResult = session.value!!.connectInternal()
+
+        when (sfuConnectionResult) {
+            is SfuConnectionResult.Success -> Unit
+            is SfuConnectionResult.Failure -> {
+                if (sfuConnectionResult.recoverable) {
+                    logger.w { "[_join] Recoverable SFU connection failure — awaiting reconnect outcome" }
+                    if (!didReconnectSucceed()) {
+                        logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
+                        sendJoinErrorAnalytics(sfuConnectionResult)
+                        return Failure(
+                            Error.GenericError(
+                                sfuConnectionResult.error.message ?: "SFU connection failed",
+                            ),
+                        )
+                    }
+                } else {
+                    logger.e {
+                        "[_join] Got non recoverable error while connecting to SFU. Error : $sfuConnectionResult"
+                    }
+                    sendJoinErrorAnalytics(sfuConnectionResult)
+                    return Failure(
+                        Error.GenericError(
+                            sfuConnectionResult.error.message ?: "RtcSession error occurred.",
+                        ),
+                    )
+                }
+            }
         }
         client.state.setActiveCall(this)
         monitorSession(result.value)
         return Success(value = session.value!!)
+    }
+
+    /**
+     * Reports the SFU WebSocket join failure to analytics. Only called from the join
+     * flow ([_join]) so that reconnect-driven [RtcSession.connectInternal] failures are
+     * not counted as join errors. The retry count comes from the session's
+     * [RtcSession.sfuWsRetryCount]; the failure reason and abort code come straight from
+     * the [SfuConnectionResult.Failure] the connect attempt produced.
+     */
+    private fun sendJoinErrorAnalytics(failure: SfuConnectionResult.Failure) {
+        callAnalytics.sfuAnalytics.onSfuWsCompleted(
+            success = false,
+            retryCount = session.value?.sfuWsRetryCount?.get() ?: 0,
+            failureReason = failure.error.message,
+            failureCode = (failure.abortReason ?: AnalyticsCallAbortReason.SFU_ERROR).name,
+        )
+    }
+
+    /**
+     * Suspends until the reconnect loop triggered by a recoverable connection failure
+     * reaches a terminal state, returning `true` if the call recovered (became
+     * [RealtimeConnection.Connected]) and `false` otherwise
+     * ([RealtimeConnection.ReconnectingFailed] / [RealtimeConnection.Disconnected]).
+     */
+    private suspend fun didReconnectSucceed(): Boolean {
+        val terminal = state.connection.first {
+            it is RealtimeConnection.Connected ||
+                it is RealtimeConnection.ReconnectingFailed ||
+                it is RealtimeConnection.Disconnected
+        }
+        logger.d { "[_join] Reconnect after recoverable connection failure settled on $terminal" }
+        return terminal is RealtimeConnection.Connected
     }
 
     private fun Call.monitorSession(result: JoinCallResponse) {
@@ -1207,15 +1265,14 @@ public class Call(
             val result = newSession.connectInternal(
                 reconnectDetails,
                 currentOptions,
-                JoinAnalyticsModel(joinAnalyticsModel.retryAttempt),
             )
         ) {
-            is SfuConnectionResult.Connected -> {
+            is SfuConnectionResult.Success -> {
                 newSession.sfuTracer.trace("rejoin", reason)
                 monitorSession(joinResponse.value)
                 ReconnectOutcome.Success
             }
-            is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
+            is SfuConnectionResult.Failure -> ReconnectOutcome.Failed(result.error)
         }
     }
 
@@ -1291,14 +1348,13 @@ public class Call(
             val result = newSession.connectInternal(
                 reconnectDetails,
                 currentOptions,
-                JoinAnalyticsModel(joinAnalyticsModel.retryAttempt),
             )
             when (result) {
-                is SfuConnectionResult.Connected -> {
+                is SfuConnectionResult.Success -> {
                     monitorSession(joinResponse.value)
                     ReconnectOutcome.Success
                 }
-                is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
+                is SfuConnectionResult.Failure -> ReconnectOutcome.Failed(result.error)
             }
         } finally {
             oldSession.finalizeMigration()
@@ -2218,8 +2274,9 @@ public class Call(
     companion object {
         /** How many consecutive FAST reconnect failures are allowed before
          *  escalating to a full REJOIN. Kept small because each failed FAST
-         *  attempt can cost up to DEFAULT_SOCKET_TIMEOUT (10 s) waiting for
-         *  the WebSocket handshake to time out. */
+         *  attempt can cost up to the socket connection deadline before it gives
+         *  up: OkHttp's WebSocket-upgrade timeout, followed by the join-response
+         *  wait — both driven by StreamVideoBuilder.connectionTimeoutInMs (default 10s). */
         private const val MAX_FAST_RECONNECT_ATTEMPTS = 3
 
         /** Absolute upper bound on loop iterations across all strategies

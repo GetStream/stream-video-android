@@ -52,6 +52,7 @@ import io.getstream.video.android.core.utils.suspendDebugOnly
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -74,6 +75,12 @@ internal open class SfuSocket(
     private val lifecycleObserver: StreamLifecycleObserver,
     private val networkStateProvider: NetworkStateProvider,
     private val sfuAnalytics: SfuAnalytics,
+    /**
+     * Deadline (ms) for the SFU to deliver its JoinCallResponse after the transport
+     * WebSocket has opened. See [startJoinResponseTimeout]. Defaults to
+     * [DEFAULT_JOIN_RESPONSE_TIMEOUT_MS].
+     */
+    private val joinResponseTimeoutMs: Long = DEFAULT_JOIN_RESPONSE_TIMEOUT_MS,
 ) {
     private var streamWebSocket: StreamWebSocket<SfuDataRequest, SfuParser>? = null
     open val logger by taggedLogger(TAG)
@@ -83,6 +90,17 @@ internal open class SfuSocket(
     private val sfuSocketStateService = SfuSocketStateService()
     private var socketStateObserverJob: Job? = null
     private var socketListenerJob: Job? = null
+
+    /**
+     * Bounds how long the socket may stay in [SfuSocketState.WebSocketConnected]
+     * (transport open) waiting for the SFU's [JoinCallResponseEvent]. OkHttp already
+     * bounds the preceding [SfuSocketState.Connecting] (HTTP→WS upgrade) phase via its
+     * connect timeout, but once the socket is upgraded OkHttp no longer applies a
+     * timeout, so a silent SFU could otherwise leave us waiting forever. When this fires
+     * we surface a retryable [SfuSocketState.Disconnected.DisconnectedTemporarily] so the
+     * regular recovery path can take over instead of hanging.
+     */
+    private var joinResponseTimeoutJob: Job? = null
     private val healthMonitor = HealthMonitor(
         monitorInterval = 5000L,
         noEventIntervalThreshold = 15000L,
@@ -127,6 +145,8 @@ internal open class SfuSocket(
 
                             socketListenerJob = listen().onEach {
                                 when (it) {
+                                    is StreamWebSocketEvent.Open ->
+                                        sfuSocketStateService.onWebSocketConnected()
                                     is StreamWebSocketEvent.Error -> handleError(it)
                                     is StreamWebSocketEvent.SfuMessage -> when (
                                         val event =
@@ -153,6 +173,7 @@ internal open class SfuSocket(
                 logger.i { "[onSocketStateChanged] state: $state" }
                 when (state) {
                     is SfuSocketState.Connected -> {
+                        cancelJoinResponseTimeout()
                         healthMonitor.ack()
                         callListeners { listener -> listener.onConnected(state.event) }
                     }
@@ -162,11 +183,18 @@ internal open class SfuSocket(
                         callListeners { listener -> listener.onConnecting() }
                     }
 
+                    is SfuSocketState.WebSocketConnected -> {
+                        // Transport socket is open; now bound the wait for the SFU's
+                        // JoinCallResponse with a dedicated, shorter timer.
+                        startJoinResponseTimeout()
+                    }
+
                     is SfuSocketState.RestartConnection -> {
                         logger.w { "[onSocketStateChanged] RestartConnection is deprecated and no longer acted upon" }
                     }
 
                     is SfuSocketState.Disconnected -> {
+                        cancelJoinResponseTimeout()
                         when (state) {
                             is SfuSocketState.Disconnected.DisconnectedByRequest -> {
                                 streamWebSocket?.close(
@@ -224,6 +252,34 @@ internal open class SfuSocket(
         }
     }
 
+    /**
+     * Starts (or restarts) the join-response timeout once the transport WebSocket is
+     * open. If no [JoinCallResponseEvent] arrives within [joinResponseTimeoutMs] we
+     * push a retryable network error tagged with
+     * [VideoErrorCode.SFU_JOIN_RESPONSE_TIMEOUT] so the connection resolves to
+     * [SfuSocketState.Disconnected.DisconnectedTemporarily] (carrying the precise
+     * code/reason) instead of hanging.
+     */
+    private fun startJoinResponseTimeout() {
+        joinResponseTimeoutJob?.cancel()
+        joinResponseTimeoutJob = userScope.launch {
+            delay(joinResponseTimeoutMs)
+            logger.w {
+                "[joinResponseTimeout] No JoinCallResponse within ${joinResponseTimeoutMs}ms " +
+                    "after the WebSocket opened; failing the connection attempt so recovery can take over"
+            }
+            sfuSocketStateService.onNetworkError(
+                Error.NetworkError.fromVideoErrorCode(VideoErrorCode.SFU_JOIN_RESPONSE_TIMEOUT),
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+            )
+        }
+    }
+
+    private fun cancelJoinResponseTimeout() {
+        joinResponseTimeoutJob?.cancel()
+        joinResponseTimeoutJob = null
+    }
+
     suspend fun connect(joinRequest: JoinRequest) {
         logger.d { "[connect] request: ${joinRequest.client_details}" }
         socketListenerJob?.cancel()
@@ -273,12 +329,12 @@ internal open class SfuSocket(
     private suspend fun handleError(error: StreamWebSocketEvent.Error) {
         logger.e { "[handleError] error: $error" }
         when (error.streamError) {
-            is Error.NetworkError -> onVideoNetworkError(error.streamError, error.reconnectStrategy)
+            is Error.NetworkError -> onNetworkError(error.streamError, error.reconnectStrategy)
             else -> callListeners { it.onError(error) }
         }
     }
 
-    private suspend fun onVideoNetworkError(
+    private suspend fun onNetworkError(
         error: Error.NetworkError,
         reconnectStrategy: WebsocketReconnectStrategy?,
     ) {
@@ -299,11 +355,16 @@ internal open class SfuSocket(
                 sfuSocketStateService.onUnrecoverableError(error)
             }
 
-            else -> sfuSocketStateService.onNetworkError(
-                error,
-                reconnectStrategy
-                    ?: WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
-            )
+            else -> {
+                // Recoverable network errors. The error already carries the exact code + reason
+                // (the transport failure message is populated from the OkHttp throwable), so it
+                // resolves as-is to a single DisconnectedTemporarily state.
+                sfuSocketStateService.onNetworkError(
+                    error,
+                    reconnectStrategy
+                        ?: WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+                )
+            }
         }
     }
 
@@ -442,5 +503,14 @@ internal open class SfuSocket(
     companion object {
         private const val TAG = "Video:SfuSocket"
         private const val DEFAULT_CONNECTION_TIMEOUT = 2000L
+
+        /**
+         * Fallback deadline for the SFU to deliver its JoinCallResponse *after* the
+         * transport WebSocket has opened, used when no value is supplied. In production
+         * this is driven by StreamVideoBuilder.connectionTimeoutInMs (same value as the
+         * OkHttp connect timeout). The WS upgrade is bounded separately by OkHttp; this
+         * only bounds the post-open handshake wait that OkHttp does not cover.
+         */
+        private const val DEFAULT_JOIN_RESPONSE_TIMEOUT_MS = 5_000L
     }
 }
