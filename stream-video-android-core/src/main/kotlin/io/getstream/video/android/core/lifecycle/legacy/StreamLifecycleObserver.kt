@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.lifecycle
+package io.getstream.video.android.core.lifecycle.legacy
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.lifecycle.LifecycleHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

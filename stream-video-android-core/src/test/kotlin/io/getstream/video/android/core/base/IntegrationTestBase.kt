@@ -111,7 +111,12 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             client = builder.build()
             clientImpl = client as StreamVideoClient
             clientImpl.testSessionId = runBlocking {
-                (client as StreamVideoClient).coordinatorConnectionModule.socketConnection.connectionId().value
+                // Derive the WS connectionId from core's StreamClient state (D-11 replaced the
+                // coordinator-socket connectionId() flow). Falls back to null before Connected.
+                (
+                    clientImpl.streamClient.connectionState.value
+                        as? io.getstream.android.core.api.model.connection.StreamConnectionState.Connected
+                    )?.connectionId
             }
             // always mock the peer connection factory, it can't work in unit tests
             Call.testInstanceProvider.mediaManagerCreator = { mockk(relaxed = true) }

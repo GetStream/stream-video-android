@@ -28,7 +28,7 @@ import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.ConnectionPolicyLifecycleHandler
-import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
+import io.getstream.video.android.core.lifecycle.legacy.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.CallAwareConnectionPolicy
 import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.common.DISPOSE_SOCKET_REASON
