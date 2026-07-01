@@ -476,9 +476,9 @@ private fun defaultStreamClientFactory(args: StreamClientFactoryArgs): StreamCli
         appVersion = args.appVersion ?: "unknown",
     )
 
+    // D-06 / D-07: guest users authenticate via jwt (JWT obtained via createGuest);
+    // never use the anonymous factory for the coordinator socket.
     val socketConfig = StreamSocketConfig.jwt(
-        // D-06 / D-07: guest users authenticate via `jwt` (JWT obtained via createGuest);
-        // never use `StreamSocketConfig.anonymous` for the coordinator socket.
         url = StreamWsUrl.fromString(args.resolvedWssUrl),
         apiKey = StreamApiKey.fromString(args.apiKey),
         clientInfoHeader = clientInfoHeader,
