@@ -18,8 +18,22 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.content.Context
+import android.os.Build
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
+import io.getstream.android.core.api.StreamClient
+import io.getstream.android.core.api.authentication.StreamTokenProvider
+import io.getstream.android.core.api.log.StreamLoggerProvider
+import io.getstream.android.core.api.model.StreamUser
+import io.getstream.android.core.api.model.config.StreamClientSerializationConfig
+import io.getstream.android.core.api.model.config.StreamComponentProvider
+import io.getstream.android.core.api.model.config.StreamSocketConfig
+import io.getstream.android.core.api.model.value.StreamApiKey
+import io.getstream.android.core.api.model.value.StreamHttpClientInfoHeader
+import io.getstream.android.core.api.model.value.StreamUserId
+import io.getstream.android.core.api.model.value.StreamWsUrl
+import io.getstream.android.core.api.observers.lifecycle.StreamLifecycleMonitor
+import io.getstream.android.core.api.subscribe.StreamSubscriptionManager
 import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
@@ -40,6 +54,10 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
+import io.getstream.video.android.core.socket.coordinator.v2.GuestStreamTokenProvider
+import io.getstream.video.android.core.socket.coordinator.v2.IntegrationStreamTokenProvider
+import io.getstream.video.android.core.socket.coordinator.v2.VideoEventSerialization
+import io.getstream.video.android.core.socket.coordinator.v2.WritableUserRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
@@ -52,6 +70,7 @@ import io.getstream.video.android.model.UserType
 import io.getstream.webrtc.ManagedAudioProcessingFactory
 import kotlinx.coroutines.launch
 import java.net.ConnectException
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * The [StreamVideoBuilder] is used to create a new instance of the [StreamVideo] client. This is the
@@ -170,6 +189,15 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private var wssUrl: String? = null
 
     /**
+     * Seam that constructs the core [StreamClient] instance. Tests substitute this lambda so they
+     * can assert factory arguments without invoking core's Android-service-dependent
+     * initialisation (RESEARCH Pitfall 2).
+     */
+    @InternalStreamVideoApi
+    internal var streamClientFactory: (StreamClientFactoryArgs) -> StreamClient =
+        ::defaultStreamClientFactory
+
+    /**
      * Set the API URL to be used for the video client.
      *
      * For testing purposes only.
@@ -255,6 +283,43 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             tokenRepository = tokenRepository,
         )
 
+        // Adapter that satisfies GuestStreamTokenProvider's WritableUserRepository contract until
+        // the SDK-wide user repository (PR #1708-equivalent) lands. See Plan 02-01 SUMMARY.
+        val userRepository = InMemoryWritableUserRepository(user)
+
+        // Select the core token provider based on user type.
+        //  - Authenticated: adapt the integration-supplied TokenProvider.
+        //  - Guest: SDK obtains the JWT via createGuest REST call (D-06).
+        //  - Anonymous: rejected — anonymous users do not open a coordinator socket (D-07).
+        val streamTokenProvider: StreamTokenProvider = when (user.type) {
+            UserType.Authenticated -> IntegrationStreamTokenProvider(tokenProvider)
+            UserType.Guest -> GuestStreamTokenProvider(
+                api = coordinatorConnectionModule.api,
+                initialUser = user,
+                userRepository = userRepository,
+            )
+            UserType.Anonymous -> error(
+                "Anonymous users do not open a coordinator socket (D-07). " +
+                    "Construct StreamVideoBuilder with UserType.Authenticated or UserType.Guest, " +
+                    "or use the SDK's REST-only operations directly.",
+            )
+        }
+
+        // Build the core client and eagerly inject it into StreamVideoClient (D-03).
+        val streamClient = streamClientFactory.invoke(
+            StreamClientFactoryArgs(
+                scope = scope,
+                context = context,
+                user = user,
+                apiKey = apiKey,
+                resolvedWssUrl = resolvedWssUrl,
+                appName = appName,
+                appVersion = null,
+                lifecycle = lifecycle,
+                tokenProvider = streamTokenProvider,
+            ),
+        )
+
         val deviceTokenStorage = DeviceTokenStorage(context)
 
         // Install the StreamNotificationManager to configure push notifications.
@@ -281,6 +346,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             token = token,
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
+            streamClient = streamClient,
             tokenProvider = tokenProvider,
             streamNotificationManager = streamNotificationManager,
             enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
@@ -300,13 +366,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             tokenRepository = tokenRepository,
             rejectCallWhenBusy = rejectCallWhenBusy,
         )
-
-        if (user.type == UserType.Guest) {
-            coordinatorConnectionModule.updateAuthType("anonymous")
-            client.setupGuestUser(user)
-        } else if (user.type == UserType.Anonymous) {
-            coordinatorConnectionModule.updateAuthType("anonymous")
-        }
 
         // Establish a WS connection with the coordinator (we don't support this for anonymous users)
         if (user.type == UserType.Authenticated) {
@@ -385,4 +444,90 @@ internal val tokenRepository = TokenRepository("")
 sealed class GEO {
     /** Run calls over our global edge network, this is the default and right for most applications */
     object GlobalEdgeNetwork : GEO()
+}
+
+/**
+ * Aggregates the arguments handed to [StreamClient]'s factory function. Grouping them makes the
+ * `streamClientFactory` seam a single-parameter lambda that is easy to substitute in tests.
+ */
+@InternalStreamVideoApi
+internal data class StreamClientFactoryArgs(
+    val scope: kotlinx.coroutines.CoroutineScope,
+    val context: Context,
+    val user: User,
+    val apiKey: ApiKey,
+    val resolvedWssUrl: String,
+    val appName: String?,
+    val appVersion: String?,
+    val lifecycle: androidx.lifecycle.Lifecycle,
+    val tokenProvider: StreamTokenProvider,
+)
+
+private fun defaultStreamClientFactory(args: StreamClientFactoryArgs): StreamClient {
+    val logProvider: StreamLoggerProvider = StreamLoggerProvider.defaultAndroidLogger()
+
+    val clientInfoHeader = StreamHttpClientInfoHeader.create(
+        product = "video",
+        productVersion = BuildConfig.STREAM_VIDEO_VERSION,
+        os = "Android",
+        apiLevel = Build.VERSION.SDK_INT,
+        deviceModel = Build.MODEL,
+        app = args.appName ?: "unknown",
+        appVersion = args.appVersion ?: "unknown",
+    )
+
+    val socketConfig = StreamSocketConfig.jwt(
+        // D-06 / D-07: guest users authenticate via `jwt` (JWT obtained via createGuest);
+        // never use `StreamSocketConfig.anonymous` for the coordinator socket.
+        url = StreamWsUrl.fromString(args.resolvedWssUrl),
+        apiKey = StreamApiKey.fromString(args.apiKey),
+        clientInfoHeader = clientInfoHeader,
+    )
+
+    val serializationConfig = StreamClientSerializationConfig.default(
+        productEvents = VideoEventSerialization(),
+    )
+
+    // Route the integration-supplied Lifecycle through core's LifecycleMonitor so that the
+    // legacy StreamLifecycleObserver is no longer needed on the coordinator path (D-10).
+    val streamLifecycleMonitor = StreamLifecycleMonitor(
+        logger = logProvider.taggedLogger("SVLifecycleMonitor"),
+        lifecycle = args.lifecycle,
+        subscriptionManager = StreamSubscriptionManager(
+            logger = logProvider.taggedLogger("SVLifecycleSubs"),
+        ),
+    )
+
+    return StreamClient(
+        scope = args.scope,
+        context = args.context.applicationContext,
+        user = StreamUser(
+            id = StreamUserId.fromString(args.user.id),
+            name = args.user.name,
+            imageURL = args.user.image,
+            customData = args.user.custom ?: emptyMap(),
+        ),
+        tokenProvider = args.tokenProvider,
+        products = listOf("video"),
+        socketConfig = socketConfig,
+        serializationConfig = serializationConfig,
+        // Phase 2: keep video's separate Retrofit OkHttpClient; HTTP unification is Phase 4+.
+        httpConfig = null,
+        components = StreamComponentProvider(
+            logProvider = logProvider,
+            lifecycleMonitor = streamLifecycleMonitor,
+        ),
+    )
+}
+
+/**
+ * In-memory implementation of [WritableUserRepository] used by the guest-user JWT flow.
+ * Replaced by the SDK-wide user repository once the concrete type lands (PR #1708-equivalent).
+ */
+internal class InMemoryWritableUserRepository(initial: User) : WritableUserRepository {
+    private val ref = AtomicReference(initial)
+    val user: User get() = ref.get()
+    override fun setUser(user: User) {
+        ref.set(user)
+    }
 }

@@ -18,10 +18,14 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle
+import io.getstream.android.core.api.StreamClient
+import io.getstream.android.core.api.model.connection.StreamConnectionState
+import io.getstream.android.core.api.subscribe.StreamSubscription
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSessionStartedEvent
 import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
@@ -30,12 +34,15 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import kotlin.test.Test
@@ -45,11 +52,14 @@ import kotlin.test.assertTrue
 
 class StreamVideoClientTest {
     private lateinit var client: StreamVideoClient
+    private lateinit var streamClient: StreamClient
     private lateinit var state: ClientState
 
     @Before
     fun setup() {
-        client = prepareClient()
+        val prepared = prepareClient()
+        client = prepared.client
+        streamClient = prepared.streamClient
 
         state = mockk(relaxed = true)
 
@@ -65,7 +75,13 @@ class StreamVideoClientTest {
         unmockkAll()
     }
 
-    private fun prepareClient(): StreamVideoClient {
+    private data class ClientHarness(
+        val client: StreamVideoClient,
+        val streamClient: StreamClient,
+        val tokenRepository: TokenRepository,
+    )
+
+    private fun prepareClient(): ClientHarness {
         val context = mockk<Context>(relaxed = true)
         val lifecycle = mockk<Lifecycle>(relaxed = true)
         val coordinator = mockk<CoordinatorConnectionModule>(relaxed = true)
@@ -73,8 +89,12 @@ class StreamVideoClientTest {
         val notificationManager = mockk<StreamNotificationManager>(relaxed = true)
         val sounds = mockk<Sounds>(relaxed = true)
         val vibration = mockk<RingingCallVibrationConfig>(relaxed = true)
+        val streamClientMock = mockk<StreamClient>(relaxed = true)
+        val subscription = mockk<StreamSubscription>(relaxed = true)
+        every { streamClientMock.subscribe(any()) } returns Result.success(subscription)
+        every { streamClientMock.connectionState } returns MutableStateFlow(StreamConnectionState.Idle)
 
-        return spyk(
+        val client = spyk(
             StreamVideoClient(
                 context = context,
                 user = mockk(relaxed = true),
@@ -82,6 +102,7 @@ class StreamVideoClientTest {
                 token = "token",
                 lifecycle = lifecycle,
                 coordinatorConnectionModule = coordinator,
+                streamClient = streamClientMock,
                 tokenRepository = tokenRepo,
                 streamNotificationManager = notificationManager,
                 enableCallNotificationUpdates = false,
@@ -90,6 +111,7 @@ class StreamVideoClientTest {
             ),
             recordPrivateCalls = true,
         )
+        return ClientHarness(client, streamClientMock, tokenRepo)
     }
 
     @Test
@@ -224,7 +246,7 @@ class StreamVideoClientTest {
         val event = mockk<CallRingEvent>(relaxed = true)
 
         every { event.callCid } returns "video:999"
-        val client = prepareClient()
+        val client = prepareClient().client
         val clientState = mockk<ClientState>(relaxed = true)
         client::class.java.getDeclaredField("state").apply {
             isAccessible = true
@@ -248,7 +270,7 @@ class StreamVideoClientTest {
         val event = mockk<CallRingEvent>(relaxed = true)
 
         every { event.callCid } returns "video:999"
-        val client = prepareClient()
+        val client = prepareClient().client
         val clientState = mockk<ClientState>(relaxed = true)
         client::class.java.getDeclaredField("state").apply {
             isAccessible = true
@@ -265,5 +287,36 @@ class StreamVideoClientTest {
 
         verify(exactly = 1) { clientState.handleEvent(event) }
         unmockkAll()
+    }
+
+    @Test
+    fun `init subscribes to streamClient`() {
+        // The subscribe call is exercised inside prepareClient() via the ctor. Re-verify
+        // by asserting `streamClient.subscribe(...)` was invoked exactly once when the
+        // StreamVideoClient was constructed.
+        verify(exactly = 1) { streamClient.subscribe(any()) }
+    }
+
+    @Test
+    fun `connectAsync delegates to streamClient connect`() = runTest {
+        coEvery { streamClient.connect() } returns Result.success(mockk(relaxed = true))
+
+        val result = client.connectAsync().await()
+
+        coVerify(exactly = 1) { streamClient.connect() }
+        assertTrue(result is Success)
+    }
+
+    @Test
+    fun `cleanup disconnects streamClient and does not touch tokenRepository`() {
+        val harness = prepareClient()
+
+        harness.client.cleanup()
+
+        coVerify(exactly = 1) { harness.streamClient.disconnect() }
+        // COORD-03 invariant: the 401 path no longer routes through tokenRepository.updateToken
+        // from inside cleanup(). (Cleanup itself never touched tokenRepository, but this
+        // assertion guards against a future regression that reintroduces the coupling.)
+        verify(exactly = 0) { harness.tokenRepository.updateToken(any()) }
     }
 }

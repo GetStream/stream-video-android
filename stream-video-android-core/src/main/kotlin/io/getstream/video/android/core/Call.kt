@@ -563,8 +563,9 @@ public class Call(
                     "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
             }
         }
-        // if we are a guest user, make sure we wait for the token before running the join flow
-        clientImpl.guestUserJob?.await()
+        // Guest-token acquisition is now single-flighted through core's StreamTokenManager
+        // via the StreamTokenProvider wired at builder time; downstream REST/WS calls that
+        // require the token will suspend transparently through the auth interceptor.
 
         // Ensure factory is created with the current audioBitrateProfile before joining
         ensureFactoryMatchesAudioProfile()

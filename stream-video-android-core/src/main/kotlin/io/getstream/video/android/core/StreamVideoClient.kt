@@ -20,6 +20,10 @@ import android.content.Context
 import android.media.AudioAttributes
 import androidx.collection.LruCache
 import androidx.lifecycle.Lifecycle
+import io.getstream.android.core.api.StreamClient
+import io.getstream.android.core.api.model.connection.StreamConnectionState
+import io.getstream.android.core.api.socket.listeners.StreamClientListener
+import io.getstream.android.core.api.subscribe.StreamSubscription
 import io.getstream.android.push.PushDevice
 import io.getstream.android.video.generated.models.AcceptCallResponse
 import io.getstream.android.video.generated.models.BlockUserRequest
@@ -29,8 +33,6 @@ import io.getstream.android.video.generated.models.CallRequest
 import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.CollectUserFeedbackRequest
-import io.getstream.android.video.generated.models.CreateGuestRequest
-import io.getstream.android.video.generated.models.CreateGuestResponse
 import io.getstream.android.video.generated.models.GetCallResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallRequest
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
@@ -75,7 +77,6 @@ import io.getstream.android.video.generated.models.UpdateCallMembersResponse
 import io.getstream.android.video.generated.models.UpdateCallRequest
 import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
-import io.getstream.android.video.generated.models.UserRequest
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.android.video.generated.models.WSCallEvent
 import io.getstream.log.taggedLogger
@@ -114,7 +115,6 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
-import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
@@ -144,6 +144,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -168,6 +169,7 @@ internal class StreamVideoClient internal constructor(
     internal var token: String,
     private val lifecycle: Lifecycle,
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
+    internal val streamClient: StreamClient,
     internal val tokenRepository: TokenRepository,
     internal val tokenProvider: TokenProvider = RepositoryTokenProvider(tokenRepository),
     internal val streamNotificationManager: StreamNotificationManager,
@@ -203,8 +205,6 @@ internal class StreamVideoClient internal constructor(
 
     /** if true we fail fast on errors instead of logging them */
 
-    internal var guestUserJob: Deferred<Unit>? = null
-
     public override val userId = user.id
 
     private val logger by taggedLogger("Call:StreamVideo")
@@ -217,7 +217,27 @@ internal class StreamVideoClient internal constructor(
 
     internal fun getAudioContext(): AudioExecutionContext = audioExecutionContext
 
-    val socketImpl = coordinatorConnectionModule.socketConnection
+    private var streamClientSubscription: StreamSubscription? = null
+
+    private val streamClientListener = object : StreamClientListener {
+        override fun onEvent(event: Any) {
+            if (event is VideoEvent) {
+                fireEvent(event)
+            } else {
+                logger.e { "[onEvent] non-VideoEvent received: ${event::class.simpleName}" }
+            }
+        }
+
+        override fun onState(state: StreamConnectionState) {
+            // TODO(02-03): replace with this@StreamVideoClient.state.handleStreamState(state)
+            // once ClientState.handleStreamState lands in Plan 02-03. Held to validate the
+            // listener wiring at SDK init; connection-state routing is deferred to the next plan.
+        }
+
+        override fun onError(err: Throwable) {
+            logger.e(err) { "[StreamClient] error" }
+        }
+    }
 
     fun onCallCleanUp(call: Call) {
         if (enableCallUpdatesAfterLeave) {
@@ -232,6 +252,15 @@ internal class StreamVideoClient internal constructor(
         // remove all cached calls
         calls.clear()
         destroyedCalls.evictAll()
+        // cancel the StreamClient subscription before tearing down the socket
+        streamClientSubscription?.cancel()
+        streamClientSubscription = null
+        // disconnect the StreamClient socket before cancelling the scope; suspend bridged via
+        // runBlocking because cleanup() is non-suspending public API.
+        runBlocking {
+            runCatching { streamClient.disconnect() }
+                .onFailure { logger.e(it) { "[cleanup] StreamClient.disconnect failed" } }
+        }
         // stop all running coroutines
         scope.cancel()
         // call cleanup on the active call
@@ -285,12 +314,14 @@ internal class StreamVideoClient internal constructor(
         try {
             apiCall()
         } catch (e: HttpException) {
-            // Retry once with a new token if the token is expired
+            // Retry once with a new token if the token is expired.
+            // REST-side: tokenRepository update stays for CoordinatorAuthInterceptor
+            // (Phase 4+ unification). WS-side: handled by core's StreamTokenManager
+            // via the StreamTokenProvider wired at builder time.
             if (e.isAuthError()) {
                 val newToken = tokenProvider.loadToken()
                 tokenRepository.updateToken(newToken)
                 token = newToken
-                coordinatorConnectionModule.updateToken(newToken)
                 apiCall()
             } else {
                 throw e
@@ -383,35 +414,22 @@ internal class StreamVideoClient internal constructor(
     }
 
     override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
-        coordinatorConnectionModule.socketConnection.connect(user)
+        if (streamClient.connectionState.value !is StreamConnectionState.Connected) {
+            streamClient.connect()
+        }
     }
 
     init {
-        // listen to socket events and errors
-        scope.launch(CoroutineName("init#coordinatorSocket.events.collect")) {
-            coordinatorConnectionModule.socketConnection.events().collect {
-                fireEvent(it)
-            }
-        }
-        scope.launch {
-            coordinatorConnectionModule.socketConnection.state().collect {
-                state.handleState(it)
-            }
-        }
+        // Subscribe once to the StreamClient's listener stream. Events cast to VideoEvent
+        // are forwarded to the existing fireEvent(...) dispatch pipeline; connection state
+        // routing is deferred to Plan 02-03 (see streamClientListener.onState).
+        streamClientSubscription = streamClient.subscribe(streamClientListener).getOrThrow()
 
-        scope.launch(CoroutineName("init#coordinatorSocket.errors.collect")) {
-            coordinatorConnectionModule.socketConnection.errors().collect { error ->
-                state.handleError(error.streamError)
-            }
-        }
-
-        scope.launch(CoroutineName("init#coordinatorSocket.connectionState.collect")) {
-            coordinatorConnectionModule.socketConnection.state().collect { it ->
-                // If the socket is reconnected then we have a new connection ID.
-                // We need to re-watch every watched call with the new connection ID
-                // (otherwise the WS events will stop)
+        // Re-watch active calls whenever the coordinator socket (re)connects.
+        scope.launch(CoroutineName("init#streamClient.connectionState.collect")) {
+            streamClient.connectionState.collect { coreState ->
                 val watchedCalls = calls
-                if (it is VideoSocketState.Connected && watchedCalls.isNotEmpty()) {
+                if (coreState is StreamConnectionState.Connected && watchedCalls.isNotEmpty()) {
                     val filter = Filters.`in`("cid", watchedCalls.values.map { it.cid }).toMap()
                     queryCalls(filters = filter, watch = true).also {
                         if (it is Failure) {
@@ -475,23 +493,13 @@ internal class StreamVideoClient internal constructor(
 
     override suspend fun connectAsync(): Deferred<Result<Long>> {
         return scope.async {
-            // wait for the guest user setup if we're using guest users
-            guestUserJob?.await()
-            try {
-                val startTime = System.currentTimeMillis()
-                socketImpl.connect(user)
-                val duration = System.currentTimeMillis() - startTime
-                Success(duration)
-            } catch (e: ErrorResponse) {
-                if (e.code == VideoErrorCode.TOKEN_EXPIRED.code) {
-                    refreshToken(e)
-                    Failure(Error.GenericError("Initialize error. Token expired."))
-                } else {
-                    Failure(Error.ThrowableError("Error to connect user", e))
-                }
-            } catch (e: Throwable) {
-                Failure(Error.ThrowableError("Error to connect user", e))
-            }
+            val startTime = System.currentTimeMillis()
+            val result = streamClient.connect()
+            val duration = System.currentTimeMillis() - startTime
+            result.fold(
+                onSuccess = { Success(duration) },
+                onFailure = { Failure(Error.ThrowableError("Error to connect user", it)) },
+            )
         }
     }
 
@@ -499,51 +507,11 @@ internal class StreamVideoClient internal constructor(
         return connectAsync().await()
     }
 
-    private suspend fun refreshToken(error: Throwable) {
-        tokenProvider?.let {
-            val newToken = tokenProvider.loadToken()
-            coordinatorConnectionModule.updateToken(newToken)
-
-            logger.d { "[refreshToken] Token has been refreshed with: $newToken" }
-
-            socketImpl.reconnect(user, true)
-        }
-    }
-
     /**
      * @see StreamVideo.deleteDevice
      */
     override suspend fun deleteDevice(device: Device): Result<Unit> {
         return streamNotificationManager.deleteDevice(device)
-    }
-
-    fun setupGuestUser(user: User) {
-        coordinatorConnectionModule.updateToken("")
-        guestUserJob = scope.async {
-            val response = createGuestUser(
-                userRequest = UserRequest(
-                    id = user.id,
-                    image = user.image,
-                    name = user.name,
-                    custom = user.custom,
-                ),
-            )
-            if (response.isFailure) {
-                throw IllegalStateException("Failed to create guest user")
-            }
-            response.onSuccess {
-                coordinatorConnectionModule.updateAuthType("jwt")
-                coordinatorConnectionModule.updateToken(it.accessToken)
-            }
-        }
-    }
-
-    suspend fun createGuestUser(userRequest: UserRequest): Result<CreateGuestResponse> {
-        return apiCall {
-            coordinatorConnectionModule.api.createGuest(
-                createGuestRequest = CreateGuestRequest(userRequest),
-            )
-        }
     }
 
     internal suspend fun registerPushDevice() {
@@ -755,9 +723,9 @@ internal class StreamVideoClient internal constructor(
         // We return null on timeout. The Coordinator WS will update the connectionId later
         // after it reconnects (it will call queryCalls)
         val connectionId = withTimeoutOrNull(timeMillis = WAIT_FOR_CONNECTION_ID_TIMEOUT) {
-            val value =
-                coordinatorConnectionModule.socketConnection.connectionId().first { it != null }
-            value
+            val connected = streamClient.connectionState
+                .first { it is StreamConnectionState.Connected } as StreamConnectionState.Connected
+            connected.connectionId
         }.also {
             logger.d { "[waitForConnectionId]: $it" }
         }
