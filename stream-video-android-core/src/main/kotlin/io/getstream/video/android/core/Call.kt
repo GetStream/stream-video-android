@@ -2271,7 +2271,7 @@ public class Call(
          *  escalating to a full REJOIN. Kept small because each failed FAST
          *  attempt can cost up to the socket connection deadline before it gives
          *  up: OkHttp's WebSocket-upgrade timeout, followed by the join-response
-         *  wait — both driven by StreamVideoBuilder.connectionTimeoutInMs (default 10s). */
+         *  wait — both driven by StreamVideoBuilder.connectionTimeoutInMs. */
         private const val MAX_FAST_RECONNECT_ATTEMPTS = 3
 
         /** Absolute upper bound on loop iterations across all strategies
