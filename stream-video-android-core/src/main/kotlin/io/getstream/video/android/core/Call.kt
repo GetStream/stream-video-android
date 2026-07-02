@@ -771,16 +771,10 @@ public class Call(
         }
         session.value = localSession
 
-        if (session.value == null) {
-            return Failure(Error.GenericError("RtcSession was null during connection to sfu"))
-        }
-
-        session.value?.let {
-            state._connection.value = RealtimeConnection.Joined(it)
-        }
+        state._connection.value = RealtimeConnection.Joined(localSession)
 
         // This is the SFU ws connection
-        val sfuConnectionResult = session.value!!.connectInternal()
+        val sfuConnectionResult = localSession.connectInternal()
 
         when (sfuConnectionResult) {
             is SfuConnectionResult.Success -> Unit
@@ -809,9 +803,10 @@ public class Call(
                 }
             }
         }
+        val connectedSession = session.value ?: return Failure(Error.GenericError("RtcSession was cleared during connection to sfu"))
         client.state.setActiveCall(this)
         monitorSession(result.value)
-        return Success(value = session.value!!)
+        return Success(value = connectedSession)
     }
 
     /**
