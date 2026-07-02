@@ -198,6 +198,17 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         ::defaultStreamClientFactory
 
     /**
+     * Substitute the [StreamClient] factory used by [build]. Intended for preview/snapshot
+     * harnesses that instantiate the video client under Paparazzi's layoutlib bridge, where
+     * core's default factory reaches Android system services (e.g. WifiManager) that are
+     * unavailable in the test environment.
+     */
+    @InternalStreamVideoApi
+    public fun streamClientFactory(
+        factory: (StreamClientFactoryArgs) -> StreamClient,
+    ): StreamVideoBuilder = apply { streamClientFactory = factory }
+
+    /**
      * Set the API URL to be used for the video client.
      *
      * For testing purposes only.
@@ -451,7 +462,7 @@ sealed class GEO {
  * `streamClientFactory` seam a single-parameter lambda that is easy to substitute in tests.
  */
 @InternalStreamVideoApi
-internal data class StreamClientFactoryArgs(
+public data class StreamClientFactoryArgs(
     val scope: kotlinx.coroutines.CoroutineScope,
     val context: Context,
     val user: User,

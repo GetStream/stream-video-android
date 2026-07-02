@@ -22,6 +22,7 @@ import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.VideoTrack
@@ -35,6 +36,7 @@ public object StreamPreviewDataUtils {
     @PublishedApi
     internal lateinit var streamVideo: StreamVideo
 
+    @OptIn(InternalStreamVideoApi::class)
     public fun initializeStreamVideo(context: Context) {
         if (::streamVideo.isInitialized.not()) {
             streamVideo = StreamVideoBuilder(
@@ -42,7 +44,12 @@ public object StreamPreviewDataUtils {
                 apiKey = "stream-api-key",
                 user = previewUsers.first(),
                 token = "user-token",
-            ).build()
+            )
+                // Paparazzi/preview harnesses run under layoutlib, which lacks the Android system
+                // services (WifiManager, etc.) that core's default StreamClient factory touches
+                // during eager construction. Swap in a no-op client so build() stays test-safe.
+                .streamClientFactory { NoOpStreamClient }
+                .build()
         }
     }
 }
