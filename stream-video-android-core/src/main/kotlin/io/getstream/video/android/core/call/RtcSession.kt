@@ -959,7 +959,7 @@ public class RtcSession internal constructor(
             sendCallStats()
             SfuConnectionResult.Failure(
                 error = Exception(msg),
-                recoverable = (sfuSocketState as? SfuSocketState.Disconnected)?.triggersReconnect() ?: false,
+                recoverable = (sfuSocketState as? SfuSocketState.Disconnected)?.canTriggersReconnect() ?: false,
                 abortReason = networkError?.toAbortReason(),
             )
         }
@@ -974,7 +974,7 @@ public class RtcSession internal constructor(
      * `when` (no `else`) makes a new [SfuSocketState.Disconnected] subtype a compile
      * error here, forcing both sites to stay in sync.
      */
-    private fun SfuSocketState.Disconnected.triggersReconnect(): Boolean = when (this) {
+    private fun SfuSocketState.Disconnected.canTriggersReconnect(): Boolean = when (this) {
         is SfuSocketState.Disconnected.DisconnectedTemporarily,
         is SfuSocketState.Disconnected.WebSocketEventLost,
         -> true

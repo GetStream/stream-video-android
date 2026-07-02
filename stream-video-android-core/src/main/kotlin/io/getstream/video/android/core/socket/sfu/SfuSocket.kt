@@ -146,7 +146,7 @@ internal open class SfuSocket(
                             socketListenerJob = listen().onEach {
                                 when (it) {
                                     is StreamWebSocketEvent.Open ->
-                                        sfuSocketStateService.onWebSocketConnected()
+                                        sfuSocketStateService.onWebSocketEstablished()
                                     is StreamWebSocketEvent.Error -> handleError(it)
                                     is StreamWebSocketEvent.SfuMessage -> when (
                                         val event =

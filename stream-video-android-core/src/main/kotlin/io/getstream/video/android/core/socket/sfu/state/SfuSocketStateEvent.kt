@@ -33,9 +33,11 @@ public sealed class SfuSocketStateEvent {
 
     /**
      * Event to notify that the transport WebSocket has opened (HTTP→WS upgrade
-     * completed), but before the SFU JoinCallResponse has been received.
+     * completed), but before the SFU JoinCallResponse has been received. Mirrors
+     * [ConnectionEstablished]: this drives the socket into
+     * [io.getstream.video.android.core.socket.sfu.state.SfuSocketState.WebSocketConnected].
      */
-    object WebSocketConnected : SfuSocketStateEvent() { override fun toString() = "WebSocketConnected" }
+    object WebSocketEstablished : SfuSocketStateEvent() { override fun toString() = "WebSocketEstablished" }
 
     /**
      * Event to notify the connection was established.

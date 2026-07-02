@@ -87,7 +87,7 @@ import java.net.ConnectException
  * @property connectionTimeoutInMs Connection timeout in milliseconds. Applies both to the
  * coordinator/SFU OkHttp clients (HTTP and WebSocket upgrade) and to the SFU join-response
  * wait (time allowed for the SFU to deliver its JoinCallResponse after the socket opens).
- * Defaults to 10s.
+ * Defaults to 5s.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig]. (Deprecated) Use `callServiceConfigRegistry` instead.

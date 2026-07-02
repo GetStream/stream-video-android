@@ -40,7 +40,7 @@ class SfuSocketStateServiceTest {
         assertThat(service.currentState).isInstanceOf(SfuSocketState.Connecting::class.java)
 
         // Transport WebSocket opened, but no JoinResponse yet.
-        service.onWebSocketConnected()
+        service.onWebSocketEstablished()
         assertThat(service.currentState).isEqualTo(SfuSocketState.WebSocketConnected)
 
         // JoinResponse delivered by the SFU.
@@ -77,7 +77,7 @@ class SfuSocketStateServiceTest {
         runTest {
             val service = SfuSocketStateService()
             service.onConnect(conf)
-            service.onWebSocketConnected()
+            service.onWebSocketEstablished()
             assertThat(service.currentState).isEqualTo(SfuSocketState.WebSocketConnected)
 
             // The join-response timer fires after the WebSocket opened.
@@ -100,7 +100,7 @@ class SfuSocketStateServiceTest {
     fun `timeout disconnect can reconnect via Connect`() = runTest {
         val service = SfuSocketStateService()
         service.onConnect(conf)
-        service.onWebSocketConnected()
+        service.onWebSocketEstablished()
         service.onNetworkError(
             Error.NetworkError.fromVideoErrorCode(VideoErrorCode.SFU_JOIN_RESPONSE_TIMEOUT),
             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,

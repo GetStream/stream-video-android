@@ -64,9 +64,9 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
      * Notify that the transport WebSocket has opened, but before the SFU
      * JoinCallResponse has been received.
      */
-    suspend fun onWebSocketConnected() {
-        logger.v { "[onWebSocketConnected] no args" }
-        stateMachine.sendEvent(SfuSocketStateEvent.WebSocketConnected)
+    suspend fun onWebSocketEstablished() {
+        logger.v { "[onWebSocketEstablished] no args" }
+        stateMachine.sendEvent(SfuSocketStateEvent.WebSocketEstablished)
     }
 
     /**
@@ -173,7 +173,7 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
                 onEvent<SfuSocketStateEvent.Connect> {
                     SfuSocketState.Connecting(it.connectionConf, it.connectionType)
                 }
-                onEvent<SfuSocketStateEvent.WebSocketConnected> { SfuSocketState.WebSocketConnected }
+                onEvent<SfuSocketStateEvent.WebSocketEstablished> { SfuSocketState.WebSocketConnected }
                 onEvent<SfuSocketStateEvent.ConnectionEstablished> {
                     SfuSocketState.Connected(
                         it.connectedEvent,

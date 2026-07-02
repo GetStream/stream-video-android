@@ -805,7 +805,14 @@ public class Call(
         }
         val connectedSession = session.value ?: return Failure(Error.GenericError("RtcSession was cleared during connection to sfu"))
         client.state.setActiveCall(this)
-        monitorSession(result.value)
+        // rejoin/migrate recovery swaps in a NEW session and already calls monitorSession()
+        // with the recovered join response. fastReconnect recovery — and the normal success
+        // path — keep the original session, which is not monitored anywhere else. Only
+        // (re)establish monitoring when the session is unchanged, using the response that
+        // still matches it, so we neither double-register nor monitor with a stale response.
+        if (connectedSession === localSession) {
+            monitorSession(result.value)
+        }
         return Success(value = connectedSession)
     }
 
