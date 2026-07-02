@@ -163,6 +163,7 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
+import java.io.InterruptedIOException
 import java.net.SocketTimeoutException
 import java.util.Collections
 import java.util.concurrent.atomic.AtomicInteger
@@ -1002,15 +1003,21 @@ public class RtcSession internal constructor(
      * Maps a disconnect [Error.NetworkError] to the analytics abort reason. Both flavours of
      * timeout report [AnalyticsCallAbortReason.REQUEST_TIMEOUT]:
      *  - a missing JoinResponse after the socket opened (tagged [VideoErrorCode.SFU_JOIN_RESPONSE_TIMEOUT]), and
-     *  - a transport connect/read timeout, detected via its [java.net.SocketTimeoutException] cause
-     *    (type check, not message matching).
+     *  - a transport connect/read timeout: [java.net.SocketTimeoutException], or a bare
+     *    [java.io.InterruptedIOException] with message "timeout" (OkHttp connect/call timeout).
      * Everything else is attributed to [AnalyticsCallAbortReason.SFU_ERROR].
      */
     private fun Error.NetworkError.toAbortReason(): AnalyticsCallAbortReason = when {
         serverErrorCode == VideoErrorCode.SFU_JOIN_RESPONSE_TIMEOUT.code ->
             AnalyticsCallAbortReason.REQUEST_TIMEOUT
-        cause is SocketTimeoutException -> AnalyticsCallAbortReason.REQUEST_TIMEOUT
+        cause.isTransportTimeout() -> AnalyticsCallAbortReason.REQUEST_TIMEOUT
         else -> AnalyticsCallAbortReason.SFU_ERROR
+    }
+
+    private fun Throwable?.isTransportTimeout(): Boolean = when (this) {
+        is SocketTimeoutException -> true
+        is InterruptedIOException -> message?.contains("timeout", ignoreCase = true) == true
+        else -> false
     }
 
     private suspend fun buildJoinRequest(

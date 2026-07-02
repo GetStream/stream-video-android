@@ -28,6 +28,7 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
+import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.connection.Publisher
@@ -72,6 +73,7 @@ import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.WebsocketReconnectStrategy
+import java.io.InterruptedIOException
 
 class RtcSessionTest2 {
 
@@ -296,6 +298,68 @@ class RtcSessionTest2 {
             // A timeout is recoverable — the stateJob triggers a reconnect, so the
             // join flow should await it rather than failing permanently.
             assertTrue("Expected recoverable=true for a timeout", result.recoverable)
+            assertEquals(
+                AnalyticsCallAbortReason.REQUEST_TIMEOUT,
+                (result as SfuConnectionResult.Failure).abortReason,
+            )
+        }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `connectInternal maps OkHttp InterruptedIOException timeout to REQUEST_TIMEOUT abort reason`() =
+        runTest(testDispatcher) {
+            val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
+                SfuSocketState.Disconnected.Stopped,
+            )
+            val mockSocketConnection = mockk<SfuSocketConnection>(relaxed = true)
+            every { mockSocketConnection.state() } returns sfuSocketStateFlow
+            coEvery { mockSocketConnection.connect(any()) } coAnswers {
+                sfuSocketStateFlow.value =
+                    SfuSocketState.Disconnected.DisconnectedTemporarily(
+                        Error.NetworkError(
+                            message = "timeout",
+                            serverErrorCode = VideoErrorCode.SOCKET_FAILURE.code,
+                            statusCode = -1,
+                            cause = InterruptedIOException("timeout"),
+                        ),
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+                    )
+            }
+            val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
+            every { sfuSocketModule.socketConnection } returns mockSocketConnection
+
+            val rtcSession = spyk(
+                RtcSession(
+                    client = mockStreamVideo,
+                    powerManager = mockPowerManager,
+                    call = mockCall,
+                    sessionId = "test-session-id",
+                    apiKey = "test-api-key",
+                    lifecycle = mockLifecycle,
+                    sfuUrl = "https://test-sfu.stream.com",
+                    sfuWsUrl = "wss://test-sfu.stream.com",
+                    sfuToken = "fake-sfu-token",
+                    sfuName = "test-sfu-edge",
+                    clientImpl = mockVideoClient,
+                    coroutineScope = testScope,
+                    remoteIceServers = emptyList(),
+                    sfuConnectionModuleProvider = { sfuSocketModule },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                ),
+            )
+            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+
+            val result = rtcSession.connectInternal()
+
+            assertTrue(
+                "Expected SfuConnectionResult.Failure but got $result",
+                result is SfuConnectionResult.Failure,
+            )
+            assertEquals(
+                AnalyticsCallAbortReason.REQUEST_TIMEOUT,
+                (result as SfuConnectionResult.Failure).abortReason,
+            )
+            assertTrue("Expected recoverable=true for a transport timeout", result.recoverable)
         }
 
     @Suppress("DEPRECATION")
