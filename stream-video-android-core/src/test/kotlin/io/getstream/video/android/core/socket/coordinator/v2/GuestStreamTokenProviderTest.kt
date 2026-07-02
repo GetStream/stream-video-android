@@ -51,7 +51,7 @@ internal class GuestStreamTokenProviderTest {
             duration = "10ms",
             user = serverIssuedUser(),
         )
-        val subject = GuestStreamTokenProvider(api, initialUser, repo)
+        val subject = GuestStreamTokenProvider(api, initialUser, repo, onTokenIssued = {})
 
         val token = subject.loadToken(StreamUserId.fromString("guest-1"))
 
@@ -64,6 +64,65 @@ internal class GuestStreamTokenProviderTest {
                 },
             )
         }
+    }
+
+    @Test
+    fun `loadToken publishes the issued token to onTokenIssued before returning`() = runTest {
+        val api = mockk<ProductvideoApi>()
+        val repo = mockk<WritableUserRepository>(relaxed = true)
+        coEvery { api.createGuest(any()) } returns CreateGuestResponse(
+            accessToken = "fake-jwt",
+            duration = "10ms",
+            user = serverIssuedUser(),
+        )
+        val issuedTokens = mutableListOf<String>()
+        val subject = GuestStreamTokenProvider(
+            api = api,
+            initialUser = User(id = "guest-local", type = UserType.Guest),
+            userRepository = repo,
+            onTokenIssued = issuedTokens::add,
+        )
+
+        val token = subject.loadToken(StreamUserId.fromString("guest-1"))
+
+        // COORD-03 split-brain invariant: the REST auth path (legacy CoordinatorAuthInterceptor)
+        // must observe the same JWT that core's StreamTokenManager receives.
+        assertEquals(listOf("fake-jwt"), issuedTokens)
+        assertEquals("fake-jwt", token.rawValue)
+    }
+
+    @Test
+    fun `adopted user keeps local display name when server decorates it (iOS parity)`() = runTest {
+        val api = mockk<ProductvideoApi>()
+        val repo = mockk<WritableUserRepository>(relaxed = true)
+        val initialUser = User(id = "guest-local", name = "Alex", type = UserType.Guest)
+        coEvery { api.createGuest(any()) } returns CreateGuestResponse(
+            accessToken = "fake-jwt",
+            duration = "10ms",
+            user = serverIssuedUser(name = "guest-abc123-Alex"),
+        )
+        val subject = GuestStreamTokenProvider(api, initialUser, repo, onTokenIssued = {})
+
+        subject.loadToken(StreamUserId.fromString("guest-1"))
+
+        verify(exactly = 1) { repo.setUser(match { it.name == "Alex" }) }
+    }
+
+    @Test
+    fun `adopted user keeps server name when it does not derive from the local name`() = runTest {
+        val api = mockk<ProductvideoApi>()
+        val repo = mockk<WritableUserRepository>(relaxed = true)
+        val initialUser = User(id = "guest-local", name = "Alex", type = UserType.Guest)
+        coEvery { api.createGuest(any()) } returns CreateGuestResponse(
+            accessToken = "fake-jwt",
+            duration = "10ms",
+            user = serverIssuedUser(name = "Server Chosen Name"),
+        )
+        val subject = GuestStreamTokenProvider(api, initialUser, repo, onTokenIssued = {})
+
+        subject.loadToken(StreamUserId.fromString("guest-1"))
+
+        verify(exactly = 1) { repo.setUser(match { it.name == "Server Chosen Name" }) }
     }
 
     @Test
@@ -83,7 +142,7 @@ internal class GuestStreamTokenProviderTest {
             duration = "5ms",
             user = serverIssuedUser(),
         )
-        val subject = GuestStreamTokenProvider(api, initialUser, repo)
+        val subject = GuestStreamTokenProvider(api, initialUser, repo, onTokenIssued = {})
 
         subject.loadToken(StreamUserId.fromString("guest-1"))
 
@@ -93,12 +152,13 @@ internal class GuestStreamTokenProviderTest {
         assertEquals("en_US", captured.captured.user.custom?.get("locale"))
     }
 
-    private fun serverIssuedUser(): UserResponse = UserResponse(
+    private fun serverIssuedUser(name: String? = null): UserResponse = UserResponse(
         createdAt = FIXED_TIME,
         id = "server-issued-id",
         language = "en",
         role = "user",
         updatedAt = FIXED_TIME,
+        name = name,
     )
 
     private companion object {

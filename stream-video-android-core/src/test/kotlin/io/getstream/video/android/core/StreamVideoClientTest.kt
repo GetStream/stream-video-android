@@ -25,6 +25,7 @@ import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSessionStartedEvent
 import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.call.RtcSession
@@ -34,6 +35,8 @@ import io.getstream.video.android.core.notifications.internal.StreamNotification
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -81,7 +84,7 @@ class StreamVideoClientTest {
         val tokenRepository: TokenRepository,
     )
 
-    private fun prepareClient(): ClientHarness {
+    private fun prepareClient(user: User = mockk(relaxed = true)): ClientHarness {
         val context = mockk<Context>(relaxed = true)
         val lifecycle = mockk<Lifecycle>(relaxed = true)
         val coordinator = mockk<CoordinatorConnectionModule>(relaxed = true)
@@ -97,7 +100,7 @@ class StreamVideoClientTest {
         val client = spyk(
             StreamVideoClient(
                 context = context,
-                user = mockk(relaxed = true),
+                user = user,
                 apiKey = "apikey",
                 token = "token",
                 lifecycle = lifecycle,
@@ -318,5 +321,30 @@ class StreamVideoClientTest {
         // from inside cleanup(). (Cleanup itself never touched tokenRepository, but this
         // assertion guards against a future regression that reintroduces the coupling.)
         verify(exactly = 0) { harness.tokenRepository.updateToken(any()) }
+    }
+
+    @Test
+    fun `connectAsync fails fast for anonymous users without touching streamClient`() = runTest {
+        // D-07 / iOS parity: anonymous users are REST-only; connect attempts fail before
+        // reaching the network.
+        val harness = prepareClient(
+            user = User(id = "anon-1", type = UserType.Anonymous),
+        )
+
+        val result = harness.client.connectAsync().await()
+
+        assertTrue(result is Failure)
+        coVerify(exactly = 0) { harness.streamClient.connect() }
+    }
+
+    @Test
+    fun `connectIfNotAlreadyConnected is a no-op for anonymous users`() = runTest {
+        val harness = prepareClient(
+            user = User(id = "anon-1", type = UserType.Anonymous),
+        )
+
+        harness.client.connectIfNotAlreadyConnected()
+
+        coVerify(exactly = 0) { harness.streamClient.connect() }
     }
 }

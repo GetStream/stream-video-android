@@ -54,6 +54,7 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
+import io.getstream.video.android.core.socket.coordinator.v2.AnonymousStreamTokenProvider
 import io.getstream.video.android.core.socket.coordinator.v2.GuestStreamTokenProvider
 import io.getstream.video.android.core.socket.coordinator.v2.IntegrationStreamTokenProvider
 import io.getstream.video.android.core.socket.coordinator.v2.VideoEventSerialization
@@ -294,26 +295,36 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             tokenRepository = tokenRepository,
         )
 
-        // Adapter that satisfies GuestStreamTokenProvider's WritableUserRepository contract until
-        // the SDK-wide user repository (PR #1708-equivalent) lands. See Plan 02-01 SUMMARY.
-        val userRepository = InMemoryWritableUserRepository(user)
+        // Sink that adopts the server-issued guest identity into ClientState once the client
+        // exists (bound below, after construction). iOS analog: `state.user = guestInfo.user`.
+        val userRepository = BindableWritableUserRepository()
 
-        // Select the core token provider based on user type.
+        // Select the core token provider based on user type — mirrors iOS's
+        // `initialConnectIfRequired` dispatch.
         //  - Authenticated: adapt the integration-supplied TokenProvider.
-        //  - Guest: SDK obtains the JWT via createGuest REST call (D-06).
-        //  - Anonymous: rejected — anonymous users do not open a coordinator socket (D-07).
+        //  - Guest: SDK obtains the JWT via createGuest REST call (D-06). Until the token
+        //    arrives, REST auth runs as "anonymous" (same as iOS's AnonymousAuth transport for
+        //    createGuest); GuestStreamTokenProvider flips it to "jwt" and syncs the token into
+        //    the legacy Retrofit path the moment the server issues it.
+        //  - Anonymous: REST-only (D-07). Construction succeeds; connect attempts fail.
         val streamTokenProvider: StreamTokenProvider = when (user.type) {
             UserType.Authenticated -> IntegrationStreamTokenProvider(tokenProvider)
-            UserType.Guest -> GuestStreamTokenProvider(
-                api = coordinatorConnectionModule.api,
-                initialUser = user,
-                userRepository = userRepository,
-            )
-            UserType.Anonymous -> error(
-                "Anonymous users do not open a coordinator socket (D-07). " +
-                    "Construct StreamVideoBuilder with UserType.Authenticated or UserType.Guest, " +
-                    "or use the SDK's REST-only operations directly.",
-            )
+            UserType.Guest -> {
+                coordinatorConnectionModule.updateAuthType("anonymous")
+                GuestStreamTokenProvider(
+                    api = coordinatorConnectionModule.api,
+                    initialUser = user,
+                    userRepository = userRepository,
+                    onTokenIssued = { issuedToken ->
+                        coordinatorConnectionModule.updateAuthType("jwt")
+                        coordinatorConnectionModule.updateToken(issuedToken)
+                    },
+                )
+            }
+            UserType.Anonymous -> {
+                coordinatorConnectionModule.updateAuthType("anonymous")
+                AnonymousStreamTokenProvider()
+            }
         }
 
         // Build the core client and eagerly inject it into StreamVideoClient (D-03).
@@ -378,11 +389,20 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             rejectCallWhenBusy = rejectCallWhenBusy,
         )
 
-        // Establish a WS connection with the coordinator (we don't support this for anonymous users)
-        if (user.type == UserType.Authenticated) {
+        // Route guest identity adoption into ClientState now that the client exists. Bound
+        // before the connect launch below, so no token load can race the binding.
+        userRepository.bind { adoptedUser -> client.state.updateUser(adoptedUser) }
+
+        // Establish a WS connection with the coordinator for authenticated AND guest users —
+        // iOS parity (`initialConnectIfRequired`): only anonymous users never connect. For
+        // guests, core's token manager drives the createGuest flow inside connect().
+        // Push-device registration stays authenticated-only (guests have no durable identity).
+        if (user.type != UserType.Anonymous) {
             scope.launch {
                 try {
-                    if (notificationConfig.autoRegisterPushDevice) {
+                    if (user.type == UserType.Authenticated &&
+                        notificationConfig.autoRegisterPushDevice
+                    ) {
                         client.registerPushDevice()
                     }
                     if (connectOnInit) {
@@ -532,13 +552,27 @@ private fun defaultStreamClientFactory(args: StreamClientFactoryArgs): StreamCli
 }
 
 /**
- * In-memory implementation of [WritableUserRepository] used by the guest-user JWT flow.
- * Replaced by the SDK-wide user repository once the concrete type lands (PR #1708-equivalent).
+ * [WritableUserRepository] whose sink is bound after the [StreamVideoClient] is constructed
+ * (the guest token provider is created before the client exists). A user written before
+ * [bind] is buffered and delivered on binding, so no adoption is lost even if a token load
+ * completes first.
  */
-internal class InMemoryWritableUserRepository(initial: User) : WritableUserRepository {
-    private val ref = AtomicReference(initial)
-    val user: User get() = ref.get()
+internal class BindableWritableUserRepository : WritableUserRepository {
+    @Volatile
+    private var sink: ((User) -> Unit)? = null
+    private val pending = AtomicReference<User?>(null)
+
+    fun bind(sink: (User) -> Unit) {
+        this.sink = sink
+        pending.getAndSet(null)?.let(sink)
+    }
+
     override fun setUser(user: User) {
-        ref.set(user)
+        val target = sink
+        if (target != null) {
+            target(user)
+        } else {
+            pending.set(user)
+        }
     }
 }

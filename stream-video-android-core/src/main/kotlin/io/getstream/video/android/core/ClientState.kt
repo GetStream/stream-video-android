@@ -76,6 +76,14 @@ class ClientState(private val client: StreamVideo) {
     /** Current user for the client. */
     public val user: StateFlow<User?> = _user
 
+    /**
+     * Adopts [user] as the SDK's active user. Used by the guest flow to publish the
+     * server-issued identity returned by `createGuest` (iOS analog: `state.user`).
+     */
+    internal fun updateUser(user: User) {
+        _user.value = user
+    }
+
     /** Coordinator connection state */
     public val connection: StateFlow<ConnectionState> = _connection
 

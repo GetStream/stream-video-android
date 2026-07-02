@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import android.content.Context
 import android.net.ConnectivityManager
 import io.getstream.android.core.api.StreamClient
+import io.getstream.video.android.core.socket.coordinator.v2.AnonymousStreamTokenProvider
 import io.getstream.video.android.core.socket.coordinator.v2.GuestStreamTokenProvider
 import io.getstream.video.android.core.socket.coordinator.v2.IntegrationStreamTokenProvider
 import io.getstream.video.android.model.User
@@ -27,7 +28,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /**
@@ -40,15 +40,16 @@ import kotlin.test.assertTrue
 internal class StreamVideoBuilderDispatchTest {
 
     @Test
-    fun `Anonymous user throws IllegalStateException with D-07 reference`() {
-        val builder = builderFor(
+    fun `Anonymous path selects AnonymousStreamTokenProvider and does not throw`() {
+        // iOS parity: anonymous users construct normally (REST-only, D-07); only explicit
+        // connect attempts fail.
+        val capturedProvider = captureFactoryArgsFor(
             user = User(id = "anon-1", type = UserType.Anonymous),
-        )
-
-        val err = assertFailsWith<IllegalStateException> { builder.build() }
+            token = "",
+        )?.tokenProvider
         assertTrue(
-            err.message?.contains("D-07") == true,
-            "Expected IllegalStateException to reference D-07, got: ${err.message}",
+            capturedProvider is AnonymousStreamTokenProvider,
+            "Expected AnonymousStreamTokenProvider, got: ${capturedProvider?.javaClass}",
         )
     }
 

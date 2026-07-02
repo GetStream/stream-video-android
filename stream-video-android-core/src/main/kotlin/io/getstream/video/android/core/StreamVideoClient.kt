@@ -129,6 +129,7 @@ import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import io.getstream.video.android.model.UserType
 import io.getstream.webrtc.ManagedAudioProcessingFactory
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -414,6 +415,8 @@ internal class StreamVideoClient internal constructor(
     }
 
     override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
+        // Anonymous users never open a coordinator socket (D-07; iOS parity).
+        if (user.type == UserType.Anonymous) return@safeSuspendingCall
         if (streamClient.connectionState.value !is StreamConnectionState.Connected) {
             streamClient.connect()
         }
@@ -493,6 +496,13 @@ internal class StreamVideoClient internal constructor(
 
     override suspend fun connectAsync(): Deferred<Result<Long>> {
         return scope.async {
+            // Anonymous users never open a coordinator socket (D-07). Fail fast without
+            // touching the network — iOS parity with `connectUser` throwing MissingPermissions.
+            if (user.type == UserType.Anonymous) {
+                return@async Failure(
+                    Error.GenericError("Anonymous users cannot connect to the coordinator WS."),
+                )
+            }
             val startTime = System.currentTimeMillis()
             val result = streamClient.connect()
             val duration = System.currentTimeMillis() - startTime
