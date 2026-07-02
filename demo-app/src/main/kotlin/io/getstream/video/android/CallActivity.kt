@@ -49,6 +49,7 @@ import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -68,7 +69,9 @@ class CallActivity : ComposeStreamCallActivity() {
     var observeCallReadyToJoinJob: Job? = null
     var observeRingingJob: Job? = null
     private val previousRingingStates = ConcurrentHashMap.newKeySet<RingingState>()
-    override val callJoinInterceptor = DemoCallJoinInterceptor(previousRingingStates)
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+    override val callJoinInterceptor =
+        DemoCallJoinInterceptor(previousRingingStates, coroutineScope)
 
     /**
      * This code is required to pass the UI-tests (as it hardcodes the configuration)
@@ -207,6 +210,7 @@ class CallActivity : ComposeStreamCallActivity() {
         super.finish()
         observeCallReadyToJoinJob?.cancel()
         observeRingingJob?.cancel()
+        coroutineScope.cancel()
         previousRingingStates.clear()
     }
 }

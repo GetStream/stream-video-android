@@ -19,20 +19,23 @@ package io.getstream.video.android.core
 import kotlin.jvm.Throws
 
 /**
- * Controls when a ringing call transitions to [RingingState.Active].
+ * Controls when a ringing call transitions to [RingingState.Active], and provides
+ * best-effort hooks around the join lifecycle.
  *
  * Implement this to insert custom logic (e.g. waiting for user confirmation) between
  * the publisher peer connection becoming ready and the call going active.
  * Has no effect on non-ringing joins (livestream, direct join).
+ *
+ * Order: [callWillJoin] → [callReadyToJoin] → [callDidJoin].
  */
-@Deprecated(
-    message = "Use CallJoinLifecycleInterceptor instead",
-    replaceWith = ReplaceWith(
-        "CallJoinLifecycleInterceptor",
-        "io.getstream.video.android.core.call.interceptor.CallJoinLifecycleInterceptor",
-    ),
-)
 public interface CallJoinInterceptor {
+
+    /**
+     * Called right after the [io.getstream.video.android.core.call.RtcSession] is created,
+     * before the call goes [RingingState.Active]. Exceptions are logged and swallowed —
+     * this hook is best-effort and never fails the join.
+     */
+    public suspend fun callWillJoin(call: Call) {}
 
     /**
      * Called when the SDK is ready to transition to [RingingState.Active].
@@ -45,6 +48,12 @@ public interface CallJoinInterceptor {
      */
     @Throws(CallJoinInterceptionException::class)
     public suspend fun callReadyToJoin(call: Call)
+
+    /**
+     * Called once the call has transitioned to [RingingState.Active] (after [callReadyToJoin]).
+     * Exceptions are logged and swallowed — this hook is best-effort and never fails the join.
+     */
+    public suspend fun callDidJoin(call: Call) {}
 }
 
 /**

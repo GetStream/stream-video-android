@@ -71,7 +71,6 @@ import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.connection.Subscriber
-import io.getstream.video.android.core.call.interceptor.CallJoinLifecycleInterceptor
 import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
@@ -104,6 +103,7 @@ import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.toQueriedMembers
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -627,8 +627,12 @@ public class Call(
                     }
                 }
 
-                if (callJoinInterceptor is CallJoinLifecycleInterceptor) {
-                    callJoinInterceptor.callWillJoin(this)
+                try {
+                    callJoinInterceptor?.callWillJoin(this)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    logger.e(e) { "[callWillJoin] interceptor threw, proceeding" }
                 }
 
                 return result

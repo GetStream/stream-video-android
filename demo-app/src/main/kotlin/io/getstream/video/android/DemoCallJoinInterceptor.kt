@@ -19,10 +19,10 @@ package io.getstream.video.android
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.CallActivity.Companion.USE_CALL_JOIN_INTERCEPTOR
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallJoinInterceptor
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.RingingState
-import io.getstream.video.android.core.call.interceptor.CallJoinLifecycleInterceptor
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
@@ -39,29 +39,40 @@ import kotlinx.coroutines.launch
  */
 class DemoCallJoinInterceptor(
     private val previousRingingStates: Set<RingingState>,
-) : CallJoinLifecycleInterceptor {
+    private val coroutineScope: CoroutineScope,
+) : CallJoinInterceptor {
     private val logger by taggedLogger("DemoCallJoinInterceptor")
 
     companion object {
         const val CALLER_READY_TO_JOIN_EVENT_TYPE = "caller_ready_join"
         const val CALLEE_READY_TO_JOIN_EVENT_TYPE = "callee_ready_join"
     }
-    var observeJob: Job? = null
-    val observerScope = CoroutineScope(Dispatchers.Default)
+    private var observeJob: Job? = null
     override suspend fun callWillJoin(call: Call) {
-        observeJob = observerScope.launch {
-            call.state.participants
-                .flatMapLatest { participants ->
-                    participants
-                        .filter { !it.isLocal }
-                        .asFlow()
-                        .flatMapMerge { participant ->
-                            participant.audioTrack.filterNotNull()
-                        }
-                }
-                .collect { track ->
-                    track.audio.setEnabled(false)
-                }
+        observeJob?.cancel()
+        observeJob = coroutineScope.launch {
+            val muteJob = launch {
+                call.state.participants
+                    .flatMapLatest { participants ->
+                        participants
+                            .filter { !it.isLocal }
+                            .asFlow()
+                            .flatMapMerge { participant ->
+                                participant.audioTrack.filterNotNull()
+                            }
+                    }
+                    .collect { track ->
+                        track.audio.setEnabled(false)
+                    }
+            }
+            // Stop muting once the call reaches a terminal state, even if callDidJoin
+            // never runs (e.g. the interceptor aborts the join or it's left externally).
+            call.state.connection.first {
+                it is RealtimeConnection.Disconnected ||
+                    it is RealtimeConnection.Failed ||
+                    it is RealtimeConnection.ReconnectingFailed
+            }
+            muteJob.cancel()
         }
     }
 
@@ -110,6 +121,7 @@ class DemoCallJoinInterceptor(
 
     override suspend fun callDidJoin(call: Call) {
         observeJob?.cancel()
+        observeJob = null
         call.state.participants.value.filter { !it.isLocal }
             .forEach {
                 val audioTrack = it.audioTrack.value

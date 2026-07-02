@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import androidx.lifecycle.AtomicReference
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.call.interceptor.CallJoinLifecycleInterceptor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -86,15 +85,7 @@ internal class ActiveStateGate(
 
                 if (shouldProceed) {
                     onReady()
-                    try {
-                        if (interceptor is CallJoinLifecycleInterceptor) {
-                            interceptor.callDidJoin(call)
-                        }
-                    } catch (ex: CancellationException) {
-                        throw ex
-                    } catch (ex: Exception) {
-                        logger.e(ex) { "[callDidJoin] interceptor threw, proceeding" }
-                    }
+                    invokeCallDidJoin(call, interceptor)
                 }
                 cancelInterceptorJob()
             },
@@ -121,19 +112,21 @@ internal class ActiveStateGate(
 
                 if (shouldProceed) {
                     onReady()
-                    try {
-                        if (interceptor is CallJoinLifecycleInterceptor) {
-                            interceptor.callDidJoin(call)
-                        }
-                    } catch (ex: CancellationException) {
-                        throw ex
-                    } catch (ex: Exception) {
-                        logger.e(ex) { "[callDidJoin] interceptor threw, proceeding" }
-                    }
+                    invokeCallDidJoin(call, interceptor)
                 }
                 cleanup()
             },
         )
+    }
+
+    private suspend fun invokeCallDidJoin(call: Call, interceptor: CallJoinInterceptor?) {
+        try {
+            interceptor?.callDidJoin(call)
+        } catch (ex: CancellationException) {
+            throw ex
+        } catch (ex: Exception) {
+            logger.e(ex) { "[callDidJoin] interceptor threw, proceeding" }
+        }
     }
 
     private suspend fun awaitPeerConnection(call: Call) {
