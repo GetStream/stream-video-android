@@ -38,6 +38,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.IceServer
+import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.mockk.MockKAnnotations
@@ -56,12 +57,14 @@ import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -247,9 +250,8 @@ class RtcSessionTest2 {
             )
             val mockSocketConnection = mockk<SfuSocketConnection>(relaxed = true)
             every { mockSocketConnection.state() } returns sfuSocketStateFlow
-            // connectInternal no longer owns a timer; the socket layer bounds the join
-            // handshake and surfaces a timeout as a DisconnectedTemporarily whose error
-            // carries the precise SFU_JOIN_RESPONSE_TIMEOUT code/reason.
+            // The socket layer surfaces timeouts as DisconnectedTemporarily; connectInternal
+            // also has a safety timeout if the state machine never reaches a terminal state.
             coEvery { mockSocketConnection.connect(any()) } coAnswers {
                 sfuSocketStateFlow.value =
                     SfuSocketState.Disconnected.DisconnectedTemporarily(
@@ -301,6 +303,65 @@ class RtcSessionTest2 {
             assertEquals(
                 AnalyticsCallAbortReason.REQUEST_TIMEOUT,
                 (result as SfuConnectionResult.Failure).abortReason,
+            )
+        }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `connectInternal safety timeout fires when socket stays non-terminal`() =
+        runTest(testDispatcher) {
+            val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
+                SfuSocketState.Disconnected.Stopped,
+            )
+            val mockSocketConnection = mockk<SfuSocketConnection>(relaxed = true)
+            every { mockSocketConnection.state() } returns sfuSocketStateFlow
+            coEvery { mockSocketConnection.connect(any()) } coAnswers {
+                sfuSocketStateFlow.value = SfuSocketState.Connecting(
+                    mockk<ConnectionConf.SfuConnectionConf>(relaxed = true),
+                )
+            }
+            val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
+            every { sfuSocketModule.socketConnection } returns mockSocketConnection
+            every { mockVideoClient.connectionTimeoutInMs } returns 50L
+
+            val rtcSession = spyk(
+                RtcSession(
+                    client = mockStreamVideo,
+                    powerManager = mockPowerManager,
+                    call = mockCall,
+                    sessionId = "test-session-id",
+                    apiKey = "test-api-key",
+                    lifecycle = mockLifecycle,
+                    sfuUrl = "https://test-sfu.stream.com",
+                    sfuWsUrl = "wss://test-sfu.stream.com",
+                    sfuToken = "fake-sfu-token",
+                    sfuName = "test-sfu-edge",
+                    clientImpl = mockVideoClient,
+                    coroutineScope = testScope,
+                    remoteIceServers = emptyList(),
+                    sfuConnectionModuleProvider = { sfuSocketModule },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                ),
+            )
+            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+
+            val resultDeferred = async { rtcSession.connectInternal() }
+            // Safety timeout = 2 * 50ms + 1000ms grace
+            advanceTimeBy(1_101L)
+            val result = resultDeferred.await()
+
+            assertTrue(
+                "Expected SfuConnectionResult.Failure but got $result",
+                result is SfuConnectionResult.Failure,
+            )
+            assertTrue(
+                "Expected safety-timeout message",
+                (result as SfuConnectionResult.Failure).error.message!!.contains("timed out"),
+            )
+            assertTrue("Expected recoverable=true for a safety timeout", result.recoverable)
+            assertEquals(
+                AnalyticsCallAbortReason.REQUEST_TIMEOUT,
+                result.abortReason,
             )
         }
 

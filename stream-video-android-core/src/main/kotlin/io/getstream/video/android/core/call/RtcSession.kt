@@ -124,6 +124,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
@@ -941,8 +942,23 @@ public class RtcSession internal constructor(
             "[connectInternal] SFU WS connect (retryCount=$retryCount, reconnect=${reconnectDetails?.strategy})"
         }
         sfuConnectionModule.socketConnection.connect(request)
-        val sfuSocketState = sfuConnectionModule.socketConnection.state().first {
-            it is SfuSocketState.Connected || it is SfuSocketState.Disconnected
+        val connectTimeoutMs = connectInternalSafetyTimeoutMs()
+        val sfuSocketState = withTimeoutOrNull(connectTimeoutMs) {
+            sfuConnectionModule.socketConnection.state().first {
+                it is SfuSocketState.Connected || it is SfuSocketState.Disconnected
+            }
+        }
+        if (sfuSocketState == null) {
+            val msg =
+                "SFU connection timed out waiting for socket state (${connectTimeoutMs}ms)"
+            logger.w { "[connectInternal] $msg" }
+            sfuTracer.trace("connect-failed", msg)
+            sendCallStats()
+            return SfuConnectionResult.Failure(
+                error = Exception(msg),
+                recoverable = true,
+                abortReason = AnalyticsCallAbortReason.REQUEST_TIMEOUT,
+            )
         }
         return if (sfuSocketState is SfuSocketState.Connected) {
             sendConnectionTimeStats(reconnectDetails?.strategy)
@@ -2129,5 +2145,18 @@ public class RtcSession internal constructor(
         sfuTracer.trace("leave-session", reason)
         val request = SfuRequest(leave_call_request = leaveCallRequest)
         sfuConnectionModule.socketConnection.sendEvent(SfuDataRequest(request))
+    }
+
+    /**
+     * Upper bound for [connectInternal] waiting on a terminal [SfuSocketState]. The socket
+     * layer already bounds the HTTP→WS upgrade (OkHttp) and the post-open join-response
+     * wait separately, each by [StreamVideoClient.connectionTimeoutInMs]; this adds
+     * headroom so [connectInternal] still returns if those timers never fire.
+     */
+    private fun connectInternalSafetyTimeoutMs(): Long =
+        clientImpl.connectionTimeoutInMs * 2 + CONNECT_INTERNAL_SAFETY_GRACE_MS
+
+    private companion object {
+        private const val CONNECT_INTERNAL_SAFETY_GRACE_MS = 1_000L
     }
 }
