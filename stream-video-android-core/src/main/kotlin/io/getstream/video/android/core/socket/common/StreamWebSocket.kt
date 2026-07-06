@@ -46,6 +46,8 @@ internal class StreamWebSocket<V, T : GenericParser<V>>(
 
         override fun onOpen(webSocket: WebSocket, response: Response) {
             super.onOpen(webSocket, response)
+            logger.v { "[onOpen] transport WebSocket opened" }
+            eventFlow.tryEmit(StreamWebSocketEvent.Open)
         }
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
@@ -67,10 +69,17 @@ internal class StreamWebSocket<V, T : GenericParser<V>>(
         }
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+            // Surface the real transport failure (e.g. "Failed to connect to /1.2.3.4:443",
+            // "timeout", SSL handshake errors)
+            // When the WS upgrade failed on an HTTP response (non-101, e.g. 401/429/5xx),
+            // OkHttp hands us that response — use its real status code; otherwise (pure
+            // transport failure) there is no HTTP response so we fall back to unknown.
             eventFlow.tryEmit(
                 StreamWebSocketEvent.Error(
-                    Error.NetworkError.fromVideoErrorCode(
-                        videoErrorCode = VideoErrorCode.SOCKET_FAILURE,
+                    Error.NetworkError(
+                        message = t.message ?: t.javaClass.simpleName,
+                        serverErrorCode = VideoErrorCode.SOCKET_FAILURE.code,
+                        statusCode = response?.code ?: Error.NetworkError.UNKNOWN_STATUS_CODE,
                         cause = t,
                     ),
                 ),

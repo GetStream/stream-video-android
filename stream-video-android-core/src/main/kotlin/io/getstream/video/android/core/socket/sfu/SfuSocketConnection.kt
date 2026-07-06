@@ -67,6 +67,11 @@ class SfuSocketConnection internal constructor(
     private val tokenProvider: TokenProvider,
     private val tokenRepository: TokenRepository,
     private val sfuAnalytics: SfuAnalytics,
+    /**
+     * Deadline (ms) for the SFU to deliver its JoinCallResponse after the transport
+     * WebSocket has opened. Defaults to [DEFAULT_SFU_SOCKET_TIMEOUT].
+     */
+    private val joinResponseTimeoutMs: Long = DEFAULT_SFU_SOCKET_TIMEOUT,
 ) : SocketListener<SfuDataEvent, JoinCallResponseEvent>(),
     SocketActions<SfuDataRequest, SfuDataEvent, StreamWebSocketEvent.Error, SfuSocketState, SfuToken, JoinRequest> {
 
@@ -112,6 +117,7 @@ class SfuSocketConnection internal constructor(
         networkStateProvider = networkStateProvider,
         userScope = scope as? UserScope ?: UserScope(ClientScope()),
         sfuAnalytics = sfuAnalytics,
+        joinResponseTimeoutMs = joinResponseTimeoutMs,
     ).also {
         it.addListener(this)
     }
