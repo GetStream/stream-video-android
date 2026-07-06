@@ -8989,7 +8989,11 @@ public final class io/getstream/video/android/core/CallJoinInterceptionException
 }
 
 public abstract interface class io/getstream/video/android/core/CallJoinInterceptor {
+	public fun callDidJoin (Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun callDidJoin$suspendImpl (Lio/getstream/video/android/core/CallJoinInterceptor;Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun callReadyToJoin (Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun callWillJoin (Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun callWillJoin$suspendImpl (Lio/getstream/video/android/core/CallJoinInterceptor;Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/CallKt {
@@ -10068,11 +10072,6 @@ public final class io/getstream/video/android/core/call/connection/StreamPeerCon
 	public final fun setAudioSampleCallback (Lkotlin/jvm/functions/Function1;)V
 	public final fun setPreferredAudioInputDevice (Landroid/media/AudioDeviceInfo;)Z
 	public final fun toggleAudioProcessing ()Z
-}
-
-public abstract interface class io/getstream/video/android/core/call/interceptor/CallJoinLifecycleInterceptor : io/getstream/video/android/core/CallJoinInterceptor {
-	public abstract fun callDidJoin (Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun callWillJoin (Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/call/signal/socket/RTCEventMapper {
