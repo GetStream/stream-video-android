@@ -58,8 +58,8 @@ internal class SfuConnectionModule(
             .baseUrl("$apiUrl/").build()
     }
     private fun buildSfuOkHttpClient(): OkHttpClient {
-        val connectionTimeoutInMs = 10000L
-        // create a new OkHTTP client and set timeouts
+        // create a new OkHTTP client and set timeouts (driven by the builder's
+        // connectionTimeoutInMs; bounds the HTTP→WS upgrade among other things)
         val authInterceptor = CoordinatorAuthInterceptor(apiKey, tokenRepository)
         return OkHttpClient.Builder().addInterceptor(authInterceptor).addInterceptor(
             HttpLoggingInterceptor().apply {
@@ -99,6 +99,7 @@ internal class SfuConnectionModule(
         networkStateProvider = networkStateProvider,
         tokenRepository = tokenRepository,
         sfuAnalytics = sfuAnalytics,
+        joinResponseTimeoutMs = connectionTimeoutInMs,
     )
     override val socketConnection: SfuSocketConnection = _internalSocketConnection
 

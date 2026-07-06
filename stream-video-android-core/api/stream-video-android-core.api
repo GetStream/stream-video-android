@@ -12043,6 +12043,7 @@ public final class io/getstream/video/android/core/errors/VideoErrorCode : java/
 	public static final field NETWORK_FAILED Lio/getstream/video/android/core/errors/VideoErrorCode;
 	public static final field NO_ERROR_BODY Lio/getstream/video/android/core/errors/VideoErrorCode;
 	public static final field PARSER_ERROR Lio/getstream/video/android/core/errors/VideoErrorCode;
+	public static final field SFU_JOIN_RESPONSE_TIMEOUT Lio/getstream/video/android/core/errors/VideoErrorCode;
 	public static final field SOCKET_CLOSED Lio/getstream/video/android/core/errors/VideoErrorCode;
 	public static final field SOCKET_FAILURE Lio/getstream/video/android/core/errors/VideoErrorCode;
 	public static final field TOKEN_DATE_INCORRECT Lio/getstream/video/android/core/errors/VideoErrorCode;
@@ -14413,6 +14414,11 @@ public final class io/getstream/video/android/core/socket/common/StreamWebSocket
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/socket/common/StreamWebSocketEvent$Open : io/getstream/video/android/core/socket/common/StreamWebSocketEvent {
+	public static final field INSTANCE Lio/getstream/video/android/core/socket/common/StreamWebSocketEvent$Open;
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/socket/common/StreamWebSocketEvent$SfuMessage : io/getstream/video/android/core/socket/common/StreamWebSocketEvent {
 	public fun <init> (Lio/getstream/video/android/core/events/SfuDataEvent;)V
 	public final fun component1 ()Lio/getstream/video/android/core/events/SfuDataEvent;
@@ -14863,6 +14869,11 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketState$WebSocketConnected : io/getstream/video/android/core/socket/sfu/state/SfuSocketState {
+	public static final field INSTANCE Lio/getstream/video/android/core/socket/sfu/state/SfuSocketState$WebSocketConnected;
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract class io/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent {
 }
 
@@ -14937,6 +14948,11 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getError ()Lio/getstream/result/Error$NetworkError;
 	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent$WebSocketEstablished : io/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent {
+	public static final field INSTANCE Lio/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent$WebSocketEstablished;
 	public fun toString ()Ljava/lang/String;
 }
 

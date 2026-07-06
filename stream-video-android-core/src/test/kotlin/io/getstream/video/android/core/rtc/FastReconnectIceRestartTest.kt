@@ -165,7 +165,7 @@ class FastReconnectIceRestartTest {
         session.publisher.value = pub
         session.subscriber.value = sub
 
-        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Connected
+        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
         val result = session.fastReconnect(null)
 
@@ -185,7 +185,7 @@ class FastReconnectIceRestartTest {
         session.publisher.value = pub
         session.subscriber.value = sub
 
-        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Connected
+        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
         val result = session.fastReconnect(null)
 
@@ -204,7 +204,7 @@ class FastReconnectIceRestartTest {
         session.publisher.value = pub
         session.subscriber.value = sub
 
-        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Connected
+        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
         val result = session.fastReconnect(null)
 
@@ -223,7 +223,7 @@ class FastReconnectIceRestartTest {
         session.publisher.value = pub
         session.subscriber.value = sub
 
-        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Connected
+        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
         val result = session.fastReconnect(null)
 
@@ -243,7 +243,7 @@ class FastReconnectIceRestartTest {
         session.subscriber.value = sub
 
         val error = Exception("SFU connection timed out")
-        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Failed(error)
+        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Failure(error)
 
         val result = session.fastReconnect(null)
 
