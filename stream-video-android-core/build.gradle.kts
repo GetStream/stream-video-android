@@ -86,6 +86,12 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+            all { test ->
+                // Forked test-executor JVMs do not inherit org.gradle.jvmargs and default to
+                // 512m, which the suite (MockK inline instrumentation + Robolectric + mock
+                // web servers) now exceeds on CI runners.
+                test.maxHeapSize = "2g"
+            }
         }
 
         managedDevices {
