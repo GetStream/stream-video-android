@@ -49,30 +49,32 @@ class DemoCallJoinInterceptor(
     }
     private var observeJob: Job? = null
     override suspend fun callWillJoin(call: Call) {
-        observeJob?.cancel()
-        observeJob = coroutineScope.launch {
-            val muteJob = launch {
-                call.state.participants
-                    .flatMapLatest { participants ->
-                        participants
-                            .filter { !it.isLocal }
-                            .asFlow()
-                            .flatMapMerge { participant ->
-                                participant.audioTrack.filterNotNull()
-                            }
-                    }
-                    .collect { track ->
-                        track.audio.setEnabled(false)
-                    }
+        if (USE_CALL_JOIN_INTERCEPTOR) {
+            observeJob?.cancel()
+            observeJob = coroutineScope.launch {
+                val muteJob = launch {
+                    call.state.participants
+                        .flatMapLatest { participants ->
+                            participants
+                                .filter { !it.isLocal }
+                                .asFlow()
+                                .flatMapMerge { participant ->
+                                    participant.audioTrack.filterNotNull()
+                                }
+                        }
+                        .collect { track ->
+                            track.audio.setEnabled(false)
+                        }
+                }
+                // Stop muting once the call reaches a terminal state, even if callDidJoin
+                // never runs (e.g. the interceptor aborts the join or it's left externally).
+                call.state.connection.first {
+                    it is RealtimeConnection.Disconnected ||
+                        it is RealtimeConnection.Failed ||
+                        it is RealtimeConnection.ReconnectingFailed
+                }
+                muteJob.cancel()
             }
-            // Stop muting once the call reaches a terminal state, even if callDidJoin
-            // never runs (e.g. the interceptor aborts the join or it's left externally).
-            call.state.connection.first {
-                it is RealtimeConnection.Disconnected ||
-                    it is RealtimeConnection.Failed ||
-                    it is RealtimeConnection.ReconnectingFailed
-            }
-            muteJob.cancel()
         }
     }
 
@@ -120,12 +122,14 @@ class DemoCallJoinInterceptor(
     }
 
     override suspend fun callDidJoin(call: Call) {
-        observeJob?.cancel()
-        observeJob = null
-        call.state.participants.value.filter { !it.isLocal }
-            .forEach {
-                val audioTrack = it.audioTrack.value
-                audioTrack?.audio?.setEnabled(true)
-            }
+        if (USE_CALL_JOIN_INTERCEPTOR) {
+            observeJob?.cancel()
+            observeJob = null
+            call.state.participants.value.filter { !it.isLocal }
+                .forEach {
+                    val audioTrack = it.audioTrack.value
+                    audioTrack?.audio?.setEnabled(true)
+                }
+        }
     }
 }
