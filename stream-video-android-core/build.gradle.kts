@@ -90,7 +90,12 @@ android {
                 // Forked test-executor JVMs do not inherit org.gradle.jvmargs and default to
                 // 512m, which the suite (MockK inline instrumentation + Robolectric + mock
                 // web servers) now exceeds on CI runners.
-                test.maxHeapSize = "3g"
+                test.maxHeapSize = "2g"
+                // The single reused executor accumulates Robolectric sandboxes and MockK
+                // recordings across the whole suite and exhausts any fixed heap on CI, where
+                // parallel module test tasks compete for runner memory. Recycle the JVM
+                // periodically to bound the accumulation instead of growing the heap.
+                test.setForkEvery(200)
             }
         }
 
