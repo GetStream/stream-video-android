@@ -13,6 +13,7 @@ concurrency:
 
 env:
   PLAY_PUBLISH_TRACK: ${{ github.ref_name == 'main' && 'alpha' || 'internal' }}
+
 jobs:
   distribute_stream_video_calls_to_google_play:
     permissions:
