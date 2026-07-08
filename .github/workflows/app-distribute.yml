@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   build_dogfooding_sample_app:
     name: Build and Distribute Dogfooding Android
