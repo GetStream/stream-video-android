@@ -13,9 +13,6 @@ jobs:
       issues: write
       pull-requests: read
     runs-on: ubuntu-22.04
-      contents: read
-      issues: write
-      pull-requests: read
     steps:
       - uses: lee-dohm/no-response@v0.5.0
         with:
