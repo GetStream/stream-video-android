@@ -7,9 +7,11 @@ on:
   workflow_dispatch:
 jobs:
   build_dogfooding_sample_app:
+    permissions:
+      actions: write
+      contents: read
     name: Build and Distribute Dogfooding Android
     runs-on: ubuntu-24.04
-    permissions:
       actions: write
       contents: read
     steps:
