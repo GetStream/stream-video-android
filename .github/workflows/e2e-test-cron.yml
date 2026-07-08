@@ -45,20 +45,20 @@ jobs:
     env:
       ANDROID_API_LEVEL: ${{ matrix.android_api_level }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
       - uses: actions/download-artifact@v8.0.1
         continue-on-error: true
         with:
           name: apks
       - uses: GetStream/android-ci-actions/actions/setup-java@cb46e4f44d105a68738bfd2a1cfd156bb768665b
-      - uses: GetStream/android-ci-actions/actions/enable-kvm@main
-      - uses: GetStream/android-ci-actions/actions/setup-ruby@main
-      - uses: GetStream/android-ci-actions/actions/allure-launch@main
+      - uses: GetStream/android-ci-actions/actions/enable-kvm@cb46e4f44d105a68738bfd2a1cfd156bb768665b
+      - uses: GetStream/android-ci-actions/actions/setup-ruby@cb46e4f44d105a68738bfd2a1cfd156bb768665b
+      - uses: GetStream/android-ci-actions/actions/allure-launch@cb46e4f44d105a68738bfd2a1cfd156bb768665b
         with:
           allure-token: ${{ secrets.ALLURE_TOKEN }}
           cron: true
       - name: Run tests
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
         timeout-minutes: 120
         with:
           api-level: ${{ env.ANDROID_API_LEVEL }}
@@ -98,7 +98,7 @@ jobs:
     needs: [build-compose-apks, run-compose-tests-nightly]
     if: failure() && github.event_name == 'schedule'
     steps:
-      - uses: 8398a7/action-slack@v3
+      - uses: 8398a7/action-slack@77eaa4f1c608a7d68b38af4e3f739dcd8cba273e
         with:
           status: cancelled
           text: "You shall not pass!"
