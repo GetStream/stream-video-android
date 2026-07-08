@@ -10,7 +10,8 @@ env:
   BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
 jobs:
   build:
-    permissions:
+permissions:
+  contents: read
       actions: write
       contents: read
     name: compose apks
