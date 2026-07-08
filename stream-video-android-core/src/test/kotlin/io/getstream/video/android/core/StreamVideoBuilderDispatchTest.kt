@@ -26,6 +26,8 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.unmockkAll
+import org.junit.After
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -38,6 +40,16 @@ import kotlin.test.assertTrue
  * the tests never call core's Android-service-dependent initialisation path (RESEARCH Pitfall 2).
  */
 internal class StreamVideoBuilderDispatchTest {
+
+    @After
+    fun tearDown() {
+        // Every successful build() ends in StreamVideo.install(client); without removal the
+        // singleton retains the client (live scopes, OkHttp pools, notification manager) for
+        // the executor's lifetime and the suite exhausts the CI heap. removeClient() also
+        // cleans up the retained client.
+        StreamVideo.removeClient()
+        unmockkAll()
+    }
 
     @Test
     fun `Anonymous path selects AnonymousStreamTokenProvider and does not throw`() {
