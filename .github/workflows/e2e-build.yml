@@ -9,6 +9,10 @@ env:
   BUILD_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.BUILD_CACHE_AWS_ACCESS_KEY_ID }}
   BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   build:
     name: compose apks
