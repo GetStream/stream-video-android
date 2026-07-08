@@ -780,7 +780,31 @@ public class Call(
             is SfuConnectionResult.Success -> Unit
             is SfuConnectionResult.Failure -> {
                 if (sfuConnectionResult.recoverable) {
-                    logger.w { "[_join] Recoverable SFU connection failure — awaiting reconnect outcome" }
+                    // When the failure came from a socket state stateJob reacts to, a
+                    // Call.reconnect is already being launched, so we just await its outcome.
+                    // Otherwise (e.g. the connect safety-timeout, which left the socket in a
+                    // state stateJob ignores) nothing would start recovery and
+                    // didReconnectSucceed() would block forever — so trigger a REJOIN ourselves.
+                    if (!sfuConnectionResult.reconnectTriggered) {
+                        // REJOIN (not FAST) on purpose: reaching here means the initial join
+                        // never completed (the connect safety-timeout is the only source of
+                        // recoverable + !reconnectTriggered). There is no established SFU
+                        // session or negotiated media path to resume, so a FAST resume would
+                        // likely hit PARTICIPANT_NOT_FOUND and burn attempts before the loop
+                        // escalates. A full REJOIN re-fetches credentials and starts a clean
+                        // join, which is the only thing that can actually succeed here.
+                        logger.w {
+                            "[_join] Recoverable SFU connection failure with no recovery started — triggering REJOIN"
+                        }
+                        scope.launch {
+                            reconnect(
+                                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                                "join-recoverable-connect-failure",
+                            )
+                        }
+                    } else {
+                        logger.w { "[_join] Recoverable SFU connection failure — awaiting recovery outcome" }
+                    }
                     if (!didReconnectSucceed()) {
                         logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
                         sendJoinErrorAnalytics(sfuConnectionResult)

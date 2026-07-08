@@ -223,12 +223,16 @@ internal sealed class SfuConnectionResult {
     /**
      * The connection attempt failed.
      *
-     * @param recoverable `true` when the terminal socket state is one that
-     * RtcSession's `stateJob` reacts to by triggering `Call.reconnect` (e.g.
-     * a connection timeout or a temporary socket disconnect). In that case the
-     * initial-join flow can defer to that recovery loop and await its outcome
-     * instead of treating the failure as permanent. `false` for terminal
-     * failures with no recovery (auth errors, permanent disconnects, etc.).
+     * @param recoverable `true` when the failure can be recovered from, so the
+     * initial-join flow can await a recovery loop instead of treating it as
+     * permanent. `false` for terminal failures with no recovery (auth errors,
+     * permanent disconnects, etc.).
+     * @param reconnectTriggered `true` when the terminal socket state is one that
+     * RtcSession's `stateJob` reacts to by launching `Call.reconnect`, so a recovery
+     * loop is already being started and the caller must not start its own. `false`
+     * when nothing will drive recovery on its own (e.g. the connect safety-timeout,
+     * which disconnects the socket into a state `stateJob` ignores) — in that case
+     * the initial-join flow must trigger `Call.reconnect` itself.
      * @param abortReason the analytics abort reason derived from the disconnect
      * state's error code, or `null` when the terminal state carried no error.
      * The caller (the join flow) decides whether/when to report it, so that
@@ -237,6 +241,7 @@ internal sealed class SfuConnectionResult {
     data class Failure(
         val error: Exception,
         val recoverable: Boolean = false,
+        val reconnectTriggered: Boolean = false,
         val abortReason: AnalyticsCallAbortReason? = null,
     ) : SfuConnectionResult()
 }
@@ -949,14 +954,28 @@ public class RtcSession internal constructor(
             }
         }
         if (sfuSocketState == null) {
+            // Safety net: the socket never reached a terminal state (Connected or
+            // Disconnected) within the timeout. This happens when the socket layer's own
+            // timers fail to fire and it gets stuck in a non-terminal state — e.g. the
+            // HTTP→WS upgrade stalls (proxy/captive portal drops packets silently, half-open
+            // TCP after a network handoff) so OkHttp never opens or errors the socket, or the
+            // WS opens but the SFU never sends the JoinResponse and the join-response wait
+            // never completes. Without this branch, `.first { }` would suspend forever.
             val msg =
                 "SFU connection timed out waiting for socket state (${connectTimeoutMs}ms)"
             logger.w { "[connectInternal] $msg" }
             sfuTracer.trace("connect-failed", msg)
+            // The socket never reached a terminal state, so the connect attempt is still
+            // in flight. Tear it down before returning so a late Connected/JoinResponse
+            // can't resurface through stateJob and resurrect this abandoned session.
+            sfuConnectionModule.socketConnection.disconnect()
             sendCallStats()
             return SfuConnectionResult.Failure(
                 error = Exception(msg),
                 recoverable = true,
+                // We disconnected the socket into a state stateJob ignores, so no
+                // recovery loop will start on its own — the caller must trigger it.
+                reconnectTriggered = false,
                 abortReason = AnalyticsCallAbortReason.REQUEST_TIMEOUT,
             )
         }
@@ -974,9 +993,14 @@ public class RtcSession internal constructor(
             logger.w { "[connectInternal] $msg" }
             sfuTracer.trace("connect-failed", msg)
             sendCallStats()
+            // These are the exact states stateJob reacts to, so if this is recoverable
+            // a Call.reconnect is already being launched — the caller must not start another.
+            val triggersReconnect =
+                (sfuSocketState as? SfuSocketState.Disconnected)?.triggersStateJobReconnect() ?: false
             SfuConnectionResult.Failure(
                 error = Exception(msg),
-                recoverable = (sfuSocketState as? SfuSocketState.Disconnected)?.canTriggersReconnect() ?: false,
+                recoverable = triggersReconnect,
+                reconnectTriggered = triggersReconnect,
                 abortReason = networkError?.toAbortReason(),
             )
         }
@@ -991,7 +1015,7 @@ public class RtcSession internal constructor(
      * `when` (no `else`) makes a new [SfuSocketState.Disconnected] subtype a compile
      * error here, forcing both sites to stay in sync.
      */
-    private fun SfuSocketState.Disconnected.canTriggersReconnect(): Boolean = when (this) {
+    private fun SfuSocketState.Disconnected.triggersStateJobReconnect(): Boolean = when (this) {
         is SfuSocketState.Disconnected.DisconnectedTemporarily,
         is SfuSocketState.Disconnected.WebSocketEventLost,
         -> true

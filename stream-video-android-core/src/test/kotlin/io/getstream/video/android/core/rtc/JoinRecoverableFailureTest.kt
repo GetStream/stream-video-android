@@ -34,6 +34,7 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.model.User
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
@@ -49,15 +50,20 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
  * Tests the initial-join handling of a recoverable SFU connection failure
  * (e.g. a connection timeout) in [Call._join].
  *
- * On a recoverable failure the RtcSession's stateJob has already triggered
- * [Call.reconnect], so `_join` must defer to that single recovery loop and await
- * its terminal outcome instead of declaring a permanent failure. A non-recoverable
- * failure must fail immediately.
+ * A recoverable failure carries [SfuConnectionResult.Failure.reconnectTriggered]:
+ * - `true` — the RtcSession's stateJob is already launching [Call.reconnect], so
+ *   `_join` defers to that single recovery loop and awaits its terminal outcome.
+ * - `false` — nothing will start recovery on its own (e.g. the connect safety-timeout
+ *   disconnected the socket into a state stateJob ignores), so `_join` must trigger
+ *   the reconnect itself before awaiting.
+ *
+ * A non-recoverable failure must fail immediately.
  */
 class JoinRecoverableFailureTest {
 
@@ -123,11 +129,15 @@ class JoinRecoverableFailureTest {
     }
 
     @Test
-    fun `recoverable failure returns failure when reconnect is exhausted`() = runTest(
+    fun `recoverable failure with reconnect already triggered awaits the existing loop`() = runTest(
         testDispatcher,
     ) {
         coEvery { mockSession.connectInternal(any(), any()) } returns
-            SfuConnectionResult.Failure(Exception("SFU connection timed out"), recoverable = true)
+            SfuConnectionResult.Failure(
+                Exception("SFU connection timed out"),
+                recoverable = true,
+                reconnectTriggered = true,
+            )
 
         val deferred = async {
             call._join(joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt))
@@ -135,7 +145,43 @@ class JoinRecoverableFailureTest {
         advanceUntilIdle()
         assertThat(deferred.isCompleted).isFalse()
 
+        // stateJob owns the loop here; _join must not start its own.
+        coVerify(exactly = 0) { call.reconnect(any(), any()) }
+
         // The reconnect loop gives up.
+        call.state._connection.value = RealtimeConnection.ReconnectingFailed
+        advanceUntilIdle()
+
+        assertThat(deferred.await()).isInstanceOf(Failure::class.java)
+    }
+
+    @Test
+    fun `recoverable failure with no reconnect triggered starts a REJOIN itself`() = runTest(
+        testDispatcher,
+    ) {
+        coEvery { mockSession.connectInternal(any(), any()) } returns
+            SfuConnectionResult.Failure(
+                Exception("SFU connection timed out"),
+                recoverable = true,
+                reconnectTriggered = false,
+            )
+        // Stub the loop so we only assert it is invoked, not run it for real.
+        coEvery { call.reconnect(any(), any()) } returns Unit
+
+        val deferred = async {
+            call._join(joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt))
+        }
+        advanceUntilIdle()
+
+        // Nothing else would drive recovery, so _join must trigger a REJOIN.
+        coVerify {
+            call.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                any(),
+            )
+        }
+        assertThat(deferred.isCompleted).isFalse()
+
         call.state._connection.value = RealtimeConnection.ReconnectingFailed
         advanceUntilIdle()
 

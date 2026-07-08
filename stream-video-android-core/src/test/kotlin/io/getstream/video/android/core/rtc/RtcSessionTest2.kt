@@ -363,6 +363,9 @@ class RtcSessionTest2 {
                 AnalyticsCallAbortReason.REQUEST_TIMEOUT,
                 result.abortReason,
             )
+            // The abandoned, still-in-flight socket must be torn down so a late
+            // Connected can't resurface through stateJob and resurrect the session.
+            coVerify { mockSocketConnection.disconnect() }
         }
 
     @Suppress("DEPRECATION")
