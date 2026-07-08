@@ -23,7 +23,6 @@ jobs:
     name: Pre release check
     runs-on: ubuntu-24.04
     environment: 'publish'
-      contents: read
     steps:
       - name: Check
         id: pre_release_check_step
