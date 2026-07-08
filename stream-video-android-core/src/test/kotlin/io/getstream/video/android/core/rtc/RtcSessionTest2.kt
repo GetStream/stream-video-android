@@ -20,7 +20,6 @@ import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.result.Error
-import io.getstream.result.Result
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.MediaManagerImpl
@@ -30,6 +29,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectException
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.errors.VideoErrorCode
@@ -359,6 +359,12 @@ class RtcSessionTest2 {
                 (result as SfuConnectionResult.Failure).error.message!!.contains("timed out"),
             )
             assertTrue("Expected recoverable=true for a safety timeout", result.recoverable)
+            // A Timeout-typed error is what makes _join self-trigger a REJOIN for this path,
+            // since stateJob ignores the state the stuck socket was torn down into.
+            assertTrue(
+                "Expected a SfuConnectException.Timeout error for a safety timeout",
+                result.error is SfuConnectException.Timeout,
+            )
             assertEquals(
                 AnalyticsCallAbortReason.REQUEST_TIMEOUT,
                 result.abortReason,

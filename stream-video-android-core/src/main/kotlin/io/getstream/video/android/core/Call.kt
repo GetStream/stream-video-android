@@ -67,6 +67,7 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectException
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -780,21 +781,20 @@ public class Call(
             is SfuConnectionResult.Success -> Unit
             is SfuConnectionResult.Failure -> {
                 if (sfuConnectionResult.recoverable) {
-                    // When the failure came from a socket state stateJob reacts to, a
-                    // Call.reconnect is already being launched, so we just await its outcome.
-                    // Otherwise (e.g. the connect safety-timeout, which left the socket in a
-                    // state stateJob ignores) nothing would start recovery and
-                    // didReconnectSucceed() would block forever — so trigger a REJOIN ourselves.
-                    if (!sfuConnectionResult.reconnectTriggered) {
-                        // REJOIN (not FAST) on purpose: reaching here means the initial join
-                        // never completed (the connect safety-timeout is the only source of
-                        // recoverable + !reconnectTriggered). There is no established SFU
-                        // session or negotiated media path to resume, so a FAST resume would
-                        // likely hit PARTICIPANT_NOT_FOUND and burn attempts before the loop
-                        // escalates. A full REJOIN re-fetches credentials and starts a clean
-                        // join, which is the only thing that can actually succeed here.
+                    // A recoverable socket disconnect means stateJob is already launching
+                    // Call.reconnect, so we just await its outcome. A connect safety-timeout
+                    // instead tore down a stuck socket into a state stateJob ignores, so
+                    // nothing would start recovery and didReconnectSucceed() would block
+                    // forever — trigger a REJOIN ourselves for that case.
+                    if (sfuConnectionResult.error is SfuConnectException.Timeout) {
+                        // REJOIN (not FAST) on purpose: a connect timeout means the initial
+                        // join never completed. There is no established SFU session or
+                        // negotiated media path to resume, so a FAST resume would likely hit
+                        // PARTICIPANT_NOT_FOUND and burn attempts before the loop escalates.
+                        // A full REJOIN re-fetches credentials and starts a clean join, which
+                        // is the only thing that can actually succeed here.
                         logger.w {
-                            "[_join] Recoverable SFU connection failure with no recovery started — triggering REJOIN"
+                            "[_join] Recoverable SFU connect timeout with no recovery started — triggering REJOIN"
                         }
                         scope.launch {
                             reconnect(
