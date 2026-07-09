@@ -89,21 +89,8 @@ android {
             all { test ->
                 // Forked test-executor JVMs do not inherit org.gradle.jvmargs and default to
                 // 512m, which the suite (MockK inline instrumentation + Robolectric + mock
-                // web servers) now exceeds on CI runners.
+                // web servers) exceeds.
                 test.maxHeapSize = "2g"
-                // The single reused executor accumulates Robolectric sandboxes and MockK
-                // recordings across the whole suite and exhausts any fixed heap on CI, where
-                // parallel module test tasks compete for runner memory. Recycle the JVM
-                // periodically to bound the accumulation instead of growing the heap.
-                test.setForkEvery(200)
-                // Diagnostics for the CI-only executor OOM: dump the heap into the reports
-                // directory (uploaded as the unit-tests-results artifact on failure) and log
-                // the OOM reason. TODO: remove once the CI OOM is resolved.
-                test.jvmArgs(
-                    "-XX:+HeapDumpOnOutOfMemoryError",
-                    "-XX:HeapDumpPath=${project.layout.buildDirectory.get().asFile}/reports/tests/",
-                    "-Xlog:gc:${project.layout.buildDirectory.get().asFile}/reports/tests/gc-executor-%p.log",
-                )
             }
         }
 
