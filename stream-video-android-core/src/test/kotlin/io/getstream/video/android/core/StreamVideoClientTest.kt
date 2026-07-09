@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.core.api.StreamClient
 import io.getstream.android.core.api.model.connection.StreamConnectionState
+import io.getstream.android.core.api.socket.listeners.StreamClientListener
 import io.getstream.android.core.api.subscribe.StreamSubscription
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallRingEvent
@@ -41,6 +42,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -346,5 +348,56 @@ class StreamVideoClientTest {
         harness.client.connectIfNotAlreadyConnected()
 
         coVerify(exactly = 0) { harness.streamClient.connect() }
+    }
+
+    @Test
+    fun `connectIfNotAlreadyConnected connects when the socket is not connected`() = runTest {
+        val harness = prepareClient(
+            user = User(id = "auth-1", type = UserType.Authenticated),
+        )
+
+        harness.client.connectIfNotAlreadyConnected()
+
+        coVerify(exactly = 1) { harness.streamClient.connect() }
+    }
+
+    @Test
+    fun `streamClientListener forwards VideoEvents into the event pipeline`() {
+        // The listener belongs to the underlying instance, not the spyk copy, so verify
+        // through the shared subscriptions set instead of spy recording.
+        val harness = prepareClient()
+        val listener = slot<StreamClientListener>()
+        verify { harness.streamClient.subscribe(capture(listener)) }
+        val received = mutableListOf<VideoEvent>()
+        harness.client.subscribe { received.add(it) }
+        // CallSessionStartedEvent has no ClientState.handleEvent branch, so the dispatch
+        // reaches client subscriptions without side effects.
+        val event = mockk<CallSessionStartedEvent>(relaxed = true)
+
+        listener.captured.onEvent(event)
+
+        assertEquals(listOf<VideoEvent>(event), received)
+    }
+
+    @Test
+    fun `streamClientListener ignores non-VideoEvent payloads`() {
+        val harness = prepareClient()
+        val listener = slot<StreamClientListener>()
+        verify { harness.streamClient.subscribe(capture(listener)) }
+        val received = mutableListOf<VideoEvent>()
+        harness.client.subscribe { received.add(it) }
+
+        listener.captured.onEvent("not-a-video-event")
+
+        assertTrue(received.isEmpty())
+    }
+
+    @Test
+    fun `streamClientListener onError does not throw`() {
+        val harness = prepareClient()
+        val listener = slot<StreamClientListener>()
+        verify { harness.streamClient.subscribe(capture(listener)) }
+
+        listener.captured.onError(RuntimeException("socket error"))
     }
 }
