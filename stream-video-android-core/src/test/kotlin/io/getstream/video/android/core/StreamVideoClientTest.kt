@@ -393,6 +393,18 @@ class StreamVideoClientTest {
     }
 
     @Test
+    fun `streamClientListener routes connection state into ClientState`() {
+        val harness = prepareClient()
+        val listener = slot<StreamClientListener>()
+        verify { harness.streamClient.subscribe(capture(listener)) }
+        val reported = StreamConnectionState.Connecting.Opening("user-1")
+
+        listener.captured.onState(reported)
+
+        assertEquals(reported, harness.client.state.connection.value)
+    }
+
+    @Test
     fun `streamClientListener onError does not throw`() {
         val harness = prepareClient()
         val listener = slot<StreamClientListener>()
