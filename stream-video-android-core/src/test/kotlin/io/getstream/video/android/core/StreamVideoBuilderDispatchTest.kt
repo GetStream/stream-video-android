@@ -33,11 +33,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Dispatch-level tests for [StreamVideoBuilder] focused on the token-provider selection wired in
- * Plan 02-02 (D-05, D-06, D-07) and the `localCoordinatorAddress` -> `ws://` plumbing (COORD-08).
+ * Dispatch-level tests for [StreamVideoBuilder] focused on the per-user-type token-provider
+ * selection and the `localCoordinatorAddress` -> `ws://` plumbing.
  *
  * Uses the [StreamVideoBuilder.streamClientFactory] seam to stub the [StreamClient] factory so
- * the tests never call core's Android-service-dependent initialisation path (RESEARCH Pitfall 2).
+ * the tests never call core's Android-service-dependent initialisation path.
  */
 internal class StreamVideoBuilderDispatchTest {
 
@@ -53,7 +53,7 @@ internal class StreamVideoBuilderDispatchTest {
 
     @Test
     fun `Anonymous path selects AnonymousStreamTokenProvider and does not throw`() {
-        // iOS parity: anonymous users construct normally (REST-only, D-07); only explicit
+        // iOS parity: anonymous users construct normally (REST-only); only explicit
         // connect attempts fail.
         val capturedProvider = captureFactoryArgsFor(
             user = User(id = "anon-1", type = UserType.Anonymous),

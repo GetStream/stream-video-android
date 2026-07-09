@@ -317,7 +317,7 @@ class StreamVideoClientTest {
         harness.client.cleanup()
 
         coVerify(exactly = 1) { harness.streamClient.disconnect() }
-        // COORD-03 invariant: the 401 path no longer routes through tokenRepository.updateToken
+        // Invariant: the 401 path no longer routes through tokenRepository.updateToken
         // from inside cleanup(). (Cleanup itself never touched tokenRepository, but this
         // assertion guards against a future regression that reintroduces the coupling.)
         verify(exactly = 0) { harness.tokenRepository.updateToken(any()) }
@@ -325,7 +325,7 @@ class StreamVideoClientTest {
 
     @Test
     fun `connectAsync fails fast for anonymous users without touching streamClient`() = runTest {
-        // D-07 / iOS parity: anonymous users are REST-only; connect attempts fail before
+        // iOS parity: anonymous users are REST-only; connect attempts fail before
         // reaching the network.
         val harness = prepareClient(
             user = User(id = "anon-1", type = UserType.Anonymous),

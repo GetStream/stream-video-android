@@ -111,8 +111,8 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             client = builder.build()
             clientImpl = client as StreamVideoClient
             clientImpl.testSessionId = runBlocking {
-                // Derive the WS connectionId from core's StreamClient state (D-11 replaced the
-                // coordinator-socket connectionId() flow). Falls back to null before Connected.
+                // Derive the WS connectionId from core's StreamClient state (StreamClient
+                // replaced the coordinator-socket connectionId() flow). Null before Connected.
                 (
                     clientImpl.streamClient.connectionState.value
                         as? io.getstream.android.core.api.model.connection.StreamConnectionState.Connected

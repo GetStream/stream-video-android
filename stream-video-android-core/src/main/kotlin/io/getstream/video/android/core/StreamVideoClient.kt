@@ -230,9 +230,9 @@ internal class StreamVideoClient internal constructor(
         }
 
         override fun onState(state: StreamConnectionState) {
-            // TODO(02-03): replace with this@StreamVideoClient.state.handleStreamState(state)
-            // once ClientState.handleStreamState lands in Plan 02-03. Held to validate the
-            // listener wiring at SDK init; connection-state routing is deferred to the next plan.
+            // TODO: replace with this@StreamVideoClient.state.handleStreamState(state) once
+            // ClientState.handleStreamState lands in the follow-up ConnectionState PR. Held to
+            // validate the listener wiring at SDK init; connection-state routing comes with it.
         }
 
         override fun onError(err: Throwable) {
@@ -316,8 +316,8 @@ internal class StreamVideoClient internal constructor(
             apiCall()
         } catch (e: HttpException) {
             // Retry once with a new token if the token is expired.
-            // REST-side: tokenRepository update stays for CoordinatorAuthInterceptor
-            // (Phase 4+ unification). WS-side: handled by core's StreamTokenManager
+            // REST-side: tokenRepository update stays for CoordinatorAuthInterceptor until
+            // HTTP is unified through core. WS-side: handled by core's StreamTokenManager
             // via the StreamTokenProvider wired at builder time.
             if (e.isAuthError()) {
                 val newToken = tokenProvider.loadToken()
@@ -415,7 +415,7 @@ internal class StreamVideoClient internal constructor(
     }
 
     override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
-        // Anonymous users never open a coordinator socket (D-07; iOS parity).
+        // Anonymous users never open a coordinator socket (iOS parity).
         if (user.type == UserType.Anonymous) return@safeSuspendingCall
         if (streamClient.connectionState.value !is StreamConnectionState.Connected) {
             streamClient.connect()
@@ -425,7 +425,7 @@ internal class StreamVideoClient internal constructor(
     init {
         // Subscribe once to the StreamClient's listener stream. Events cast to VideoEvent
         // are forwarded to the existing fireEvent(...) dispatch pipeline; connection state
-        // routing is deferred to Plan 02-03 (see streamClientListener.onState).
+        // routing arrives with the ConnectionState rewrite (see streamClientListener.onState).
         streamClientSubscription = streamClient.subscribe(streamClientListener).getOrThrow()
 
         // Re-watch active calls whenever the coordinator socket (re)connects.
@@ -496,7 +496,7 @@ internal class StreamVideoClient internal constructor(
 
     override suspend fun connectAsync(): Deferred<Result<Long>> {
         return scope.async {
-            // Anonymous users never open a coordinator socket (D-07). Fail fast without
+            // Anonymous users never open a coordinator socket. Fail fast without
             // touching the network — iOS parity with `connectUser` throwing MissingPermissions.
             if (user.type == UserType.Anonymous) {
                 return@async Failure(

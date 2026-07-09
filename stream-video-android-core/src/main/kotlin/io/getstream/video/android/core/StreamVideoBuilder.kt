@@ -192,7 +192,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     /**
      * Seam that constructs the core [StreamClient] instance. Tests substitute this lambda so they
      * can assert factory arguments without invoking core's Android-service-dependent
-     * initialisation (RESEARCH Pitfall 2).
+     * initialisation.
      */
     @InternalStreamVideoApi
     internal var streamClientFactory: (StreamClientFactoryArgs) -> StreamClient =
@@ -302,11 +302,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         // Select the core token provider based on user type — mirrors iOS's
         // `initialConnectIfRequired` dispatch.
         //  - Authenticated: adapt the integration-supplied TokenProvider.
-        //  - Guest: SDK obtains the JWT via createGuest REST call (D-06). Until the token
+        //  - Guest: SDK obtains the JWT via createGuest REST call. Until the token
         //    arrives, REST auth runs as "anonymous" (same as iOS's AnonymousAuth transport for
         //    createGuest); GuestStreamTokenProvider flips it to "jwt" and syncs the token into
         //    the legacy Retrofit path the moment the server issues it.
-        //  - Anonymous: REST-only (D-07). Construction succeeds; connect attempts fail.
+        //  - Anonymous: REST-only. Construction succeeds; connect attempts fail.
         val streamTokenProvider: StreamTokenProvider = when (user.type) {
             UserType.Authenticated -> IntegrationStreamTokenProvider(tokenProvider)
             UserType.Guest -> {
@@ -327,7 +327,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             }
         }
 
-        // Build the core client and eagerly inject it into StreamVideoClient (D-03).
+        // Build the core client and eagerly inject it into StreamVideoClient.
         val streamClient = streamClientFactory.invoke(
             StreamClientFactoryArgs(
                 scope = scope,
@@ -507,7 +507,7 @@ private fun defaultStreamClientFactory(args: StreamClientFactoryArgs): StreamCli
         appVersion = args.appVersion ?: "unknown",
     )
 
-    // D-06 / D-07: guest users authenticate via jwt (JWT obtained via createGuest);
+    // Guest users authenticate via jwt (JWT obtained via createGuest);
     // never use the anonymous factory for the coordinator socket.
     val socketConfig = StreamSocketConfig.jwt(
         url = StreamWsUrl.fromString(args.resolvedWssUrl),
@@ -520,7 +520,7 @@ private fun defaultStreamClientFactory(args: StreamClientFactoryArgs): StreamCli
     )
 
     // Route the integration-supplied Lifecycle through core's LifecycleMonitor so that the
-    // legacy StreamLifecycleObserver is no longer needed on the coordinator path (D-10).
+    // legacy StreamLifecycleObserver is no longer needed on the coordinator path.
     val streamLifecycleMonitor = StreamLifecycleMonitor(
         logger = logProvider.taggedLogger("SVLifecycleMonitor"),
         lifecycle = args.lifecycle,
@@ -542,7 +542,7 @@ private fun defaultStreamClientFactory(args: StreamClientFactoryArgs): StreamCli
         products = listOf("video"),
         socketConfig = socketConfig,
         serializationConfig = serializationConfig,
-        // Phase 2: keep video's separate Retrofit OkHttpClient; HTTP unification is Phase 4+.
+        // Keep video's separate Retrofit OkHttpClient; HTTP unification through core comes later.
         httpConfig = null,
         components = StreamComponentProvider(
             logProvider = logProvider,

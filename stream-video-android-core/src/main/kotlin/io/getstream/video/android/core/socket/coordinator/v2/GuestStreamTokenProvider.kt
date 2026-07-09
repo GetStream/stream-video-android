@@ -44,7 +44,7 @@ internal interface WritableUserRepository {
  * user identity through [userRepository], publishes the JWT to the SDK's REST auth path via
  * [onTokenIssued], and returns the token wrapped in a [StreamToken] for core's WS auth path.
  *
- * The video SDK keeps two auth surfaces until Phase 4 unifies HTTP through core: the coordinator
+ * The video SDK keeps two auth surfaces until HTTP is unified through core: the coordinator
  * WS (core's `StreamTokenManager`, fed by this provider's return value) and the legacy Retrofit
  * `CoordinatorAuthInterceptor` (fed by [onTokenIssued]). Both must observe the guest JWT —
  * iOS expresses the same invariant through its single `tokenSubject`.

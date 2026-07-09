@@ -85,7 +85,7 @@ internal class GuestStreamTokenProviderTest {
 
         val token = subject.loadToken(StreamUserId.fromString("guest-1"))
 
-        // COORD-03 split-brain invariant: the REST auth path (legacy CoordinatorAuthInterceptor)
+        // Split-brain invariant: the REST auth path (legacy CoordinatorAuthInterceptor)
         // must observe the same JWT that core's StreamTokenManager receives.
         assertEquals(listOf("fake-jwt"), issuedTokens)
         assertEquals("fake-jwt", token.rawValue)

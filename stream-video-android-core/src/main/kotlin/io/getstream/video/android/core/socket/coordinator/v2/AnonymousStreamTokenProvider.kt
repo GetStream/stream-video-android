@@ -21,7 +21,7 @@ import io.getstream.android.core.api.model.value.StreamToken
 import io.getstream.android.core.api.model.value.StreamUserId
 
 /**
- * [StreamTokenProvider] for anonymous users, who never open a coordinator socket (D-07).
+ * [StreamTokenProvider] for anonymous users, who never open a coordinator socket.
  *
  * Anonymous users are REST-only: the video client constructs normally, but any explicit
  * connect attempt fails before touching the network. Mirrors the iOS SDK's behavior where
@@ -32,7 +32,7 @@ internal class AnonymousStreamTokenProvider : StreamTokenProvider {
 
     override suspend fun loadToken(userId: StreamUserId): StreamToken =
         throw IllegalStateException(
-            "Anonymous users do not open a coordinator socket (D-07). " +
+            "Anonymous users do not open a coordinator socket. " +
                 "REST-only operations remain available on the client.",
         )
 }

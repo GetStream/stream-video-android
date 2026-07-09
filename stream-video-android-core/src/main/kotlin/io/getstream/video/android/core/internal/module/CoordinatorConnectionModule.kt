@@ -93,9 +93,9 @@ internal class CoordinatorConnectionModule(
     }
     override val api: ProductvideoApi by lazy { retrofit.create(ProductvideoApi::class.java) }
 
-    // Phase 2 D-11: coordinator socket is owned by StreamClient (constructed in
+    // The coordinator socket is owned by StreamClient (constructed in
     // StreamVideoBuilder.build()); this field is a vestigial slot to satisfy the legacy
-    // ConnectionModuleDeclaration generic and is deleted in Phase 8 alongside the interface.
+    // ConnectionModuleDeclaration generic and goes away with the interface later in v2.
     override val socketConnection: Unit = Unit
 
     override fun updateToken(token: UserToken) {
