@@ -8886,56 +8886,12 @@ public final class io/getstream/video/android/core/ClientState {
 	public final fun getRingingCall ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getTelecomIntegrationType ()Lio/getstream/video/android/core/notifications/internal/telecom/TelecomIntegrationType;
 	public final fun getUser ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun handleError (Lio/getstream/result/Error;)V
 	public final fun handleEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
 	public final fun hasActiveOrRingingCall ()Z
 	public final fun removeActiveCall ()V
 	public final fun removeRingingCall ()V
 	public final fun removeRingingCall (Lio/getstream/video/android/core/Call;)V
 	public final fun setActiveCall (Lio/getstream/video/android/core/Call;)V
-}
-
-public abstract interface class io/getstream/video/android/core/ConnectionState {
-}
-
-public final class io/getstream/video/android/core/ConnectionState$Connected : io/getstream/video/android/core/ConnectionState {
-	public static final field INSTANCE Lio/getstream/video/android/core/ConnectionState$Connected;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/ConnectionState$Disconnected : io/getstream/video/android/core/ConnectionState {
-	public static final field INSTANCE Lio/getstream/video/android/core/ConnectionState$Disconnected;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/ConnectionState$Failed : io/getstream/video/android/core/ConnectionState {
-	public fun <init> (Lio/getstream/result/Error;)V
-	public final fun getError ()Lio/getstream/result/Error;
-}
-
-public final class io/getstream/video/android/core/ConnectionState$Loading : io/getstream/video/android/core/ConnectionState {
-	public static final field INSTANCE Lio/getstream/video/android/core/ConnectionState$Loading;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/ConnectionState$PreConnect : io/getstream/video/android/core/ConnectionState {
-	public static final field INSTANCE Lio/getstream/video/android/core/ConnectionState$PreConnect;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/ConnectionState$Reconnecting : io/getstream/video/android/core/ConnectionState {
-	public static final field INSTANCE Lio/getstream/video/android/core/ConnectionState$Reconnecting;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/getstream/video/android/core/CreateCallOptions {
