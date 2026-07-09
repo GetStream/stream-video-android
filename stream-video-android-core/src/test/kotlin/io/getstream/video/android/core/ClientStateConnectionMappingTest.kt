@@ -27,9 +27,9 @@ import kotlin.test.assertTrue
 /**
  * Table-driven mapping test for [StreamConnectionState] -> [ConnectionState] extension.
  *
- * Asserts the temporary placeholder mapping shipped by Plan 02-01. A subsequent plan reshapes
- * the video [ConnectionState] sealed interface to mirror core 1:1; both this test and the
- * mapper body flip together in that plan.
+ * Asserts the temporary placeholder mapping. A follow-up PR reshapes the video
+ * [ConnectionState] sealed interface to mirror core 1:1; both this test and the mapper body
+ * flip together in that PR.
  */
 internal class ClientStateConnectionMappingTest {
 
@@ -37,7 +37,7 @@ internal class ClientStateConnectionMappingTest {
     fun `Idle maps to PreConnect`() {
         val result = (StreamConnectionState.Idle as StreamConnectionState).toVideoConnectionState()
         assertEquals(ConnectionState.PreConnect, result)
-        // TODO(02-03): update expected value when ConnectionState sealed interface is rewritten
+        // TODO: update expected value when the ConnectionState sealed interface is rewritten
     }
 
     @Test
@@ -45,7 +45,7 @@ internal class ClientStateConnectionMappingTest {
         val result: ConnectionState =
             StreamConnectionState.Connecting.Opening("user-1").toVideoConnectionState()
         assertEquals(ConnectionState.Loading, result)
-        // TODO(02-03): update expected value when ConnectionState sealed interface is rewritten
+        // TODO: update expected value when the ConnectionState sealed interface is rewritten
     }
 
     @Test
@@ -53,7 +53,7 @@ internal class ClientStateConnectionMappingTest {
         val result: ConnectionState =
             StreamConnectionState.Connecting.Authenticating("user-1").toVideoConnectionState()
         assertEquals(ConnectionState.Loading, result)
-        // TODO(02-03): update expected value when ConnectionState sealed interface is rewritten
+        // TODO: update expected value when the ConnectionState sealed interface is rewritten
     }
 
     @Test
@@ -62,7 +62,7 @@ internal class ClientStateConnectionMappingTest {
             .Connected(connectedUserFixture(), "connection-id")
             .toVideoConnectionState()
         assertEquals(ConnectionState.Connected, result)
-        // TODO(02-03): update expected value when ConnectionState sealed interface is rewritten
+        // TODO: update expected value when the ConnectionState sealed interface is rewritten
     }
 
     @Test
@@ -70,7 +70,7 @@ internal class ClientStateConnectionMappingTest {
         val result: ConnectionState =
             StreamConnectionState.Disconnected(cause = null).toVideoConnectionState()
         assertEquals(ConnectionState.Disconnected, result)
-        // TODO(02-03): update expected value when ConnectionState sealed interface is rewritten
+        // TODO: update expected value when the ConnectionState sealed interface is rewritten
     }
 
     @Test
@@ -81,7 +81,7 @@ internal class ClientStateConnectionMappingTest {
 
         assertTrue(result is ConnectionState.Failed)
         assertEquals("boom", result.error.message)
-        // TODO(02-03): update expected value when ConnectionState sealed interface is rewritten
+        // TODO: update expected value when the ConnectionState sealed interface is rewritten
     }
 
     private fun connectedUserFixture(): StreamConnectedUser = StreamConnectedUser(

@@ -29,7 +29,7 @@ import io.getstream.video.android.model.UserType
 /**
  * Writable sink for the SDK's currently active [User]. Introduced here as a minimal seam so the
  * guest flow can adopt the server-issued identity (id, role, image, custom) returned by the
- * `createGuest` REST call. Plan 02-02 will connect this to the concrete SDK-wide user store.
+ * `createGuest` REST call. A follow-up PR connects this to the concrete SDK-wide user store.
  */
 internal interface WritableUserRepository {
     /** Persists [user] as the SDK's active user. */
@@ -37,7 +37,7 @@ internal interface WritableUserRepository {
 }
 
 /**
- * [StreamTokenProvider] implementation for guest users (COORD-09, D-06).
+ * [StreamTokenProvider] implementation for guest users.
  *
  * On invocation, calls the coordinator's `POST /video/guest` endpoint via [ProductvideoApi],
  * adopts the server-issued user identity through [userRepository], and returns the resulting

@@ -23,14 +23,13 @@ import io.getstream.video.android.core.ConnectionState
 /**
  * Maps a core [StreamConnectionState] onto the SDK's existing [ConnectionState] shape.
  *
- * The mapping produced here is a placeholder that preserves compilation until a later plan
- * reshapes the video [ConnectionState] sealed interface to mirror the richer core states 1:1
- * (D-04, D-09). Once that reshape lands, both this function body and the collaborating tests
- * flip together in a single commit.
+ * The mapping produced here is a placeholder that preserves compilation until a follow-up PR
+ * reshapes the video [ConnectionState] sealed interface to mirror the richer core states 1:1.
+ * Once that reshape lands, both this function body and the collaborating tests flip together
+ * in a single commit.
  */
 internal fun StreamConnectionState.toVideoConnectionState(): ConnectionState {
-    // TODO(02-03): replace placeholder mapping when ConnectionState sealed interface is
-    // rewritten per D-04/D-09.
+    // TODO: replace placeholder mapping when the ConnectionState sealed interface is rewritten.
     return when (this) {
         is StreamConnectionState.Idle -> ConnectionState.PreConnect
         is StreamConnectionState.Connecting.Opening -> ConnectionState.Loading

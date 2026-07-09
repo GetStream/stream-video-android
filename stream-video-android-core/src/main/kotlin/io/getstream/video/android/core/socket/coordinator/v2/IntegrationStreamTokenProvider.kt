@@ -25,7 +25,7 @@ import io.getstream.video.android.core.socket.common.token.TokenProvider
  * Adapts the integration-supplied video [TokenProvider] to core's [StreamTokenProvider].
  *
  * Selected at builder time for authenticated users; guest users are served by
- * `GuestStreamTokenProvider` instead. See D-05 in the phase context.
+ * `GuestStreamTokenProvider` instead.
  */
 internal class IntegrationStreamTokenProvider(
     private val delegate: TokenProvider,
@@ -36,7 +36,7 @@ internal class IntegrationStreamTokenProvider(
      *
      * The [userId] parameter is intentionally unused — the integration's
      * `TokenProvider.loadToken()` already binds the user identity through the SDK's builder
-     * configuration (D-05). Core passes the identifier for parity with alternate providers
+     * configuration. Core passes the identifier for parity with alternate providers
      * that mint per-user tokens.
      */
     override suspend fun loadToken(userId: StreamUserId): StreamToken =
