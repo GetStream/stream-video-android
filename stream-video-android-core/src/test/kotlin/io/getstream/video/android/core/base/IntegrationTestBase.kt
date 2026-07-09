@@ -74,6 +74,17 @@ object IntegrationTestState {
 }
 
 open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestBase() {
+
+    /**
+     * Integration tests hit the live coordinator, so IO must run on real time. Keeping IO on
+     * the shared virtual-time dispatcher lets runTest's scheduler fast-forward the
+     * StreamClient health-monitor `delay` loop millions of times while a test awaits a real
+     * network response, and every iteration logs into Robolectric's ShadowLog buffer — the
+     * source of the CI executor OOM (2 GB of ShadowLog$LogItem in the heap dump).
+     */
+    override fun createDispatcherRule(): DispatcherRule =
+        DispatcherRule(ioDispatcher = Dispatchers.IO)
+
     /** Client */
     lateinit var client: StreamVideo
 

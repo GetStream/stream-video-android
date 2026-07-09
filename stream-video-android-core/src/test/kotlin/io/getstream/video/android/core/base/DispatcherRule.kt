@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.base
 
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestDispatcher
@@ -28,11 +29,12 @@ import org.junit.runner.Description
 
 public class DispatcherRule(
     public val testDispatcher: TestDispatcher = sharedTestDispatcher,
+    private val ioDispatcher: CoroutineDispatcher = testDispatcher,
 ) : TestWatcher() {
     override fun starting(description: Description) {
-        println("setting up test dispatcher $testDispatcher")
+        println("setting up test dispatcher $testDispatcher (io: $ioDispatcher)")
         Dispatchers.setMain(testDispatcher)
-        DispatcherProvider.set(testDispatcher, testDispatcher)
+        DispatcherProvider.set(testDispatcher, ioDispatcher)
     }
 
     override fun finished(description: Description) {
