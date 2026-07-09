@@ -85,6 +85,14 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
     override fun createDispatcherRule(): DispatcherRule =
         DispatcherRule(ioDispatcher = Dispatchers.IO)
 
+    /**
+     * Awaits [block] on a real-time dispatcher with a real-time timeout. Needed for assertions
+     * on state produced by the client scope (real IO here): the runTest virtual clock can
+     * neither advance that work nor time it out.
+     */
+    suspend fun <T> awaitRealTime(timeoutMs: Long = 10_000, block: suspend () -> T): T =
+        withContext(Dispatchers.Default) { withTimeout(timeoutMs) { block() } }
+
     /** Client */
     lateinit var client: StreamVideo
 
