@@ -215,8 +215,10 @@ class CallStateTest : IntegrationTestBase() {
             },
         )
 
-        delay(1000)
-        val sorted = sortedParticipants.value.map { it.sessionId }
+        // updateParticipant propagates through the call scope (real IO in integration
+        // tests), so await the expected size in real time instead of reading instantly.
+        val sorted = awaitRealTime { sortedParticipants.first { it.size == 3 } }
+            .map { it.sessionId }
         assertThat(sorted).isEqualTo(listOf("3", "2", "1"))
     }
 
