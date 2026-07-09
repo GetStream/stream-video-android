@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.rtc
 
 import com.google.common.truth.Truth
-import io.getstream.video.android.core.ConnectionState
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
@@ -97,7 +97,10 @@ class RtcSessionTest : IntegrationTestBase() {
         val joinResult = call.join()
         assertSuccess(joinResult)
         waitForNextEvent<SFUConnectedEvent>()
-        Truth.assertThat(call.state.connection.value).isEqualTo(ConnectionState.Connected)
+        // call.state.connection is a RealtimeConnection (SFU), not the coordinator state.
+        Truth.assertThat(
+            call.state.connection.value,
+        ).isInstanceOf(RealtimeConnection.Joined::class.java)
         // call.session?.publishVideo()
     }
 

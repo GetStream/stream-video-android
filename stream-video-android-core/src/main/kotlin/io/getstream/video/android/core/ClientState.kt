@@ -17,35 +17,22 @@
 package io.getstream.video.android.core
 
 import androidx.compose.runtime.Stable
+import io.getstream.android.core.api.model.connection.StreamConnectionState
 import io.getstream.android.video.generated.models.CallCreatedEvent
 import io.getstream.android.video.generated.models.CallRingEvent
-import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
-import io.getstream.result.Error
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomIntegrationType
-import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
-// These are UI states, need to move out.
-@Stable
-public sealed interface ConnectionState {
-    public data object PreConnect : ConnectionState
-    public data object Loading : ConnectionState
-    public data object Connected : ConnectionState
-    public data object Reconnecting : ConnectionState
-    public data object Disconnected : ConnectionState
-    public class Failed(val error: Error) : ConnectionState
-}
 
 // These are UI states, need to move out.
 @Stable
@@ -64,8 +51,8 @@ class ClientState(private val client: StreamVideo) {
 
     // Internal data
     private val _user: MutableStateFlow<User?> = MutableStateFlow(client.user)
-    private val _connection: MutableStateFlow<ConnectionState> =
-        MutableStateFlow(ConnectionState.PreConnect)
+    private val _connection: MutableStateFlow<StreamConnectionState> =
+        MutableStateFlow(StreamConnectionState.Idle)
     internal val _ringingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
     private val _activeCall: MutableStateFlow<Call?> = MutableStateFlow(null)
 
@@ -84,8 +71,11 @@ class ClientState(private val client: StreamVideo) {
         _user.value = user
     }
 
-    /** Coordinator connection state */
-    public val connection: StateFlow<ConnectionState> = _connection
+    /**
+     * Coordinator connection state. Surfaces core's [StreamConnectionState] directly —
+     * the same type the Feeds SDK exposes — so there is no video-local copy to maintain.
+     */
+    public val connection: StateFlow<StreamConnectionState> = _connection
 
     /** When there is an incoming call, this state will be set. */
     public val ringingCall: StateFlow<Call?> = _ringingCall
@@ -127,12 +117,7 @@ class ClientState(private val client: StreamVideo) {
      * Most event logic happens in the Call instead of the client
      */
     fun handleEvent(event: VideoEvent) {
-        // mark connected
         when (event) {
-            is ConnectedEvent -> {
-                _connection.value = ConnectionState.Connected
-            }
-
             is CallCreatedEvent -> {
                 // what's the right thing to do here?
                 // if it's ringing we add it
@@ -150,28 +135,9 @@ class ClientState(private val client: StreamVideo) {
         }
     }
 
-    internal fun handleState(socketState: VideoSocketState) {
-        val state = when (socketState) {
-            // Before connection is established
-            is VideoSocketState.Disconnected.Stopped -> ConnectionState.PreConnect
-            // Loading
-            is VideoSocketState.Connecting -> ConnectionState.Loading
-            // Connected
-            is VideoSocketState.Connected -> ConnectionState.Connected
-            //  Reconnecting
-            is VideoSocketState.Disconnected.DisconnectedTemporarily -> ConnectionState.Reconnecting
-            is VideoSocketState.RestartConnection -> ConnectionState.Reconnecting
-            // Disconnected
-            is VideoSocketState.Disconnected.WebSocketEventLost -> ConnectionState.Disconnected
-            is VideoSocketState.Disconnected.NetworkDisconnected -> ConnectionState.Disconnected
-            is VideoSocketState.Disconnected.DisconnectedByRequest -> ConnectionState.Disconnected
-            is VideoSocketState.Disconnected.DisconnectedPermanently -> ConnectionState.Disconnected
-        }
-        _connection.value = state
-    }
-
-    fun handleError(error: Error) {
-        _connection.value = ConnectionState.Failed(error)
+    /** Routes the coordinator connection state reported by core's StreamClient listener. */
+    internal fun handleStreamState(streamState: StreamConnectionState) {
+        _connection.value = streamState
     }
 
     /**

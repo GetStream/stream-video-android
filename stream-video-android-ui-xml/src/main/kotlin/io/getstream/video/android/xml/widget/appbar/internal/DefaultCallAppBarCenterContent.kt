@@ -20,7 +20,7 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
-import io.getstream.video.android.core.ConnectionState
+import io.getstream.android.core.api.model.connection.StreamConnectionState
 import io.getstream.video.android.xml.utils.extensions.createStreamThemeWrapper
 import io.getstream.video.android.xml.widget.appbar.CallAppBarContent
 
@@ -41,7 +41,7 @@ internal class DefaultCallAppBarCenterContent : AppCompatTextView, CallAppBarCon
         ellipsize = TextUtils.TruncateAt.END
     }
 
-    override fun renderState(callState: ConnectionState) {
+    override fun renderState(callState: StreamConnectionState) {
         text = ""
     }
 }

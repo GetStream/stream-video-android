@@ -230,9 +230,7 @@ internal class StreamVideoClient internal constructor(
         }
 
         override fun onState(state: StreamConnectionState) {
-            // TODO: replace with this@StreamVideoClient.state.handleStreamState(state) once
-            // ClientState.handleStreamState lands in the follow-up ConnectionState PR. Held to
-            // validate the listener wiring at SDK init; connection-state routing comes with it.
+            this@StreamVideoClient.state.handleStreamState(state)
         }
 
         override fun onError(err: Throwable) {
@@ -425,7 +423,7 @@ internal class StreamVideoClient internal constructor(
     init {
         // Subscribe once to the StreamClient's listener stream. Events cast to VideoEvent
         // are forwarded to the existing fireEvent(...) dispatch pipeline; connection state
-        // routing arrives with the ConnectionState rewrite (see streamClientListener.onState).
+        // routes through ClientState.handleStreamState (see streamClientListener.onState).
         streamClientSubscription = streamClient.subscribe(streamClientListener).getOrThrow()
 
         // Re-watch active calls whenever the coordinator socket (re)connects.

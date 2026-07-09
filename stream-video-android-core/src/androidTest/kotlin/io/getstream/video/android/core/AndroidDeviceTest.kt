@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.core.api.model.connection.StreamConnectionState
 import io.getstream.android.video.generated.models.MemberRequest
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.api.SignalServerService
@@ -260,7 +261,9 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     @Test
     fun coordinatorWSConnection() = runTest {
-        assertThat(client.state.connection.value).isEqualTo(ConnectionState.Connected)
+        assertThat(
+            client.state.connection.value,
+        ).isInstanceOf(StreamConnectionState.Connected::class.java)
     }
 
     @Test
