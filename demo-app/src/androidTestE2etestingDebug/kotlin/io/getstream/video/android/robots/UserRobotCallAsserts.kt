@@ -73,12 +73,14 @@ fun UserRobot.assertUserMicrophone(isEnabled: Boolean, videoCall: Boolean = true
     if (isEnabled) {
         assertTrue(CallPage.microphoneEnabledToggle.waitToAppear().isDisplayed())
         if (videoCall) {
-            assertTrue(CallPage.ParticipantView.microphoneEnabledIcon.isDisplayed())
+            // The own-tile mic icon reflects the published audio track state and lags the
+            // local toggle by an SFU round-trip — wait for it instead of asserting instantly.
+            assertTrue(CallPage.ParticipantView.microphoneEnabledIcon.waitToAppear().isDisplayed())
         }
     } else {
         assertTrue(CallPage.microphoneDisabledToggle.waitToAppear().isDisplayed())
         if (videoCall) {
-            assertTrue(CallPage.ParticipantView.microphoneDisabledIcon.isDisplayed())
+            assertTrue(CallPage.ParticipantView.microphoneDisabledIcon.waitToAppear().isDisplayed())
         }
     }
     return this
