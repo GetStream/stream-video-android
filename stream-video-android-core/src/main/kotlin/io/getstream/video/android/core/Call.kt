@@ -67,6 +67,7 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -779,8 +780,37 @@ public class Call(
         when (sfuConnectionResult) {
             is SfuConnectionResult.Success -> Unit
             is SfuConnectionResult.Failure -> {
-                if (sfuConnectionResult.recoverable) {
-                    logger.w { "[_join] Recoverable SFU connection failure — awaiting reconnect outcome" }
+                when (sfuConnectionResult.cause) {
+                    SfuConnectFailureCause.SocketStateObservationTimeout -> {
+                        logger.w {
+                            "[_join] SFU socket state observation timed out with no recovery started — triggering REJOIN"
+                        }
+                        scope.launch {
+                            reconnect(
+                                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                                "join-recoverable-connect-failure",
+                            )
+                        }
+                    }
+
+                    SfuConnectFailureCause.RecoverableSocketFailure -> {
+                        logger.w { "[_join] Recoverable SFU socket failure — awaiting reconnect outcome" }
+                    }
+
+                    SfuConnectFailureCause.TerminalSocketFailure -> {
+                        logger.e {
+                            "[_join] Got terminal error while connecting to SFU. Error : $sfuConnectionResult"
+                        }
+                        sendJoinErrorAnalytics(sfuConnectionResult)
+                        return Failure(
+                            Error.GenericError(
+                                sfuConnectionResult.error.message ?: "RtcSession error occurred.",
+                            ),
+                        )
+                    }
+                }
+
+                if (sfuConnectionResult.cause != SfuConnectFailureCause.TerminalSocketFailure) {
                     if (!didReconnectSucceed()) {
                         logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
                         sendJoinErrorAnalytics(sfuConnectionResult)
@@ -790,16 +820,6 @@ public class Call(
                             ),
                         )
                     }
-                } else {
-                    logger.e {
-                        "[_join] Got non recoverable error while connecting to SFU. Error : $sfuConnectionResult"
-                    }
-                    sendJoinErrorAnalytics(sfuConnectionResult)
-                    return Failure(
-                        Error.GenericError(
-                            sfuConnectionResult.error.message ?: "RtcSession error occurred.",
-                        ),
-                    )
                 }
             }
         }

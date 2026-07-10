@@ -28,12 +28,14 @@ import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyti
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.model.User
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
@@ -49,15 +51,17 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
- * Tests the initial-join handling of a recoverable SFU connection failure
- * (e.g. a connection timeout) in [Call._join].
+ * Tests the initial-join handling of failed SFU connect attempts in [Call._join].
  *
- * On a recoverable failure the RtcSession's stateJob has already triggered
- * [Call.reconnect], so `_join` must defer to that single recovery loop and await
- * its terminal outcome instead of declaring a permanent failure. A non-recoverable
- * failure must fail immediately.
+ * The failure cause decides how `_join` orchestrates recovery:
+ * - [SfuConnectFailureCause.SocketStateObservationTimeout] starts a REJOIN
+ *   because no reconnect loop was started by stateJob.
+ * - [SfuConnectFailureCause.RecoverableSocketFailure] waits for the reconnect
+ *   loop already started by stateJob.
+ * - [SfuConnectFailureCause.TerminalSocketFailure] fails immediately.
  */
 class JoinRecoverableFailureTest {
 
@@ -123,17 +127,23 @@ class JoinRecoverableFailureTest {
     }
 
     @Test
-    fun `recoverable failure returns failure when reconnect is exhausted`() = runTest(
+    fun `recoverable socket failure awaits the existing reconnect loop`() = runTest(
         testDispatcher,
     ) {
         coEvery { mockSession.connectInternal(any(), any()) } returns
-            SfuConnectionResult.Failure(Exception("SFU connection timed out"), recoverable = true)
+            SfuConnectionResult.Failure(
+                Exception("SFU socket disconnected"),
+                cause = SfuConnectFailureCause.RecoverableSocketFailure,
+            )
 
         val deferred = async {
             call._join(joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt))
         }
         advanceUntilIdle()
         assertThat(deferred.isCompleted).isFalse()
+
+        // stateJob owns the loop here; _join must not start its own.
+        coVerify(exactly = 0) { call.reconnect(any(), any()) }
 
         // The reconnect loop gives up.
         call.state._connection.value = RealtimeConnection.ReconnectingFailed
@@ -143,11 +153,46 @@ class JoinRecoverableFailureTest {
     }
 
     @Test
-    fun `non-recoverable failure fails immediately without awaiting reconnect`() = runTest(
+    fun `socket state observation timeout starts a REJOIN itself`() = runTest(
         testDispatcher,
     ) {
         coEvery { mockSession.connectInternal(any(), any()) } returns
-            SfuConnectionResult.Failure(Exception("permanent auth error"), recoverable = false)
+            SfuConnectionResult.Failure(
+                Exception("SFU connection timed out"),
+                cause = SfuConnectFailureCause.SocketStateObservationTimeout,
+            )
+        // Stub the loop so we only assert it is invoked, not run it for real.
+        coEvery { call.reconnect(any(), any()) } returns Unit
+
+        val deferred = async {
+            call._join(joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt))
+        }
+        advanceUntilIdle()
+
+        // Nothing else would drive recovery, so _join must trigger a REJOIN.
+        coVerify {
+            call.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                any(),
+            )
+        }
+        assertThat(deferred.isCompleted).isFalse()
+
+        call.state._connection.value = RealtimeConnection.ReconnectingFailed
+        advanceUntilIdle()
+
+        assertThat(deferred.await()).isInstanceOf(Failure::class.java)
+    }
+
+    @Test
+    fun `terminal socket failure fails immediately without awaiting reconnect`() = runTest(
+        testDispatcher,
+    ) {
+        coEvery { mockSession.connectInternal(any(), any()) } returns
+            SfuConnectionResult.Failure(
+                Exception("permanent auth error"),
+                cause = SfuConnectFailureCause.TerminalSocketFailure,
+            )
 
         val result = call._join(joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt))
 

@@ -30,6 +30,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.errors.VideoErrorCode
@@ -53,7 +54,6 @@ import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
@@ -251,7 +251,8 @@ class RtcSessionTest2 {
             val mockSocketConnection = mockk<SfuSocketConnection>(relaxed = true)
             every { mockSocketConnection.state() } returns sfuSocketStateFlow
             // The socket layer surfaces timeouts as DisconnectedTemporarily; connectInternal
-            // also has a safety timeout if the state machine never reaches a terminal state.
+            // also has a socket state observation timeout if the state machine never reaches
+            // a terminal state.
             coEvery { mockSocketConnection.connect(any()) } coAnswers {
                 sfuSocketStateFlow.value =
                     SfuSocketState.Disconnected.DisconnectedTemporarily(
@@ -297,18 +298,19 @@ class RtcSessionTest2 {
                 "Expected timeout message",
                 (result as SfuConnectionResult.Failure).error.message!!.contains("timed out"),
             )
-            // A timeout is recoverable — the stateJob triggers a reconnect, so the
-            // join flow should await it rather than failing permanently.
-            assertTrue("Expected recoverable=true for a timeout", result.recoverable)
+            assertEquals(
+                SfuConnectFailureCause.RecoverableSocketFailure,
+                result.cause,
+            )
             assertEquals(
                 AnalyticsCallAbortReason.REQUEST_TIMEOUT,
-                (result as SfuConnectionResult.Failure).abortReason,
+                result.abortReason,
             )
         }
 
     @Suppress("DEPRECATION")
     @Test
-    fun `connectInternal safety timeout fires when socket stays non-terminal`() =
+    fun `connectInternal socket state observation timeout fires when socket stays non-terminal`() =
         runTest(testDispatcher) {
             val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
                 SfuSocketState.Disconnected.Stopped,
@@ -346,7 +348,7 @@ class RtcSessionTest2 {
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
 
             val resultDeferred = async { rtcSession.connectInternal() }
-            // Safety timeout = 2 * 50ms + 1000ms grace
+            // Socket state observation timeout = 2 * 50ms + 1000ms grace
             advanceTimeBy(1_101L)
             val result = resultDeferred.await()
 
@@ -358,7 +360,10 @@ class RtcSessionTest2 {
                 "Expected safety-timeout message",
                 (result as SfuConnectionResult.Failure).error.message!!.contains("timed out"),
             )
-            assertTrue("Expected recoverable=true for a safety timeout", result.recoverable)
+            assertEquals(
+                SfuConnectFailureCause.SocketStateObservationTimeout,
+                result.cause,
+            )
             assertEquals(
                 AnalyticsCallAbortReason.REQUEST_TIMEOUT,
                 result.abortReason,
@@ -420,7 +425,10 @@ class RtcSessionTest2 {
                 AnalyticsCallAbortReason.REQUEST_TIMEOUT,
                 (result as SfuConnectionResult.Failure).abortReason,
             )
-            assertTrue("Expected recoverable=true for a transport timeout", result.recoverable)
+            assertEquals(
+                SfuConnectFailureCause.RecoverableSocketFailure,
+                result.cause,
+            )
         }
 
     @Suppress("DEPRECATION")
@@ -471,9 +479,9 @@ class RtcSessionTest2 {
                 "Expected SfuConnectionResult.Failure but got $result",
                 result is SfuConnectionResult.Failure,
             )
-            assertFalse(
-                "Expected recoverable=false for a permanent disconnect",
-                (result as SfuConnectionResult.Failure).recoverable,
+            assertEquals(
+                SfuConnectFailureCause.TerminalSocketFailure,
+                (result as SfuConnectionResult.Failure).cause,
             )
         }
 
