@@ -67,7 +67,7 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.call.SfuConnectFailureCause
+import io.getstream.video.android.core.call.SfuConnectFailure
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -781,7 +781,7 @@ public class Call(
             is SfuConnectionResult.Success -> Unit
             is SfuConnectionResult.Failure -> {
                 when (sfuConnectionResult.cause) {
-                    SfuConnectFailureCause.SocketStateObservationTimeout -> {
+                    is SfuConnectFailure.SocketStateObservationTimeout -> {
                         // REJOIN (not FAST) on purpose: a connect timeout means the initial
                         // join never completed. There is no established SFU session or
                         // negotiated media path to resume, so a FAST resume would likely hit
@@ -799,30 +799,27 @@ public class Call(
                         }
                     }
 
-                    SfuConnectFailureCause.RecoverableSocketFailure -> {
+                    is SfuConnectFailure.RecoverableSocketFailure -> {
                         logger.w { "[_join] Recoverable SFU socket failure — awaiting recovery outcome" }
+                        if (!didReconnectSucceed()) {
+                            logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
+                            sendJoinErrorAnalytics(sfuConnectionResult)
+                            return Failure(
+                                Error.GenericError(
+                                    sfuConnectionResult.cause.error.message ?: "SFU connection failed",
+                                ),
+                            )
+                        }
                     }
 
-                    SfuConnectFailureCause.TerminalSocketFailure -> {
+                    is SfuConnectFailure.TerminalSocketFailure -> {
                         logger.e {
                             "[_join] Got terminal error while connecting to SFU. Error : $sfuConnectionResult"
                         }
                         sendJoinErrorAnalytics(sfuConnectionResult)
                         return Failure(
                             Error.GenericError(
-                                sfuConnectionResult.error.message ?: "RtcSession error occurred.",
-                            ),
-                        )
-                    }
-                }
-
-                if (sfuConnectionResult.cause != SfuConnectFailureCause.TerminalSocketFailure) {
-                    if (!didReconnectSucceed()) {
-                        logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
-                        sendJoinErrorAnalytics(sfuConnectionResult)
-                        return Failure(
-                            Error.GenericError(
-                                sfuConnectionResult.error.message ?: "SFU connection failed",
+                                sfuConnectionResult.cause.error.message ?: "RtcSession error occurred.",
                             ),
                         )
                     }
@@ -853,7 +850,7 @@ public class Call(
         callAnalytics.sfuAnalytics.onSfuWsCompleted(
             success = false,
             retryCount = session.value?.sfuWsRetryCount?.get() ?: 0,
-            failureReason = failure.error.message,
+            failureReason = failure.cause.error.message,
             failureCode = (failure.abortReason ?: AnalyticsCallAbortReason.SFU_ERROR).name,
         )
     }
@@ -1300,7 +1297,7 @@ public class Call(
                 monitorSession(joinResponse.value)
                 ReconnectOutcome.Success
             }
-            is SfuConnectionResult.Failure -> ReconnectOutcome.Failed(result.error)
+            is SfuConnectionResult.Failure -> ReconnectOutcome.Failed(result.cause.error)
         }
     }
 
@@ -1382,7 +1379,7 @@ public class Call(
                     monitorSession(joinResponse.value)
                     ReconnectOutcome.Success
                 }
-                is SfuConnectionResult.Failure -> ReconnectOutcome.Failed(result.error)
+                is SfuConnectionResult.Failure -> ReconnectOutcome.Failed(result.cause.error)
             }
         } finally {
             oldSession.finalizeMigration()

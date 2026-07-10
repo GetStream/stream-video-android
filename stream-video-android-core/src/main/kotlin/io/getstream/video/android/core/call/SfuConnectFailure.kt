@@ -17,22 +17,29 @@
 package io.getstream.video.android.core.call
 
 /**
- * Typed cause of a failed SFU connect attempt. This reports what happened at
- * the socket/session boundary; callers decide how to recover from each cause.
+ * Typed SFU connect failure produced by [RtcSession.connectInternal].
  */
-internal sealed interface SfuConnectFailureCause {
+internal sealed interface SfuConnectFailure {
+    val error: Exception
+
     /**
      * [RtcSession.connectInternal] stopped waiting for the socket to reach a terminal state.
      */
-    data object SocketStateObservationTimeout : SfuConnectFailureCause
+    data class SocketStateObservationTimeout(
+        override val error: Exception,
+    ) : SfuConnectFailure
 
     /**
      * The socket failure is already being recovered by [RtcSession.stateJob].
      */
-    data object RecoverableSocketFailure : SfuConnectFailureCause
+    data class RecoverableSocketFailure(
+        override val error: Exception,
+    ) : SfuConnectFailure
 
     /**
      * The socket failure should fail immediately without recovery.
      */
-    data object TerminalSocketFailure : SfuConnectFailureCause
+    data class TerminalSocketFailure(
+        override val error: Exception,
+    ) : SfuConnectFailure
 }

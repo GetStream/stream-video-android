@@ -223,18 +223,14 @@ internal sealed class SfuConnectionResult {
     /**
      * The connection attempt failed.
      *
-     * @param cause the classified failure cause. Callers can use it to decide
-     * whether to start recovery, await recovery already started by `stateJob`,
-     * or fail immediately.
-     * @param cause See [SfuConnectFailureCause]
+     * @param cause the typed SFU connect failure, including its underlying error.
      * @param abortReason the analytics abort reason derived from the disconnect
      * state's error code, or `null` when the terminal state carried no error.
      * The caller (the join flow) decides whether/when to report it, so that
      * analytics are not emitted for reconnect-driven `connectInternal` calls.
      */
     data class Failure(
-        val error: Exception,
-        val cause: SfuConnectFailureCause,
+        val cause: SfuConnectFailure,
         val abortReason: AnalyticsCallAbortReason? = null,
     ) : SfuConnectionResult()
 }
@@ -908,7 +904,7 @@ public class RtcSession internal constructor(
     ) {
         when (val result = connectInternal(reconnectDetails, options)) {
             is SfuConnectionResult.Success -> Unit
-            is SfuConnectionResult.Failure -> throw result.error
+            is SfuConnectionResult.Failure -> throw result.cause.error
         }
     }
 
@@ -964,8 +960,7 @@ public class RtcSession internal constructor(
             sfuConnectionModule.socketConnection.disconnect()
             sendCallStats()
             return SfuConnectionResult.Failure(
-                error = Exception(msg),
-                cause = SfuConnectFailureCause.SocketStateObservationTimeout,
+                cause = SfuConnectFailure.SocketStateObservationTimeout(Exception(msg)),
                 abortReason = AnalyticsCallAbortReason.REQUEST_TIMEOUT,
             )
         }
@@ -983,14 +978,14 @@ public class RtcSession internal constructor(
             logger.w { "[connectInternal] $msg" }
             sfuTracer.trace("connect-failed", msg)
             sendCallStats()
-            val cause = if ((sfuSocketState as? SfuSocketState.Disconnected)?.isRecoverable() == true) {
-                SfuConnectFailureCause.RecoverableSocketFailure
+            val error = Exception(msg)
+            val failure = if ((sfuSocketState as? SfuSocketState.Disconnected)?.isRecoverable() == true) {
+                SfuConnectFailure.RecoverableSocketFailure(error)
             } else {
-                SfuConnectFailureCause.TerminalSocketFailure
+                SfuConnectFailure.TerminalSocketFailure(error)
             }
             SfuConnectionResult.Failure(
-                error = Exception(msg),
-                cause = cause,
+                cause = failure,
                 abortReason = networkError?.toAbortReason(),
             )
         }
@@ -2030,7 +2025,7 @@ public class RtcSession internal constructor(
             publisher.value?.currentOptions(),
         )
         if (connectResult is SfuConnectionResult.Failure) {
-            return FastReconnectResult.Failed(connectResult.error)
+            return FastReconnectResult.Failed(connectResult.cause.error)
         }
 
         val peerConnectionClosed =

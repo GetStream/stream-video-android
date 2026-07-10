@@ -29,7 +29,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.call.SfuConnectFailureCause
+import io.getstream.video.android.core.call.SfuConnectFailure
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.errors.VideoErrorCode
@@ -294,11 +294,13 @@ class RtcSessionTest2 {
             )
             assertTrue(
                 "Expected timeout message",
-                (result as SfuConnectionResult.Failure).error.message!!.contains("timed out"),
+                (result as SfuConnectionResult.Failure).cause.error.message!!.contains(
+                    "timed out",
+                ),
             )
-            assertEquals(
-                SfuConnectFailureCause.RecoverableSocketFailure,
-                result.cause,
+            assertTrue(
+                "Expected RecoverableSocketFailure",
+                result.cause is SfuConnectFailure.RecoverableSocketFailure,
             )
             assertEquals(
                 AnalyticsCallAbortReason.REQUEST_TIMEOUT,
@@ -356,11 +358,13 @@ class RtcSessionTest2 {
             )
             assertTrue(
                 "Expected socket state observation timeout message",
-                (result as SfuConnectionResult.Failure).error.message!!.contains("timed out"),
+                (result as SfuConnectionResult.Failure).cause.error.message!!.contains(
+                    "timed out",
+                ),
             )
-            assertEquals(
-                SfuConnectFailureCause.SocketStateObservationTimeout,
-                result.cause,
+            assertTrue(
+                "Expected SocketStateObservationTimeout",
+                result.cause is SfuConnectFailure.SocketStateObservationTimeout,
             )
             assertEquals(
                 AnalyticsCallAbortReason.REQUEST_TIMEOUT,
@@ -426,9 +430,9 @@ class RtcSessionTest2 {
                 AnalyticsCallAbortReason.REQUEST_TIMEOUT,
                 (result as SfuConnectionResult.Failure).abortReason,
             )
-            assertEquals(
-                SfuConnectFailureCause.RecoverableSocketFailure,
-                result.cause,
+            assertTrue(
+                "Expected RecoverableSocketFailure",
+                result.cause is SfuConnectFailure.RecoverableSocketFailure,
             )
         }
 
@@ -480,9 +484,9 @@ class RtcSessionTest2 {
                 "Expected SfuConnectionResult.Failure but got $result",
                 result is SfuConnectionResult.Failure,
             )
-            assertEquals(
-                SfuConnectFailureCause.TerminalSocketFailure,
-                (result as SfuConnectionResult.Failure).cause,
+            assertTrue(
+                "Expected TerminalSocketFailure",
+                (result as SfuConnectionResult.Failure).cause is SfuConnectFailure.TerminalSocketFailure,
             )
         }
 

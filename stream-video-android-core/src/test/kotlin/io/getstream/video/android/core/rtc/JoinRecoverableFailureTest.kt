@@ -28,7 +28,7 @@ import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyti
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.call.SfuConnectFailureCause
+import io.getstream.video.android.core.call.SfuConnectFailure
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -57,11 +57,11 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
  * Tests the initial-join handling of failed SFU connect attempts in [Call._join].
  *
  * The failure cause decides how `_join` orchestrates recovery:
- * - [SfuConnectFailureCause.SocketStateObservationTimeout] starts a REJOIN
+ * - [SfuConnectFailure.SocketStateObservationTimeout] starts a REJOIN
  *   because no reconnect loop was started by stateJob.
- * - [SfuConnectFailureCause.RecoverableSocketFailure] waits for the reconnect
+ * - [SfuConnectFailure.RecoverableSocketFailure] waits for the reconnect
  *   loop already started by stateJob.
- * - [SfuConnectFailureCause.TerminalSocketFailure] fails immediately.
+ * - [SfuConnectFailure.TerminalSocketFailure] fails immediately.
  */
 class JoinRecoverableFailureTest {
 
@@ -132,8 +132,9 @@ class JoinRecoverableFailureTest {
     ) {
         coEvery { mockSession.connectInternal(any(), any()) } returns
             SfuConnectionResult.Failure(
-                Exception("SFU socket disconnected"),
-                cause = SfuConnectFailureCause.RecoverableSocketFailure,
+                SfuConnectFailure.RecoverableSocketFailure(
+                    Exception("SFU socket disconnected"),
+                ),
             )
 
         val deferred = async {
@@ -158,8 +159,9 @@ class JoinRecoverableFailureTest {
     ) {
         coEvery { mockSession.connectInternal(any(), any()) } returns
             SfuConnectionResult.Failure(
-                Exception("SFU connection timed out"),
-                cause = SfuConnectFailureCause.SocketStateObservationTimeout,
+                SfuConnectFailure.SocketStateObservationTimeout(
+                    Exception("SFU connection timed out"),
+                ),
             )
         // Stub the loop so we only assert it is invoked, not run it for real.
         coEvery { call.reconnect(any(), any()) } returns Unit
@@ -190,8 +192,9 @@ class JoinRecoverableFailureTest {
     ) {
         coEvery { mockSession.connectInternal(any(), any()) } returns
             SfuConnectionResult.Failure(
-                Exception("permanent auth error"),
-                cause = SfuConnectFailureCause.TerminalSocketFailure,
+                SfuConnectFailure.TerminalSocketFailure(
+                    Exception("permanent auth error"),
+                ),
             )
 
         val result = call._join(joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt))
