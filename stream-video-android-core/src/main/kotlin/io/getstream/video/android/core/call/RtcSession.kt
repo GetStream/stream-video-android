@@ -226,6 +226,7 @@ internal sealed class SfuConnectionResult {
      * @param cause the classified failure cause. Callers can use it to decide
      * whether to start recovery, await recovery already started by `stateJob`,
      * or fail immediately.
+     * @param cause See [SfuConnectFailureCause]
      * @param abortReason the analytics abort reason derived from the disconnect
      * state's error code, or `null` when the terminal state carried no error.
      * The caller (the join flow) decides whether/when to report it, so that

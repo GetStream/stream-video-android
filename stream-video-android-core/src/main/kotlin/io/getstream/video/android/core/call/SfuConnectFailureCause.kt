@@ -21,7 +21,18 @@ package io.getstream.video.android.core.call
  * the socket/session boundary; callers decide how to recover from each cause.
  */
 internal sealed interface SfuConnectFailureCause {
+    /**
+     * [RtcSession.connectInternal] stopped waiting for the socket to reach a terminal state.
+     */
     data object SocketStateObservationTimeout : SfuConnectFailureCause
+
+    /**
+     * The socket failure is already being recovered by [RtcSession.stateJob].
+     */
     data object RecoverableSocketFailure : SfuConnectFailureCause
+
+    /**
+     * The socket failure should fail immediately without recovery.
+     */
     data object TerminalSocketFailure : SfuConnectFailureCause
 }
