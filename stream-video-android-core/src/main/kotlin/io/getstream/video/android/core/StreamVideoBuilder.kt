@@ -18,8 +18,22 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.content.Context
+import android.os.Build
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
+import io.getstream.android.core.api.StreamClient
+import io.getstream.android.core.api.authentication.StreamTokenProvider
+import io.getstream.android.core.api.log.StreamLoggerProvider
+import io.getstream.android.core.api.model.StreamUser
+import io.getstream.android.core.api.model.config.StreamClientSerializationConfig
+import io.getstream.android.core.api.model.config.StreamComponentProvider
+import io.getstream.android.core.api.model.config.StreamSocketConfig
+import io.getstream.android.core.api.model.value.StreamApiKey
+import io.getstream.android.core.api.model.value.StreamHttpClientInfoHeader
+import io.getstream.android.core.api.model.value.StreamUserId
+import io.getstream.android.core.api.model.value.StreamWsUrl
+import io.getstream.android.core.api.observers.lifecycle.StreamLifecycleMonitor
+import io.getstream.android.core.api.subscribe.StreamSubscriptionManager
 import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
@@ -40,6 +54,11 @@ import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
+import io.getstream.video.android.core.socket.coordinator.v2.AnonymousStreamTokenProvider
+import io.getstream.video.android.core.socket.coordinator.v2.GuestStreamTokenProvider
+import io.getstream.video.android.core.socket.coordinator.v2.IntegrationStreamTokenProvider
+import io.getstream.video.android.core.socket.coordinator.v2.VideoEventSerialization
+import io.getstream.video.android.core.socket.coordinator.v2.WritableUserRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
@@ -52,6 +71,7 @@ import io.getstream.video.android.model.UserType
 import io.getstream.webrtc.ManagedAudioProcessingFactory
 import kotlinx.coroutines.launch
 import java.net.ConnectException
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * The [StreamVideoBuilder] is used to create a new instance of the [StreamVideo] client. This is the
@@ -170,6 +190,26 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private var wssUrl: String? = null
 
     /**
+     * Seam that constructs the core [StreamClient] instance. Tests substitute this lambda so they
+     * can assert factory arguments without invoking core's Android-service-dependent
+     * initialisation.
+     */
+    @InternalStreamVideoApi
+    internal var streamClientFactory: (StreamClientFactoryArgs) -> StreamClient =
+        ::defaultStreamClientFactory
+
+    /**
+     * Substitute the [StreamClient] factory used by [build]. Intended for preview/snapshot
+     * harnesses that instantiate the video client under Paparazzi's layoutlib bridge, where
+     * core's default factory reaches Android system services (e.g. WifiManager) that are
+     * unavailable in the test environment.
+     */
+    @InternalStreamVideoApi
+    public fun streamClientFactory(
+        factory: (StreamClientFactoryArgs) -> StreamClient,
+    ): StreamVideoBuilder = apply { streamClientFactory = factory }
+
+    /**
      * Set the API URL to be used for the video client.
      *
      * For testing purposes only.
@@ -255,6 +295,53 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             tokenRepository = tokenRepository,
         )
 
+        // Sink that adopts the server-issued guest identity into ClientState once the client
+        // exists (bound below, after construction). iOS analog: `state.user = guestInfo.user`.
+        val userRepository = BindableWritableUserRepository()
+
+        // Select the core token provider based on user type — mirrors iOS's
+        // `initialConnectIfRequired` dispatch.
+        //  - Authenticated: adapt the integration-supplied TokenProvider.
+        //  - Guest: SDK obtains the JWT via createGuest REST call. Until the token
+        //    arrives, REST auth runs as "anonymous" (same as iOS's AnonymousAuth transport for
+        //    createGuest); GuestStreamTokenProvider flips it to "jwt" and syncs the token into
+        //    the legacy Retrofit path the moment the server issues it.
+        //  - Anonymous: REST-only. Construction succeeds; connect attempts fail.
+        val streamTokenProvider: StreamTokenProvider = when (user.type) {
+            UserType.Authenticated -> IntegrationStreamTokenProvider(tokenProvider)
+            UserType.Guest -> {
+                coordinatorConnectionModule.updateAuthType("anonymous")
+                GuestStreamTokenProvider(
+                    api = coordinatorConnectionModule.api,
+                    initialUser = user,
+                    userRepository = userRepository,
+                    onTokenIssued = { issuedToken ->
+                        coordinatorConnectionModule.updateAuthType("jwt")
+                        coordinatorConnectionModule.updateToken(issuedToken)
+                    },
+                )
+            }
+            UserType.Anonymous -> {
+                coordinatorConnectionModule.updateAuthType("anonymous")
+                AnonymousStreamTokenProvider()
+            }
+        }
+
+        // Build the core client and eagerly inject it into StreamVideoClient.
+        val streamClient = streamClientFactory.invoke(
+            StreamClientFactoryArgs(
+                scope = scope,
+                context = context,
+                user = user,
+                apiKey = apiKey,
+                resolvedWssUrl = resolvedWssUrl,
+                appName = appName,
+                appVersion = null,
+                lifecycle = lifecycle,
+                tokenProvider = streamTokenProvider,
+            ),
+        )
+
         val deviceTokenStorage = DeviceTokenStorage(context)
 
         // Install the StreamNotificationManager to configure push notifications.
@@ -281,6 +368,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             token = token,
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
+            streamClient = streamClient,
             tokenProvider = tokenProvider,
             streamNotificationManager = streamNotificationManager,
             enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
@@ -301,18 +389,20 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             rejectCallWhenBusy = rejectCallWhenBusy,
         )
 
-        if (user.type == UserType.Guest) {
-            coordinatorConnectionModule.updateAuthType("anonymous")
-            client.setupGuestUser(user)
-        } else if (user.type == UserType.Anonymous) {
-            coordinatorConnectionModule.updateAuthType("anonymous")
-        }
+        // Route guest identity adoption into ClientState now that the client exists. Bound
+        // before the connect launch below, so no token load can race the binding.
+        userRepository.bind { adoptedUser -> client.state.updateUser(adoptedUser) }
 
-        // Establish a WS connection with the coordinator (we don't support this for anonymous users)
-        if (user.type == UserType.Authenticated) {
+        // Establish a WS connection with the coordinator for authenticated AND guest users —
+        // iOS parity (`initialConnectIfRequired`): only anonymous users never connect. For
+        // guests, core's token manager drives the createGuest flow inside connect().
+        // Push-device registration stays authenticated-only (guests have no durable identity).
+        if (user.type != UserType.Anonymous) {
             scope.launch {
                 try {
-                    if (notificationConfig.autoRegisterPushDevice) {
+                    if (user.type == UserType.Authenticated &&
+                        notificationConfig.autoRegisterPushDevice
+                    ) {
                         client.registerPushDevice()
                     }
                     if (connectOnInit) {
@@ -385,4 +475,104 @@ internal val tokenRepository = TokenRepository("")
 sealed class GEO {
     /** Run calls over our global edge network, this is the default and right for most applications */
     object GlobalEdgeNetwork : GEO()
+}
+
+/**
+ * Aggregates the arguments handed to [StreamClient]'s factory function. Grouping them makes the
+ * `streamClientFactory` seam a single-parameter lambda that is easy to substitute in tests.
+ */
+@InternalStreamVideoApi
+public data class StreamClientFactoryArgs(
+    val scope: kotlinx.coroutines.CoroutineScope,
+    val context: Context,
+    val user: User,
+    val apiKey: ApiKey,
+    val resolvedWssUrl: String,
+    val appName: String?,
+    val appVersion: String?,
+    val lifecycle: androidx.lifecycle.Lifecycle,
+    val tokenProvider: StreamTokenProvider,
+)
+
+private fun defaultStreamClientFactory(args: StreamClientFactoryArgs): StreamClient {
+    val logProvider: StreamLoggerProvider = StreamLoggerProvider.defaultAndroidLogger()
+
+    val clientInfoHeader = StreamHttpClientInfoHeader.create(
+        product = "video",
+        productVersion = BuildConfig.STREAM_VIDEO_VERSION,
+        os = "Android",
+        apiLevel = Build.VERSION.SDK_INT,
+        deviceModel = Build.MODEL,
+        app = args.appName ?: "unknown",
+        appVersion = args.appVersion ?: "unknown",
+    )
+
+    // Guest users authenticate via jwt (JWT obtained via createGuest);
+    // never use the anonymous factory for the coordinator socket.
+    val socketConfig = StreamSocketConfig.jwt(
+        url = StreamWsUrl.fromString(args.resolvedWssUrl),
+        apiKey = StreamApiKey.fromString(args.apiKey),
+        clientInfoHeader = clientInfoHeader,
+    )
+
+    val serializationConfig = StreamClientSerializationConfig.default(
+        productEvents = VideoEventSerialization(),
+    )
+
+    // Route the integration-supplied Lifecycle through core's LifecycleMonitor so that the
+    // legacy StreamLifecycleObserver is no longer needed on the coordinator path.
+    val streamLifecycleMonitor = StreamLifecycleMonitor(
+        logger = logProvider.taggedLogger("SVLifecycleMonitor"),
+        lifecycle = args.lifecycle,
+        subscriptionManager = StreamSubscriptionManager(
+            logger = logProvider.taggedLogger("SVLifecycleSubs"),
+        ),
+    )
+
+    return StreamClient(
+        scope = args.scope,
+        context = args.context.applicationContext,
+        user = StreamUser(
+            id = StreamUserId.fromString(args.user.id),
+            name = args.user.name,
+            imageURL = args.user.image,
+            customData = args.user.custom ?: emptyMap(),
+        ),
+        tokenProvider = args.tokenProvider,
+        products = listOf("video"),
+        socketConfig = socketConfig,
+        serializationConfig = serializationConfig,
+        // Keep video's separate Retrofit OkHttpClient; HTTP unification through core comes later.
+        httpConfig = null,
+        components = StreamComponentProvider(
+            logProvider = logProvider,
+            lifecycleMonitor = streamLifecycleMonitor,
+        ),
+    )
+}
+
+/**
+ * [WritableUserRepository] whose sink is bound after the [StreamVideoClient] is constructed
+ * (the guest token provider is created before the client exists). A user written before
+ * [bind] is buffered and delivered on binding, so no adoption is lost even if a token load
+ * completes first.
+ */
+internal class BindableWritableUserRepository : WritableUserRepository {
+    @Volatile
+    private var sink: ((User) -> Unit)? = null
+    private val pending = AtomicReference<User?>(null)
+
+    fun bind(sink: (User) -> Unit) {
+        this.sink = sink
+        pending.getAndSet(null)?.let(sink)
+    }
+
+    override fun setUser(user: User) {
+        val target = sink
+        if (target != null) {
+            target(user)
+        } else {
+            pending.set(user)
+        }
+    }
 }

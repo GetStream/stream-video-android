@@ -26,7 +26,7 @@ import io.getstream.android.video.generated.models.WSAuthMessageRequest
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
+import io.getstream.video.android.core.lifecycle.legacy.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.SocketActions
 import io.getstream.video.android.core.socket.common.SocketFactory
 import io.getstream.video.android.core.socket.common.SocketListener

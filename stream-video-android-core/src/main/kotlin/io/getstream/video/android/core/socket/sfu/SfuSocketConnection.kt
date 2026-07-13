@@ -23,7 +23,7 @@ import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.SfuDataEvent
 import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
+import io.getstream.video.android.core.lifecycle.legacy.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.SfuParser
 import io.getstream.video.android.core.socket.common.SocketActions
 import io.getstream.video.android.core.socket.common.SocketFactory

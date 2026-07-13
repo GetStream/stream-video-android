@@ -35,7 +35,17 @@ import java.util.UUID
 
 public open class TestBase {
     @get:Rule
-    val dispatcherRule = DispatcherRule()
+    val dispatcherRule = createDispatcherRule()
+
+    /**
+     * Seam so subclasses can keep virtual time on Main while running IO in real time.
+     * Integration tests that talk to the real network need this: core's StreamClient runs
+     * periodic work (health-monitor pings) on DispatcherProvider.IO via `delay`, and a
+     * virtual-time IO dispatcher lets the test scheduler fast-forward that loop without
+     * bound while the test awaits a real network round trip — flooding Robolectric's
+     * ShadowLog buffer until the executor OOMs.
+     */
+    protected open fun createDispatcherRule(): DispatcherRule = DispatcherRule()
 
     /** Convenient helper with test data */
     val testData = IntegrationTestHelper()

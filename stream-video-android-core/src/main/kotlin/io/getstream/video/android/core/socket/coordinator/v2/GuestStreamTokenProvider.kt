@@ -39,9 +39,18 @@ internal interface WritableUserRepository {
 /**
  * [StreamTokenProvider] implementation for guest users.
  *
- * On invocation, calls the coordinator's `POST /video/guest` endpoint via [ProductvideoApi],
- * adopts the server-issued user identity through [userRepository], and returns the resulting
- * JWT wrapped in a [StreamToken].
+ * Mirrors the iOS SDK's guest flow (`StreamVideo.loadGuestUserInfo`): on invocation, calls the
+ * coordinator's `POST /video/guest` endpoint via [ProductvideoApi], adopts the server-issued
+ * user identity through [userRepository], publishes the JWT to the SDK's REST auth path via
+ * [onTokenIssued], and returns the token wrapped in a [StreamToken] for core's WS auth path.
+ *
+ * The video SDK keeps two auth surfaces until HTTP is unified through core: the coordinator
+ * WS (core's `StreamTokenManager`, fed by this provider's return value) and the legacy Retrofit
+ * `CoordinatorAuthInterceptor` (fed by [onTokenIssued]). Both must observe the guest JWT —
+ * iOS expresses the same invariant through its single `tokenSubject`.
+ *
+ * Token refresh matches iOS: an expired guest token is renewed by calling `createGuest` again
+ * (`StreamTokenManager` re-invokes this provider).
  *
  * `StreamTokenManager` wraps this provider in a `StreamSingleFlightProcessor`, so concurrent
  * callers share the same in-flight request. No additional deduplication is needed here (unlike
@@ -51,6 +60,7 @@ internal class GuestStreamTokenProvider(
     private val api: ProductvideoApi,
     private val initialUser: User,
     private val userRepository: WritableUserRepository,
+    private val onTokenIssued: (String) -> Unit,
 ) : StreamTokenProvider {
 
     override suspend fun loadToken(userId: StreamUserId): StreamToken {
@@ -66,7 +76,25 @@ internal class GuestStreamTokenProvider(
         )
         // Adopt the server-issued user identity so downstream SDK components observe the
         // canonical id/role instead of the placeholder used at builder time (AND-1202).
-        userRepository.setUser(response.user.toUser().copy(type = UserType.Guest))
+        userRepository.setUser(adoptServerUser(response.user.toUser()))
+        // Sync the JWT into the legacy REST auth path before core proceeds to WS auth.
+        onTokenIssued(response.accessToken)
         return StreamToken.fromString(response.accessToken)
+    }
+
+    /**
+     * Ports iOS's name-preservation quirk (`StreamVideo.loadGuestUserInfo`): the server decorates
+     * guest display names (e.g. `guest-<id>-<name>`); when the decorated name's last `-` component
+     * equals the locally supplied name, keep the local name.
+     */
+    private fun adoptServerUser(serverUser: User): User {
+        val localName = initialUser.name
+        val lastNameComponent = serverUser.name?.split("-")?.lastOrNull()
+        val resolvedName = if (!localName.isNullOrBlank() && lastNameComponent == localName) {
+            localName
+        } else {
+            serverUser.name
+        }
+        return serverUser.copy(type = UserType.Guest, name = resolvedName)
     }
 }

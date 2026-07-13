@@ -74,6 +74,25 @@ object IntegrationTestState {
 }
 
 open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestBase() {
+
+    /**
+     * Integration tests hit the live coordinator, so IO must run on real time. Keeping IO on
+     * the shared virtual-time dispatcher lets runTest's scheduler fast-forward the
+     * StreamClient health-monitor `delay` loop millions of times while a test awaits a real
+     * network response, and every iteration logs into Robolectric's ShadowLog buffer — the
+     * source of the CI executor OOM (2 GB of ShadowLog$LogItem in the heap dump).
+     */
+    override fun createDispatcherRule(): DispatcherRule =
+        DispatcherRule(ioDispatcher = Dispatchers.IO)
+
+    /**
+     * Awaits [block] on a real-time dispatcher with a real-time timeout. Needed for assertions
+     * on state produced by the client scope (real IO here): the runTest virtual clock can
+     * neither advance that work nor time it out.
+     */
+    suspend fun <T> awaitRealTime(timeoutMs: Long = 10_000, block: suspend () -> T): T =
+        withContext(Dispatchers.Default) { withTimeout(timeoutMs) { block() } }
+
     /** Client */
     lateinit var client: StreamVideo
 
@@ -111,7 +130,12 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             client = builder.build()
             clientImpl = client as StreamVideoClient
             clientImpl.testSessionId = runBlocking {
-                (client as StreamVideoClient).coordinatorConnectionModule.socketConnection.connectionId().value
+                // Derive the WS connectionId from core's StreamClient state (StreamClient
+                // replaced the coordinator-socket connectionId() flow). Null before Connected.
+                (
+                    clientImpl.streamClient.connectionState.value
+                        as? io.getstream.android.core.api.model.connection.StreamConnectionState.Connected
+                    )?.connectionId
             }
             // always mock the peer connection factory, it can't work in unit tests
             Call.testInstanceProvider.mediaManagerCreator = { mockk(relaxed = true) }

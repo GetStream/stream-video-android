@@ -31,7 +31,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -166,12 +165,13 @@ class CallStateTest : IntegrationTestBase() {
             },
         )
 
-        val participants = call.state.participants.value
-        println("emitSorted participants size is ${participants.size}")
+        // updateParticipant propagates through the call scope (real IO in integration
+        // tests), so await the expected size in real time instead of reading instantly.
+        val participants = awaitRealTime { call.state.participants.first { it.size == 6 } }
         assertThat(participants.size).isEqualTo(6)
-        delay(60)
 
-        val sorted2 = sortedParticipants.value.map { it.sessionId }
+        val sorted2 = awaitRealTime { sortedParticipants.first { it.size == 6 } }
+            .map { it.sessionId }
         // Default preset ordering with this setup:
         //   tier 1 (screenSharing): "2"
         //   tier 2 (pinned): "1"
@@ -215,8 +215,10 @@ class CallStateTest : IntegrationTestBase() {
             },
         )
 
-        delay(1000)
-        val sorted = sortedParticipants.value.map { it.sessionId }
+        // updateParticipant propagates through the call scope (real IO in integration
+        // tests), so await the expected size in real time instead of reading instantly.
+        val sorted = awaitRealTime { sortedParticipants.first { it.size == 3 } }
+            .map { it.sessionId }
         assertThat(sorted).isEqualTo(listOf("3", "2", "1"))
     }
 
@@ -304,9 +306,10 @@ class CallStateTest : IntegrationTestBase() {
         call.state.markSpeakingAsMuted()
 
         assertTrue(call.state.speakingWhileMuted.first())
-        // The flag should automatically reset to false 2 seconds
-        advanceTimeBy(3000)
-
-        assertFalse(call.state.speakingWhileMuted.first())
+        // The flag resets to false after 2 seconds. The reset job runs on the client scope
+        // (real IO in integration tests), so wait for the flip in real time — the virtual
+        // clock cannot advance it.
+        val reset = awaitRealTime { call.state.speakingWhileMuted.first { !it } }
+        assertFalse(reset)
     }
 }

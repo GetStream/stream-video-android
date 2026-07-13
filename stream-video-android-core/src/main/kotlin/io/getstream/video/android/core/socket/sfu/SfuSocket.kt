@@ -31,7 +31,7 @@ import io.getstream.video.android.core.events.SfuDataRequest
 import io.getstream.video.android.core.events.UnknownEvent
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.lifecycle.NoOpLifecycleHandler
-import io.getstream.video.android.core.lifecycle.StreamLifecycleObserver
+import io.getstream.video.android.core.lifecycle.legacy.StreamLifecycleObserver
 import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.common.DISPOSE_SOCKET_REASON
 import io.getstream.video.android.core.socket.common.DISPOSE_SOCKET_RECONNECT

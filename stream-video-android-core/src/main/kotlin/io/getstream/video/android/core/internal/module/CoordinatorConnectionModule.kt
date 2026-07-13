@@ -25,16 +25,13 @@ import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
-import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketConnection
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -60,7 +57,7 @@ internal class CoordinatorConnectionModule(
     override val apiKey: ApiKey,
     override val lifecycle: Lifecycle,
     override val tracer: Tracer = Tracer("coordinator"),
-) : ConnectionModuleDeclaration<ProductvideoApi, CoordinatorSocketConnection, OkHttpClient, UserToken> {
+) : ConnectionModuleDeclaration<ProductvideoApi, Unit, OkHttpClient, UserToken> {
     // Internals
     private val authInterceptor = CoordinatorAuthInterceptor(apiKey, tokenRepository)
     private val retrofit: Retrofit by lazy {
@@ -95,18 +92,11 @@ internal class CoordinatorConnectionModule(
         )
     }
     override val api: ProductvideoApi by lazy { retrofit.create(ProductvideoApi::class.java) }
-    override val socketConnection: CoordinatorSocketConnection = CoordinatorSocketConnection(
-        apiKey = apiKey,
-        url = wssUrl,
-        user = user,
-        token = tokenRepository.getToken(),
-        httpClient = http,
-        networkStateProvider = networkStateProvider,
-        scope = UserScope(context = scope.coroutineContext + Dispatchers.IO.limitedParallelism(1)),
-        lifecycle = lifecycle,
-        tokenProvider = tokenProvider,
-        tokenRepository = tokenRepository,
-    )
+
+    // The coordinator socket is owned by StreamClient (constructed in
+    // StreamVideoBuilder.build()); this field is a vestigial slot to satisfy the legacy
+    // ConnectionModuleDeclaration generic and goes away with the interface later in v2.
+    override val socketConnection: Unit = Unit
 
     override fun updateToken(token: UserToken) {
         tokenRepository.updateToken(token)

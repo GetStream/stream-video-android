@@ -55,7 +55,10 @@ streamProject {
             "**/*.mp3",
             "**/*.webp",
             "**/generated/**",
-            "**/io/getstream/video/android/core/model/**"
+            "**/io/getstream/video/android/core/model/**",
+            // Quarantined legacy code kept only until the remaining legacy socket consumers
+            // migrate; moving it made Sonar treat it as uncovered new code.
+            "**/io/getstream/video/android/core/lifecycle/legacy/**"
         )
         koverClassExclusions = listOf(
             "io.getstream.android.video.generated.*",
