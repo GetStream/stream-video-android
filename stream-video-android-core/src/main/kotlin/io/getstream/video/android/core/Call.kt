@@ -195,6 +195,10 @@ public class Call(
     internal val clientImpl = client as StreamVideoClient
     internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
 
+    // Unit-test only hook for replacing RtcSession construction.
+    // TODO(v2): replace this with a proper dependency injection boundary.
+    internal var unitTestRtcSessionFactory: (() -> RtcSession)? = null
+
     // Atomic controls
     private var atomicLeave = AtomicUnitCall()
 
@@ -748,8 +752,8 @@ public class Call(
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
         val sfuName = result.value.credentials.server.edgeName
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
-        val localSession = if (testInstanceProvider.rtcSessionCreator != null) {
-            testInstanceProvider.rtcSessionCreator!!.invoke()
+        val localSession = if (unitTestRtcSessionFactory != null) {
+            unitTestRtcSessionFactory!!.invoke()
         } else {
             RtcSession(
                 sessionId = this.sessionId,
@@ -2322,7 +2326,6 @@ public class Call(
 
         internal class TestInstanceProvider {
             var mediaManagerCreator: (() -> MediaManagerImpl)? = null
-            var rtcSessionCreator: (() -> RtcSession)? = null
         }
     }
 }

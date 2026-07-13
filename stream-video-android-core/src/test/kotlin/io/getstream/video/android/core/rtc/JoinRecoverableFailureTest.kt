@@ -115,13 +115,12 @@ class JoinRecoverableFailureTest {
             call.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
         } returns Success(mockJoinResponse)
 
-        // Inject our mocked RtcSession instead of constructing a real one.
-        Call.testInstanceProvider.rtcSessionCreator = { mockSession }
+        // Inject our mocked RtcSession into this Call instead of constructing a real one.
+        call.unitTestRtcSessionFactory = { mockSession }
     }
 
     @After
     fun tearDown() {
-        Call.testInstanceProvider.rtcSessionCreator = null
         StreamVideo.removeClient()
         unmockkAll()
     }

@@ -22,9 +22,12 @@ import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.base.TestBase
+import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
+import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -139,7 +142,6 @@ class ClientAndAuthTest : TestBase() {
     fun `guest user can join a call`() = runTest {
         // Mock WebRTC components — real peer connections cannot run in Robolectric/unit tests.
         Call.testInstanceProvider.mediaManagerCreator = { mockk(relaxed = true) }
-        Call.testInstanceProvider.rtcSessionCreator = { mockk(relaxed = true) }
 
         // Step 1: create the call as an authenticated user.
         val authClient = StreamVideoBuilder(
@@ -181,6 +183,9 @@ class ClientAndAuthTest : TestBase() {
 
         val guestCall = guestClient.call("default", callId)
         guestCall.peerConnectionFactory = mockedPCFactory
+        val rtcSession = mockk<RtcSession>(relaxed = true)
+        coEvery { rtcSession.connectInternal(any(), any()) } returns SfuConnectionResult.Success
+        guestCall.unitTestRtcSessionFactory = { rtcSession }
 
         val joinResult = guestCall.join()
         assertSuccess(joinResult)
