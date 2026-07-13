@@ -223,14 +223,10 @@ internal sealed class SfuConnectionResult {
     /**
      * The connection attempt failed.
      *
-     * @param error the typed cause of the failure (see [SfuConnectException]).
-     * Callers branch on its concrete type to decide how to recover — e.g. a
-     * [SfuConnectException.Timeout] means the safety-timeout tore down a stuck
-     * socket and no recovery loop was started, so the caller must start one.
-     * @param recoverable `true` when the failure can be recovered from, so the
-     * initial-join flow can await a recovery loop instead of treating it as
-     * permanent. `false` for terminal failures with no recovery (auth errors,
-     * permanent disconnects, etc.).
+     * @param cause the classified failure cause. Callers can use it to decide
+     * whether to start recovery, await recovery already started by `stateJob`,
+     * or fail immediately.
+     * @param cause See [SfuConnectFailureCause]
      * @param abortReason the analytics abort reason derived from the disconnect
      * state's error code, or `null` when the terminal state carried no error.
      * The caller (the join flow) decides whether/when to report it, so that
@@ -238,31 +234,9 @@ internal sealed class SfuConnectionResult {
      */
     data class Failure(
         val error: Exception,
-        val recoverable: Boolean = false,
+        val cause: SfuConnectFailureCause,
         val abortReason: AnalyticsCallAbortReason? = null,
     ) : SfuConnectionResult()
-}
-
-/**
- * Typed causes carried by [SfuConnectionResult.Failure], so callers of
- * [RtcSession.connectInternal] can branch on the failure kind instead of parsing
- * the message text.
- */
-internal sealed class SfuConnectException(message: String) : Exception(message) {
-    /**
-     * The connect attempt never reached a terminal socket state within the safety
-     * timeout, so [RtcSession.connectInternal] tore the in-flight socket down.
-     * That leaves the socket in a state `stateJob` ignores, so no recovery loop is
-     * started on its own — the initial-join flow must start one itself.
-     */
-    class Timeout(message: String) : SfuConnectException(message)
-
-    /**
-     * The SFU socket reached a terminal [SfuSocketState.Disconnected] state. When
-     * the failure is recoverable, `stateJob` is already launching `Call.reconnect`,
-     * so the initial-join flow only needs to await the outcome.
-     */
-    class Disconnected(message: String) : SfuConnectException(message)
 }
 
 /**
@@ -989,11 +963,9 @@ public class RtcSession internal constructor(
             // can't resurface through stateJob and resurrect this abandoned session.
             sfuConnectionModule.socketConnection.disconnect()
             sendCallStats()
-            // Typed as Timeout: we disconnected the socket into a state stateJob ignores,
-            // so no recovery loop starts on its own — the caller must start it.
             return SfuConnectionResult.Failure(
-                error = SfuConnectException.Timeout(msg),
-                recoverable = true,
+                error = Exception(msg),
+                cause = SfuConnectFailureCause.SocketStateObservationTimeout,
                 abortReason = AnalyticsCallAbortReason.REQUEST_TIMEOUT,
             )
         }
@@ -1011,13 +983,14 @@ public class RtcSession internal constructor(
             logger.w { "[connectInternal] $msg" }
             sfuTracer.trace("connect-failed", msg)
             sendCallStats()
-            // Recoverable only when the terminal state is one stateJob reacts to; in that
-            // case a Call.reconnect is already being launched, so the join flow just awaits.
-            val recoverable =
-                (sfuSocketState as? SfuSocketState.Disconnected)?.isRecoverable() ?: false
+            val cause = if ((sfuSocketState as? SfuSocketState.Disconnected)?.isRecoverable() == true) {
+                SfuConnectFailureCause.RecoverableSocketFailure
+            } else {
+                SfuConnectFailureCause.TerminalSocketFailure
+            }
             SfuConnectionResult.Failure(
-                error = SfuConnectException.Disconnected(msg),
-                recoverable = recoverable,
+                error = Exception(msg),
+                cause = cause,
                 abortReason = networkError?.toAbortReason(),
             )
         }
