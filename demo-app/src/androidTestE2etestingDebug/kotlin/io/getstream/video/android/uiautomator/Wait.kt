@@ -53,26 +53,21 @@ public fun UiObject2.waitForText(
     var textPresent = false
     while (!textPresent && System.currentTimeMillis() < endTime) {
         textPresent = if (mustBeEqual) text == expectedText else text.contains(expectedText)
+        if (!textPresent) {
+            Thread.sleep(POLL_INTERVAL_MILLIS)
+        }
     }
     return this
 }
 
 public fun BySelector.waitForCount(count: Int, timeOutMillis: Long = io.getstream.video.android.uiautomator.defaultTimeout): List<UiObject2> {
     val endTime = System.currentTimeMillis() + timeOutMillis
-    var elements: List<UiObject2> = emptyList()
-    var success = false
-    while (!success && System.currentTimeMillis() < endTime) {
+    var elements: List<UiObject2> = findObjects()
+    while (elements.size != count && System.currentTimeMillis() < endTime) {
+        Thread.sleep(POLL_INTERVAL_MILLIS)
         elements = findObjects()
-        success = elements.size == count
     }
     return elements
 }
 
-public fun UiObject2.waitForTextToChange(text: String, timeOutMillis: Long = io.getstream.video.android.uiautomator.defaultTimeout): UiObject2 {
-    val endTime = System.currentTimeMillis() + timeOutMillis
-    var textChanged = false
-    while (!textChanged && System.currentTimeMillis() < endTime) {
-        textChanged = this.text != text
-    }
-    return this
-}
+private const val POLL_INTERVAL_MILLIS = 50L
