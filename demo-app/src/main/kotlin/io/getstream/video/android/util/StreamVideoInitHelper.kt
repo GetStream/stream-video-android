@@ -406,7 +406,7 @@ object StreamVideoInitHelper {
             apiKey = apiKey,
             user = user,
             token = token,
-            connectionTimeoutInMs = 12_000L,
+            connectionTimeoutInMs = 5_000L,
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             localCoordinatorAddress = localCoordinatorAddress,

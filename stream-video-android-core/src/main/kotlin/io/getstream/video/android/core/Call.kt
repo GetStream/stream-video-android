@@ -67,6 +67,7 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -193,6 +194,10 @@ public class Call(
     internal var nonFastReconnectAttempts = 0
     internal val clientImpl = client as StreamVideoClient
     internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
+
+    // Unit-test only hook for replacing RtcSession construction.
+    // TODO(v2): replace this with a proper dependency injection boundary.
+    internal var unitTestRtcSessionFactory: (() -> RtcSession)? = null
 
     // Atomic controls
     private var atomicLeave = AtomicUnitCall()
@@ -747,8 +752,8 @@ public class Call(
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
         val sfuName = result.value.credentials.server.edgeName
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
-        val localSession = if (testInstanceProvider.rtcSessionCreator != null) {
-            testInstanceProvider.rtcSessionCreator!!.invoke()
+        val localSession = if (unitTestRtcSessionFactory != null) {
+            unitTestRtcSessionFactory!!.invoke()
         } else {
             RtcSession(
                 sessionId = this.sessionId,
@@ -779,8 +784,43 @@ public class Call(
         when (sfuConnectionResult) {
             is SfuConnectionResult.Success -> Unit
             is SfuConnectionResult.Failure -> {
-                if (sfuConnectionResult.recoverable) {
-                    logger.w { "[_join] Recoverable SFU connection failure — awaiting reconnect outcome" }
+                when (sfuConnectionResult.cause) {
+                    SfuConnectFailureCause.SocketStateObservationTimeout -> {
+                        // REJOIN (not FAST) on purpose: a connect timeout means the initial
+                        // join never completed. There is no established SFU session or
+                        // negotiated media path to resume, so a FAST resume would likely hit
+                        // PARTICIPANT_NOT_FOUND and burn attempts before the loop escalates.
+                        // A full REJOIN re-fetches credentials and starts a clean join, which
+                        // is the only thing that can actually succeed here.
+                        logger.w {
+                            "[_join] SFU socket state observation timed out with no recovery started — triggering REJOIN"
+                        }
+                        scope.launch {
+                            reconnect(
+                                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                                "join-recoverable-connect-failure",
+                            )
+                        }
+                    }
+
+                    SfuConnectFailureCause.RecoverableSocketFailure -> {
+                        logger.w { "[_join] Recoverable SFU socket failure — awaiting recovery outcome" }
+                    }
+
+                    SfuConnectFailureCause.TerminalSocketFailure -> {
+                        logger.e {
+                            "[_join] Got terminal error while connecting to SFU. Error : $sfuConnectionResult"
+                        }
+                        sendJoinErrorAnalytics(sfuConnectionResult)
+                        return Failure(
+                            Error.GenericError(
+                                sfuConnectionResult.error.message ?: "RtcSession error occurred.",
+                            ),
+                        )
+                    }
+                }
+
+                if (sfuConnectionResult.cause != SfuConnectFailureCause.TerminalSocketFailure) {
                     if (!didReconnectSucceed()) {
                         logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
                         sendJoinErrorAnalytics(sfuConnectionResult)
@@ -790,16 +830,6 @@ public class Call(
                             ),
                         )
                     }
-                } else {
-                    logger.e {
-                        "[_join] Got non recoverable error while connecting to SFU. Error : $sfuConnectionResult"
-                    }
-                    sendJoinErrorAnalytics(sfuConnectionResult)
-                    return Failure(
-                        Error.GenericError(
-                            sfuConnectionResult.error.message ?: "RtcSession error occurred.",
-                        ),
-                    )
                 }
             }
         }
@@ -2296,7 +2326,6 @@ public class Call(
 
         internal class TestInstanceProvider {
             var mediaManagerCreator: (() -> MediaManagerImpl)? = null
-            var rtcSessionCreator: (() -> RtcSession)? = null
         }
     }
 }
