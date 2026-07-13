@@ -28,10 +28,10 @@ import android.Manifest.permission.READ_MEDIA_VIDEO
 import android.Manifest.permission.RECORD_AUDIO
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.annotation.SuppressLint
-import io.getstream.chat.android.e2e.test.rules.RetryRule
 import io.getstream.video.android.robots.ParticipantRobot
 import io.getstream.video.android.robots.UserRobot
 import io.getstream.video.android.robots.VideoView
+import io.getstream.video.android.rules.RetryRule
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.grantPermission
 import io.getstream.video.android.uiautomator.startApp
