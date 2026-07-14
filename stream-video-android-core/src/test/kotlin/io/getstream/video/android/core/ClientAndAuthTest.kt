@@ -17,6 +17,7 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.core.api.model.connection.StreamConnectionState
 import io.getstream.android.video.generated.models.ConnectedEvent
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
@@ -235,14 +236,16 @@ class ClientAndAuthTest : TestBase() {
             user = testData.users["thierry"]!!,
             token = authData!!.token,
         ).build()
-        assertThat(client.state.connection.value).isEqualTo(ConnectionState.PreConnect)
+        assertThat(client.state.connection.value).isEqualTo(StreamConnectionState.Idle)
         val clientImpl = client as StreamVideoClient
 
         val connectResultDeferred = clientImpl.connectAsync()
 
         val connectResult = connectResultDeferred.await()
         delay(100L)
-        assertThat(client.state.connection.value).isEqualTo(ConnectionState.Connected)
+        assertThat(
+            client.state.connection.value,
+        ).isInstanceOf(StreamConnectionState.Connected::class.java)
     }
 
     @Test

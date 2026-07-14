@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.xml.widget.appbar
 
-import io.getstream.video.android.core.ConnectionState
+import io.getstream.android.core.api.model.connection.StreamConnectionState
 
 /**
  * An interface that must be implemented by the content views of [CallAppBarView].
@@ -28,5 +28,5 @@ public interface CallAppBarContent {
      *
      * @param callState The state that will be used to render the updated UI.
      */
-    public fun renderState(callState: ConnectionState)
+    public fun renderState(callState: StreamConnectionState)
 }
