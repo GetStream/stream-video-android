@@ -115,7 +115,6 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             }
             // always mock the peer connection factory, it can't work in unit tests
             Call.testInstanceProvider.mediaManagerCreator = { mockk(relaxed = true) }
-            Call.testInstanceProvider.rtcSessionCreator = { mockk(relaxed = true) }
             // Connect to the WS if needed
             if (connectCoordinatorWS) {
                 // wait for the connection/ avoids race conditions in tests

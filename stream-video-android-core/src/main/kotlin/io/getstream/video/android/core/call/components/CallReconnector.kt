@@ -398,15 +398,14 @@ internal class CallReconnector(
             val result = newSession.connectInternal(
                 reconnectDetails,
                 currentOptions,
-                JoinAnalyticsModel(joinAnalyticsModel.retryAttempt),
             )
         ) {
-            is SfuConnectionResult.Connected -> {
+            is SfuConnectionResult.Success -> {
                 newSession.sfuTracer.trace("rejoin", reason)
                 call.monitorSession(joinResponse.value)
                 ReconnectOutcome.Success
             }
-            is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
+            is SfuConnectionResult.Failure -> ReconnectOutcome.Failed(result.error)
         }
     }
 
@@ -482,14 +481,13 @@ internal class CallReconnector(
             val result = newSession.connectInternal(
                 reconnectDetails,
                 currentOptions,
-                JoinAnalyticsModel(joinAnalyticsModel.retryAttempt),
             )
             when (result) {
-                is SfuConnectionResult.Connected -> {
+                is SfuConnectionResult.Success -> {
                     call.monitorSession(joinResponse.value)
                     ReconnectOutcome.Success
                 }
-                is SfuConnectionResult.Failed -> ReconnectOutcome.Failed(result.error)
+                is SfuConnectionResult.Failure -> ReconnectOutcome.Failed(result.error)
             }
         } finally {
             oldSession.finalizeMigration()
@@ -525,8 +523,9 @@ internal class CallReconnector(
     companion object {
         /** How many consecutive FAST reconnect failures are allowed before
          *  escalating to a full REJOIN. Kept small because each failed FAST
-         *  attempt can cost up to DEFAULT_SOCKET_TIMEOUT (10 s) waiting for
-         *  the WebSocket handshake to time out. */
+         *  attempt can cost up to the socket connection deadline before it gives
+         *  up: OkHttp's WebSocket-upgrade timeout, followed by the join-response
+         *  wait — both driven by StreamVideoBuilder.connectionTimeoutInMs. */
         private const val MAX_FAST_RECONNECT_ATTEMPTS = 3
 
         /** Absolute upper bound on loop iterations across all strategies

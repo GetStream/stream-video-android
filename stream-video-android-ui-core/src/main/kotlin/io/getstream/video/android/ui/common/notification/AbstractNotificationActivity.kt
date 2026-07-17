@@ -22,7 +22,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
-import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_NOTIFICATION_ID
+import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
 import kotlinx.coroutines.launch
@@ -56,7 +56,7 @@ public abstract class AbstractNotificationActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             if (hasAcceptedCall) {
-                dismissIncomingCallNotifications()
+                dismissIncomingCallNotifications(callCid)
             } else {
                 loadCallData(callCid)
             }
@@ -74,15 +74,18 @@ public abstract class AbstractNotificationActivity : ComponentActivity() {
 //            is Result.Success -> Unit
 //            is Result.Failure -> finish()
 //        }
-        dismissIncomingCallNotifications()
+        dismissIncomingCallNotifications(guid)
     }
 
     /**
      * Dismisses any notifications that might be active with a given notification ID.
      * Used to clear up the notification state if the call has been accepted or rejected.
      */
-    private fun dismissIncomingCallNotifications() {
-        val notificationId = intent.getIntExtra(INTENT_EXTRA_NOTIFICATION_ID, 0)
+    private fun dismissIncomingCallNotifications(callCid: StreamCallId) {
+        // A call has a single notification; the incoming-call notification's id comes from the
+        // shared generator, so derive it from the call id and cancel it. (Replaces the deprecated
+        // INTENT_EXTRA_NOTIFICATION_ID extra.)
+        val notificationId = callCid.getNotificationId(NotificationType.Incoming)
         NotificationManagerCompat.from(this).cancel(notificationId)
         finish()
     }

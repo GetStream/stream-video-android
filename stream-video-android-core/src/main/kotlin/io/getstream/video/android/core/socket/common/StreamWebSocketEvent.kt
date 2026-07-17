@@ -22,6 +22,13 @@ import io.getstream.video.android.core.events.SfuDataEvent
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 public sealed class StreamWebSocketEvent {
+    /**
+     * The underlying transport WebSocket connection has been opened (the HTTP→WS
+     * upgrade completed). Note this is distinct from the application-level
+     * "connected" signal, which only happens once the server delivers its
+     * handshake response (e.g. SFU [SfuDataEvent]/JoinResponse).
+     */
+    object Open : StreamWebSocketEvent() { override fun toString(): String = "Open" }
     data class Error(
         val streamError: io.getstream.result.Error,
         val reconnectStrategy: WebsocketReconnectStrategy? = null,

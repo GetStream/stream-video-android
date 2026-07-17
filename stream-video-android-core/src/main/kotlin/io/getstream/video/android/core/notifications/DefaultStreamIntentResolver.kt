@@ -367,10 +367,6 @@ public class DefaultStreamIntentResolver(
                 resolveInfo.activityInfo.name,
             )
             putExtra(NotificationHandler.INTENT_EXTRA_CALL_CID, callId)
-            putExtra(
-                NotificationHandler.INTENT_EXTRA_NOTIFICATION_ID,
-                callId.cid,
-            )
         }
     }
 }

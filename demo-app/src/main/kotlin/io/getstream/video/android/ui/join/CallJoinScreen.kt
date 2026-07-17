@@ -103,6 +103,7 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
+import io.getstream.video.android.ui.CallSettingsScreen
 import io.getstream.video.android.ui.LogFilesScreen
 import io.getstream.video.android.ui.SingleButtonDialog
 import io.getstream.video.android.util.config.AppConfig
@@ -125,6 +126,7 @@ fun CallJoinScreen(
     val isNetworkAvailable by callJoinViewModel.isNetworkAvailable.collectAsStateWithLifecycle()
 
     var renderLogsFileUi by remember { mutableStateOf(false) }
+    var renderCallSettingsUi by remember { mutableStateOf(false) }
 
     HandleCallJoinUiState(
         callJoinUiState = uiState,
@@ -150,6 +152,9 @@ fun CallJoinScreen(
             },
             onLogsClick = {
                 renderLogsFileUi = true
+            },
+            onCallSettingsClink = {
+                renderCallSettingsUi = true
             },
         )
 
@@ -195,6 +200,12 @@ fun CallJoinScreen(
             renderLogsFileUi = false
         })
     }
+
+    if (renderCallSettingsUi) {
+        CallSettingsScreen(onClose = {
+            renderCallSettingsUi = false
+        })
+    }
 }
 
 @Composable
@@ -224,6 +235,7 @@ private fun CallJoinHeader(
     onDirectCallClick: () -> Unit,
     onSignOutClick: () -> Unit,
     onLogsClick: () -> Unit,
+    onCallSettingsClink: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -327,6 +339,19 @@ private fun CallJoinHeader(
                         }
                         Spacer(modifier = Modifier.width(5.dp))
                         if (!isProduction) {
+                            StreamButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("Stream_CallSettingsButton"),
+                                icon = Icons.Default.Settings,
+                                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                                text = stringResource(id = R.string.call_settings),
+                                onClick = {
+                                    showMenu = false
+                                    onCallSettingsClink()
+                                },
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
                             StreamButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -743,6 +768,6 @@ private fun CallJoinScreenLandscapePreview() {
 private fun CallJoinScreenHeader() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallJoinHeader(previewUsers[0], false, true, {}, {}, {}, {})
+        CallJoinHeader(previewUsers[0], false, true, {}, {}, {}, {}, {})
     }
 }

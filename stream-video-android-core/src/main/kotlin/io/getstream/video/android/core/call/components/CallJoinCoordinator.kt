@@ -34,9 +34,13 @@ import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyti
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.model.toIceServer
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
  * Drives the join flow for a [Call]: permission checks, the bounded retry loop, the
@@ -223,7 +227,7 @@ internal class CallJoinCoordinator(
                 null
             }
         val result =
-            joinRequest(
+            call.joinRequest(
                 options,
                 locationResult.value,
                 ring = ring,
@@ -240,8 +244,8 @@ internal class CallJoinCoordinator(
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
         val sfuName = result.value.credentials.server.edgeName
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
-        val localSession = if (Call.testInstanceProvider.rtcSessionCreator != null) {
-            Call.testInstanceProvider.rtcSessionCreator!!.invoke()
+        val localSession = if (call.unitTestRtcSessionFactory != null) {
+            call.unitTestRtcSessionFactory!!.invoke()
         } else {
             RtcSession(
                 sessionId = call.sessionId,
@@ -264,22 +268,107 @@ internal class CallJoinCoordinator(
         }
         session.value = localSession
 
-        session.value?.let {
-            state._connection.value = RealtimeConnection.Joined(it)
-        }
+        state._connection.value = RealtimeConnection.Joined(localSession)
 
-        when (val result = session.value?.connectInternal()) {
-            is SfuConnectionResult.Connected -> Unit
-            is SfuConnectionResult.Failed ->
-                return Failure(
-                    Error.GenericError(result.error.message ?: "RtcSession error occurred."),
-                )
-            null ->
-                return Failure(Error.GenericError("RtcSession was null during connect"))
+        // This is the SFU ws connection
+        val sfuConnectionResult = localSession.connectInternal()
+
+        when (sfuConnectionResult) {
+            is SfuConnectionResult.Success -> Unit
+            is SfuConnectionResult.Failure -> {
+                when (sfuConnectionResult.cause) {
+                    SfuConnectFailureCause.SocketStateObservationTimeout -> {
+                        // REJOIN (not FAST) on purpose: a connect timeout means the initial
+                        // join never completed. There is no established SFU session or
+                        // negotiated media path to resume, so a FAST resume would likely hit
+                        // PARTICIPANT_NOT_FOUND and burn attempts before the loop escalates.
+                        // A full REJOIN re-fetches credentials and starts a clean join, which
+                        // is the only thing that can actually succeed here.
+                        logger.w {
+                            "[_join] SFU socket state observation timed out with no recovery started — triggering REJOIN"
+                        }
+                        call.scope.launch {
+                            call.reconnect(
+                                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                                "join-recoverable-connect-failure",
+                            )
+                        }
+                    }
+
+                    SfuConnectFailureCause.RecoverableSocketFailure -> {
+                        logger.w { "[_join] Recoverable SFU socket failure — awaiting recovery outcome" }
+                    }
+
+                    SfuConnectFailureCause.TerminalSocketFailure -> {
+                        logger.e {
+                            "[_join] Got terminal error while connecting to SFU. Error : $sfuConnectionResult"
+                        }
+                        sendJoinErrorAnalytics(sfuConnectionResult)
+                        return Failure(
+                            Error.GenericError(
+                                sfuConnectionResult.error.message ?: "RtcSession error occurred.",
+                            ),
+                        )
+                    }
+                }
+
+                if (sfuConnectionResult.cause != SfuConnectFailureCause.TerminalSocketFailure) {
+                    if (!didReconnectSucceed()) {
+                        logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
+                        sendJoinErrorAnalytics(sfuConnectionResult)
+                        return Failure(
+                            Error.GenericError(
+                                sfuConnectionResult.error.message ?: "SFU connection failed",
+                            ),
+                        )
+                    }
+                }
+            }
         }
+        val connectedSession = session.value
+            ?: return Failure(Error.GenericError("RtcSession was cleared during connection to sfu"))
         call.client.state.setActiveCall(call)
-        call.monitorSession(result.value)
-        return Success(value = session.value!!)
+        // rejoin/migrate recovery swaps in a NEW session and already calls monitorSession()
+        // with the recovered join response. fastReconnect recovery — and the normal success
+        // path — keep the original session, which is not monitored anywhere else. Only
+        // (re)establish monitoring when the session is unchanged, using the response that
+        // still matches it, so we neither double-register nor monitor with a stale response.
+        if (connectedSession === localSession) {
+            call.monitorSession(result.value)
+        }
+        return Success(value = connectedSession)
+    }
+
+    /**
+     * Reports the SFU WebSocket join failure to analytics. Only called from the join
+     * flow ([joinInternal]) so that reconnect-driven [RtcSession.connectInternal] failures
+     * are not counted as join errors. The retry count comes from the session's
+     * [RtcSession.sfuWsRetryCount]; the failure reason and abort code come straight from
+     * the [SfuConnectionResult.Failure] the connect attempt produced.
+     */
+    private fun sendJoinErrorAnalytics(failure: SfuConnectionResult.Failure) {
+        callAnalytics.sfuAnalytics.onSfuWsCompleted(
+            success = false,
+            retryCount = session.value?.sfuWsRetryCount?.get() ?: 0,
+            failureReason = failure.error.message,
+            failureCode = (failure.abortReason ?: AnalyticsCallAbortReason.SFU_ERROR).name,
+        )
+    }
+
+    /**
+     * Suspends until the reconnect loop triggered by a recoverable connection failure
+     * reaches a terminal state, returning `true` if the call recovered (became
+     * [RealtimeConnection.Connected]) and `false` otherwise
+     * ([RealtimeConnection.ReconnectingFailed] / [RealtimeConnection.Disconnected]).
+     */
+    private suspend fun didReconnectSucceed(): Boolean {
+        val terminal = state.connection.first {
+            it is RealtimeConnection.Connected ||
+                it is RealtimeConnection.ReconnectingFailed ||
+                it is RealtimeConnection.Disconnected
+        }
+        logger.d { "[_join] Reconnect after recoverable connection failure settled on $terminal" }
+        return terminal is RealtimeConnection.Connected
     }
 
     suspend fun joinRequest(

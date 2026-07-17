@@ -21,6 +21,7 @@ import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.UserActionCause
+import io.getstream.video.android.core.analytics.call.observer.VideoAnalyticsIceState
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
@@ -170,8 +171,8 @@ class CallAnalyticsTest {
 
         verify(exactly = 1) {
             reporter.abortAllPostCallInFlight(
-                PeerConnection.IceConnectionState.CONNECTED,
-                PeerConnection.IceConnectionState.DISCONNECTED,
+                VideoAnalyticsIceState.CONNECTED,
+                VideoAnalyticsIceState.NOT_CONNECTED,
                 AnalyticsCallAbortReason.CLIENT_ABORTED.name,
                 any(),
             )

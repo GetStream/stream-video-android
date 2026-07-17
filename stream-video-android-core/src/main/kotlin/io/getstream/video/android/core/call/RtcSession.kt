@@ -34,6 +34,7 @@ import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
+import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
@@ -46,7 +47,6 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
-import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
@@ -58,6 +58,7 @@ import io.getstream.video.android.core.call.utils.SessionFatalException
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishOptionsEvent
 import io.getstream.video.android.core.events.ChangePublishQualityEvent
@@ -82,7 +83,6 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
-import io.getstream.video.android.core.socket.common.SocketActions
 import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.common.token.TokenRepository
@@ -164,7 +164,10 @@ import stream.video.sfu.signal.UpdateMuteStatesRequest
 import stream.video.sfu.signal.UpdateMuteStatesResponse
 import stream.video.sfu.signal.UpdateSubscriptionsRequest
 import stream.video.sfu.signal.UpdateSubscriptionsResponse
+import java.io.InterruptedIOException
+import java.net.SocketTimeoutException
 import java.util.Collections
+import java.util.concurrent.atomic.AtomicInteger
 /**
  * Keeps track of which track is being rendered at what resolution.
  * Also stores if the track is visible or not
@@ -182,7 +185,7 @@ data class TrackDimensions(
  * It handles everything webrtc related.
  * State is handled by the call state class
  *
- * @see CallState
+ * @see io.getstream.video.android.core.CallState
  *
  * Audio/video management is done by the MediaManager
  *
@@ -215,8 +218,25 @@ internal class PeerConnectionNotUsableException :
  * connected successfully or the attempt failed.
  */
 internal sealed class SfuConnectionResult {
-    object Connected : SfuConnectionResult()
-    data class Failed(val error: Exception) : SfuConnectionResult()
+    object Success : SfuConnectionResult()
+
+    /**
+     * The connection attempt failed.
+     *
+     * @param cause the classified failure cause. Callers can use it to decide
+     * whether to start recovery, await recovery already started by `stateJob`,
+     * or fail immediately.
+     * @param cause See [SfuConnectFailureCause]
+     * @param abortReason the analytics abort reason derived from the disconnect
+     * state's error code, or `null` when the terminal state carried no error.
+     * The caller (the join flow) decides whether/when to report it, so that
+     * analytics are not emitted for reconnect-driven `connectInternal` calls.
+     */
+    data class Failure(
+        val error: Exception,
+        val cause: SfuConnectFailureCause,
+        val abortReason: AnalyticsCallAbortReason? = null,
+    ) : SfuConnectionResult()
 }
 
 /**
@@ -268,7 +288,7 @@ public class RtcSession internal constructor(
             apiKey = apiKey,
             apiUrl = sfuUrl,
             wssUrl = sfuWsUrl,
-            connectionTimeoutInMs = 2000L,
+            connectionTimeoutInMs = clientImpl.connectionTimeoutInMs,
             lifecycle = lifecycle,
             onSfuApiError = { error ->
                 if (call.state.connection.value is RealtimeConnection.Disconnected) return@SfuConnectionModule
@@ -302,6 +322,14 @@ public class RtcSession internal constructor(
 ) {
     private var muteStateSyncJob: Job? = null
     private val oneBasedSessionCounter = sessionCounter + 1
+
+    /**
+     * Number of SFU WebSocket *retries* for this session. Starts at 0 and stays there
+     * for the initial connect; incremented only on reconnection attempts (any
+     * [connectInternal] call carrying [ReconnectDetails]). Reset to 0 once the socket
+     * reaches [SfuSocketState.Connected].
+     */
+    internal val sfuWsRetryCount = AtomicInteger(0)
 
     private var stateJob: Job? = null
     private var eventJob: Job? = null
@@ -689,6 +717,8 @@ public class RtcSession internal constructor(
                 _sfuSfuSocketState.value = sfuSocketState
                 when (sfuSocketState) {
                     is SfuSocketState.Connected -> {
+                        // Capture how many retries it took, then reset for the next cycle.
+                        val retryCount = sfuWsRetryCount.getAndSet(0)
                         call.state._connection.value =
                             RealtimeConnection.Connected
                         call.onSfuConnectionEstablished()
@@ -699,9 +729,10 @@ public class RtcSession internal constructor(
                         pendingTrickleEvents.forEach {
                             sendIceCandidate(it.first, it.second)
                         }
+                        // Success scenario analytics
                         call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
                             success = true,
-                            retryCount = 0,
+                            retryCount = retryCount,
                         )
                     }
 
@@ -715,6 +746,8 @@ public class RtcSession internal constructor(
                     }
 
                     is SfuSocketState.Disconnected.DisconnectedTemporarily -> {
+                        // Covers generic socket drops and connection timeouts alike — the
+                        // carried error holds the exact code/reason, so no per-type branching.
                         val strategy = sfuSocketState.reconnectStrategy
                         val reason = "SFU:${sfuSocketState.error.message}:$strategy"
                         logger.w { "[stateJob] SFU sent $strategy for $sfuName" }
@@ -874,8 +907,8 @@ public class RtcSession internal constructor(
         options: List<PublishOption>? = null,
     ) {
         when (val result = connectInternal(reconnectDetails, options)) {
-            is SfuConnectionResult.Connected -> Unit
-            is SfuConnectionResult.Failed -> throw result.error
+            is SfuConnectionResult.Success -> Unit
+            is SfuConnectionResult.Failure -> throw result.error
         }
     }
 
@@ -887,7 +920,6 @@ public class RtcSession internal constructor(
     internal suspend fun connectInternal(
         reconnectDetails: ReconnectDetails? = null,
         options: List<PublishOption>? = null,
-        joinAnalyticsModel: JoinAnalyticsModel? = null,
     ): SfuConnectionResult {
         logger.i { "[connectInternal] #sfu; #track; reconnect=${reconnectDetails?.strategy}" }
         val request = buildJoinRequest(reconnectDetails, options)
@@ -898,57 +930,124 @@ public class RtcSession internal constructor(
             },
         )
         listenToSfuSocket()
+        // Only reconnection attempts count as retries; the initial connect leaves the count at 0.
+        val retryCount = if (reconnectDetails != null) {
+            sfuWsRetryCount.incrementAndGet()
+        } else {
+            sfuWsRetryCount.get()
+        }
+        logger.d {
+            "[connectInternal] SFU WS connect (retryCount=$retryCount, reconnect=${reconnectDetails?.strategy})"
+        }
         sfuConnectionModule.socketConnection.connect(request)
-        val terminalState = withTimeoutOrNull(SocketActions.DEFAULT_SOCKET_TIMEOUT) {
+        val connectTimeoutMs = connectInternalSafetyTimeoutMs()
+        val sfuSocketState = withTimeoutOrNull(connectTimeoutMs) {
             sfuConnectionModule.socketConnection.state().first {
                 it is SfuSocketState.Connected || it is SfuSocketState.Disconnected
             }
         }
-        return when (terminalState) {
-            is SfuSocketState.Connected -> {
-                sendConnectionTimeStats(reconnectDetails?.strategy)
-                SfuConnectionResult.Connected
-            }
-            is SfuSocketState.Disconnected -> {
-                val msg = when (terminalState) {
-                    is SfuSocketState.Disconnected.DisconnectedTemporarily ->
-                        "SFU socket disconnected: ${terminalState.error.message}"
-                    is SfuSocketState.Disconnected.DisconnectedPermanently ->
-                        "SFU socket permanently disconnected: ${terminalState.error.message}"
-                    else -> "SFU socket disconnected"
-                }
-                logger.w { "[connectInternal] $msg" }
-                sfuTracer.trace("connect-failed", msg)
-                sendCallStats()
-                when (terminalState) {
-                    is SfuSocketState.Disconnected.DisconnectedTemporarily,
-                    is SfuSocketState.Disconnected.DisconnectedPermanently,
-                    -> {
-                        call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
-                            success = false,
-                            retryCount = joinAnalyticsModel?.retryAttempt ?: 0,
-                            failureReason = msg,
-                            failureCode = AnalyticsCallAbortReason.SFU_ERROR.name,
-                        )
-                    }
-
-                    else -> {}
-                }
-
-                SfuConnectionResult.Failed(Exception(msg))
-            }
-            else -> {
-                sfuTracer.trace("connect-failed", "Connection timed out")
-                sendCallStats()
-                call.callAnalytics.sfuAnalytics.onSfuWsCompleted(
-                    success = false,
-                    retryCount = joinAnalyticsModel?.retryAttempt ?: 0,
-                    failureReason = "SFU connection timed out",
-                    failureCode = AnalyticsCallAbortReason.REQUEST_TIMEOUT.name,
-                )
-                SfuConnectionResult.Failed(Exception("SFU connection timed out"))
-            }
+        if (sfuSocketState == null) {
+            // Safety net: the socket never reached a terminal state (Connected or
+            // Disconnected) within the timeout. This happens when the socket layer's own
+            // timers fail to fire and it gets stuck in a non-terminal state — e.g. the
+            // HTTP→WS upgrade stalls (proxy/captive portal drops packets silently, half-open
+            // TCP after a network handoff) so OkHttp never opens or errors the socket, or the
+            // WS opens but the SFU never sends the JoinResponse and the join-response wait
+            // never completes. Without this branch, `.first { }` would suspend forever.
+            val msg =
+                "SFU connection timed out waiting for socket state (${connectTimeoutMs}ms)"
+            logger.w { "[connectInternal] $msg" }
+            sfuTracer.trace("connect-failed", msg)
+            // The socket never reached a terminal state, so the connect attempt is still
+            // in flight. Tear it down before returning so a late Connected/JoinResponse
+            // can't resurface through stateJob and resurrect this abandoned session.
+            sfuConnectionModule.socketConnection.disconnect()
+            sendCallStats()
+            return SfuConnectionResult.Failure(
+                error = Exception(msg),
+                cause = SfuConnectFailureCause.SocketStateObservationTimeout,
+                abortReason = AnalyticsCallAbortReason.REQUEST_TIMEOUT,
+            )
         }
+        return if (sfuSocketState is SfuSocketState.Connected) {
+            sendConnectionTimeStats(reconnectDetails?.strategy)
+            sfuTracer.trace("sfu-connected", sfuName)
+            SfuConnectionResult.Success
+        } else {
+            // Single source of truth: the disconnect state's NetworkError carries the exact
+            // code + reason. We surface the derived message + analytics abort reason on the
+            // result but do NOT report analytics here — connectInternal also runs during
+            // reconnect, and join-error analytics must only be emitted from the join flow.
+            val networkError = (sfuSocketState as? SfuSocketState.Disconnected)?.networkErrorOrNull()
+            val msg = networkError?.message ?: "SFU socket disconnected"
+            logger.w { "[connectInternal] $msg" }
+            sfuTracer.trace("connect-failed", msg)
+            sendCallStats()
+            val cause = if ((sfuSocketState as? SfuSocketState.Disconnected)?.isRecoverable() == true) {
+                SfuConnectFailureCause.RecoverableSocketFailure
+            } else {
+                SfuConnectFailureCause.TerminalSocketFailure
+            }
+            SfuConnectionResult.Failure(
+                error = Exception(msg),
+                cause = cause,
+                abortReason = networkError?.toAbortReason(),
+            )
+        }
+    }
+
+    /**
+     * Whether [stateJob] reacts to this disconnect by launching a [Call.reconnect].
+     * Used by the initial-join flow to decide whether to await the recovery loop
+     * instead of failing permanently.
+     *
+     * MUST mirror the reconnect-triggering branches in [stateJob]; the exhaustive
+     * `when` (no `else`) makes a new [SfuSocketState.Disconnected] subtype a compile
+     * error here, forcing both sites to stay in sync.
+     */
+    private fun SfuSocketState.Disconnected.isRecoverable(): Boolean = when (this) {
+        is SfuSocketState.Disconnected.DisconnectedTemporarily,
+        is SfuSocketState.Disconnected.WebSocketEventLost,
+        -> true
+
+        is SfuSocketState.Disconnected.DisconnectedByRequest,
+        is SfuSocketState.Disconnected.DisconnectedPermanently,
+        is SfuSocketState.Disconnected.NetworkDisconnected,
+        is SfuSocketState.Disconnected.Rejoin,
+        is SfuSocketState.Disconnected.Stopped,
+        -> false
+    }
+
+    /**
+     * Extracts the [Error.NetworkError] carried by a disconnect state, if any.
+     * Only [SfuSocketState.Disconnected.DisconnectedTemporarily] and
+     * [SfuSocketState.Disconnected.DisconnectedPermanently] carry one.
+     */
+    private fun SfuSocketState.Disconnected.networkErrorOrNull(): Error.NetworkError? = when (this) {
+        is SfuSocketState.Disconnected.DisconnectedTemporarily -> error
+        is SfuSocketState.Disconnected.DisconnectedPermanently -> error
+        else -> null
+    }
+
+    /**
+     * Maps a disconnect [Error.NetworkError] to the analytics abort reason. Both flavours of
+     * timeout report [AnalyticsCallAbortReason.REQUEST_TIMEOUT]:
+     *  - a missing JoinResponse after the socket opened (tagged [VideoErrorCode.SFU_JOIN_RESPONSE_TIMEOUT]), and
+     *  - a transport connect/read timeout: [java.net.SocketTimeoutException], or a bare
+     *    [java.io.InterruptedIOException] with message "timeout" (OkHttp connect/call timeout).
+     * Everything else is attributed to [AnalyticsCallAbortReason.SFU_ERROR].
+     */
+    private fun Error.NetworkError.toAbortReason(): AnalyticsCallAbortReason = when {
+        serverErrorCode == VideoErrorCode.SFU_JOIN_RESPONSE_TIMEOUT.code ->
+            AnalyticsCallAbortReason.REQUEST_TIMEOUT
+        cause.isTransportTimeout() -> AnalyticsCallAbortReason.REQUEST_TIMEOUT
+        else -> AnalyticsCallAbortReason.SFU_ERROR
+    }
+
+    private fun Throwable?.isTransportTimeout(): Boolean = when (this) {
+        is SocketTimeoutException -> true
+        is InterruptedIOException -> message?.contains("timeout", ignoreCase = true) == true
+        else -> false
     }
 
     private suspend fun buildJoinRequest(
@@ -1868,7 +1967,7 @@ public class RtcSession internal constructor(
     // share what size and which participants we're looking at
     suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> =
         subscriber.value?.restartIce() ?: Failure(
-            io.getstream.result.Error.ThrowableError(
+            Error.ThrowableError(
                 "Subscriber is null",
                 Exception("Subscriber is null"),
             ),
@@ -1920,7 +2019,7 @@ public class RtcSession internal constructor(
         return Triple(previousSessionId, currentSubscriptions, publisherTracks)
     }
 
-    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?, joinAnalyticsModel: JoinAnalyticsModel? = null): FastReconnectResult {
+    internal suspend fun fastReconnect(reconnectDetails: ReconnectDetails?): FastReconnectResult {
         logger.d { "[fastReconnect] Starting fast reconnect." }
         sfuTracer.trace("fastReconnect", reconnectDetails.toString())
         val (_, _, publisherTracks) = currentSfuInfo()
@@ -1929,9 +2028,8 @@ public class RtcSession internal constructor(
         val connectResult = connectInternal(
             reconnectDetails,
             publisher.value?.currentOptions(),
-            joinAnalyticsModel,
         )
-        if (connectResult is SfuConnectionResult.Failed) {
+        if (connectResult is SfuConnectionResult.Failure) {
             return FastReconnectResult.Failed(connectResult.error)
         }
 
@@ -2061,5 +2159,18 @@ public class RtcSession internal constructor(
         sfuTracer.trace("leave-session", reason)
         val request = SfuRequest(leave_call_request = leaveCallRequest)
         sfuConnectionModule.socketConnection.sendEvent(SfuDataRequest(request))
+    }
+
+    /**
+     * Upper bound for [connectInternal] waiting on a terminal [SfuSocketState]. The socket
+     * layer already bounds the HTTP→WS upgrade (OkHttp) and the post-open join-response
+     * wait separately, each by [StreamVideoClient.connectionTimeoutInMs]; this adds
+     * headroom so [connectInternal] still returns if those timers never fire.
+     */
+    private fun connectInternalSafetyTimeoutMs(): Long =
+        clientImpl.connectionTimeoutInMs * 2 + CONNECT_INTERNAL_SAFETY_GRACE_MS
+
+    private companion object {
+        private const val CONNECT_INTERNAL_SAFETY_GRACE_MS = 1_000L
     }
 }

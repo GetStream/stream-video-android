@@ -18,7 +18,9 @@ package io.getstream.video.android.core.analytics.reporting
 
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.analytics.call.observer.VideoAnalyticsIceState
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
+import io.getstream.video.android.core.analytics.coordinator.CoordinatorAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.reporting.model.EventOutcome
 import io.getstream.video.android.core.analytics.reporting.model.EventStage
 import io.getstream.video.android.core.analytics.reporting.model.EventType
@@ -27,7 +29,11 @@ import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
 import org.webrtc.PeerConnection
 
-internal class ClientEventFactory(val sdkVersion: String, val userAgent: () -> String, val getCoordinatorId: () -> String) {
+internal class ClientEventFactory(
+    val sdkVersion: String,
+    val userAgent: () -> String,
+    val coordinatorAnalyticsStateHolder: CoordinatorAnalyticsStateHolder,
+) {
 
     fun buildRequest(
         callId: String? = null,
@@ -46,7 +52,7 @@ internal class ClientEventFactory(val sdkVersion: String, val userAgent: () -> S
         sfuId: String? = null,
         peerConnection: PeerConnectionRole? = null,
         wasPreviouslyConnected: Boolean? = null,
-        iceState: PeerConnection.IceConnectionState? = null,
+        iceState: VideoAnalyticsIceState? = null,
         peerConnectionState: PeerConnection.PeerConnectionState? = null,
         userSessionId: String? = null,
         screenShareAllowed: Boolean? = null,
@@ -66,7 +72,7 @@ internal class ClientEventFactory(val sdkVersion: String, val userAgent: () -> S
         userId = StreamVideo.Companion.instanceOrNull()?.userId,
         callSessionId = callSessionId,
         elapsedTime = elapsedTime?.toInt(),
-        iceState = iceState?.name,
+        iceState = iceState?.text,
         outcome = outcome?.value,
         peerConnection = peerConnection?.value,
         previouslyConnectedTimestamp = null,
@@ -80,7 +86,7 @@ internal class ClientEventFactory(val sdkVersion: String, val userAgent: () -> S
         microphonePermissionStatus = getPermissionStatusText(microphoneAllowed),
         cameraPermissionStatus = getPermissionStatusText(cameraAllowed),
         trackId = trackId,
-        coordinatorConnectId = getCoordinatorId(),
+        coordinatorConnectId = coordinatorAnalyticsStateHolder.coordinatorConnectId.value,
         joinReason = joinReason?.message,
     )
 

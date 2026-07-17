@@ -83,8 +83,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.analytics.coordinator.CoordinatorAnalytics
-import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
+import io.getstream.video.android.core.analytics.AnalyticsModule
 import io.getstream.video.android.core.audio.AudioExecutionContext
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.errors.VideoErrorCode
@@ -189,6 +188,7 @@ internal class StreamVideoClient internal constructor(
     internal val appName: String? = null,
     internal val audioProcessing: ManagedAudioProcessingFactory? = null,
     internal val loggingLevel: LoggingLevel = LoggingLevel(),
+    internal val connectionTimeoutInMs: Long = 5_000,
     internal val leaveAfterDisconnectSeconds: Long = 30,
     internal val appVersion: String? = null,
     internal val enableCallUpdatesAfterLeave: Boolean = false,
@@ -196,8 +196,9 @@ internal class StreamVideoClient internal constructor(
     internal val enableStereoForSubscriber: Boolean = true,
     internal val telecomConfig: TelecomConfig? = null,
     internal val rejectCallWhenBusy: Boolean = false,
-    internal val clientEventReporter: ClientEventReporter = ClientEventReporter.getDefault(
+    internal val analytics: AnalyticsModule = AnalyticsModule.getDefault(
         coordinatorConnectionModule.api,
+        scope,
     ),
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
@@ -236,7 +237,6 @@ internal class StreamVideoClient internal constructor(
     internal fun getAudioContext(): AudioExecutionContext = audioExecutionContext
 
     val socketImpl = coordinatorConnectionModule.socketConnection
-    val coordinatorAnalytics = CoordinatorAnalytics(scope, clientEventReporter)
     fun onCallCleanUp(call: Call) {
         if (enableCallUpdatesAfterLeave) {
             logger.d { "[cleanup] Call updates are required, preserve the instance: ${call.cid}" }
@@ -273,7 +273,7 @@ internal class StreamVideoClient internal constructor(
             CallLeaveReason.SdkDriven(cause = SdkCause.CLIENT_CLEANUP),
         )
         audioExecutionContext.release()
-        coordinatorAnalytics.endObserver()
+        analytics.coordinatorAnalytics.endObserver()
     }
 
     /**
@@ -432,7 +432,7 @@ internal class StreamVideoClient internal constructor(
         }
 
         scope.launch {
-            coordinatorAnalytics
+            analytics.coordinatorAnalytics
                 .startObserver(coordinatorConnectionModule.socketConnection.state())
         }
 

@@ -75,6 +75,10 @@ import io.getstream.video.android.ui.common.R
  * @param permissions Android permissions that should be required to render a video call properly.
  * @param onRenderedContent A video renderer, which renders a local video track before joining a call.
  * @param onDisabledContent Content is shown that a local camera is disabled. It displays user avatar by default.
+ * @param videoPreviewModifier Modifier applied to the [Box] that wraps the local video preview. Defaults
+ * to a responsive height (180/280/200dp depending on screen size and orientation), full width, and a
+ * 12dp rounded corner clip. Override to provide custom size, shape, padding, or background — useful
+ * when the preview needs to match a host layout instead of the SDK's default sizing.
  * @param participantLabelContent Slot for the participant label overlaid on the preview. Defaults to a
  * label showing the user's name and microphone state at [Alignment.BottomStart]. Pass `{}` to hide the
  * label entirely, or override to provide custom positioning and content (use [BoxScope.align] inside).
@@ -118,6 +122,7 @@ public fun CallLobby(
     onDisabledContent: @Composable () -> Unit = {
         OnDisabledContent(user = user)
     },
+    videoPreviewModifier: Modifier = defaultVideoPreviewModifier(),
     participantLabelContent: @Composable BoxScope.() -> Unit = {
         DefaultParticipantLabel(
             user = user,
@@ -144,18 +149,10 @@ public fun CallLobby(
     DefaultPermissionHandler(videoPermission = permissions)
 
     MediaPiPLifecycle(call = call, PictureInPictureConfiguration(false, false))
-    val configuration = LocalConfiguration.current
-    val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
-    val screenHeightDp = configuration.screenHeightDp
-
-    val boxModifier = Modifier
-        .responsiveHeight(isPortrait, screenHeightDp)
-        .fillMaxWidth()
-        .clip(RoundedCornerShape(12.dp))
 
     Column(modifier = modifier) {
         Box(
-            modifier = boxModifier,
+            modifier = videoPreviewModifier,
         ) {
             if (isCameraEnabled) {
                 onRenderedContent.invoke(video)
@@ -356,6 +353,16 @@ private fun OnDisabledContent(user: User) {
             userName = user.name.takeUnless { it.isNullOrBlank() } ?: user.id,
         )
     }
+}
+
+@Composable
+private fun defaultVideoPreviewModifier(): Modifier {
+    val configuration = LocalConfiguration.current
+    val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+    return Modifier
+        .responsiveHeight(isPortrait = isPortrait, screenHeightDp = configuration.screenHeightDp)
+        .fillMaxWidth()
+        .clip(RoundedCornerShape(12.dp))
 }
 
 private fun Modifier.responsiveHeight(isPortrait: Boolean, screenHeightDp: Int): Modifier {

@@ -1307,7 +1307,7 @@ public class CallState(
         }
     }
 
-    private fun updateRingingState(rejectReason: RejectReason? = null) {
+    internal fun updateRingingState(rejectReason: RejectReason? = null) {
         when (ringingState.value) {
             RingingState.TimeoutNoAnswer, RingingState.RejectedByAll -> {
                 return

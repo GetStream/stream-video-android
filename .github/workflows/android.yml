@@ -18,5 +18,13 @@ concurrency:
 
 jobs:
   base-android-ci:
-    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@v0.13.1
-    secrets: inherit
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@8c5fbade4ee9c06a0a979bcb0866e64669254f73
+    secrets:
+      BUILD_CACHE_AWS_REGION: ${{ secrets.BUILD_CACHE_AWS_REGION }}
+      BUILD_CACHE_AWS_BUCKET: ${{ secrets.BUILD_CACHE_AWS_BUCKET }}
+      BUILD_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.BUILD_CACHE_AWS_ACCESS_KEY_ID }}
+      BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

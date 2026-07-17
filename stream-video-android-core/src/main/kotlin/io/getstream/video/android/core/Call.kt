@@ -177,6 +177,10 @@ public class Call(
             sessionManager.reconnectStartTime = value
         }
 
+    // Unit-test only hook for replacing RtcSession construction.
+    // TODO(v2): replace this with a proper dependency injection boundary.
+    internal var unitTestRtcSessionFactory: (() -> RtcSession)? = null
+
     /** Delegate that owns the event flow, subscriptions and event dispatch. */
     private val eventManager = CallEventManager(this)
 
@@ -927,7 +931,6 @@ public class Call(
 
         internal class TestInstanceProvider {
             var mediaManagerCreator: (() -> MediaManagerImpl)? = null
-            var rtcSessionCreator: (() -> RtcSession)? = null
         }
     }
 }

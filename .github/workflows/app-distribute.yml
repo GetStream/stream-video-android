@@ -8,18 +8,26 @@ on:
 
 jobs:
   build_dogfooding_sample_app:
+    permissions:
+      actions: write
+      contents: read
     name: Build and Distribute Dogfooding Android
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - uses: GetStream/android-ci-actions/actions/setup-java@main
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: GetStream/android-ci-actions/actions/setup-java@cb46e4f44d105a68738bfd2a1cfd156bb768665b
       - name: Prepare environment
+        env:
+          ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
+          PASSPHRASE: ${{ secrets.PASSPHRASE }}
+          RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
+          RELEASE_KEYSTORE_PROPERTIES: ${{ secrets.RELEASE_KEYSTORE_PROPERTIES }}
         run: |
-          echo "${{ secrets.RELEASE_KEYSTORE }}" > .sign/release.keystore.asc
-          gpg -d --passphrase "${{ secrets.PASSPHRASE }}" --batch .sign/release.keystore.asc > .sign/release.keystore
-          echo "${{ secrets.RELEASE_KEYSTORE_PROPERTIES }}" > .sign/keystore.properties.asc
-          gpg -d --passphrase "${{ secrets.PASSPHRASE }}" --batch .sign/keystore.properties.asc > .sign/keystore.properties
-          echo "${{ secrets.ENV_PROPERTIES }}" > .env.properties
+          echo "${{ env.RELEASE_KEYSTORE }}" > .sign/release.keystore.asc
+          gpg -d --passphrase "${{ env.PASSPHRASE }}" --batch .sign/release.keystore.asc > .sign/release.keystore
+          echo "${{ env.RELEASE_KEYSTORE_PROPERTIES }}" > .sign/keystore.properties.asc
+          gpg -d --passphrase "${{ env.PASSPHRASE }}" --batch .sign/keystore.properties.asc > .sign/keystore.properties
+          echo "${{ env.ENV_PROPERTIES }}" > .env.properties
       - name: Assemble
         run: bash ./gradlew :demo-app:assembleRelease --stacktrace
       - name: Upload APK
@@ -28,7 +36,7 @@ jobs:
           name: demo-app-release
           path: demo-app/build/outputs/apk/demo-app/release/
       - name: Upload artifact to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1.7.1
+        uses: wzieba/Firebase-Distribution-Github-Action@bd494989dd4bec0343f78adee87fe66e48279ad6
         with:
           appId: ${{secrets.FIREBASE_DOGFOODING_SAMPLE_APP_ID}}
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}

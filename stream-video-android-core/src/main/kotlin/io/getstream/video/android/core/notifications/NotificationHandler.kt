@@ -70,6 +70,11 @@ public interface NotificationHandler :
         const val INTENT_EXTRA_CALL_DISPLAY_NAME: String =
             "io.getstream.video.android.intent-extra.call_displayname"
 
+        @Deprecated(
+            message = "Notification ids are managed internally and this extra is no longer " +
+                "populated. Read the active notification id from CallState.notificationIdFlow, or " +
+                "derive it with StreamCallId.getNotificationId(NotificationType).",
+        )
         const val INTENT_EXTRA_NOTIFICATION_ID: String =
             "io.getstream.video.android.intent-extra.notification_id"
 
