@@ -388,37 +388,14 @@ public class Call(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
         callJoinInterceptor: CallJoinInterceptor? = null,
-    ): Result<RtcSession> {
-        callAnalytics.joinAnalytics.onJoinFunctionStart()
-        callAnalytics.mediaPermissionObserver.mediaPermissionStatus()
-        logger.d {
-            "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
-        }
-        val permissionPass =
-            clientImpl.permissionCheck.checkAndroidPermissionsGroup(clientImpl.context, this)
-        // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
-        if (!permissionPass.first) {
-            logger.w {
-                "\n[Call.join()] called without having the required permissions.\n" +
-                    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
-                    "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
-                    "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
-                    "otherwise the service will fail to start, resulting in a crash.\n" +
-                    "You can re-define your permissions and their expected state by overriding the [permissionCheck] in [StreamVideoBuilder]\n"
-            }
-        }
-        // if we are a guest user, make sure we wait for the token before running the join flow
-        clientImpl.guestUserJob?.await()
-
-        return joinCoordinator.join(
-            create,
-            createOptions,
-            ring,
-            notify,
-            hintHighScaleLivestreamPublisher,
-            callJoinInterceptor,
-        )
-    }
+    ): Result<RtcSession> = joinCoordinator.join(
+        create,
+        createOptions,
+        ring,
+        notify,
+        hintHighScaleLivestreamPublisher,
+        callJoinInterceptor,
+    )
 
     suspend fun joinAndRing(
         members: List<String>,
