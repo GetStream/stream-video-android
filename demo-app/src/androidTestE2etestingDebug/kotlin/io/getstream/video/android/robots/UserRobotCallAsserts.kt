@@ -202,7 +202,12 @@ fun UserRobot.assertRecordingView(isDisplayed: Boolean): UserRobot {
         assertTrue(CallPage.recordingIcon.waitToAppear(timeOutMillis = 30.seconds).isDisplayed())
         assertEquals(label, CallPage.callInfoView.findObject().text)
     } else {
-        assertFalse(CallPage.recordingIcon.waitToDisappear().isDisplayed())
+        // Recording stop is also backend-driven (call.recording_stopped); give it room.
+        // waitToDisappear returns as soon as the icon is gone, so the longer timeout is
+        // only spent when the backend is slow.
+        assertFalse(
+            CallPage.recordingIcon.waitToDisappear(timeOutMillis = 30.seconds).isDisplayed(),
+        )
         assertNotEquals(label, CallPage.callInfoView.findObject().text)
     }
     return this
