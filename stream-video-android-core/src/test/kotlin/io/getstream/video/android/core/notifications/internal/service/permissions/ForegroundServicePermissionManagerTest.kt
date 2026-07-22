@@ -27,6 +27,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowApplication
+import org.robolectric.util.ReflectionHelpers
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -97,6 +98,40 @@ class ForegroundServicePermissionManagerTest {
     fun `pre Q returns zero service type`() {
         val type = manager.allPermissionsServiceType()
         assertEquals(0, type)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.UPSIDE_DOWN_CAKE])
+    fun `incoming call keeps short service below android 17`() {
+        // ringingServiceType only switches to phoneCall from Android 17 up, where the
+        // background-audio hardening applies. Android 14/15/16 keep their existing behavior.
+        val type = manager.getServiceType(
+            context,
+            CallService.TRIGGER_INCOMING_CALL,
+        )
+
+        assertEquals(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
+            type,
+        )
+    }
+
+    @Test
+    fun `incoming call uses phone call service type on android 17 and above`() {
+        // Android 17 background-audio hardening mutes the ringtone under SHORT_SERVICE; use the
+        // while-in-use phoneCall type instead. Robolectric 4.11.1 caps @Config at API 34, so the
+        // >= 37 branch is exercised by forcing SDK_INT.
+        ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", 37)
+
+        val type = manager.getServiceType(
+            context,
+            CallService.TRIGGER_INCOMING_CALL,
+        )
+
+        assertEquals(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
+            type,
+        )
     }
 
     @Test
