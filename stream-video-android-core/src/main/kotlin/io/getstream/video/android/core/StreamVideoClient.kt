@@ -778,7 +778,7 @@ internal class StreamVideoClient internal constructor(
         logger.d { "[getOrCreateCall] type: $type, id: $id, members: $members" }
 
         return apiCall {
-            coordinatorConnectionModule.api.getOrCreateCall( //noob
+            coordinatorConnectionModule.api.getOrCreateCall(
                 type = type,
                 id = id,
                 getOrCreateCallRequest = GetOrCreateCallRequest(
