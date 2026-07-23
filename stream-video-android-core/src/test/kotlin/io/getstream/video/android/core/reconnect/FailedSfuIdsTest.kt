@@ -38,29 +38,41 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
     private fun Call.injectMockNetwork(connected: Boolean = true) {
         val mockNetwork = mockk<NetworkStateProvider>(relaxed = true)
         every { mockNetwork.isConnected() } returns connected
-        val field = Call::class.java.getDeclaredField("network\$delegate")
+        val monitorField = Call::class.java.getDeclaredField("connectivityMonitor")
+        monitorField.isAccessible = true
+        val monitor = monitorField.get(this)
+        val field = monitor.javaClass.getDeclaredField("network\$delegate")
         field.isAccessible = true
-        field.set(this, lazyOf(mockNetwork))
+        field.set(monitor, lazyOf(mockNetwork))
+    }
+
+    private fun Call.reconnector(): Any {
+        val field = Call::class.java.getDeclaredField("reconnector")
+        field.isAccessible = true
+        return field.get(this)
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun Call.getFailedSfuIds(): MutableSet<String> {
-        val field = Call::class.java.getDeclaredField("failedSfuIds")
+        val reconnector = reconnector()
+        val field = reconnector.javaClass.getDeclaredField("failedSfuIds")
         field.isAccessible = true
-        return field.get(this) as MutableSet<String>
+        return field.get(reconnector) as MutableSet<String>
     }
 
     private fun Call.invokeAddFailedSfuId(sfuId: String) {
-        val method = Call::class.java.getDeclaredMethod("addFailedSfuId", String::class.java)
+        val reconnector = reconnector()
+        val method = reconnector.javaClass.getDeclaredMethod("addFailedSfuId", String::class.java)
         method.isAccessible = true
-        method.invoke(this, sfuId)
+        method.invoke(reconnector, sfuId)
     }
 
     private fun Call.invokeGetFailedSfuIdsSnapshot(): List<String> {
-        val method = Call::class.java.getDeclaredMethod("getFailedSfuIdsSnapshot")
+        val reconnector = reconnector()
+        val method = reconnector.javaClass.getDeclaredMethod("getFailedSfuIdsSnapshot")
         method.isAccessible = true
         @Suppress("UNCHECKED_CAST")
-        return method.invoke(this) as List<String>
+        return method.invoke(reconnector) as List<String>
     }
 
     @Test

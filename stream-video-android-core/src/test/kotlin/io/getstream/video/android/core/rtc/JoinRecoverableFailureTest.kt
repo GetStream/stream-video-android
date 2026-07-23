@@ -110,6 +110,11 @@ class JoinRecoverableFailureTest {
             ),
         )
 
+        // The join flow was extracted into CallJoinCoordinator, which captured the real
+        // Call in Call's constructor. Repoint it at the spy so stubs on call.joinRequest /
+        // call.reconnect and call.unitTestRtcSessionFactory are visible to the coordinator.
+        repointJoinCoordinatorToSpy(call)
+
         // _join builds the JoinCallResponse via joinRequest; stub it out.
         coEvery {
             call.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
@@ -123,6 +128,15 @@ class JoinRecoverableFailureTest {
     fun tearDown() {
         StreamVideo.removeClient()
         unmockkAll()
+    }
+
+    private fun repointJoinCoordinatorToSpy(spy: Call) {
+        val coordinatorField = Call::class.java.getDeclaredField("joinCoordinator")
+        coordinatorField.isAccessible = true
+        val coordinator = coordinatorField.get(spy)
+        val callField = coordinator.javaClass.getDeclaredField("call")
+        callField.isAccessible = true
+        callField.set(coordinator, spy)
     }
 
     @Test
