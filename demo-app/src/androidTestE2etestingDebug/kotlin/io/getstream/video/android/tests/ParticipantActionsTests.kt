@@ -140,9 +140,14 @@ class ParticipantActionsTests : StreamTestCase() {
         step("GIVEN user starts a call") {
             userRobot.joinCall()
         }
-        step("AND participant joins the call and starts recording the call for 10 seconds") {
+        step("AND participant joins the call and starts recording the call") {
+            // Composite recording spins up ~10-15s after the request, so a short duration
+            // leaves almost no client-visible window. Record for 60s (and keep the buddy
+            // in the call for 120s) so the icon is reliably observable across all views,
+            // then still stops in time for the "recording disappeared" assertions.
             participantRobot
-                .setCallRecordingDuration(15)
+                .setCallDuration(120)
+                .setCallRecordingDuration(60)
                 .joinCall(callId, actions = arrayOf(RECORD_CALL))
         }
         step("WHEN participants join the call and one of them starts recording") {
