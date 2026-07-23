@@ -373,7 +373,7 @@ internal class CallReconnector(
         )
         call.state.removeParticipant(prevSessionId)
         oldSession.prepareRejoin("rejoin")
-        val newSession = RtcSession(
+        val newSession = call.unitTestRtcSessionFactory?.invoke() ?: RtcSession(
             clientImpl,
             call.nonFastReconnectAttempts,
             call.powerManager,
@@ -456,7 +456,7 @@ internal class CallReconnector(
         oldSession.sendCallStats(stats)
         oldSession.enterMigration()
 
-        val newSession = RtcSession(
+        val newSession = call.unitTestRtcSessionFactory?.invoke() ?: RtcSession(
             clientImpl,
             call.nonFastReconnectAttempts,
             call.powerManager,

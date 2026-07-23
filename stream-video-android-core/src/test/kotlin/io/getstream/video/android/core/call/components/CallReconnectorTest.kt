@@ -17,12 +17,18 @@
 package io.getstream.video.android.core.call.components
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.connection.Publisher
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -159,5 +165,86 @@ class CallReconnectorTest {
         reconnector.rejoin("helper")
         reconnector.migrate()
         advanceUntilIdle()
+    }
+
+    @Test
+    fun `rejoin swaps in the new session and monitors it on success`() = runTest(testDispatcher) {
+        val oldSession = mockk<RtcSession>(relaxed = true)
+        val newSession = mockk<RtcSession>(relaxed = true)
+        val joinResponse = mockk<JoinCallResponse>(relaxed = true)
+        prepareRejoinOrMigrate(oldSession, newSession, joinResponse)
+        coEvery { newSession.connectInternal(any(), any()) } returns SfuConnectionResult.Success
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+            "rejoin",
+        )
+        advanceUntilIdle()
+
+        assertThat(sessionFlow.value).isSameInstanceAs(newSession)
+        coVerify { call.monitorSession(joinResponse) }
+    }
+
+    @Test
+    fun `rejoin failures are retried until the attempts are exhausted`() = runTest(testDispatcher) {
+        val oldSession = mockk<RtcSession>(relaxed = true)
+        val newSession = mockk<RtcSession>(relaxed = true)
+        val joinResponse = mockk<JoinCallResponse>(relaxed = true)
+        prepareRejoinOrMigrate(oldSession, newSession, joinResponse)
+        coEvery { newSession.connectInternal(any(), any()) } returns SfuConnectionResult.Failure(
+            Exception("rejoin failed"),
+            cause = io.getstream.video.android.core.call.SfuConnectFailureCause.RecoverableSocketFailure,
+        )
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+            "rejoin",
+        )
+        advanceUntilIdle()
+
+        verify { call.leave(any<CallLeaveReason>()) }
+    }
+
+    @Test
+    fun `migrate swaps in the new session and finalizes the old one on success`() = runTest(
+        testDispatcher,
+    ) {
+        val oldSession = mockk<RtcSession>(relaxed = true)
+        val newSession = mockk<RtcSession>(relaxed = true)
+        val joinResponse = mockk<JoinCallResponse>(relaxed = true)
+        prepareRejoinOrMigrate(oldSession, newSession, joinResponse)
+        coEvery { newSession.connectInternal(any(), any()) } returns SfuConnectionResult.Success
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+            "migrate",
+        )
+        advanceUntilIdle()
+
+        assertThat(sessionFlow.value).isSameInstanceAs(newSession)
+        coVerify { oldSession.finalizeMigration() }
+        coVerify { call.monitorSession(joinResponse) }
+    }
+
+    /**
+     * Wires up the shared happy-path state a rejoin/migrate needs: a resolvable location,
+     * an existing (old) session, a stubbed join request and an injected new session.
+     */
+    private fun prepareRejoinOrMigrate(
+        oldSession: RtcSession,
+        newSession: RtcSession,
+        joinResponse: JoinCallResponse,
+    ) {
+        every { call.location } returns "test-location"
+        sessionFlow.value = oldSession
+        // The old session becomes the new one on every retry, so both need the same stubs.
+        for (s in listOf(oldSession, newSession)) {
+            every { s.currentSfuInfo() } returns Triple("prev-session", emptyList(), emptyList())
+            every { s.publisher } returns MutableStateFlow<Publisher?>(null)
+        }
+        coEvery {
+            call.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        } returns Success(joinResponse)
+        every { call.unitTestRtcSessionFactory } returns { newSession }
     }
 }

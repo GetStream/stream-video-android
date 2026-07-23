@@ -18,6 +18,9 @@ package io.getstream.video.android.core.call.components
 
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.video.android.core.model.AudioTrack
+import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.mockk.every
 import io.mockk.mockk
@@ -25,6 +28,7 @@ import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Test
 import stream.video.sfu.models.TrackType
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Unit tests for [CallRenderer], which binds tracks to renderers and forwards
@@ -135,5 +139,39 @@ class CallRendererTest {
 
         // No tracks available -> should return without throwing.
         renderer().setIncomingAudioEnabled(enabled = true)
+    }
+
+    @Test
+    fun `setIncomingAudioEnabled toggles audio for all participants`() {
+        val audioTrack = mockk<AudioTrack>(relaxed = true)
+        sessionFlow.value = sessionWithAudioTrack(audioTrack)
+
+        renderer().setIncomingAudioEnabled(enabled = false)
+
+        verify { audioTrack.enableAudio(false) }
+    }
+
+    @Test
+    fun `setIncomingAudioEnabled toggles audio for the requested sessions`() {
+        val audioTrack = mockk<AudioTrack>(relaxed = true)
+        sessionFlow.value = sessionWithAudioTrack(audioTrack)
+
+        renderer().setIncomingAudioEnabled(enabled = true, sessionIds = listOf("s1"))
+
+        verify { audioTrack.enableAudio(true) }
+    }
+
+    private fun sessionWithAudioTrack(audioTrack: AudioTrack): RtcSession {
+        val innerTracks = ConcurrentHashMap<TrackType, MediaTrack>().apply {
+            put(TrackType.TRACK_TYPE_AUDIO, audioTrack)
+        }
+        val tracks = ConcurrentHashMap<String, ConcurrentHashMap<TrackType, MediaTrack>>().apply {
+            put("s1", innerTracks)
+        }
+        val subscriber = mockk<Subscriber>(relaxed = true)
+        every { subscriber.tracks } returns tracks
+        return mockk<RtcSession>(relaxed = true).also {
+            every { it.subscriber } returns MutableStateFlow(subscriber)
+        }
     }
 }
