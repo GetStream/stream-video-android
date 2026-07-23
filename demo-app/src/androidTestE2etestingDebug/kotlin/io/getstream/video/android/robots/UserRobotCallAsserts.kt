@@ -197,10 +197,17 @@ fun UserRobot.assertConnectionQualityIndicator(): UserRobot {
 fun UserRobot.assertRecordingView(isDisplayed: Boolean): UserRobot {
     val label = "Recording"
     if (isDisplayed) {
-        assertTrue(CallPage.recordingIcon.waitToAppear().isDisplayed())
+        // The backend composite recorder can take 20-30s to actually start and emit
+        // call.recording_started, so the icon needs a longer window than the 5s default.
+        assertTrue(CallPage.recordingIcon.waitToAppear(timeOutMillis = 30.seconds).isDisplayed())
         assertEquals(label, CallPage.callInfoView.findObject().text)
     } else {
-        assertFalse(CallPage.recordingIcon.waitToDisappear().isDisplayed())
+        // The buddy records for ~60s, so the icon stays visible until the backend emits
+        // call.recording_stopped. waitToDisappear returns as soon as the icon is gone, so
+        // this longer timeout is only fully spent if the recording is still running.
+        assertFalse(
+            CallPage.recordingIcon.waitToDisappear(timeOutMillis = 70.seconds).isDisplayed(),
+        )
         assertNotEquals(label, CallPage.callInfoView.findObject().text)
     }
     return this
@@ -254,9 +261,11 @@ fun UserRobot.assertIncomingCall(isDisplayed: Boolean): UserRobot {
 
 fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean): UserRobot {
     if (isDisplayed) {
+        // The outgoing ringing screen only renders after the call create/ring network
+        // round-trip completes, which can exceed 10s under CI load.
         assertTrue(
             "Decline call button",
-            RingPage.declineCallButton.waitToAppear(timeOutMillis = 10.seconds).isDisplayed(),
+            RingPage.declineCallButton.waitToAppear(timeOutMillis = 20.seconds).isDisplayed(),
         )
         assertTrue("Call label", RingPage.outgoingCallLabel.isDisplayed())
         assertTrue("Avatar", RingPage.callParticipantAvatar.isDisplayed())
