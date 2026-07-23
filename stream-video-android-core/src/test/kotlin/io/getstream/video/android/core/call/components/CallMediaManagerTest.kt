@@ -22,8 +22,10 @@ import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
+import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.mockk.every
@@ -32,6 +34,8 @@ import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -164,5 +168,46 @@ class CallMediaManagerTest {
     @Test
     fun `localMicrophoneAudioLevel is exposed`() {
         assertThat(manager().localMicrophoneAudioLevel.value).isEqualTo(0f)
+    }
+
+    @Test
+    fun `updateMediaManagerFromSettings initialises not-yet-selected devices`() = runTest(
+        testDispatcher,
+    ) {
+        every { mediaManager.speaker.status } returns MutableStateFlow(DeviceStatus.NotSelected)
+        every { mediaManager.camera.status } returns MutableStateFlow(DeviceStatus.NotSelected)
+        every { mediaManager.microphone.status } returns MutableStateFlow(DeviceStatus.NotSelected)
+        every { mediaManager.microphone.devices } returns MutableStateFlow(emptyList())
+
+        manager().updateMediaManagerFromSettings(mockk(relaxed = true))
+        advanceUntilIdle()
+
+        verify { mediaManager.speaker.setEnabled(any()) }
+        verify { mediaManager.camera.setEnabled(any()) }
+        verify { mediaManager.microphone.setEnabled(any()) }
+    }
+
+    @Test
+    fun `monitorHeadset selects a bluetooth headset when available`() = runTest(testDispatcher) {
+        val bluetooth = mockk<StreamAudioDevice.BluetoothHeadset>(relaxed = true)
+        every { mediaManager.microphone.devices } returns MutableStateFlow(listOf(bluetooth))
+
+        manager().updateMediaManagerFromSettings(mockk(relaxed = true))
+        advanceUntilIdle()
+
+        verify { mediaManager.microphone.select(bluetooth) }
+    }
+
+    @Test
+    fun `monitorHeadset selects a wired headset when no bluetooth is present`() = runTest(
+        testDispatcher,
+    ) {
+        val wired = mockk<StreamAudioDevice.WiredHeadset>(relaxed = true)
+        every { mediaManager.microphone.devices } returns MutableStateFlow(listOf(wired))
+
+        manager().updateMediaManagerFromSettings(mockk(relaxed = true))
+        advanceUntilIdle()
+
+        verify { mediaManager.microphone.select(wired) }
     }
 }

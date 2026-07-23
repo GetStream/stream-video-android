@@ -21,6 +21,7 @@ import io.getstream.android.video.generated.models.GetCallResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.MemberRequest
+import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.android.video.generated.models.StartHLSBroadcastingResponse
 import io.getstream.android.video.generated.models.StopLiveResponse
 import io.getstream.android.video.generated.models.UpdateCallResponse
@@ -263,6 +264,25 @@ class CallApiClientTest {
         coVerify { clientImpl.notify("default", "call-id") }
         coVerify { clientImpl.accept("default", "call-id") }
         coVerify { clientImpl.reject("default", "call-id", RejectReason.Cancel) }
+    }
+
+    @Test
+    fun `ring with an explicit request delegates`() = runTest(testDispatcher) {
+        val request = RingCallRequest(video = true)
+        apiClient.ring(request)
+        coVerify { clientImpl.ring("default", "call-id", request) }
+    }
+
+    @Test
+    fun `create with members and ring registers an outgoing ringing call`() = runTest(
+        testDispatcher,
+    ) {
+        apiClient.create(members = listOf(MemberRequest(userId = "u1")), ring = true)
+
+        coVerify {
+            clientImpl.getOrCreateCallFullMembers(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+        }
+        coVerify { call.client.state.addRingingCall(any(), any()) }
     }
 
     @Test
