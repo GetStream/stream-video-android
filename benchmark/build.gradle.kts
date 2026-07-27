@@ -51,12 +51,10 @@ android {
 
     targetProjectPath = ":demo-app"
 
-    testOptions.managedDevices.devices {
-        maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel6api31").apply {
-            device = "Pixel 6"
-            apiLevel = 31
-            systemImageSource = "aosp"
-        }
+    testOptions.managedDevices.localDevices.maybeCreate("pixel6api31").apply {
+        device = "Pixel 6"
+        apiLevel = 31
+        systemImageSource = "aosp"
     }
 }
 

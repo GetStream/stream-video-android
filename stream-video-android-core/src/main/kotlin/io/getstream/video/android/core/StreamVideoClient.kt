@@ -229,7 +229,7 @@ internal class StreamVideoClient internal constructor(
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
     private var calls = mutableMapOf<String, Call>()
-    private val destroyedCalls = LruCache<Int, Call>(maxSize = 100)
+    private val destroyedCalls = LruCache<Int, Call>(100)
     internal val callSoundAndVibrationPlayer = CallSoundAndVibrationPlayer(context)
 
     internal val audioExecutionContext = AudioExecutionContext()

@@ -1,11 +1,12 @@
 import com.android.build.gradle.LibraryExtension
 import io.getstream.video.configureAndroidCompose
 import io.getstream.video.configureKotlinAndroid
-import io.getstream.video.kotlinOptions
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -20,12 +21,14 @@ class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
                 configureKotlinAndroid(this)
                 configureAndroidCompose(this)
 
-                kotlinOptions {
-                    freeCompilerArgs = freeCompilerArgs + listOf("-Xexplicit-api=strict")
-                }
-
                 dependencies {
                     add("baselineProfile", project(":benchmark"))
+                }
+            }
+
+            tasks.withType<KotlinCompile>().configureEach {
+                compilerOptions {
+                    freeCompilerArgs.addAll("-Xexplicit-api=strict")
                 }
             }
         }

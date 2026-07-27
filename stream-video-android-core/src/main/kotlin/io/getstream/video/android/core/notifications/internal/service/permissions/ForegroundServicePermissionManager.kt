@@ -100,10 +100,9 @@ internal open class ForegroundServicePermissionManager {
      */
     @SuppressLint("InlinedApi")
     internal open fun incomingRingingServiceType(): Int =
-        // TODO: replace the hardcoded 37 with Build.VERSION_CODES.<ANDROID_17> once compileSdk /
-        //  targetSdk are raised to 37; the constant does not exist at the current compileSdk.
+        // Android 17 (API 37) = Build.VERSION_CODES.CINNAMON_BUN.
         if (requiredForegroundTypes.contains(ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL) &&
-            Build.VERSION.SDK_INT >= 37
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN
         ) {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
         } else {

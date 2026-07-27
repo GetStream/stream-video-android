@@ -175,7 +175,7 @@ androidComponents {
                     .filterKeys { "$it".startsWith(buildConfigKeyPrefix) }
                     .forEach {
                         val key: String = it.key.toString().replace(buildConfigKeyPrefix, "")
-                        applicationVariant.buildConfigFields.put(
+                        applicationVariant.buildConfigFields?.put(
                             key,
                             BuildConfigField("String", "\"${it.value}\"", null),
                         )
@@ -185,7 +185,7 @@ androidComponents {
                     .forEach {
                         val key: String = it.key.toString()
                             .replace(resConfigKeyPrefix, "")
-                            .toLowerCase()
+                            .lowercase()
                         applicationVariant.resValues.put(
                             applicationVariant.makeResValueKey("string", key),
                             ResValue("${it.value}"),
@@ -204,6 +204,18 @@ androidComponents {
             if (applicationVariant.name == "developmentDebug" || applicationVariant.name == "productionDebug") {
                 dependencies.add("${applicationVariant.name}Implementation", libs.leakCanary)
             }
+        }
+    }
+}
+
+// stream-chat (6.10.0) transitively pulls the old stream-log file logger (1.3.1), whose namespace
+// `io.getstream.log` collides with stream-log-android's. AGP 9 rejects duplicate namespaces (was a
+// warning before). Bumping the catalog `streamLog` only moves the direct stream-log-android; this
+// forces the transitive stream-log-file family up to 1.3.4, where it moved to `io.getstream.log.file`.
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "io.getstream" && requested.name.startsWith("stream-log")) {
+            useVersion("1.3.4")
         }
     }
 }

@@ -12,7 +12,7 @@ java {
 dependencies {
   compileOnly(libs.android.gradlePlugin)
   compileOnly(libs.kotlin.gradlePlugin)
-  // compileOnly(libs.compose.compiler.gradlePlugin) -> Enable with Kotlin 2.0+
+  compileOnly(libs.compose.compiler.gradlePlugin)
   compileOnly(libs.spotless.gradlePlugin)
 }
 

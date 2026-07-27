@@ -89,12 +89,10 @@ android {
         }
 
         managedDevices {
-            devices {
-                maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel2api31").apply {
-                    device = "Pixel 2"
-                    apiLevel = 31
-                    systemImageSource = "aosp"
-                }
+            localDevices.maybeCreate("pixel2api31").apply {
+                device = "Pixel 2"
+                apiLevel = 31
+                systemImageSource = "aosp"
             }
         }
     }
@@ -124,12 +122,12 @@ android {
     resourcePrefix = "stream_video_"
 
     sourceSets.getByName("main") {
-        kotlin.srcDir("${project.buildDir}/generated/source/services")
+        kotlin.srcDir(layout.buildDirectory.dir("generated/source/services").get().asFile)
     }
 
     packaging {
-        exclude("META-INF/LICENSE.md")
-        exclude("META-INF/LICENSE-notice.md")
+        resources.excludes.add("META-INF/LICENSE.md")
+        resources.excludes.add("META-INF/LICENSE-notice.md")
     }
 }
 

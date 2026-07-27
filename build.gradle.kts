@@ -25,7 +25,7 @@ plugins {
   alias(libs.plugins.stream.java.platform) apply false
   alias(libs.plugins.android.application) apply false
   alias(libs.plugins.kotlin.android) apply false
-  // alias(libs.plugins.compose.compiler) apply false -> Enable with Kotlin 2.0+
+  alias(libs.plugins.compose.compiler) apply false
   alias(libs.plugins.kotlin.serialization) apply false
   alias(libs.plugins.kotlin.compatibility.validator) apply false
   alias(libs.plugins.ksp) apply false
@@ -73,9 +73,9 @@ streamProject {
 
 subprojects {
   if (name.startsWith("stream-video-android")) {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-      kotlinOptions.freeCompilerArgs += listOf(
-        "-Xjvm-default=enable",
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+      compilerOptions.freeCompilerArgs.addAll(
+        "-Xjvm-default=all",
         "-opt-in=io.getstream.video.android.core.internal.InternalStreamVideoApi"
       )
     }
@@ -85,8 +85,8 @@ subprojects {
   if (name.startsWith("stream-video-android")
       && !name.startsWith("stream-video-android-core")
       && !name.contains("metrics")) {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-      kotlinOptions.freeCompilerArgs += listOf(
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+      compilerOptions.freeCompilerArgs.addAll(
         "-Xexplicit-api=strict"
       )
     }
@@ -102,14 +102,12 @@ subprojects {
 
 afterEvaluate {
     println("Running Add Pre Commit Git Hook Script on Build")
-    exec {
-        if (System.getProperty("os.name").toLowerCase().contains("win")) {
-            // Windows-specific command
-            commandLine("cmd", "/c", "copy", ".\\scripts\\git-hooks\\pre-push", ".\\.git\\hooks")
-        } else {
-            // Unix-based systems
-            commandLine("cp", "./scripts/git-hooks/pre-push", "./.git/hooks")
-        }
+    val prePushSource = file("scripts/git-hooks/pre-push")
+    val gitHooksDir = file(".git/hooks")
+    if (prePushSource.exists() && gitHooksDir.isDirectory) {
+        val prePushTarget = File(gitHooksDir, "pre-push")
+        prePushSource.copyTo(prePushTarget, overwrite = true)
+        prePushTarget.setExecutable(true)
+        println("Added pre-push Git Hook Script.")
     }
-    println("Added pre-push Git Hook Script.")
 }
