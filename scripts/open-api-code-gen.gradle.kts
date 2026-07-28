@@ -7,7 +7,6 @@ tasks.register<Exec>("generateOpenApiClient") {
     val refValue = project.findProperty("refValue") as? String ?: "feature/rahullohra/master_feeds_kotlin_open_api_generator-v2"
 
     val modelPackageName = project.findProperty("modelPackage") as? String ?: "io.getstream.android.video.generated.models"
-    val modelsDir = project.findProperty("modelsDir") as? String ?: "models"
 
     val apiServicePackageName = project.findProperty("apiServicePackage") as? String ?: "io.getstream.android.video.generated.apis"
     val apiServiceClassName = project.findProperty("apiServiceClassName") as? String ?: "ProductvideoApi"
@@ -50,7 +49,6 @@ tasks.register<Exec>("generateOpenApiClient") {
         "--ref-type=$refType",
         "--ref-value=$refValue",
         "--model-package-name=$modelPackageName",
-        "--model-dir=$modelsDir",
         "--api-service-package-name=$apiServicePackageName",
         "--api-service-class-name=$apiServiceClassName",
         "--api-service-dir=$apiServiceDir",
