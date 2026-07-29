@@ -16,6 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: GetStream/android-ci-actions/actions/setup-java@main
+        with:
+          java-version: '21'
       - uses: GetStream/android-ci-actions/actions/enable-kvm@main
       - uses: GetStream/android-ci-actions/actions/setup-ruby@main
       - uses: GetStream/android-ci-actions/actions/gradle-cache@main

@@ -21,6 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: GetStream/android-ci-actions/actions/setup-java@main
+        with:
+          java-version: '21'
       - name: Prepare environment
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE }}" > .sign/release.keystore.asc
