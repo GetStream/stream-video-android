@@ -54,6 +54,10 @@ afterEvaluate {
 //            plugins.apply(composePlugin.pluginId) // Enable with Kotlin 2.0+
             android.buildFeatures.compose = true
             val configurationName = "${flavorName}Implementation"
+            // These compose artifacts are unversioned in the catalog (versions come from the BOM).
+            // This module uses the plain `application` convention (not `.compose`), so the BOM is
+            // not applied for us — add it here or the versions resolve to empty.
+            dependencies.add(configurationName, dependencies.platform(libs.androidx.compose.bom))
             dependencies.add(configurationName, libs.androidx.compose.ui)
             dependencies.add(configurationName, libs.androidx.compose.ui.tooling)
             dependencies.add(configurationName, libs.androidx.compose.foundation)
