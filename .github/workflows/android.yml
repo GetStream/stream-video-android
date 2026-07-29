@@ -18,5 +18,5 @@ concurrency:
 
 jobs:
   base-android-ci:
-    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@v0.13.1
+    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@feature/rahullohra/build-on-sdk-37
     secrets: inherit
