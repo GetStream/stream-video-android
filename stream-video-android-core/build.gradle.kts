@@ -95,12 +95,10 @@ android {
         }
 
         managedDevices {
-            devices {
-                maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel2api31").apply {
-                    device = "Pixel 2"
-                    apiLevel = 31
-                    systemImageSource = "aosp"
-                }
+            localDevices.maybeCreate("pixel2api31").apply {
+                device = "Pixel 2"
+                apiLevel = 31
+                systemImageSource = "aosp"
             }
         }
     }

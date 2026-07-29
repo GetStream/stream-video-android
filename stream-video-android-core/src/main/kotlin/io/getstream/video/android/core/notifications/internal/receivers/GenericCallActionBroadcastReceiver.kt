@@ -59,7 +59,7 @@ internal abstract class GenericCallActionBroadcastReceiver : BroadcastReceiver()
                         if (streamVideo == null) {
                             // Stream not initialized, action not handled
                             logger.e(
-                                createMessage(
+                                message = createMessage(
                                     intentAction,
                                     "StreamVideo is not initialised. To handle notifications to initialise StreamVideo in Application.onCreate().",
                                 ),
@@ -82,7 +82,7 @@ internal abstract class GenericCallActionBroadcastReceiver : BroadcastReceiver()
                     pendingResult.finish()
                 }
             } else {
-                logger.w(createMessage(intentAction, "Stream call ID is not provided."))
+                logger.w(message = createMessage(intentAction, "Stream call ID is not provided."))
             }
         } else {
             logger.w { "[onReceive] #ringing; Context or Intent or Action is null." }

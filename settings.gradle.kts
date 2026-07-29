@@ -5,16 +5,34 @@ import com.github.burrunan.s3cache.AwsS3BuildCache
 pluginManagement {
     includeBuild("build-logic")
     repositories {
+        // mavenLocal() first so locally-published io.getstream snapshots (e.g. the AGP 9-compatible
+        // convention plugin built from stream-build-conventions-android) shadow the remote snapshot.
+        mavenLocal()
         gradlePluginPortal()
         google()
         mavenCentral()
-        mavenLocal()
+        maven(url = "https://central.sonatype.com/repository/maven-snapshots/") {
+            content {
+                includeGroupByRegex("io\\.getstream.*")
+            }
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
     }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
+        maven(url = "https://central.sonatype.com/repository/maven-snapshots/") {
+            content {
+                includeGroupByRegex("io\\.getstream.*")
+            }
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
         mavenCentral()
         maven(url = "https://plugins.gradle.org/m2/")
     }
@@ -51,7 +69,7 @@ include(":metrics:stream-video-android-metrics")
 buildCache {
     local {
         isEnabled = !System.getenv().containsKey("CI")
-        removeUnusedEntriesAfterDays = 7
+//        removeUnusedEntriesAfterDays = 7
     }
     val localProperties = java.util.Properties()
     val file = File("local.properties")

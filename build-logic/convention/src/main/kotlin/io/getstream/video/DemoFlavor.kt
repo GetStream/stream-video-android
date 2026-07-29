@@ -4,6 +4,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.ApplicationProductFlavor
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.ProductFlavor
+import org.gradle.api.NamedDomainObjectContainer
 
 @Suppress("EnumEntryName")
 enum class FlavorDimension {
@@ -21,28 +22,28 @@ enum class VideoDemoFlavor(val dimension: FlavorDimension, val applicationIdSuff
 }
 
 internal fun configureFlavors(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: CommonExtension,
 ) {
-    commonExtension.apply {
-        flavorDimensions += "environment"
-        productFlavors {
-            VideoDemoFlavor.values().forEach { flavor ->
-                create(flavor.name) {
-                    dimension = "environment"
-                    buildConfigField(
-                        "String",
-                        "APP_FLAVOR_SUFFIX",
-                        "\"${flavor.applicationIdSuffix.orEmpty()}\"",
-                    )
+    commonExtension.flavorDimensions += "environment"
 
-                    if (this@apply is ApplicationExtension && this is ApplicationProductFlavor) {
-                        if (flavor.applicationIdSuffix != null) {
-                            applicationIdSuffix = flavor.applicationIdSuffix
-                        }
-                    }
-                    proguardFiles("benchmark-rules.pro")
+    @Suppress("UNCHECKED_CAST")
+    val productFlavors =
+        commonExtension.productFlavors as NamedDomainObjectContainer<ProductFlavor>
+    VideoDemoFlavor.values().forEach { flavor ->
+        productFlavors.create(flavor.name) {
+            dimension = "environment"
+            buildConfigField(
+                "String",
+                "APP_FLAVOR_SUFFIX",
+                "\"${flavor.applicationIdSuffix.orEmpty()}\"",
+            )
+
+            if (commonExtension is ApplicationExtension && this is ApplicationProductFlavor) {
+                if (flavor.applicationIdSuffix != null) {
+                    applicationIdSuffix = flavor.applicationIdSuffix
                 }
             }
+            proguardFiles("benchmark-rules.pro")
         }
     }
 }
