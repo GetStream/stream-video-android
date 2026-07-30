@@ -292,8 +292,13 @@ internal class Publisher(
                         return newTrack
                     }
                 } catch (e: Exception) {
-                    // Fallback if anything happens with the sender
-                    logger.w { "Failed to set track for ${publishOption.track_type}, creating new transceiver" }
+                    // Fallback if anything happens with the sender. Stop the old transceiver before
+                    // replacing it; otherwise it lingers on the PeerConnection as a live sendonly m-line
+                    // that SetPublisher.tracks never announces, and the SFU force-rejoins with
+                    // "track ... not announced by user". Only stop() (not dispose()): the PC is live and
+                    // owns the native sender; disposing here is a use-after-free on network_thread.
+                    logger.w { "Failed to set track for ${publishOption.track_type}, replacing transceiver" }
+                    safeCall { transceiver.stop() }
                     transceiverCache.remove(publishOption)
                     val fallbackTrack = newTrackFromSource(publishOption.track_type)
                     traceTrack(trackType, fallbackTrack.id())
@@ -353,6 +358,20 @@ internal class Publisher(
         track: MediaStreamTrack,
         publishOption: PublishOption,
     ) {
+        // Guard against orphans: never leave two live transceivers for the same
+        // [track_type, publish_option_id]. transceiverCache is keyed by that tuple, so add() would
+        // silently overwrite the entry and strand the old transceiver on the PeerConnection, where it
+        // keeps emitting a sendonly m-line that SetPublisher.tracks doesn't announce -> SFU rejoin loop.
+        // Only stop() (not dispose()): the PC is live and owns the native transceiver; disposing here
+        // is a use-after-free on network_thread. It is freed safely when the PC is torn down.
+        transceiverCache.get(publishOption)?.let { existing ->
+            logger.w {
+                "Existing ${publishOption.track_type} transceiver found (publishOptionId=${publishOption.id}); " +
+                    "stopping it before adding a new one to avoid an orphaned m-line."
+            }
+            safeCall { existing.stop() }
+            transceiverCache.remove(publishOption)
+        }
         val rtpParametersEncodings = computeTransceiverEncodings(
             captureFormat,
             publishOption,
@@ -406,12 +425,18 @@ internal class Publisher(
         // stop publishing with options not required anymore
         for (item in transceiverCache.items()) {
             val (option, transceiver) = item
-            val hasPublishOption = transceiverCache.has(option)
-            if (!hasPublishOption) continue
-            safeCall {
-                transceiver.stop()
-                transceiver.dispose()
+            // Keep transceivers whose option is still requested by the SFU. Comparing against the
+            // cache itself (the previous behaviour) was always true, so every transceiver was torn
+            // down on each ChangePublishOptions event — dropping tracks and, because dispose() frees
+            // senders the still-live PeerConnection keeps using, hard-crashing native WebRTC.
+            val stillRequested = publishOptions.any {
+                it.id == option.id && it.track_type == option.track_type
             }
+            if (stillRequested) continue
+            // Only stop() on a live PeerConnection: the m-line goes inactive/recycled in the next
+            // offer. Never dispose() here — the PC still owns the native transceiver/sender and frees
+            // it safely at teardown. Disposing mid-session is a use-after-free on network_thread.
+            safeCall { transceiver.stop() }
             transceiverCache.remove(option)
         }
     }
