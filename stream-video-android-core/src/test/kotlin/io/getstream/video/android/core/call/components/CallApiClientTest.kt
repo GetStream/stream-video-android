@@ -26,7 +26,6 @@ import io.getstream.android.video.generated.models.StartHLSBroadcastingResponse
 import io.getstream.android.video.generated.models.StopLiveResponse
 import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.result.Result
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.RejectReason
@@ -34,7 +33,6 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.recording.RecordingType
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -56,21 +54,14 @@ class CallApiClientTest {
 
     private lateinit var clientImpl: StreamVideoClient
     private lateinit var state: CallState
-    private lateinit var call: Call
+    private lateinit var ringRegistrar: RingingCallRegistrar
     private lateinit var apiClient: CallApiClient
 
     @Before
     fun setup() {
         clientImpl = mockk(relaxed = true)
         state = mockk(relaxed = true)
-        call = mockk(relaxed = true)
-
-        every { call.type } returns "default"
-        every { call.id } returns "call-id"
-        every { call.clientImpl } returns clientImpl
-        every { call.state } returns state
-        every { call.scope } returns testScope
-        every { call.sessionId } returns "session-id"
+        ringRegistrar = mockk(relaxed = true)
 
         // Response-processing endpoints return Success so the onSuccess/state-update
         // branches are exercised.
@@ -96,7 +87,15 @@ class CallApiClientTest {
             clientImpl.startBroadcasting(any(), any())
         } returns Result.Success(mockk<StartHLSBroadcastingResponse>(relaxed = true))
 
-        apiClient = CallApiClient(call)
+        apiClient = CallApiClient(
+            type = "default",
+            id = "call-id",
+            state = state,
+            clientImpl = clientImpl,
+            scope = testScope,
+            callSessionId = { "session-id" },
+            ringRegistrar = ringRegistrar,
+        )
     }
 
     @Test
@@ -131,7 +130,8 @@ class CallApiClientTest {
     fun `create with ring registers an outgoing ringing call`() = runTest(testDispatcher) {
         apiClient.create(ring = true)
 
-        coVerify { call.client.state.addRingingCall(any(), any()) }
+        verify { ringRegistrar.beforeOutgoingStateUpdate() }
+        verify { ringRegistrar.afterOutgoingStateUpdate() }
     }
 
     @Test
@@ -282,13 +282,14 @@ class CallApiClientTest {
         coVerify {
             clientImpl.getOrCreateCallFullMembers(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
-        coVerify { call.client.state.addRingingCall(any(), any()) }
+        verify { ringRegistrar.afterOutgoingStateUpdate() }
     }
 
     @Test
     fun `accept marks the call accepted on this device`() = runTest(testDispatcher) {
         apiClient.accept()
         verify { state.acceptedOnThisDevice = true }
+        verify { ringRegistrar.onAccepted() }
     }
 
     @Test

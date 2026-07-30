@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call.components
 
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.Subscriber
@@ -45,7 +44,6 @@ class CallIceConnectionMonitorTest {
     private lateinit var publisher: Publisher
     private lateinit var subscriber: Subscriber
     private lateinit var sessionFlow: MutableStateFlow<RtcSession?>
-    private lateinit var call: Call
 
     @Before
     fun setup() {
@@ -53,17 +51,12 @@ class CallIceConnectionMonitorTest {
         publisher = mockk(relaxed = true)
         subscriber = mockk(relaxed = true)
         sessionFlow = MutableStateFlow(session)
-        call = mockk(relaxed = true)
 
-        every { call.type } returns "default"
-        every { call.id } returns "call-id"
-        every { call.scope } returns testScope
-        every { call.session } returns sessionFlow
         every { session.publisher } returns MutableStateFlow(publisher)
         every { session.subscriber } returns MutableStateFlow(subscriber)
     }
 
-    private fun monitor() = CallIceConnectionMonitor(call)
+    private fun monitor() = CallIceConnectionMonitor("default", "call-id", testScope, sessionFlow)
 
     @Test
     fun `failed publisher ice state triggers an ice restart`() = runTest(testDispatcher) {

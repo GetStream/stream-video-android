@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call.components
 
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.model.AudioTrack
@@ -37,13 +36,16 @@ import java.util.concurrent.ConcurrentHashMap
 class CallRendererTest {
 
     private val sessionFlow = MutableStateFlow<RtcSession?>(null)
-    private val call = mockk<Call>(relaxed = true).also {
-        every { it.type } returns "default"
-        every { it.id } returns "call-id"
-        every { it.session } returns sessionFlow
-    }
 
-    private fun renderer() = CallRenderer(call)
+    private fun renderer() = CallRenderer(
+        type = "default",
+        id = "call-id",
+        scope = mockk(relaxed = true),
+        session = sessionFlow,
+        callAnalytics = mockk(relaxed = true),
+        eglBase = { mockk(relaxed = true) },
+        callSessionId = { "call-id" },
+    )
 
     @Test
     fun `setVisibility updates track dimensions with default dimension`() {

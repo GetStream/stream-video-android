@@ -18,28 +18,38 @@ package io.getstream.video.android.core.call.components
 
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.BackendCause
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallLeaveReason
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
- * Observes device network connectivity for a [Call] and drives the call's response:
+ * Observes device network connectivity for a call and drives the call's response:
  * triggering a fast/rejoin reconnect when connectivity returns, and leaving the call if
  * the device stays offline past the configured `leaveAfterDisconnectSeconds`.
  *
  * Also owns the call's subscription to the underlying [NetworkStateProvider].
+ *
+ * @param reconnectDeadlineMillis a provider for the (mutable, runtime-updated) fast-reconnect
+ * deadline; read on each connectivity change rather than captured as a snapshot.
  */
 internal class CallConnectivityMonitor(
-    private val call: Call,
+    private val type: String,
+    private val id: String,
+    private val clientImpl: StreamVideoClient,
+    private val scope: CoroutineScope,
+    private val state: CallState,
+    private val reconnector: CallReconnector,
+    private val lifecycle: CallLifecycleManager,
+    private val reconnectDeadlineMillis: () -> Int,
 ) {
-    private val logger by taggedLogger("Call:ConnectivityMonitor:${call.type}:${call.id}")
-
-    private val clientImpl get() = call.clientImpl
+    private val logger by taggedLogger("Call:ConnectivityMonitor:$type:$id")
 
     private val network by lazy { clientImpl.coordinatorConnectionModule.networkStateProvider }
 
@@ -51,15 +61,16 @@ internal class CallConnectivityMonitor(
             leaveTimeoutAfterDisconnect?.cancel()
 
             val elapsedTimeMils = System.currentTimeMillis() - lastDisconnect
+            val deadlineMillis = reconnectDeadlineMillis()
             logger.d {
-                "[NetworkStateListener#onConnected] #network; no args, elapsedTimeMils:$elapsedTimeMils, lastDisconnect:$lastDisconnect, reconnectDeadlineMils:${call.reconnectDeadlineMillis}"
+                "[NetworkStateListener#onConnected] #network; no args, elapsedTimeMils:$elapsedTimeMils, lastDisconnect:$lastDisconnect, reconnectDeadlineMils:$deadlineMillis"
             }
-            val strategy = if (lastDisconnect > 0 && elapsedTimeMils < call.reconnectDeadlineMillis) {
+            val strategy = if (lastDisconnect > 0 && elapsedTimeMils < deadlineMillis) {
                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST
             } else {
                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN
             }
-            call.reconnect(strategy, "NetworkStateListener#onConnected")
+            reconnector.reconnect(strategy, "NetworkStateListener#onConnected")
         }
 
         override suspend fun onDisconnected() {
@@ -70,9 +81,9 @@ internal class CallConnectivityMonitor(
             logger.d {
                 "[NetworkStateListener#onDisconnected] #network; new lastDisconnect:$lastDisconnect"
             }
-            leaveTimeoutAfterDisconnect = call.scope.launch {
+            leaveTimeoutAfterDisconnect = scope.launch {
                 delay(clientImpl.leaveAfterDisconnectSeconds * 1000)
-                val conn = call.state.connection.value
+                val conn = state.connection.value
                 if (conn is RealtimeConnection.Connected) {
                     logger.d {
                         "[NetworkStateListener#onDisconnected] #network; Already reconnected ($conn) — not leaving"
@@ -83,7 +94,7 @@ internal class CallConnectivityMonitor(
                 logger.d {
                     "[NetworkStateListener#onDisconnected] #network; Leaving after being disconnected for ${clientImpl.leaveAfterDisconnectSeconds} (connection=$conn)"
                 }
-                call.leave(
+                lifecycle.leave(
                     CallLeaveReason.Backend(
                         cause = BackendCause.LEAVE_TIMEOUT_AFTER_DISCONNECT,
                         message = message,

@@ -74,7 +74,9 @@ class CallReconnectorTest {
         every { call.state } returns state
         every { call.session } returns sessionFlow
         every { call.isDestroyed } returns false
-        every { call.isNetworkConnected() } returns true
+        every {
+            clientImpl.coordinatorConnectionModule.networkStateProvider.isConnected()
+        } returns true
         every { call.reconnectDeadlineMillis } returns 60_000
         every { call.location } returns null
         every { state.connection } returns connectionFlow

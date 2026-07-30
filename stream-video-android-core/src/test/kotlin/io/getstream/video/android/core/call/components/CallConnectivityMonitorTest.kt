@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.call.components
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
@@ -39,8 +38,10 @@ import org.junit.Test
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
- * Tests [CallConnectivityMonitor]: network subscription forwarding, the reconnect
- * strategy chosen on reconnection, and the delayed leave when the device stays offline.
+ * Tests [CallConnectivityMonitor]: network subscription forwarding, and the actions it
+ * drives directly on its sibling components — a fast/rejoin reconnect via [CallReconnector]
+ * when connectivity returns, and a leave via [CallLifecycleManager] when the device stays
+ * offline past the deadline.
  */
 class CallConnectivityMonitorTest {
 
@@ -51,15 +52,17 @@ class CallConnectivityMonitorTest {
     private lateinit var clientImpl: StreamVideoClient
     private lateinit var state: CallState
     private lateinit var connectionFlow: MutableStateFlow<RealtimeConnection>
-    private lateinit var call: Call
+    private lateinit var reconnector: CallReconnector
+    private lateinit var lifecycle: CallLifecycleManager
 
     @Before
     fun setup() {
         network = mockk(relaxed = true)
         clientImpl = mockk(relaxed = true)
         state = mockk(relaxed = true)
+        reconnector = mockk(relaxed = true)
+        lifecycle = mockk(relaxed = true)
         connectionFlow = MutableStateFlow(RealtimeConnection.Reconnecting)
-        call = mockk(relaxed = true)
 
         val coordinatorModule = mockk<CoordinatorConnectionModule>(relaxed = true)
         every { coordinatorModule.networkStateProvider } returns network
@@ -67,16 +70,19 @@ class CallConnectivityMonitorTest {
         every { clientImpl.leaveAfterDisconnectSeconds } returns 1L
         every { network.isConnected() } returns true
 
-        every { call.type } returns "default"
-        every { call.id } returns "call-id"
-        every { call.clientImpl } returns clientImpl
-        every { call.scope } returns testScope
-        every { call.state } returns state
-        every { call.reconnectDeadlineMillis } returns 10_000
         every { state.connection } returns connectionFlow
     }
 
-    private fun monitor() = CallConnectivityMonitor(call)
+    private fun monitor() = CallConnectivityMonitor(
+        type = "default",
+        id = "call-id",
+        clientImpl = clientImpl,
+        scope = testScope,
+        state = state,
+        reconnector = reconnector,
+        lifecycle = lifecycle,
+        reconnectDeadlineMillis = { 10_000 },
+    )
 
     private fun listenerOf(monitor: CallConnectivityMonitor): NetworkStateProvider.NetworkStateListener {
         val field = CallConnectivityMonitor::class.java.getDeclaredField("listener")
@@ -98,19 +104,26 @@ class CallConnectivityMonitorTest {
     }
 
     @Test
-    fun `first connection with no prior disconnect rejoins`() = runTest(testDispatcher) {
+    fun `first connection with no prior disconnect triggers a rejoin`() = runTest(
+        testDispatcher,
+    ) {
         val listener = listenerOf(monitor())
 
         listener.onConnected()
         advanceUntilIdle()
 
         coVerify {
-            call.reconnect(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN, any())
+            reconnector.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                any(),
+            )
         }
     }
 
     @Test
-    fun `reconnection soon after a disconnect uses fast reconnect`() = runTest(testDispatcher) {
+    fun `reconnection soon after a disconnect triggers a fast reconnect`() = runTest(
+        testDispatcher,
+    ) {
         val listener = listenerOf(monitor())
 
         listener.onDisconnected()
@@ -118,7 +131,10 @@ class CallConnectivityMonitorTest {
         advanceUntilIdle()
 
         coVerify {
-            call.reconnect(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST, any())
+            reconnector.reconnect(
+                WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                any(),
+            )
         }
     }
 
@@ -130,7 +146,7 @@ class CallConnectivityMonitorTest {
         advanceTimeBy(2_000)
         advanceUntilIdle()
 
-        verify { call.leave(any<CallLeaveReason>()) }
+        verify { lifecycle.leave(any<CallLeaveReason>()) }
     }
 
     @Test
@@ -142,6 +158,6 @@ class CallConnectivityMonitorTest {
         advanceTimeBy(2_000)
         advanceUntilIdle()
 
-        verify(exactly = 0) { call.leave(any<CallLeaveReason>()) }
+        verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
     }
 }

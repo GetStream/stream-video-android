@@ -57,7 +57,6 @@ class CallMediaManagerTest {
     private lateinit var state: CallState
     private lateinit var sessionFlow: MutableStateFlow<RtcSession?>
     private lateinit var mediaManager: MediaManagerImpl
-    private lateinit var call: Call
 
     @Before
     fun setup() {
@@ -65,15 +64,9 @@ class CallMediaManagerTest {
         state = mockk(relaxed = true)
         sessionFlow = MutableStateFlow(null)
         mediaManager = mockk(relaxed = true)
-        call = mockk(relaxed = true)
 
-        every { call.type } returns "default"
-        every { call.id } returns "call-id"
-        every { call.clientImpl } returns clientImpl
-        every { call.state } returns state
-        every { call.scope } returns testScope
-        every { call.session } returns sessionFlow
-
+        // MediaManagerImpl is provided via testInstanceProvider, so eglBase / callProvider
+        // are never invoked and no real Call or native resources are needed.
         Call.testInstanceProvider.mediaManagerCreator = { mediaManager }
     }
 
@@ -82,7 +75,16 @@ class CallMediaManagerTest {
         Call.testInstanceProvider.mediaManagerCreator = null
     }
 
-    private fun manager() = CallMediaManager(call)
+    private fun manager() = CallMediaManager(
+        type = "default",
+        id = "call-id",
+        clientImpl = clientImpl,
+        scope = testScope,
+        state = state,
+        session = sessionFlow,
+        eglBase = { mockk(relaxed = true) },
+        callProvider = { mockk(relaxed = true) },
+    )
 
     @Test
     fun `startScreenSharing enables screen share when the capability is granted`() {

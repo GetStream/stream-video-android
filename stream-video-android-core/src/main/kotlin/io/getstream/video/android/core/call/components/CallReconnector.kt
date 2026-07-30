@@ -73,6 +73,11 @@ internal class CallReconnector(
     private val session get() = call.session
     private val callAnalytics get() = call.callAnalytics
 
+    // Read connectivity from the leaf NetworkStateProvider directly rather than routing
+    // through CallConnectivityMonitor — that back-reference would form a dependency cycle
+    // (ConnectivityMonitor → Reconnector → ConnectivityMonitor).
+    private val network get() = clientImpl.coordinatorConnectionModule.networkStateProvider
+
     private val reconnectMutex = Mutex()
 
     /**
@@ -178,7 +183,7 @@ internal class CallReconnector(
                 // Wait for network before doing anything else. Polls without
                 // consuming the attempt budget — the elapsed-time guard below
                 // will still fire if we wait too long.
-                if (!call.isNetworkConnected()) {
+                if (!network.isConnected()) {
                     logger.d {
                         "[reconnect] Network unavailable — waiting for connectivity (loopIteration=$loopIteration)"
                     }

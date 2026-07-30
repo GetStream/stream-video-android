@@ -18,13 +18,11 @@ package io.getstream.video.android.core.call.components
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.video.generated.models.VideoEvent
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -36,7 +34,7 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * Unit tests for [CallEventManager] which owns the event pipeline for a [Call]:
+ * Unit tests for [CallEventManager] which owns the event pipeline for a call:
  * the shared events flow, legacy subscriptions and dispatch of incoming events.
  */
 class CallEventManagerTest {
@@ -47,13 +45,9 @@ class CallEventManagerTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private val call = mockk<Call>(relaxed = true).also {
-        every { it.type } returns "default"
-        every { it.id } returns "call-id"
-        every { it.scope } returns testScope
-    }
+    private val reconnector = mockk<CallReconnector>(relaxed = true)
 
-    private fun manager() = CallEventManager(call)
+    private fun manager() = CallEventManager("default", "call-id", testScope, reconnector)
 
     @Test
     fun `subscribe without filter receives every fired event`() {
@@ -125,13 +119,13 @@ class CallEventManagerTest {
     }
 
     @Test
-    fun `handleEvent triggers migrate on GoAwayEvent`() = runTest(testDispatcher) {
+    fun `handleEvent triggers a migrate on GoAwayEvent`() = runTest(testDispatcher) {
         val manager = manager()
 
         manager.handleEvent(mockk<GoAwayEvent>(relaxed = true))
         advanceUntilIdle()
 
-        coVerify(exactly = 1) { call.migrate() }
+        coVerify(exactly = 1) { reconnector.migrate() }
     }
 
     @Test
@@ -141,6 +135,6 @@ class CallEventManagerTest {
         manager.handleEvent(mockk<SFUConnectedEvent>(relaxed = true))
         advanceUntilIdle()
 
-        coVerify(exactly = 0) { call.migrate() }
+        coVerify(exactly = 0) { reconnector.migrate() }
     }
 }

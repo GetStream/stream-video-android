@@ -17,8 +17,10 @@
 package io.getstream.video.android.core.call.components
 
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.CallStatsReport
+import io.getstream.video.android.core.call.RtcSession
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,13 +28,17 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
- * Periodically collects WebRTC stats for a [Call], reports them to the SFU, and exposes
+ * Periodically collects WebRTC stats for a call, reports them to the SFU, and exposes
  * the latest report and latency history as observable flows.
  */
 internal class CallStatsReporter(
-    private val call: Call,
+    private val type: String,
+    private val id: String,
+    private val scope: CoroutineScope,
+    private val session: MutableStateFlow<RtcSession?>,
+    private val state: CallState,
 ) {
-    private val logger by taggedLogger("Call:StatsReporter:${call.type}:${call.id}")
+    private val logger by taggedLogger("Call:StatsReporter:$type:$id")
 
     /** Contains stats events for observation. */
     val statsReport: MutableStateFlow<CallStatsReport?> = MutableStateFlow(null)
@@ -44,13 +50,13 @@ internal class CallStatsReporter(
 
     fun start(reportingIntervalMs: Long = 10_000) {
         callStatsReportingJob?.cancel()
-        callStatsReportingJob = call.scope.launch {
+        callStatsReportingJob = scope.launch {
             // Wait a bit before we start capturing stats
             delay(reportingIntervalMs)
 
             while (isActive) {
                 delay(reportingIntervalMs)
-                call.session.value?.sendCallStats(
+                session.value?.sendCallStats(
                     report = collectStats(),
                 )
             }
@@ -62,10 +68,9 @@ internal class CallStatsReporter(
     }
 
     suspend fun collectStats(): CallStatsReport {
-        val session = call.session.value
-        val state = call.state
-        val publisherStats = runCatching { session?.getPublisherStats() }.getOrNull()
-        val subscriberStats = runCatching { session?.getSubscriberStats() }.getOrNull()
+        val currentSession = session.value
+        val publisherStats = runCatching { currentSession?.getPublisherStats() }.getOrNull()
+        val subscriberStats = runCatching { currentSession?.getSubscriberStats() }.getOrNull()
         runCatching {
             state.stats.updateFromRTCStats(publisherStats, isPublisher = true)
             state.stats.updateFromRTCStats(subscriberStats, isPublisher = false)

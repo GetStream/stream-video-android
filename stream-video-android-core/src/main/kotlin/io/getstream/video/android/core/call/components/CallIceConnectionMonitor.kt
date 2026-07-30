@@ -17,8 +17,10 @@
 package io.getstream.video.android.core.call.components
 
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.call.RtcSession
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -26,13 +28,16 @@ import kotlinx.coroutines.launch
 import org.webrtc.PeerConnection
 
 /**
- * Watches the publisher and subscriber peer-connection ICE states for a [Call] and
+ * Watches the publisher and subscriber peer-connection ICE states for a call and
  * triggers an ICE restart whenever a connection FAILS or becomes DISCONNECTED.
  */
 internal class CallIceConnectionMonitor(
-    private val call: Call,
+    private val type: String,
+    private val id: String,
+    private val scope: CoroutineScope,
+    private val session: MutableStateFlow<RtcSession?>,
 ) {
-    private val logger by taggedLogger("Call:IceMonitor:${call.type}:${call.id}")
+    private val logger by taggedLogger("Call:IceMonitor:$type:$id")
 
     private var monitorPublisherPCStateJob: Job? = null
     private var monitorSubscriberPCStateJob: Job? = null
@@ -44,8 +49,8 @@ internal class CallIceConnectionMonitor(
 
     private fun startPublisherMonitor() {
         monitorPublisherPCStateJob?.cancel()
-        monitorPublisherPCStateJob = call.scope.launch {
-            call.session
+        monitorPublisherPCStateJob = scope.launch {
+            session
                 .filterNotNull()
                 .flatMapLatest { it.publisher.filterNotNull() }
                 .flatMapLatest { publisher ->
@@ -68,11 +73,11 @@ internal class CallIceConnectionMonitor(
 
     private fun startSubscriberMonitor() {
         monitorSubscriberPCStateJob?.cancel()
-        monitorSubscriberPCStateJob = call.scope.launch {
-            call.session.value?.subscriber?.value?.iceState?.collect {
+        monitorSubscriberPCStateJob = scope.launch {
+            session.value?.subscriber?.value?.iceState?.collect {
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        call.session.value?.requestSubscriberIceRestart()
+                        session.value?.requestSubscriberIceRestart()
                     }
 
                     else -> {

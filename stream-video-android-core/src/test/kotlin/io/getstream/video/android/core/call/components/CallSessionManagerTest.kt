@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.call.components
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.RtcSession
 import io.mockk.mockk
 import org.junit.Test
@@ -28,9 +27,7 @@ import org.junit.Test
  */
 class CallSessionManagerTest {
 
-    private val call = mockk<Call>(relaxed = true)
-
-    private fun manager() = CallSessionManager(call)
+    private fun manager() = CallSessionManager()
 
     @Test
     fun `session starts empty and can be replaced`() {

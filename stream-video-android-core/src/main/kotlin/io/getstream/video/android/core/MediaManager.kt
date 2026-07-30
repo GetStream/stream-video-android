@@ -1515,7 +1515,8 @@ class MediaManagerImpl(
      *
      * Once released, [runOnAudioTrackIfAvailable] / [runOnVideoTrackIfAvailable] become no-ops. Set
      * only on the terminal [cleanup] path and NOT in [disposeTracksAndSources], because
-     * [Call.recreateFactoryAndAudioTracks] disposes and then deliberately recreates before joining.
+     * CallMediaManager.recreateFactoryAndAudioTracks disposes and then deliberately recreates
+     * before joining.
      */
     private var released = false
 

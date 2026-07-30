@@ -18,15 +18,19 @@ package io.getstream.video.android.core.call.components
 
 import android.graphics.Bitmap
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.analytics.call.CallAnalytics
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.call.video.YuvFrame
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import org.webrtc.EglBase
 import org.webrtc.RendererCommon
 import org.webrtc.VideoSink
 import stream.video.sfu.models.TrackType
@@ -35,14 +39,22 @@ import kotlin.coroutines.resume
 
 /**
  * Handles binding video tracks to renderers, visibility / track-dimension updates,
- * screenshots and incoming media-quality overrides for a [Call].
+ * screenshots and incoming media-quality overrides for a call.
+ *
+ * @param eglBase provider for the shared EGL context; invoked lazily on first render so the
+ * native context isn't created until it's actually needed.
+ * @param callSessionId provider for the call's (mutable, runtime-updated) session id.
  */
 internal class CallRenderer(
-    private val call: Call,
+    private val type: String,
+    private val id: String,
+    private val scope: CoroutineScope,
+    private val session: MutableStateFlow<RtcSession?>,
+    private val callAnalytics: CallAnalytics,
+    private val eglBase: () -> EglBase,
+    private val callSessionId: () -> String,
 ) {
-    private val logger by taggedLogger("Call:Renderer:${call.type}:${call.id}")
-
-    private val session get() = call.session
+    private val logger by taggedLogger("Call:Renderer:$type:$id")
 
     fun setVisibility(
         sessionId: String,
@@ -93,7 +105,7 @@ internal class CallRenderer(
 
         // Note this comes from the shared eglBase
         videoRenderer.init(
-            call.eglBase.eglBaseContext,
+            eglBase().eglBaseContext,
             object : RendererCommon.RendererEvents {
                 override fun onFirstFrameRendered() {
                     val width = videoRenderer.measuredWidth
@@ -113,14 +125,14 @@ internal class CallRenderer(
                         )
                     }
                     onRendered(videoRenderer)
-                    call.callAnalytics.videoAnalytics.firstVideoFrameRendered(
+                    callAnalytics.videoAnalytics.firstVideoFrameRendered(
 
                         trackType,
                         width,
                         height,
                         rtcSession = session.value,
                         sessionId,
-                        call.sessionId,
+                        callSessionId(),
                     )
                 }
 
@@ -168,7 +180,7 @@ internal class CallRenderer(
                 // This has to be launched asynchronously - removing the sink on the
                 // same thread as the videoframe is delivered will lead to a deadlock
                 // (needs investigation why)
-                call.scope.launch {
+                scope.launch {
                     track.video.removeSink(screenshotSink)
                 }
                 continuation.resume(bitmap)

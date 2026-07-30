@@ -18,22 +18,25 @@ package io.getstream.video.android.core.call.components
 
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.EventSubscription
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.VideoEventListener
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import java.util.Collections
 
 /**
- * Owns the event pipeline for a [Call]: the shared [events] flow, the set of legacy
+ * Owns the event pipeline for a call: the shared [events] flow, the set of legacy
  * [EventSubscription]s, and the dispatch / handling of incoming [VideoEvent]s.
  */
 internal class CallEventManager(
-    private val call: Call,
+    private val type: String,
+    private val id: String,
+    private val scope: CoroutineScope,
+    private val reconnector: CallReconnector,
 ) {
-    private val logger by taggedLogger("Call:EventManager:${call.type}:${call.id}")
+    private val logger by taggedLogger("Call:EventManager:$type:$id")
 
     val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
 
@@ -68,8 +71,8 @@ internal class CallEventManager(
 
         when (event) {
             is GoAwayEvent ->
-                call.scope.launch {
-                    call.migrate()
+                scope.launch {
+                    reconnector.migrate()
                 }
         }
     }

@@ -29,9 +29,7 @@ import java.util.UUID
  * Keeping this state in a single component gives the join, reconnect, connectivity and
  * lifecycle collaborators a single source of truth to depend on.
  */
-internal class CallSessionManager(
-    @Suppress("unused") private val call: Call,
-) {
+internal class CallSessionManager() {
     /** Session handles all real time communication for video and audio. */
     val session: MutableStateFlow<RtcSession?> = MutableStateFlow(null)
 

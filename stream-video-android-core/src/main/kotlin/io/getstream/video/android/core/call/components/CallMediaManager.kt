@@ -23,34 +23,50 @@ import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.webrtc.EglBase
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 
 /**
- * Owns the media pipeline for a [Call]: the [StreamPeerConnectionFactory] lifecycle, the
+ * Owns the media pipeline for a call: the [StreamPeerConnectionFactory] lifecycle, the
  * [MediaManagerImpl] (camera / microphone / speaker / screen share), audio-level monitoring,
  * settings-driven device initialisation and screen sharing.
+ *
+ * @param eglBase provider for the shared EGL context; invoked lazily so the native context
+ * isn't created until the media manager / factory actually needs it.
+ * @param callProvider supplies the owning call, needed only to build [MediaManagerImpl] (a
+ * public type that takes a [Call]); invoked lazily when the media manager is created.
  */
 internal class CallMediaManager(
-    private val call: Call,
+    private val type: String,
+    private val id: String,
+    private val clientImpl: StreamVideoClient,
+    private val scope: CoroutineScope,
+    private val state: CallState,
+    private val session: MutableStateFlow<RtcSession?>,
+    private val eglBase: () -> EglBase,
+    private val callProvider: () -> Call,
 ) {
-    private val logger by taggedLogger("Call:MediaManager:${call.type}:${call.id}")
-
-    private val clientImpl get() = call.clientImpl
+    private val logger by taggedLogger("Call:MediaManager:$type:$id")
 
     private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
         if (!mediaManager.microphone.isEnabled.value) {
-            call.state.markSpeakingAsMuted()
+            state.markSpeakingAsMuted()
         }
     })
     private val audioLevelOutputHelper = RampValueUpAndDownHelper()
@@ -67,10 +83,10 @@ internal class CallMediaManager(
                 _peerConnectionFactory = StreamPeerConnectionFactory(
                     context = clientImpl.context,
                     audioProcessing = clientImpl.audioProcessing,
-                    audioUsage = clientImpl.callServiceConfigRegistry.get(call.type).audioUsage,
-                    audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(call.type).audioUsage },
+                    audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+                    audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
                     audioBitrateProfileProvider = { mediaManager.microphone.audioBitrateProfile.value },
-                    sharedEglBaseProvider = { call.eglBase },
+                    sharedEglBaseProvider = { eglBase() },
                     webRtcLoggingLevel = clientImpl.loggingLevel.webRtcLoggingLevel,
                 )
             }
@@ -86,17 +102,17 @@ internal class CallMediaManager(
         } else {
             MediaManagerImpl(
                 clientImpl.context,
-                call,
-                call.scope,
-                call.eglBase.eglBaseContext,
-                clientImpl.callServiceConfigRegistry.get(call.type).audioUsage,
-            ) { clientImpl.callServiceConfigRegistry.get(call.type).audioUsage }
+                callProvider(),
+                scope,
+                eglBase().eglBaseContext,
+                clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+            ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }
         }
     }
 
     /** Starts streaming smoothed microphone audio levels into [localMicrophoneAudioLevel]. */
     fun startAudioLevelMonitoring() {
-        call.scope.launch {
+        scope.launch {
             soundInputProcessor.currentAudioLevel.collect {
                 audioLevelOutputHelper.rampToValue(it)
             }
@@ -233,15 +249,15 @@ internal class CallMediaManager(
                     microphone.select(deviceBeforeHeadset)
                 }
             }
-        }.launchIn(call.scope)
+        }.launchIn(scope)
     }
 
     fun startScreenSharing(
         mediaProjectionPermissionResultData: Intent,
         includeAudio: Boolean = false,
     ) {
-        if (call.state.ownCapabilities.value.contains(OwnCapability.Screenshare)) {
-            call.session.value?.setScreenShareTrack()
+        if (state.ownCapabilities.value.contains(OwnCapability.Screenshare)) {
+            session.value?.setScreenShareTrack()
             mediaManager.screenShare.enable(
                 mediaProjectionPermissionResultData,
                 includeAudio = includeAudio,

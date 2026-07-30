@@ -46,8 +46,8 @@ import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
-import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.CallState
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
@@ -55,25 +55,43 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.UpdateUserPermissionsData
 import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.utils.toQueriedMembers
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
 
 /**
- * Wraps all coordinator (REST) API calls for a [Call]. Each method delegates to the
- * coordinator client and, where relevant, updates [Call.state] from the response.
+ * Reflects this call's ringing-lifecycle transitions into the shared client state.
+ *
+ * These are identity hand-offs (the owning call registers itself with client state), so
+ * they're provided by the call rather than reached into from this component.
+ *
+ * Outgoing ringing is split into two steps because [CallState.updateFromResponse] reads
+ * the current ringingCall: the call must be set as the ringing call *before* the state
+ * update (which reads it) and added to the ringing-call registry *after* it.
+ */
+internal interface RingingCallRegistrar {
+    fun beforeOutgoingStateUpdate()
+    fun afterOutgoingStateUpdate()
+    fun onAccepted()
+}
+
+/**
+ * Wraps all coordinator (REST) API calls for a call. Each method delegates to the
+ * coordinator client and, where relevant, updates [CallState] from the response.
  *
  * This component holds no mutable call state — it is a stateless façade over the
- * coordinator endpoints, extracted from [Call] to keep the public class focused.
+ * coordinator endpoints, extracted from the call to keep the public class focused.
  */
 internal class CallApiClient(
-    private val call: Call,
+    private val type: String,
+    private val id: String,
+    private val state: CallState,
+    private val clientImpl: StreamVideoClient,
+    private val scope: CoroutineScope,
+    private val callSessionId: () -> String,
+    private val ringRegistrar: RingingCallRegistrar,
 ) {
-    private val logger by taggedLogger("Call:ApiClient:${call.type}:${call.id}")
-
-    private val clientImpl get() = call.clientImpl
-    private val type get() = call.type
-    private val id get() = call.id
-    private val state get() = call.state
+    private val logger by taggedLogger("Call:ApiClient:$type:$id")
 
     suspend fun get(): Result<GetCallResponse> {
         val response = clientImpl.getCall(type, id)
@@ -123,16 +141,14 @@ internal class CallApiClient(
         }
 
         response.onSuccess {
-            /**
-             * Because [io.getstream.video.android.core.CallState.updateFromResponse] reads the
-             * value of [io.getstream.video.android.core.ClientState.ringingCall]
-             */
+            // Ordering matters: the ringing call must be registered before the state
+            // update (which reads ringingCall) and added after. See OutgoingRingRegistrar.
             if (ring) {
-                call.client.state._ringingCall.value = call
+                ringRegistrar.beforeOutgoingStateUpdate()
             }
             state.updateFromResponse(it)
             if (ring) {
-                call.client.state.addRingingCall(call, RingingState.Outgoing())
+                ringRegistrar.afterOutgoingStateUpdate()
             }
         }
         return response
@@ -354,7 +370,7 @@ internal class CallApiClient(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        clientImpl.state.transitionToAcceptCall(call)
+        ringRegistrar.onAccepted()
         return clientImpl.accept(type, id)
     }
 
@@ -368,11 +384,11 @@ internal class CallApiClient(
         reason: String? = null,
         custom: Map<String, Any>? = null,
     ) {
-        call.scope.launch {
+        scope.launch {
             clientImpl.collectFeedback(
                 callType = type,
                 id = id,
-                sessionId = call.sessionId,
+                sessionId = callSessionId(),
                 rating = rating,
                 reason = reason,
                 custom = custom,
