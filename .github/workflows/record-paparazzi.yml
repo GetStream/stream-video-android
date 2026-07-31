@@ -3,8 +3,8 @@ name: Record Paparazzi Snapshots
 # Manually-triggered job that regenerates Paparazzi golden images on the CI runner (Linux/amd64)
 # and uploads them as an artifact. Paparazzi renders via native layoutlib, whose pixels depend on
 # OS + architecture, so goldens must be produced in the same environment that verifies them —
-# the CI runner. Download the artifact with scripts/paparazzi-pull-goldens.sh, then commit + push.
-#
+# the CI runner.
+# Download the artifact with scripts/paparazzi-pull-goldens.sh, then commit + push.
 # Deliberately does NOT commit back: no write permissions needed, and you review the diff locally.
 on:
   # Manual trigger — only works once this file is on the default branch (kept for later).
