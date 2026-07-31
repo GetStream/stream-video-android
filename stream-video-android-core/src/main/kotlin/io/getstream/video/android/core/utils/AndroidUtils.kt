@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlin.coroutines.cancellation.CancellationException
 
 @JvmSynthetic
 internal suspend fun Context.registerReceiverAsFlow(vararg actions: String): Flow<Intent> {
@@ -262,4 +263,23 @@ internal fun debugPrintLastStackFrames(tag: String, messagePrefix: String = "", 
     val stack = Thread.currentThread().stackTrace
     val message = stack.takeLast(count).joinToString("\n")
     Log.d(tag, "$messagePrefix:$message")
+}
+
+/**
+ * Runs a [block] and returns a [Result] with proper cancellation semantics:
+ * - On **success**: returns [Result.Success].
+ * - On existing [Result.Failure]: returns it unchanged.
+ * - On **cancellation**: **rethrows** [CancellationException].
+ * - On **NullPointerException**: `Result.Failure(cause)`.
+ */
+@OptIn(ExperimentalContracts::class)
+internal inline fun <T : Any> runResultCatchingCancellable(block: () -> Result<T>): Result<T> {
+    contract { callsInPlace(block, InvocationKind.AT_MOST_ONCE) }
+    return try {
+        block()
+    } catch (ce: CancellationException) {
+        throw ce
+    } catch (npe: NullPointerException) {
+        Result.Failure(Error.ThrowableError(npe.message ?: "NullPointerException caught", npe))
+    }
 }

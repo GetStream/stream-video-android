@@ -85,6 +85,7 @@ import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.debugOnly
+import io.getstream.video.android.core.utils.runResultCatchingCancellable
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -95,7 +96,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.EglBase
@@ -381,7 +381,7 @@ public class Call(
     }
 
     /** Basic crud operations */
-    suspend fun get(): Result<GetCallResponse> = apiClient.get()
+    suspend fun get(): Result<GetCallResponse> = runResultCatchingCancellable { apiClient.get() }
 
     /** Create a call. You can create a call client side, many apps prefer to do this server side though */
     suspend fun create(
@@ -394,24 +394,28 @@ public class Call(
         ring: Boolean = false,
         notify: Boolean = false,
         video: Boolean? = null,
-    ): Result<GetOrCreateCallResponse> = apiClient.create(
-        memberIds = memberIds,
-        members = members,
-        custom = custom,
-        settings = settings,
-        startsAt = startsAt,
-        team = team,
-        ring = ring,
-        notify = notify,
-        video = video,
-    )
+    ): Result<GetOrCreateCallResponse> = runResultCatchingCancellable {
+        apiClient.create(
+            memberIds = memberIds,
+            members = members,
+            custom = custom,
+            settings = settings,
+            startsAt = startsAt,
+            team = team,
+            ring = ring,
+            notify = notify,
+            video = video,
+        )
+    }
 
     /** Update a call */
     suspend fun update(
         custom: Map<String, Any>? = null,
         settingsOverride: CallSettingsRequest? = null,
         startsAt: OffsetDateTime? = null,
-    ): Result<UpdateCallResponse> = apiClient.update(custom, settingsOverride, startsAt)
+    ): Result<UpdateCallResponse> = runResultCatchingCancellable {
+        apiClient.update(custom, settingsOverride, startsAt)
+    }
 
     suspend fun join(
         create: Boolean = false,
@@ -420,26 +424,30 @@ public class Call(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
         callJoinInterceptor: CallJoinInterceptor? = null,
-    ): Result<RtcSession> = joinCoordinator.join(
-        create,
-        createOptions,
-        ring,
-        notify,
-        hintHighScaleLivestreamPublisher,
-        callJoinInterceptor,
-    )
+    ): Result<RtcSession> = runResultCatchingCancellable {
+        joinCoordinator.join(
+            create,
+            createOptions,
+            ring,
+            notify,
+            hintHighScaleLivestreamPublisher,
+            callJoinInterceptor,
+        )
+    }
 
     suspend fun joinAndRing(
         members: List<String>,
         createOptions: CreateCallOptions? = CreateCallOptions(members),
         video: Boolean = isVideoEnabled(),
         callJoinInterceptor: CallJoinInterceptor? = null,
-    ): Result<RtcSession> = joinCoordinator.joinAndRing(
-        members,
-        createOptions,
-        video,
-        callJoinInterceptor,
-    )
+    ): Result<RtcSession> = runResultCatchingCancellable {
+        joinCoordinator.joinAndRing(
+            members,
+            createOptions,
+            video,
+            callJoinInterceptor,
+        )
+    }
 
     internal fun isPermanentError(error: Any): Boolean = joinCoordinator.isPermanentError(error)
 
@@ -524,19 +532,21 @@ public class Call(
     fun leave(reason: String = "user") = lifecycle.leave(reason)
 
     /** ends the call for yourself as well as other users */
-    suspend fun end(): Result<Unit> = lifecycle.end()
+    suspend fun end(): Result<Unit> = runResultCatchingCancellable { lifecycle.end() }
 
     suspend fun pinForEveryone(sessionId: String, userId: String): Result<PinResponse> =
-        apiClient.pinForEveryone(sessionId, userId)
+        runResultCatchingCancellable { apiClient.pinForEveryone(sessionId, userId) }
 
     suspend fun unpinForEveryone(sessionId: String, userId: String): Result<UnpinResponse> =
-        apiClient.unpinForEveryone(sessionId, userId)
+        runResultCatchingCancellable { apiClient.unpinForEveryone(sessionId, userId) }
 
     suspend fun sendReaction(
         type: String,
         emoji: String? = null,
         custom: Map<String, Any>? = null,
-    ): Result<SendReactionResponse> = apiClient.sendReaction(type, emoji, custom)
+    ): Result<SendReactionResponse> = runResultCatchingCancellable {
+        apiClient.sendReaction(type, emoji, custom)
+    }
 
     suspend fun queryMembers(
         filter: Map<String, Any>,
@@ -544,13 +554,17 @@ public class Call(
         limit: Int = 25,
         prev: String? = null,
         next: String? = null,
-    ): Result<QueriedMembers> = apiClient.queryMembers(filter, sort, limit, prev, next)
+    ): Result<QueriedMembers> = runResultCatchingCancellable {
+        apiClient.queryMembers(filter, sort, limit, prev, next)
+    }
 
     suspend fun muteAllUsers(
         audio: Boolean = true,
         video: Boolean = false,
         screenShare: Boolean = false,
-    ): Result<MuteUsersResponse> = apiClient.muteAllUsers(audio, video, screenShare)
+    ): Result<MuteUsersResponse> = runResultCatchingCancellable {
+        apiClient.muteAllUsers(audio, video, screenShare)
+    }
 
     fun setVisibility(
         sessionId: String,
@@ -608,29 +622,33 @@ public class Call(
         startHls: Boolean = false,
         startRecording: Boolean = false,
         startTranscription: Boolean = false,
-    ): Result<GoLiveResponse> = apiClient.goLive(startHls, startRecording, startTranscription)
+    ): Result<GoLiveResponse> = runResultCatchingCancellable {
+        apiClient.goLive(startHls, startRecording, startTranscription)
+    }
 
-    suspend fun stopLive(): Result<StopLiveResponse> = apiClient.stopLive()
+    suspend fun stopLive(): Result<StopLiveResponse> = runResultCatchingCancellable {
+        apiClient.stopLive()
+    }
 
     suspend fun sendCustomEvent(data: Map<String, Any>): Result<SendCallEventResponse> =
-        apiClient.sendCustomEvent(data)
+        runResultCatchingCancellable { apiClient.sendCustomEvent(data) }
 
     /** Permissions */
     suspend fun requestPermissions(vararg permission: String): Result<Unit> =
-        apiClient.requestPermissions(*permission)
+        runResultCatchingCancellable { apiClient.requestPermissions(*permission) }
 
     suspend fun startRecording(): Result<Any> {
         return startRecording(RecordingType.Composite)
     }
     suspend fun startRecording(recordingType: RecordingType): Result<Any> =
-        apiClient.startRecording(recordingType)
+        runResultCatchingCancellable { apiClient.startRecording(recordingType) }
 
     suspend fun stopRecording(): Result<Any> {
         return stopRecording(RecordingType.Composite)
     }
 
     suspend fun stopRecording(recordingType: RecordingType): Result<Any> =
-        apiClient.stopRecording(recordingType)
+        runResultCatchingCancellable { apiClient.stopRecording(recordingType) }
 
     /**
      * User needs to have [OwnCapability.Screenshare] capability in order to start screen
@@ -648,9 +666,9 @@ public class Call(
 
     fun stopScreenSharing() = media.stopScreenSharing()
 
-    suspend fun startHLS(): Result<Any> = apiClient.startHLS()
+    suspend fun startHLS(): Result<Any> = runResultCatchingCancellable { apiClient.startHLS() }
 
-    suspend fun stopHLS(): Result<Any> = apiClient.stopHLS()
+    suspend fun stopHLS(): Result<Any> = runResultCatchingCancellable { apiClient.stopHLS() }
 
     public fun subscribeFor(
         vararg eventTypes: Class<out VideoEvent>,
@@ -675,25 +693,29 @@ public class Call(
         eventManager.unsubscribe(eventSubscription)
 
     public suspend fun blockUser(userId: String): Result<BlockUserResponse> =
-        apiClient.blockUser(userId)
+        runResultCatchingCancellable { apiClient.blockUser(userId) }
 
     // TODO: add removeMember (single)
 
     public suspend fun removeMembers(userIds: List<String>): Result<UpdateCallMembersResponse> =
-        apiClient.removeMembers(userIds)
+        runResultCatchingCancellable { apiClient.removeMembers(userIds) }
 
     public suspend fun grantPermissions(
         userId: String,
         permissions: List<String>,
-    ): Result<UpdateUserPermissionsResponse> = apiClient.grantPermissions(userId, permissions)
+    ): Result<UpdateUserPermissionsResponse> = runResultCatchingCancellable {
+        apiClient.grantPermissions(userId, permissions)
+    }
 
     public suspend fun revokePermissions(
         userId: String,
         permissions: List<String>,
-    ): Result<UpdateUserPermissionsResponse> = apiClient.revokePermissions(userId, permissions)
+    ): Result<UpdateUserPermissionsResponse> = runResultCatchingCancellable {
+        apiClient.revokePermissions(userId, permissions)
+    }
 
     public suspend fun updateMembers(memberRequests: List<MemberRequest>): Result<UpdateCallMembersResponse> =
-        apiClient.updateMembers(memberRequests)
+        runResultCatchingCancellable { apiClient.updateMembers(memberRequests) }
 
     fun fireEvent(event: VideoEvent) = eventManager.fireEvent(event)
 
@@ -703,7 +725,7 @@ public class Call(
      * @param sessionId - if session ID is supplied, only recordings for that session will be loaded.
      */
     suspend fun listRecordings(sessionId: String? = null): Result<ListRecordingsResponse> =
-        apiClient.listRecordings(sessionId)
+        runResultCatchingCancellable { apiClient.listRecordings(sessionId) }
 
     /**
      * Kick a user from the call.
@@ -714,21 +736,25 @@ public class Call(
     suspend fun kickUser(
         userId: String,
         block: Boolean = false,
-    ): Result<KickUserResponse> = apiClient.kickUser(userId, block)
+    ): Result<KickUserResponse> = runResultCatchingCancellable { apiClient.kickUser(userId, block) }
 
     suspend fun muteUser(
         userId: String,
         audio: Boolean = true,
         video: Boolean = false,
         screenShare: Boolean = false,
-    ): Result<MuteUsersResponse> = apiClient.muteUser(userId, audio, video, screenShare)
+    ): Result<MuteUsersResponse> = runResultCatchingCancellable {
+        apiClient.muteUser(userId, audio, video, screenShare)
+    }
 
     suspend fun muteUsers(
         userIds: List<String>,
         audio: Boolean = true,
         video: Boolean = false,
         screenShare: Boolean = false,
-    ): Result<MuteUsersResponse> = apiClient.muteUsers(userIds, audio, video, screenShare)
+    ): Result<MuteUsersResponse> = runResultCatchingCancellable {
+        apiClient.muteUsers(userIds, audio, video, screenShare)
+    }
 
     /** Returns a snapshot of failed SFU IDs to send as migrating_from_list. */
     internal fun getFailedSfuIdsSnapshot(): List<String> = reconnector.getFailedSfuIdsSnapshot()
@@ -773,14 +799,16 @@ public class Call(
         scope.cancel()
     }
 
-    suspend fun ring(): Result<GetCallResponse> = apiClient.ring()
+    suspend fun ring(): Result<GetCallResponse> = runResultCatchingCancellable { apiClient.ring() }
 
     suspend fun ring(ringCallRequest: RingCallRequest): Result<RingCallResponse> =
-        apiClient.ring(ringCallRequest)
+        runResultCatchingCancellable { apiClient.ring(ringCallRequest) }
 
-    suspend fun notify(): Result<GetCallResponse> = apiClient.notify()
+    suspend fun notify(): Result<GetCallResponse> = runResultCatchingCancellable { apiClient.notify() }
 
-    suspend fun accept(): Result<AcceptCallResponse> = apiClient.accept()
+    suspend fun accept(): Result<AcceptCallResponse> = runResultCatchingCancellable {
+        apiClient.accept()
+    }
 
     /**
      * Should outlive both the call scope and the service scope and needs to be executed in the client-level scope.
@@ -788,7 +816,7 @@ public class Call(
      * TODO: Run this in clientImpl.scope internally
      */
     suspend fun reject(reason: RejectReason? = null): Result<RejectCallResponse> =
-        apiClient.reject(reason)
+        runResultCatchingCancellable { apiClient.reject(reason) }
 
     // For debugging
     internal suspend fun reject(
@@ -838,19 +866,19 @@ public class Call(
     fun toggleAudioProcessing(): Boolean = media.toggleAudioProcessing()
 
     suspend fun startTranscription(): Result<StartTranscriptionResponse> =
-        apiClient.startTranscription()
+        runResultCatchingCancellable { apiClient.startTranscription() }
 
     suspend fun stopTranscription(): Result<StopTranscriptionResponse> =
-        apiClient.stopTranscription()
+        runResultCatchingCancellable { apiClient.stopTranscription() }
 
     suspend fun listTranscription(): Result<ListTranscriptionsResponse> =
-        apiClient.listTranscription()
+        runResultCatchingCancellable { apiClient.listTranscription() }
 
     suspend fun startClosedCaptions(): Result<io.getstream.android.video.generated.models.StartClosedCaptionsResponse> =
-        apiClient.startClosedCaptions()
+        runResultCatchingCancellable { apiClient.startClosedCaptions() }
 
     suspend fun stopClosedCaptions(): Result<io.getstream.android.video.generated.models.StopClosedCaptionsResponse> =
-        apiClient.stopClosedCaptions()
+        runResultCatchingCancellable { apiClient.stopClosedCaptions() }
 
     fun updateClosedCaptionsSettings(closedCaptionsSettings: ClosedCaptionsSettings) {
         state.closedCaptionManager.updateClosedCaptionsSettings(closedCaptionsSettings)
