@@ -7,7 +7,14 @@ name: Record Paparazzi Snapshots
 #
 # Deliberately does NOT commit back: no write permissions needed, and you review the diff locally.
 on:
+  # Manual trigger — only works once this file is on the default branch (kept for later).
   workflow_dispatch:
+  # Branch trigger — works from a feature branch without default-branch access. The heavy job is
+  # gated by a commit-message marker (see the job's `if:`) so ordinary pushes don't run it.
+  # To trigger: git commit --allow-empty -m "record goldens [record-paparazzi]" && git push
+  push:
+    branches:
+      - "v2/feature/rahullohra/**"
 
 concurrency:
   group: record-paparazzi-${{ github.ref }}
@@ -20,6 +27,10 @@ jobs:
   record:
     name: Record golden images (Linux/amd64)
     runs-on: ubuntu-latest # Same runner as the verify job, so recorded pixels match verification.
+    # Run only on manual dispatch, or on a push whose commit message contains [record-paparazzi].
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.message, '[record-paparazzi]')
     steps:
       - uses: actions/checkout@v7
       - name: Setup Java
