@@ -19,7 +19,8 @@ package io.getstream.video.android.core.reconnect
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.injectMockNetwork
+import io.getstream.video.android.core.injectSession
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -34,17 +35,6 @@ import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
-
-    private fun Call.injectMockNetwork(connected: Boolean = true) {
-        val mockNetwork = mockk<NetworkStateProvider>(relaxed = true)
-        every { mockNetwork.isConnected() } returns connected
-        val monitorField = Call::class.java.getDeclaredField("connectivityMonitor")
-        monitorField.isAccessible = true
-        val monitor = monitorField.get(this)
-        val field = monitor.javaClass.getDeclaredField("network\$delegate")
-        field.isAccessible = true
-        field.set(monitor, lazyOf(mockNetwork))
-    }
 
     private fun Call.reconnector(): Any {
         val field = Call::class.java.getDeclaredField("reconnector")
@@ -150,7 +140,7 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
             emptyList(),
             emptyList(),
         )
-        call.session.value = sessionMock
+        call.injectSession(sessionMock)
         call.location = "test-location"
 
         call.migrate()

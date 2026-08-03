@@ -17,32 +17,36 @@
 package io.getstream.video.android.core.rtc
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
-import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
-import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.model.User
-import io.mockk.MockKAnnotations
+import io.getstream.video.android.core.call.components.CallApiClient
+import io.getstream.video.android.core.call.components.CallJoinCoordinator
+import io.getstream.video.android.core.call.components.CallLifecycleManager
+import io.getstream.video.android.core.call.components.CallMediaManager
+import io.getstream.video.android.core.call.components.CallReconnector
+import io.getstream.video.android.core.call.components.CallSessionManager
+import io.getstream.video.android.core.call.components.ClientCallRegistry
+import io.getstream.video.android.core.call.components.RtcSessionFactory
+import io.getstream.video.android.core.call.components.SessionMonitor
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.unmockkAll
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -54,9 +58,10 @@ import org.junit.Test
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
- * Tests the initial-join handling of failed SFU connect attempts in [Call._join].
+ * Tests the initial-join handling of failed SFU connect attempts in
+ * [CallJoinCoordinator.joinInternal] (reached publicly through `Call._join`).
  *
- * The failure cause decides how `_join` orchestrates recovery:
+ * The failure cause decides how the join orchestrates recovery:
  * - [SfuConnectFailureCause.SocketStateObservationTimeout] starts a REJOIN
  *   because no reconnect loop was started by stateJob.
  * - [SfuConnectFailureCause.RecoverableSocketFailure] waits for the reconnect
@@ -71,73 +76,63 @@ class JoinRecoverableFailureTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    @RelaxedMockK
-    private lateinit var mockClientImpl: StreamVideoClient
-
-    @RelaxedMockK
+    private lateinit var clientImpl: StreamVideoClient
+    private lateinit var state: CallState
+    private lateinit var sessionManager: CallSessionManager
+    private lateinit var reconnector: CallReconnector
     private lateinit var mockSession: RtcSession
-
-    private lateinit var mockStreamVideo: StreamVideo
     private lateinit var mockJoinResponse: JoinCallResponse
-    private lateinit var call: Call
+    private lateinit var connectionFlow: MutableStateFlow<RealtimeConnection>
 
     @Before
     fun setup() {
-        MockKAnnotations.init(this, relaxUnitFun = true)
-
-        mockStreamVideo = mockk(relaxed = true)
-        StreamVideo.install(mockStreamVideo)
-
-        val mockNetworkStateProvider = mockk<NetworkStateProvider>(relaxed = true)
-        every { mockNetworkStateProvider.isConnected() } returns true
-        val mockCoordinatorModule = mockk<CoordinatorConnectionModule>(relaxed = true)
-        every { mockCoordinatorModule.networkStateProvider } returns mockNetworkStateProvider
-
-        every { mockClientImpl.coordinatorConnectionModule } returns mockCoordinatorModule
-        every { mockClientImpl.scope } returns testScope as CoroutineScope
-        every { mockClientImpl.leaveAfterDisconnectSeconds } returns 120L
-        every { mockClientImpl.apiKey } returns "test-api-key"
-        coEvery { mockClientImpl.getCachedLocation() } returns Success("test-location")
-
+        clientImpl = mockk(relaxed = true)
+        state = mockk(relaxed = true)
+        reconnector = mockk(relaxed = true)
+        mockSession = mockk(relaxed = true)
         mockJoinResponse = mockk(relaxed = true)
 
-        call = spyk(
-            Call(
-                client = mockClientImpl,
-                type = "default",
-                id = "test-call",
-                user = User(id = "test-user", role = "user"),
-            ),
-        )
+        sessionManager = CallSessionManager()
+        connectionFlow = MutableStateFlow(RealtimeConnection.InProgress)
 
-        // The join flow was extracted into CallJoinCoordinator, which captured the real
-        // Call in Call's constructor. Repoint it at the spy so stubs on call.joinRequest /
-        // call.reconnect and call.unitTestRtcSessionFactory are visible to the coordinator.
-        repointJoinCoordinatorToSpy(call)
-
-        // _join builds the JoinCallResponse via joinRequest; stub it out.
+        every { state._connection } returns connectionFlow
+        every { state.connection } returns connectionFlow
+        every { state.settings } returns MutableStateFlow<CallSettingsResponse?>(null)
+        coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
         coEvery {
-            call.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            clientImpl.joinCall(
+                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(),
+            )
         } returns Success(mockJoinResponse)
-
-        // Inject our mocked RtcSession into this Call instead of constructing a real one.
-        call.unitTestRtcSessionFactory = { mockSession }
     }
 
     @After
     fun tearDown() {
-        StreamVideo.removeClient()
         unmockkAll()
     }
 
-    private fun repointJoinCoordinatorToSpy(spy: Call) {
-        val coordinatorField = Call::class.java.getDeclaredField("joinCoordinator")
-        coordinatorField.isAccessible = true
-        val coordinator = coordinatorField.get(spy)
-        val callField = coordinator.javaClass.getDeclaredField("call")
-        callField.isAccessible = true
-        callField.set(coordinator, spy)
-    }
+    private fun coordinator() = CallJoinCoordinator(
+        clientImpl = clientImpl,
+        state = state,
+        callAnalytics = mockk<CallAnalytics>(relaxed = true),
+        type = "default",
+        id = "test-call",
+        scope = testScope,
+        sessionManager = sessionManager,
+        sessionFactory = RtcSessionFactory { _, _, _, _, _, _, _ -> mockSession },
+        media = mockk<CallMediaManager>(relaxed = true),
+        lifecycle = mockk<CallLifecycleManager>(relaxed = true),
+        apiClient = mockk<CallApiClient>(relaxed = true),
+        reconnector = reconnector,
+        sessionMonitor = mockk<SessionMonitor>(relaxed = true),
+        callRegistry = mockk<ClientCallRegistry>(relaxed = true),
+        hasRequiredPermissions = { true },
+    )
+
+    private suspend fun join() = coordinator().joinInternal(
+        joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
+    )
 
     @Test
     fun `recoverable socket failure awaits the existing reconnect loop`() = runTest(
@@ -149,17 +144,15 @@ class JoinRecoverableFailureTest {
                 cause = SfuConnectFailureCause.RecoverableSocketFailure,
             )
 
-        val deferred = async {
-            call._join(joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt))
-        }
+        val deferred = async { join() }
         advanceUntilIdle()
         assertThat(deferred.isCompleted).isFalse()
 
-        // stateJob owns the loop here; _join must not start its own.
-        coVerify(exactly = 0) { call.reconnect(any(), any()) }
+        // stateJob owns the loop here; the join must not start its own.
+        coVerify(exactly = 0) { reconnector.reconnect(any(), any()) }
 
         // The reconnect loop gives up.
-        call.state._connection.value = RealtimeConnection.ReconnectingFailed
+        connectionFlow.value = RealtimeConnection.ReconnectingFailed
         advanceUntilIdle()
 
         assertThat(deferred.await()).isInstanceOf(Failure::class.java)
@@ -174,24 +167,20 @@ class JoinRecoverableFailureTest {
                 Exception("SFU connection timed out"),
                 cause = SfuConnectFailureCause.SocketStateObservationTimeout,
             )
-        // Stub the loop so we only assert it is invoked, not run it for real.
-        coEvery { call.reconnect(any(), any()) } returns Unit
 
-        val deferred = async {
-            call._join(joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt))
-        }
+        val deferred = async { join() }
         advanceUntilIdle()
 
-        // Nothing else would drive recovery, so _join must trigger a REJOIN.
+        // Nothing else would drive recovery, so the join must trigger a REJOIN.
         coVerify {
-            call.reconnect(
+            reconnector.reconnect(
                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
                 any(),
             )
         }
         assertThat(deferred.isCompleted).isFalse()
 
-        call.state._connection.value = RealtimeConnection.ReconnectingFailed
+        connectionFlow.value = RealtimeConnection.ReconnectingFailed
         advanceUntilIdle()
 
         assertThat(deferred.await()).isInstanceOf(Failure::class.java)
@@ -207,8 +196,9 @@ class JoinRecoverableFailureTest {
                 cause = SfuConnectFailureCause.TerminalSocketFailure,
             )
 
-        val result = call._join(joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt))
+        val result = join()
 
         assertThat(result).isInstanceOf(Failure::class.java)
+        coVerify(exactly = 0) { reconnector.reconnect(any(), any()) }
     }
 }

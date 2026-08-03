@@ -19,7 +19,6 @@ package io.getstream.video.android.core.call.components
 import android.graphics.Bitmap
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.analytics.call.CallAnalytics
-import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.call.video.YuvFrame
 import io.getstream.video.android.core.model.AudioTrack
@@ -27,7 +26,6 @@ import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.webrtc.EglBase
@@ -49,7 +47,7 @@ internal class CallRenderer(
     private val type: String,
     private val id: String,
     private val scope: CoroutineScope,
-    private val session: MutableStateFlow<RtcSession?>,
+    private val sessionManager: CallSessionManager,
     private val callAnalytics: CallAnalytics,
     private val eglBase: () -> EglBase,
     private val callSessionId: () -> String,
@@ -65,7 +63,7 @@ internal class CallRenderer(
         logger.i {
             "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
-        session.value?.updateTrackDimensions(
+        sessionManager.session.value?.updateTrackDimensions(
             sessionId,
             trackType,
             visible,
@@ -85,7 +83,7 @@ internal class CallRenderer(
         logger.i {
             "[setVisibility] #track; #sfu; viewportId: $viewportId, sessionId: $sessionId, trackType: $trackType, visible: $visible"
         }
-        session.value?.updateTrackDimensions(
+        sessionManager.session.value?.updateTrackDimensions(
             sessionId,
             trackType,
             visible,
@@ -116,7 +114,7 @@ internal class CallRenderer(
                             "sessionId: $sessionId"
                     }
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session.value?.updateTrackDimensions(
+                        sessionManager.session.value?.updateTrackDimensions(
                             sessionId,
                             trackType,
                             true,
@@ -130,7 +128,7 @@ internal class CallRenderer(
                         trackType,
                         width,
                         height,
-                        rtcSession = session.value,
+                        rtcSession = sessionManager.session.value,
                         sessionId,
                         callSessionId(),
                     )
@@ -152,7 +150,7 @@ internal class CallRenderer(
                     }
 
                     if (trackType != TrackType.TRACK_TYPE_SCREEN_SHARE) {
-                        session.value?.updateTrackDimensions(
+                        sessionManager.session.value?.updateTrackDimensions(
                             sessionId,
                             trackType,
                             true,
@@ -194,7 +192,7 @@ internal class CallRenderer(
         resolution: PreferredVideoResolution?,
         sessionIds: List<String>? = null,
     ) {
-        session.value?.let { session ->
+        sessionManager.session.value?.let { session ->
             session.trackOverridesHandler.updateOverrides(
                 sessionIds = sessionIds,
                 dimensions = resolution?.let { VideoDimension(it.width, it.height) },
@@ -203,11 +201,14 @@ internal class CallRenderer(
     }
 
     fun setIncomingVideoEnabled(enabled: Boolean?, sessionIds: List<String>? = null) {
-        session.value?.trackOverridesHandler?.updateOverrides(sessionIds, visible = enabled)
+        sessionManager.session.value?.trackOverridesHandler?.updateOverrides(
+            sessionIds,
+            visible = enabled,
+        )
     }
 
     fun setIncomingAudioEnabled(enabled: Boolean, sessionIds: List<String>? = null) {
-        val participantTrackMap = session.value?.subscriber?.value?.tracks ?: return
+        val participantTrackMap = sessionManager.session.value?.subscriber?.value?.tracks ?: return
 
         val targetTracks = when {
             sessionIds != null -> sessionIds.mapNotNull { participantTrackMap[it] }

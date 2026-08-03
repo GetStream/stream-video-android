@@ -19,7 +19,6 @@ package io.getstream.video.android.core.call.components
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.CallStatsReport
-import io.getstream.video.android.core.call.RtcSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -35,7 +34,7 @@ internal class CallStatsReporter(
     private val type: String,
     private val id: String,
     private val scope: CoroutineScope,
-    private val session: MutableStateFlow<RtcSession?>,
+    private val sessionManager: CallSessionManager,
     private val state: CallState,
 ) {
     private val logger by taggedLogger("Call:StatsReporter:$type:$id")
@@ -56,7 +55,7 @@ internal class CallStatsReporter(
 
             while (isActive) {
                 delay(reportingIntervalMs)
-                session.value?.sendCallStats(
+                sessionManager.session.value?.sendCallStats(
                     report = collectStats(),
                 )
             }
@@ -68,7 +67,7 @@ internal class CallStatsReporter(
     }
 
     suspend fun collectStats(): CallStatsReport {
-        val currentSession = session.value
+        val currentSession = sessionManager.session.value
         val publisherStats = runCatching { currentSession?.getPublisherStats() }.getOrNull()
         val subscriberStats = runCatching { currentSession?.getSubscriberStats() }.getOrNull()
         runCatching {

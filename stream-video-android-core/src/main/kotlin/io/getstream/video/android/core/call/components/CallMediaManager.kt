@@ -22,19 +22,16 @@ import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.StreamAudioDevice
-import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -49,8 +46,8 @@ import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
  *
  * @param eglBase provider for the shared EGL context; invoked lazily so the native context
  * isn't created until the media manager / factory actually needs it.
- * @param callProvider supplies the owning call, needed only to build [MediaManagerImpl] (a
- * public type that takes a [Call]); invoked lazily when the media manager is created.
+ * @param mediaManagerFactory creates the [MediaManagerImpl]; owned by the Call facade so the
+ * public type's `call` dependency never leaks into this component.
  */
 internal class CallMediaManager(
     private val type: String,
@@ -58,9 +55,9 @@ internal class CallMediaManager(
     private val clientImpl: StreamVideoClient,
     private val scope: CoroutineScope,
     private val state: CallState,
-    private val session: MutableStateFlow<RtcSession?>,
+    private val sessionManager: CallSessionManager,
     private val eglBase: () -> EglBase,
-    private val callProvider: () -> Call,
+    private val mediaManagerFactory: MediaManagerFactory,
 ) {
     private val logger by taggedLogger("Call:MediaManager:$type:$id")
 
@@ -97,17 +94,10 @@ internal class CallMediaManager(
         }
 
     val mediaManager by lazy {
-        if (Call.testInstanceProvider.mediaManagerCreator != null) {
-            Call.testInstanceProvider.mediaManagerCreator!!.invoke()
-        } else {
-            MediaManagerImpl(
-                clientImpl.context,
-                callProvider(),
-                scope,
-                eglBase().eglBaseContext,
-                clientImpl.callServiceConfigRegistry.get(type).audioUsage,
-            ) { clientImpl.callServiceConfigRegistry.get(type).audioUsage }
-        }
+        mediaManagerFactory.create(
+            audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
+            audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
+        )
     }
 
     /** Starts streaming smoothed microphone audio levels into [localMicrophoneAudioLevel]. */
@@ -257,7 +247,7 @@ internal class CallMediaManager(
         includeAudio: Boolean = false,
     ) {
         if (state.ownCapabilities.value.contains(OwnCapability.Screenshare)) {
-            session.value?.setScreenShareTrack()
+            sessionManager.session.value?.setScreenShareTrack()
             mediaManager.screenShare.enable(
                 mediaProjectionPermissionResultData,
                 includeAudio = includeAudio,
@@ -281,6 +271,13 @@ internal class CallMediaManager(
 
     fun toggleAudioProcessing(): Boolean {
         return peerConnectionFactory.toggleAudioProcessing()
+    }
+
+    /** Disables all local capture devices. Used when leaving the call. */
+    fun disableLocalCapture() {
+        stopScreenSharing()
+        mediaManager.camera.disable()
+        mediaManager.microphone.disable()
     }
 
     fun cleanup() {

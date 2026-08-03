@@ -60,22 +60,6 @@ import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
 
 /**
- * Reflects this call's ringing-lifecycle transitions into the shared client state.
- *
- * These are identity hand-offs (the owning call registers itself with client state), so
- * they're provided by the call rather than reached into from this component.
- *
- * Outgoing ringing is split into two steps because [CallState.updateFromResponse] reads
- * the current ringingCall: the call must be set as the ringing call *before* the state
- * update (which reads it) and added to the ringing-call registry *after* it.
- */
-internal interface RingingCallRegistrar {
-    fun beforeOutgoingStateUpdate()
-    fun afterOutgoingStateUpdate()
-    fun onAccepted()
-}
-
-/**
  * Wraps all coordinator (REST) API calls for a call. Each method delegates to the
  * coordinator client and, where relevant, updates [CallState] from the response.
  *
@@ -89,7 +73,7 @@ internal class CallApiClient(
     private val clientImpl: StreamVideoClient,
     private val scope: CoroutineScope,
     private val callSessionId: () -> String,
-    private val ringRegistrar: RingingCallRegistrar,
+    private val callRegistry: ClientCallRegistry,
 ) {
     private val logger by taggedLogger("Call:ApiClient:$type:$id")
 
@@ -141,14 +125,14 @@ internal class CallApiClient(
         }
 
         response.onSuccess {
-            // Ordering matters: the ringing call must be registered before the state
-            // update (which reads ringingCall) and added after. See OutgoingRingRegistrar.
+            // Ordering matters: updateFromResponse reads the client's ringing call, so this
+            // call has to occupy that slot before the update and join the registry after it.
             if (ring) {
-                ringRegistrar.beforeOutgoingStateUpdate()
+                callRegistry.markRinging()
             }
             state.updateFromResponse(it)
             if (ring) {
-                ringRegistrar.afterOutgoingStateUpdate()
+                callRegistry.registerOutgoingRing()
             }
         }
         return response
@@ -370,7 +354,7 @@ internal class CallApiClient(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        ringRegistrar.onAccepted()
+        callRegistry.markAccepted()
         return clientImpl.accept(type, id)
     }
 

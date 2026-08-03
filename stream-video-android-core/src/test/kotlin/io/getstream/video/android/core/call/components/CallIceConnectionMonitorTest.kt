@@ -43,20 +43,22 @@ class CallIceConnectionMonitorTest {
     private lateinit var session: RtcSession
     private lateinit var publisher: Publisher
     private lateinit var subscriber: Subscriber
-    private lateinit var sessionFlow: MutableStateFlow<RtcSession?>
+    private lateinit var sessionManager: CallSessionManager
 
     @Before
     fun setup() {
         session = mockk(relaxed = true)
         publisher = mockk(relaxed = true)
         subscriber = mockk(relaxed = true)
-        sessionFlow = MutableStateFlow(session)
+        sessionManager = CallSessionManager()
+        sessionManager.setActiveSession(session)
 
         every { session.publisher } returns MutableStateFlow(publisher)
         every { session.subscriber } returns MutableStateFlow(subscriber)
     }
 
-    private fun monitor() = CallIceConnectionMonitor("default", "call-id", testScope, sessionFlow)
+    private fun monitor() =
+        CallIceConnectionMonitor("default", "call-id", testScope, sessionManager)
 
     @Test
     fun `failed publisher ice state triggers an ice restart`() = runTest(testDispatcher) {

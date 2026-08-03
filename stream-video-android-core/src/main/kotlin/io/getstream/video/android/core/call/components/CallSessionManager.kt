@@ -16,13 +16,14 @@
 
 package io.getstream.video.android.core.call.components
 
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.RtcSession
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.UUID
 
 /**
- * Owns the live RTC session state for a [Call] and the bookkeeping shared across the
+ * Owns the live RTC session state for a call and the bookkeeping shared across the
  * join / reconnect flows: the current [session], the participant [sessionId], the cached
  * SFU [location], reconnect attempt counters and connect/reconnect timestamps.
  *
@@ -30,8 +31,19 @@ import java.util.UUID
  * lifecycle collaborators a single source of truth to depend on.
  */
 internal class CallSessionManager() {
-    /** Session handles all real time communication for video and audio. */
-    val session: MutableStateFlow<RtcSession?> = MutableStateFlow(null)
+    private val _session: MutableStateFlow<RtcSession?> = MutableStateFlow(null)
+
+    /**
+     * The live RTC session that handles all real time communication for video and audio.
+     * Read-only to collaborators — mutate exclusively through [setActiveSession] so there is a
+     * single, unidirectional write path for the session.
+     */
+    val session: StateFlow<RtcSession?> = _session.asStateFlow()
+
+    /** Sole write path for [session]: swaps in a new RTC session or clears it with `null`. */
+    fun setActiveSession(rtcSession: RtcSession?) {
+        _session.value = rtcSession
+    }
 
     var sessionId = UUID.randomUUID().toString()
 
@@ -45,4 +57,12 @@ internal class CallSessionManager() {
 
     var connectStartTime = 0L
     var reconnectStartTime = 0L
+
+    /**
+     * Fast-reconnect deadline (in millis), updated at runtime from the SFU's
+     * `fastReconnectDeadlineSeconds`. Written by the session observer and read by the
+     * reconnect loop and the connectivity monitor, so it lives with the other shared
+     * reconnect bookkeeping.
+     */
+    var reconnectDeadlineMillis: Int = 10_000
 }

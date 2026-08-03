@@ -30,14 +30,17 @@ class CallSessionManagerTest {
     private fun manager() = CallSessionManager()
 
     @Test
-    fun `session starts empty and can be replaced`() {
+    fun `session starts empty and can be replaced via setActiveSession`() {
         val manager = manager()
         assertThat(manager.session.value).isNull()
 
         val session = mockk<RtcSession>(relaxed = true)
-        manager.session.value = session
+        manager.setActiveSession(session)
 
         assertThat(manager.session.value).isSameInstanceAs(session)
+
+        manager.setActiveSession(null)
+        assertThat(manager.session.value).isNull()
     }
 
     @Test

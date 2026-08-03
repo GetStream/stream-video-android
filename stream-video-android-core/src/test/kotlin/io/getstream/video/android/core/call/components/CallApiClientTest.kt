@@ -54,14 +54,14 @@ class CallApiClientTest {
 
     private lateinit var clientImpl: StreamVideoClient
     private lateinit var state: CallState
-    private lateinit var ringRegistrar: RingingCallRegistrar
+    private lateinit var callRegistry: ClientCallRegistry
     private lateinit var apiClient: CallApiClient
 
     @Before
     fun setup() {
         clientImpl = mockk(relaxed = true)
         state = mockk(relaxed = true)
-        ringRegistrar = mockk(relaxed = true)
+        callRegistry = mockk(relaxed = true)
 
         // Response-processing endpoints return Success so the onSuccess/state-update
         // branches are exercised.
@@ -94,7 +94,7 @@ class CallApiClientTest {
             clientImpl = clientImpl,
             scope = testScope,
             callSessionId = { "session-id" },
-            ringRegistrar = ringRegistrar,
+            callRegistry = callRegistry,
         )
     }
 
@@ -130,8 +130,8 @@ class CallApiClientTest {
     fun `create with ring registers an outgoing ringing call`() = runTest(testDispatcher) {
         apiClient.create(ring = true)
 
-        verify { ringRegistrar.beforeOutgoingStateUpdate() }
-        verify { ringRegistrar.afterOutgoingStateUpdate() }
+        verify { callRegistry.markRinging() }
+        verify { callRegistry.registerOutgoingRing() }
     }
 
     @Test
@@ -282,14 +282,14 @@ class CallApiClientTest {
         coVerify {
             clientImpl.getOrCreateCallFullMembers(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
-        verify { ringRegistrar.afterOutgoingStateUpdate() }
+        verify { callRegistry.registerOutgoingRing() }
     }
 
     @Test
     fun `accept marks the call accepted on this device`() = runTest(testDispatcher) {
         apiClient.accept()
         verify { state.acceptedOnThisDevice = true }
-        verify { ringRegistrar.onAccepted() }
+        verify { callRegistry.markAccepted() }
     }
 
     @Test
