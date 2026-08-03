@@ -133,9 +133,8 @@ class CallJoinCoordinatorTest {
 
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {
         coEvery {
-            clientImpl.joinCall(
-                any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(),
+            apiClient.joinRequest(
+                any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns result
     }
@@ -183,11 +182,17 @@ class CallJoinCoordinatorTest {
         advanceUntilIdle()
 
         assertThat(result).isInstanceOf(Failure::class.java)
-        // joinRequest -> clientImpl.joinCall is attempted once per retry (3 attempts total).
+        // The join request is issued once per retry (3 attempts total).
         coVerify(exactly = 3) {
-            clientImpl.joinCall(
-                any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(),
+            apiClient.joinRequest(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
             )
         }
     }
@@ -253,23 +258,5 @@ class CallJoinCoordinatorTest {
 
         assertThat(result).isInstanceOf(Failure::class.java)
         coVerify { lifecycle.leave(any<CallLeaveReason>()) }
-    }
-
-    @Test
-    fun `joinRequest delegates to the coordinator client`() = runTest(testDispatcher) {
-        stubJoinCall(Failure(Error.GenericError("boom")))
-
-        val result = coordinator().joinRequest(
-            location = "test-location",
-            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
-        )
-
-        assertThat(result).isInstanceOf(Failure::class.java)
-        coVerify {
-            clientImpl.joinCall(
-                any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(),
-            )
-        }
     }
 }

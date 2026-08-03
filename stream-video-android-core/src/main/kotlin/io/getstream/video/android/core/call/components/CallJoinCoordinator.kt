@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call.components
 
-import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -237,7 +236,7 @@ internal class CallJoinCoordinator(
                 null
             }
         val result =
-            joinRequest(
+            apiClient.joinRequest(
                 options,
                 locationResult.value,
                 ring = ring,
@@ -366,43 +365,5 @@ internal class CallJoinCoordinator(
         }
         logger.d { "[_join] Reconnect after recoverable connection failure settled on $terminal" }
         return terminal is RealtimeConnection.Connected
-    }
-
-    suspend fun joinRequest(
-        create: CreateCallOptions? = null,
-        location: String,
-        migratingFrom: String? = null,
-        migratingFromList: List<String>? = null,
-        ring: Boolean = false,
-        notify: Boolean = false,
-        hintHighScaleLivestreamPublisher: Boolean? = null,
-        joinAnalyticsModel: JoinAnalyticsModel,
-    ): Result<JoinCallResponse> {
-        val migratingFromList =
-            migratingFromList ?: reconnector.getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
-        callAnalytics.joinAnalytics.onJoinRequestStart(joinAnalyticsModel.joinReason)
-        val result = clientImpl.joinCall(
-            type, id,
-            create = create != null,
-            members = create?.memberRequestsFromIds(),
-            custom = create?.custom,
-            settingsOverride = create?.settings,
-            startsAt = create?.startsAt,
-            team = create?.team,
-            ring = ring,
-            notify = notify,
-            location = location,
-            migratingFrom = migratingFrom,
-            migratingFromList = migratingFromList,
-            hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
-        )
-        result.onSuccess {
-            callAnalytics.joinAnalytics.onJoinRequestSuccess(
-                joinAnalyticsModel,
-                it.call.currentSessionId,
-            )
-            state.updateFromResponse(it)
-        }
-        return result
     }
 }

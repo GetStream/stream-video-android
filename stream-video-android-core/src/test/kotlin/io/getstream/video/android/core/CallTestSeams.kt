@@ -36,6 +36,12 @@ internal fun Call.injectSession(session: RtcSession?) {
     sessionManager().setActiveSession(session)
 }
 
+/** Records [sfuId] as a failed edge for this call, as the reconnect flow does on migrate. */
+internal fun Call.addFailedSfuId(sfuId: String) = sessionManager().addFailedSfuId(sfuId)
+
+/** Snapshot of the SFU IDs this call has recorded as failed. */
+internal fun Call.failedSfuIds(): List<String> = sessionManager().failedSfuIdsSnapshot()
+
 /**
  * Pins the SFU location a call will (re)join, so tests don't depend on a real location lookup.
  */

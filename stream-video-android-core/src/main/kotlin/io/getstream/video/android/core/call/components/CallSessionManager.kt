@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Owns the live RTC session state for a call and the bookkeeping shared across the
@@ -64,6 +65,29 @@ internal class CallSessionManager() {
     /** Seconds elapsed since [reconnectStartTime], for the reconnection-time telemetry. */
     fun reconnectionTimeSeconds(): Float =
         (System.currentTimeMillis() - reconnectStartTime) / 1000f
+
+    /**
+     * SFU IDs (edge names) that have already failed for this call, sent as `migrating_from_list`
+     * so the coordinator can steer the next join away from them.
+     *
+     * Written by the reconnect flow and read when building the join request. It lives here rather
+     * than in either of those components so neither has to depend on the other.
+     */
+    private val failedSfuIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
+
+    /** Adds the given SFU ID to the failed set. Blank IDs are ignored. */
+    fun addFailedSfuId(sfuId: String) {
+        if (sfuId.isBlank()) return
+        failedSfuIds.add(sfuId)
+    }
+
+    /** Returns a snapshot of failed SFU IDs to send as `migrating_from_list`. */
+    fun failedSfuIdsSnapshot(): List<String> = failedSfuIds.toList()
+
+    /** Clears the failed SFU list (e.g. after a successful join). */
+    fun clearFailedSfuIds() {
+        failedSfuIds.clear()
+    }
 
     /**
      * Fast-reconnect deadline (in millis), updated at runtime from the SFU's

@@ -79,6 +79,7 @@ class JoinRecoverableFailureTest {
     private lateinit var clientImpl: StreamVideoClient
     private lateinit var state: CallState
     private lateinit var sessionManager: CallSessionManager
+    private lateinit var apiClient: CallApiClient
     private lateinit var reconnector: CallReconnector
     private lateinit var mockSession: RtcSession
     private lateinit var mockJoinResponse: JoinCallResponse
@@ -93,6 +94,7 @@ class JoinRecoverableFailureTest {
         mockJoinResponse = mockk(relaxed = true)
 
         sessionManager = CallSessionManager()
+        apiClient = mockk(relaxed = true)
         connectionFlow = MutableStateFlow(RealtimeConnection.InProgress)
 
         every { state._connection } returns connectionFlow
@@ -100,9 +102,8 @@ class JoinRecoverableFailureTest {
         every { state.settings } returns MutableStateFlow<CallSettingsResponse?>(null)
         coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
         coEvery {
-            clientImpl.joinCall(
-                any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(),
+            apiClient.joinRequest(
+                any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Success(mockJoinResponse)
     }
@@ -123,7 +124,7 @@ class JoinRecoverableFailureTest {
         sessionFactory = RtcSessionFactory { _, _, _, _, _, _, _ -> mockSession },
         media = mockk<CallMediaManager>(relaxed = true),
         lifecycle = mockk<CallLifecycleManager>(relaxed = true),
-        apiClient = mockk<CallApiClient>(relaxed = true),
+        apiClient = apiClient,
         reconnector = reconnector,
         sessionMonitor = mockk<SessionMonitor>(relaxed = true),
         callRegistry = mockk<ClientCallRegistry>(relaxed = true),

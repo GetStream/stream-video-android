@@ -35,7 +35,6 @@ import kotlinx.coroutines.sync.Mutex
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Outcome of a single reconnect attempt. Each reconnect method returns one of
@@ -73,20 +72,17 @@ internal class CallReconnector(
     private val sessionManager: CallSessionManager,
     private val sessionFactory: RtcSessionFactory,
     private val lifecycle: CallLifecycleManager,
-    // Lazy providers: constructed after the reconnector in Call (avoids construction cycles /
-    // init-order issues).
+    private val apiClient: CallApiClient,
+    private val state: CallState,
+    private val callAnalytics: CallAnalytics,
+    private val statsReporter: CallStatsReporter,
+    // Lazy provider: the session monitor is built from the connectivity monitor, which takes
+    // this component, so it can only be resolved after construction.
     private val sessionMonitor: () -> SessionMonitor,
-    private val stateProvider: () -> CallState,
-    private val callAnalyticsProvider: () -> CallAnalytics,
-    private val statsReporter: () -> CallStatsReporter,
-    private val joinCoordinator: () -> CallJoinCoordinator,
     private val type: String,
     private val id: String,
 ) {
     private val logger by taggedLogger("Call:Reconnector:$type:$id")
-
-    private val state get() = stateProvider()
-    private val callAnalytics get() = callAnalyticsProvider()
 
     // Read connectivity from the leaf NetworkStateProvider directly rather than routing
     // through CallConnectivityMonitor — that back-reference would form a dependency cycle
@@ -99,7 +95,6 @@ internal class CallReconnector(
      * SFU IDs (edge names) we failed to connect to (e.g. SFU_FULL). Sent in migrating_from_list
      * when requesting new credentials so the coordinator can exclude them.
      */
-    private val failedSfuIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     /**
      * Unified reconnection entry point.
@@ -336,7 +331,7 @@ internal class CallReconnector(
         val currentSession = sessionManager.session.value
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for fast reconnect")
 
-        val stats = statsReporter().collectStats()
+        val stats = statsReporter.collectStats()
         currentSession.sendCallStats(stats)
 
         currentSession.prepareReconnect()
@@ -376,7 +371,7 @@ internal class CallReconnector(
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for rejoin")
         sessionManager.reconnectStartTime = System.currentTimeMillis()
 
-        val joinResponse = joinCoordinator().joinRequest(
+        val joinResponse = apiClient.joinRequest(
             location = loc,
             joinAnalyticsModel = joinAnalyticsModel,
         )
@@ -440,10 +435,10 @@ internal class CallReconnector(
         val oldSession = sessionManager.session.value
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for migrate")
         sessionManager.reconnectStartTime = System.currentTimeMillis()
-        addFailedSfuId(oldSession.sfuName)
+        sessionManager.addFailedSfuId(oldSession.sfuName)
 
         val joinResponse =
-            joinCoordinator().joinRequest(
+            apiClient.joinRequest(
                 location = loc,
                 migratingFrom = oldSession.sfuName,
                 joinAnalyticsModel = joinAnalyticsModel,
@@ -471,7 +466,7 @@ internal class CallReconnector(
             reconnect_attempt = sessionManager.nonFastReconnectAttempts,
         )
 
-        val stats = statsReporter().collectStats()
+        val stats = statsReporter.collectStats()
         oldSession.sendCallStats(stats)
         oldSession.enterMigration()
 
@@ -513,20 +508,6 @@ internal class CallReconnector(
 
     suspend fun migrate() {
         reconnect(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE, "migrate")
-    }
-
-    /** Adds the given SFU ID (edge name) to the failed set (for migrating_from_list). */
-    private fun addFailedSfuId(sfuId: String) {
-        if (sfuId.isBlank()) return
-        failedSfuIds.add(sfuId)
-    }
-
-    /** Returns a snapshot of failed SFU IDs to send as migrating_from_list. */
-    fun getFailedSfuIdsSnapshot(): List<String> = failedSfuIds.toList()
-
-    /** Clears the failed SFU list (e.g. after a successful join). */
-    fun clearFailedSfuIds() {
-        failedSfuIds.clear()
     }
 
     companion object {

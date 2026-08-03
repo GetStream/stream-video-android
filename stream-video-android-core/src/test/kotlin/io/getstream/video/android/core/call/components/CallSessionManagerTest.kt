@@ -91,6 +91,35 @@ class CallSessionManagerTest {
     }
 
     @Test
+    fun `failed sfu ids are de-duplicated, ignore blanks, and clear`() {
+        val manager = manager()
+        assertThat(manager.failedSfuIdsSnapshot()).isEmpty()
+
+        manager.addFailedSfuId("sfu-edge-1")
+        manager.addFailedSfuId("sfu-edge-1")
+        manager.addFailedSfuId("sfu-edge-2")
+        manager.addFailedSfuId("")
+        manager.addFailedSfuId("   ")
+
+        assertThat(manager.failedSfuIdsSnapshot()).containsExactly("sfu-edge-1", "sfu-edge-2")
+
+        manager.clearFailedSfuIds()
+        assertThat(manager.failedSfuIdsSnapshot()).isEmpty()
+    }
+
+    @Test
+    fun `failed sfu id snapshot is a copy`() {
+        val manager = manager()
+        manager.addFailedSfuId("sfu-edge-1")
+        val snapshot = manager.failedSfuIdsSnapshot()
+
+        manager.addFailedSfuId("sfu-edge-2")
+
+        assertThat(snapshot).containsExactly("sfu-edge-1")
+        assertThat(manager.failedSfuIdsSnapshot()).hasSize(2)
+    }
+
+    @Test
     fun `connection and reconnection times are measured from their start timestamps`() {
         val manager = manager()
         val fiveSecondsAgo = System.currentTimeMillis() - 5_000L

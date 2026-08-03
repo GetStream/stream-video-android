@@ -22,6 +22,7 @@ import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.GetCallResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
+import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.android.video.generated.models.KickUserResponse
 import io.getstream.android.video.generated.models.ListRecordingsResponse
 import io.getstream.android.video.generated.models.ListTranscriptionsResponse
@@ -47,7 +48,10 @@ import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.CallState
+import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.CallAnalytics
+import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
@@ -74,8 +78,52 @@ internal class CallApiClient(
     private val scope: CoroutineScope,
     private val callSessionId: () -> String,
     private val callRegistry: ClientCallRegistry,
+    private val callAnalytics: CallAnalytics,
+    private val sessionManager: CallSessionManager,
 ) {
     private val logger by taggedLogger("Call:ApiClient:$type:$id")
+
+    /**
+     * Executes the coordinator join request. Shared by the join flow and the reconnect flow
+     * (rejoin / migrate), which is why it lives here rather than in either of them.
+     */
+    suspend fun joinRequest(
+        create: CreateCallOptions? = null,
+        location: String,
+        migratingFrom: String? = null,
+        migratingFromList: List<String>? = null,
+        ring: Boolean = false,
+        notify: Boolean = false,
+        hintHighScaleLivestreamPublisher: Boolean? = null,
+        joinAnalyticsModel: JoinAnalyticsModel,
+    ): Result<JoinCallResponse> {
+        val migratingFromList =
+            migratingFromList ?: sessionManager.failedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
+        callAnalytics.joinAnalytics.onJoinRequestStart(joinAnalyticsModel.joinReason)
+        val result = clientImpl.joinCall(
+            type, id,
+            create = create != null,
+            members = create?.memberRequestsFromIds(),
+            custom = create?.custom,
+            settingsOverride = create?.settings,
+            startsAt = create?.startsAt,
+            team = create?.team,
+            ring = ring,
+            notify = notify,
+            location = location,
+            migratingFrom = migratingFrom,
+            migratingFromList = migratingFromList,
+            hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
+        )
+        result.onSuccess {
+            callAnalytics.joinAnalytics.onJoinRequestSuccess(
+                joinAnalyticsModel,
+                it.call.currentSessionId,
+            )
+            state.updateFromResponse(it)
+        }
+        return result
+    }
 
     suspend fun get(): Result<GetCallResponse> {
         val response = clientImpl.getCall(type, id)

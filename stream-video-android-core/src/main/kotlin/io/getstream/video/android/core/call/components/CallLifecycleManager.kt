@@ -45,13 +45,14 @@ internal class CallLifecycleManager(
     private val callRegistry: ClientCallRegistry,
     /** Cancels the call's supervisor job and scope once in-flight children complete. */
     private val shutDownJobs: () -> Unit,
-    // Lazy providers: constructed after this component during Call initialization.
-    private val stateProvider: () -> CallState,
-    private val callAnalyticsProvider: () -> CallAnalytics,
-    private val statsReporter: () -> CallStatsReporter,
-    private val media: () -> CallMediaManager,
+    private val state: CallState,
+    private val callAnalytics: CallAnalytics,
+    private val statsReporter: CallStatsReporter,
+    private val media: CallMediaManager,
+    private val iceMonitor: CallIceConnectionMonitor,
+    // Lazy providers: both sit on a cycle with this component — the connectivity monitor takes the
+    // lifecycle manager to leave on timeout, and the session monitor is built from that monitor.
     private val sessionMonitor: () -> SessionMonitor,
-    private val iceMonitor: () -> CallIceConnectionMonitor,
     private val connectivityMonitor: () -> CallConnectivityMonitor,
     private val type: String,
     private val id: String,
@@ -59,8 +60,6 @@ internal class CallLifecycleManager(
     private val logger by taggedLogger("Call:LifecycleManager:$type:$id")
 
     private val cid = "$type:$id"
-    private val state get() = stateProvider()
-    private val callAnalytics get() = callAnalyticsProvider()
 
     // Atomic controls
     private var atomicLeave = AtomicUnitCall()
@@ -106,7 +105,7 @@ internal class CallLifecycleManager(
         /**
          * TODO Rahul, need to check which call has owned the media at the moment(probably use active call)
          */
-        media().disableLocalCapture()
+        media.disableLocalCapture()
 
         callRegistry.detach()
 
@@ -115,7 +114,7 @@ internal class CallLifecycleManager(
             callAnalytics.onCallLeave(sessionManager.session, reason)
             safeCall {
                 sessionManager.session.value?.sfuTracer?.trace("leave-call", leaveReason)
-                val stats = statsReporter().collectStats()
+                val stats = statsReporter.collectStats()
                 sessionManager.session.value?.sendCallStats(stats)
             }
             // Must complete before cleanup() cancels the session's supervisor job.
@@ -143,8 +142,8 @@ internal class CallLifecycleManager(
         state.cleanup()
         sessionManager.session.value?.cleanup()
         shutDownJobs()
-        statsReporter().stop()
-        media().cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
+        statsReporter.stop()
+        media.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
         sessionManager.setActiveSession(null)
         // Cleanup the call's scope provider
         scopeProvider.cleanup()
@@ -152,7 +151,7 @@ internal class CallLifecycleManager(
 
     /** Stops the ICE and connectivity monitors. */
     private fun stopConnectionMonitors() {
-        iceMonitor().stop()
+        iceMonitor.stop()
         connectivityMonitor().cancelLeaveTimeout()
         connectivityMonitor().unsubscribe()
     }

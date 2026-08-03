@@ -56,7 +56,7 @@ class CallReconnectorTest {
     private lateinit var sessionMonitor: SessionMonitor
     private lateinit var lifecycle: CallLifecycleManager
     private lateinit var statsReporter: CallStatsReporter
-    private lateinit var joinCoordinator: CallJoinCoordinator
+    private lateinit var apiClient: CallApiClient
     private lateinit var callAnalytics: CallAnalytics
     private lateinit var sessionFactory: RtcSessionFactory
 
@@ -68,7 +68,7 @@ class CallReconnectorTest {
         sessionMonitor = mockk(relaxed = true)
         lifecycle = mockk(relaxed = true)
         statsReporter = mockk(relaxed = true)
-        joinCoordinator = mockk(relaxed = true)
+        apiClient = mockk(relaxed = true)
         callAnalytics = mockk(relaxed = true)
         sessionFactory = mockk(relaxed = true)
 
@@ -91,11 +91,11 @@ class CallReconnectorTest {
         sessionManager = sessionManager,
         sessionFactory = sessionFactory,
         lifecycle = lifecycle,
+        apiClient = apiClient,
+        state = state,
+        callAnalytics = callAnalytics,
+        statsReporter = statsReporter,
         sessionMonitor = { sessionMonitor },
-        stateProvider = { state },
-        callAnalyticsProvider = { callAnalytics },
-        statsReporter = { statsReporter },
-        joinCoordinator = { joinCoordinator },
         type = "default",
         id = "call-id",
     )
@@ -165,14 +165,6 @@ class CallReconnectorTest {
 
         assertThat(connectionFlow.value)
             .isInstanceOf(RealtimeConnection.ReconnectingFailed::class.java)
-    }
-
-    @Test
-    fun `failed sfu id bookkeeping is exposed as a snapshot`() {
-        val reconnector = reconnector()
-        assertThat(reconnector.getFailedSfuIdsSnapshot()).isEmpty()
-        reconnector.clearFailedSfuIds()
-        assertThat(reconnector.getFailedSfuIdsSnapshot()).isEmpty()
     }
 
     @Test
@@ -260,7 +252,7 @@ class CallReconnectorTest {
             every { s.publisher } returns MutableStateFlow<Publisher?>(null)
         }
         coEvery {
-            joinCoordinator.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
         } returns Success(joinResponse)
         every {
             sessionFactory.create(any(), any(), any(), any(), any(), any(), any())
