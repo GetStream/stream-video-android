@@ -33,9 +33,35 @@ import io.mockk.mockk
  * method that exists purely for tests.
  */
 internal fun Call.injectSession(session: RtcSession?) {
+    sessionManager().setActiveSession(session)
+}
+
+/**
+ * Pins the SFU location a call will (re)join, so tests don't depend on a real location lookup.
+ */
+internal fun Call.injectLocation(location: String?) {
+    sessionManager().location = location
+}
+
+/**
+ * Number of REJOIN / MIGRATE attempts the reconnect loop has made, for tests asserting on
+ * escalation behaviour. Read straight off the owning component: only the reconnect flow has any
+ * business seeing this counter, so it isn't worth a facade accessor.
+ */
+internal fun Call.nonFastReconnectAttempts(): Int = sessionManager().nonFastReconnectAttempts
+
+/**
+ * Reaches the [CallSessionManager] that owns the session and reconnect bookkeeping.
+ *
+ * [Call] intentionally exposes none of this: the session has a single write path through
+ * [CallSessionManager.setActiveSession], and the rest is bookkeeping shared between the join and
+ * reconnect flows. Going through reflection keeps those test-only entry points out of the
+ * production API.
+ */
+private fun Call.sessionManager(): CallSessionManager {
     val field = Call::class.java.getDeclaredField("sessionManager")
     field.isAccessible = true
-    (field.get(this) as CallSessionManager).setActiveSession(session)
+    return field.get(this) as CallSessionManager
 }
 
 /**

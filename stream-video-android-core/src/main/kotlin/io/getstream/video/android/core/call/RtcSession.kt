@@ -48,6 +48,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
+import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.StreamPeerConnection
 import io.getstream.video.android.core.call.connection.Subscriber
@@ -255,6 +256,7 @@ public class RtcSession internal constructor(
     private val sessionCounter: Int = 0,
     private val powerManager: PowerManager?,
     private val call: Call,
+    private val sessionManager: CallSessionManager,
     private val sessionId: String,
     private val apiKey: String,
     private val lifecycle: Lifecycle,
@@ -1056,7 +1058,7 @@ public class RtcSession internal constructor(
     ): JoinRequest = JoinRequest(
         subscriber_sdp = throwawaySubscriberSdpAndOptions(),
         publisher_sdp = throwawayPublisherSdpAndOptions(),
-        unified_session_id = call.unifiedSessionId,
+        unified_session_id = sessionManager.unifiedSessionId,
         session_id = sessionId,
         token = sfuToken,
         fast_reconnect = false,
@@ -1071,13 +1073,13 @@ public class RtcSession internal constructor(
         if (reconnectStrategy == null) {
             sendCallStats(
                 report = call.collectStats(),
-                connectionTimeSeconds = (System.currentTimeMillis() - call.connectStartTime) / 1000f,
+                connectionTimeSeconds = sessionManager.connectionTimeSeconds(),
             )
         } else {
             sendCallStats(
                 report = call.collectStats(),
                 reconnectionTimeSeconds = Pair(
-                    (System.currentTimeMillis() - call.reconnectStartTime) / 1000f,
+                    sessionManager.reconnectionTimeSeconds(),
                     reconnectStrategy,
                 ),
             )
@@ -1899,7 +1901,7 @@ public class RtcSession internal constructor(
             val sendStatsRequest = SendStatsRequest(
                 session_id = sessionId,
                 sdk = "stream-android",
-                unified_session_id = call.unifiedSessionId,
+                unified_session_id = sessionManager.unifiedSessionId,
                 sdk_version = BuildConfig.STREAM_VIDEO_VERSION,
                 webrtc_version = BuildConfig.STREAM_WEBRTC_VERSION,
                 publisher_stats = report?.toJson(StreamPeerType.PUBLISHER) ?: "",
@@ -1999,7 +2001,7 @@ public class RtcSession internal constructor(
         subscriber.value?.setTrackDimension(viewportId, sessionId, trackType, visible, dimensions)
         coroutineScope.launch {
             serialProcessor.submit("updateTrackDimensions") {
-                if (sessionId != call.sessionId) {
+                if (sessionId != sessionManager.sessionId) {
                     // dimension updated for another participant
                     subscriber.value?.setVideoSubscriptions(
                         trackOverridesHandler,

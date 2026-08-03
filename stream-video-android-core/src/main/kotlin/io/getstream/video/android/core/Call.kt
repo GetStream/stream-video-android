@@ -152,33 +152,6 @@ public class Call(
         set(value) {
             sessionManager.sessionId = value
         }
-    internal val unifiedSessionId: String get() = sessionManager.unifiedSessionId
-
-    internal var location: String?
-        get() = sessionManager.location
-        set(value) {
-            sessionManager.location = value
-        }
-
-    /**
-     * Increment this only for REJOIN and MIGRATION strategies
-     */
-    internal var nonFastReconnectAttempts: Int
-        get() = sessionManager.nonFastReconnectAttempts
-        set(value) {
-            sessionManager.nonFastReconnectAttempts = value
-        }
-
-    internal var connectStartTime: Long
-        get() = sessionManager.connectStartTime
-        set(value) {
-            sessionManager.connectStartTime = value
-        }
-    internal var reconnectStartTime: Long
-        get() = sessionManager.reconnectStartTime
-        set(value) {
-            sessionManager.reconnectStartTime = value
-        }
 
     // Unit-test only hook for replacing RtcSession construction.
     // TODO(v2): replace this with a proper dependency injection boundary.
@@ -186,7 +159,9 @@ public class Call(
 
     /**
      * Creates [RtcSession] instances for join / rejoin / migrate. Captures `this` so the
-     * session's Call dependency never leaks into the join/reconnect orchestrators.
+     * session's Call dependency never leaks into the join/reconnect orchestrators, and hands it
+     * the [CallSessionManager] directly so session identity and reconnect timings are read from
+     * their owner rather than routed back through this facade.
      */
     private val sessionFactory = RtcSessionFactory {
             sessionId, sessionCounter, sfuUrl, sfuWsUrl, sfuToken, sfuName, iceServers ->
@@ -195,6 +170,7 @@ public class Call(
             sessionCounter = sessionCounter,
             powerManager = powerManager,
             call = this,
+            sessionManager = sessionManager,
             sessionId = sessionId,
             apiKey = clientImpl.apiKey,
             lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,

@@ -58,6 +58,13 @@ internal class CallSessionManager() {
     var connectStartTime = 0L
     var reconnectStartTime = 0L
 
+    /** Seconds elapsed since [connectStartTime], for the connection-time telemetry. */
+    fun connectionTimeSeconds(): Float = (System.currentTimeMillis() - connectStartTime) / 1000f
+
+    /** Seconds elapsed since [reconnectStartTime], for the reconnection-time telemetry. */
+    fun reconnectionTimeSeconds(): Float =
+        (System.currentTimeMillis() - reconnectStartTime) / 1000f
+
     /**
      * Fast-reconnect deadline (in millis), updated at runtime from the SFU's
      * `fastReconnectDeadlineSeconds`. Written by the session observer and read by the

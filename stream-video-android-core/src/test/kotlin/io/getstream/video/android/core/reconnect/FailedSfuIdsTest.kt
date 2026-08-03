@@ -19,6 +19,7 @@ package io.getstream.video.android.core.reconnect
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.injectLocation
 import io.getstream.video.android.core.injectMockNetwork
 import io.getstream.video.android.core.injectSession
 import io.mockk.coEvery
@@ -141,7 +142,7 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
             emptyList(),
         )
         call.injectSession(sessionMock)
-        call.location = "test-location"
+        call.injectLocation("test-location")
 
         call.migrate()
 

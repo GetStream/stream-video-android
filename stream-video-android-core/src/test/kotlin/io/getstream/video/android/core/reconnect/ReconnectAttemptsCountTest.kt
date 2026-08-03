@@ -22,6 +22,7 @@ import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.injectMockNetwork
 import io.getstream.video.android.core.injectSession
+import io.getstream.video.android.core.nonFastReconnectAttempts
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -35,7 +36,7 @@ import kotlin.test.assertTrue
 
 /**
  * Tests that the unified [io.getstream.video.android.core.Call.reconnect] loop
- * increments [io.getstream.video.android.core.Call.nonFastReconnectAttempts] according
+ * increments the non-fast reconnect attempt counter according
  * to the JS SDK contract:
  * - FAST strategy does NOT increment the counter.
  * - REJOIN strategy increments the counter once per attempt.
@@ -71,10 +72,10 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
         // REJOIN (because FAST keeps failing), those iterations will increment,
         // but we verify there's no increment for the initial FAST attempt.
         assertTrue(
-            call.nonFastReconnectAttempts == 0 ||
+            call.nonFastReconnectAttempts() == 0 ||
                 call.state.connection.value is RealtimeConnection.ReconnectingFailed,
             "Expected 0 reconnect attempts for FAST or ReconnectingFailed state, " +
-                "got ${call.nonFastReconnectAttempts}",
+                "got ${call.nonFastReconnectAttempts()}",
         )
     }
 
@@ -93,8 +94,8 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
 
         // At least one REJOIN attempt should have been counted
         assertTrue(
-            call.nonFastReconnectAttempts > 0,
-            "Expected reconnect attempts > 0, got ${call.nonFastReconnectAttempts}",
+            call.nonFastReconnectAttempts() > 0,
+            "Expected reconnect attempts > 0, got ${call.nonFastReconnectAttempts()}",
         )
     }
 
@@ -110,7 +111,7 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
             "first",
         )
-        val attemptsAfterFirst = call.nonFastReconnectAttempts
+        val attemptsAfterFirst = call.nonFastReconnectAttempts()
 
         call.reconnect(
             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
@@ -118,8 +119,8 @@ class ReconnectAttemptsCountTest : IntegrationTestBase() {
         )
 
         assertTrue(
-            call.nonFastReconnectAttempts >= attemptsAfterFirst,
-            "Expected accumulated attempts >= $attemptsAfterFirst, got ${call.nonFastReconnectAttempts}",
+            call.nonFastReconnectAttempts() >= attemptsAfterFirst,
+            "Expected accumulated attempts >= $attemptsAfterFirst, got ${call.nonFastReconnectAttempts()}",
         )
     }
 }

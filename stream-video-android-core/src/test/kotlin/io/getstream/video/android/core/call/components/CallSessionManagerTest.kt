@@ -89,4 +89,15 @@ class CallSessionManagerTest {
         assertThat(manager.connectStartTime).isEqualTo(111L)
         assertThat(manager.reconnectStartTime).isEqualTo(222L)
     }
+
+    @Test
+    fun `connection and reconnection times are measured from their start timestamps`() {
+        val manager = manager()
+        val fiveSecondsAgo = System.currentTimeMillis() - 5_000L
+        manager.connectStartTime = fiveSecondsAgo
+        manager.reconnectStartTime = fiveSecondsAgo - 5_000L
+
+        assertThat(manager.connectionTimeSeconds()).isWithin(1f).of(5f)
+        assertThat(manager.reconnectionTimeSeconds()).isWithin(1f).of(10f)
+    }
 }
