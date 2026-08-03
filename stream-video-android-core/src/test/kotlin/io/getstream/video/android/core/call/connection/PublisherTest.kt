@@ -427,6 +427,152 @@ class PublisherTest {
         }
     }
 
+    /**
+     * Bug #1: the cleanup loop in [Publisher.syncPublishOptions] used to compare the cache against
+     * itself, so every transceiver was stopped/disposed on each ChangePublishOptions event. This
+     * asserts that transceivers whose options are still requested are left untouched.
+     */
+    @Test
+    fun `syncPublishOptions keeps transceivers whose options are still requested`() =
+        runTest(coroutineContext) {
+            val liveVideoTrack = mockk<VideoTrack>(relaxed = true) {
+                every { kind() } returns "video"
+                every { state() } returns MediaStreamTrack.State.LIVE
+                every { enabled() } returns true
+                every { isDisposed } returns false
+            }
+            val liveAudioTrack = mockk<AudioTrack>(relaxed = true) {
+                every { kind() } returns "audio"
+                every { state() } returns MediaStreamTrack.State.LIVE
+                every { enabled() } returns true
+                every { isDisposed } returns false
+            }
+            val videoTransceiver = mockk<RtpTransceiver>(relaxed = true) {
+                every { sender.track() } returns liveVideoTrack
+            }
+            val audioTransceiver = mockk<RtpTransceiver>(relaxed = true) {
+                every { sender.track() } returns liveAudioTrack
+            }
+            every {
+                mockPeerConnection.addTransceiver(any<MediaStreamTrack>(), any())
+            } returns videoTransceiver andThen audioTransceiver
+
+            publisher.publishStreamInternal("stream-1", TrackType.TRACK_TYPE_VIDEO)
+            publisher.publishStreamInternal("stream-1", TrackType.TRACK_TYPE_AUDIO)
+            assertEquals(2, mockTransceiverCache.items().size)
+
+            // Re-send the SAME options that are already active (both still requested).
+            publisher.syncPublishOptions(
+                captureFormat = CameraEnumerationAndroid.CaptureFormat(1280, 720, 24, 30),
+                publishOptions = listOf(videoPublishOption, audioPublishOption),
+            )
+
+            // Nothing should have been torn down or removed.
+            verify(exactly = 0) { videoTransceiver.stop() }
+            verify(exactly = 0) { videoTransceiver.dispose() }
+            verify(exactly = 0) { audioTransceiver.stop() }
+            verify(exactly = 0) { audioTransceiver.dispose() }
+            verify(exactly = 0) { mockTransceiverCache.remove(videoPublishOption) }
+            verify(exactly = 0) { mockTransceiverCache.remove(audioPublishOption) }
+            assertEquals(2, mockTransceiverCache.items().size)
+        }
+
+    /**
+     * Bug #2: when the sender can't be reused, [Publisher.publishStreamInternal] falls back to a new
+     * transceiver. It used to drop the old one from the cache without stopping it, leaving a live
+     * sendonly m-line that SetPublisher.tracks never announces -> SFU force-rejoins. This asserts the
+     * old transceiver is now stopped (but not disposed on the live PC), and exactly one transceiver
+     * remains announced.
+     */
+    @Test
+    fun `publishStreamInternal fallback stops the orphaned transceiver`() =
+        runTest(coroutineContext) {
+            val senderA = mockk<RtpSender>(relaxed = true)
+            val senderB = mockk<RtpSender>(relaxed = true)
+            val transceiverA = mockk<RtpTransceiver>(relaxed = true) {
+                every { sender } returns senderA
+            }
+            val transceiverB = mockk<RtpTransceiver>(relaxed = true) {
+                every { sender } returns senderB
+            }
+            every {
+                mockPeerConnection.addTransceiver(any<MediaStreamTrack>(), any())
+            } returns transceiverA andThen transceiverB
+
+            // First publish creates & caches transceiver A.
+            publisher.publishStreamInternal("stream-1", TrackType.TRACK_TYPE_VIDEO)
+            assertEquals(1, mockTransceiverCache.items().size)
+
+            // Arrange the failure that drops us into the fallback: A's track is disposed and setTrack throws.
+            val disposedTrack = mockk<VideoTrack>(relaxed = true) {
+                every { isDisposed } returns true
+                every { kind() } returns "video"
+            }
+            every { senderA.track() } returns disposedTrack
+            every { senderA.setTrack(any(), any()) } throws RuntimeException("sender failure")
+
+            // B is healthy so it stays announced.
+            every { senderB.track() } returns mockk<VideoTrack>(relaxed = true) {
+                every { isDisposed } returns false
+                every { kind() } returns "video"
+                every { state() } returns MediaStreamTrack.State.LIVE
+                every { id() } returns "track-B"
+            }
+
+            publisher.publishStreamInternal("stream-1", TrackType.TRACK_TYPE_VIDEO)
+
+            // Old transceiver A is stopped (the fix) so its m-line goes inactive; it is NOT disposed
+            // because the PeerConnection is live and owns it (disposing mid-session crashes native WebRTC).
+            verify(exactly = 1) { transceiverA.stop() }
+            verify(exactly = 0) { transceiverA.dispose() }
+            // Exactly one live transceiver remains, and it's B.
+            assertEquals(1, mockTransceiverCache.items().size)
+            assertEquals(transceiverB, mockTransceiverCache.get(videoPublishOption))
+        }
+
+    /**
+     * Bug #3: [Publisher.addTransceiver] caches by [track_type, publish_option_id], so adding a second
+     * transceiver for the same tuple used to silently overwrite the cache entry and strand the old
+     * transceiver on the PeerConnection (an orphaned m-line). This asserts the guard stops any
+     * pre-existing transceiver before adding the new one (without disposing it on the live PC).
+     */
+    @Test
+    fun `addTransceiver stops existing transceiver for the same publish option before adding`() =
+        runTest(coroutineContext) {
+            val liveTrack = mockk<VideoTrack>(relaxed = true) {
+                every { kind() } returns "video"
+                every { state() } returns MediaStreamTrack.State.LIVE
+                every { enabled() } returns true
+                every { isDisposed } returns false
+            }
+            val existingTransceiver = mockk<RtpTransceiver>(relaxed = true) {
+                every { sender.track() } returns liveTrack
+            }
+            mockTransceiverCache.add(videoPublishOption, existingTransceiver)
+
+            val newTransceiver = mockk<RtpTransceiver>(relaxed = true)
+            every {
+                mockPeerConnection.addTransceiver(any<MediaStreamTrack>(), any())
+            } returns newTransceiver
+
+            val newTrack = mockk<VideoTrack>(relaxed = true) {
+                every { kind() } returns "video"
+                every { id() } returns "new-track"
+            }
+            publisher.addTransceiver(
+                streamIdList = listOf("stream-1"),
+                captureFormat = CameraEnumerationAndroid.CaptureFormat(1280, 720, 24, 30),
+                track = newTrack,
+                publishOption = videoPublishOption,
+            )
+
+            // The stale transceiver is stopped (m-line goes inactive) and replaced by the new one.
+            // It is NOT disposed on the live PeerConnection — that would be a native use-after-free.
+            verify(exactly = 1) { existingTransceiver.stop() }
+            verify(exactly = 0) { existingTransceiver.dispose() }
+            assertEquals(newTransceiver, mockTransceiverCache.get(videoPublishOption))
+        }
+
     @Test
     fun `getTrackType returns the correct track type if found`() = runTest {
         // 1) Mock a video track with a specific ID
