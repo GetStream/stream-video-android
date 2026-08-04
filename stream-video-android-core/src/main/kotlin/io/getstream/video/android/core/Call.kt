@@ -89,7 +89,6 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.runResultCatchingCancellable
-import io.getstream.video.android.core.utils.runResultCatchingCancellable
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
