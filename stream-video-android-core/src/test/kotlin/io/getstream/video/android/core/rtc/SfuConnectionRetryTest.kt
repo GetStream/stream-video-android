@@ -29,6 +29,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
@@ -149,6 +150,7 @@ class SfuConnectionRetryTest {
             client = mockStreamVideo,
             powerManager = mockPowerManager,
             call = mockCall,
+            sessionManager = CallSessionManager(),
             sessionId = "test-session-id",
             apiKey = "test-api-key",
             lifecycle = mockLifecycle,

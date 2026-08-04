@@ -20,13 +20,11 @@ import android.content.Intent
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.OwnCapability
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.StreamAudioDevice
-import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.mockk.every
 import io.mockk.mockk
@@ -36,7 +34,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
@@ -45,7 +42,7 @@ import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
  * Unit tests for [CallMediaManager], which owns the media pipeline: the peer-connection
  * factory lifecycle, screen sharing, settings-driven device init and audio processing.
  *
- * The [MediaManagerImpl] is injected through [Call.testInstanceProvider] so no real
+ * The [MediaManagerImpl] is injected through [MediaManagerFactory] so no real
  * WebRTC / native resources are created.
  */
 class CallMediaManagerTest {
@@ -55,24 +52,16 @@ class CallMediaManagerTest {
 
     private lateinit var clientImpl: StreamVideoClient
     private lateinit var state: CallState
-    private lateinit var sessionFlow: MutableStateFlow<RtcSession?>
+    private lateinit var sessionManager: CallSessionManager
     private lateinit var mediaManager: MediaManagerImpl
 
     @Before
     fun setup() {
         clientImpl = mockk(relaxed = true)
         state = mockk(relaxed = true)
-        sessionFlow = MutableStateFlow(null)
+        sessionManager = mockk(relaxed = true)
         mediaManager = mockk(relaxed = true)
-
-        // MediaManagerImpl is provided via testInstanceProvider, so eglBase / callProvider
-        // are never invoked and no real Call or native resources are needed.
-        Call.testInstanceProvider.mediaManagerCreator = { mediaManager }
-    }
-
-    @After
-    fun tearDown() {
-        Call.testInstanceProvider.mediaManagerCreator = null
+        every { sessionManager.session } returns MutableStateFlow(null)
     }
 
     private fun manager() = CallMediaManager(
@@ -81,9 +70,9 @@ class CallMediaManagerTest {
         clientImpl = clientImpl,
         scope = testScope,
         state = state,
-        session = sessionFlow,
+        sessionManager = sessionManager,
         eglBase = { mockk(relaxed = true) },
-        callProvider = { mockk(relaxed = true) },
+        mediaManagerFactory = MediaManagerFactory { _, _ -> mediaManager },
     )
 
     @Test

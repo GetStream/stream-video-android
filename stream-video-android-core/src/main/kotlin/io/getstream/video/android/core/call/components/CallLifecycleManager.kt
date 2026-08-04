@@ -18,30 +18,48 @@ package io.getstream.video.android.core.call.components
 
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallLeaveReason
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
+import io.getstream.video.android.core.analytics.call.CallAnalytics
+import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.launch
 
 /**
- * Owns the call's lifecycle / teardown for a [Call]: leaving, ending, the single-shot
- * leave guard ([AtomicUnitCall]), the destroyed flag, and the ordered cleanup of state,
- * session, jobs and media.
+ * Owns the call's lifecycle / teardown: leaving, ending, the single-shot leave guard
+ * ([AtomicUnitCall]), the destroyed flag, and the ordered cleanup of state, session,
+ * jobs and media.
+ *
+ * This component is constructed early in [io.getstream.video.android.core.Call] (the reconnect
+ * and event pipeline depend on it), so collaborators created later are injected as lazy
+ * providers rather than eager values.
  */
 internal class CallLifecycleManager(
-    private val call: Call,
+    private val clientImpl: StreamVideoClient,
+    private val sessionManager: CallSessionManager,
+    private val scopeProvider: ScopeProvider,
+    private val callRegistry: ClientCallRegistry,
+    /** Cancels the call's supervisor job and scope once in-flight children complete. */
+    private val shutDownJobs: () -> Unit,
+    private val state: CallState,
+    private val callAnalytics: CallAnalytics,
+    private val statsReporter: CallStatsReporter,
+    private val media: CallMediaManager,
+    private val iceMonitor: CallIceConnectionMonitor,
+    // Lazy providers: both sit on a cycle with this component — the connectivity monitor takes the
+    // lifecycle manager to leave on timeout, and the session monitor is built from that monitor.
+    private val sessionMonitor: () -> SessionMonitor,
+    private val connectivityMonitor: () -> CallConnectivityMonitor,
+    private val type: String,
+    private val id: String,
 ) {
-    private val logger by taggedLogger("Call:LifecycleManager:${call.type}:${call.id}")
+    private val logger by taggedLogger("Call:LifecycleManager:$type:$id")
 
-    private val clientImpl get() = call.clientImpl
-    private val state get() = call.state
-    private val session get() = call.session
-    private val callAnalytics get() = call.callAnalytics
+    private val cid = "$type:$id"
 
     // Atomic controls
     private var atomicLeave = AtomicUnitCall()
@@ -61,21 +79,21 @@ internal class CallLifecycleManager(
     }
 
     fun leave(reason: CallLeaveReason) {
-        logger.d { "[leave] #ringing; call_cid:${call.cid}" }
+        logger.d { "[leave] #ringing; call_cid:$cid" }
         internalLeave(reason)
     }
 
     fun leave(reason: String = "user") {
-        logger.d { "[leave] #ringing; no args, call_cid:${call.cid}" }
+        logger.d { "[leave] #ringing; no args, call_cid:$cid" }
         internalLeave(CallLeaveReason.Custom(reason))
     }
 
     private fun internalLeave(reason: CallLeaveReason) = atomicLeave {
-        call.stopConnectionMonitors()
+        stopConnectionMonitors()
         callAnalytics.stopObservers()
-        call.cancelSfuObservers()
+        sessionMonitor().cancelSfuObservers()
         state._connection.value = RealtimeConnection.Disconnected
-        logger.v { "[leave] #ringing; call_id = ${call.id}" }
+        logger.v { "[leave] #ringing; call_id = $id" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
             return@atomicLeave
@@ -87,33 +105,20 @@ internal class CallLifecycleManager(
         /**
          * TODO Rahul, need to check which call has owned the media at the moment(probably use active call)
          */
-        call.stopScreenSharing()
-        call.camera.disable()
-        call.microphone.disable()
+        media.disableLocalCapture()
 
-        if (call.id == call.client.state.activeCall.value?.id) {
-            call.client.state.removeActiveCall(call) // Will also stop CallService
-        }
-
-        if (call.id == call.client.state.ringingCall.value?.id) {
-            call.client.state.removeRingingCall(call)
-        }
-
-        TelecomCallController(call.client.context)
-            .leaveCall(call)
-
-        (call.client as StreamVideoClient).onCallCleanUp(call)
+        callRegistry.detach()
 
         clientImpl.scope.launch {
             val leaveReason = "[reason=${reason::class.simpleName}, message=${reason.message}]"
-            callAnalytics.onCallLeave(session, reason)
+            callAnalytics.onCallLeave(sessionManager.session, reason)
             safeCall {
-                session.value?.sfuTracer?.trace("leave-call", leaveReason)
-                val stats = call.collectStats()
-                session.value?.sendCallStats(stats)
+                sessionManager.session.value?.sfuTracer?.trace("leave-call", leaveReason)
+                val stats = statsReporter.collectStats()
+                sessionManager.session.value?.sendCallStats(stats)
             }
             // Must complete before cleanup() cancels the session's supervisor job.
-            safeCall { session.value?.sendLeaveEvent(leaveReason) }
+            safeCall { sessionManager.session.value?.sendLeaveEvent(leaveReason) }
             cleanup()
         }
     }
@@ -121,7 +126,7 @@ internal class CallLifecycleManager(
     /** ends the call for yourself as well as other users */
     suspend fun end(): Result<Unit> {
         // end the call for everyone
-        val result = clientImpl.endCall(call.type, call.id)
+        val result = clientImpl.endCall(type, id)
         // cleanup
         leave(
             CallLeaveReason.SdkDriven(
@@ -135,12 +140,19 @@ internal class CallLifecycleManager(
     fun cleanup() {
         // monitor.stop()
         state.cleanup()
-        session.value?.cleanup()
-        call.shutDownJobsGracefully()
-        call.stopStatsReporting()
-        call.mediaManager.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
-        session.value = null
+        sessionManager.session.value?.cleanup()
+        shutDownJobs()
+        statsReporter.stop()
+        media.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
+        sessionManager.setActiveSession(null)
         // Cleanup the call's scope provider
-        call.scopeProvider.cleanup()
+        scopeProvider.cleanup()
+    }
+
+    /** Stops the ICE and connectivity monitors. */
+    private fun stopConnectionMonitors() {
+        iceMonitor.stop()
+        connectivityMonitor().cancelLeaveTimeout()
+        connectivityMonitor().unsubscribe()
     }
 }

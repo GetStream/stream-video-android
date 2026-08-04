@@ -22,6 +22,7 @@ import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.GetCallResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
+import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.android.video.generated.models.KickUserResponse
 import io.getstream.android.video.generated.models.ListRecordingsResponse
 import io.getstream.android.video.generated.models.ListTranscriptionsResponse
@@ -47,7 +48,10 @@ import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.CallState
+import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.CallAnalytics
+import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.model.MuteUsersData
 import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
@@ -58,22 +62,6 @@ import io.getstream.video.android.core.utils.toQueriedMembers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
-
-/**
- * Reflects this call's ringing-lifecycle transitions into the shared client state.
- *
- * These are identity hand-offs (the owning call registers itself with client state), so
- * they're provided by the call rather than reached into from this component.
- *
- * Outgoing ringing is split into two steps because [CallState.updateFromResponse] reads
- * the current ringingCall: the call must be set as the ringing call *before* the state
- * update (which reads it) and added to the ringing-call registry *after* it.
- */
-internal interface RingingCallRegistrar {
-    fun beforeOutgoingStateUpdate()
-    fun afterOutgoingStateUpdate()
-    fun onAccepted()
-}
 
 /**
  * Wraps all coordinator (REST) API calls for a call. Each method delegates to the
@@ -89,9 +77,53 @@ internal class CallApiClient(
     private val clientImpl: StreamVideoClient,
     private val scope: CoroutineScope,
     private val callSessionId: () -> String,
-    private val ringRegistrar: RingingCallRegistrar,
+    private val callRegistry: ClientCallRegistry,
+    private val callAnalytics: CallAnalytics,
+    private val sessionManager: CallSessionManager,
 ) {
     private val logger by taggedLogger("Call:ApiClient:$type:$id")
+
+    /**
+     * Executes the coordinator join request. Shared by the join flow and the reconnect flow
+     * (rejoin / migrate), which is why it lives here rather than in either of them.
+     */
+    suspend fun joinRequest(
+        create: CreateCallOptions? = null,
+        location: String,
+        migratingFrom: String? = null,
+        migratingFromList: List<String>? = null,
+        ring: Boolean = false,
+        notify: Boolean = false,
+        hintHighScaleLivestreamPublisher: Boolean? = null,
+        joinAnalyticsModel: JoinAnalyticsModel,
+    ): Result<JoinCallResponse> {
+        val migratingFromList =
+            migratingFromList ?: sessionManager.failedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
+        callAnalytics.joinAnalytics.onJoinRequestStart(joinAnalyticsModel.joinReason)
+        val result = clientImpl.joinCall(
+            type, id,
+            create = create != null,
+            members = create?.memberRequestsFromIds(),
+            custom = create?.custom,
+            settingsOverride = create?.settings,
+            startsAt = create?.startsAt,
+            team = create?.team,
+            ring = ring,
+            notify = notify,
+            location = location,
+            migratingFrom = migratingFrom,
+            migratingFromList = migratingFromList,
+            hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
+        )
+        result.onSuccess {
+            callAnalytics.joinAnalytics.onJoinRequestSuccess(
+                joinAnalyticsModel,
+                it.call.currentSessionId,
+            )
+            state.updateFromResponse(it)
+        }
+        return result
+    }
 
     suspend fun get(): Result<GetCallResponse> {
         val response = clientImpl.getCall(type, id)
@@ -141,14 +173,14 @@ internal class CallApiClient(
         }
 
         response.onSuccess {
-            // Ordering matters: the ringing call must be registered before the state
-            // update (which reads ringingCall) and added after. See OutgoingRingRegistrar.
+            // Ordering matters: updateFromResponse reads the client's ringing call, so this
+            // call has to occupy that slot before the update and join the registry after it.
             if (ring) {
-                ringRegistrar.beforeOutgoingStateUpdate()
+                callRegistry.markRinging()
             }
             state.updateFromResponse(it)
             if (ring) {
-                ringRegistrar.afterOutgoingStateUpdate()
+                callRegistry.registerOutgoingRing()
             }
         }
         return response
@@ -370,7 +402,7 @@ internal class CallApiClient(
         logger.d { "[accept] #ringing; no args, call_id:$id" }
         state.acceptedOnThisDevice = true
 
-        ringRegistrar.onAccepted()
+        callRegistry.markAccepted()
         return clientImpl.accept(type, id)
     }
 

@@ -17,10 +17,8 @@
 package io.getstream.video.android.core.call.components
 
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.call.RtcSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -35,7 +33,7 @@ internal class CallIceConnectionMonitor(
     private val type: String,
     private val id: String,
     private val scope: CoroutineScope,
-    private val session: MutableStateFlow<RtcSession?>,
+    private val sessionManager: CallSessionManager,
 ) {
     private val logger by taggedLogger("Call:IceMonitor:$type:$id")
 
@@ -50,7 +48,7 @@ internal class CallIceConnectionMonitor(
     private fun startPublisherMonitor() {
         monitorPublisherPCStateJob?.cancel()
         monitorPublisherPCStateJob = scope.launch {
-            session
+            sessionManager.session
                 .filterNotNull()
                 .flatMapLatest { it.publisher.filterNotNull() }
                 .flatMapLatest { publisher ->
@@ -74,10 +72,10 @@ internal class CallIceConnectionMonitor(
     private fun startSubscriberMonitor() {
         monitorSubscriberPCStateJob?.cancel()
         monitorSubscriberPCStateJob = scope.launch {
-            session.value?.subscriber?.value?.iceState?.collect {
+            sessionManager.session.value?.subscriber?.value?.iceState?.collect {
                 when (it) {
                     PeerConnection.IceConnectionState.FAILED, PeerConnection.IceConnectionState.DISCONNECTED -> {
-                        session.value?.requestSubscriberIceRestart()
+                        sessionManager.session.value?.requestSubscriberIceRestart()
                     }
 
                     else -> {

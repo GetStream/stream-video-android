@@ -19,14 +19,15 @@ package io.getstream.video.android.core.call.components
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.BackendCause
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallLeaveReason
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.FastReconnectResult
-import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.model.toIceServer
 import kotlinx.coroutines.delay
@@ -34,7 +35,6 @@ import kotlinx.coroutines.sync.Mutex
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Outcome of a single reconnect attempt. Each reconnect method returns one of
@@ -59,19 +59,30 @@ private sealed class ReconnectOutcome {
 }
 
 /**
- * Owns the unified reconnection state machine for a [Call]: the FAST / REJOIN / MIGRATE
+ * Owns the unified reconnection state machine for a call: the FAST / REJOIN / MIGRATE
  * strategies, escalation logic, the single-flight reconnect mutex and the set of failed
  * SFU edge names used to populate `migrating_from_list`.
+ *
+ * Several collaborators are constructed after this component in [io.getstream.video.android.core.Call]
+ * (the reconnector feeds the event pipeline before [CallState] exists), so those are injected
+ * as lazy providers rather than eager values.
  */
 internal class CallReconnector(
-    private val call: Call,
+    private val clientImpl: StreamVideoClient,
+    private val sessionManager: CallSessionManager,
+    private val sessionFactory: RtcSessionFactory,
+    private val lifecycle: CallLifecycleManager,
+    private val apiClient: CallApiClient,
+    private val state: CallState,
+    private val callAnalytics: CallAnalytics,
+    private val statsReporter: CallStatsReporter,
+    // Lazy provider: the session monitor is built from the connectivity monitor, which takes
+    // this component, so it can only be resolved after construction.
+    private val sessionMonitor: () -> SessionMonitor,
+    private val type: String,
+    private val id: String,
 ) {
-    private val logger by taggedLogger("Call:Reconnector:${call.type}:${call.id}")
-
-    private val clientImpl get() = call.clientImpl
-    private val state get() = call.state
-    private val session get() = call.session
-    private val callAnalytics get() = call.callAnalytics
+    private val logger by taggedLogger("Call:Reconnector:$type:$id")
 
     // Read connectivity from the leaf NetworkStateProvider directly rather than routing
     // through CallConnectivityMonitor — that back-reference would form a dependency cycle
@@ -84,7 +95,6 @@ internal class CallReconnector(
      * SFU IDs (edge names) we failed to connect to (e.g. SFU_FULL). Sent in migrating_from_list
      * when requesting new credentials so the coordinator can exclude them.
      */
-    private val failedSfuIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     /**
      * Unified reconnection entry point.
@@ -112,9 +122,9 @@ internal class CallReconnector(
         val conn = state.connection.value
         logger.d { "[reconnect] Entry — strategy=$strategy reason=$reason connection=$conn" }
 
-        if (call.isDestroyed || conn is RealtimeConnection.Disconnected) {
+        if (lifecycle.isDestroyed || conn is RealtimeConnection.Disconnected) {
             logger.d {
-                "[reconnect] Call already left/destroyed (isDestroyed=${call.isDestroyed}, conn=$conn) — skipping ($reason)"
+                "[reconnect] Call already left/destroyed (isDestroyed=${lifecycle.isDestroyed}, conn=$conn) — skipping ($reason)"
             }
             return
         }
@@ -192,7 +202,7 @@ internal class CallReconnector(
                 }
 
                 val currentTimeInMillis = System.currentTimeMillis()
-                if (currentTimeInMillis - loopStartTime >= call.reconnectDeadlineMillis) {
+                if (currentTimeInMillis - loopStartTime >= sessionManager.reconnectDeadlineMillis) {
                     currentStrategy = when (currentStrategy) {
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                         WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
@@ -214,17 +224,23 @@ internal class CallReconnector(
                     -> reconnectFast(reason)
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN -> {
-                        call.nonFastReconnectAttempts++
+                        sessionManager.nonFastReconnectAttempts++
                         reconnectRejoin(
                             reason,
-                            JoinAnalyticsModel(call.nonFastReconnectAttempts, JoinReason.ReJoin),
+                            JoinAnalyticsModel(
+                                sessionManager.nonFastReconnectAttempts,
+                                JoinReason.ReJoin,
+                            ),
                         )
                     }
 
                     WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE -> {
-                        call.nonFastReconnectAttempts++
+                        sessionManager.nonFastReconnectAttempts++
                         reconnectMigrate(
-                            JoinAnalyticsModel(call.nonFastReconnectAttempts, JoinReason.Migrate),
+                            JoinAnalyticsModel(
+                                sessionManager.nonFastReconnectAttempts,
+                                JoinReason.Migrate,
+                            ),
                         )
                     }
 
@@ -237,7 +253,7 @@ internal class CallReconnector(
 
                     is ReconnectOutcome.Disconnect -> {
                         logger.w { "[reconnect] DISCONNECT requested — leaving call" }
-                        call.leave(
+                        lifecycle.leave(
                             CallLeaveReason.Backend(BackendCause.SFU_DISCONNECT),
                         )
                         break
@@ -258,7 +274,7 @@ internal class CallReconnector(
 
                     is ReconnectOutcome.Failed -> {
                         logger.w {
-                            "[reconnect] $currentStrategy (${call.nonFastReconnectAttempts}) failed: ${outcome.error.message}"
+                            "[reconnect] $currentStrategy (${sessionManager.nonFastReconnectAttempts}) failed: ${outcome.error.message}"
                         }
 
                         delay(RECONNECT_DELAY_MS)
@@ -267,7 +283,7 @@ internal class CallReconnector(
                         val wasMigrating = currentStrategy ==
                             WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE
                         val pastFastReconnectDeadline = (System.currentTimeMillis() - loopStartTime) >
-                            call.reconnectDeadlineMillis
+                            sessionManager.reconnectDeadlineMillis
                         val shouldEscalateToRejoin = wasMigrating ||
                             pastFastReconnectDeadline
 
@@ -287,7 +303,7 @@ internal class CallReconnector(
                     AnalyticsCallAbortReason.RETRY_EXHAUSTED.name,
                     message,
                 )
-                call.leave(
+                lifecycle.leave(
                     CallLeaveReason.RetryExhausted(
                         loopIteration,
                         "reconnect-failed",
@@ -311,16 +327,16 @@ internal class CallReconnector(
      * SFU already knows this participant.
      */
     private suspend fun reconnectFast(reason: String): ReconnectOutcome {
-        logger.d { "[reconnectFast] reconnectAttempts=${call.nonFastReconnectAttempts}" }
-        val currentSession = session.value
+        logger.d { "[reconnectFast] reconnectAttempts=${sessionManager.nonFastReconnectAttempts}" }
+        val currentSession = sessionManager.session.value
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for fast reconnect")
 
-        val stats = call.collectStats()
+        val stats = statsReporter.collectStats()
         currentSession.sendCallStats(stats)
 
         currentSession.prepareReconnect()
         state._connection.value = RealtimeConnection.Reconnecting
-        call.reconnectStartTime = System.currentTimeMillis()
+        sessionManager.reconnectStartTime = System.currentTimeMillis()
 
         val (_, subscriptionsInfo, publishingInfo) = currentSession.currentSfuInfo()
         val reconnectDetails = ReconnectDetails(
@@ -328,7 +344,7 @@ internal class CallReconnector(
             strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
             announced_tracks = publishingInfo,
             subscriptions = subscriptionsInfo,
-            reconnect_attempt = call.nonFastReconnectAttempts,
+            reconnect_attempt = sessionManager.nonFastReconnectAttempts,
             reason = reason,
         )
         return when (val result = currentSession.fastReconnect(reconnectDetails)) {
@@ -347,15 +363,18 @@ internal class CallReconnector(
         reason: String,
         joinAnalyticsModel: JoinAnalyticsModel,
     ): ReconnectOutcome {
-        logger.d { "[reconnectRejoin] reconnectAttempts=${call.nonFastReconnectAttempts}" }
+        logger.d { "[reconnectRejoin] reconnectAttempts=${sessionManager.nonFastReconnectAttempts}" }
         state._connection.value = RealtimeConnection.Reconnecting
-        val loc = call.location
+        val loc = sessionManager.location
             ?: return ReconnectOutcome.PreconditionNotMet("No location available for rejoin")
-        val oldSession = session.value
+        val oldSession = sessionManager.session.value
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for rejoin")
-        call.reconnectStartTime = System.currentTimeMillis()
+        sessionManager.reconnectStartTime = System.currentTimeMillis()
 
-        val joinResponse = call.joinRequest(location = loc, joinAnalyticsModel = joinAnalyticsModel)
+        val joinResponse = apiClient.joinRequest(
+            location = loc,
+            joinAnalyticsModel = joinAnalyticsModel,
+        )
         if (joinResponse !is Success) {
             return ReconnectOutcome.Failed(
                 Exception("Failed to get join response: ${joinResponse.errorOrNull()}"),
@@ -366,38 +385,28 @@ internal class CallReconnector(
         val currentOptions = oldSession.publisher.value?.currentOptions()
         logger.i { "Rejoin SFU ${oldSession.sfuUrl} to ${cred.server.url}" }
 
-        call.sessionId = UUID.randomUUID().toString()
+        sessionManager.sessionId = UUID.randomUUID().toString()
         val (prevSessionId, subscriptionsInfo, publishingInfo) = oldSession.currentSfuInfo()
         val reconnectDetails = ReconnectDetails(
             previous_session_id = prevSessionId,
             strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
             announced_tracks = publishingInfo,
             subscriptions = subscriptionsInfo,
-            reconnect_attempt = call.nonFastReconnectAttempts,
+            reconnect_attempt = sessionManager.nonFastReconnectAttempts,
             reason = reason,
         )
-        call.state.removeParticipant(prevSessionId)
+        state.removeParticipant(prevSessionId)
         oldSession.prepareRejoin("rejoin")
-        val newSession = call.unitTestRtcSessionFactory?.invoke() ?: RtcSession(
-            clientImpl,
-            call.nonFastReconnectAttempts,
-            call.powerManager,
-            call,
-            call.sessionId,
-            clientImpl.apiKey,
-            clientImpl.coordinatorConnectionModule.lifecycle,
-            cred.server.url,
-            cred.server.wsEndpoint,
-            cred.token,
-            cred.server.edgeName,
-            cred.iceServers.map { ice -> ice.toIceServer() },
-            sfuAnalytics = callAnalytics.sfuAnalytics.apply {
-                sfuAnalyticsStateHolder.updateSfuId(
-                    cred.server.edgeName,
-                )
-            },
+        val newSession = sessionFactory.create(
+            sessionId = sessionManager.sessionId,
+            sessionCounter = sessionManager.nonFastReconnectAttempts,
+            sfuUrl = cred.server.url,
+            sfuWsUrl = cred.server.wsEndpoint,
+            sfuToken = cred.token,
+            sfuName = cred.server.edgeName,
+            iceServers = cred.iceServers.map { ice -> ice.toIceServer() },
         )
-        session.value = newSession
+        sessionManager.setActiveSession(newSession)
 
         return when (
             val result = newSession.connectInternal(
@@ -407,7 +416,7 @@ internal class CallReconnector(
         ) {
             is SfuConnectionResult.Success -> {
                 newSession.sfuTracer.trace("rejoin", reason)
-                call.monitorSession(joinResponse.value)
+                sessionMonitor().monitorSession(joinResponse.value)
                 ReconnectOutcome.Success
             }
             is SfuConnectionResult.Failure -> ReconnectOutcome.Failed(result.error)
@@ -421,15 +430,15 @@ internal class CallReconnector(
     private suspend fun reconnectMigrate(joinAnalyticsModel: JoinAnalyticsModel): ReconnectOutcome {
         logger.d { "[reconnectMigrate] Migrating" }
         state._connection.value = RealtimeConnection.Migrating
-        val loc = call.location
+        val loc = sessionManager.location
             ?: return ReconnectOutcome.PreconditionNotMet("No location available for migrate")
-        val oldSession = session.value
+        val oldSession = sessionManager.session.value
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for migrate")
-        call.reconnectStartTime = System.currentTimeMillis()
-        addFailedSfuId(oldSession.sfuName)
+        sessionManager.reconnectStartTime = System.currentTimeMillis()
+        sessionManager.addFailedSfuId(oldSession.sfuName)
 
         val joinResponse =
-            call.joinRequest(
+            apiClient.joinRequest(
                 location = loc,
                 migratingFrom = oldSession.sfuName,
                 joinAnalyticsModel = joinAnalyticsModel,
@@ -454,33 +463,23 @@ internal class CallReconnector(
             announced_tracks = publishingInfo,
             subscriptions = subscriptionsInfo,
             from_sfu_id = oldSfuName,
-            reconnect_attempt = call.nonFastReconnectAttempts,
+            reconnect_attempt = sessionManager.nonFastReconnectAttempts,
         )
 
-        val stats = call.collectStats()
+        val stats = statsReporter.collectStats()
         oldSession.sendCallStats(stats)
         oldSession.enterMigration()
 
-        val newSession = call.unitTestRtcSessionFactory?.invoke() ?: RtcSession(
-            clientImpl,
-            call.nonFastReconnectAttempts,
-            call.powerManager,
-            call,
-            call.sessionId,
-            clientImpl.apiKey,
-            clientImpl.coordinatorConnectionModule.lifecycle,
-            cred.server.url,
-            cred.server.wsEndpoint,
-            cred.token,
-            cred.server.edgeName,
-            cred.iceServers.map { ice -> ice.toIceServer() },
-            sfuAnalytics = callAnalytics.sfuAnalytics.apply {
-                sfuAnalyticsStateHolder.updateSfuId(
-                    cred.server.edgeName,
-                )
-            },
+        val newSession = sessionFactory.create(
+            sessionId = sessionManager.sessionId,
+            sessionCounter = sessionManager.nonFastReconnectAttempts,
+            sfuUrl = cred.server.url,
+            sfuWsUrl = cred.server.wsEndpoint,
+            sfuToken = cred.token,
+            sfuName = cred.server.edgeName,
+            iceServers = cred.iceServers.map { ice -> ice.toIceServer() },
         )
-        session.value = newSession
+        sessionManager.setActiveSession(newSession)
 
         return try {
             val result = newSession.connectInternal(
@@ -489,7 +488,7 @@ internal class CallReconnector(
             )
             when (result) {
                 is SfuConnectionResult.Success -> {
-                    call.monitorSession(joinResponse.value)
+                    sessionMonitor().monitorSession(joinResponse.value)
                     ReconnectOutcome.Success
                 }
                 is SfuConnectionResult.Failure -> ReconnectOutcome.Failed(result.error)
@@ -509,20 +508,6 @@ internal class CallReconnector(
 
     suspend fun migrate() {
         reconnect(WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE, "migrate")
-    }
-
-    /** Adds the given SFU ID (edge name) to the failed set (for migrating_from_list). */
-    private fun addFailedSfuId(sfuId: String) {
-        if (sfuId.isBlank()) return
-        failedSfuIds.add(sfuId)
-    }
-
-    /** Returns a snapshot of failed SFU IDs to send as migrating_from_list. */
-    fun getFailedSfuIdsSnapshot(): List<String> = failedSfuIds.toList()
-
-    /** Clears the failed SFU list (e.g. after a successful join). */
-    fun clearFailedSfuIds() {
-        failedSfuIds.clear()
     }
 
     companion object {

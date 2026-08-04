@@ -34,7 +34,9 @@ internal class CallEventManager(
     private val type: String,
     private val id: String,
     private val scope: CoroutineScope,
-    private val reconnector: CallReconnector,
+    // Lazy provider: the reconnector is built after the event pipeline, because `CallState` reads
+    // `events` while constructing and the reconnector transitively needs the state.
+    private val reconnector: () -> CallReconnector,
 ) {
     private val logger by taggedLogger("Call:EventManager:$type:$id")
 
@@ -72,7 +74,7 @@ internal class CallEventManager(
         when (event) {
             is GoAwayEvent ->
                 scope.launch {
-                    reconnector.migrate()
+                    reconnector().migrate()
                 }
         }
     }

@@ -35,13 +35,13 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class CallRendererTest {
 
-    private val sessionFlow = MutableStateFlow<RtcSession?>(null)
+    private val sessionManager = CallSessionManager()
 
     private fun renderer() = CallRenderer(
         type = "default",
         id = "call-id",
         scope = mockk(relaxed = true),
-        session = sessionFlow,
+        sessionManager = sessionManager,
         callAnalytics = mockk(relaxed = true),
         eglBase = { mockk(relaxed = true) },
         callSessionId = { "call-id" },
@@ -50,7 +50,7 @@ class CallRendererTest {
     @Test
     fun `setVisibility updates track dimensions with default dimension`() {
         val session = mockk<RtcSession>(relaxed = true)
-        sessionFlow.value = session
+        sessionManager.setActiveSession(session)
 
         renderer().setVisibility("s1", TrackType.TRACK_TYPE_VIDEO, visible = true)
 
@@ -68,7 +68,7 @@ class CallRendererTest {
     @Test
     fun `setVisibility with explicit size forwards the requested dimension`() {
         val session = mockk<RtcSession>(relaxed = true)
-        sessionFlow.value = session
+        sessionManager.setActiveSession(session)
 
         renderer().setVisibility(
             sessionId = "s1",
@@ -85,7 +85,7 @@ class CallRendererTest {
 
     @Test
     fun `setVisibility is a no-op when there is no session`() {
-        sessionFlow.value = null
+        sessionManager.setActiveSession(null)
         // Should not throw.
         renderer().setVisibility("s1", TrackType.TRACK_TYPE_VIDEO, visible = false)
     }
@@ -93,7 +93,7 @@ class CallRendererTest {
     @Test
     fun `setPreferredIncomingVideoResolution forwards overrides`() {
         val session = mockk<RtcSession>(relaxed = true)
-        sessionFlow.value = session
+        sessionManager.setActiveSession(session)
 
         renderer().setPreferredIncomingVideoResolution(
             PreferredVideoResolution(width = 1280, height = 720),
@@ -111,7 +111,7 @@ class CallRendererTest {
     @Test
     fun `setPreferredIncomingVideoResolution clears overrides when resolution is null`() {
         val session = mockk<RtcSession>(relaxed = true)
-        sessionFlow.value = session
+        sessionManager.setActiveSession(session)
 
         renderer().setPreferredIncomingVideoResolution(null)
 
@@ -126,7 +126,7 @@ class CallRendererTest {
     @Test
     fun `setIncomingVideoEnabled forwards visibility overrides`() {
         val session = mockk<RtcSession>(relaxed = true)
-        sessionFlow.value = session
+        sessionManager.setActiveSession(session)
 
         renderer().setIncomingVideoEnabled(enabled = false, sessionIds = listOf("s1"))
 
@@ -137,7 +137,7 @@ class CallRendererTest {
     fun `setIncomingAudioEnabled returns early when there is no subscriber`() {
         val session = mockk<RtcSession>(relaxed = true)
         every { session.subscriber } returns MutableStateFlow(null)
-        sessionFlow.value = session
+        sessionManager.setActiveSession(session)
 
         // No tracks available -> should return without throwing.
         renderer().setIncomingAudioEnabled(enabled = true)
@@ -146,7 +146,7 @@ class CallRendererTest {
     @Test
     fun `setIncomingAudioEnabled toggles audio for all participants`() {
         val audioTrack = mockk<AudioTrack>(relaxed = true)
-        sessionFlow.value = sessionWithAudioTrack(audioTrack)
+        sessionManager.setActiveSession(sessionWithAudioTrack(audioTrack))
 
         renderer().setIncomingAudioEnabled(enabled = false)
 
@@ -156,7 +156,7 @@ class CallRendererTest {
     @Test
     fun `setIncomingAudioEnabled toggles audio for the requested sessions`() {
         val audioTrack = mockk<AudioTrack>(relaxed = true)
-        sessionFlow.value = sessionWithAudioTrack(audioTrack)
+        sessionManager.setActiveSession(sessionWithAudioTrack(audioTrack))
 
         renderer().setIncomingAudioEnabled(enabled = true, sessionIds = listOf("s1"))
 

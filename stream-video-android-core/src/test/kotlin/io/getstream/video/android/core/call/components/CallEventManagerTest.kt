@@ -47,7 +47,9 @@ class CallEventManagerTest {
 
     private val reconnector = mockk<CallReconnector>(relaxed = true)
 
-    private fun manager() = CallEventManager("default", "call-id", testScope, reconnector)
+    private fun manager() = CallEventManager("default", "call-id", testScope, reconnector = {
+        reconnector
+    })
 
     @Test
     fun `subscribe without filter receives every fired event`() {

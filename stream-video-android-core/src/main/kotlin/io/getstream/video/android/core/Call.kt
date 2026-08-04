@@ -67,13 +67,15 @@ import io.getstream.video.android.core.call.components.CallReconnector
 import io.getstream.video.android.core.call.components.CallRenderer
 import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.components.CallStatsReporter
-import io.getstream.video.android.core.call.components.RingingCallRegistrar
+import io.getstream.video.android.core.call.components.ClientCallRegistry
+import io.getstream.video.android.core.call.components.MediaManagerFactory
+import io.getstream.video.android.core.call.components.RtcSessionFactory
+import io.getstream.video.android.core.call.components.SessionMonitor
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
-import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -81,16 +83,17 @@ import io.getstream.video.android.core.model.QueriedMembers
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.runResultCatchingCancellable
+import io.getstream.video.android.core.utils.runResultCatchingCancellable
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -142,54 +145,116 @@ public class Call(
     /** Delegate that owns the live RTC session state and reconnect bookkeeping. */
     private val sessionManager = CallSessionManager()
 
-    /** Session handles all real time communication for video and audio */
-    internal val session: MutableStateFlow<RtcSession?> get() = sessionManager.session
+    /**
+     * Session handles all real time communication for video and audio.
+     *
+     * This is the read path for collaborators outside the decomposition — `CallStats`,
+     * `StreamVideoClient`, `ActiveStateGate`, the media session controller and [Debug]. Components
+     * under `call.components` take [CallSessionManager] directly rather than reading it from here.
+     */
+    // TODO(v2): hand those consumers the CallSessionManager and drop this accessor. Blocked on
+    //  binary compatibility today: CallStats' constructor is published ABI, and adding a parameter
+    //  replaces it rather than overloading it (defaults are source-level only). CallSessionManager
+    //  is also internal, so it cannot appear in a public signature at all.
+    internal val session: StateFlow<RtcSession?> get() = sessionManager.session
 
     var sessionId: String
         get() = sessionManager.sessionId
         set(value) {
             sessionManager.sessionId = value
         }
-    internal val unifiedSessionId: String get() = sessionManager.unifiedSessionId
-
-    internal var location: String?
-        get() = sessionManager.location
-        set(value) {
-            sessionManager.location = value
-        }
-
-    /**
-     * Increment this only for REJOIN and MIGRATION strategies
-     */
-    internal var nonFastReconnectAttempts: Int
-        get() = sessionManager.nonFastReconnectAttempts
-        set(value) {
-            sessionManager.nonFastReconnectAttempts = value
-        }
-
-    internal var connectStartTime: Long
-        get() = sessionManager.connectStartTime
-        set(value) {
-            sessionManager.connectStartTime = value
-        }
-    internal var reconnectStartTime: Long
-        get() = sessionManager.reconnectStartTime
-        set(value) {
-            sessionManager.reconnectStartTime = value
-        }
 
     // Unit-test only hook for replacing RtcSession construction.
     // TODO(v2): replace this with a proper dependency injection boundary.
     internal var unitTestRtcSessionFactory: (() -> RtcSession)? = null
 
-    /** Delegate that owns the unified reconnect state machine (fast / rejoin / migrate). */
-    private val reconnector = CallReconnector(this)
+    /**
+     * Creates [RtcSession] instances for join / rejoin / migrate. Captures `this` so the
+     * session's Call dependency never leaks into the join/reconnect orchestrators, and hands it
+     * the [CallSessionManager] directly so session identity and reconnect timings are read from
+     * their owner rather than routed back through this facade.
+     */
+    private val sessionFactory = RtcSessionFactory {
+            sessionId, sessionCounter, sfuUrl, sfuWsUrl, sfuToken, sfuName, iceServers ->
+        unitTestRtcSessionFactory?.invoke() ?: RtcSession(
+            client = clientImpl,
+            sessionCounter = sessionCounter,
+            powerManager = powerManager,
+            call = this,
+            sessionManager = sessionManager,
+            sessionId = sessionId,
+            apiKey = clientImpl.apiKey,
+            lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
+            sfuUrl = sfuUrl,
+            sfuWsUrl = sfuWsUrl,
+            sfuToken = sfuToken,
+            sfuName = sfuName,
+            remoteIceServers = iceServers,
+            sfuAnalytics = callAnalytics.sfuAnalytics.apply {
+                sfuAnalyticsStateHolder.updateSfuId(sfuName)
+            },
+        )
+    }
 
-    /** Delegate that owns leave / end / cleanup teardown and the destroyed flag. */
-    private val lifecycle = CallLifecycleManager(this)
+    /**
+     * The call's registration in the client-level ringing / active / telecom registries. Every
+     * operation needs this instance, which the extracted components deliberately don't hold.
+     */
+    private val callRegistry = object : ClientCallRegistry {
+        override fun markRinging() {
+            clientImpl.state._ringingCall.value = this@Call
+        }
+
+        override fun registerOutgoingRing() {
+            client.state.addRingingCall(this@Call, RingingState.Outgoing())
+        }
+
+        override fun markActive() {
+            client.state.setActiveCall(this@Call)
+        }
+
+        override fun markAccepted() {
+            clientImpl.state.transitionToAcceptCall(this@Call)
+        }
+
+        override fun detach() {
+            if (id == client.state.activeCall.value?.id) {
+                client.state.removeActiveCall(this@Call) // Will also stop CallService
+            }
+            if (id == client.state.ringingCall.value?.id) {
+                client.state.removeRingingCall(this@Call)
+            }
+            TelecomCallController(client.context).leaveCall(this@Call)
+            clientImpl.onCallCleanUp(this@Call)
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Component graph. Declaration order is load-bearing: Kotlin initialises properties top to
+    // bottom, so a component can only take a collaborator directly if that collaborator is
+    // declared above it.
+    //
+    // A `() -> T` parameter below is never an ordering accident; it is one of three things:
+    //  - a cycle: two components need each other, so the later one is injected as a provider
+    //  - a deferral: `eglBase` stays lazy so the native EGL context is only created if used
+    //  - a live read: mutable state such as `reconnectDeadlineMillis`, where the component needs
+    //    the current value rather than a snapshot taken at construction
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * EGL base context shared between peerConnectionFactory and mediaManager
+     * to break circular dependency.
+     */
+    internal val eglBase: EglBase by lazy {
+        EglBase.create()
+    }
+
+    /** Delegate that restarts ICE when the publisher/subscriber connections drop. */
+    private val iceMonitor: CallIceConnectionMonitor =
+        CallIceConnectionMonitor(type, id, scope, sessionManager)
 
     /** Delegate that owns the event flow, subscriptions and event dispatch. */
-    private val eventManager = CallEventManager(type, id, scope, reconnector)
+    private val eventManager = CallEventManager(type, id, scope, reconnector = { reconnector })
 
     // Must be initialized before `state` — CallState → SortedParticipantsState
     // launches a coroutine that reads `call.events` (leaking-this race).
@@ -197,6 +262,127 @@ public class Call(
 
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(client, this, user, scope)
+
+    internal val callAnalytics =
+        CallAnalytics(
+            clientImpl.context,
+            this.id,
+            this.type,
+            state.me,
+            state.connection,
+            state.participants,
+            client.state.clientEventReporter,
+            scope,
+        )
+
+    /** Delegate that periodically collects and reports WebRTC stats. */
+    private val statsReporter = CallStatsReporter(type, id, scope, sessionManager, state)
+
+    /** Delegate that wraps all coordinator (REST) API calls for this call. */
+    private val apiClient = CallApiClient(
+        type = type,
+        id = id,
+        state = state,
+        clientImpl = clientImpl,
+        scope = scope,
+        callSessionId = { sessionId },
+        callRegistry = callRegistry,
+        callAnalytics = callAnalytics,
+        sessionManager = sessionManager,
+    )
+
+    /**
+     * Creates [MediaManagerImpl] for this call. Captures `this` (and the test hook) so
+     * [CallMediaManager] never needs a Call reference.
+     */
+    private val mediaManagerFactory = MediaManagerFactory { audioUsage, audioUsageProvider ->
+        testInstanceProvider.mediaManagerCreator?.invoke()
+            ?: MediaManagerImpl(
+                clientImpl.context,
+                this,
+                scope,
+                eglBase.eglBaseContext,
+                audioUsage,
+                audioUsageProvider,
+            )
+    }
+
+    /** Delegate that owns the peer-connection factory, media manager and audio pipeline. */
+    private val media = CallMediaManager(
+        type = type,
+        id = id,
+        clientImpl = clientImpl,
+        scope = scope,
+        state = state,
+        sessionManager = sessionManager,
+        eglBase = { eglBase },
+        mediaManagerFactory = mediaManagerFactory,
+    )
+
+    /** Delegate that owns leave / end / cleanup teardown and the destroyed flag. */
+    private val lifecycle: CallLifecycleManager = CallLifecycleManager(
+        clientImpl = clientImpl,
+        sessionManager = sessionManager,
+        scopeProvider = scopeProvider,
+        callRegistry = callRegistry,
+        // Lets the REST calls queued before leave finish before the scope is torn down.
+        shutDownJobs = {
+            UserScope(ClientScope()).launch {
+                supervisorJob.children.forEach { it.join() }
+                supervisorJob.cancel()
+            }
+            scope.cancel()
+        },
+        state = state,
+        callAnalytics = callAnalytics,
+        statsReporter = statsReporter,
+        media = media,
+        iceMonitor = iceMonitor,
+        sessionMonitor = { sessionMonitor },
+        connectivityMonitor = { connectivityMonitor },
+        type = type,
+        id = id,
+    )
+
+    /** Delegate that owns the unified reconnect state machine (fast / rejoin / migrate). */
+    private val reconnector: CallReconnector = CallReconnector(
+        clientImpl = clientImpl,
+        sessionManager = sessionManager,
+        sessionFactory = sessionFactory,
+        lifecycle = lifecycle,
+        apiClient = apiClient,
+        state = state,
+        callAnalytics = callAnalytics,
+        statsReporter = statsReporter,
+        sessionMonitor = { sessionMonitor },
+        type = type,
+        id = id,
+    )
+
+    /** Delegate that reacts to device connectivity changes (reconnect / leave-on-timeout). */
+    private val connectivityMonitor: CallConnectivityMonitor = CallConnectivityMonitor(
+        type = type,
+        id = id,
+        clientImpl = clientImpl,
+        scope = scope,
+        state = state,
+        reconnector = reconnector,
+        lifecycle = lifecycle,
+        reconnectDeadlineMillis = { reconnectDeadlineMillis },
+    )
+
+    /** Delegate that owns the SFU signal/event observers and (re)wires per-session monitoring. */
+    private val sessionMonitor: SessionMonitor = SessionMonitor(
+        type = type,
+        id = id,
+        scope = scope,
+        state = state,
+        sessionManager = sessionManager,
+        statsReporter = statsReporter,
+        iceMonitor = iceMonitor,
+        connectivityMonitor = connectivityMonitor,
+        callAnalytics = callAnalytics,
+    )
 
     /** Camera gives you access to the local camera */
     val camera get() = mediaManager.camera
@@ -245,79 +431,21 @@ public class Call(
      */
     internal val isDestroyed: Boolean get() = lifecycle.isDestroyed
 
-    /**
-     * EGL base context shared between peerConnectionFactory and mediaManager
-     * to break circular dependency.
-     */
-    internal val eglBase: EglBase by lazy {
-        EglBase.create()
-    }
-
     internal var peerConnectionFactory: StreamPeerConnectionFactory
         get() = media.peerConnectionFactory
         set(value) {
             media.peerConnectionFactory = value
         }
 
-    internal val callAnalytics =
-        CallAnalytics(
-            clientImpl.context,
-            this.id,
-            this.type,
-            state.me,
-            state.connection,
-            state.participants,
-            client.state.clientEventReporter,
-            scope,
-        )
-
-    /** Delegate that wraps all coordinator (REST) API calls for this call. */
-    private val apiClient = CallApiClient(
-        type = type,
-        id = id,
-        state = state,
-        clientImpl = clientImpl,
-        scope = scope,
-        callSessionId = { sessionId },
-        ringRegistrar = object : RingingCallRegistrar {
-            override fun beforeOutgoingStateUpdate() {
-                client.state._ringingCall.value = this@Call
-            }
-
-            override fun afterOutgoingStateUpdate() {
-                client.state.addRingingCall(this@Call, RingingState.Outgoing())
-            }
-
-            override fun onAccepted() {
-                clientImpl.state.transitionToAcceptCall(this@Call)
-            }
-        },
-    )
-
-    /** Delegate that periodically collects and reports WebRTC stats. */
-    private val statsReporter = CallStatsReporter(type, id, scope, session, state)
-
     /** Delegate that binds video tracks to renderers and handles media-quality overrides. */
     private val callRenderer = CallRenderer(
         type = type,
         id = id,
         scope = scope,
-        session = session,
+        sessionManager = sessionManager,
         callAnalytics = callAnalytics,
         eglBase = { eglBase },
         callSessionId = { sessionId },
-    )
-
-    /** Delegate that owns the peer-connection factory, media manager and audio pipeline. */
-    private val media = CallMediaManager(
-        type = type,
-        id = id,
-        clientImpl = clientImpl,
-        scope = scope,
-        state = state,
-        session = session,
-        eglBase = { eglBase },
-        callProvider = { this },
     )
 
     /**
@@ -338,46 +466,39 @@ public class Call(
 
     internal val mediaManager get() = media.mediaManager
 
-    /** Delegate that reacts to device connectivity changes (reconnect / leave-on-timeout). */
-    private val connectivityMonitor = CallConnectivityMonitor(
+    /** Delegate that drives the join flow (permissions, retry loop, session creation). */
+    private val joinCoordinator = CallJoinCoordinator(
+        clientImpl = clientImpl,
+        state = state,
+        callAnalytics = callAnalytics,
         type = type,
         id = id,
-        clientImpl = clientImpl,
         scope = scope,
-        state = state,
-        reconnector = reconnector,
+        sessionManager = sessionManager,
+        sessionFactory = sessionFactory,
+        media = media,
         lifecycle = lifecycle,
-        reconnectDeadlineMillis = { reconnectDeadlineMillis },
+        apiClient = apiClient,
+        reconnector = reconnector,
+        sessionMonitor = sessionMonitor,
+        callRegistry = callRegistry,
+        hasRequiredPermissions = {
+            clientImpl.permissionCheck
+                .checkAndroidPermissionsGroup(clientImpl.context, this@Call).first
+        },
     )
 
-    /** Delegate that drives the join flow (permissions, retry loop, session creation). */
-    private val joinCoordinator = CallJoinCoordinator(this)
-
-    internal var reconnectDeadlineMillis: Int = 10_000
-
-    private var sfuListener: Job? = null
-    private var sfuEvents: Job? = null
-
-    /** Delegate that restarts ICE when the publisher/subscriber connections drop. */
-    private val iceMonitor = CallIceConnectionMonitor(type, id, scope, session)
+    internal var reconnectDeadlineMillis: Int
+        get() = sessionManager.reconnectDeadlineMillis
+        set(value) {
+            sessionManager.reconnectDeadlineMillis = value
+        }
 
     init {
         media.startAudioLevelMonitoring()
         powerManager = safeCallWithDefault(null) {
             clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
-    }
-
-    /** Stops the ICE and connectivity monitors (used during teardown). */
-    internal fun stopConnectionMonitors() {
-        iceMonitor.stop()
-        connectivityMonitor.cancelLeaveTimeout()
-        connectivityMonitor.unsubscribe()
-    }
-
-    /** Stops periodic WebRTC stats reporting (used during teardown). */
-    internal fun stopStatsReporting() {
-        statsReporter.stop()
     }
 
     /** Basic crud operations */
@@ -467,42 +588,12 @@ public class Call(
         joinAnalyticsModel,
     )
 
-    /** Cancels the SFU socket observers (signal WS + fast-reconnect deadline listener). */
-    internal fun cancelSfuObservers() {
-        sfuEvents?.cancel()
-        sfuListener?.cancel()
-    }
-
     /** Resets the leave guard so a fresh join can run after a previous leave. */
     internal fun resetLeaveGuard() = lifecycle.resetLeaveGuard()
 
     /** Applies server-provided call settings to the local media manager. */
     internal fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) =
         media.updateMediaManagerFromSettings(callSettings)
-
-    internal fun monitorSession(result: JoinCallResponse) {
-        sfuEvents?.cancel()
-        sfuListener?.cancel()
-        statsReporter.start(result.statsOptions.reportingIntervalMs.toLong())
-        // listen to Signal WS
-        sfuEvents = scope.launch {
-            session.value?.let {
-                it.socket.events().collect { event ->
-                    if (event is JoinCallResponseEvent) {
-                        reconnectDeadlineMillis = event.fastReconnectDeadlineSeconds * 1000
-                        logger.d { "[join] #deadline for reconnect is ${reconnectDeadlineMillis / 1000} seconds" }
-                    }
-                }
-            }
-        }
-        callAnalytics.peerConnectionAnalytics.stopAndObservePeerConnections(session)
-        callAnalytics.audioAnalytics.observeFirstRemoteParticipantAudioMuteState(
-            session,
-            state.participants,
-        )
-        iceMonitor.start()
-        connectivityMonitor.subscribe()
-    }
 
     internal suspend fun collectStats(): CallStatsReport = statsReporter.collectStats()
 
@@ -756,15 +847,12 @@ public class Call(
         apiClient.muteUsers(userIds, audio, video, screenShare)
     }
 
-    /** Returns a snapshot of failed SFU IDs to send as migrating_from_list. */
-    internal fun getFailedSfuIdsSnapshot(): List<String> = reconnector.getFailedSfuIdsSnapshot()
-
     /**
      * Called by [RtcSession] when connection to the SFU is established successfully.
      * Clears the failed SFU list so we don't exclude this SFU on future requests.
      */
     internal fun onSfuConnectionEstablished() {
-        reconnector.clearFailedSfuIds()
+        sessionManager.clearFailedSfuIds()
     }
 
     @VisibleForTesting
@@ -777,7 +865,7 @@ public class Call(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
         joinAnalyticsModel: JoinAnalyticsModel,
-    ): Result<JoinCallResponse> = joinCoordinator.joinRequest(
+    ): Result<JoinCallResponse> = apiClient.joinRequest(
         create,
         location,
         migratingFrom,

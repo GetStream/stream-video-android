@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call.components
 
-import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -25,11 +24,13 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.result.flatMap
 import io.getstream.video.android.core.BackendCause
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallJoinInterceptor
 import io.getstream.video.android.core.CallLeaveReason
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.CreateCallOptions
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
@@ -37,26 +38,36 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.model.toIceServer
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
- * Drives the join flow for a [Call]: permission checks, the bounded retry loop, the
+ * Drives the join flow for a call: permission checks, the bounded retry loop, the
  * underlying join request to the coordinator, and creation + connection of the [RtcSession].
  */
 internal class CallJoinCoordinator(
-    private val call: Call,
+    private val clientImpl: StreamVideoClient,
+    private val state: CallState,
+    private val callAnalytics: CallAnalytics,
+    private val type: String,
+    private val id: String,
+    private val scope: CoroutineScope,
+    private val sessionManager: CallSessionManager,
+    private val sessionFactory: RtcSessionFactory,
+    private val media: CallMediaManager,
+    private val lifecycle: CallLifecycleManager,
+    private val apiClient: CallApiClient,
+    private val reconnector: CallReconnector,
+    private val sessionMonitor: SessionMonitor,
+    private val callRegistry: ClientCallRegistry,
+    private val hasRequiredPermissions: () -> Boolean,
 ) {
-    private val logger by taggedLogger("Call:JoinCoordinator:${call.type}:${call.id}")
+    private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
 
-    private val clientImpl get() = call.clientImpl
-    private val state get() = call.state
-    private val session get() = call.session
-    private val callAnalytics get() = call.callAnalytics
-    private val type get() = call.type
-    private val id get() = call.id
+    private fun isVideoEnabled(): Boolean = state.settings.value?.video?.enabled ?: false
 
     suspend fun join(
         create: Boolean = false,
@@ -71,10 +82,8 @@ internal class CallJoinCoordinator(
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
-        val permissionPass =
-            clientImpl.permissionCheck.checkAndroidPermissionsGroup(clientImpl.context, call)
         // Check android permissions and log a warning to make sure developers requested adequate permissions prior to using the call.
-        if (!permissionPass.first) {
+        if (!hasRequiredPermissions()) {
             logger.w {
                 "\n[Call.join()] called without having the required permissions.\n" +
                     "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
@@ -88,7 +97,7 @@ internal class CallJoinCoordinator(
         clientImpl.guestUserJob?.await()
 
         // Ensure factory is created with the current audioBitrateProfile before joining
-        call.ensureFactoryMatchesAudioProfile()
+        media.ensureFactoryMatchesAudioProfile()
 
         state.callJoinInterceptor = callJoinInterceptor
 
@@ -100,7 +109,7 @@ internal class CallJoinCoordinator(
 
         var result: Result<RtcSession>
 
-        call.resetLeaveGuard()
+        lifecycle.resetLeaveGuard()
         while (retryCount < 3) {
             result = joinInternal(
                 create,
@@ -116,7 +125,7 @@ internal class CallJoinCoordinator(
                 // the settings during a call.
                 val settings = state.settings.value
                 if (settings != null) {
-                    call.updateMediaManagerFromSettings(settings)
+                    media.updateMediaManagerFromSettings(settings)
                 } else {
                     logger.w {
                         "[join] Call settings were null - this should never happen after a call" +
@@ -126,7 +135,7 @@ internal class CallJoinCoordinator(
                 return result
             }
             if (result is Failure) {
-                session.value = null
+                sessionManager.setActiveSession(null)
                 logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
                     state._connection.value = RealtimeConnection.Failed(result.value)
@@ -142,7 +151,7 @@ internal class CallJoinCoordinator(
             }
             delay((retryCount - 1) * 1000L)
         }
-        session.value = null
+        sessionManager.setActiveSession(null)
         val errorMessage = "Join failed after 3 retries"
         state._connection.value = RealtimeConnection.Failed(errorMessage)
         callAnalytics.joinAnalytics.onJoinRequestRetryExhausted(
@@ -156,7 +165,7 @@ internal class CallJoinCoordinator(
     suspend fun joinAndRing(
         members: List<String>,
         createOptions: CreateCallOptions? = CreateCallOptions(members),
-        video: Boolean = call.isVideoEnabled(),
+        video: Boolean = isVideoEnabled(),
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
         logger.d { "[joinAndRing] #ringing; #track; members: $members, video: $video" }
@@ -167,14 +176,14 @@ internal class CallJoinCoordinator(
             callJoinInterceptor = callJoinInterceptor,
         ).flatMap { rtcSession ->
             logger.d { "[joinAndRing] Joined #ringing; #track; ring: $members" }
-            call.ring(RingCallRequest(call.isVideoEnabled(), members)).map {
+            apiClient.ring(RingCallRequest(isVideoEnabled(), members)).map {
                 logger.d { "[joinAndRing] Ringed #ringing; #track; ring: $members" }
-                clientImpl.state._ringingCall.value = call
+                callRegistry.markRinging()
                 rtcSession
             }.onError {
                 logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
                 state.toggleJoinAndRingProgress(false)
-                call.leave(
+                lifecycle.leave(
                     CallLeaveReason.Backend(
                         BackendCause.RING_FAILED,
                         message = "ring-failed (${it.message})",
@@ -201,24 +210,24 @@ internal class CallJoinCoordinator(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         joinAnalyticsModel: JoinAnalyticsModel,
     ): Result<RtcSession> {
-        call.nonFastReconnectAttempts = 0
-        call.cancelSfuObservers()
+        sessionManager.nonFastReconnectAttempts = 0
+        sessionMonitor.cancelSfuObservers()
 
-        if (session.value != null) {
-            return Failure(Error.GenericError("Call ${call.cid} has already been joined"))
+        if (sessionManager.session.value != null) {
+            return Failure(Error.GenericError("Call $type:$id has already been joined"))
         }
         logger.d {
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
 
-        call.connectStartTime = System.currentTimeMillis()
+        sessionManager.connectStartTime = System.currentTimeMillis()
 
         // step 1. call the join endpoint to get a list of SFUs
         val locationResult = clientImpl.getCachedLocation()
         if (locationResult !is Success) {
             return locationResult as Failure
         }
-        call.location = locationResult.value
+        sessionManager.location = locationResult.value
 
         val options = createOptions
             ?: if (create) {
@@ -227,7 +236,7 @@ internal class CallJoinCoordinator(
                 null
             }
         val result =
-            call.joinRequest(
+            apiClient.joinRequest(
                 options,
                 locationResult.value,
                 ring = ring,
@@ -244,29 +253,16 @@ internal class CallJoinCoordinator(
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
         val sfuName = result.value.credentials.server.edgeName
         val iceServers = result.value.credentials.iceServers.map { it.toIceServer() }
-        val localSession = if (call.unitTestRtcSessionFactory != null) {
-            call.unitTestRtcSessionFactory!!.invoke()
-        } else {
-            RtcSession(
-                sessionId = call.sessionId,
-                apiKey = clientImpl.apiKey,
-                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                client = call.client,
-                call = call,
-                sfuUrl = sfuUrl,
-                sfuWsUrl = sfuWsUrl,
-                sfuToken = sfuToken,
-                sfuName = sfuName,
-                remoteIceServers = iceServers,
-                powerManager = call.powerManager,
-                sfuAnalytics = callAnalytics.sfuAnalytics.apply {
-                    sfuAnalyticsStateHolder.updateSfuId(
-                        sfuName,
-                    )
-                },
-            )
-        }
-        session.value = localSession
+        val localSession = sessionFactory.create(
+            sessionId = sessionManager.sessionId,
+            sessionCounter = 0,
+            sfuUrl = sfuUrl,
+            sfuWsUrl = sfuWsUrl,
+            sfuToken = sfuToken,
+            sfuName = sfuName,
+            iceServers = iceServers,
+        )
+        sessionManager.setActiveSession(localSession)
 
         state._connection.value = RealtimeConnection.Joined(localSession)
 
@@ -287,8 +283,8 @@ internal class CallJoinCoordinator(
                         logger.w {
                             "[_join] SFU socket state observation timed out with no recovery started — triggering REJOIN"
                         }
-                        call.scope.launch {
-                            call.reconnect(
+                        scope.launch {
+                            reconnector.reconnect(
                                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
                                 "join-recoverable-connect-failure",
                             )
@@ -325,16 +321,16 @@ internal class CallJoinCoordinator(
                 }
             }
         }
-        val connectedSession = session.value
+        val connectedSession = sessionManager.session.value
             ?: return Failure(Error.GenericError("RtcSession was cleared during connection to sfu"))
-        call.client.state.setActiveCall(call)
+        callRegistry.markActive()
         // rejoin/migrate recovery swaps in a NEW session and already calls monitorSession()
         // with the recovered join response. fastReconnect recovery — and the normal success
         // path — keep the original session, which is not monitored anywhere else. Only
         // (re)establish monitoring when the session is unchanged, using the response that
         // still matches it, so we neither double-register nor monitor with a stale response.
         if (connectedSession === localSession) {
-            call.monitorSession(result.value)
+            sessionMonitor.monitorSession(result.value)
         }
         return Success(value = connectedSession)
     }
@@ -349,7 +345,7 @@ internal class CallJoinCoordinator(
     private fun sendJoinErrorAnalytics(failure: SfuConnectionResult.Failure) {
         callAnalytics.sfuAnalytics.onSfuWsCompleted(
             success = false,
-            retryCount = session.value?.sfuWsRetryCount?.get() ?: 0,
+            retryCount = sessionManager.session.value?.sfuWsRetryCount?.get() ?: 0,
             failureReason = failure.error.message,
             failureCode = (failure.abortReason ?: AnalyticsCallAbortReason.SFU_ERROR).name,
         )
@@ -369,43 +365,5 @@ internal class CallJoinCoordinator(
         }
         logger.d { "[_join] Reconnect after recoverable connection failure settled on $terminal" }
         return terminal is RealtimeConnection.Connected
-    }
-
-    suspend fun joinRequest(
-        create: CreateCallOptions? = null,
-        location: String,
-        migratingFrom: String? = null,
-        migratingFromList: List<String>? = null,
-        ring: Boolean = false,
-        notify: Boolean = false,
-        hintHighScaleLivestreamPublisher: Boolean? = null,
-        joinAnalyticsModel: JoinAnalyticsModel,
-    ): Result<JoinCallResponse> {
-        val migratingFromList =
-            migratingFromList ?: call.getFailedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
-        callAnalytics.joinAnalytics.onJoinRequestStart(joinAnalyticsModel.joinReason)
-        val result = clientImpl.joinCall(
-            type, id,
-            create = create != null,
-            members = create?.memberRequestsFromIds(),
-            custom = create?.custom,
-            settingsOverride = create?.settings,
-            startsAt = create?.startsAt,
-            team = create?.team,
-            ring = ring,
-            notify = notify,
-            location = location,
-            migratingFrom = migratingFrom,
-            migratingFromList = migratingFromList,
-            hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
-        )
-        result.onSuccess {
-            callAnalytics.joinAnalytics.onJoinRequestSuccess(
-                joinAnalyticsModel,
-                it.call.currentSessionId,
-            )
-            state.updateFromResponse(it)
-        }
-        return result
     }
 }

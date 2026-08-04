@@ -28,6 +28,8 @@ import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.result.Result
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
+import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.recording.RecordingType
@@ -54,14 +56,16 @@ class CallApiClientTest {
 
     private lateinit var clientImpl: StreamVideoClient
     private lateinit var state: CallState
-    private lateinit var ringRegistrar: RingingCallRegistrar
+    private lateinit var callRegistry: ClientCallRegistry
+    private lateinit var sessionManager: CallSessionManager
     private lateinit var apiClient: CallApiClient
 
     @Before
     fun setup() {
         clientImpl = mockk(relaxed = true)
         state = mockk(relaxed = true)
-        ringRegistrar = mockk(relaxed = true)
+        callRegistry = mockk(relaxed = true)
+        sessionManager = CallSessionManager()
 
         // Response-processing endpoints return Success so the onSuccess/state-update
         // branches are exercised.
@@ -94,7 +98,9 @@ class CallApiClientTest {
             clientImpl = clientImpl,
             scope = testScope,
             callSessionId = { "session-id" },
-            ringRegistrar = ringRegistrar,
+            callRegistry = callRegistry,
+            callAnalytics = mockk(relaxed = true),
+            sessionManager = sessionManager,
         )
     }
 
@@ -130,8 +136,8 @@ class CallApiClientTest {
     fun `create with ring registers an outgoing ringing call`() = runTest(testDispatcher) {
         apiClient.create(ring = true)
 
-        verify { ringRegistrar.beforeOutgoingStateUpdate() }
-        verify { ringRegistrar.afterOutgoingStateUpdate() }
+        verify { callRegistry.markRinging() }
+        verify { callRegistry.registerOutgoingRing() }
     }
 
     @Test
@@ -282,14 +288,14 @@ class CallApiClientTest {
         coVerify {
             clientImpl.getOrCreateCallFullMembers(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
-        verify { ringRegistrar.afterOutgoingStateUpdate() }
+        verify { callRegistry.registerOutgoingRing() }
     }
 
     @Test
     fun `accept marks the call accepted on this device`() = runTest(testDispatcher) {
         apiClient.accept()
         verify { state.acceptedOnThisDevice = true }
-        verify { ringRegistrar.onAccepted() }
+        verify { callRegistry.markAccepted() }
     }
 
     @Test
@@ -320,6 +326,29 @@ class CallApiClientTest {
                 rating = 5,
                 reason = "great",
                 custom = null,
+            )
+        }
+    }
+
+    @Test
+    fun `joinRequest delegates to the coordinator client`() = runTest(testDispatcher) {
+        coEvery {
+            clientImpl.joinCall(
+                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(),
+            )
+        } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
+
+        val result = apiClient.joinRequest(
+            location = "test-location",
+            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
+        )
+
+        assertThat(result).isInstanceOf(Result.Failure::class.java)
+        coVerify {
+            clientImpl.joinCall(
+                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(),
             )
         }
     }

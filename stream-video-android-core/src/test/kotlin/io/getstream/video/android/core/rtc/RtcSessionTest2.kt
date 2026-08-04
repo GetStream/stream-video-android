@@ -31,6 +31,7 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.ICETrickleEvent
@@ -158,6 +159,7 @@ class RtcSessionTest2 {
                 client = mockStreamVideo,
                 powerManager = mockPowerManager,
                 call = mockCall,
+                sessionManager = CallSessionManager(),
                 sessionId = sessionId,
                 apiKey = apiKey,
                 lifecycle = lifecycle,
@@ -211,6 +213,7 @@ class RtcSessionTest2 {
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
                     call = mockCall,
+                    sessionManager = CallSessionManager(),
                     sessionId = sessionId,
                     apiKey = apiKey,
                     lifecycle = mockLifecycle,
@@ -270,6 +273,7 @@ class RtcSessionTest2 {
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
                     call = mockCall,
+                    sessionManager = CallSessionManager(),
                     sessionId = "test-session-id",
                     apiKey = "test-api-key",
                     lifecycle = mockLifecycle,
@@ -329,6 +333,7 @@ class RtcSessionTest2 {
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
                     call = mockCall,
+                    sessionManager = CallSessionManager(),
                     sessionId = "test-session-id",
                     apiKey = "test-api-key",
                     lifecycle = mockLifecycle,
@@ -400,6 +405,7 @@ class RtcSessionTest2 {
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
                     call = mockCall,
+                    sessionManager = CallSessionManager(),
                     sessionId = "test-session-id",
                     apiKey = "test-api-key",
                     lifecycle = mockLifecycle,
@@ -458,6 +464,7 @@ class RtcSessionTest2 {
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
                     call = mockCall,
+                    sessionManager = CallSessionManager(),
                     sessionId = "test-session-id",
                     apiKey = "test-api-key",
                     lifecycle = mockLifecycle,
@@ -506,6 +513,7 @@ class RtcSessionTest2 {
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
                     call = mockCall,
+                    sessionManager = CallSessionManager(),
                     sessionId = "test-session-id",
                     apiKey = "test-api-key",
                     lifecycle = mockLifecycle,
@@ -561,6 +569,7 @@ class RtcSessionTest2 {
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
                     call = mockCall,
+                    sessionManager = CallSessionManager(),
                     sessionId = sessionId,
                     apiKey = apiKey,
                     lifecycle = mockLifecycle,
@@ -622,6 +631,7 @@ class RtcSessionTest2 {
             client = mockStreamVideo,
             powerManager = mockPowerManager,
             call = mockCall,
+            sessionManager = CallSessionManager(),
             sessionId = "session-id",
             apiKey = "api-key",
             lifecycle = mockLifecycle,
@@ -672,6 +682,7 @@ class RtcSessionTest2 {
                 client = mockStreamVideo,
                 powerManager = mockPowerManager,
                 call = mockCall,
+                sessionManager = CallSessionManager(),
                 sessionId = "session-id",
                 apiKey = "api-key",
                 lifecycle = mockLifecycle,
@@ -720,6 +731,7 @@ class RtcSessionTest2 {
             client = mockStreamVideo,
             powerManager = mockPowerManager,
             call = mockCall,
+            sessionManager = CallSessionManager(),
             sessionId = sessionId,
             apiKey = "test-api-key",
             lifecycle = mockLifecycle,
@@ -818,6 +830,7 @@ class RtcSessionTest2 {
                 client = mockStreamVideo,
                 powerManager = mockPowerManager,
                 call = mockCall,
+                sessionManager = CallSessionManager(),
                 sessionId = "session-id",
                 apiKey = "api-key",
                 lifecycle = mockLifecycle,

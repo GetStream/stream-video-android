@@ -30,14 +30,17 @@ class CallSessionManagerTest {
     private fun manager() = CallSessionManager()
 
     @Test
-    fun `session starts empty and can be replaced`() {
+    fun `session starts empty and can be replaced via setActiveSession`() {
         val manager = manager()
         assertThat(manager.session.value).isNull()
 
         val session = mockk<RtcSession>(relaxed = true)
-        manager.session.value = session
+        manager.setActiveSession(session)
 
         assertThat(manager.session.value).isSameInstanceAs(session)
+
+        manager.setActiveSession(null)
+        assertThat(manager.session.value).isNull()
     }
 
     @Test
@@ -85,5 +88,45 @@ class CallSessionManagerTest {
         assertThat(manager.nonFastReconnectAttempts).isEqualTo(3)
         assertThat(manager.connectStartTime).isEqualTo(111L)
         assertThat(manager.reconnectStartTime).isEqualTo(222L)
+    }
+
+    @Test
+    fun `failed sfu ids are de-duplicated, ignore blanks, and clear`() {
+        val manager = manager()
+        assertThat(manager.failedSfuIdsSnapshot()).isEmpty()
+
+        manager.addFailedSfuId("sfu-edge-1")
+        manager.addFailedSfuId("sfu-edge-1")
+        manager.addFailedSfuId("sfu-edge-2")
+        manager.addFailedSfuId("")
+        manager.addFailedSfuId("   ")
+
+        assertThat(manager.failedSfuIdsSnapshot()).containsExactly("sfu-edge-1", "sfu-edge-2")
+
+        manager.clearFailedSfuIds()
+        assertThat(manager.failedSfuIdsSnapshot()).isEmpty()
+    }
+
+    @Test
+    fun `failed sfu id snapshot is a copy`() {
+        val manager = manager()
+        manager.addFailedSfuId("sfu-edge-1")
+        val snapshot = manager.failedSfuIdsSnapshot()
+
+        manager.addFailedSfuId("sfu-edge-2")
+
+        assertThat(snapshot).containsExactly("sfu-edge-1")
+        assertThat(manager.failedSfuIdsSnapshot()).hasSize(2)
+    }
+
+    @Test
+    fun `connection and reconnection times are measured from their start timestamps`() {
+        val manager = manager()
+        val fiveSecondsAgo = System.currentTimeMillis() - 5_000L
+        manager.connectStartTime = fiveSecondsAgo
+        manager.reconnectStartTime = fiveSecondsAgo - 5_000L
+
+        assertThat(manager.connectionTimeSeconds()).isWithin(1f).of(5f)
+        assertThat(manager.reconnectionTimeSeconds()).isWithin(1f).of(10f)
     }
 }
