@@ -785,6 +785,7 @@ public class Call(
         }
         client.state.setActiveCall(this)
         monitorSession(result.value)
+        session.value = null
         return Success(value = session.value!!)
     }
 
