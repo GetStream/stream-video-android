@@ -718,6 +718,32 @@ interface ProductvideoApi {
     ): io.getstream.android.video.generated.models.DeleteTranscriptionResponse
     
     /**
+     * Report client-side events
+     * Reports a batch of client-side telemetry events. Events are processed independently; one invalid event does not block the rest of the batch.
+     */
+    @POST("/video/call_client_event")
+    suspend fun reportClientCallEvent(
+        @Body reportClientEventRequest: io.getstream.android.video.generated.models.ReportClientEventRequest
+    ): io.getstream.android.video.generated.models.ReportClientEventResponse
+    
+    /**
+     * Query call session stats
+     * 
+     */
+    @POST("/video/call_stats")
+    suspend fun queryCallSessionStats(
+        @Body queryCallSessionStatsRequest: io.getstream.android.video.generated.models.QueryCallSessionStatsRequest
+    ): io.getstream.android.video.generated.models.QueryCallSessionStatsResponse
+    
+    /**
+     * Query call session stats
+     * 
+     */
+    @POST("/video/call_stats")
+    suspend fun queryCallSessionStats(
+    ): io.getstream.android.video.generated.models.QueryCallSessionStatsResponse
+    
+    /**
      * Map call participants by location
      * 
      */
@@ -850,6 +876,15 @@ interface ProductvideoApi {
     @GET("/video/longpoll")
     suspend fun videoConnect(
     )
+    
+    /**
+     * Resolve SIP Auth
+     * Determine authentication requirements for an inbound SIP call before sending a digest challenge
+     */
+    @POST("/video/sip/auth")
+    suspend fun resolveSipAuth(
+        @Body resolveSipAuthRequest: io.getstream.android.video.generated.models.ResolveSipAuthRequest
+    ): io.getstream.android.video.generated.models.ResolveSipAuthResponse
     
     /**
      * Resolve SIP Inbound Routing

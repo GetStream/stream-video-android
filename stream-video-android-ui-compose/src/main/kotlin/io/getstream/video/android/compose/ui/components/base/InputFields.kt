@@ -17,9 +17,6 @@
 package io.getstream.video.android.compose.ui.components.base
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
@@ -27,17 +24,13 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.StreamTextFieldStyles
 import io.getstream.video.android.compose.ui.components.base.styling.TextFieldStyle
 import io.getstream.video.android.compose.ui.components.base.styling.styleState
 
@@ -145,81 +138,3 @@ public fun StreamTextField(
     value = value,
     onValueChange = onValueChange,
 )
-
-@Preview
-@Composable
-private fun StreamInputFieldsPreviews() {
-    VideoTheme {
-        Column {
-            // Empty
-            StreamTextField(
-                value = TextFieldValue(""),
-                placeholder = "Call ID",
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            StreamTextField(
-                value = TextFieldValue(""),
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-
-            StreamTextField(
-                icon = Icons.Outlined.Phone,
-                value = TextFieldValue(""),
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-
-            // Not empty
-            StreamTextField(
-                value = TextFieldValue("Some value"),
-                placeholder = "Call ID",
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-
-            StreamTextField(
-                icon = Icons.Outlined.Phone,
-                value = TextFieldValue("+ 123 456 789"),
-                placeholder = "Call ID",
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-
-            // Disabled
-            StreamTextField(
-                enabled = false,
-                value = TextFieldValue(""),
-                placeholder = "Call ID",
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-
-            // Error
-            StreamTextField(
-                error = true,
-                value = TextFieldValue("Wrong data"),
-                placeholder = "Call ID",
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-
-            StreamTextField(
-                value = TextFieldValue(""),
-                placeholder = "Message",
-                onValueChange = { },
-                minLines = 8,
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-        }
-    }
-}

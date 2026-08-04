@@ -49,19 +49,19 @@ public sealed interface RingingState {
 class ClientState(private val client: StreamVideo) {
     private val logger by taggedLogger("ClientState")
 
-    // Internal data
-    private val _user: MutableStateFlow<User?> = MutableStateFlow(client.user)
-    private val _connection: MutableStateFlow<StreamConnectionState> =
-        MutableStateFlow(StreamConnectionState.Idle)
-    internal val _ringingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
-    private val _activeCall: MutableStateFlow<Call?> = MutableStateFlow(null)
-
     // Stream video client is used until full decoupling is archived between `CallState` and `StreamVideoClient (former StreamVideoImpl)
     private val streamVideoClient: StreamVideoClient = client as StreamVideoClient
 
+    // Internal data
+    private val _connection: MutableStateFlow<ConnectionState> =
+        MutableStateFlow(ConnectionState.PreConnect)
+    internal val _ringingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
+    private val _activeCall: MutableStateFlow<Call?> = MutableStateFlow(null)
+
     // API
-    /** Current user for the client. */
-    public val user: StateFlow<User?> = _user
+    /** Current user for the client. Sourced from the UserRepository so observers see
+     *  identity updates (e.g. the server-issued guest user) without a local mirror. */
+    public val user: StateFlow<User?> = streamVideoClient.userRepository.userFlow
 
     /**
      * Adopts [user] as the SDK's active user. Used by the guest flow to publish the
@@ -85,6 +85,8 @@ class ClientState(private val client: StreamVideo) {
 
     public val callConfigRegistry = (client as StreamVideoClient).callServiceConfigRegistry
     private val serviceLauncher = ServiceLauncher(client.context)
+
+    internal val clientEventReporter = (client as StreamVideoClient).analytics.clientEventReporter
 
     @InternalStreamVideoApi
     public val rejectCallWhenBusy: Boolean = (client as StreamVideoClient).rejectCallWhenBusy
@@ -147,12 +149,16 @@ class ClientState(private val client: StreamVideo) {
         this._activeCall.value = call
         val serviceTransitionDelayMs = 500L
         val ringingState = call.state.ringingState.value
+        val callServiceConfig = callConfigRegistry.get(call.type)
+
         when (ringingState) {
             is RingingState.Incoming -> {
                 transitionToAcceptCall(call)
-                call.scope.launch {
-                    delay(serviceTransitionDelayMs)
-                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                if (callServiceConfig.runCallServiceInForeground) {
+                    call.scope.launch {
+                        delay(serviceTransitionDelayMs)
+                        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                    }
                 }
             }
             is RingingState.Outgoing -> {
@@ -161,7 +167,6 @@ class ClientState(private val client: StreamVideo) {
                 }
                 // Intentionally skipping maybeStartForegroundService because service should already be started
                 // when initiating outgoing-call
-                val callServiceConfig = callConfigRegistry.get(call.type)
                 val serviceClass = callServiceConfig.serviceClass
                 val isServiceRunning = ServiceIntentBuilder()
                     .isServiceRunning(this.client.context, serviceClass)
@@ -173,9 +178,17 @@ class ClientState(private val client: StreamVideo) {
             }
             else -> {
                 removeRingingCall(call)
-                call.scope.launch {
-                    delay(serviceTransitionDelayMs)
-                    maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+
+                if (callServiceConfig.runCallServiceInForeground) {
+                    call.scope.launch {
+                        delay(serviceTransitionDelayMs)
+                        maybeStartForegroundService(call, CallService.TRIGGER_ONGOING_CALL)
+                    }
+                } else {
+                    // So that we can transition to Active State for non-ringing calls
+                    if (ringingState is RingingState.Idle) {
+                        call.state.updateRingingState()
+                    }
                 }
             }
         }

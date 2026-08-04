@@ -153,8 +153,27 @@ public interface StreamVideo : NotificationHandler {
     public suspend fun connect(): Result<Long>
 
     /**
-     * Clears the internal user state, removes push notification devices and clears the call state.
+     * Clears the locally stored push device token only. Does not call the
+     * server `DELETE /devices` endpoint, disconnect the coordinator socket, or
+     * clear any in-memory user / call state. The name and historical KDoc
+     * misrepresented this behavior; the method is kept for source compatibility
+     * but should not be used.
+     *
+     * For a full teardown, call [deleteDevice] (if a server-side device row
+     * should be removed) and then [StreamVideo.removeClient], which triggers
+     * [cleanup] and uninstalls the singleton.
      */
+    @Deprecated(
+        message = "logOut() only clears the local push device cache; it does not log the user " +
+            "out, remove the server-side device row, or disconnect the socket. Use " +
+            "StreamVideo.removeClient() for a full teardown (combine with deleteDevice() " +
+            "first if the server-side device row must be removed).",
+        replaceWith = ReplaceWith(
+            expression = "StreamVideo.removeClient()",
+            imports = ["io.getstream.video.android.core.StreamVideo"],
+        ),
+        level = DeprecationLevel.WARNING,
+    )
     public fun logOut()
 
     public companion object {

@@ -21,13 +21,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.avatar.AvatarImagePreview
-import io.getstream.video.android.mock.StreamPreviewDataUtils
 
 /**
  * Renders a call background that shows either a static image or user images based on the call state.
@@ -49,18 +44,5 @@ public fun CallBackground(
     ) {
         backgroundContent?.invoke(this)
         content()
-    }
-}
-
-@Preview
-@Composable
-private fun CallBackgroundPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        CallBackground {
-            Box(modifier = Modifier.align(Alignment.Center)) {
-                AvatarImagePreview()
-            }
-        }
     }
 }

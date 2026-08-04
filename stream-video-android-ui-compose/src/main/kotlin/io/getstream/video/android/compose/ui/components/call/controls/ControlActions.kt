@@ -18,21 +18,16 @@ package io.getstream.video.android.compose.ui.components.call.controls
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.buildDefaultCallControlActions
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 
 /**
  * Represents the set of controls the user can use to change their audio and video device state, or
@@ -67,17 +62,6 @@ public fun ControlActions(
             items(actions) { action ->
                 action.invoke()
             }
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun CallControlsPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    Column {
-        VideoTheme {
-            ControlActions(call = previewCall, onCallAction = {})
         }
     }
 }

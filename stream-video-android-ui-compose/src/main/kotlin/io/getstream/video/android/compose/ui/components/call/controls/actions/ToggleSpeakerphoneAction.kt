@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.VolumeOff
@@ -26,8 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.tooling.preview.Preview
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleSpeakerphone
@@ -67,20 +63,4 @@ public fun ToggleSpeakerphoneAction(
     iconOnOff = Pair(Icons.AutoMirrored.Filled.VolumeUp, Icons.Default.VolumeOff),
 ) {
     onCallAction(ToggleSpeakerphone(isSpeakerphoneEnabled.not()))
-}
-
-@Preview
-@Composable
-public fun ToggleSpeakerphoneActionPreview() {
-    VideoTheme {
-        Column {
-            Row {
-                ToggleSpeakerphoneAction(isSpeakerphoneEnabled = false) {
-                }
-
-                ToggleSpeakerphoneAction(isSpeakerphoneEnabled = true) {
-                }
-            }
-        }
-    }
 }

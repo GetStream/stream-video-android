@@ -44,7 +44,17 @@ public sealed class SfuSocketState {
     ) : SfuSocketState()
 
     /**
-     * State of socket when the connection is established.
+     * State of socket when the transport WebSocket is open (HTTP→WS upgrade done)
+     * but the SFU has not yet delivered its [JoinCallResponseEvent]. This is the
+     * window bounded by the join-response timeout: the OkHttp client bounds the
+     * preceding [Connecting] (upgrade) phase, while this phase is bounded
+     * separately so a slow/silent SFU is detected without hanging.
+     */
+    object WebSocketConnected : SfuSocketState() { override fun toString() = "WebSocketConnected" }
+
+    /**
+     * State of socket when the connection is established (the SFU delivered its
+     * [JoinCallResponseEvent]).
      */
     data class Connected(val event: JoinCallResponseEvent) : SfuSocketState()
 
@@ -76,7 +86,12 @@ public sealed class SfuSocketState {
         object DisconnectedByRequest : Disconnected() { override fun toString() = "Disconnected.ByRequest" }
 
         /**
-         * State of socket when a [Error] happens.
+         * State of socket when a recoverable [Error] happens (a temporary socket
+         * disconnect that should be retried). The carried [error] holds the exact
+         * [Error.NetworkError.serverErrorCode] and message, so failures such as a missing
+         * JoinResponse
+         * (see [io.getstream.video.android.core.errors.VideoErrorCode.SFU_JOIN_RESPONSE_TIMEOUT])
+         * are attributed precisely without needing a separate state type.
          */
         data class DisconnectedTemporarily(
             val error: Error.NetworkError,

@@ -51,6 +51,9 @@ data class PushPreferencesResponse (
     @Json(name = "feeds_level")
     val feedsLevel: kotlin.String? = null,
 
+    @Json(name = "chat_preferences")
+    val chatPreferences: io.getstream.android.video.generated.models.ChatPreferencesResponse? = null,
+
     @Json(name = "feeds_preferences")
     val feedsPreferences: io.getstream.android.video.generated.models.FeedsPreferencesResponse? = null
 )

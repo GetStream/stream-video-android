@@ -16,12 +16,10 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
@@ -49,16 +47,3 @@ public fun LeaveCallAction(
     color = VideoTheme.colors.alertWarning,
     iconTint = VideoTheme.colors.basePrimary,
 )
-
-@Preview
-@Composable
-public fun LeaveCalLActionPreview() {
-    VideoTheme {
-        Row {
-            LeaveCallAction(enabled = false) {
-            }
-            LeaveCallAction {
-            }
-        }
-    }
-}

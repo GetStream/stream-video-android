@@ -39,6 +39,9 @@ import com.squareup.moshi.ToJson
  */
 
 data class SipInboundCredentials (
+    @Json(name = "api_key")
+    val apiKey: kotlin.String,
+
     @Json(name = "call_id")
     val callId: kotlin.String,
 

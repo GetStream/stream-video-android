@@ -19,20 +19,26 @@ package io.getstream.video.android.core.rtc
 import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.result.Error
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
+import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.connection.Publisher
+import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.IceServer
+import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.webrtc.SessionDescription
@@ -51,12 +57,14 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -68,6 +76,7 @@ import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.WebsocketReconnectStrategy
+import java.io.InterruptedIOException
 
 class RtcSessionTest2 {
 
@@ -161,6 +170,7 @@ class RtcSessionTest2 {
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
                 sfuConnectionModuleProvider = { mockk(relaxed = true) },
+                sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
             ),
         )
 
@@ -213,6 +223,7 @@ class RtcSessionTest2 {
                     coroutineScope = testScope,
                     remoteIceServers = remoteIceServers,
                     sfuConnectionModuleProvider = { sfuSocketModule },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -232,7 +243,73 @@ class RtcSessionTest2 {
 
     @Suppress("DEPRECATION")
     @Test
-    fun `connectInternal returns Failed when socket connection times out`() =
+    fun `connectInternal returns Failed when the socket reports a connection timeout`() =
+        runTest(testDispatcher) {
+            val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
+                SfuSocketState.Disconnected.Stopped,
+            )
+            val mockSocketConnection = mockk<SfuSocketConnection>(relaxed = true)
+            every { mockSocketConnection.state() } returns sfuSocketStateFlow
+            // The socket layer surfaces timeouts as DisconnectedTemporarily; connectInternal
+            // also has a safety timeout if the state machine never reaches a terminal state.
+            coEvery { mockSocketConnection.connect(any()) } coAnswers {
+                sfuSocketStateFlow.value =
+                    SfuSocketState.Disconnected.DisconnectedTemporarily(
+                        Error.NetworkError(
+                            message = VideoErrorCode.SFU_JOIN_RESPONSE_TIMEOUT.description,
+                            serverErrorCode = VideoErrorCode.SFU_JOIN_RESPONSE_TIMEOUT.code,
+                            statusCode = -1,
+                        ),
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+                    )
+            }
+            val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
+            every { sfuSocketModule.socketConnection } returns mockSocketConnection
+
+            val rtcSession = spyk(
+                RtcSession(
+                    client = mockStreamVideo,
+                    powerManager = mockPowerManager,
+                    call = mockCall,
+                    sessionId = "test-session-id",
+                    apiKey = "test-api-key",
+                    lifecycle = mockLifecycle,
+                    sfuUrl = "https://test-sfu.stream.com",
+                    sfuWsUrl = "wss://test-sfu.stream.com",
+                    sfuToken = "fake-sfu-token",
+                    sfuName = "test-sfu-edge",
+                    clientImpl = mockVideoClient,
+                    coroutineScope = testScope,
+                    remoteIceServers = emptyList(),
+                    sfuConnectionModuleProvider = { sfuSocketModule },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                ),
+            )
+            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+
+            val result = rtcSession.connectInternal()
+
+            assertTrue(
+                "Expected SfuConnectionResult.Failure but got $result",
+                result is SfuConnectionResult.Failure,
+            )
+            assertTrue(
+                "Expected timeout message",
+                (result as SfuConnectionResult.Failure).error.message!!.contains("timed out"),
+            )
+            assertEquals(
+                SfuConnectFailureCause.RecoverableSocketFailure,
+                result.cause,
+            )
+            assertEquals(
+                AnalyticsCallAbortReason.REQUEST_TIMEOUT,
+                result.abortReason,
+            )
+        }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `connectInternal socket state observation timeout fires when socket stays non-terminal`() =
         runTest(testDispatcher) {
             val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
                 SfuSocketState.Disconnected.Stopped,
@@ -241,7 +318,137 @@ class RtcSessionTest2 {
             every { mockSocketConnection.state() } returns sfuSocketStateFlow
             coEvery { mockSocketConnection.connect(any()) } coAnswers {
                 sfuSocketStateFlow.value = SfuSocketState.Connecting(
-                    connectionConf = mockk(relaxed = true),
+                    mockk<ConnectionConf.SfuConnectionConf>(relaxed = true),
+                )
+            }
+            val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
+            every { sfuSocketModule.socketConnection } returns mockSocketConnection
+            every { mockVideoClient.connectionTimeoutInMs } returns 50L
+
+            val rtcSession = spyk(
+                RtcSession(
+                    client = mockStreamVideo,
+                    powerManager = mockPowerManager,
+                    call = mockCall,
+                    sessionId = "test-session-id",
+                    apiKey = "test-api-key",
+                    lifecycle = mockLifecycle,
+                    sfuUrl = "https://test-sfu.stream.com",
+                    sfuWsUrl = "wss://test-sfu.stream.com",
+                    sfuToken = "fake-sfu-token",
+                    sfuName = "test-sfu-edge",
+                    clientImpl = mockVideoClient,
+                    coroutineScope = testScope,
+                    remoteIceServers = emptyList(),
+                    sfuConnectionModuleProvider = { sfuSocketModule },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                ),
+            )
+            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+
+            val resultDeferred = async { rtcSession.connectInternal() }
+            // Socket state observation timeout = 2 * 50ms + 1000ms grace
+            advanceTimeBy(1_101L)
+            val result = resultDeferred.await()
+
+            assertTrue(
+                "Expected SfuConnectionResult.Failure but got $result",
+                result is SfuConnectionResult.Failure,
+            )
+            assertTrue(
+                "Expected socket state observation timeout message",
+                (result as SfuConnectionResult.Failure).error.message!!.contains("timed out"),
+            )
+            assertEquals(
+                SfuConnectFailureCause.SocketStateObservationTimeout,
+                result.cause,
+            )
+            assertEquals(
+                AnalyticsCallAbortReason.REQUEST_TIMEOUT,
+                result.abortReason,
+            )
+            // The abandoned, still-in-flight socket must be torn down so a late
+            // Connected can't resurface through stateJob and resurrect the session.
+            coVerify { mockSocketConnection.disconnect() }
+        }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `connectInternal maps OkHttp InterruptedIOException timeout to REQUEST_TIMEOUT abort reason`() =
+        runTest(testDispatcher) {
+            val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
+                SfuSocketState.Disconnected.Stopped,
+            )
+            val mockSocketConnection = mockk<SfuSocketConnection>(relaxed = true)
+            every { mockSocketConnection.state() } returns sfuSocketStateFlow
+            coEvery { mockSocketConnection.connect(any()) } coAnswers {
+                sfuSocketStateFlow.value =
+                    SfuSocketState.Disconnected.DisconnectedTemporarily(
+                        Error.NetworkError(
+                            message = "timeout",
+                            serverErrorCode = VideoErrorCode.SOCKET_FAILURE.code,
+                            statusCode = -1,
+                            cause = InterruptedIOException("timeout"),
+                        ),
+                        WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
+                    )
+            }
+            val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
+            every { sfuSocketModule.socketConnection } returns mockSocketConnection
+
+            val rtcSession = spyk(
+                RtcSession(
+                    client = mockStreamVideo,
+                    powerManager = mockPowerManager,
+                    call = mockCall,
+                    sessionId = "test-session-id",
+                    apiKey = "test-api-key",
+                    lifecycle = mockLifecycle,
+                    sfuUrl = "https://test-sfu.stream.com",
+                    sfuWsUrl = "wss://test-sfu.stream.com",
+                    sfuToken = "fake-sfu-token",
+                    sfuName = "test-sfu-edge",
+                    clientImpl = mockVideoClient,
+                    coroutineScope = testScope,
+                    remoteIceServers = emptyList(),
+                    sfuConnectionModuleProvider = { sfuSocketModule },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                ),
+            )
+            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+
+            val result = rtcSession.connectInternal()
+
+            assertTrue(
+                "Expected SfuConnectionResult.Failure but got $result",
+                result is SfuConnectionResult.Failure,
+            )
+            assertEquals(
+                AnalyticsCallAbortReason.REQUEST_TIMEOUT,
+                (result as SfuConnectionResult.Failure).abortReason,
+            )
+            assertEquals(
+                SfuConnectFailureCause.RecoverableSocketFailure,
+                result.cause,
+            )
+        }
+
+    @Suppress("DEPRECATION")
+    @Test
+    fun `connectInternal returns non-recoverable Failed on a permanent disconnect`() =
+        runTest(testDispatcher) {
+            val sfuSocketStateFlow = MutableStateFlow<SfuSocketState>(
+                SfuSocketState.Disconnected.Stopped,
+            )
+            val mockSocketConnection = mockk<SfuSocketConnection>(relaxed = true)
+            every { mockSocketConnection.state() } returns sfuSocketStateFlow
+            coEvery { mockSocketConnection.connect(any()) } coAnswers {
+                sfuSocketStateFlow.value = SfuSocketState.Disconnected.DisconnectedPermanently(
+                    Error.NetworkError(
+                        message = "permanent auth error",
+                        serverErrorCode = 0,
+                        statusCode = -1,
+                    ),
                 )
             }
             val sfuSocketModule = mockk<SfuConnectionModule>(relaxed = true)
@@ -263,6 +470,7 @@ class RtcSessionTest2 {
                     coroutineScope = testScope,
                     remoteIceServers = emptyList(),
                     sfuConnectionModuleProvider = { sfuSocketModule },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -270,12 +478,12 @@ class RtcSessionTest2 {
             val result = rtcSession.connectInternal()
 
             assertTrue(
-                "Expected SfuConnectionResult.Failed but got $result",
-                result is SfuConnectionResult.Failed,
+                "Expected SfuConnectionResult.Failure but got $result",
+                result is SfuConnectionResult.Failure,
             )
-            assertTrue(
-                "Expected timeout message",
-                (result as SfuConnectionResult.Failed).error.message!!.contains("timed out"),
+            assertEquals(
+                SfuConnectFailureCause.TerminalSocketFailure,
+                (result as SfuConnectionResult.Failure).cause,
             )
         }
 
@@ -310,6 +518,7 @@ class RtcSessionTest2 {
                     coroutineScope = testScope,
                     remoteIceServers = emptyList(),
                     sfuConnectionModuleProvider = { sfuSocketModule },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -326,7 +535,7 @@ class RtcSessionTest2 {
 
             val result = rtcSession.connectInternal(reconnectDetails = reconnectDetails)
 
-            assertEquals(SfuConnectionResult.Connected, result)
+            assertEquals(SfuConnectionResult.Success, result)
             coVerify {
                 mockSocketConnection.connect(
                     match { request ->
@@ -364,6 +573,7 @@ class RtcSessionTest2 {
                     coroutineScope = testScope,
                     remoteIceServers = remoteIceServers,
                     sfuConnectionModuleProvider = { mockk(relaxed = true) },
+                    sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
             val subscriber = rtcSession.subscriber
@@ -425,6 +635,7 @@ class RtcSessionTest2 {
             rtcSessionScope = testScope,
             remoteIceServers = emptyList(),
             sfuConnectionModuleProvider = { mockModule },
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
         )
         // Confirm publisher is null
         assertNull(rtcSession.publisher.value)
@@ -473,6 +684,7 @@ class RtcSessionTest2 {
                 coroutineScope = testScope,
                 remoteIceServers = emptyList(),
                 sfuConnectionModuleProvider = { mockk(relaxed = true) },
+                sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
             )
             val mockPublisher = mockk<Publisher>(relaxed = true)
             rtcSession.publisher.value = mockPublisher
@@ -520,6 +732,7 @@ class RtcSessionTest2 {
             coroutineScope = testScope,
             remoteIceServers = emptyList(),
             sfuConnectionModuleProvider = { mockk(relaxed = true) },
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
         )
         val subscriber = rtcSession.subscriber.value
         assertNotNull(subscriber)
@@ -618,6 +831,7 @@ class RtcSessionTest2 {
                 rtcSessionScope = testScope,
                 remoteIceServers = emptyList(),
                 sfuConnectionModuleProvider = { mockModule },
+                sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
             ),
             recordPrivateCalls = true,
         )

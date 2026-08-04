@@ -70,5 +70,8 @@ data class QueryCallSessionParticipantStatsResponse (
     val prev: kotlin.String? = null,
 
     @Json(name = "tmp_data_source")
-    val tmpDataSource: kotlin.String? = null
+    val tmpDataSource: kotlin.String? = null,
+
+    @Json(name = "call_events")
+    val callEvents: kotlin.collections.List<io.getstream.android.video.generated.models.CallLevelEventPayload>? = emptyList()
 )

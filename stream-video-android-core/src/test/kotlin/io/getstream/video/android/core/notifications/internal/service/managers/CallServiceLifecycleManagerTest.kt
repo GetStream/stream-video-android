@@ -20,9 +20,11 @@ import io.getstream.android.video.generated.models.GetCallResponse
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.Called
@@ -169,7 +171,14 @@ class CallServiceLifecycleManagerTest {
 
         advanceUntilIdle()
 
-        verify { call.leave("call-service-end-call-incoming") }
+        verify {
+            call.leave(
+                CallLeaveReason.SdkDriven(
+                    cause = SdkCause.TASK_REMOVED,
+                    message = "${SdkCause.TASK_REMOVED.defaultMessage} for (incoming call)",
+                ),
+            )
+        }
     }
 
     @Test
@@ -182,8 +191,15 @@ class CallServiceLifecycleManagerTest {
         sut.endCall(this, callId)
 
         advanceUntilIdle()
-
-        verify { call.leave("call-service-end-call-unknown") }
+        val message = "${SdkCause.TASK_REMOVED.defaultMessage} for ringing state: ${ringingStateFlow.value}"
+        verify {
+            call.leave(
+                CallLeaveReason.SdkDriven(
+                    cause = SdkCause.TASK_REMOVED,
+                    message = message,
+                ),
+            )
+        }
     }
 
     @Test

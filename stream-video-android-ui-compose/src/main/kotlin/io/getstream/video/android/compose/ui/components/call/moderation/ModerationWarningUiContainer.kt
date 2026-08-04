@@ -50,7 +50,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.R
@@ -194,7 +193,6 @@ internal fun ModerationWarningUiContent(
     }
 }
 
-@Preview
 @Composable
 internal fun ModerationWarningUiContentDemo() {
     ModerationWarningUiContent(

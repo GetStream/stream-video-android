@@ -351,12 +351,16 @@ class UserRobot {
     }
 
     fun acceptCallRecording(): UserRobot {
-        CallPage.RecordingButtons.accept.waitToAppear(timeOutMillis = 10.seconds).click()
+        // The recording-consent dialog only appears once the backend composite recorder
+        // emits call.recording_started, which can take 20-30s, so 10s is too short.
+        CallPage.RecordingButtons.accept.waitToAppear(timeOutMillis = 30.seconds).click()
         return this
     }
 
     fun declineCallRecording(): UserRobot {
-        CallPage.RecordingButtons.leave.waitToAppear(timeOutMillis = 10.seconds).click()
+        // See acceptCallRecording: the consent dialog is gated on the backend recorder
+        // starting (call.recording_started), which can take 20-30s.
+        CallPage.RecordingButtons.leave.waitToAppear(timeOutMillis = 30.seconds).click()
         return this
     }
 

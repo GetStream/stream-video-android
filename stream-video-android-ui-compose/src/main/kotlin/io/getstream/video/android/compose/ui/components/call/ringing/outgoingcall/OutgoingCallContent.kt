@@ -28,9 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -38,9 +36,6 @@ import io.getstream.video.android.compose.ui.components.background.CallBackgroun
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewMemberListState
 import io.getstream.video.android.model.User.Companion.isLocalUser
 
 /**
@@ -169,33 +164,5 @@ public fun OutgoingCallContent(
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction,
         )
-    }
-}
-
-@Preview
-@Composable
-private fun OutgoingCallVideoPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        OutgoingCallContent(
-            call = previewCall,
-            isVideoType = true,
-            participants = previewMemberListState,
-            onBackPressed = {},
-        ) {}
-    }
-}
-
-@Preview
-@Composable
-private fun OutgoingCallAudioPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        OutgoingCallContent(
-            call = previewCall,
-            isVideoType = false,
-            participants = previewMemberListState,
-            onBackPressed = {},
-        ) {}
     }
 }

@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.MusicOff
@@ -25,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
 import io.getstream.video.android.core.call.state.CallAction
@@ -67,20 +64,4 @@ public fun ToggleHifiAudioAction(
     iconOnOff = Pair(Icons.Default.MusicNote, Icons.Default.MusicOff),
 ) {
     onCallAction(ToggleHifiAudio(isHifiAudioEnabled = isMusicHighQuality.not()))
-}
-
-@Preview
-@Composable
-public fun ToggleHifiAudioActionPreview() {
-    VideoTheme {
-        Column {
-            Row {
-                ToggleHifiAudioAction(isMusicHighQuality = false) {
-                }
-
-                ToggleHifiAudioAction(isMusicHighQuality = true) {
-                }
-            }
-        }
-    }
 }

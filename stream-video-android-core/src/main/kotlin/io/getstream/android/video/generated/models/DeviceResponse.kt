@@ -57,6 +57,9 @@ data class DeviceResponse (
     @Json(name = "disabled_reason")
     val disabledReason: kotlin.String? = null,
 
+    @Json(name = "hardware_id")
+    val hardwareId: kotlin.String? = null,
+
     @Json(name = "push_provider_name")
     val pushProviderName: kotlin.String? = null,
 

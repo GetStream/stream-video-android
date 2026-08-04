@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamBadgeBox
 import io.getstream.video.android.core.call.state.CallAction
@@ -60,15 +59,4 @@ public fun ChatDialogAction(
         color = bgColor,
         iconTint = iconTint,
     )
-}
-
-@Preview
-@Composable
-private fun ChatActionPreview() {
-    VideoTheme {
-        ChatDialogAction {
-        }
-        ChatDialogAction(messageCount = 15) {
-        }
-    }
 }

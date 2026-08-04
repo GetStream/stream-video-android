@@ -69,6 +69,18 @@ data class CallStatsParticipantSession (
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,
 
+    @Json(name = "freezes_duration_ms")
+    val freezesDurationMs: kotlin.Int? = null,
+
+    @Json(name = "ingress")
+    val ingress: kotlin.String? = null,
+
+    @Json(name = "jitter_ms")
+    val jitterMs: kotlin.Int? = null,
+
+    @Json(name = "latency_ms")
+    val latencyMs: kotlin.Int? = null,
+
     @Json(name = "os")
     val os: kotlin.String? = null,
 
