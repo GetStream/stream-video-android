@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.call.connection.utils
 
-import org.webrtc.RtpParameters
+import io.getstream.webrtc.RtpParameters
 import stream.video.sfu.models.DegradationPreference as SfuDegradationPreference
 
 /**
@@ -38,7 +38,8 @@ internal fun SfuDegradationPreference.toRtcDegradationPreference():
         RtpParameters.DegradationPreference.MAINTAIN_FRAMERATE
     SfuDegradationPreference.DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION ->
         RtpParameters.DegradationPreference.MAINTAIN_RESOLUTION
+    // WebRTC exposes this as DISABLED (do not degrade resolution or framerate).
     SfuDegradationPreference.DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE_AND_RESOLUTION ->
-        RtpParameters.DegradationPreference.MAINTAIN_FRAMERATE_AND_RESOLUTION
+        RtpParameters.DegradationPreference.DISABLED
     SfuDegradationPreference.DEGRADATION_PREFERENCE_UNSPECIFIED -> null
 }

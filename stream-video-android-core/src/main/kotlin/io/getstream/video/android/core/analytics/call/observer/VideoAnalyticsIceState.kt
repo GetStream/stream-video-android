@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.analytics.call.observer
 
-import org.webrtc.PeerConnection
+import io.getstream.webrtc.PeerConnection
 
 internal enum class VideoAnalyticsIceState(val text: String) {
     CONNECTED("CONNECTED"), FAILED("FAILED"), NOT_CONNECTED("NOT_CONNECTED")

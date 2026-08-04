@@ -16,10 +16,10 @@
 
 package io.getstream.video.android.core.call.connection.utils
 
+import io.getstream.webrtc.RtpParameters
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import org.webrtc.RtpParameters
 import stream.video.sfu.models.DegradationPreference
 
 class DegradationPreferenceMapperTest {
@@ -51,9 +51,9 @@ class DegradationPreferenceMapperTest {
     }
 
     @Test
-    fun `MAINTAIN_FRAMERATE_AND_RESOLUTION maps to RtpParameters MAINTAIN_FRAMERATE_AND_RESOLUTION`() {
+    fun `MAINTAIN_FRAMERATE_AND_RESOLUTION maps to RtpParameters DISABLED`() {
         assertEquals(
-            RtpParameters.DegradationPreference.MAINTAIN_FRAMERATE_AND_RESOLUTION,
+            RtpParameters.DegradationPreference.DISABLED,
             DegradationPreference
                 .DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE_AND_RESOLUTION
                 .toRtcDegradationPreference(),

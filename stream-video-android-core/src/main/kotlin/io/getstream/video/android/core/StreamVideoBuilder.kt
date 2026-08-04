@@ -285,6 +285,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             "ws://${it.trimEnd('/')}/video/connect"
         } ?: wssUrl ?: "wss://$videoDomain/video/connect"
 
+        // Single source of truth for the SDK user. Shared with the coordinator module
+        // (vestigial constructor slot) and StreamVideoClient so guest identity adoption
+        // and ClientState.user stay in sync without local mirrors.
+        val userRepository = StreamUserRepositoryImpl(user)
+
         val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
             scope = scope,
@@ -292,16 +297,17 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             wssUrl = resolvedWssUrl,
             connectionTimeoutInMs = connectionTimeoutInMs,
             loggingLevel = loggingLevel,
-            user = user,
+            userRepository = userRepository,
             apiKey = apiKey,
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
             tokenRepository = tokenRepository,
         )
 
-        // Sink that adopts the server-issued guest identity into ClientState once the client
-        // exists (bound below, after construction). iOS analog: `state.user = guestInfo.user`.
-        val userRepository = BindableWritableUserRepository()
+        // Deferred write sink for GuestStreamTokenProvider: the provider is created
+        // before StreamVideoClient exists, so adoption is buffered until [bind] below.
+        // iOS analog: `state.user = guestInfo.user`.
+        val guestUserAdoptionSink = BindableWritableUserRepository()
 
         // Select the core token provider based on user type — mirrors iOS's
         // `initialConnectIfRequired` dispatch.
@@ -318,7 +324,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
                 GuestStreamTokenProvider(
                     api = coordinatorConnectionModule.api,
                     initialUser = user,
-                    userRepository = userRepository,
+                    userRepository = guestUserAdoptionSink,
                     onTokenIssued = { issuedToken ->
                         coordinatorConnectionModule.updateAuthType("jwt")
                         coordinatorConnectionModule.updateToken(issuedToken)
@@ -391,12 +397,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableStereoForSubscriber = enableStereoForSubscriber,
             telecomConfig = telecomConfig,
             tokenRepository = tokenRepository,
+            userRepository = userRepository,
             rejectCallWhenBusy = rejectCallWhenBusy,
         )
 
-        // Route guest identity adoption into ClientState now that the client exists. Bound
-        // before the connect launch below, so no token load can race the binding.
-        userRepository.bind { adoptedUser -> client.state.updateUser(adoptedUser) }
+        // Route guest identity adoption into the shared UserRepository now that the client
+        // exists. Bound before the connect launch below, so no token load can race the binding.
+        guestUserAdoptionSink.bind { adoptedUser -> client.state.updateUser(adoptedUser) }
 
         // Auto-register push and open the coordinator WS for any user with an
         // identity. Anonymous users don't have one, so neither path applies.

@@ -33,6 +33,8 @@ import io.getstream.android.video.generated.models.CallRequest
 import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.CollectUserFeedbackRequest
+import io.getstream.android.video.generated.models.CreateGuestRequest
+import io.getstream.android.video.generated.models.CreateGuestResponse
 import io.getstream.android.video.generated.models.GetCallResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallRequest
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
@@ -77,6 +79,7 @@ import io.getstream.android.video.generated.models.UpdateCallMembersResponse
 import io.getstream.android.video.generated.models.UpdateCallRequest
 import io.getstream.android.video.generated.models.UpdateCallResponse
 import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
+import io.getstream.android.video.generated.models.UserRequest
 import io.getstream.android.video.generated.models.VideoEvent
 import io.getstream.android.video.generated.models.WSCallEvent
 import io.getstream.log.taggedLogger
@@ -460,10 +463,10 @@ internal class StreamVideoClient internal constructor(
         // routes through ClientState.handleStreamState (see streamClientListener.onState).
         streamClientSubscription = streamClient.subscribe(streamClientListener).getOrThrow()
 
-        // TODO: RAHUL -> update with core
+        // Coordinator WS analytics now observe core's StreamClient connection state
+        // (legacy VideoSocketState flow was removed with CoordinatorSocketConnection).
         scope.launch {
-            analytics.coordinatorAnalytics
-                .startObserver(coordinatorConnectionModule.socketConnection.state())
+            analytics.coordinatorAnalytics.startObserver(streamClient.connectionState)
         }
         // Re-watch active calls whenever the coordinator socket (re)connects.
         scope.launch(CoroutineName("init#streamClient.connectionState.collect")) {

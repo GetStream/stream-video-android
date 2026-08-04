@@ -22,6 +22,7 @@ import io.getstream.android.core.api.StreamClient
 import io.getstream.android.core.api.model.connection.StreamConnectionState
 import io.getstream.android.core.api.socket.listeners.StreamClientListener
 import io.getstream.android.core.api.subscribe.StreamSubscription
+import io.getstream.android.video.generated.apis.ProductvideoApi
 import io.getstream.android.video.generated.models.CallAcceptedEvent
 import io.getstream.android.video.generated.models.CallRingEvent
 import io.getstream.android.video.generated.models.CallSessionStartedEvent
@@ -53,7 +54,6 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -96,7 +96,9 @@ class StreamVideoClientTest {
         val tokenRepository: TokenRepository,
     )
 
-    private fun prepareClient(user: User = mockk(relaxed = true)): ClientHarness {
+    private fun prepareClient(
+        user: User = User(id = "user-1", type = UserType.Authenticated),
+    ): ClientHarness {
         val context = mockk<Context>(relaxed = true)
         val lifecycle = mockk<Lifecycle>(relaxed = true)
         val coordinator = mockk<CoordinatorConnectionModule>(relaxed = true)
@@ -112,7 +114,7 @@ class StreamVideoClientTest {
         val client = spyk(
             StreamVideoClient(
                 context = context,
-                initialUser = mockk(relaxed = true),
+                initialUser = user,
                 apiKey = "apikey",
                 token = "token",
                 lifecycle = lifecycle,
@@ -441,6 +443,11 @@ class StreamVideoClientTest {
                 name = "Guest",
             ),
         )
+        val streamClientMock = mockk<StreamClient>(relaxed = true)
+        every {
+            streamClientMock.subscribe(any())
+        } returns Result.success(mockk<StreamSubscription>(relaxed = true))
+        every { streamClientMock.connectionState } returns MutableStateFlow(StreamConnectionState.Idle)
         val client = StreamVideoClient(
             context = context,
             initialUser = User(id = "local_input_id", type = UserType.Guest),
@@ -448,6 +455,7 @@ class StreamVideoClientTest {
             token = "",
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinator,
+            streamClient = streamClientMock,
             tokenRepository = mockk(relaxed = true),
             streamNotificationManager = mockk(relaxed = true),
             enableCallNotificationUpdates = false,

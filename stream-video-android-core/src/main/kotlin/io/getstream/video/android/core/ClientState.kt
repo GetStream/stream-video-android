@@ -53,8 +53,8 @@ class ClientState(private val client: StreamVideo) {
     private val streamVideoClient: StreamVideoClient = client as StreamVideoClient
 
     // Internal data
-    private val _connection: MutableStateFlow<ConnectionState> =
-        MutableStateFlow(ConnectionState.PreConnect)
+    private val _connection: MutableStateFlow<StreamConnectionState> =
+        MutableStateFlow(StreamConnectionState.Idle)
     internal val _ringingCall: MutableStateFlow<Call?> = MutableStateFlow(null)
     private val _activeCall: MutableStateFlow<Call?> = MutableStateFlow(null)
 
@@ -68,7 +68,7 @@ class ClientState(private val client: StreamVideo) {
      * server-issued identity returned by `createGuest` (iOS analog: `state.user`).
      */
     internal fun updateUser(user: User) {
-        _user.value = user
+        streamVideoClient.userRepository.setUser(user)
     }
 
     /**

@@ -16,11 +16,9 @@
 
 package io.getstream.video.android.core.analytics.coordinator
 
+import io.getstream.android.core.api.model.connection.StreamConnectionState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
-import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketStateService
-import io.getstream.video.android.core.socket.coordinator.state.VideoSocketConnectionType
-import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -41,9 +39,8 @@ import org.junit.Test
 class CoordinatorAnalyticsTest {
 
     private val reporter = mockk<ClientEventReporter>(relaxed = true)
-    private val socketState =
-        MutableStateFlow<VideoSocketState>(VideoSocketState.Disconnected.Stopped)
-    private var previousRetryAttempts = 0
+    private val connectionState =
+        MutableStateFlow<StreamConnectionState>(StreamConnectionState.Idle)
 
     @Before
     fun setup() {
@@ -53,14 +50,11 @@ class CoordinatorAnalyticsTest {
         every { StreamVideo.instanceOrNull() } returns streamVideo
 
         every { reporter.reportCoordinatorWSInitiated() } returns "ws-stage-1"
-        previousRetryAttempts = CoordinatorSocketStateService.lastRetryAttempts
-        CoordinatorSocketStateService.lastRetryAttempts = 2
     }
 
     @After
     fun tearDown() {
         unmockkObject(StreamVideo)
-        CoordinatorSocketStateService.lastRetryAttempts = previousRetryAttempts
     }
 
     private fun TestScope.startedAnalytics(): CoordinatorAnalytics {
@@ -69,18 +63,15 @@ class CoordinatorAnalyticsTest {
             reporter,
             CoordinatorAnalyticsStateHolder(),
         )
-        analytics.startObserver(socketState)
+        analytics.startObserver(connectionState)
         return analytics
     }
-
-    private fun connecting(type: VideoSocketConnectionType) =
-        VideoSocketState.Connecting(mockk(), type)
 
     @Test
     fun `an initial connection reports coordinator ws initiated`() = runTest {
         startedAnalytics()
 
-        socketState.value = connecting(VideoSocketConnectionType.INITIAL_CONNECTION)
+        connectionState.value = StreamConnectionState.Connecting.Opening("user-1")
         runCurrent()
 
         verify(exactly = 1) { reporter.reportCoordinatorWSInitiated() }
@@ -91,35 +82,35 @@ class CoordinatorAnalyticsTest {
         every { StreamVideo.instanceOrNull() } returns null
         startedAnalytics()
 
-        socketState.value = connecting(VideoSocketConnectionType.INITIAL_CONNECTION)
+        connectionState.value = StreamConnectionState.Connecting.Opening("user-1")
         runCurrent()
 
         verify(exactly = 0) { reporter.reportCoordinatorWSInitiated() }
     }
 
     @Test
-    fun `automatic and forced reconnections are not reported as initiated`() = runTest {
+    fun `reconnect while a stage is open does not report a second initiated`() = runTest {
         startedAnalytics()
 
-        socketState.value = connecting(VideoSocketConnectionType.AUTOMATIC_RECONNECTION)
+        connectionState.value = StreamConnectionState.Connecting.Opening("user-1")
         runCurrent()
-        socketState.value = connecting(VideoSocketConnectionType.FORCE_RECONNECTION)
+        connectionState.value = StreamConnectionState.Connecting.Authenticating("user-1")
         runCurrent()
 
-        verify(exactly = 0) { reporter.reportCoordinatorWSInitiated() }
+        verify(exactly = 1) { reporter.reportCoordinatorWSInitiated() }
     }
 
     @Test
-    fun `connected after initiated reports completion with the retry count`() = runTest {
+    fun `connected after initiated reports completion`() = runTest {
         startedAnalytics()
 
-        socketState.value = connecting(VideoSocketConnectionType.INITIAL_CONNECTION)
+        connectionState.value = StreamConnectionState.Connecting.Opening("user-1")
         runCurrent()
-        socketState.value = VideoSocketState.Connected(mockk())
+        connectionState.value = StreamConnectionState.Connected(mockk(), "connection-1")
         runCurrent()
 
         verify(exactly = 1) {
-            reporter.reportCoordinatorWSCompleted("ws-stage-1", true, 2, null, null)
+            reporter.reportCoordinatorWSCompleted("ws-stage-1", true, 0, null, null)
         }
     }
 
@@ -127,7 +118,7 @@ class CoordinatorAnalyticsTest {
     fun `connected without a prior initiated stage reports nothing`() = runTest {
         startedAnalytics()
 
-        socketState.value = VideoSocketState.Connected(mockk())
+        connectionState.value = StreamConnectionState.Connected(mockk(), "connection-1")
         runCurrent()
 
         verify(exactly = 0) {
@@ -136,25 +127,25 @@ class CoordinatorAnalyticsTest {
     }
 
     @Test
-    fun `a permanent disconnect after initiated reports a failed completion`() = runTest {
+    fun `a disconnect after initiated reports a failed completion`() = runTest {
         startedAnalytics()
 
-        socketState.value = connecting(VideoSocketConnectionType.INITIAL_CONNECTION)
+        connectionState.value = StreamConnectionState.Connecting.Opening("user-1")
         runCurrent()
-        socketState.value = VideoSocketState.Disconnected.DisconnectedPermanently(mockk())
+        connectionState.value = StreamConnectionState.Disconnected()
         runCurrent()
 
         verify(exactly = 1) {
-            reporter.reportCoordinatorWSCompleted("ws-stage-1", false, 2, null, null)
+            reporter.reportCoordinatorWSCompleted("ws-stage-1", false, 0, null, null)
         }
     }
 
     @Test
-    fun `endObserver stops reporting socket state changes`() = runTest {
+    fun `endObserver stops reporting connection state changes`() = runTest {
         val analytics = startedAnalytics()
 
         analytics.endObserver()
-        socketState.value = connecting(VideoSocketConnectionType.INITIAL_CONNECTION)
+        connectionState.value = StreamConnectionState.Connecting.Opening("user-1")
         runCurrent()
 
         verify(exactly = 0) { reporter.reportCoordinatorWSInitiated() }

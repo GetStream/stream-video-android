@@ -36,7 +36,7 @@ private fun CallLobbyPreview() {
                 sessionId = previewCall.sessionId,
                 track = VideoTrack(
                     streamId = previewCall.sessionId,
-                    video = org.webrtc.VideoTrack(1000L),
+                    video = io.getstream.webrtc.VideoTrack(1000L),
                 ),
                 enabled = true,
                 paused = false,

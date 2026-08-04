@@ -25,9 +25,9 @@ import io.getstream.video.android.core.analytics.reporting.model.EventOutcome
 import io.getstream.video.android.core.analytics.reporting.model.EventStage
 import io.getstream.video.android.core.analytics.reporting.model.EventType
 import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionRole
+import io.getstream.webrtc.PeerConnection
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
-import org.webrtc.PeerConnection
 
 internal class ClientEventFactory(
     val sdkVersion: String,

@@ -36,12 +36,12 @@ import io.getstream.video.android.core.analytics.reporting.model.PostCallFlightS
 import io.getstream.video.android.core.analytics.reporting.model.StageId
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.webrtc.PeerConnection
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import org.webrtc.PeerConnection
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
