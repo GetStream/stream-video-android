@@ -25,6 +25,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
 
 internal open class ForegroundServicePermissionManager {
     @SuppressLint("InlinedApi")
@@ -56,6 +57,7 @@ internal open class ForegroundServicePermissionManager {
             CallService.Companion.TRIGGER_ONGOING_CALL,
             CallService.Companion.TRIGGER_OUTGOING_CALL,
             -> calculateServiceType(context)
+            CallService.Companion.TRIGGER_INCOMING_CALL -> incomingRingingServiceType()
             else -> noPermissionServiceType()
         }
     }
@@ -90,6 +92,22 @@ internal open class ForegroundServicePermissionManager {
         else ->
             ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
     }
+
+    /**
+     * Foreground-service type for the incoming-ringing window.
+     *
+     * On Android 17+, background audio (the ringtone) is muted under [ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE],
+     * so phoneCall-capable VoIP services use phoneCall instead. Other services keep [noPermissionServiceType].
+     */
+    @SuppressLint("InlinedApi")
+    internal open fun incomingRingingServiceType(): Int =
+        if (requiredForegroundTypes.contains(ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL) &&
+            Build.VERSION.SDK_INT >= BUILD_VERSION_CODES_CINNAMON_BUN
+        ) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+        } else {
+            noPermissionServiceType()
+        }
 
     @SuppressLint("InlinedApi")
     internal open fun androidQServiceType(): Int {
