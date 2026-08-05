@@ -25,11 +25,12 @@ import java.io.File
  *
  * `Call` declares `val state = CallState(client, this, user, scope)` which passes
  * `this` to [CallState]. CallState constructs [io.getstream.video.android.core.sorting.SortedParticipantsState],
- * whose `init` launches `scope.launch { call.events.collect { ... } }`. Kotlin
- * runs field initializers in textual order, so if `events` is declared after
- * `state`, the launched coroutine reads `call.events` while the field is still
- * null and NPEs into the scope's CoroutineExceptionHandler on production
- * dispatchers (Default/Main/IO).
+ * whose `init` launches `scope.launch { call.events.collect { ... } }`. The
+ * `events` flow is owned by `eventManager` (CallEventManager) and `Call.events`
+ * is assigned from it. Kotlin runs field initializers in textual order, so if
+ * `eventManager` is declared after `state`, the launched coroutine reads
+ * `call.events` while the backing field is still null and NPEs into the scope's
+ * CoroutineExceptionHandler on production dispatchers (Default/Main/IO).
  *
  * The full test suite uses [kotlinx.coroutines.test.UnconfinedTestDispatcher],
  * which captures the NPE silently in the scope's exception handler — no
@@ -49,15 +50,20 @@ class CallFieldDeclarationOrderTest {
         ).readText()
 
         val lines = callSource.lines()
+        val eventManagerLine = lines.indexOfFirst {
+            it.contains("val eventManager = CallEventManager(")
+        }
         val eventsLine = lines.indexOfFirst {
-            it.contains("val events = MutableSharedFlow<VideoEvent>(")
+            it.contains("val events: MutableSharedFlow<VideoEvent> = eventManager.events")
         }
         val stateLine = lines.indexOfFirst {
             it.contains("val state = CallState(")
         }
 
+        assertThat(eventManagerLine).isGreaterThan(-1)
         assertThat(eventsLine).isGreaterThan(-1)
         assertThat(stateLine).isGreaterThan(-1)
+        assertThat(eventManagerLine).isLessThan(stateLine)
         assertThat(eventsLine).isLessThan(stateLine)
     }
 }
