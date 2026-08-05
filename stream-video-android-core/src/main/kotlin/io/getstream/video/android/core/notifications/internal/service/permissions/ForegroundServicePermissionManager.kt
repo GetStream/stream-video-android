@@ -25,6 +25,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
 
 internal open class ForegroundServicePermissionManager {
     @SuppressLint("InlinedApi")
@@ -100,10 +101,8 @@ internal open class ForegroundServicePermissionManager {
      */
     @SuppressLint("InlinedApi")
     internal open fun incomingRingingServiceType(): Int =
-        // TODO: replace the hardcoded 37 with Build.VERSION_CODES.<ANDROID_17> once compileSdk /
-        //  targetSdk are raised to 37; the constant does not exist at the current compileSdk.
         if (requiredForegroundTypes.contains(ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL) &&
-            Build.VERSION.SDK_INT >= 37
+            Build.VERSION.SDK_INT >= BUILD_VERSION_CODES_CINNAMON_BUN
         ) {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
         } else {
