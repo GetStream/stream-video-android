@@ -116,6 +116,9 @@ internal class CallMediaManager(
     /**
      * Checks if the audioBitrateProfile has changed since the factory was created,
      * and recreates the factory if needed. This should only be called before joining.
+     *
+     * If the factory hasn't been created yet, it will be created with the current profile
+     * when first accessed, so no recreation is needed.
      */
     fun ensureFactoryMatchesAudioProfile() {
         val factory = _peerConnectionFactory
@@ -173,6 +176,7 @@ internal class CallMediaManager(
         // Next access to peerConnectionFactory will recreate it with current profile
     }
 
+    /** Applies server-provided call settings to the local media manager. */
     fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) {
         val camera = mediaManager.camera
         val microphone = mediaManager.microphone
