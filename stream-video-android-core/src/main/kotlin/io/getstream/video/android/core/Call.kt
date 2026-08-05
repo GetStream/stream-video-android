@@ -25,7 +25,6 @@ import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.AcceptCallResponse
 import io.getstream.android.video.generated.models.BlockUserResponse
 import io.getstream.android.video.generated.models.CallSettingsRequest
-import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.GetCallResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
@@ -402,8 +401,6 @@ public class Call(
      */
     var audioFilter: InputAudioFilter? = null
 
-    // val monitor = CallHealthMonitor(this, scope, onIceRecoveryFailed)
-
     /**
      * This returns the local microphone volume level. The audio volume is a linear
      * value between 0 (no sound) and 1 (maximum volume). This is not a raw output -
@@ -425,11 +422,6 @@ public class Call(
      */
     val statLatencyHistory: MutableStateFlow<List<Int>> get() = statsReporter.statLatencyHistory
 
-    /**
-     * Call has been left and the object is cleaned up and destroyed.
-     */
-    internal val isDestroyed: Boolean get() = lifecycle.isDestroyed
-
     internal var peerConnectionFactory: StreamPeerConnectionFactory
         get() = media.peerConnectionFactory
         set(value) {
@@ -446,15 +438,6 @@ public class Call(
         eglBase = { eglBase },
         callSessionId = { sessionId },
     )
-
-    /**
-     * Checks if the audioBitrateProfile has changed since the factory was created,
-     * and recreates the factory if needed. This should only be called before joining.
-     *
-     * If the factory hasn't been created yet, it will be created with the current profile
-     * when first accessed, so no recreation is needed.
-     */
-    internal fun ensureFactoryMatchesAudioProfile() = media.ensureFactoryMatchesAudioProfile()
 
     internal val clientCapabilities = ConcurrentHashMap<String, ClientCapability>().apply {
         put(
@@ -560,31 +543,6 @@ public class Call(
         video,
         callJoinInterceptor,
     )
-
-    internal fun isPermanentError(error: Any): Boolean = joinCoordinator.isPermanentError(error)
-
-    internal suspend fun _join(
-        create: Boolean = false,
-        createOptions: CreateCallOptions? = null,
-        ring: Boolean = false,
-        notify: Boolean = false,
-        hintHighScaleLivestreamPublisher: Boolean? = null,
-        joinAnalyticsModel: JoinAnalyticsModel,
-    ): Result<RtcSession> = joinCoordinator.joinInternal(
-        create,
-        createOptions,
-        ring,
-        notify,
-        hintHighScaleLivestreamPublisher,
-        joinAnalyticsModel,
-    )
-
-    /** Resets the leave guard so a fresh join can run after a previous leave. */
-    internal fun resetLeaveGuard() = lifecycle.resetLeaveGuard()
-
-    /** Applies server-provided call settings to the local media manager. */
-    internal fun updateMediaManagerFromSettings(callSettings: CallSettingsResponse) =
-        media.updateMediaManagerFromSettings(callSettings)
 
     internal suspend fun collectStats(): CallStatsReport = statsReporter.collectStats()
 
