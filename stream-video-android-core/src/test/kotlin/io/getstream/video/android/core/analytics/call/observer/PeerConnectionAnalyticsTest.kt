@@ -103,6 +103,7 @@ class PeerConnectionAnalyticsTest {
                 joinReason = JoinReason.ReJoin,
                 role = PeerConnectionRole.SUBSCRIBE,
                 iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
             )
         }
@@ -131,6 +132,7 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.CONNECTED,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
             )
         }
@@ -161,6 +163,7 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+                wasPrevConnected = true,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTED,
             )
         }
@@ -191,6 +194,7 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
             )
         }
@@ -220,6 +224,7 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.FAILED,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.FAILED,
             )
         }
@@ -285,7 +290,67 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.CONNECTED,
+                wasPrevConnected = true,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTED,
+            )
+        }
+        scope.cancel()
+    }
+
+    @Test
+    fun `a publisher reconnect is flagged as previously connected without affecting subscriber`() {
+        val scope = CoroutineScope(Dispatchers.Unconfined)
+        val peerConnectionAnalytics = analytics(scope)
+
+        peerConnectionAnalytics.onPeerConnectionStateChanged(
+            peerConnectionHashCode = 42,
+            role = PeerConnectionRole.PUBLISH,
+            iceState = VideoAnalyticsIceState.CONNECTED,
+            peerConnectionState = PeerConnection.PeerConnectionState.CONNECTED,
+        )
+
+        peerConnectionAnalytics.onPeerConnectionStateChanged(
+            peerConnectionHashCode = 43,
+            role = PeerConnectionRole.SUBSCRIBE,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+            peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
+        )
+
+        peerConnectionAnalytics.onPeerConnectionStateChanged(
+            peerConnectionHashCode = 44,
+            role = PeerConnectionRole.PUBLISH,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+            peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
+        )
+
+        verify {
+            reporter.onPeerConnectionStateChanged(
+                peerConnectionHashCode = 43,
+                callId = "call-1",
+                callType = "default",
+                joinStageAttemptId = any(),
+                callSessionId = any(),
+                sfuId = any(),
+                joinReason = any(),
+                role = PeerConnectionRole.SUBSCRIBE,
+                iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+                wasPrevConnected = false,
+                peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
+            )
+        }
+        verify {
+            reporter.onPeerConnectionStateChanged(
+                peerConnectionHashCode = 44,
+                callId = "call-1",
+                callType = "default",
+                joinStageAttemptId = any(),
+                callSessionId = any(),
+                sfuId = any(),
+                joinReason = any(),
+                role = PeerConnectionRole.PUBLISH,
+                iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+                wasPrevConnected = true,
+                peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
             )
         }
         scope.cancel()

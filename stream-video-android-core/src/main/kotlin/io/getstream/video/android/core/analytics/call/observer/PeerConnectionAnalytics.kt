@@ -162,6 +162,17 @@ internal class PeerConnectionAnalytics(
         iceState: VideoAnalyticsIceState,
         peerConnectionState: PeerConnection.PeerConnectionState?,
     ) {
+        when (peerConnectionState) {
+            PeerConnection.PeerConnectionState.CONNECTED -> {
+                if (role == PeerConnectionRole.PUBLISH) {
+                    stateHolder.updatePublisherEverConnected(true)
+                } else {
+                    stateHolder.updateSubscriberEverConnected(true)
+                }
+            }
+            else -> {}
+        }
+
         reporter.onPeerConnectionStateChanged(
             peerConnectionHashCode = peerConnectionHashCode,
             callId = callId,
@@ -172,6 +183,7 @@ internal class PeerConnectionAnalytics(
             joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
             joinReason = joinAnalyticsStateHolder.state.value.joinReason ?: JoinReason.Unknown,
             sfuId = sfuAnalyticsStateHolder.sfuId.value,
+            wasPrevConnected = stateHolder.isPcEverConnected(role),
             callSessionId = joinAnalyticsStateHolder.state.value.callSessionId,
         )
     }

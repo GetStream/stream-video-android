@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.analytics.call.observer
 
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
+import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionRole
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,6 +46,22 @@ internal class PeerConnectionAnalyticsStateHolder {
 
     fun updateSubscriberStage(stage: Stage) {
         _state.update { it.copy(subscriberStage = stage) }
+    }
+
+    fun updatePublisherEverConnected(wasPublisherEverConnected: Boolean) {
+        _state.update { it.copy(wasPublisherEverConnected = wasPublisherEverConnected) }
+    }
+
+    fun updateSubscriberEverConnected(wasSubscriberEverConnected: Boolean) {
+        _state.update { it.copy(wasSubscriberEverConnected = wasSubscriberEverConnected) }
+    }
+
+    fun isPcEverConnected(role: PeerConnectionRole): Boolean {
+        return if (role == PeerConnectionRole.PUBLISH) {
+            _state.value.wasPublisherEverConnected
+        } else {
+            _state.value.wasSubscriberEverConnected
+        }
     }
 
     fun update(
@@ -76,4 +93,6 @@ internal data class PeerConnectionAnalyticsState(
     val subscriberJob: Job? = null,
     val publisherStage: Stage = Stage.NOT_STARTED,
     val subscriberStage: Stage = Stage.NOT_STARTED,
+    val wasPublisherEverConnected: Boolean = false,
+    val wasSubscriberEverConnected: Boolean = false,
 )
