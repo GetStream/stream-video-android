@@ -2482,6 +2482,11 @@ func (m *VideoSender) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i -= len(m.unknownFields)
 		copy(dAtA[i:], m.unknownFields)
 	}
+	if m.DegradationPreference != 0 {
+		i = encodeVarint(dAtA, i, uint64(m.DegradationPreference))
+		i--
+		dAtA[i] = 0x30
+	}
 	if m.PublishOptionId != 0 {
 		i = encodeVarint(dAtA, i, uint64(m.PublishOptionId))
 		i--
@@ -3990,6 +3995,9 @@ func (m *VideoSender) SizeVT() (n int) {
 	}
 	if m.PublishOptionId != 0 {
 		n += 1 + sov(uint64(m.PublishOptionId))
+	}
+	if m.DegradationPreference != 0 {
+		n += 1 + sov(uint64(m.DegradationPreference))
 	}
 	if m.unknownFields != nil {
 		n += len(m.unknownFields)
@@ -9357,6 +9365,25 @@ func (m *VideoSender) UnmarshalVT(dAtA []byte) error {
 				b := dAtA[iNdEx]
 				iNdEx++
 				m.PublishOptionId |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DegradationPreference", wireType)
+			}
+			m.DegradationPreference = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.DegradationPreference |= models.DegradationPreference(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

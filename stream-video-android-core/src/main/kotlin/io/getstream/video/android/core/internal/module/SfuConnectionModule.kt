@@ -19,6 +19,7 @@ package io.getstream.video.android.core.internal.module
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
+import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.utils.RetryableSignalingServiceDecorator
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit
 internal class SfuConnectionModule(
     context: Context,
     val tokenRepository: TokenRepository,
+    val sfuAnalytics: SfuAnalytics,
     override val apiKey: ApiKey,
     override val apiUrl: String,
     override val wssUrl: String,
@@ -56,8 +58,8 @@ internal class SfuConnectionModule(
             .baseUrl("$apiUrl/").build()
     }
     private fun buildSfuOkHttpClient(): OkHttpClient {
-        val connectionTimeoutInMs = 10000L
-        // create a new OkHTTP client and set timeouts
+        // create a new OkHTTP client and set timeouts (driven by the builder's
+        // connectionTimeoutInMs; bounds the HTTP→WS upgrade among other things)
         val authInterceptor = CoordinatorAuthInterceptor(apiKey, tokenRepository)
         return OkHttpClient.Builder().addInterceptor(authInterceptor).addInterceptor(
             HttpLoggingInterceptor().apply {
@@ -96,6 +98,8 @@ internal class SfuConnectionModule(
         lifecycle = lifecycle,
         networkStateProvider = networkStateProvider,
         tokenRepository = tokenRepository,
+        sfuAnalytics = sfuAnalytics,
+        joinResponseTimeoutMs = connectionTimeoutInMs,
     )
     override val socketConnection: SfuSocketConnection = _internalSocketConnection
 

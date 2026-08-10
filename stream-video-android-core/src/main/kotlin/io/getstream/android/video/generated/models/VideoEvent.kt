@@ -129,8 +129,10 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
             "ingress.stopped" -> io.getstream.android.video.generated.models.IngressStoppedEvent::class.java
             "user.banned" -> io.getstream.android.video.generated.models.UserBannedEvent::class.java
             "user.deactivated" -> io.getstream.android.video.generated.models.UserDeactivatedEvent::class.java
-            "user.muted" -> io.getstream.android.video.generated.models.UserMutedEvent::class.java
+            "user.deleted" -> io.getstream.android.video.generated.models.UserDeletedEvent::class.java
+            "user.presence.changed" -> io.getstream.android.video.generated.models.UserPresenceChangedEvent::class.java
             "user.reactivated" -> io.getstream.android.video.generated.models.UserReactivatedEvent::class.java
+            "user.unbanned" -> io.getstream.android.video.generated.models.UserUnbannedEvent::class.java
             "user.updated" -> io.getstream.android.video.generated.models.UserUpdatedEvent::class.java
             else -> UnsupportedVideoEvent::class.java       
         }

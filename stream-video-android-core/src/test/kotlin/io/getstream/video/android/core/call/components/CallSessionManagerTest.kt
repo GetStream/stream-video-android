@@ -1,0 +1,132 @@
+/*
+ * Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
+ *
+ * Licensed under the Stream License;
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.getstream.video.android.core.call.components
+
+import com.google.common.truth.Truth.assertThat
+import io.getstream.video.android.core.call.RtcSession
+import io.mockk.mockk
+import org.junit.Test
+
+/**
+ * Unit tests for [CallSessionManager], the single source of truth for the live RTC
+ * session and the bookkeeping shared across the join / reconnect flows.
+ */
+class CallSessionManagerTest {
+
+    private fun manager() = CallSessionManager()
+
+    @Test
+    fun `session starts empty and can be replaced via setActiveSession`() {
+        val manager = manager()
+        assertThat(manager.session.value).isNull()
+
+        val session = mockk<RtcSession>(relaxed = true)
+        manager.setActiveSession(session)
+
+        assertThat(manager.session.value).isSameInstanceAs(session)
+
+        manager.setActiveSession(null)
+        assertThat(manager.session.value).isNull()
+    }
+
+    @Test
+    fun `session and unified session ids are non-blank uuids and distinct`() {
+        val manager = manager()
+
+        assertThat(manager.sessionId).isNotEmpty()
+        assertThat(manager.unifiedSessionId).isNotEmpty()
+        assertThat(manager.sessionId).isNotEqualTo(manager.unifiedSessionId)
+    }
+
+    @Test
+    fun `each manager gets its own session ids`() {
+        assertThat(manager().sessionId).isNotEqualTo(manager().sessionId)
+        assertThat(manager().unifiedSessionId).isNotEqualTo(manager().unifiedSessionId)
+    }
+
+    @Test
+    fun `sessionId is mutable`() {
+        val manager = manager()
+        manager.sessionId = "custom-session-id"
+        assertThat(manager.sessionId).isEqualTo("custom-session-id")
+    }
+
+    @Test
+    fun `location defaults to null and is mutable`() {
+        val manager = manager()
+        assertThat(manager.location).isNull()
+
+        manager.location = "amsterdam"
+        assertThat(manager.location).isEqualTo("amsterdam")
+    }
+
+    @Test
+    fun `reconnect and timing counters default to zero and are mutable`() {
+        val manager = manager()
+        assertThat(manager.nonFastReconnectAttempts).isEqualTo(0)
+        assertThat(manager.connectStartTime).isEqualTo(0L)
+        assertThat(manager.reconnectStartTime).isEqualTo(0L)
+
+        manager.nonFastReconnectAttempts += 3
+        manager.connectStartTime = 111L
+        manager.reconnectStartTime = 222L
+
+        assertThat(manager.nonFastReconnectAttempts).isEqualTo(3)
+        assertThat(manager.connectStartTime).isEqualTo(111L)
+        assertThat(manager.reconnectStartTime).isEqualTo(222L)
+    }
+
+    @Test
+    fun `failed sfu ids are de-duplicated, ignore blanks, and clear`() {
+        val manager = manager()
+        assertThat(manager.failedSfuIdsSnapshot()).isEmpty()
+
+        manager.addFailedSfuId("sfu-edge-1")
+        manager.addFailedSfuId("sfu-edge-1")
+        manager.addFailedSfuId("sfu-edge-2")
+        manager.addFailedSfuId("")
+        manager.addFailedSfuId("   ")
+
+        assertThat(manager.failedSfuIdsSnapshot()).containsExactly("sfu-edge-1", "sfu-edge-2")
+
+        manager.clearFailedSfuIds()
+        assertThat(manager.failedSfuIdsSnapshot()).isEmpty()
+    }
+
+    @Test
+    fun `failed sfu id snapshot is a copy`() {
+        val manager = manager()
+        manager.addFailedSfuId("sfu-edge-1")
+        val snapshot = manager.failedSfuIdsSnapshot()
+
+        manager.addFailedSfuId("sfu-edge-2")
+
+        assertThat(snapshot).containsExactly("sfu-edge-1")
+        assertThat(manager.failedSfuIdsSnapshot()).hasSize(2)
+    }
+
+    @Test
+    fun `connection and reconnection times are measured from their start timestamps`() {
+        val manager = manager()
+        val fiveSecondsAgo = System.currentTimeMillis() - 5_000L
+        manager.connectStartTime = fiveSecondsAgo
+        manager.reconnectStartTime = fiveSecondsAgo - 5_000L
+
+        assertThat(manager.connectionTimeSeconds()).isWithin(1f).of(5f)
+        assertThat(manager.reconnectionTimeSeconds()).isWithin(1f).of(10f)
+    }
+}

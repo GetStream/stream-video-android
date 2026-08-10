@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.ClosedCaptionOff
@@ -25,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ClosedCaptionsAction
@@ -57,20 +54,4 @@ public fun ClosedCaptionsToggleAction(
     onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
 ) {
     onCallAction(ClosedCaptionsAction(!active))
-}
-
-@Preview
-@Composable
-public fun ClosedCaptionsToggleActionPreview() {
-    VideoTheme {
-        Column {
-            Row {
-                ClosedCaptionsToggleAction(active = false) {
-                }
-
-                ClosedCaptionsToggleAction(active = true) {
-                }
-            }
-        }
-    }
 }

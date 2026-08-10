@@ -46,41 +46,5 @@ data class SortParamRequest (
     val field: kotlin.String? = null,
 
     @Json(name = "type")
-    val type: Type? = null
+    val type: kotlin.String? = null
 )
-{
-    
-    /**
-    * Type Enum
-    */
-    sealed class Type(val value: kotlin.String) {
-            override fun toString(): String = value
-
-            companion object {
-                fun fromString(s: kotlin.String): Type = when (s) {
-                    "boolean" -> Boolean
-                    "" -> Empty
-                    "number" -> Number
-                    else -> Unknown(s)
-                }
-            }
-            object Boolean : Type("boolean")
-            object Empty : Type("")
-            object Number : Type("number")
-            data class Unknown(val unknownValue: kotlin.String) : Type(unknownValue)
-        
-
-        class TypeAdapter : JsonAdapter<Type>() {
-            @FromJson
-            override fun fromJson(reader: JsonReader): Type? {
-                val s = reader.nextString() ?: return null
-                return Type.fromString(s)
-            }
-
-            @ToJson
-            override fun toJson(writer: JsonWriter, value: Type?) {
-                writer.value(value?.value)
-            }
-        }
-    }    
-}

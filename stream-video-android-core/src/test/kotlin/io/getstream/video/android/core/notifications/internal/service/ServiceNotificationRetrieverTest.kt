@@ -59,6 +59,8 @@ class ServiceNotificationRetrieverTest {
         serviceNotificationRetriever = ServiceNotificationRetriever()
         testCallId = StreamCallId(type = "default", id = "test-call-123")
         every { mockStreamVideoClient.scope } returns TestScope()
+        every { mockStreamVideoClient.state } returns mockk(relaxed = true)
+        every { mockStreamVideoClient.context } returns mockk(relaxed = true)
 
         call = Call(mockStreamVideoClient, "default", "test-call-123", mockk())
         every { mockStreamVideoClient.call(testCallId.type, testCallId.id) } returns call
@@ -71,6 +73,9 @@ class ServiceNotificationRetrieverTest {
         every {
             mockStreamVideoClient.getOngoingCallNotification(any(), any(), payload = any())
         } returns mockNotification
+
+        every { mockStreamVideoClient.state } returns mockk(relaxed = true)
+        every { mockStreamVideoClient.context } returns mockk(relaxed = true)
 
         // When
         val result = serviceNotificationRetriever.getNotificationPair(
@@ -114,6 +119,9 @@ class ServiceNotificationRetrieverTest {
 
     @Test
     fun `getNotificationPair returns null notification for remove incoming call`() {
+        every { mockStreamVideoClient.state } returns mockk(relaxed = true)
+        every { mockStreamVideoClient.context } returns mockk(relaxed = true)
+
         // When
         val result = serviceNotificationRetriever.getNotificationPair(
             context = context,
@@ -130,6 +138,9 @@ class ServiceNotificationRetrieverTest {
 
     @Test
     fun `getNotificationPair returns null notification for unknown trigger`() {
+        every { mockStreamVideoClient.state } returns mockk(relaxed = true)
+        every { mockStreamVideoClient.context } returns mockk(relaxed = true)
+
         // When
         val result = serviceNotificationRetriever.getNotificationPair(
             context = context,
@@ -147,6 +158,8 @@ class ServiceNotificationRetrieverTest {
     @Test
     fun `service handles missing StreamVideo instance gracefully in notification generation`() {
         // Given - Using a real CallService instance but with mocked dependencies
+        every { mockStreamVideoClient.state } returns mockk(relaxed = true)
+        every { mockStreamVideoClient.context } returns mockk(relaxed = true)
 
         // When - Call getNotificationPair with minimal valid parameters
         val result = serviceNotificationRetriever.getNotificationPair(

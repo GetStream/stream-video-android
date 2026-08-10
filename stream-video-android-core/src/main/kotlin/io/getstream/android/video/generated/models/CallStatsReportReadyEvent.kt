@@ -48,8 +48,17 @@ data class CallStatsReportReadyEvent (
     @Json(name = "session_id")
     val sessionId: kotlin.String,
 
+    @Json(name = "counts")
+    val counts: io.getstream.android.video.generated.models.CallStatsParticipantCounts,
+
     @Json(name = "type")
-    val type: kotlin.String
+    val type: kotlin.String,
+
+    @Json(name = "is_trimmed")
+    val isTrimmed: kotlin.Boolean? = null,
+
+    @Json(name = "participants_overview")
+    val participantsOverview: kotlin.collections.List<io.getstream.android.video.generated.models.CallStatsParticipant>? = emptyList()
 )
 : io.getstream.android.video.generated.models.VideoEvent(), io.getstream.android.video.generated.models.WSCallEvent
 {

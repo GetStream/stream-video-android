@@ -24,6 +24,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.injectSession
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.model.User
@@ -109,7 +110,7 @@ class ReconnectEscalationTest {
             emptyList<TrackInfo>(),
         )
 
-        call.session.value = mockSession
+        call.injectSession(mockSession)
         call.state._connection.value = RealtimeConnection.Connected
     }
 

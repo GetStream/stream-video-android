@@ -26,9 +26,12 @@ import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
@@ -128,6 +131,7 @@ class FastReconnectIceRestartTest {
                 client = mockStreamVideo,
                 powerManager = mockPowerManager,
                 call = mockCall,
+                sessionManager = CallSessionManager(),
                 sessionId = "test-session",
                 apiKey = "test-api-key",
                 lifecycle = mockLifecycle,
@@ -139,6 +143,7 @@ class FastReconnectIceRestartTest {
                 clientImpl = mockVideoClient,
                 coroutineScope = testScope,
                 sfuConnectionModuleProvider = { sfuConnectionModule },
+                sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
             ),
         )
     }
@@ -163,7 +168,7 @@ class FastReconnectIceRestartTest {
         session.publisher.value = pub
         session.subscriber.value = sub
 
-        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Connected
+        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
         val result = session.fastReconnect(null)
 
@@ -183,7 +188,7 @@ class FastReconnectIceRestartTest {
         session.publisher.value = pub
         session.subscriber.value = sub
 
-        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Connected
+        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
         val result = session.fastReconnect(null)
 
@@ -202,7 +207,7 @@ class FastReconnectIceRestartTest {
         session.publisher.value = pub
         session.subscriber.value = sub
 
-        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Connected
+        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
         val result = session.fastReconnect(null)
 
@@ -221,7 +226,7 @@ class FastReconnectIceRestartTest {
         session.publisher.value = pub
         session.subscriber.value = sub
 
-        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Connected
+        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
         val result = session.fastReconnect(null)
 
@@ -241,7 +246,10 @@ class FastReconnectIceRestartTest {
         session.subscriber.value = sub
 
         val error = Exception("SFU connection timed out")
-        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Failed(error)
+        coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Failure(
+            error,
+            cause = SfuConnectFailureCause.TerminalSocketFailure,
+        )
 
         val result = session.fastReconnect(null)
 

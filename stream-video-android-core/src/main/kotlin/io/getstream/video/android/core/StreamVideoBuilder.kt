@@ -64,6 +64,7 @@ import io.getstream.video.android.core.sounds.Sounds
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
 import io.getstream.video.android.core.sounds.disableVibrationConfig
 import io.getstream.video.android.core.sounds.toSounds
+import io.getstream.video.android.core.user.StreamUserRepositoryImpl
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -103,7 +104,10 @@ import java.util.concurrent.atomic.AtomicReference
  * @property loggingLevel Represents and wraps SDK logging levels for Stream logger, HTTP interceptor and native WebRTC logging.
  * @property notificationConfig The configurations for handling push notification.
  * @property ringNotification Overwrite the default notification logic for incoming calls.
- * @property connectionTimeoutInMs Connection timeout in seconds.
+ * @property connectionTimeoutInMs Connection timeout in milliseconds. Applies both to the
+ * coordinator/SFU OkHttp clients (HTTP and WebSocket upgrade) and to the SFU join-response
+ * wait (time allowed for the SFU to deliver its JoinCallResponse after the socket opens).
+ * Defaults to 5s.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig]. (Deprecated) Use `callServiceConfigRegistry` instead.
@@ -146,7 +150,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
-    private val connectionTimeoutInMs: Long = 10_000,
+    private val connectionTimeoutInMs: Long = 5_000,
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
     @Deprecated(
@@ -281,6 +285,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             "ws://${it.trimEnd('/')}/video/connect"
         } ?: wssUrl ?: "wss://$videoDomain/video/connect"
 
+        // Single source of truth for the SDK user. Shared with the coordinator module
+        // (vestigial constructor slot) and StreamVideoClient so guest identity adoption
+        // and ClientState.user stay in sync without local mirrors.
+        val userRepository = StreamUserRepositoryImpl(user)
+
         val coordinatorConnectionModule = CoordinatorConnectionModule(
             context = context,
             scope = scope,
@@ -288,16 +297,17 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             wssUrl = resolvedWssUrl,
             connectionTimeoutInMs = connectionTimeoutInMs,
             loggingLevel = loggingLevel,
-            user = user,
+            userRepository = userRepository,
             apiKey = apiKey,
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
             tokenRepository = tokenRepository,
         )
 
-        // Sink that adopts the server-issued guest identity into ClientState once the client
-        // exists (bound below, after construction). iOS analog: `state.user = guestInfo.user`.
-        val userRepository = BindableWritableUserRepository()
+        // Deferred write sink for GuestStreamTokenProvider: the provider is created
+        // before StreamVideoClient exists, so adoption is buffered until [bind] below.
+        // iOS analog: `state.user = guestInfo.user`.
+        val guestUserAdoptionSink = BindableWritableUserRepository()
 
         // Select the core token provider based on user type — mirrors iOS's
         // `initialConnectIfRequired` dispatch.
@@ -314,7 +324,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
                 GuestStreamTokenProvider(
                     api = coordinatorConnectionModule.api,
                     initialUser = user,
-                    userRepository = userRepository,
+                    userRepository = guestUserAdoptionSink,
                     onTokenIssued = { issuedToken ->
                         coordinatorConnectionModule.updateAuthType("jwt")
                         coordinatorConnectionModule.updateToken(issuedToken)
@@ -363,7 +373,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         val client = StreamVideoClient(
             context = context,
             scope = scope,
-            user = user,
+            initialUser = user,
             apiKey = apiKey,
             token = token,
             lifecycle = lifecycle,
@@ -379,6 +389,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             appName = appName,
             audioProcessing = audioProcessing,
             loggingLevel = loggingLevel,
+            connectionTimeoutInMs = connectionTimeoutInMs,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
             enableStatsCollection = enableStatsReporting,
@@ -386,23 +397,23 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableStereoForSubscriber = enableStereoForSubscriber,
             telecomConfig = telecomConfig,
             tokenRepository = tokenRepository,
+            userRepository = userRepository,
             rejectCallWhenBusy = rejectCallWhenBusy,
         )
 
-        // Route guest identity adoption into ClientState now that the client exists. Bound
-        // before the connect launch below, so no token load can race the binding.
-        userRepository.bind { adoptedUser -> client.state.updateUser(adoptedUser) }
+        // Route guest identity adoption into the shared UserRepository now that the client
+        // exists. Bound before the connect launch below, so no token load can race the binding.
+        guestUserAdoptionSink.bind { adoptedUser -> client.state.updateUser(adoptedUser) }
 
-        // Establish a WS connection with the coordinator for authenticated AND guest users —
-        // iOS parity (`initialConnectIfRequired`): only anonymous users never connect. For
-        // guests, core's token manager drives the createGuest flow inside connect().
-        // Push-device registration stays authenticated-only (guests have no durable identity).
-        if (user.type != UserType.Anonymous) {
+        // Auto-register push and open the coordinator WS for any user with an
+        // identity. Anonymous users don't have one, so neither path applies.
+        // Guest setup runs asynchronously inside StreamVideoClient — both
+        // registerPushDevice() and connectAsync() await guestUserJob before
+        // touching the coordinator, so the auth headers are set by then.
+        if (user.type == UserType.Authenticated || user.type == UserType.Guest) {
             scope.launch {
                 try {
-                    if (user.type == UserType.Authenticated &&
-                        notificationConfig.autoRegisterPushDevice
-                    ) {
+                    if (notificationConfig.autoRegisterPushDevice) {
                         client.registerPushDevice()
                     }
                     if (connectOnInit) {

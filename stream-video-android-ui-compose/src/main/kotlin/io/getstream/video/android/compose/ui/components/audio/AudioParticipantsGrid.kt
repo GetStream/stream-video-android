@@ -19,21 +19,15 @@ package io.getstream.video.android.compose.ui.components.audio
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewParticipantsList
 
 /**
  * Renders all the participants to construct a audio room, based on the number of people in a call and the call state.
@@ -76,18 +70,5 @@ public fun AudioParticipantsGrid(
         items(items = participants, key = { it.sessionId }) { participant ->
             audioRenderer.invoke(participant, style)
         }
-    }
-}
-
-@Preview
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
-@Composable
-private fun AudioParticipantsGridPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        AudioParticipantsGrid(
-            modifier = Modifier.fillMaxSize(),
-            participants = previewParticipantsList,
-        )
     }
 }

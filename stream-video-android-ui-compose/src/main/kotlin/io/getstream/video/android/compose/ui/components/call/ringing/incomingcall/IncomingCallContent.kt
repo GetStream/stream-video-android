@@ -25,28 +25,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewPlaceholder
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewMemberListState
 import io.getstream.video.android.model.User.Companion.isLocalUser
-import io.getstream.video.android.ui.common.R
 
 /**
  * Represents the Incoming Call state and UI, when the user receives a call from other people.
@@ -178,45 +170,5 @@ public fun IncomingCallContent(
             isCameraEnabled = isCameraEnabled,
             onCallAction = onCallAction,
         )
-    }
-}
-
-@Preview
-@Composable
-private fun IncomingCallPreview1() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        CompositionLocalProvider(
-            LocalAvatarPreviewPlaceholder provides
-                R.drawable.stream_video_call_sample,
-        ) {
-            IncomingCallContent(
-                call = previewCall,
-                participants = previewMemberListState.takeLast(1),
-                isVideoType = true,
-                isCameraEnabled = false,
-                onBackPressed = {},
-            ) {}
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun IncomingCallPreview2() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        CompositionLocalProvider(
-            LocalAvatarPreviewPlaceholder provides
-                R.drawable.stream_video_call_sample,
-        ) {
-            IncomingCallContent(
-                call = previewCall,
-                participants = previewMemberListState,
-                isVideoType = true,
-                isCameraEnabled = false,
-                onBackPressed = {},
-            ) {}
-        }
     }
 }

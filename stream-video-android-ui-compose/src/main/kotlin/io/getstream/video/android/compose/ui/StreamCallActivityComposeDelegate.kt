@@ -70,9 +70,11 @@ import io.getstream.video.android.compose.ui.components.call.ringing.RingingCall
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.UserActionCause
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.CancelCall
@@ -224,7 +226,11 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                             call = call,
                             centerContent = { },
                             onCallAction = {
-                                call.leave()
+                                call.leave(
+                                    CallLeaveReason.UserAction(
+                                        UserActionCause.CANCELLED_BY_SELF,
+                                    ),
+                                )
                                 safeFinish()
                             },
                         )

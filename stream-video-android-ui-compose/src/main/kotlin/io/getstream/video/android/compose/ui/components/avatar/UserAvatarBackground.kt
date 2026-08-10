@@ -25,18 +25,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
-import io.getstream.video.android.ui.common.R
 
 /**
  * Component that displays a user avatar and a background that reflects the avatar.
@@ -91,20 +86,5 @@ public fun UserAvatarBackground(
                 textOffset = textOffset,
             )
         }
-    }
-}
-
-@Preview
-@Composable
-private fun UserAvatarBackgroundPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        val user = previewUsers[0]
-        UserAvatarBackground(
-            modifier = Modifier.fillMaxSize(),
-            userImage = user.image,
-            userName = user.name.takeUnless { it.isNullOrBlank() } ?: user.id,
-            previewModePlaceholder = R.drawable.stream_video_call_sample,
-        )
     }
 }

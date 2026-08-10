@@ -23,15 +23,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.model.CallStatus
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewMemberListState
 
 /**
  * Component that displays details for an incoming call.
@@ -55,18 +51,6 @@ public fun IncomingCallDetails(
             isVideoType = isVideoType,
             callStatus = CallStatus.Incoming,
             members = participants,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun IncomingCallDetailsPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        IncomingCallDetails(
-            isVideoType = true,
-            participants = previewMemberListState,
         )
     }
 }

@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -70,13 +69,10 @@ import io.getstream.video.android.CallActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.compose.ui.components.call.lobby.buildDefaultLobbyControlActions
-import io.getstream.video.android.compose.ui.components.video.VideoRenderer
-import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleCamera
@@ -322,26 +318,6 @@ private fun CallLobbyBodyPortrait(
                 .padding(VideoTheme.dimens.spacingM),
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
-            onRenderedContent = {
-                val videoRendererConfig = remember {
-                    videoRenderConfig {
-                        this.fallbackContent = {
-                            val userName = it.user.userNameOrId
-                            val userImage = it.user.image
-                            UserAvatarBackground(userImage = userImage, userName = userName)
-                        }
-                    }
-                }
-                VideoRenderer(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(VideoTheme.colors.baseSheetTertiary)
-                        .testTag("on_rendered_content"),
-                    call = call,
-                    video = it,
-                    videoRendererConfig = videoRendererConfig,
-                )
-            },
             onCallAction = onCallAction,
             lobbyControlsContent = { modifier, _ ->
                 ControlActions(
@@ -409,31 +385,6 @@ private fun CallLobbyBodyLandscape(
                         ),
                     isCameraEnabled = isCameraEnabled,
                     isMicrophoneEnabled = isMicrophoneEnabled,
-                    onRenderedContent = {
-                        Box(
-                            modifier = Modifier.fillMaxHeight(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            val videoRendererConfig = remember {
-                                videoRenderConfig {
-                                    this.fallbackContent = {
-                                        val userName = it.user.userNameOrId
-                                        val userImage = it.user.image
-                                        UserAvatarBackground(userImage = userImage, userName = userName)
-                                    }
-                                }
-                            }
-                            VideoRenderer(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(VideoTheme.colors.baseSheetTertiary)
-                                    .testTag("on_rendered_content"),
-                                call = call,
-                                video = it,
-                                videoRendererConfig = videoRendererConfig,
-                            )
-                        }
-                    },
                     onCallAction = onCallAction,
                     lobbyControlsContent = { _, _ ->
                         ControlActions(

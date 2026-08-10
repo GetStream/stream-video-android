@@ -115,7 +115,9 @@ import io.getstream.video.android.compose.ui.components.call.renderer.RegularVid
 import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.UserActionCause
 import io.getstream.video.android.core.call.state.ChooseLayout
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
@@ -371,7 +373,12 @@ fun CallScreen(
                                     LeaveCallAction(
                                         modifier = Modifier.testTag("Stream_HangUpButton"),
                                     ) {
-                                        call.leave()
+                                        // for call join analytics purpose
+                                        call.leave(
+                                            CallLeaveReason.UserAction(
+                                                UserActionCause.CANCELLED_BY_SELF,
+                                            ),
+                                        )
                                     }
                                 },
                             )

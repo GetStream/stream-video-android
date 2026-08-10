@@ -59,6 +59,7 @@ internal abstract class GenericCallActionBroadcastReceiver : BroadcastReceiver()
                         if (streamVideo == null) {
                             // Stream not initialized, action not handled
                             logger.e(
+                                message =
                                 createMessage(
                                     intentAction,
                                     "StreamVideo is not initialised. To handle notifications to initialise StreamVideo in Application.onCreate().",

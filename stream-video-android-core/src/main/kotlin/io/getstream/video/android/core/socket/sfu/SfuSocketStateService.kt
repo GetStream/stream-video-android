@@ -61,6 +61,15 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
     }
 
     /**
+     * Notify that the transport WebSocket has opened, but before the SFU
+     * JoinCallResponse has been received.
+     */
+    suspend fun onWebSocketEstablished() {
+        logger.v { "[onWebSocketEstablished] no args" }
+        stateMachine.sendEvent(SfuSocketStateEvent.WebSocketEstablished)
+    }
+
+    /**
      * Notify the WebSocket connection has been established.
      *
      * @param connectedEvent The [ConnectedEvent] received within the WebSocket connection.
@@ -161,6 +170,35 @@ internal class SfuSocketStateService(initialState: SfuSocketState = SfuSocketSta
             }
 
             state<SfuSocketState.Connecting> {
+                onEvent<SfuSocketStateEvent.Connect> {
+                    SfuSocketState.Connecting(it.connectionConf, it.connectionType)
+                }
+                onEvent<SfuSocketStateEvent.WebSocketEstablished> { SfuSocketState.WebSocketConnected }
+                onEvent<SfuSocketStateEvent.ConnectionEstablished> {
+                    SfuSocketState.Connected(
+                        it.connectedEvent,
+                    )
+                }
+                onEvent<SfuSocketStateEvent.WebSocketEventLost> { SfuSocketState.Disconnected.WebSocketEventLost }
+                onEvent<SfuSocketStateEvent.NetworkNotAvailable> { SfuSocketState.Disconnected.NetworkDisconnected }
+                onEvent<SfuSocketStateEvent.UnrecoverableError> {
+                    SfuSocketState.Disconnected.DisconnectedPermanently(
+                        it.error,
+                    )
+                }
+                onEvent<SfuSocketStateEvent.NetworkError> {
+                    SfuSocketState.Disconnected.DisconnectedTemporarily(
+                        it.error,
+                        it.reconnectStrategy,
+                    )
+                }
+                onEvent<SfuSocketStateEvent.RequiredDisconnection> {
+                    SfuSocketState.Disconnected.DisconnectedByRequest
+                }
+                onEvent<SfuSocketStateEvent.Stop> { SfuSocketState.Disconnected.Stopped }
+            }
+
+            state<SfuSocketState.WebSocketConnected> {
                 onEvent<SfuSocketStateEvent.Connect> {
                     SfuSocketState.Connecting(it.connectionConf, it.connectionType)
                 }

@@ -28,6 +28,7 @@ private const val INVALID_TOKEN_ERROR_CODE = 1006
 private const val UNDEFINED_TOKEN_ERROR_CODE = 1007
 private const val UNABLE_TO_PARSE_SOCKET_EVENT_ERROR_CODE = 1008
 private const val NO_ERROR_BODY_ERROR_CODE = 1009
+private const val SFU_JOIN_RESPONSE_TIMEOUT_ERROR_CODE = 1011
 private const val VALIDATION_ERROR_ERROR_CODE = 4
 private const val AUTHENTICATION_ERROR_CODE = 5
 private const val TOKEN_EXPIRED_ERROR_CODE = 40
@@ -61,6 +62,10 @@ public enum class VideoErrorCode(public val code: Int, public val description: S
         "Socket event payload either invalid or null",
     ),
     NO_ERROR_BODY(NO_ERROR_BODY_ERROR_CODE, "No error body. See http status code"),
+    SFU_JOIN_RESPONSE_TIMEOUT(
+        SFU_JOIN_RESPONSE_TIMEOUT_ERROR_CODE,
+        "SFU connection timed out: no JoinCallResponse after the WebSocket opened",
+    ),
 
     // server error codes
     VALIDATION_ERROR(VALIDATION_ERROR_ERROR_CODE, "Validation error, check your credentials"),

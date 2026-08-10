@@ -83,6 +83,18 @@ class DirectCallJoinViewModel @Inject constructor(
         }
     }
 
+    fun addUser(userId: String, userName: String) {
+        val newUser = User(id = userId, name = userName)
+        _uiState.update {
+            it.copy(
+                otherUsers = (it.otherUsers ?: emptyList()) + UserUiState(
+                    isSelected = false,
+                    user = newUser,
+                ),
+            )
+        }
+    }
+
     fun toggleGoogleAccountSelection(selectedIndex: Int) {
         _uiState.update {
             it.copy(

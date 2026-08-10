@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core
 
+import io.getstream.video.android.core.user.StreamUserRepositoryImpl
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
+import io.mockk.every
 import io.mockk.mockk
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -26,8 +28,11 @@ internal class ClientStateUpdateUserTest {
 
     @Test
     fun `updateUser publishes the new user to the state flow`() {
-        // ClientState casts its client to StreamVideoClient internally.
-        val state = ClientState(mockk<StreamVideoClient>(relaxed = true))
+        val userRepository = StreamUserRepositoryImpl(User(id = "initial"))
+        val client = mockk<StreamVideoClient>(relaxed = true)
+        every { client.userRepository } returns userRepository
+
+        val state = ClientState(client)
         val user = User(id = "guest-1", name = "Guest", type = UserType.Guest)
 
         state.updateUser(user)

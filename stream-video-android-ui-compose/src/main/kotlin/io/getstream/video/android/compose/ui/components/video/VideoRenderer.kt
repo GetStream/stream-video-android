@@ -22,10 +22,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -41,13 +42,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -62,8 +61,6 @@ import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.utils.ALL_PARTICIPANTS
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.VideoTrack
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.ui.common.renderer.StreamVideoTextureViewRenderer
 import io.getstream.video.android.ui.common.util.StreamVideoUiDelicateApi
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -96,7 +93,7 @@ public fun VideoRenderer(
             return
         }
 
-        // Show avatar always behind the video.
+        // Neutral placeholder rendered behind the video while the track is loading.
         videoRendererConfig.fallbackContent.invoke(call)
 
         if (video?.paused == true) {
@@ -271,25 +268,18 @@ private fun setupVideo(
 @Composable
 internal fun DefaultMediaTrackFallbackContent(
     modifier: Modifier,
-    call: Call,
+    @Suppress("UNUSED_PARAMETER") call: Call,
 ) {
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(VideoTheme.colors.baseSheetTertiary)
             .testTag("video_renderer_fallback"),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        contentAlignment = Alignment.Center,
     ) {
-        Text(
-            modifier = Modifier.padding(30.dp),
-            text = stringResource(
-                id = io.getstream.video.android.ui.common.R.string.stream_video_call_rendering_failed,
-                call.sessionId,
-            ),
+        CircularProgressIndicator(
+            modifier = Modifier.size(48.dp),
             color = VideoTheme.colors.basePrimary,
-            textAlign = TextAlign.Center,
-            fontSize = 14.sp,
         )
     }
 }
@@ -328,60 +318,5 @@ internal fun DefaultBadNetworkFallbackContent(
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
         )
-    }
-}
-
-@Preview
-@Composable
-private fun VideoRendererPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        VideoRenderer(
-            call = previewCall,
-            video = ParticipantState.Video(
-                track = VideoTrack("", io.getstream.webrtc.VideoTrack(123)),
-                enabled = true,
-                sessionId = "",
-                paused = false,
-            ),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun VideoRendererPausedPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        VideoRenderer(
-            call = previewCall,
-            video = ParticipantState.Video(
-                track = VideoTrack("", io.getstream.webrtc.VideoTrack(123)),
-                enabled = true,
-                sessionId = "",
-                paused = true,
-            ),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun VideoRendererPausedPreview2() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        DefaultBadNetworkFallbackContent(
-            call = previewCall,
-            modifier = Modifier,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun VideoRendererFallbackPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        DefaultMediaTrackFallbackContent(modifier = Modifier, call = previewCall)
     }
 }

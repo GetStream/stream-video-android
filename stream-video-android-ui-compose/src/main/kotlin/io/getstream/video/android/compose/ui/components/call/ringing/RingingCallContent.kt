@@ -21,11 +21,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
@@ -34,8 +31,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 
 /**
  * Represents different outgoing/incoming call content based on the call state provided from the [call].
@@ -178,19 +173,5 @@ public fun RingingCallContent(
             // Includes Idle
             onIdle.invoke()
         }
-    }
-}
-
-@Preview
-@Composable
-private fun RingingCallContentPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        RingingCallContent(
-            call = previewCall,
-            isVideoType = true,
-            onAcceptedContent = {},
-            onRejectedContent = {},
-        )
     }
 }

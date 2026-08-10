@@ -42,8 +42,14 @@ data class FeedsPreferencesResponse (
     @Json(name = "comment")
     val comment: kotlin.String? = null,
 
+    @Json(name = "comment_mention")
+    val commentMention: kotlin.String? = null,
+
     @Json(name = "comment_reaction")
     val commentReaction: kotlin.String? = null,
+
+    @Json(name = "comment_reply")
+    val commentReply: kotlin.String? = null,
 
     @Json(name = "follow")
     val follow: kotlin.String? = null,

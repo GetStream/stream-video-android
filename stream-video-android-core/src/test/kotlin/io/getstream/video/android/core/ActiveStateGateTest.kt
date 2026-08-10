@@ -75,7 +75,7 @@ class ActiveStateGateTest {
         }
         val call = mockk<Call> {
             every { this@mockk.session } returns MutableStateFlow(session)
-            every { leave(any()) } just runs
+            every { leave(any<CallLeaveReason>()) } just runs
         }
         return TestData(call, publisherState)
     }
@@ -238,7 +238,7 @@ class ActiveStateGateTest {
 
         advanceUntilIdle()
         assertFalse(readyCalled)
-        coVerify { data.call.leave(any()) }
+        coVerify { data.call.leave(any<CallLeaveReason>()) }
     }
 
     @Test
@@ -420,7 +420,7 @@ class ActiveStateGateTest {
 
         advanceUntilIdle()
         assertFalse(readyCalled)
-        coVerify { data.call.leave(any()) }
+        coVerify { data.call.leave(reason = any<CallLeaveReason>()) }
     }
 
     @Test

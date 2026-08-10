@@ -17,14 +17,12 @@
 package io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
 import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
@@ -80,32 +78,5 @@ public fun OutgoingCallControls(
             onCallAction = onCallAction,
             style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
         )
-    }
-}
-
-@Preview
-@Composable
-private fun OutgoingCallOptionsPreview() {
-    VideoTheme {
-        Column {
-            OutgoingCallControls(
-                isMicrophoneEnabled = true,
-                isCameraEnabled = true,
-                onCallAction = { },
-            )
-
-            OutgoingCallControls(
-                isMicrophoneEnabled = false,
-                isCameraEnabled = false,
-                onCallAction = { },
-            )
-
-            OutgoingCallControls(
-                isVideoCall = false,
-                isMicrophoneEnabled = false,
-                isCameraEnabled = false,
-                onCallAction = { },
-            )
-        }
     }
 }

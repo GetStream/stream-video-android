@@ -17,24 +17,18 @@
 package io.getstream.video.android.compose.ui.components.call.renderer
 
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 
 public enum class LayoutType {
     /** Automatically choose between Grid and Spotlight based on pinned participants and dominant speaker. */
@@ -131,19 +125,6 @@ public fun ParticipantsLayout(
             ),
             videoRenderer = videoRenderer,
             screenSharingFallbackContent = screenSharingFallbackContent,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun CallVideoRendererPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        ParticipantsLayout(
-            call = previewCall,
-            modifier = Modifier.fillMaxWidth(),
-            layoutType = LayoutType.GRID,
         )
     }
 }

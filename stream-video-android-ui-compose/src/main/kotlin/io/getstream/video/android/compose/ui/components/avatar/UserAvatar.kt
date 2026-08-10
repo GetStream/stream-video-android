@@ -20,26 +20,18 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.model.User
-import io.getstream.video.android.ui.common.R
 
 /**
  * Component that renders an image or a name as an avatar. If the image is `null` or unavailable, it uses the name initials.
@@ -116,23 +108,4 @@ public fun UserAvatar(
 @Composable
 internal fun BoxScope.DefaultOnlineIndicator(onlineIndicatorAlignment: OnlineIndicatorAlignment) {
     OnlineIndicator(modifier = Modifier.align(onlineIndicatorAlignment.alignment))
-}
-
-@Preview
-@Composable
-private fun UserAvatarPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        val participant = previewParticipantsList[0]
-        val userImage by participant.image.collectAsStateWithLifecycle()
-        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
-
-        UserAvatar(
-            modifier = Modifier.size(82.dp),
-            userImage = userImage,
-            userName = userName,
-            previewModePlaceholder = R.drawable.stream_video_call_sample,
-            isShowingOnlineIndicator = true,
-        )
-    }
 }

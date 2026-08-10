@@ -63,13 +63,5 @@ data class CustomVideoEvent (
 
     override fun getCallCID(): kotlin.String {
         return callCid
-    }
-
-    override fun toString(): String = buildString {
-        append("CustomVideoEvent(")
-        append("callCid='").append(callCid).append("', ")
-        append("custom=").append(custom).append(", ")
-        append("type='").append(type).append("'")
-        append(")")
-    }
+    }    
 }
