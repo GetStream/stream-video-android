@@ -38,10 +38,14 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.model.toIceServer
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
@@ -67,8 +71,33 @@ internal class CallJoinCoordinator(
 ) {
     private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
 
+    /**
+     * Single-flight bookkeeping for [join] (same idea as
+     * [io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl], but the shared
+     * work runs on the **caller's** coroutine so a ViewModel/UI cancel still aborts the join).
+     *
+     * Concurrent [join] calls must share one attempt: each would otherwise build its own
+     * [RtcSession] while reusing [CallSessionManager.sessionId], leaving SFU-evicted zombies
+     * that fail every RPC with PARTICIPANT_NOT_FOUND. Checking [CallSessionManager.session] is
+     * not enough — it is only set after the coordinator round-trip.
+     *
+     * Coalescing the whole [join] also keeps once-per-join work once-only: JoinInitiated /
+     * MediaDevicePermission analytics, installing [CallState.callJoinInterceptor], resetting
+     * the leave guard, and moving to [RealtimeConnection.InProgress].
+     *
+     * Held only long enough to read or publish [joinFlight], never across the join itself.
+     */
+    private val joinMutex = Mutex()
+
+    /** The in-flight [join], if any. Completed flights are never reused. */
+    private var joinFlight: CompletableDeferred<Result<RtcSession>>? = null
+
     private fun isVideoEnabled(): Boolean = state.settings.value?.video?.enabled ?: false
 
+    /**
+     * Joins the call, coalescing concurrent callers into one in-flight execution (single-flight).
+     * Additional callers await the same [Result]. The winner runs on its own caller coroutine.
+     */
     suspend fun join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
@@ -76,6 +105,51 @@ internal class CallJoinCoordinator(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
         callJoinInterceptor: CallJoinInterceptor? = null,
+    ): Result<RtcSession> {
+        val (flight, isWinner) = joinMutex.withLock {
+            val running = joinFlight?.takeUnless { it.isCompleted }
+            if (running != null) {
+                logger.i {
+                    "[join] Single-flight: join already in flight — awaiting its result"
+                }
+                running to false
+            } else {
+                CompletableDeferred<Result<RtcSession>>().also { joinFlight = it } to true
+            }
+        }
+
+        if (isWinner) {
+            // Winner executes on this caller's coroutine (e.g. viewModelScope). Followers
+            // only await [flight]; cancelling the winner cancels the shared join for them too.
+            try {
+                val result = executeJoin(
+                    create,
+                    createOptions,
+                    ring,
+                    notify,
+                    hintHighScaleLivestreamPublisher,
+                    callJoinInterceptor,
+                )
+                flight.complete(result)
+                return result
+            } catch (e: CancellationException) {
+                flight.cancel(e)
+                throw e
+            } catch (e: Throwable) {
+                flight.completeExceptionally(e)
+                throw e
+            }
+        }
+        return flight.await()
+    }
+
+    private suspend fun executeJoin(
+        create: Boolean,
+        createOptions: CreateCallOptions?,
+        ring: Boolean,
+        notify: Boolean,
+        hintHighScaleLivestreamPublisher: Boolean?,
+        callJoinInterceptor: CallJoinInterceptor?,
     ): Result<RtcSession> {
         callAnalytics.joinAnalytics.onJoinFunctionStart()
         callAnalytics.mediaPermissionObserver.mediaPermissionStatus()
@@ -300,6 +374,7 @@ internal class CallJoinCoordinator(
                             "[_join] Got terminal error while connecting to SFU. Error : $sfuConnectionResult"
                         }
                         sendJoinErrorAnalytics(sfuConnectionResult)
+                        discardFailedSession(localSession)
                         return Failure(
                             Error.GenericError(
                                 sfuConnectionResult.error.message ?: "RtcSession error occurred.",
@@ -312,6 +387,7 @@ internal class CallJoinCoordinator(
                     if (!didReconnectSucceed()) {
                         logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
                         sendJoinErrorAnalytics(sfuConnectionResult)
+                        discardFailedSession(localSession)
                         return Failure(
                             Error.GenericError(
                                 sfuConnectionResult.error.message ?: "SFU connection failed",
@@ -333,6 +409,21 @@ internal class CallJoinCoordinator(
             sessionMonitor.monitorSession(result.value)
         }
         return Success(value = connectedSession)
+    }
+
+    /**
+     * Tears down a session this join created but could not connect. Clearing the reference
+     * alone is not enough: the socket and peer connections stay alive and keep issuing SFU
+     * RPCs for a participant that is gone, which the SFU answers with PARTICIPANT_NOT_FOUND.
+     *
+     * Skipped when recovery has already swapped a different session in — that one belongs to
+     * the reconnect flow, which owns the disposal of the session it replaced.
+     */
+    private fun discardFailedSession(localSession: RtcSession) {
+        if (sessionManager.session.value !== localSession) return
+        logger.d { "[joinInternal] Discarding the session this join could not connect" }
+        sessionManager.setActiveSession(null)
+        localSession.cleanup()
     }
 
     /**

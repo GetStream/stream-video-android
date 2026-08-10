@@ -24,6 +24,7 @@ import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.result.Error
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
+import io.getstream.video.android.core.CallJoinInterceptor
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
@@ -41,6 +42,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import io.mockk.verify
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -230,6 +234,108 @@ class CallJoinCoordinatorTest {
 
         assertThat(coordinator.isPermanentError(transient)).isFalse()
         assertThat(coordinator.isPermanentError(permanent)).isTrue()
+    }
+
+    @Test
+    fun `concurrent joins issue a single coordinator join and share one session`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        // Suspends until released, so all callers are inside join at the same time —
+        // which is exactly the window the old session.value check failed to cover.
+        val connectGate = CompletableDeferred<Unit>()
+        coEvery { mockSession.connectInternal() } coAnswers {
+            connectGate.await()
+            SfuConnectionResult.Success
+        }
+        val coordinator = coordinator()
+
+        val joins = (1..5).map {
+            async { coordinator.join() }
+        }
+        advanceUntilIdle()
+        connectGate.complete(Unit)
+        val results = joins.awaitAll()
+        advanceUntilIdle()
+
+        results.forEach { assertThat(it).isInstanceOf(Success::class.java) }
+        assertThat(results.map { (it as Success).value }.distinct()).hasSize(1)
+        // One join request and one SFU connect for five callers.
+        coVerify(exactly = 1) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+        coVerify(exactly = 1) { mockSession.connectInternal() }
+        verify(exactly = 1) { sessionManager.setActiveSession(mockSession) }
+    }
+
+    @Test
+    fun `concurrent joins run the join setup exactly once`() = runTest(testDispatcher) {
+        stubJoinCall(Success(mockJoinResponse))
+        val connectGate = CompletableDeferred<Unit>()
+        coEvery { mockSession.connectInternal() } coAnswers {
+            connectGate.await()
+            SfuConnectionResult.Success
+        }
+        val coordinator = coordinator()
+        val interceptor = mockk<CallJoinInterceptor>(relaxed = true)
+
+        // The interceptor-carrying caller goes first, then a bare join() like the auto-join in
+        // CallState — which used to overwrite the interceptor with null.
+        val first = async { coordinator.join(callJoinInterceptor = interceptor) }
+        advanceUntilIdle()
+        val second = async { coordinator.join() }
+        advanceUntilIdle()
+        connectGate.complete(Unit)
+        val results = listOf(first, second).awaitAll()
+        advanceUntilIdle()
+
+        results.forEach { assertThat(it).isInstanceOf(Success::class.java) }
+        verify(exactly = 1) { callAnalytics.joinAnalytics.onJoinFunctionStart() }
+        verify(exactly = 1) { callAnalytics.mediaPermissionObserver.mediaPermissionStatus() }
+        verify(exactly = 1) { lifecycle.resetLeaveGuard() }
+        verify(exactly = 1) { state.callJoinInterceptor = interceptor }
+        verify(exactly = 0) { state.callJoinInterceptor = null }
+    }
+
+    @Test
+    fun `a join after the previous one finished starts a fresh attempt`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+        val coordinator = coordinator()
+
+        coordinator.join()
+        advanceUntilIdle()
+        // The completed in-flight join must not be reused, otherwise a later join() would
+        // replay a stale result instead of starting again.
+        sessionFlow.value = null
+        coordinator.join()
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `a session that cannot connect is cleaned up rather than left running`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Failure(
+            Exception("permanent auth error"),
+            cause = SfuConnectFailureCause.TerminalSocketFailure,
+        )
+
+        val result = coordinator().joinInternal(
+            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
+        )
+        advanceUntilIdle()
+
+        assertThat(result).isInstanceOf(Failure::class.java)
+        verify { mockSession.cleanup() }
+        assertThat(sessionFlow.value).isNull()
     }
 
     @Test
