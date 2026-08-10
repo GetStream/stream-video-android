@@ -376,7 +376,9 @@ class UserRobot {
     }
 
     private fun waitForCallToStart(): UserRobot {
-        CallPage.callInfoView.waitToAppear(timeOutMillis = 15.seconds)
+        // Join can take longer than 15s under CI load, especially during reconnection and
+        // recording flows, so the call UI needs a wider window to appear.
+        CallPage.callInfoView.waitToAppear(timeOutMillis = 30.seconds)
         return this
     }
 }
