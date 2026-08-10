@@ -31,6 +31,7 @@ import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
@@ -130,6 +131,7 @@ class FastReconnectIceRestartTest {
                 client = mockStreamVideo,
                 powerManager = mockPowerManager,
                 call = mockCall,
+                sessionManager = CallSessionManager(),
                 sessionId = "test-session",
                 apiKey = "test-api-key",
                 lifecycle = mockLifecycle,

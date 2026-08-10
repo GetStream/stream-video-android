@@ -22,11 +22,15 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.android.core.notifications.internal.service.CallService
+import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_BAKLAVA
+import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
+import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowApplication
+import org.robolectric.util.ReflectionHelpers
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -37,11 +41,19 @@ class ForegroundServicePermissionManagerTest {
 
     private lateinit var context: Context
     private lateinit var manager: ForegroundServicePermissionManager
+    private var originalSdkInt = 0
 
     @Before
     fun setup() {
         context = ApplicationProvider.getApplicationContext()
         manager = ForegroundServicePermissionManager()
+        originalSdkInt = Build.VERSION.SDK_INT
+    }
+
+    // Restore SDK_INT for tests that force it via ReflectionHelpers, independent of sandbox isolation.
+    @After
+    fun tearDown() {
+        ReflectionHelpers.setStaticField(Build.VERSION::class.java, "SDK_INT", originalSdkInt)
     }
 
     @Test
@@ -97,6 +109,92 @@ class ForegroundServicePermissionManagerTest {
     fun `pre Q returns zero service type`() {
         val type = manager.allPermissionsServiceType()
         assertEquals(0, type)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.UPSIDE_DOWN_CAKE])
+    fun `incoming call keeps short service below android 17`() {
+        // ringingServiceType only switches to phoneCall from Android 17 up, where the
+        // background-audio hardening applies. Android 14/15/16 keep their existing behavior.
+        val type = manager.getServiceType(
+            context,
+            CallService.TRIGGER_INCOMING_CALL,
+        )
+
+        assertEquals(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE,
+            type,
+        )
+    }
+
+    // Forces SDK_INT to 35 since Robolectric caps @Config at API 34; TODO: use @Config once API 35+ is supported.
+    @Test
+    fun `incoming call keeps short service on android 15`() {
+        ReflectionHelpers.setStaticField(
+            Build.VERSION::class.java,
+            "SDK_INT",
+            Build.VERSION_CODES.VANILLA_ICE_CREAM,
+        )
+
+        val type = manager.getServiceType(context, CallService.TRIGGER_INCOMING_CALL)
+
+        assertEquals(ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, type)
+    }
+
+    // Forces SDK_INT to 36 since Robolectric caps @Config at API 34; TODO: use @Config once API 36+ is supported.
+    @Test
+    fun `incoming call keeps short service on android 16`() {
+        ReflectionHelpers.setStaticField(
+            Build.VERSION::class.java,
+            "SDK_INT",
+            BUILD_VERSION_CODES_BAKLAVA,
+        )
+
+        val type = manager.getServiceType(context, CallService.TRIGGER_INCOMING_CALL)
+
+        assertEquals(ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, type)
+    }
+
+    @Test
+    fun `incoming call uses phone call service type on android 17 and above`() {
+        // Android 17 background-audio hardening mutes the ringtone under SHORT_SERVICE; use the
+        // while-in-use phoneCall type instead. Robolectric 4.11.1 caps @Config at API 34, so the
+        // >= 37 branch is exercised by forcing SDK_INT.
+        ReflectionHelpers.setStaticField(
+            Build.VERSION::class.java,
+            "SDK_INT",
+            BUILD_VERSION_CODES_CINNAMON_BUN,
+        )
+
+        val type = manager.getServiceType(
+            context,
+            CallService.TRIGGER_INCOMING_CALL,
+        )
+
+        assertEquals(
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL,
+            type,
+        )
+    }
+
+    // A service that validly omits PHONE_CALL (e.g. camera + mic, no Telecom) keeps SHORT_SERVICE on 17+.
+    @Test
+    fun `incoming call keeps short service on android 17 when service does not declare phone call`() {
+        ReflectionHelpers.setStaticField(
+            Build.VERSION::class.java,
+            "SDK_INT",
+            BUILD_VERSION_CODES_CINNAMON_BUN,
+        )
+        val cameraMicManager = object : ForegroundServicePermissionManager() {
+            override val requiredForegroundTypes = setOf(
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE,
+            )
+        }
+
+        val type = cameraMicManager.getServiceType(context, CallService.TRIGGER_INCOMING_CALL)
+
+        assertEquals(ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, type)
     }
 
     @Test

@@ -54,7 +54,7 @@ streamNoiseCancellation = "2.0.0"
 streamResult = "1.3.0"
 streamChat = "6.10.0"
 streamCore = "5.0.1"
-streamLog = "1.3.2"
+streamLog = "1.3.4"
 streamPush = "1.3.4"
 streamRenderscript = "0.0.1"
 
