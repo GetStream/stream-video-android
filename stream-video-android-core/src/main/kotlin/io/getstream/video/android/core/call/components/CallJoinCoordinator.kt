@@ -412,17 +412,24 @@ internal class CallJoinCoordinator(
     }
 
     /**
-     * Tears down a session this join created but could not connect. Clearing the reference
-     * alone is not enough: the socket and peer connections stay alive and keep issuing SFU
+     * Tears down every session left after a failed join connect. Clearing the reference
+     * alone is not enough: sockets and peer connections stay alive and keep issuing SFU
      * RPCs for a participant that is gone, which the SFU answers with PARTICIPANT_NOT_FOUND.
      *
-     * Skipped when recovery has already swapped a different session in — that one belongs to
-     * the reconnect flow, which owns the disposal of the session it replaced.
+     * Recoverable failures may already have swapped in a replacement via [CallReconnector]
+     * before [didReconnectSucceed] settles as failed. That replacement is not useful once
+     * join is returning Failure — tear it down too so nothing live is left behind.
      */
     private fun discardFailedSession(localSession: RtcSession) {
-        if (sessionManager.session.value !== localSession) return
-        logger.d { "[joinInternal] Discarding the session this join could not connect" }
+        val active = sessionManager.session.value
+        logger.d {
+            "[joinInternal] Discarding session(s) after failed join connect " +
+                "(activeIsJoinSession=${active === localSession})"
+        }
         sessionManager.setActiveSession(null)
+        if (active != null && active !== localSession) {
+            active.cleanup()
+        }
         localSession.cleanup()
     }
 

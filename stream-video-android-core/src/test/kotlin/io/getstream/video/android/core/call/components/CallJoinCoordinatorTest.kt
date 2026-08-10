@@ -339,6 +339,33 @@ class CallJoinCoordinatorTest {
     }
 
     @Test
+    fun `failed recovery tears down the join session and any reconnect replacement`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        val replacement = mockk<RtcSession>(relaxed = true)
+        coEvery { mockSession.connectInternal() } coAnswers {
+            // Reconnect swapped the active session before recovery settled as failed.
+            sessionFlow.value = replacement
+            connectionFlow.value = RealtimeConnection.ReconnectingFailed
+            SfuConnectionResult.Failure(
+                Exception("recoverable socket failure"),
+                cause = SfuConnectFailureCause.RecoverableSocketFailure,
+            )
+        }
+
+        val result = coordinator().joinInternal(
+            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
+        )
+        advanceUntilIdle()
+
+        assertThat(result).isInstanceOf(Failure::class.java)
+        verify { mockSession.cleanup() }
+        verify { replacement.cleanup() }
+        assertThat(sessionFlow.value).isNull()
+    }
+
+    @Test
     fun `joinAndRing joins then rings the members`() = runTest(testDispatcher) {
         stubJoinCall(Success(mockJoinResponse))
         coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
