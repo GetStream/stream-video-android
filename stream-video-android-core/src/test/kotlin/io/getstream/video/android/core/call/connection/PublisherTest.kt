@@ -62,7 +62,10 @@ import stream.video.sfu.event.VideoSender
 import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.Codec
 import stream.video.sfu.models.DegradationPreference
+import stream.video.sfu.models.Error
+import stream.video.sfu.models.ErrorCode
 import stream.video.sfu.models.PublishOption
+import stream.video.sfu.models.TrackInfo
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.signal.SetPublisherResponse
@@ -92,6 +95,7 @@ class PublisherTest {
     private lateinit var publisher: Publisher
     private val coroutineContext = UnconfinedTestDispatcher()
     private val testScope = TestScope(coroutineContext)
+    private var rejoinInvocations = 0
 
     //region Example PublishOptions
     private val videoPublishOption = PublishOption(
@@ -129,6 +133,7 @@ class PublisherTest {
     @Before
     fun setUp() {
         MockKAnnotations.init(this, relaxUnitFun = true)
+        rejoinInvocations = 0
 
         // Mock the mediaManager and peerConnectionFactory so they return mock Audio/Video tracks.
         every { mockPeerConnectionFactory.makeAudioTrack(any(), any()) } answers {
@@ -171,7 +176,7 @@ class PublisherTest {
                 maxBitRate = 1_500_000,
                 sfuClient = mockSignalServerService,
                 sessionId = "session-id",
-                rejoin = { },
+                rejoin = { rejoinInvocations++ },
                 tracer = mockk(relaxed = true),
                 fastReconnect = {},
                 transceiverCache = mockTransceiverCache,
@@ -283,6 +288,70 @@ class PublisherTest {
         publisher.negotiate()
 
         coVerify(exactly = 0) { mockSignalServerService.setPublisher(any()) }
+    }
+
+    @Test
+    fun `getAnnouncedTracks includes video layers even when track is not LIVE`() {
+        val mockVideoTrack = mockk<VideoTrack>(relaxed = true) {
+            every { id() } returns "video-1"
+            every { kind() } returns "video"
+            every { isDisposed } returns false
+            every { state() } returns MediaStreamTrack.State.ENDED
+        }
+        val mockSender = mockk<RtpSender>(relaxed = true) {
+            every { track() } returns mockVideoTrack
+        }
+        val mockTransceiver = mockk<RtpTransceiver>(relaxed = true) {
+            every { sender } returns mockSender
+            every { mid } returns "0"
+        }
+        every { mockTransceiverCache.items() } returns listOf(
+            TransceiverId(videoPublishOption, mockTransceiver),
+        )
+        every { mockTransceiverCache.indexOf(videoPublishOption) } returns 0
+        every { mockTransceiverCache.getLayers(videoPublishOption) } returns null
+
+        val announced = publisher.getAnnouncedTracks(null, null)
+
+        assertEquals(1, announced.size)
+        assertTrue(announced[0].muted)
+        assertTrue(announced[0].layers.isNotEmpty())
+    }
+
+    @Test
+    fun `SetPublisher validation failure rejoins`() = runTest(coroutineContext) {
+        every { publisher.getAnnouncedTracks(any(), any()) } returns listOf(
+            TrackInfo(
+                track_id = "video-1",
+                track_type = TrackType.TRACK_TYPE_VIDEO,
+                mid = "0",
+                muted = false,
+                layers = listOf(
+                    stream.video.sfu.models.VideoLayer(
+                        rid = "f",
+                        video_dimension = VideoDimension(1280, 720),
+                        bitrate = 1_000_000,
+                        fps = 30,
+                    ),
+                ),
+                publish_option_id = videoPublishOption.id,
+            ),
+        )
+        coEvery { publisher.setLocalDescription(any()) } returns Result.Success(Unit)
+        coEvery { publisher.setRemoteDescription(any()) } returns Result.Success(Unit)
+        coEvery { mockSignalServerService.setPublisher(any()) } returns SetPublisherResponse(
+            sdp = "",
+            error = Error(
+                code = ErrorCode.ERROR_CODE_REQUEST_VALIDATION_FAILED,
+                message = "Invalid SetPublisher request",
+                should_retry = false,
+            ),
+        )
+
+        publisher.negotiate(source = "test")
+
+        coVerify(exactly = 1) { mockSignalServerService.setPublisher(any()) }
+        assertEquals(1, rejoinInvocations)
     }
 
     @Test
