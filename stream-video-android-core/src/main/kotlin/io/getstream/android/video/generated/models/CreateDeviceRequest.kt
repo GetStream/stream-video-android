@@ -45,6 +45,9 @@ data class CreateDeviceRequest (
     @Json(name = "push_provider")
     val pushProvider: PushProvider,
 
+    @Json(name = "hardware_id")
+    val hardwareId: kotlin.String? = null,
+
     @Json(name = "push_provider_name")
     val pushProviderName: kotlin.String? = null,
 

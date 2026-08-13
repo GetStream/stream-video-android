@@ -40,19 +40,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewParticipant
 
 /**
  * Renders a single participant with a given call, which displays an avatar of the participant.
@@ -163,19 +159,6 @@ private fun BoxScope.DefaultMicrophoneIndicator(
             imageVector = Icons.Default.MicOff,
             tint = VideoTheme.colors.alertWarning,
             contentDescription = null,
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun ParticipantAudioPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        ParticipantAudio(
-            modifier = Modifier.size(150.dp),
-            participant = previewParticipant,
-            style = RegularAudioRendererStyle(isShowingSpeakingBorder = true),
         )
     }
 }

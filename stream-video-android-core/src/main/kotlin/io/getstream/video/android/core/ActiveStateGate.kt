@@ -149,7 +149,12 @@ internal class ActiveStateGate(
         } catch (e: CallJoinInterceptionException) {
             val message = "[CallJoinInterceptor] aborted with reason: ${e.reason}"
             logger.e(e) { message }
-            call.leave(reason = message)
+            call.leave(
+                CallLeaveReason.UserAction(
+                    cause = UserActionCause.CALL_JOIN_ABORT,
+                    message = e.reason,
+                ),
+            )
             clearAllJobs()
             false
         } catch (e: Exception) {

@@ -30,6 +30,7 @@
     <string name="sign_in_contact_us">Contact us</string>
     <string name="sign_out">Sign out</string>
     <string name="logs">Share Logs</string>
+    <string name="call_settings">Call Settings</string>
     <string name="join_description">Start a new call, join a meeting by \nentering the call ID or by scanning \na QR code.</string>
     <string name="join_call">Join Call</string>
     <string name="join_call_by_qr_code">Scan QR meeting code</string>
@@ -64,6 +65,9 @@
     <string name="moderation_warning_title">Warning</string>
     <string name="join_first">Join First</string>
     <string name="use_call_join_interceptor">Use Call Join Interceptor</string>
+    <string name="add_user">Add user</string>
+    <string name="user_id">User ID</string>
+    <string name="user_name">User Name</string>
 
     <plurals name="chat_typing">
         <item quantity="one">%s is typing</item>

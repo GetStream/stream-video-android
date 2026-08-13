@@ -35,30 +35,36 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * This event is sent when a user gets banned. The event contains information about the user that was banned.
  */
 
 data class UserBannedEvent (
-    @Json(name = "channel_id")
-    val channelId: kotlin.String,
-
-    @Json(name = "channel_type")
-    val channelType: kotlin.String,
-
-    @Json(name = "cid")
-    val cid: kotlin.String,
-
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
-    @Json(name = "shadow")
-    val shadow: kotlin.Boolean,
+    @Json(name = "custom")
+    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
 
-    @Json(name = "created_by")
-    val createdBy: io.getstream.android.video.generated.models.User,
+    @Json(name = "user")
+    val user: io.getstream.android.video.generated.models.UserResponseCommonFields,
 
     @Json(name = "type")
     val type: kotlin.String,
+
+    @Json(name = "channel_id")
+    val channelId: kotlin.String? = null,
+
+    @Json(name = "channel_member_count")
+    val channelMemberCount: kotlin.Int? = null,
+
+    @Json(name = "channel_message_count")
+    val channelMessageCount: kotlin.Int? = null,
+
+    @Json(name = "channel_type")
+    val channelType: kotlin.String? = null,
+
+    @Json(name = "cid")
+    val cid: kotlin.String? = null,
 
     @Json(name = "expiration")
     val expiration: org.threeten.bp.OffsetDateTime? = null,
@@ -66,11 +72,23 @@ data class UserBannedEvent (
     @Json(name = "reason")
     val reason: kotlin.String? = null,
 
+    @Json(name = "received_at")
+    val receivedAt: org.threeten.bp.OffsetDateTime? = null,
+
+    @Json(name = "shadow")
+    val shadow: kotlin.Boolean? = null,
+
     @Json(name = "team")
     val team: kotlin.String? = null,
 
-    @Json(name = "user")
-    val user: io.getstream.android.video.generated.models.User? = null
+    @Json(name = "total_bans")
+    val totalBans: kotlin.Int? = null,
+
+    @Json(name = "channel_custom")
+    val channelCustom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap(),
+
+    @Json(name = "created_by")
+    val createdBy: io.getstream.android.video.generated.models.UserResponseCommonFields? = null
 )
 : io.getstream.android.video.generated.models.VideoEvent()
 {

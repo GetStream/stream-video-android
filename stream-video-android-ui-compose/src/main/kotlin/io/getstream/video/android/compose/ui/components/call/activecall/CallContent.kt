@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui.components.call.activecall
 
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
-import android.content.res.Configuration.UI_MODE_TYPE_CAR
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -47,7 +46,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
@@ -76,13 +74,13 @@ import io.getstream.video.android.compose.ui.components.call.renderer.VideoRende
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LocalVideoContentSize
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
 import kotlinx.coroutines.delay
 
 /**
@@ -189,7 +187,12 @@ public fun CallContent(
                 enterPictureInPicture(context = context, call = call, pictureInPictureConfiguration)
             } catch (e: Exception) {
                 StreamLog.e(tag = "CallContent") { e.stackTraceToString() }
-                call.leave()
+                call.leave(
+                    CallLeaveReason.SdkDriven(
+                        SdkCause.PIP_ERROR,
+                        "Error in Pip: ${e.message}",
+                    ),
+                )
             }
         } else {
             onBackPressed.invoke()
@@ -427,27 +430,5 @@ internal fun DefaultPictureInPictureContent(call: Call) {
                 style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart),
             )
         }
-    }
-}
-
-@Preview
-@Composable
-private fun CallContentPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        CallContent(call = previewCall)
-    }
-}
-
-@Preview(
-    widthDp = 640,
-    heightDp = 360,
-    uiMode = UI_MODE_TYPE_CAR,
-)
-@Composable
-private fun CallContentPreviewLandscape() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        CallContent(call = previewCall)
     }
 }

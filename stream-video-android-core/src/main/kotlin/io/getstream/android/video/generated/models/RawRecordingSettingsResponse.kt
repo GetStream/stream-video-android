@@ -40,7 +40,10 @@ import com.squareup.moshi.ToJson
 
 data class RawRecordingSettingsResponse (
     @Json(name = "mode")
-    val mode: Mode
+    val mode: Mode,
+
+    @Json(name = "audio_only")
+    val audioOnly: kotlin.Boolean? = null
 )
 {
     

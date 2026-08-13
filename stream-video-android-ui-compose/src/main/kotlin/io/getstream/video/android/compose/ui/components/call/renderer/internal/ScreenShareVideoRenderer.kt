@@ -23,10 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
@@ -35,9 +32,6 @@ import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipantsList
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 
@@ -97,19 +91,5 @@ public fun ScreenShareVideoRenderer(
                 modifier = Modifier.align(Alignment.BottomEnd),
             )
         }
-    }
-}
-
-@Preview
-@Composable
-private fun ScreenShareVideoRendererPreview() {
-    VideoTheme {
-        StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-        ScreenShareVideoRenderer(
-            call = previewCall,
-            session = ScreenSharingSession(
-                participant = previewParticipantsList[0],
-            ),
-        )
     }
 }

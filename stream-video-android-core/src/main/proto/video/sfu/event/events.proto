@@ -305,6 +305,7 @@ message VideoSender {
   repeated VideoLayerSetting layers = 3;
   models.TrackType track_type = 4;
   int32 publish_option_id = 5;
+  models.DegradationPreference degradation_preference = 6;
 }
 
 // sent to users when they need to change the quality of their video

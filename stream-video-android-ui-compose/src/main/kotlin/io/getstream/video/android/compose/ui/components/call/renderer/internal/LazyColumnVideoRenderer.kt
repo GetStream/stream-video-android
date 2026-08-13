@@ -28,8 +28,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
@@ -39,9 +37,6 @@ import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.compose.ui.extensions.topOrBottomPadding
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipantsList
 
 /**
  * Shows a column of call participants.
@@ -146,17 +141,4 @@ private fun ListVideoRenderer(
             isFocused = isDomSpeakerSpeaking && participant.sessionId == dominantSpeaker?.sessionId,
         ),
     )
-}
-
-@Preview
-@Composable
-private fun ParticipantsColumnPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        LazyColumnVideoRenderer(
-            call = previewCall,
-            participants = previewParticipantsList,
-            dominantSpeaker = previewParticipantsList[0],
-        )
-    }
 }

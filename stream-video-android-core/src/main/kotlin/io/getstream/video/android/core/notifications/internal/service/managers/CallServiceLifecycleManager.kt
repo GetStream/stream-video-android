@@ -19,7 +19,9 @@ package io.getstream.video.android.core.notifications.internal.service.managers
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.model.StreamCallId
@@ -96,7 +98,12 @@ internal class CallServiceLifecycleManager {
                     }
 
                     else -> {
-                        call.leave("call-service-end-call-unknown")
+                        call.leave(
+                            CallLeaveReason.SdkDriven(
+                                cause = SdkCause.TASK_REMOVED,
+                                message = "${SdkCause.TASK_REMOVED.defaultMessage} for ringing state: $ringingState",
+                            ),
+                        )
                         logger.i { "[onTaskRemoved] Ended ongoing call for me" }
                     }
                 }
@@ -114,7 +121,12 @@ internal class CallServiceLifecycleManager {
                 logger.i { "[handleIncomingCallTaskRemoved] Ended incoming call for both users" }
             }
         } else {
-            call.leave("call-service-end-call-incoming")
+            call.leave(
+                CallLeaveReason.SdkDriven(
+                    cause = SdkCause.TASK_REMOVED,
+                    message = "${SdkCause.TASK_REMOVED.defaultMessage} for (incoming call)",
+                ),
+            )
             logger.i { "[handleIncomingCallTaskRemoved] Ended incoming call for me" }
         }
     }

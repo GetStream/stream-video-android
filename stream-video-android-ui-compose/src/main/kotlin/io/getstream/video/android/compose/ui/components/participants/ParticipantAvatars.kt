@@ -34,9 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -44,8 +42,6 @@ import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.userNameOrId
 import io.getstream.video.android.core.utils.toCallUser
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewMemberListState
 
 /**
  * Component that renders user avatars for call participants.
@@ -186,16 +182,5 @@ public fun ParticipantAvatars(
                 }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-private fun ParticipantAvatarsPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        ParticipantAvatars(
-            members = previewMemberListState,
-        )
     }
 }

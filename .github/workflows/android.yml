@@ -18,5 +18,13 @@ concurrency:
 
 jobs:
   base-android-ci:
+    permissions:
+      contents: read
+      pull-requests: read
     uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@feature/rahullohra/build-on-sdk-37
-    secrets: inherit
+    secrets:
+      BUILD_CACHE_AWS_REGION: ${{ secrets.BUILD_CACHE_AWS_REGION }}
+      BUILD_CACHE_AWS_BUCKET: ${{ secrets.BUILD_CACHE_AWS_BUCKET }}
+      BUILD_CACHE_AWS_ACCESS_KEY_ID: ${{ secrets.BUILD_CACHE_AWS_ACCESS_KEY_ID }}
+      BUILD_CACHE_AWS_SECRET_KEY: ${{ secrets.BUILD_CACHE_AWS_SECRET_KEY }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

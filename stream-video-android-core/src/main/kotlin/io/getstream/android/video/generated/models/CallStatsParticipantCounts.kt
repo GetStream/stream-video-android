@@ -57,6 +57,24 @@ data class CallStatsParticipantCounts (
     @Json(name = "sessions")
     val sessions: kotlin.Int,
 
+    @Json(name = "sfus_used")
+    val sfusUsed: kotlin.Int,
+
+    @Json(name = "average_jitter_ms")
+    val averageJitterMs: kotlin.Int? = null,
+
+    @Json(name = "average_latency_ms")
+    val averageLatencyMs: kotlin.Int? = null,
+
+    @Json(name = "call_event_count")
+    val callEventCount: kotlin.Int? = null,
+
+    @Json(name = "cq_score")
+    val cqScore: kotlin.Int? = null,
+
+    @Json(name = "max_freezes_duration_ms")
+    val maxFreezesDurationMs: kotlin.Int? = null,
+
     @Json(name = "total_participant_duration")
     val totalParticipantDuration: kotlin.Int? = null
 )

@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
@@ -64,18 +63,6 @@ internal fun CallParticipantsInfoActions(
         ToggleMicrophoneAction(
             isMicrophoneEnabled = isLocalAudioEnabled,
             onCallAction = { onMute(!isLocalAudioEnabled) },
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun CallParticipantsInfoOptionsPreview() {
-    VideoTheme {
-        CallParticipantsInfoActions(
-            isLocalAudioEnabled = false,
-            onInviteUser = {},
-            onMute = {},
         )
     }
 }

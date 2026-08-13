@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -37,9 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -51,9 +48,6 @@ import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipantsList
 
 /**
  * Represents the portrait screen sharing content.
@@ -180,40 +174,5 @@ private fun BoxWithConstraintsScope.ScreenSharingContent(
                 )
             }
         }
-    }
-}
-
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun PortraitScreenSharingContentPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        PortraitScreenSharingVideoRenderer(
-            call = previewCall,
-            session = ScreenSharingSession(
-                participant = previewParticipantsList[1],
-            ),
-            participants = previewParticipantsList,
-            dominantSpeaker = previewParticipantsList[1],
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-}
-
-@Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun PortraitScreenSharingMyContentPreview() {
-    VideoTheme {
-        PortraitScreenSharingVideoRenderer(
-            call = previewCall,
-            session = ScreenSharingSession(
-                participant = previewParticipantsList[0],
-            ),
-            participants = previewParticipantsList,
-            dominantSpeaker = previewParticipantsList[0],
-            modifier = Modifier.fillMaxSize(),
-        )
     }
 }

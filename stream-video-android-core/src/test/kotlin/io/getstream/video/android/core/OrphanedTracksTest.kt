@@ -18,6 +18,10 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.IntegrationTestBase
+import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.SfuConnectionResult
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -41,6 +45,13 @@ private inline fun <R> Call.use(block: (Call) -> R): R {
     }
 }
 
+private fun StreamVideo.mockSuccessfulJoinCall(type: String, id: String): Call =
+    call(type, id).apply {
+        val rtcSession = mockk<RtcSession>(relaxed = true)
+        coEvery { rtcSession.connectInternal(any(), any()) } returns SfuConnectionResult.Success
+        unitTestRtcSessionFactory = { rtcSession }
+    }
+
 /**
  * Integration tests for the orphaned tracks mechanism.
  *
@@ -57,7 +68,7 @@ class OrphanedTracksTest : IntegrationTestBase() {
 
     @Test
     fun `track arriving before participant is stored as orphaned and reconciled on participant join`() = runTest {
-        val call = client.call("livestream", randomUUID())
+        val call = client.mockSuccessfulJoinCall("livestream", randomUUID())
         call.use {
             call.create()
             call.join()
@@ -89,7 +100,7 @@ class OrphanedTracksTest : IntegrationTestBase() {
 
     @Test
     fun `multiple tracks for same participant are all reconciled`() = runTest {
-        val call = client.call("livestream", randomUUID())
+        val call = client.mockSuccessfulJoinCall("livestream", randomUUID())
         call.use {
             call.create()
             call.join()
@@ -123,8 +134,8 @@ class OrphanedTracksTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `orphaned tracks for different participants don't interfere`() = runTest {
-        val call = client.call("livestream", randomUUID())
+    fun `orphaned tracks for different participants don't interfere`() = runTest { // noob
+        val call = client.mockSuccessfulJoinCall("livestream", randomUUID())
         call.use {
             call.create()
             call.join()
@@ -174,7 +185,7 @@ class OrphanedTracksTest : IntegrationTestBase() {
 
     @Test
     fun `TrackPublishedEvent with participant info creates participant and reconciles tracks`() = runTest {
-        val call = client.call("livestream", randomUUID())
+        val call = client.mockSuccessfulJoinCall("livestream", randomUUID())
         call.use {
             call.create()
             call.join()
@@ -205,7 +216,7 @@ class OrphanedTracksTest : IntegrationTestBase() {
 
     @Test
     fun `TrackUnpublishedEvent with participant info updates participant state`() = runTest {
-        val call = client.call("livestream", randomUUID())
+        val call = client.mockSuccessfulJoinCall("livestream", randomUUID())
         call.use {
             call.create()
             call.join()
@@ -246,7 +257,7 @@ class OrphanedTracksTest : IntegrationTestBase() {
 
     @Test
     fun `track arriving after participant is attached immediately`() = runTest {
-        val call = client.call("livestream", randomUUID())
+        val call = client.mockSuccessfulJoinCall("livestream", randomUUID())
         call.use {
             call.create()
             call.join()
@@ -286,8 +297,8 @@ class OrphanedTracksTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `orphaned tracks are cleaned up when WebRTC stream is removed`() = runTest {
-        val call = client.call("livestream", randomUUID())
+    fun `orphaned tracks are cleaned up when WebRTC stream is removed`() = runTest { // noob
+        val call = client.mockSuccessfulJoinCall("livestream", randomUUID())
         call.use {
             call.create()
             call.join()

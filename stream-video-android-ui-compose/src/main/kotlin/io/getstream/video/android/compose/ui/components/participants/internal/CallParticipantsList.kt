@@ -37,17 +37,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.ui.common.R
 
 /**
@@ -173,20 +169,5 @@ private fun CallParticipantInfoItem(
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
-    }
-}
-
-@Preview
-@Composable
-private fun CallParticipantsListPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        CallParticipantsList(
-            participants = previewParticipantsList,
-            onUserOptionsSelected = {},
-            isLocalAudioEnabled = false,
-            onInviteUser = {},
-            onMute = {},
-        ) {}
     }
 }

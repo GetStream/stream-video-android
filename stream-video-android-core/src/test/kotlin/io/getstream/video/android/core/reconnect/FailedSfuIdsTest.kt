@@ -16,10 +16,13 @@
 
 package io.getstream.video.android.core.reconnect
 
-import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.addFailedSfuId
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.failedSfuIds
+import io.getstream.video.android.core.injectLocation
+import io.getstream.video.android.core.injectMockNetwork
+import io.getstream.video.android.core.injectSession
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -35,42 +38,14 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
-    private fun Call.injectMockNetwork(connected: Boolean = true) {
-        val mockNetwork = mockk<NetworkStateProvider>(relaxed = true)
-        every { mockNetwork.isConnected() } returns connected
-        val field = Call::class.java.getDeclaredField("network\$delegate")
-        field.isAccessible = true
-        field.set(this, lazyOf(mockNetwork))
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun Call.getFailedSfuIds(): MutableSet<String> {
-        val field = Call::class.java.getDeclaredField("failedSfuIds")
-        field.isAccessible = true
-        return field.get(this) as MutableSet<String>
-    }
-
-    private fun Call.invokeAddFailedSfuId(sfuId: String) {
-        val method = Call::class.java.getDeclaredMethod("addFailedSfuId", String::class.java)
-        method.isAccessible = true
-        method.invoke(this, sfuId)
-    }
-
-    private fun Call.invokeGetFailedSfuIdsSnapshot(): List<String> {
-        val method = Call::class.java.getDeclaredMethod("getFailedSfuIdsSnapshot")
-        method.isAccessible = true
-        @Suppress("UNCHECKED_CAST")
-        return method.invoke(this) as List<String>
-    }
-
     @Test
     fun `addFailedSfuId adds unique SFU IDs`() = runTest {
         val call = client.call("default", randomUUID())
 
-        call.invokeAddFailedSfuId("sfu-edge-1")
-        call.invokeAddFailedSfuId("sfu-edge-2")
+        call.addFailedSfuId("sfu-edge-1")
+        call.addFailedSfuId("sfu-edge-2")
 
-        val ids = call.getFailedSfuIds()
+        val ids = call.failedSfuIds()
         assertEquals(2, ids.size)
         assertTrue(ids.contains("sfu-edge-1"))
         assertTrue(ids.contains("sfu-edge-2"))
@@ -80,47 +55,47 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun `addFailedSfuId does not add duplicates`() = runTest {
         val call = client.call("default", randomUUID())
 
-        call.invokeAddFailedSfuId("sfu-edge-1")
-        call.invokeAddFailedSfuId("sfu-edge-1")
-        call.invokeAddFailedSfuId("sfu-edge-1")
+        call.addFailedSfuId("sfu-edge-1")
+        call.addFailedSfuId("sfu-edge-1")
+        call.addFailedSfuId("sfu-edge-1")
 
-        assertEquals(1, call.getFailedSfuIds().size)
+        assertEquals(1, call.failedSfuIds().size)
     }
 
     @Test
     fun `addFailedSfuId ignores blank strings`() = runTest {
         val call = client.call("default", randomUUID())
 
-        call.invokeAddFailedSfuId("")
-        call.invokeAddFailedSfuId("   ")
+        call.addFailedSfuId("")
+        call.addFailedSfuId("   ")
 
-        assertTrue(call.getFailedSfuIds().isEmpty())
+        assertTrue(call.failedSfuIds().isEmpty())
     }
 
     @Test
     fun `getFailedSfuIdsSnapshot returns a copy`() = runTest {
         val call = client.call("default", randomUUID())
 
-        call.invokeAddFailedSfuId("sfu-edge-1")
-        val snapshot = call.invokeGetFailedSfuIdsSnapshot()
+        call.addFailedSfuId("sfu-edge-1")
+        val snapshot = call.failedSfuIds()
 
-        call.invokeAddFailedSfuId("sfu-edge-2")
+        call.addFailedSfuId("sfu-edge-2")
 
         assertEquals(1, snapshot.size)
-        assertEquals(2, call.getFailedSfuIds().size)
+        assertEquals(2, call.failedSfuIds().size)
     }
 
     @Test
     fun `onSfuConnectionEstablished clears failed SFU IDs`() = runTest {
         val call = client.call("default", randomUUID())
 
-        call.invokeAddFailedSfuId("sfu-edge-1")
-        call.invokeAddFailedSfuId("sfu-edge-2")
-        assertEquals(2, call.getFailedSfuIds().size)
+        call.addFailedSfuId("sfu-edge-1")
+        call.addFailedSfuId("sfu-edge-2")
+        assertEquals(2, call.failedSfuIds().size)
 
         call.onSfuConnectionEstablished()
 
-        assertTrue(call.getFailedSfuIds().isEmpty())
+        assertTrue(call.failedSfuIds().isEmpty())
     }
 
     @Test
@@ -138,22 +113,22 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
             emptyList(),
             emptyList(),
         )
-        call.session.value = sessionMock
-        call.location = "test-location"
+        call.injectSession(sessionMock)
+        call.injectLocation("test-location")
 
         call.migrate()
 
-        assertTrue(call.getFailedSfuIds().contains("sfu-edge-old"))
+        assertTrue(call.failedSfuIds().contains("sfu-edge-old"))
     }
 
     @Test
     fun `failed SFU IDs accumulate across multiple addFailedSfuId calls`() = runTest {
         val call = client.call("default", randomUUID())
 
-        call.invokeAddFailedSfuId("sfu-edge-1")
-        call.invokeAddFailedSfuId("sfu-edge-2")
+        call.addFailedSfuId("sfu-edge-1")
+        call.addFailedSfuId("sfu-edge-2")
 
-        val ids = call.getFailedSfuIds()
+        val ids = call.failedSfuIds()
         assertTrue(ids.contains("sfu-edge-1"))
         assertTrue(ids.contains("sfu-edge-2"))
         assertEquals(2, ids.size)
@@ -163,13 +138,13 @@ class FailedSfuIdsTest : IntegrationTestBase(connectCoordinatorWS = false) {
     fun `onSfuConnectionEstablished after migrate clears accumulated IDs`() = runTest {
         val call = client.call("default", randomUUID())
 
-        call.invokeAddFailedSfuId("sfu-edge-1")
-        call.invokeAddFailedSfuId("sfu-edge-2")
-        call.invokeAddFailedSfuId("sfu-edge-3")
-        assertFalse(call.getFailedSfuIds().isEmpty())
+        call.addFailedSfuId("sfu-edge-1")
+        call.addFailedSfuId("sfu-edge-2")
+        call.addFailedSfuId("sfu-edge-3")
+        assertFalse(call.failedSfuIds().isEmpty())
 
         call.onSfuConnectionEstablished()
 
-        assertTrue(call.getFailedSfuIds().isEmpty())
+        assertTrue(call.failedSfuIds().isEmpty())
     }
 }

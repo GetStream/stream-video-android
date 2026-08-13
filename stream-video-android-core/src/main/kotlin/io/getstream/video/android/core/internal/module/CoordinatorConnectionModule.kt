@@ -28,8 +28,8 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.trace.Tracer
+import io.getstream.video.android.core.user.UserRepository
 import io.getstream.video.android.model.ApiKey
-import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.OkHttpClient
@@ -46,7 +46,7 @@ internal class CoordinatorConnectionModule(
     // Coordinator API
     context: Context,
     tokenProvider: TokenProvider,
-    user: User,
+    userRepository: UserRepository,
     val tokenRepository: TokenRepository,
     override val scope: CoroutineScope,
     // Common API

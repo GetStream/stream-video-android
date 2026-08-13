@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.trace
 
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
-import java.util.Collections
 
 /**
  * A single trace item captured by [Tracer].
@@ -51,7 +50,7 @@ fun TraceRecord.serialize(): Array<Any?> = arrayOf(tag, id, data, timestamp)
 @InternalStreamVideoApi
 class Tracer(private val id: String?) {
 
-    private val buffer: MutableList<TraceRecord> = Collections.synchronizedList(mutableListOf())
+    private val buffer: MutableList<TraceRecord> = mutableListOf()
     private var enabled: Boolean = true
 
     /**
@@ -76,16 +75,18 @@ class Tracer(private val id: String?) {
      * The lambda form matches the original TypeScript API and can be stored or passed
      * around as a function reference.
      */
-    fun trace(tag: String, data: Any?) = synchronized(buffer) {
-        if (!enabled) return@synchronized
-        buffer.add(
-            TraceRecord(
-                tag = tag,
-                id = id,
-                data = data,
-                timestamp = System.currentTimeMillis(),
-            ),
+    fun trace(tag: String, data: Any?) {
+        val record = TraceRecord(
+            tag = tag,
+            id = id,
+            data = data,
+            timestamp = System.currentTimeMillis(),
         )
+
+        synchronized(buffer) {
+            if (!enabled) return
+            buffer.add(record)
+        }
     }
 
     /**

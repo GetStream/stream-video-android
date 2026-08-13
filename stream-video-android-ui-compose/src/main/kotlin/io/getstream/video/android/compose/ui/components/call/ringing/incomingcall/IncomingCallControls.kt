@@ -17,17 +17,12 @@
 package io.getstream.video.android.compose.ui.components.call.ringing.incomingcall
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
@@ -93,33 +88,5 @@ public fun IncomingCallControls(
             onCallAction = onCallAction,
             style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
         )
-    }
-}
-
-@Preview(name = "Small Phone - 320dp", widthDp = 320)
-@Preview(name = "Normal Phone - 411dp", widthDp = 411)
-@Composable
-private fun IncomingCallOptionsPreview() {
-    VideoTheme {
-        Column {
-            IncomingCallControls(
-                isVideoCall = false,
-                isCameraEnabled = true,
-                onCallAction = { },
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            IncomingCallControls(
-                isVideoCall = true,
-                isCameraEnabled = false,
-                onCallAction = { },
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            IncomingCallControls(
-                isVideoCall = true,
-                isMicrophoneEnabled = true,
-                isCameraEnabled = true,
-                onCallAction = { },
-            )
-        }
     }
 }
