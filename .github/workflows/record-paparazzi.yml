@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: paparazzi-goldens
-          # Paths are preserved relative to the workspace, i.e. <module>/src/test/snapshots/...,
+          # Paths are preserved relative to the workspace, i.e. <module>/src/test/snapshots/....,
           # so the local pull script can overlay them straight onto the repo root.
           path: '**/src/test/snapshots/**'
           if-no-files-found: error
