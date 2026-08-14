@@ -32,14 +32,14 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       contains(github.event.head_commit.message, '[record-paparazzi]')
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: GetStream/android-ci-actions/actions/setup-java@cb46e4f44d105a68738bfd2a1cfd156bb768665b
         with:
           java-version: '21' # Paparazzi 2.0.0-alpha05 requires JDK 21.
           distribution: temurin
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1
       - name: Record Paparazzi goldens
         # cleanRecord so stale / differently-named goldens are removed and the artifact is the
         # exact set the current tests produce under this Paparazzi/layoutlib version.
