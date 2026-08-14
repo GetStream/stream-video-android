@@ -5,34 +5,16 @@ import com.github.burrunan.s3cache.AwsS3BuildCache
 pluginManagement {
     includeBuild("build-logic")
     repositories {
-        // mavenLocal() first so locally-published io.getstream snapshots (e.g. the AGP 9-compatible
-        // convention plugin built from stream-build-conventions-android) shadow the remote snapshot.
-        mavenLocal()
         gradlePluginPortal()
         google()
         mavenCentral()
-        maven(url = "https://central.sonatype.com/repository/maven-snapshots/") {
-            content {
-                includeGroupByRegex("io\\.getstream.*")
-            }
-            mavenContent {
-                snapshotsOnly()
-            }
-        }
+        mavenLocal()
     }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
-        maven(url = "https://central.sonatype.com/repository/maven-snapshots/") {
-            content {
-                includeGroupByRegex("io\\.getstream.*")
-            }
-            mavenContent {
-                snapshotsOnly()
-            }
-        }
         mavenCentral()
         maven(url = "https://plugins.gradle.org/m2/")
     }
