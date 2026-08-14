@@ -20,7 +20,6 @@ import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.video.generated.models.OwnCapability
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
@@ -31,9 +30,13 @@ import io.getstream.video.android.core.call.FastReconnectResult
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.components.CallMediaManager
 import io.getstream.video.android.core.call.components.CallSessionManager
+import io.getstream.video.android.core.call.components.PeerConnections
+import io.getstream.video.android.core.call.components.ReconnectRequests
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.IceServer
 import io.mockk.MockKAnnotations
@@ -72,7 +75,13 @@ class FastReconnectIceRestartTest {
     private lateinit var mockPowerManager: PowerManager
 
     @RelaxedMockK
-    private lateinit var mockCall: Call
+    private lateinit var mockMedia: CallMediaManager
+
+    @RelaxedMockK
+    private lateinit var mockReconnectRequests: ReconnectRequests
+
+    @RelaxedMockK
+    private lateinit var mockScopeProvider: ScopeProvider
 
     @RelaxedMockK
     private lateinit var mockCallState: CallState
@@ -87,16 +96,17 @@ class FastReconnectIceRestartTest {
     private lateinit var mockVideoClient: StreamVideoClient
 
     private lateinit var mockStreamVideo: StreamVideo
+    private lateinit var peerConnections: PeerConnections
 
     @Before
     fun setup() {
         MockKAnnotations.init(this, relaxUnitFun = true)
 
         mockStreamVideo = mockk(relaxed = true)
-        every { mockCall.state } returns mockCallState
-        every { mockCall.scope } returns testScope
-        every { mockCall.mediaManager } returns mockMediaManager
-        every { mockCall.peerConnectionFactory } returns mockk(relaxed = true) {
+        peerConnections = PeerConnections()
+        every { mockReconnectRequests.scope } returns testScope
+        every { mockMedia.mediaManager } returns mockMediaManager
+        every { mockMedia.peerConnectionFactory } returns mockk(relaxed = true) {
             every {
                 makePeerConnection(any(), any(), any(), any())
             } answers {
@@ -130,7 +140,15 @@ class FastReconnectIceRestartTest {
             RtcSession(
                 client = mockStreamVideo,
                 powerManager = mockPowerManager,
-                call = mockCall,
+                type = "default",
+                callId = "test-call-id",
+                state = mockCallState,
+                media = mockMedia,
+                statsReporter = mockk(relaxed = true),
+                reconnectRequests = mockReconnectRequests,
+                clientCapabilities = { emptyList() },
+                audioFilter = { null },
+                scopeProvider = mockScopeProvider,
                 sessionManager = CallSessionManager(),
                 sessionId = "test-session",
                 apiKey = "test-api-key",
@@ -144,6 +162,7 @@ class FastReconnectIceRestartTest {
                 coroutineScope = testScope,
                 sfuConnectionModuleProvider = { sfuConnectionModule },
                 sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                peerConnections = peerConnections,
             ),
         )
     }
@@ -165,8 +184,8 @@ class FastReconnectIceRestartTest {
         val pub = mockPublisher()
         val sub = mockSubscriber()
 
-        session.publisher.value = pub
-        session.subscriber.value = sub
+        peerConnections.setPublisher(pub)
+        peerConnections.setSubscriber(sub)
 
         coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
@@ -185,8 +204,8 @@ class FastReconnectIceRestartTest {
         val pub = mockPublisher(closed = false)
         val sub = mockSubscriber(closed = false)
 
-        session.publisher.value = pub
-        session.subscriber.value = sub
+        peerConnections.setPublisher(pub)
+        peerConnections.setSubscriber(sub)
 
         coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
@@ -204,8 +223,8 @@ class FastReconnectIceRestartTest {
         val pub = mockPublisher(closed = true)
         val sub = mockSubscriber()
 
-        session.publisher.value = pub
-        session.subscriber.value = sub
+        peerConnections.setPublisher(pub)
+        peerConnections.setSubscriber(sub)
 
         coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
@@ -223,8 +242,8 @@ class FastReconnectIceRestartTest {
         val pub = mockPublisher()
         val sub = mockSubscriber(closed = true)
 
-        session.publisher.value = pub
-        session.subscriber.value = sub
+        peerConnections.setPublisher(pub)
+        peerConnections.setSubscriber(sub)
 
         coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
@@ -242,8 +261,8 @@ class FastReconnectIceRestartTest {
         val pub = mockPublisher()
         val sub = mockSubscriber()
 
-        session.publisher.value = pub
-        session.subscriber.value = sub
+        peerConnections.setPublisher(pub)
+        peerConnections.setSubscriber(sub)
 
         val error = Exception("SFU connection timed out")
         coEvery { session.connectInternal(any(), any()) } returns SfuConnectionResult.Failure(

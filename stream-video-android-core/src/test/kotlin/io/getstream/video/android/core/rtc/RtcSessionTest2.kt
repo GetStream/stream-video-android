@@ -20,7 +20,6 @@ import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.result.Error
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
@@ -31,8 +30,12 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.components.CallMediaManager
 import io.getstream.video.android.core.call.components.CallSessionManager
+import io.getstream.video.android.core.call.components.PeerConnections
+import io.getstream.video.android.core.call.components.ReconnectRequests
 import io.getstream.video.android.core.call.connection.Publisher
+import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -90,7 +93,13 @@ class RtcSessionTest2 {
     private lateinit var mockPowerManager: PowerManager
 
     @RelaxedMockK
-    private lateinit var mockCall: Call
+    private lateinit var mockMedia: CallMediaManager
+
+    @RelaxedMockK
+    private lateinit var mockReconnectRequests: ReconnectRequests
+
+    @RelaxedMockK
+    private lateinit var mockScopeProvider: ScopeProvider
 
     @RelaxedMockK
     private lateinit var mockCallState: CallState
@@ -106,6 +115,7 @@ class RtcSessionTest2 {
 
     // We'll spy on a minimal StreamVideo
     private lateinit var mockStreamVideo: StreamVideo
+    private lateinit var peerConnections: PeerConnections
 
     @Before
     fun setup() {
@@ -114,10 +124,10 @@ class RtcSessionTest2 {
         // We also need to mock out the client = StreamVideo
         // So we can cast it to (StreamVideoClient) internally
         mockStreamVideo = mockk(relaxed = true)
-        every { mockCall.state } returns mockCallState
-        every { mockCall.scope } returns testScope
-        every { mockCall.mediaManager } returns mockMediaManager
-        every { mockCall.peerConnectionFactory } returns mockk(relaxed = true) {
+        peerConnections = PeerConnections()
+        every { mockReconnectRequests.scope } returns testScope
+        every { mockMedia.mediaManager } returns mockMediaManager
+        every { mockMedia.peerConnectionFactory } returns mockk(relaxed = true) {
             every {
                 makePeerConnection(
                     any(), any(), any(), any(),
@@ -158,7 +168,15 @@ class RtcSessionTest2 {
             RtcSession(
                 client = mockStreamVideo,
                 powerManager = mockPowerManager,
-                call = mockCall,
+                type = "default",
+                callId = "test-call-id",
+                state = mockCallState,
+                media = mockMedia,
+                statsReporter = mockk(relaxed = true),
+                reconnectRequests = mockReconnectRequests,
+                clientCapabilities = { emptyList() },
+                audioFilter = { null },
+                scopeProvider = mockScopeProvider,
                 sessionManager = CallSessionManager(),
                 sessionId = sessionId,
                 apiKey = apiKey,
@@ -172,6 +190,7 @@ class RtcSessionTest2 {
                 coroutineScope = testScope,
                 sfuConnectionModuleProvider = { mockk(relaxed = true) },
                 sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                peerConnections = peerConnections,
             ),
         )
 
@@ -212,7 +231,15 @@ class RtcSessionTest2 {
                 RtcSession(
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
-                    call = mockCall,
+                    type = "default",
+                    callId = "test-call-id",
+                    state = mockCallState,
+                    media = mockMedia,
+                    statsReporter = mockk(relaxed = true),
+                    reconnectRequests = mockReconnectRequests,
+                    clientCapabilities = { emptyList() },
+                    audioFilter = { null },
+                    scopeProvider = mockScopeProvider,
                     sessionManager = CallSessionManager(),
                     sessionId = sessionId,
                     apiKey = apiKey,
@@ -226,6 +253,7 @@ class RtcSessionTest2 {
                     remoteIceServers = remoteIceServers,
                     sfuConnectionModuleProvider = { sfuSocketModule },
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                    peerConnections = peerConnections,
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -272,7 +300,15 @@ class RtcSessionTest2 {
                 RtcSession(
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
-                    call = mockCall,
+                    type = "default",
+                    callId = "test-call-id",
+                    state = mockCallState,
+                    media = mockMedia,
+                    statsReporter = mockk(relaxed = true),
+                    reconnectRequests = mockReconnectRequests,
+                    clientCapabilities = { emptyList() },
+                    audioFilter = { null },
+                    scopeProvider = mockScopeProvider,
                     sessionManager = CallSessionManager(),
                     sessionId = "test-session-id",
                     apiKey = "test-api-key",
@@ -286,6 +322,7 @@ class RtcSessionTest2 {
                     remoteIceServers = emptyList(),
                     sfuConnectionModuleProvider = { sfuSocketModule },
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                    peerConnections = peerConnections,
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -332,7 +369,15 @@ class RtcSessionTest2 {
                 RtcSession(
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
-                    call = mockCall,
+                    type = "default",
+                    callId = "test-call-id",
+                    state = mockCallState,
+                    media = mockMedia,
+                    statsReporter = mockk(relaxed = true),
+                    reconnectRequests = mockReconnectRequests,
+                    clientCapabilities = { emptyList() },
+                    audioFilter = { null },
+                    scopeProvider = mockScopeProvider,
                     sessionManager = CallSessionManager(),
                     sessionId = "test-session-id",
                     apiKey = "test-api-key",
@@ -346,6 +391,7 @@ class RtcSessionTest2 {
                     remoteIceServers = emptyList(),
                     sfuConnectionModuleProvider = { sfuSocketModule },
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                    peerConnections = peerConnections,
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -404,7 +450,15 @@ class RtcSessionTest2 {
                 RtcSession(
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
-                    call = mockCall,
+                    type = "default",
+                    callId = "test-call-id",
+                    state = mockCallState,
+                    media = mockMedia,
+                    statsReporter = mockk(relaxed = true),
+                    reconnectRequests = mockReconnectRequests,
+                    clientCapabilities = { emptyList() },
+                    audioFilter = { null },
+                    scopeProvider = mockScopeProvider,
                     sessionManager = CallSessionManager(),
                     sessionId = "test-session-id",
                     apiKey = "test-api-key",
@@ -418,6 +472,7 @@ class RtcSessionTest2 {
                     remoteIceServers = emptyList(),
                     sfuConnectionModuleProvider = { sfuSocketModule },
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                    peerConnections = peerConnections,
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -463,7 +518,15 @@ class RtcSessionTest2 {
                 RtcSession(
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
-                    call = mockCall,
+                    type = "default",
+                    callId = "test-call-id",
+                    state = mockCallState,
+                    media = mockMedia,
+                    statsReporter = mockk(relaxed = true),
+                    reconnectRequests = mockReconnectRequests,
+                    clientCapabilities = { emptyList() },
+                    audioFilter = { null },
+                    scopeProvider = mockScopeProvider,
                     sessionManager = CallSessionManager(),
                     sessionId = "test-session-id",
                     apiKey = "test-api-key",
@@ -477,6 +540,7 @@ class RtcSessionTest2 {
                     remoteIceServers = emptyList(),
                     sfuConnectionModuleProvider = { sfuSocketModule },
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                    peerConnections = peerConnections,
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -512,7 +576,15 @@ class RtcSessionTest2 {
                 RtcSession(
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
-                    call = mockCall,
+                    type = "default",
+                    callId = "test-call-id",
+                    state = mockCallState,
+                    media = mockMedia,
+                    statsReporter = mockk(relaxed = true),
+                    reconnectRequests = mockReconnectRequests,
+                    clientCapabilities = { emptyList() },
+                    audioFilter = { null },
+                    scopeProvider = mockScopeProvider,
                     sessionManager = CallSessionManager(),
                     sessionId = "test-session-id",
                     apiKey = "test-api-key",
@@ -526,6 +598,7 @@ class RtcSessionTest2 {
                     remoteIceServers = emptyList(),
                     sfuConnectionModuleProvider = { sfuSocketModule },
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                    peerConnections = peerConnections,
                 ),
             )
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
@@ -568,7 +641,15 @@ class RtcSessionTest2 {
                 RtcSession(
                     client = mockStreamVideo,
                     powerManager = mockPowerManager,
-                    call = mockCall,
+                    type = "default",
+                    callId = "test-call-id",
+                    state = mockCallState,
+                    media = mockMedia,
+                    statsReporter = mockk(relaxed = true),
+                    reconnectRequests = mockReconnectRequests,
+                    clientCapabilities = { emptyList() },
+                    audioFilter = { null },
+                    scopeProvider = mockScopeProvider,
                     sessionManager = CallSessionManager(),
                     sessionId = sessionId,
                     apiKey = apiKey,
@@ -582,6 +663,7 @@ class RtcSessionTest2 {
                     remoteIceServers = remoteIceServers,
                     sfuConnectionModuleProvider = { mockk(relaxed = true) },
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                    peerConnections = peerConnections,
                 ),
             )
             val subscriber = rtcSession.subscriber
@@ -630,7 +712,15 @@ class RtcSessionTest2 {
         val rtcSession = RtcSession(
             client = mockStreamVideo,
             powerManager = mockPowerManager,
-            call = mockCall,
+            type = "default",
+            callId = "test-call-id",
+            state = mockCallState,
+            media = mockMedia,
+            statsReporter = mockk(relaxed = true),
+            reconnectRequests = mockReconnectRequests,
+            clientCapabilities = { emptyList() },
+            audioFilter = { null },
+            scopeProvider = mockScopeProvider,
             sessionManager = CallSessionManager(),
             sessionId = "session-id",
             apiKey = "api-key",
@@ -645,6 +735,7 @@ class RtcSessionTest2 {
             remoteIceServers = emptyList(),
             sfuConnectionModuleProvider = { mockModule },
             sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+            peerConnections = peerConnections,
         )
         // Confirm publisher is null
         assertNull(rtcSession.publisher.value)
@@ -681,7 +772,15 @@ class RtcSessionTest2 {
             val rtcSession = RtcSession(
                 client = mockStreamVideo,
                 powerManager = mockPowerManager,
-                call = mockCall,
+                type = "default",
+                callId = "test-call-id",
+                state = mockCallState,
+                media = mockMedia,
+                statsReporter = mockk(relaxed = true),
+                reconnectRequests = mockReconnectRequests,
+                clientCapabilities = { emptyList() },
+                audioFilter = { null },
+                scopeProvider = mockScopeProvider,
                 sessionManager = CallSessionManager(),
                 sessionId = "session-id",
                 apiKey = "api-key",
@@ -695,9 +794,10 @@ class RtcSessionTest2 {
                 remoteIceServers = emptyList(),
                 sfuConnectionModuleProvider = { mockk(relaxed = true) },
                 sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                peerConnections = peerConnections,
             )
             val mockPublisher = mockk<Publisher>(relaxed = true)
-            rtcSession.publisher.value = mockPublisher
+            peerConnections.setPublisher(mockPublisher)
             val event = ICETrickleEvent(
                 candidate = """{
             "sdpMid": "0",
@@ -730,7 +830,15 @@ class RtcSessionTest2 {
         val rtcSession = RtcSession(
             client = mockStreamVideo,
             powerManager = mockPowerManager,
-            call = mockCall,
+            type = "default",
+            callId = "test-call-id",
+            state = mockCallState,
+            media = mockMedia,
+            statsReporter = mockk(relaxed = true),
+            reconnectRequests = mockReconnectRequests,
+            clientCapabilities = { emptyList() },
+            audioFilter = { null },
+            scopeProvider = mockScopeProvider,
             sessionManager = CallSessionManager(),
             sessionId = sessionId,
             apiKey = "test-api-key",
@@ -744,11 +852,12 @@ class RtcSessionTest2 {
             remoteIceServers = emptyList(),
             sfuConnectionModuleProvider = { mockk(relaxed = true) },
             sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+            peerConnections = peerConnections,
         )
         val subscriber = rtcSession.subscriber.value
         assertNotNull(subscriber)
         val publisher = mockk<Publisher>(relaxed = true)
-        rtcSession.publisher.value = publisher
+        peerConnections.setPublisher(publisher)
         val mockSocketConnection = rtcSession.sfuConnectionModule.socketConnection
         coJustRun { mockSocketConnection.disconnect() }
 
@@ -829,7 +938,15 @@ class RtcSessionTest2 {
             RtcSession(
                 client = mockStreamVideo,
                 powerManager = mockPowerManager,
-                call = mockCall,
+                type = "default",
+                callId = "test-call-id",
+                state = mockCallState,
+                media = mockMedia,
+                statsReporter = mockk(relaxed = true),
+                reconnectRequests = mockReconnectRequests,
+                clientCapabilities = { emptyList() },
+                audioFilter = { null },
+                scopeProvider = mockScopeProvider,
                 sessionManager = CallSessionManager(),
                 sessionId = "session-id",
                 apiKey = "api-key",
@@ -844,6 +961,7 @@ class RtcSessionTest2 {
                 remoteIceServers = emptyList(),
                 sfuConnectionModuleProvider = { mockModule },
                 sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+                peerConnections = peerConnections,
             ),
             recordPrivateCalls = true,
         )

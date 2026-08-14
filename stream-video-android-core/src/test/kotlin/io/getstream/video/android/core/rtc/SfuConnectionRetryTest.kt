@@ -18,6 +18,7 @@ package io.getstream.video.android.core.rtc
 
 import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
+import com.google.common.truth.Truth.assertThat
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.result.Error
 import io.getstream.video.android.core.Call
@@ -29,7 +30,10 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.components.CallMediaManager
 import io.getstream.video.android.core.call.components.CallSessionManager
+import io.getstream.video.android.core.call.components.ReconnectRequests
+import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
@@ -80,7 +84,13 @@ class SfuConnectionRetryTest {
     private lateinit var mockPowerManager: PowerManager
 
     @RelaxedMockK
-    private lateinit var mockCall: Call
+    private lateinit var mockMedia: CallMediaManager
+
+    @RelaxedMockK
+    private lateinit var mockReconnectRequests: ReconnectRequests
+
+    @RelaxedMockK
+    private lateinit var mockScopeProvider: ScopeProvider
 
     @RelaxedMockK
     private lateinit var mockCallState: CallState
@@ -95,6 +105,7 @@ class SfuConnectionRetryTest {
     private lateinit var mockVideoClient: StreamVideoClient
 
     private lateinit var mockStreamVideo: StreamVideo
+    private lateinit var sessionManager: CallSessionManager
 
     private lateinit var socketStateFlow: MutableStateFlow<SfuSocketState>
     private lateinit var mockSocket: SfuSocketConnection
@@ -108,17 +119,17 @@ class SfuConnectionRetryTest {
         MockKAnnotations.init(this, relaxUnitFun = true)
 
         mockStreamVideo = mockk(relaxed = true)
+        sessionManager = CallSessionManager()
         mockNetworkStateProvider = mockk(relaxed = true)
         every { mockNetworkStateProvider.isConnected() } returns true
         val mockCoordinatorModule = mockk<CoordinatorConnectionModule>(relaxed = true)
         every { mockCoordinatorModule.networkStateProvider } returns mockNetworkStateProvider
         every { mockVideoClient.coordinatorConnectionModule } returns mockCoordinatorModule
 
-        every { mockCall.state } returns mockCallState
-        every { mockCall.scope } returns testScope
-        every { mockCall.mediaManager } returns mockMediaManager
-        coEvery { mockCall.reconnect(any(), any()) } returns Unit
-        every { mockCall.peerConnectionFactory } returns mockk(relaxed = true) {
+        every { mockReconnectRequests.scope } returns testScope
+        every { mockMedia.mediaManager } returns mockMediaManager
+        coEvery { mockReconnectRequests.reconnect(any(), any()) } returns Unit
+        every { mockMedia.peerConnectionFactory } returns mockk(relaxed = true) {
             every { makePeerConnection(any(), any(), any(), any()) } returns mockk(relaxed = true)
         }
         every { mockCallState.ownCapabilities } returns ownCapabilitiesFlow
@@ -149,8 +160,16 @@ class SfuConnectionRetryTest {
         return RtcSession(
             client = mockStreamVideo,
             powerManager = mockPowerManager,
-            call = mockCall,
-            sessionManager = CallSessionManager(),
+            type = "default",
+            callId = "test-call-id",
+            state = mockCallState,
+            media = mockMedia,
+            statsReporter = mockk(relaxed = true),
+            reconnectRequests = mockReconnectRequests,
+            clientCapabilities = { emptyList() },
+            audioFilter = { null },
+            scopeProvider = mockScopeProvider,
+            sessionManager = sessionManager,
             sessionId = "test-session-id",
             apiKey = "test-api-key",
             lifecycle = mockLifecycle,
@@ -192,7 +211,7 @@ class SfuConnectionRetryTest {
         advance()
 
         coVerify(exactly = 1) {
-            mockCall.reconnect(
+            mockReconnectRequests.reconnect(
                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED,
                 any(),
             )
@@ -210,7 +229,7 @@ class SfuConnectionRetryTest {
         advance()
 
         coVerify(exactly = 1) {
-            mockCall.reconnect(
+            mockReconnectRequests.reconnect(
                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
                 any(),
             )
@@ -228,7 +247,7 @@ class SfuConnectionRetryTest {
         advance()
 
         coVerify(exactly = 1) {
-            mockCall.reconnect(
+            mockReconnectRequests.reconnect(
                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
                 any(),
             )
@@ -246,7 +265,7 @@ class SfuConnectionRetryTest {
         advance()
 
         coVerify(exactly = 1) {
-            mockCall.reconnect(
+            mockReconnectRequests.reconnect(
                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                 any(),
             )
@@ -264,7 +283,7 @@ class SfuConnectionRetryTest {
         advance()
 
         coVerify(exactly = 1) {
-            mockCall.reconnect(
+            mockReconnectRequests.reconnect(
                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_DISCONNECT,
                 any(),
             )
@@ -274,15 +293,16 @@ class SfuConnectionRetryTest {
     // -- Connected state --
 
     @Test
-    fun `Connected state calls onSfuConnectionEstablished`() = runTest {
+    fun `Connected state clears the failed sfu ids`() = runTest {
         val connectedEvent = mockk<JoinCallResponseEvent>(relaxed = true)
         createRtcSession()
         advance()
+        sessionManager.addFailedSfuId("sfu-edge-0")
 
         socketStateFlow.value = SfuSocketState.Connected(connectedEvent)
         advance()
 
-        coVerify(exactly = 1) { mockCall.onSfuConnectionEstablished() }
+        assertThat(sessionManager.failedSfuIdsSnapshot()).isEmpty()
     }
 
     // -- WebSocketEventLost --
@@ -296,7 +316,7 @@ class SfuConnectionRetryTest {
         advance()
 
         coVerify(exactly = 1) {
-            mockCall.reconnect(
+            mockReconnectRequests.reconnect(
                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                 match { it.contains("healthcheck-timeout") },
             )
@@ -320,7 +340,7 @@ class SfuConnectionRetryTest {
         advance()
 
         coVerify(exactly = 1) {
-            mockCall.reconnect(
+            mockReconnectRequests.reconnect(
                 WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
                 any(),
             )
@@ -346,7 +366,7 @@ class SfuConnectionRetryTest {
         )
         advance()
 
-        coVerify(exactly = 0) { mockCall.reconnect(any(), any()) }
+        coVerify(exactly = 0) { mockReconnectRequests.reconnect(any(), any()) }
     }
 
     @Test
@@ -364,7 +384,7 @@ class SfuConnectionRetryTest {
         )
         advance()
 
-        coVerify(exactly = 0) { mockCall.reconnect(any(), any()) }
+        coVerify(exactly = 0) { mockReconnectRequests.reconnect(any(), any()) }
     }
 
     // -- sfuName --

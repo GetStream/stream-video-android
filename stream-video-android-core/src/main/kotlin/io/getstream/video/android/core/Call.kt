@@ -68,6 +68,7 @@ import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.components.CallStatsReporter
 import io.getstream.video.android.core.call.components.ClientCallRegistry
 import io.getstream.video.android.core.call.components.MediaManagerFactory
+import io.getstream.video.android.core.call.components.ReconnectRequests
 import io.getstream.video.android.core.call.components.RtcSessionFactory
 import io.getstream.video.android.core.call.components.SessionMonitor
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -167,10 +168,22 @@ public class Call(
     internal var unitTestRtcSessionFactory: (() -> RtcSession)? = null
 
     /**
-     * Creates [RtcSession] instances for join / rejoin / migrate. Captures `this` so the
-     * session's Call dependency never leaks into the join/reconnect orchestrators, and hands it
-     * the [CallSessionManager] directly so session identity and reconnect timings are read from
-     * their owner rather than routed back through this facade.
+     * Hands a session the reconnect decisions it detects but cannot carry out itself. Resolves
+     * [reconnector] lazily because a session is created *by* the reconnector.
+     */
+    private val reconnectRequests = object : ReconnectRequests {
+        override val scope: CoroutineScope get() = this@Call.scope
+
+        override suspend fun reconnect(strategy: WebsocketReconnectStrategy, reason: String) =
+            reconnector.reconnect(strategy, reason)
+
+        override suspend fun rejoin(reason: String) = reconnector.rejoin(reason)
+    }
+
+    /**
+     * Creates [RtcSession] instances for join / rejoin / migrate. The session takes no Call
+     * reference: it is handed the specific collaborators it needs, so neither it nor the
+     * join/reconnect orchestrators route anything back through this facade.
      */
     private val sessionFactory = RtcSessionFactory {
             sessionId, sessionCounter, sfuUrl, sfuWsUrl, sfuToken, sfuName, iceServers ->
@@ -178,8 +191,16 @@ public class Call(
             client = clientImpl,
             sessionCounter = sessionCounter,
             powerManager = powerManager,
-            call = this,
+            type = type,
+            callId = id,
+            state = state,
+            media = media,
+            statsReporter = statsReporter,
+            reconnectRequests = reconnectRequests,
+            clientCapabilities = { clientCapabilities.values.toList() },
+            audioFilter = { audioFilter },
             sessionManager = sessionManager,
+            scopeProvider = scopeProvider,
             sessionId = sessionId,
             apiKey = clientImpl.apiKey,
             lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
