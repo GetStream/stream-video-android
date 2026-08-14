@@ -48,10 +48,10 @@ internal abstract class GenericCallActionBroadcastReceiver : BroadcastReceiver()
             }
             // Extract call id
             val streamCallId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)
-            // We want the broadcast to stay alive so we can finish the coroutine.
-            val pendingResult = goAsync()
 
             if (streamCallId != null) {
+                // We want the broadcast to stay alive so we can finish the coroutine.
+                val pendingResult = goAsync()
                 scope.launch {
                     try {
                         // Get stream video
