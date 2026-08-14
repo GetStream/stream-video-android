@@ -64,6 +64,14 @@ internal class PeerConnectionAnalyticsStateHolder {
         }
     }
 
+    fun setPcEverConnected(role: PeerConnectionRole, connected: Boolean) {
+        if (role == PeerConnectionRole.PUBLISH) {
+            updatePublisherEverConnected(connected)
+        } else {
+            updateSubscriberEverConnected(connected)
+        }
+    }
+
     fun update(
         peerConnectionObserverJob: Job? = state.value.peerConnectionObserverJob,
         publisherJob: Job? = state.value.publisherJob,

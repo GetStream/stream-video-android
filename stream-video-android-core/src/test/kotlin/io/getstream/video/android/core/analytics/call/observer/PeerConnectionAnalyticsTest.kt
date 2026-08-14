@@ -110,6 +110,32 @@ class PeerConnectionAnalyticsTest {
     }
 
     @Test
+    fun `a new call starts with wasPrevConnected set to false`() {
+        analytics(CoroutineScope(Dispatchers.Unconfined)).onPeerConnectionStateChanged(
+            peerConnectionHashCode = 42,
+            role = PeerConnectionRole.PUBLISH,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+            peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
+        )
+
+        verify(exactly = 1) {
+            reporter.onPeerConnectionStateChanged(
+                peerConnectionHashCode = 42,
+                callId = "call-1",
+                callType = "default",
+                joinStageAttemptId = any(),
+                callSessionId = any(),
+                sfuId = any(),
+                joinReason = any(),
+                role = PeerConnectionRole.PUBLISH,
+                iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+                wasPrevConnected = false,
+                peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
+            )
+        }
+    }
+
+    @Test
     fun `a connecting publisher reports its current ice state immediately and marks the stage in progress`() = runTest {
         val session = mockSession(
             publisherState = PeerConnection.PeerConnectionState.CONNECTING,
@@ -163,7 +189,7 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.NOT_CONNECTED,
-                wasPrevConnected = true,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTED,
             )
         }
@@ -290,15 +316,16 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.CONNECTED,
-                wasPrevConnected = true,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTED,
             )
         }
+        assertTrue(stateHolder.isPcEverConnected(PeerConnectionRole.PUBLISH))
         scope.cancel()
     }
 
     @Test
-    fun `a publisher reconnect is flagged as previously connected without affecting subscriber`() {
+    fun `an existing call whose Publisher was previously connected sends wasPrevConnected as true`() {
         val scope = CoroutineScope(Dispatchers.Unconfined)
         val peerConnectionAnalytics = analytics(scope)
 
@@ -311,36 +338,14 @@ class PeerConnectionAnalyticsTest {
 
         peerConnectionAnalytics.onPeerConnectionStateChanged(
             peerConnectionHashCode = 43,
-            role = PeerConnectionRole.SUBSCRIBE,
-            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
-            peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
-        )
-
-        peerConnectionAnalytics.onPeerConnectionStateChanged(
-            peerConnectionHashCode = 44,
             role = PeerConnectionRole.PUBLISH,
             iceState = VideoAnalyticsIceState.NOT_CONNECTED,
             peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
         )
 
-        verify {
+        verify(exactly = 1) {
             reporter.onPeerConnectionStateChanged(
                 peerConnectionHashCode = 43,
-                callId = "call-1",
-                callType = "default",
-                joinStageAttemptId = any(),
-                callSessionId = any(),
-                sfuId = any(),
-                joinReason = any(),
-                role = PeerConnectionRole.SUBSCRIBE,
-                iceState = VideoAnalyticsIceState.NOT_CONNECTED,
-                wasPrevConnected = false,
-                peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
-            )
-        }
-        verify {
-            reporter.onPeerConnectionStateChanged(
-                peerConnectionHashCode = 44,
                 callId = "call-1",
                 callType = "default",
                 joinStageAttemptId = any(),
