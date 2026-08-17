@@ -869,9 +869,37 @@ public class Call(
 
     fun isAudioProcessingEnabled(): Boolean = media.isAudioProcessingEnabled()
 
-    fun setAudioProcessingEnabled(enabled: Boolean) = media.setAudioProcessingEnabled(enabled)
+    fun setAudioProcessingEnabled(enabled: Boolean) {
+        media.setAudioProcessingEnabled(enabled)
+        notifyNoiseCancellationState(enabled)
+    }
 
-    fun toggleAudioProcessing(): Boolean = media.toggleAudioProcessing()
+    fun toggleAudioProcessing(): Boolean = media.toggleAudioProcessing().also { enabled ->
+        notifyNoiseCancellationState(enabled)
+    }
+
+    /**
+     * Tells the SFU whether local noise cancellation is running.
+     *
+     * Fire-and-forget: the local audio-processing module is already updated by the time this runs,
+     * so a failed signal is logged rather than surfaced to the caller.
+     */
+    private fun notifyNoiseCancellationState(enabled: Boolean) {
+        val session = session.value ?: return
+        scope.launch {
+            val result = if (enabled) {
+                session.startNoiseCancellation()
+            } else {
+                session.stopNoiseCancellation()
+            }
+            if (result is Result.Failure) {
+                logger.w {
+                    "[notifyNoiseCancellationState] #sfu; enabled: $enabled, " +
+                        "failed: ${result.value.message}"
+                }
+            }
+        }
+    }
 
     suspend fun startTranscription(): Result<StartTranscriptionResponse> =
         apiClient.startTranscription()
