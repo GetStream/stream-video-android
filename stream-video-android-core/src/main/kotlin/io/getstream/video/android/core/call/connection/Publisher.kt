@@ -195,8 +195,8 @@ internal class Publisher(
         logger.i { "Negotiating with tracks: $trackInfos" }
         logger.i { "Offer: ${offer.description}" }
 
-        safeCall {
-            isIceRestarting = iceRestart
+        isIceRestarting = iceRestart
+        try {
             setLocalDescription(offer).onErrorSuspend {
                 tracer.trace("negotiate-error-setlocaldescription", it.message ?: "unknown")
             }
@@ -245,8 +245,12 @@ internal class Publisher(
                 }.onSuccess {
                     logger.d { "Publisher negotiation successfully done ✅" }
                 }
+        } catch (e: Exception) {
+            logger.e(e) { "[negotiate] Exception occurred: ${e.message}" }
+        } finally {
+            // Must clear even when returning early from @submit (inline safeCall used to skip this).
+            isIceRestarting = false
         }
-        isIceRestarting = false
     }
 
     override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {

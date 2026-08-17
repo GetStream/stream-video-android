@@ -351,7 +351,55 @@ class PublisherTest {
         publisher.negotiate(source = "test")
 
         coVerify(exactly = 1) { mockSignalServerService.setPublisher(any()) }
+        coVerify(exactly = 0) { publisher.setRemoteDescription(any()) }
         assertEquals(1, rejoinInvocations)
+    }
+
+    @Test
+    fun `iceRestart SetPublisher error clears isIceRestarting so later negotiate runs`() = runTest(
+        coroutineContext,
+    ) {
+        every { publisher.getAnnouncedTracks(any(), any()) } returns listOf(
+            TrackInfo(
+                track_id = "video-1",
+                track_type = TrackType.TRACK_TYPE_VIDEO,
+                mid = "0",
+                muted = false,
+                layers = listOf(
+                    stream.video.sfu.models.VideoLayer(
+                        rid = "f",
+                        video_dimension = VideoDimension(1280, 720),
+                        bitrate = 1_000_000,
+                        fps = 30,
+                    ),
+                ),
+                publish_option_id = videoPublishOption.id,
+            ),
+        )
+        coEvery { publisher.setLocalDescription(any()) } returns Result.Success(Unit)
+        coEvery { publisher.setRemoteDescription(any()) } returns Result.Success(Unit)
+        coEvery { mockSignalServerService.setPublisher(any()) } returnsMany listOf(
+            SetPublisherResponse(
+                sdp = "",
+                error = Error(
+                    code = ErrorCode.ERROR_CODE_PARTICIPANT_NOT_FOUND,
+                    message = "participant not found",
+                    should_retry = false,
+                ),
+            ),
+            SetPublisherResponse(
+                sdp = fakeSdpAnswer.description,
+                error = null,
+            ),
+        )
+
+        publisher.negotiate(source = "ice-restart", iceRestart = true)
+        assertEquals(0, rejoinInvocations)
+
+        // Without finally clearing isIceRestarting, this second call would no-op.
+        publisher.negotiate(source = "after-ice-restart-error")
+
+        coVerify(exactly = 2) { mockSignalServerService.setPublisher(any()) }
     }
 
     @Test
