@@ -38,14 +38,11 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.model.toIceServer
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
+import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
@@ -72,31 +69,31 @@ internal class CallJoinCoordinator(
     private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
 
     /**
-     * Single-flight bookkeeping for [join] (same idea as
-     * [io.getstream.video.android.core.utils.StreamSingleFlightProcessorImpl], but the shared
-     * work runs on the **caller's** coroutine so a ViewModel/UI cancel still aborts the join).
+     * Coalesces concurrent [join] calls into one attempt on the call [scope].
      *
-     * Concurrent [join] calls must share one attempt: each would otherwise build its own
-     * [RtcSession] while reusing [CallSessionManager.sessionId], leaving SFU-evicted zombies
-     * that fail every RPC with PARTICIPANT_NOT_FOUND. Checking [CallSessionManager.session] is
-     * not enough — it is only set after the coordinator round-trip.
+     * Without this, overlapping joins each build an [RtcSession] while reusing
+     * [CallSessionManager.sessionId], which leaves SFU-evicted zombies that fail every RPC
+     * with PARTICIPANT_NOT_FOUND. Checking [CallSessionManager.session] is not enough — it
+     * is only set after the coordinator round-trip.
      *
      * Coalescing the whole [join] also keeps once-per-join work once-only: JoinInitiated /
      * MediaDevicePermission analytics, installing [CallState.callJoinInterceptor], resetting
      * the leave guard, and moving to [RealtimeConnection.InProgress].
      *
-     * Held only long enough to read or publish [joinFlight], never across the join itself.
+     * [StreamRefCountedSingleFlightProcessor] keeps the join alive when one waiter (e.g. an
+     * Activity) is cancelled while others still await, and cancels it when the last waiter
+     * leaves.
      */
-    private val joinMutex = Mutex()
-
-    /** The in-flight [join], if any. Completed flights are never reused. */
-    private var joinFlight: CompletableDeferred<Result<RtcSession>>? = null
+    private val joinFlight = StreamRefCountedSingleFlightProcessor(scope)
 
     private fun isVideoEnabled(): Boolean = state.settings.value?.video?.enabled ?: false
 
     /**
      * Joins the call, coalescing concurrent callers into one in-flight execution (single-flight).
-     * Additional callers await the same [Result]. The winner runs on its own caller coroutine.
+     *
+     * The shared work runs on the call [scope]. Each caller still awaits on its own coroutine,
+     * so destroying one UI scope only drops that waiter; remaining waiters keep the join.
+     * Cancelling the last waiter cancels the shared job.
      */
     suspend fun join(
         create: Boolean = false,
@@ -106,41 +103,26 @@ internal class CallJoinCoordinator(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
-        val (flight, isWinner) = joinMutex.withLock {
-            val running = joinFlight?.takeUnless { it.isCompleted }
-            if (running != null) {
-                logger.i {
-                    "[join] Single-flight: join already in flight — awaiting its result"
-                }
-                running to false
-            } else {
-                CompletableDeferred<Result<RtcSession>>().also { joinFlight = it } to true
-            }
-        }
-
-        if (isWinner) {
-            // Winner executes on this caller's coroutine (e.g. viewModelScope). Followers
-            // only await [flight]; cancelling the winner cancels the shared join for them too.
-            try {
-                val result = executeJoin(
-                    create,
-                    createOptions,
-                    ring,
-                    notify,
-                    hintHighScaleLivestreamPublisher,
-                    callJoinInterceptor,
+        return joinFlight.run(JOIN_FLIGHT_KEY) {
+            executeJoin(
+                create,
+                createOptions,
+                ring,
+                notify,
+                hintHighScaleLivestreamPublisher,
+                callJoinInterceptor,
+            )
+        }.fold(
+            onSuccess = { it },
+            onFailure = { error ->
+                Failure(
+                    Error.ThrowableError(
+                        message = error.message ?: "Join single-flight failed",
+                        cause = error,
+                    ),
                 )
-                flight.complete(result)
-                return result
-            } catch (e: CancellationException) {
-                flight.cancel(e)
-                throw e
-            } catch (e: Throwable) {
-                flight.completeExceptionally(e)
-                throw e
-            }
-        }
-        return flight.await()
+            },
+        )
     }
 
     private suspend fun executeJoin(
@@ -151,6 +133,12 @@ internal class CallJoinCoordinator(
         hintHighScaleLivestreamPublisher: Boolean?,
         callJoinInterceptor: CallJoinInterceptor?,
     ): Result<RtcSession> {
+        // Idempotent: subsequent join() while a session is already live returns that session
+        sessionManager.session.value?.let { existing ->
+            logger.i { "[join] Call already joined — returning existing session" }
+            return Success(existing)
+        }
+
         callAnalytics.joinAnalytics.onJoinFunctionStart()
         callAnalytics.mediaPermissionObserver.mediaPermissionStatus()
         logger.d {
@@ -287,8 +275,9 @@ internal class CallJoinCoordinator(
         sessionManager.nonFastReconnectAttempts = 0
         sessionMonitor.cancelSfuObservers()
 
-        if (sessionManager.session.value != null) {
-            return Failure(Error.GenericError("Call $type:$id has already been joined"))
+        sessionManager.session.value?.let { existing ->
+            logger.i { "[joinInternal] Call already joined — returning existing session" }
+            return Success(existing)
         }
         logger.d {
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -463,5 +452,9 @@ internal class CallJoinCoordinator(
         }
         logger.d { "[_join] Reconnect after recoverable connection failure settled on $terminal" }
         return terminal is RealtimeConnection.Connected
+    }
+
+    private companion object {
+        const val JOIN_FLIGHT_KEY = "join"
     }
 }

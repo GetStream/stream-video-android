@@ -42,6 +42,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import io.mockk.verify
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -54,6 +55,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import kotlin.test.assertFailsWith
 
 /**
  * Tests the join orchestration in [CallJoinCoordinator]: the [join] retry loop, join-and-ring,
@@ -202,14 +204,40 @@ class CallJoinCoordinatorTest {
     }
 
     @Test
-    fun `join fails when the call is already joined`() = runTest(testDispatcher) {
-        sessionFlow.value = mockk(relaxed = true)
+    fun `join returns the existing session when the call is already joined`() = runTest(
+        testDispatcher,
+    ) {
+        val existing = mockk<RtcSession>(relaxed = true)
+        sessionFlow.value = existing
+        connectionFlow.value = RealtimeConnection.Connected
+
+        val result = coordinator().join()
+        advanceUntilIdle()
+
+        assertThat(result).isInstanceOf(Success::class.java)
+        assertThat((result as Success).value).isSameInstanceAs(existing)
+        assertThat(sessionFlow.value).isSameInstanceAs(existing)
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Connected)
+        verify(exactly = 0) { sessionManager.setActiveSession(null) }
+        verify(exactly = 0) { callAnalytics.joinAnalytics.onJoinFunctionStart() }
+        coVerify(exactly = 0) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `joinInternal returns the existing session when the call is already joined`() = runTest(
+        testDispatcher,
+    ) {
+        val existing = mockk<RtcSession>(relaxed = true)
+        sessionFlow.value = existing
 
         val result = coordinator().joinInternal(
             joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
         )
 
-        assertThat(result).isInstanceOf(Failure::class.java)
+        assertThat(result).isInstanceOf(Success::class.java)
+        assertThat((result as Success).value).isSameInstanceAs(existing)
     }
 
     @Test
@@ -316,6 +344,107 @@ class CallJoinCoordinatorTest {
         coVerify(exactly = 2) {
             apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
         }
+    }
+
+    @Test
+    fun `cancelling one waiter leaves the shared join running for others`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        val connectGate = CompletableDeferred<Unit>()
+        coEvery { mockSession.connectInternal() } coAnswers {
+            connectGate.await()
+            SfuConnectionResult.Success
+        }
+        val coordinator = coordinator()
+
+        // Two different caller jobs (e.g. Activity A and Activity B / CallState auto-join).
+        val first = async { coordinator.join() }
+        advanceUntilIdle()
+        val second = async { coordinator.join() }
+        advanceUntilIdle()
+
+        first.cancel()
+        advanceUntilIdle()
+        assertFailsWith<CancellationException> { first.await() }
+
+        // Shared call-scoped join must still be alive for the second waiter.
+        connectGate.complete(Unit)
+        val secondResult = second.await()
+        advanceUntilIdle()
+
+        assertThat(secondResult).isInstanceOf(Success::class.java)
+        coVerify(exactly = 1) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+        coVerify(exactly = 1) { mockSession.connectInternal() }
+    }
+
+    @Test
+    fun `cancelling the last waiter cancels the shared join`() = runTest(testDispatcher) {
+        // Gate before the session is installed so cancel cannot leave a half-joined session
+        // behind in this test.
+        val joinRequestGate = CompletableDeferred<Unit>()
+        coEvery {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        } coAnswers {
+            joinRequestGate.await()
+            Success(mockJoinResponse)
+        }
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+        val coordinator = coordinator()
+
+        val first = async { coordinator.join() }
+        advanceUntilIdle()
+        val second = async { coordinator.join() }
+        advanceUntilIdle()
+
+        first.cancel()
+        second.cancel()
+        advanceUntilIdle()
+        assertFailsWith<CancellationException> { first.await() }
+        assertFailsWith<CancellationException> { second.await() }
+
+        joinRequestGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertThat(sessionFlow.value).isNull()
+        coVerify(exactly = 0) { sessionManager.setActiveSession(mockSession) }
+
+        // A later join must start a fresh attempt, not reuse the cancelled flight.
+        stubJoinCall(Success(mockJoinResponse))
+        val retry = coordinator.join()
+        advanceUntilIdle()
+        assertThat(retry).isInstanceOf(Success::class.java)
+        // First (cancelled) flight entered joinRequest once; the retry is a second attempt.
+        coVerify(exactly = 2) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `cancelling the sole waiter cancels the call-scoped join`() = runTest(testDispatcher) {
+        val joinRequestGate = CompletableDeferred<Unit>()
+        coEvery {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        } coAnswers {
+            joinRequestGate.await()
+            Success(mockJoinResponse)
+        }
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+        val coordinator = coordinator()
+
+        val join = async { coordinator.join() }
+        advanceUntilIdle()
+        join.cancel()
+        advanceUntilIdle()
+        assertFailsWith<CancellationException> { join.await() }
+
+        joinRequestGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertThat(sessionFlow.value).isNull()
+        coVerify(exactly = 0) { sessionManager.setActiveSession(mockSession) }
     }
 
     @Test
