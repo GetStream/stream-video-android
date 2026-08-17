@@ -296,6 +296,10 @@ internal class CallMediaManager(
     }
 
     fun cleanup() {
+        // The audio processor is owned by the client and shared by every call, so this call's
+        // choice has to be cleared here or it carries into the next one. Reads the backing
+        // field directly: cleanup must never lazily build a factory just to reset it.
+        _peerConnectionFactory?.resetAudioProcessing()
         mediaManager.cleanup()
     }
 }

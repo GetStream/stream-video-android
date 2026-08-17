@@ -84,6 +84,26 @@ public class StreamPeerConnectionFactory(
      */
     internal var audioBitrateProfile: stream.video.sfu.models.AudioBitrateProfile? = null
 
+    /**
+     * Whether [audioProcessing] was wired into the native factory when it was built. Under
+     * MUSIC_HIGH_QUALITY the processor is deliberately left off, so the shared module's own
+     * `isEnabled` flag says nothing about whether processing actually runs for this call.
+     */
+    private var audioProcessingAttached: Boolean = false
+
+    private var factoryCreated: Boolean = false
+
+    /**
+     * True when audio processing is — or will be — wired into the native factory for this call.
+     * Before the factory is built the only honest answer is what it will be built with.
+     */
+    private fun isAudioProcessingAttached(): Boolean = if (factoryCreated) {
+        audioProcessingAttached
+    } else {
+        audioProcessing != null && audioBitrateProfileProvider?.invoke() !=
+            stream.video.sfu.models.AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+    }
+
     private val webRtcLogger by taggedLogger("Call:WebRTC")
     private val audioLogger by taggedLogger("Call:AudioTrackCallback")
 
@@ -232,7 +252,10 @@ public class StreamPeerConnectionFactory(
             .apply {
                 // Disable audio processing (noise cancellation) when MUSIC_HIGH_QUALITY is enabled
                 if (!isMusicHighQuality) {
-                    audioProcessing?.also { setAudioProcessingFactory(it) }
+                    audioProcessing?.also {
+                        setAudioProcessingFactory(it)
+                        this@StreamPeerConnectionFactory.audioProcessingAttached = true
+                    }
                 } else {
                     setAudioProcessingEnabled(false)
                 }
@@ -243,6 +266,7 @@ public class StreamPeerConnectionFactory(
                 adm,
             )
             .createPeerConnectionFactory()
+            .also { factoryCreated = true }
     }
 
     private fun initAudioDeviceModule(): JavaAudioDeviceModule? {
@@ -680,26 +704,46 @@ public class StreamPeerConnectionFactory(
 
     /**
      * True if the audio processing is enabled, false otherwise.
+     *
+     * Returns false when the processor is not wired into the native factory — under
+     * MUSIC_HIGH_QUALITY nothing is processing this call's audio, whatever the shared
+     * module's own flag happens to say.
      */
     public fun isAudioProcessingEnabled(): Boolean {
+        if (!isAudioProcessingAttached()) return false
         return audioProcessing?.isEnabled ?: false
     }
 
     /**
      * Sets the audio processing on or off.
+     *
+     * No-op when the processor is not wired into the native factory: the module is shared
+     * across calls, and a call that cannot use it must not change what other calls observe.
      */
     public fun setAudioProcessingEnabled(enabled: Boolean) {
+        if (!isAudioProcessingAttached()) return
         audioProcessing?.isEnabled = enabled
     }
 
     /**
-     * Toggles the audio processing on and off.
+     * Toggles the audio processing on and off, returning the resulting state.
      */
     public fun toggleAudioProcessing(): Boolean {
+        if (!isAudioProcessingAttached()) return false
         return audioProcessing?.let {
             it.isEnabled = !it.isEnabled
             it.isEnabled
         } ?: false
+    }
+
+    /**
+     * Clears the shared audio processor's enabled state.
+     *
+     * The [ManagedAudioProcessingFactory] is owned by the client and reused by every call, so a
+     * call must not leave its choice behind for whichever call comes next.
+     */
+    internal fun resetAudioProcessing() {
+        audioProcessing?.isEnabled = false
     }
 
     /**

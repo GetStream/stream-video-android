@@ -41,6 +41,7 @@ import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnection.Observer
 import org.webrtc.PeerConnectionFactory
+import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.PublishOption
 
 class StreamPeerConnectionFactoryTest {
@@ -242,5 +243,72 @@ class StreamPeerConnectionFactoryTest {
         val first = factory.toggleAudioProcessing()
         assertTrue("Should now be enabled", first)
         verify { mockAudioProc.isEnabled = true }
+    }
+
+    // 10) Audio processing is only reported / mutated when the processor is actually attached
+
+    private fun factoryWithProfile(
+        profile: AudioBitrateProfile,
+        audioProcessing: ManagedAudioProcessingFactory?,
+    ): StreamPeerConnectionFactory = StreamPeerConnectionFactory(
+        context = mockContext,
+        audioProcessing = audioProcessing,
+        audioBitrateProfileProvider = { profile },
+        sharedEglBaseProvider = { mockk(relaxed = true) },
+    )
+
+    @Test
+    fun `isAudioProcessingEnabled is false under MUSIC_HIGH_QUALITY even when the module is on`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        every { mockAudioProc.isEnabled } returns true
+
+        val musicFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            mockAudioProc,
+        )
+
+        assertFalse(
+            "Processor is never attached under MUSIC_HIGH_QUALITY, so nothing is processing",
+            musicFactory.isAudioProcessingEnabled(),
+        )
+    }
+
+    @Test
+    fun `setAudioProcessingEnabled leaves the shared module alone under MUSIC_HIGH_QUALITY`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        val musicFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            mockAudioProc,
+        )
+
+        musicFactory.setAudioProcessingEnabled(true)
+
+        verify(exactly = 0) { mockAudioProc.isEnabled = any() }
+    }
+
+    @Test
+    fun `toggleAudioProcessing is a no-op under MUSIC_HIGH_QUALITY`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        val musicFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            mockAudioProc,
+        )
+
+        assertFalse("Nothing to toggle when unattached", musicFactory.toggleAudioProcessing())
+        verify(exactly = 0) { mockAudioProc.isEnabled = any() }
+    }
+
+    @Test
+    fun `resetAudioProcessing clears the shared module so it cannot leak into the next call`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        every { mockAudioProc.isEnabled } returns true
+
+        val callFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+            mockAudioProc,
+        )
+        callFactory.resetAudioProcessing()
+
+        verify { mockAudioProc.isEnabled = false }
     }
 }

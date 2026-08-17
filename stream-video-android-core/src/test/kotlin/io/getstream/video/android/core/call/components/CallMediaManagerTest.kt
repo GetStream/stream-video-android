@@ -157,6 +157,28 @@ class CallMediaManagerTest {
     }
 
     @Test
+    fun `cleanup clears the shared audio processor so it cannot leak into the next call`() {
+        val factory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+        val manager = manager()
+        manager.peerConnectionFactory = factory
+
+        manager.cleanup()
+
+        verify { factory.resetAudioProcessing() }
+        verify { mediaManager.cleanup() }
+    }
+
+    @Test
+    fun `cleanup does not build a factory when the call never used one`() {
+        val manager = manager()
+
+        // Reads the backing field, so no lazy factory is created just to be reset.
+        manager.cleanup()
+
+        verify { mediaManager.cleanup() }
+    }
+
+    @Test
     fun `localMicrophoneAudioLevel is exposed`() {
         assertThat(manager().localMicrophoneAudioLevel.value).isEqualTo(0f)
     }
