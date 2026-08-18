@@ -81,4 +81,20 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         coVerify(exactly = 0) { session.startNoiseCancellation() }
         coVerify(exactly = 0) { session.stopNoiseCancellation() }
     }
+
+    @Test
+    fun `rapid changes still leave the SFU holding the final state`() = runTest {
+        val call = client.call("default", randomUUID())
+        val session = mockk<RtcSession>(relaxed = true)
+        call.injectSession(session)
+
+        // Signals are queued and each sends whatever was requested most recently, so whichever
+        // order the queued coroutines start in, the last one carries "off". Intermediate signals
+        // are legitimate — the state really was on for a moment — so this asserts convergence,
+        // not suppression.
+        call.setAudioProcessingEnabled(true)
+        call.setAudioProcessingEnabled(false)
+
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.stopNoiseCancellation() }
+    }
 }

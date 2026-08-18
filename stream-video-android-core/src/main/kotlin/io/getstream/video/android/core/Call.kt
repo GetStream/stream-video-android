@@ -86,6 +86,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomCal
 import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
@@ -475,6 +476,21 @@ public class Call(
         set(value) {
             sessionManager.reconnectDeadlineMillis = value
         }
+
+    /**
+     * Serializes noise-cancellation signals to the SFU. Without it each signal races on its own
+     * coroutine, and a retried start can land after a stop — leaving the SFU holding a state the
+     * client left behind.
+     */
+    private val noiseCancellationSignals = SerialProcessor(scope)
+
+    /**
+     * Latest requested noise-cancellation state, written synchronously on the caller's thread so
+     * a queued signal always sends the most recent request regardless of the order the queued
+     * coroutines happened to start in.
+     */
+    @Volatile
+    private var desiredNoiseCancellationEnabled: Boolean = false
 
     init {
         media.startAudioLevelMonitoring()
@@ -883,19 +899,30 @@ public class Call(
      *
      * Fire-and-forget: the local audio-processing module is already updated by the time this runs,
      * so a failed signal is logged rather than surfaced to the caller.
+     *
+     * Signals run one at a time and each sends the latest requested state, so rapid toggles
+     * converge on the right value instead of racing. The session is resolved as the signal runs,
+     * not when it was requested — a rejoin in between must not send the request at a session that
+     * has already been replaced.
      */
     private fun notifyNoiseCancellationState(enabled: Boolean) {
-        val session = session.value ?: return
+        desiredNoiseCancellationEnabled = enabled
         scope.launch {
-            val result = if (enabled) {
-                session.startNoiseCancellation()
-            } else {
-                session.stopNoiseCancellation()
-            }
-            if (result is Result.Failure) {
-                logger.w {
-                    "[notifyNoiseCancellationState] #sfu; enabled: $enabled, " +
-                        "failed: ${result.value.message}"
+            noiseCancellationSignals.submit("noiseCancellation") {
+                val session = session.value
+                if (session != null) {
+                    val target = desiredNoiseCancellationEnabled
+                    val result = if (target) {
+                        session.startNoiseCancellation()
+                    } else {
+                        session.stopNoiseCancellation()
+                    }
+                    if (result is Result.Failure) {
+                        logger.w {
+                            "[notifyNoiseCancellationState] #sfu; enabled: $target, " +
+                                "failed: ${result.value.message}"
+                        }
+                    }
                 }
             }
         }
