@@ -195,8 +195,8 @@ internal class Publisher(
         logger.i { "Negotiating with tracks: $trackInfos" }
         logger.i { "Offer: ${offer.description}" }
 
-        safeCall {
-            isIceRestarting = iceRestart
+        isIceRestarting = iceRestart
+        try {
             setLocalDescription(offer).onErrorSuspend {
                 tracer.trace("negotiate-error-setlocaldescription", it.message ?: "unknown")
             }
@@ -206,25 +206,36 @@ internal class Publisher(
                 session_id = sessionId,
             )
             val response = sfuClient.setPublisher(request)
-            logger.i { "Received answer: ${response.sdp}" }
             if (response.error != null) {
                 logger.e {
                     "SetPublisherRequest Received error: ${response.error}, SetPublisherRequest: $request"
                 }
                 tracer.trace("negotiate-error-setpublisher", response.error.message ?: "unknown")
-                logger.e { "rejoin cause error in sfuClient.setPublisher, message:${response.error.message}" }
-
                 when (response.error.code) {
                     /**
-                     *  We are getting this error right away after joining the call first time
-                     *  Full error: 16:04:05.032 Call:PeerC...:publisher  E  (DefaultDispatcher-worker-17:526) SetPublisherRequest Received error: Error{code=ERROR_CODE_REQUEST_VALIDATION_FAILED, message=Invalid SetPublisher request, should_retry=false}
-                     * This will cause emission of ParticipantLeftEvent to other person
+                     * Historically common right after first join when video layers were omitted
+                     * for non-LIVE tracks. Layers are now always computed from publish options, so
+                     * remaining validation failures are treated as a real publisher/SFU mismatch.
                      */
-                    ErrorCode.ERROR_CODE_REQUEST_VALIDATION_FAILED -> rejoin()
+                    ErrorCode.ERROR_CODE_REQUEST_VALIDATION_FAILED -> {
+                        logger.e {
+                            "rejoin cause error in sfuClient.setPublisher, " +
+                                "message:${response.error.message}"
+                        }
+                        rejoin()
+                    }
 
-                    else -> {}
+                    else -> {
+                        logger.e {
+                            "Unhandled SetPublisher error code=${response.error.code}, " +
+                                "message=${response.error.message}"
+                        }
+                    }
                 }
+                return@submit
             }
+
+            logger.i { "Received answer: ${response.sdp}" }
             setRemoteDescription(SessionDescription(SessionDescription.Type.ANSWER, response.sdp))
                 .onErrorSuspend {
                     tracer.trace(
@@ -234,9 +245,12 @@ internal class Publisher(
                 }.onSuccess {
                     logger.d { "Publisher negotiation successfully done ✅" }
                 }
-            // Set ice trickle
+        } catch (e: Exception) {
+            logger.e(e) { "[negotiate] Exception occurred: ${e.message}" }
+        } finally {
+            // Must clear even when returning early from @submit (inline safeCall used to skip this).
+            isIceRestarting = false
         }
-        isIceRestarting = false
     }
 
     override suspend fun stats(): ComputedStats? = safeCallWithDefault(null) {
@@ -649,16 +663,15 @@ internal class Publisher(
         }
         val isTrackLive = track.state() == MediaStreamTrack.State.LIVE
         val isAudio = isAudioTrackType(publishOption.track_type)
+        // Layer math only needs dimension + PublishOption — not LIVE/frames. Previously we skipped
+        // computeLayers when !LIVE, announced empty layers, and SFU rejected SetPublisher on first
+        // join (then we rejoined). Always compute so muted/non-LIVE video still has layers.
         val layers = if (!isAudio) {
-            if (isTrackLive) {
-                computeLayers(
-                    captureFormat,
-                    track,
-                    publishOption,
-                )
-            } else {
-                transceiverCache.getLayers(publishOption)
-            }
+            computeLayers(
+                captureFormat,
+                track,
+                publishOption,
+            ) ?: transceiverCache.getLayers(publishOption)
         } else {
             null
         }
