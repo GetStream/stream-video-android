@@ -82,7 +82,6 @@ internal class ClientEventReporter(
         ClientEventFactory(sdkVersion, userAgent, coordinatorAnalyticsStateHolder)
 
     private val postCallFlightSessions = ConcurrentHashMap<StageId, InFlightSession>()
-    private val pcEverConnected = ConcurrentHashMap<PeerConnectionRole, PcConnected>()
     private val pcEventReporterStateHolder = PeerConnectionEventReporterStateHolder()
 
     // --- Coordinator WS ---
@@ -285,6 +284,7 @@ internal class ClientEventReporter(
         joinReason: JoinReason,
         role: PeerConnectionRole,
         iceState: VideoAnalyticsIceState,
+        wasPrevConnected: Boolean,
         peerConnectionState: PeerConnection.PeerConnectionState?,
     ) {
         when (peerConnectionState) {
@@ -299,6 +299,7 @@ internal class ClientEventReporter(
                     joinReason,
                     role,
                     iceState,
+                    wasPrevConnected,
                     peerConnectionState,
                 )
             }
@@ -347,9 +348,9 @@ internal class ClientEventReporter(
         joinReason: JoinReason,
         role: PeerConnectionRole,
         iceState: VideoAnalyticsIceState,
+        wasPrevConnected: Boolean,
         peerConnectionState: PeerConnection.PeerConnectionState,
     ) {
-        val wasPrevConnected = pcEverConnected[role] != null
         val stageId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
         postCallFlightSessions[stageId] = PostCallFlightSession(
@@ -400,7 +401,6 @@ internal class ClientEventReporter(
         peerConnectionState:
         PeerConnection.PeerConnectionState,
     ) {
-        pcEverConnected[role] = PcConnected(System.currentTimeMillis())
         val pcState = pcEventReporterStateHolder.map.remove(peerConnectionHashCode) ?: return
         val stageId = pcState.stageId
 
@@ -630,4 +630,3 @@ internal class PeerConnectionEventReporterState(
     var stageId: String,
     val peerConnectionRole: PeerConnectionRole,
 )
-internal class PcConnected(val lastConnectedTime: Long)
