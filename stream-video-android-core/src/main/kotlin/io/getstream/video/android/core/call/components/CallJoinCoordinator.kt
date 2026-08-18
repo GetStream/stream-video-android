@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.call.components
 
+import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -39,10 +40,13 @@ import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
@@ -133,7 +137,9 @@ internal class CallJoinCoordinator(
         hintHighScaleLivestreamPublisher: Boolean?,
         callJoinInterceptor: CallJoinInterceptor?,
     ): Result<RtcSession> {
-        // Idempotent: subsequent join() while a session is already live returns that session
+        // Single already-joined gate for the whole join flow: subsequent join() calls while a
+        // session is live return that session instead of building a second one. Every retry
+        // below clears the session first, so [joinInternal] always starts without one.
         sessionManager.session.value?.let { existing ->
             logger.i { "[join] Call already joined — returning existing session" }
             return Success(existing)
@@ -264,6 +270,14 @@ internal class CallJoinCoordinator(
         return true
     }
 
+    /**
+     * Performs one join attempt: coordinator round-trip, [RtcSession] creation and SFU connect.
+     *
+     * Assumes no session is active — [executeJoin] owns the already-joined check and clears the
+     * session before every retry. Calling this with a live session would build a second
+     * [RtcSession] for the same `sessionId` and produce the SFU-evicted zombie this coordinator
+     * exists to prevent.
+     */
     suspend fun joinInternal(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
@@ -275,10 +289,6 @@ internal class CallJoinCoordinator(
         sessionManager.nonFastReconnectAttempts = 0
         sessionMonitor.cancelSfuObservers()
 
-        sessionManager.session.value?.let { existing ->
-            logger.i { "[joinInternal] Call already joined — returning existing session" }
-            return Success(existing)
-        }
         logger.d {
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
@@ -329,6 +339,29 @@ internal class CallJoinCoordinator(
 
         state._connection.value = RealtimeConnection.Joined(localSession)
 
+        // Last-/sole-waiter cancel aborts this call-scoped job. If that happens after the
+        // session is installed, clear it — otherwise the idempotent join() path returns
+        // Success(zombie) and we keep a half-joined participant (PARTICIPANT_NOT_FOUND).
+        try {
+            return completeJoinAfterSessionInstall(localSession, result.value)
+        } catch (ce: CancellationException) {
+            withContext(NonCancellable) {
+                logger.w {
+                    "[joinInternal] Join cancelled after session install — discarding session"
+                }
+                discardFailedSession(localSession)
+                if (state._connection.value is RealtimeConnection.Joined) {
+                    state._connection.value = RealtimeConnection.Disconnected
+                }
+            }
+            throw ce
+        }
+    }
+
+    private suspend fun completeJoinAfterSessionInstall(
+        localSession: RtcSession,
+        joinResponse: JoinCallResponse,
+    ): Result<RtcSession> {
         // This is the SFU ws connection
         val sfuConnectionResult = localSession.connectInternal()
 
@@ -395,7 +428,7 @@ internal class CallJoinCoordinator(
         // (re)establish monitoring when the session is unchanged, using the response that
         // still matches it, so we neither double-register nor monitor with a stale response.
         if (connectedSession === localSession) {
-            sessionMonitor.monitorSession(result.value)
+            sessionMonitor.monitorSession(joinResponse)
         }
         return Success(value = connectedSession)
     }

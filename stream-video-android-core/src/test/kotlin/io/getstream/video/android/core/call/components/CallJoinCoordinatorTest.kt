@@ -223,21 +223,8 @@ class CallJoinCoordinatorTest {
         coVerify(exactly = 0) {
             apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
         }
-    }
-
-    @Test
-    fun `joinInternal returns the existing session when the call is already joined`() = runTest(
-        testDispatcher,
-    ) {
-        val existing = mockk<RtcSession>(relaxed = true)
-        sessionFlow.value = existing
-
-        val result = coordinator().joinInternal(
-            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
-        )
-
-        assertThat(result).isInstanceOf(Success::class.java)
-        assertThat((result as Success).value).isSameInstanceAs(existing)
+        // The single outer gate must also stop a second RtcSession from being installed.
+        verify(exactly = 0) { sessionManager.setActiveSession(mockSession) }
     }
 
     @Test
@@ -445,6 +432,45 @@ class CallJoinCoordinatorTest {
 
         assertThat(sessionFlow.value).isNull()
         coVerify(exactly = 0) { sessionManager.setActiveSession(mockSession) }
+    }
+
+    @Test
+    fun `cancelling after setActiveSession discards the half-joined session`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        val connectGate = CompletableDeferred<Unit>()
+        coEvery { mockSession.connectInternal() } coAnswers {
+            connectGate.await()
+            SfuConnectionResult.Success
+        }
+        val coordinator = coordinator()
+
+        val join = async { coordinator.join() }
+        advanceUntilIdle()
+        // Session is installed; connect is still gated — the sticky zombie window.
+        assertThat(sessionFlow.value).isSameInstanceAs(mockSession)
+        assertThat(connectionFlow.value).isInstanceOf(RealtimeConnection.Joined::class.java)
+
+        join.cancel()
+        advanceUntilIdle()
+        assertFailsWith<CancellationException> { join.await() }
+
+        connectGate.complete(Unit)
+        advanceUntilIdle()
+
+        assertThat(sessionFlow.value).isNull()
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Disconnected)
+        verify { mockSession.cleanup() }
+
+        // A later join must start fresh, not return Success(zombie) via the idempotent path.
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+        val retry = coordinator.join()
+        advanceUntilIdle()
+        assertThat(retry).isInstanceOf(Success::class.java)
+        coVerify(exactly = 2) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
     }
 
     @Test
