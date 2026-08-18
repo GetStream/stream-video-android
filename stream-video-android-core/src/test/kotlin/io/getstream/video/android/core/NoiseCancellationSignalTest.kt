@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core
 
+import io.getstream.android.video.generated.models.NoiseCancellationSettings
+import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
@@ -55,9 +57,22 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         injectPeerConnectionFactory(factory)
     }
 
-    /** A joined call whose audio processing can genuinely be turned on. */
+    /**
+     * Seeds the server state noise cancellation needs: capability granted and the call type's mode
+     * set to available. Without both the policy gate refuses and nothing is signalled — see
+     * [NoiseCancellationPolicyGateTest].
+     */
+    private fun Call.allowNoiseCancellation() {
+        state.injectServerState(
+            capabilities = listOf(OwnCapability.EnableNoiseCancellation),
+            settings = noiseCancellationSettings(NoiseCancellationSettings.Mode.Available),
+        )
+    }
+
+    /** A joined, allowed call whose audio processing can genuinely be turned on. */
     private fun callWithProcessor(): Pair<Call, RtcSession> {
         val call = client.call("default", randomUUID())
+        call.allowNoiseCancellation()
         call.injectWorkingProcessor()
         val session = mockk<RtcSession>(relaxed = true)
         call.injectSession(session)
@@ -99,6 +114,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
     @Test
     fun `nothing is signalled as started when no processor is running`() = runTest {
         val call = client.call("default", randomUUID())
+        call.allowNoiseCancellation()
         val session = mockk<RtcSession>(relaxed = true)
         call.injectSession(session)
 
@@ -113,6 +129,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
     @Test
     fun `toggle reports the wanted state but signals what is running`() = runTest {
         val call = client.call("default", randomUUID())
+        call.allowNoiseCancellation()
         val session = mockk<RtcSession>(relaxed = true)
         call.injectSession(session)
 
@@ -129,6 +146,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
     @Test
     fun `state changed before a session exists is signalled once one is installed`() = runTest {
         val call = client.call("default", randomUUID())
+        call.allowNoiseCancellation()
         call.injectWorkingProcessor()
 
         // The call type's auto-on default and any pre-join change land while joining is still in

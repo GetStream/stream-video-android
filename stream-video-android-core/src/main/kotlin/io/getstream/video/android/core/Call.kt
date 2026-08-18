@@ -68,6 +68,7 @@ import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.components.CallStatsReporter
 import io.getstream.video.android.core.call.components.ClientCallRegistry
 import io.getstream.video.android.core.call.components.MediaManagerFactory
+import io.getstream.video.android.core.call.components.NoiseCancellationPolicy
 import io.getstream.video.android.core.call.components.RtcSessionFactory
 import io.getstream.video.android.core.call.components.SessionMonitor
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -97,6 +98,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
@@ -499,12 +502,18 @@ public class Call(
     @Volatile
     private var noiseCancellationSignalPending: Boolean = false
 
+    private val noiseCancellationPolicy = NoiseCancellationPolicy()
+
+    /** Guards the call type's auto-on default so it is applied at most once per call. */
+    private var autoOnApplied: Boolean = false
+
     init {
         media.startAudioLevelMonitoring()
         powerManager = safeCallWithDefault(null) {
             clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
         observeNoiseCancellationSignalTarget()
+        observeNoiseCancellationPolicy()
     }
 
     /** Basic crud operations */
@@ -907,16 +916,38 @@ public class Call(
      * cannot differ between two calls running at the same time.
      */
     fun setAudioProcessingEnabled(enabled: Boolean) {
+        if (enabled && !isNoiseCancellationAllowed()) {
+            logger.w {
+                "[setAudioProcessingEnabled] #sfu; rejected, noise cancellation is not " +
+                    "available for this call"
+            }
+            return
+        }
         media.setAudioProcessingEnabled(enabled)
-        // Signals what was actually applied, not what was asked for: with no audio processor
-        // configured the request is a no-op locally, and the SFU must not be told otherwise.
+        // Publishes and signals what was actually applied, not what was asked for: with no audio
+        // processor configured the request is a no-op locally, and neither the state flow nor the
+        // SFU must be told otherwise.
+        publishAudioProcessingState()
         notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
     }
 
-    fun toggleAudioProcessing(): Boolean = media.toggleAudioProcessing().also {
-        // Signals what is running, not what the toggle now reports: before a factory exists the
-        // toggle reflects the wanted state, and the SFU must only hear about real processing.
-        notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
+    fun toggleAudioProcessing(): Boolean {
+        // Reads without building a factory: the gate runs before join, and a factory created
+        // there would capture the pre-join audio bitrate profile.
+        if (!media.isAudioProcessingEnabled() && !isNoiseCancellationAllowed()) {
+            logger.w {
+                "[toggleAudioProcessing] #sfu; rejected, noise cancellation is not " +
+                    "available for this call"
+            }
+            return false
+        }
+        return media.toggleAudioProcessing().also {
+            publishAudioProcessingState()
+            // Signals what is running, not what the toggle now reports: before a factory exists
+            // the toggle reflects the wanted state, and the SFU must only hear real processing.
+            notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
+        }
+    }
     }
 
     /**

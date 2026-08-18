@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.core
 
+import io.getstream.android.video.generated.models.CallSettingsResponse
+import io.getstream.android.video.generated.models.NoiseCancellationSettings
+import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.components.CallMediaManager
 import io.getstream.video.android.core.call.components.CallSessionManager
@@ -24,6 +27,7 @@ import io.getstream.video.android.core.internal.module.CoordinatorConnectionModu
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Seeds an active [RtcSession] on a real [Call], for tests that start from an already-joined
@@ -125,3 +129,31 @@ internal fun Call.mediaAppliesWantedState() {
     field.isAccessible = true
     media.peerConnectionFactory.setAudioProcessingEnabled(field.get(media) as Boolean)
 }
+
+/**
+ * Seeds the server-driven capability list and call settings a real [CallState] would receive from
+ * the coordinator, for tests that exercise policy gates (noise cancellation, permissions).
+ *
+ * Reflective on purpose: in production both are written only by coordinator responses and events,
+ * and that write path should not grow setters that exist solely for tests.
+ */
+internal fun CallState.injectServerState(
+    capabilities: List<OwnCapability>? = null,
+    settings: CallSettingsResponse? = null,
+) {
+    capabilities?.let { mutableStateField<List<OwnCapability>>("_ownCapabilities").value = it }
+    settings?.let { mutableStateField<CallSettingsResponse?>("_settings").value = it }
+}
+
+/** Builds the minimum settings object the noise-cancellation policy reads. */
+internal fun noiseCancellationSettings(
+    mode: NoiseCancellationSettings.Mode,
+): CallSettingsResponse = mockk(relaxed = true) {
+    every { audio.noiseCancellation } returns NoiseCancellationSettings(mode)
+}
+
+@Suppress("UNCHECKED_CAST")
+private fun <T> CallState.mutableStateField(name: String): MutableStateFlow<T> =
+    CallState::class.java.getDeclaredField(name).apply {
+        isAccessible = true
+    }.get(this) as MutableStateFlow<T>
