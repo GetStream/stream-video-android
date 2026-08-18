@@ -18,9 +18,14 @@ package io.getstream.video.android.core.utils
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.ClosedSendChannelException
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -254,5 +259,78 @@ class StreamRefCountedSingleFlightProcessorTest {
         val result = processor.run<String>("key") { error("should not run") }
         assertTrue(result.isFailure)
         assertTrue(result.exceptionOrNull() is ClosedSendChannelException)
+    }
+
+    @Test
+    fun `after last waiter cancel a new run starts a fresh execution`() = runTest(
+        testDispatcher,
+    ) {
+        val processor = StreamRefCountedSingleFlightProcessor(testScope)
+        val gate = CompletableDeferred<Unit>()
+        val executions = AtomicInteger(0)
+
+        val first = async {
+            processor.run("key") {
+                executions.incrementAndGet()
+                gate.await()
+                "first"
+            }
+        }
+        advanceUntilIdle()
+        first.cancel()
+        advanceUntilIdle()
+        assertFailsWith<CancellationException> { first.await() }
+        assertFalse(processor.has("key"))
+
+        assertEquals(
+            "second",
+            processor.run("key") {
+                executions.incrementAndGet()
+                "second"
+            }.getOrThrow(),
+        )
+        advanceUntilIdle()
+        assertEquals(2, executions.get())
+    }
+
+    /**
+     * Protects the race where last-waiter cancel unlocked before cancelling: a new run could
+     * attach to the dying flight and then get cancelled with it. Removal + cancel stay under
+     * one lock so that cannot happen. A new run may still share if it arrives before release
+     * (first-wins) — that must succeed, not throw CancellationException.
+     */
+    @Test
+    fun `last-waiter cancel race does not cancel a newly started run`() = runBlocking {
+        repeat(100) { iteration ->
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            val processor = StreamRefCountedSingleFlightProcessor(scope)
+            val blockEntered = CompletableDeferred<Unit>()
+            val holdBlock = CompletableDeferred<Unit>()
+
+            val first = scope.async {
+                processor.run("key") {
+                    blockEntered.complete(Unit)
+                    holdBlock.await()
+                    "first-$iteration"
+                }
+            }
+            blockEntered.await()
+
+            first.cancel()
+            val second = scope.async {
+                processor.run("key") {
+                    "second-$iteration"
+                }
+            }
+            holdBlock.complete(Unit)
+
+            assertFailsWith<CancellationException> { first.await() }
+            val secondResult = second.await()
+            assertTrue(
+                "iteration $iteration failed: ${secondResult.exceptionOrNull()}",
+                secondResult.isSuccess,
+            )
+            scope.cancel()
+        }
     }
 }

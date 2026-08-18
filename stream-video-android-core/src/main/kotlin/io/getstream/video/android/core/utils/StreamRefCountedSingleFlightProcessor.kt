@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.core.utils
 
-// package io.getstream.android.core.internal.processing
-
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -27,6 +25,7 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -45,17 +44,29 @@ import java.util.concurrent.atomic.AtomicBoolean
  * nobody is waiting — unless [scope] itself is cancelled (leave / call cleanup).
  *
  * Candidate for Stream Android Core v2 alongside [StreamSingleFlightProcessorImpl].
+ *
+ * High-level [run] algorithm:
+ * ```
+ * run
+ * ├── acquireWaiter
+ * │   └── selectFlightLocked
+ * │       ├── createFlightLocked
+ * │       └── removeFlightIfCurrentLocked
+ * └── awaitSharedResult
+ *     └── releaseWaiter
+ * ```
  */
 internal class StreamRefCountedSingleFlightProcessor(
     private val scope: CoroutineScope,
 ) {
     private class Flight<T>(
+        val key: String,
         val deferred: Deferred<Result<T>>,
         var waiters: Int,
     )
 
     private val mutex = Mutex()
-    private val flights = mutableMapOf<String, Flight<*>>()
+    private val flights = ConcurrentHashMap<String, Flight<*>>()
     private val closed = AtomicBoolean(false)
 
     /**
@@ -65,51 +76,78 @@ internal class StreamRefCountedSingleFlightProcessor(
      * been called. [CancellationException] is still rethrown when this waiter (or the shared
      * job, including last-waiter cancel) is cancelled.
      */
-    @Suppress("UNCHECKED_CAST")
     suspend fun <T> run(key: String, block: suspend () -> T): Result<T> {
         if (closed.get()) {
             return Result.failure(ClosedSendChannelException("RefCountedSingleFlight is closed"))
         }
+        val flight = acquireWaiter(key, block)
+        return awaitSharedResult(flight)
+    }
 
-        val flight = mutex.withLock {
-            val running = flights[key]?.takeUnless { it.deferred.isCompleted } as Flight<T>?
-            if (running != null) {
-                running.waiters++
-                running
-            } else {
-                val deferred = scope.async {
-                    try {
-                        // Complete normally even when [block] fails so the scope does not see an
-                        // uncaught child exception; waiters receive Result.failure after await.
-                        try {
-                            Result.success(block())
-                        } catch (ce: CancellationException) {
-                            throw ce
-                        } catch (t: Throwable) {
-                            Result.failure(t)
-                        }
-                    } finally {
-                        mutex.withLock {
-                            if (flights[key]?.deferred === this@async) {
-                                flights.remove(key)
-                            }
-                        }
-                    }
+    private suspend fun <T> acquireWaiter(
+        key: String,
+        block: suspend () -> T,
+    ): Flight<T> = mutex.withLock {
+        selectFlightLocked(key, block)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> selectFlightLocked(
+        key: String,
+        block: suspend () -> T,
+    ): Flight<T> {
+        val running = flights[key]?.takeUnless { it.deferred.isCompleted } as Flight<T>?
+        if (running != null) {
+            running.waiters++
+            return running
+        }
+        return createFlightLocked(key, block)
+    }
+
+    private fun <T> createFlightLocked(
+        key: String,
+        block: suspend () -> T,
+    ): Flight<T> {
+        lateinit var deferred: Deferred<Result<T>>
+        deferred = scope.async {
+            try {
+                // Complete normally even when [block] fails so the scope does not see an
+                // uncaught child exception; waiters receive Result.failure after await.
+                try {
+                    Result.success(block())
+                } catch (ce: CancellationException) {
+                    throw ce
+                } catch (t: Throwable) {
+                    Result.failure(t)
                 }
-                Flight(deferred = deferred, waiters = 1).also { flights[key] = it }
+            } finally {
+                mutex.withLock {
+                    removeFlightIfCurrentLocked(key, deferred)
+                }
             }
         }
+        return Flight(key = key, deferred = deferred, waiters = 1).also { flights[key] = it }
+    }
 
+    private fun removeFlightIfCurrentLocked(key: String, deferred: Deferred<*>) {
+        if (flights[key]?.deferred === deferred) {
+            flights.remove(key)
+        }
+    }
+
+    private suspend fun <T> awaitSharedResult(flight: Flight<T>): Result<T> {
         var released = false
         suspend fun releaseWaiter(cancelIfLast: Boolean) {
             if (released) return
             released = true
-            val shouldCancelShared = mutex.withLock {
+            // Decrement, map removal, and cancel must stay under one lock so a new run() cannot
+            // attach to a flight that is about to be cancelled (waiters already at 0).
+            mutex.withLock {
                 flight.waiters = (flight.waiters - 1).coerceAtLeast(0)
-                cancelIfLast && flight.waiters == 0 && flight.deferred.isActive
-            }
-            if (shouldCancelShared) {
-                flight.deferred.cancel()
+                if (cancelIfLast && flight.waiters == 0 && flight.deferred.isActive) {
+                    removeFlightIfCurrentLocked(flight.key, flight.deferred)
+                    flight.deferred.cancel()
+                }
             }
         }
 
