@@ -298,17 +298,37 @@ class StreamPeerConnectionFactoryTest {
         verify(exactly = 0) { mockAudioProc.isEnabled = any() }
     }
 
-    @Test
-    fun `resetAudioProcessing clears the shared module so it cannot leak into the next call`() {
-        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
-        every { mockAudioProc.isEnabled } returns true
+    // 11) The shared processor is only considered held once a native factory really owns it
 
+    @Test
+    fun `hasAudioProcessingAttached is false until a native factory has been built`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
         val callFactory = factoryWithProfile(
             AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
             mockAudioProc,
         )
-        callFactory.resetAudioProcessing()
 
-        verify { mockAudioProc.isEnabled = false }
+        // The profile says the processor *would* be attached, but nothing has been built yet, so
+        // releasing this factory could not take the shared processor down with it.
+        assertFalse(
+            "Nothing owns the processor before the native factory exists",
+            callFactory.hasAudioProcessingAttached(),
+        )
+    }
+
+    @Test
+    fun `dispose leaves the shared module alone when no native factory was built`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        val callFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+            mockAudioProc,
+        )
+
+        // Must not build a factory just to release it: doing so would attach the shared
+        // processor and then tear it down for every later call.
+        callFactory.dispose()
+
+        verify(exactly = 0) { mockAudioProc.createNative(any()) }
+        verify(exactly = 0) { mockAudioProc.isEnabled = any() }
     }
 }

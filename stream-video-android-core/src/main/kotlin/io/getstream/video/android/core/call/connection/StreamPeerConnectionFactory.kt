@@ -104,6 +104,15 @@ public class StreamPeerConnectionFactory(
             stream.video.sfu.models.AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
     }
 
+    /**
+     * Whether the shared audio processor was handed to a native factory that is still alive.
+     *
+     * Unlike [isAudioProcessingAttached] this never speculates: it is only true once the native
+     * factory exists and was built with the processor. [dispose] uses it to decide whether
+     * tearing this factory down would take the shared processor with it.
+     */
+    internal fun hasAudioProcessingAttached(): Boolean = factoryCreated && audioProcessingAttached
+
     private val webRtcLogger by taggedLogger("Call:WebRTC")
     private val audioLogger by taggedLogger("Call:AudioTrackCallback")
 
@@ -192,7 +201,14 @@ public class StreamPeerConnectionFactory(
      * Factory that builds all the connections based on the extensive configuration provided under
      * the hood.
      */
-    private val factory: PeerConnectionFactory by lazy { createFactory() }
+    /**
+     * Held as an explicit [Lazy] so [dispose] can tell whether a native factory was ever built.
+     * Reading [factory] builds one, which would attach the shared audio processor purely so it
+     * could be torn down again.
+     */
+    private val factoryLazy = lazy { createFactory() }
+
+    private val factory: PeerConnectionFactory get() = factoryLazy.value
 
     private var adm: JavaAudioDeviceModule? = null
 
@@ -737,16 +753,6 @@ public class StreamPeerConnectionFactory(
     }
 
     /**
-     * Clears the shared audio processor's enabled state.
-     *
-     * The [ManagedAudioProcessingFactory] is owned by the client and reused by every call, so a
-     * call must not leave its choice behind for whichever call comes next.
-     */
-    internal fun resetAudioProcessing() {
-        audioProcessing?.isEnabled = false
-    }
-
-    /**
      * Updates the audio track usage for the audio device module.
      * This allows toggling between different audio usage types (e.g., USAGE_MEDIA vs USAGE_VOICE_COMMUNICATION).
      *
@@ -760,8 +766,16 @@ public class StreamPeerConnectionFactory(
     /**
      * Disposes the factory and releases resources.
      * This should only be called when no active peer connections are using it.
+     *
+     * Does nothing when no native factory was ever built — building one here would attach the
+     * shared audio processor only to release it again. Callers must also check
+     * [hasAudioProcessingAttached] first: releasing a factory built with the shared processor
+     * takes that processor down with it.
      */
     internal fun dispose() {
+        if (!factoryLazy.isInitialized()) {
+            return
+        }
         try {
             factory.dispose()
         } catch (e: Exception) {

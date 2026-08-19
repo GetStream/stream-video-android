@@ -74,6 +74,17 @@ internal class CallMediaManager(
     // peerConnectionFactory is nullable and recreated when audioBitrateProfile changes (before joining)
     private var _peerConnectionFactory: StreamPeerConnectionFactory? = null
 
+    /**
+     * Audio-processing state this call wants, remembered separately from the factory so it
+     * survives one not existing yet or being recreated.
+     *
+     * The processor itself is owned by the client and shared by every call, and its enabled flag
+     * lives on that one instance. Rather than clearing the flag when a call ends — which reaches
+     * across into whatever call runs next — every factory applies the state its own call asked
+     * for as it is built. Defaults to off so a call that never asks does not inherit.
+     */
+    private var desiredAudioProcessingEnabled: Boolean = false
+
     var peerConnectionFactory: StreamPeerConnectionFactory
         get() {
             if (_peerConnectionFactory == null) {
@@ -85,7 +96,9 @@ internal class CallMediaManager(
                     audioBitrateProfileProvider = { mediaManager.microphone.audioBitrateProfile.value },
                     sharedEglBaseProvider = { eglBase() },
                     webRtcLoggingLevel = clientImpl.loggingLevel.webRtcLoggingLevel,
-                )
+                ).also { factory ->
+                    factory.setAudioProcessingEnabled(desiredAudioProcessingEnabled)
+                }
             }
             return _peerConnectionFactory!!
         }
@@ -171,9 +184,17 @@ internal class CallMediaManager(
      * This should only be called before the call is joined.
      */
     fun recreatePeerConnectionFactory() {
-        _peerConnectionFactory?.dispose()
-        _peerConnectionFactory = null
+        val previous = _peerConnectionFactory
         // Next access to peerConnectionFactory will recreate it with current profile
+        _peerConnectionFactory = null
+        if (previous?.hasAudioProcessingAttached() == true) {
+            // The shared audio processor is torn down when the native factory holding it is
+            // released, which would leave the client without one for every later call. Dropping
+            // the factory instead leaks it, the same way a factory is dropped on call cleanup.
+            logger.i { "Keeping the previous factory alive: it holds the shared audio processor" }
+            return
+        }
+        previous?.dispose()
     }
 
     /** Applies server-provided call settings to the local media manager. */
@@ -280,12 +301,21 @@ internal class CallMediaManager(
     fun isAudioProcessingEnabledIfCreated(): Boolean =
         _peerConnectionFactory?.isAudioProcessingEnabled() ?: false
 
+    /**
+     * Records the wanted audio-processing state and applies it to the factory if one exists.
+     * A factory built later picks the value up on creation, so this never has to build one:
+     * a factory created before join captures the pre-join audio bitrate profile and defeats
+     * [ensureFactoryMatchesAudioProfile].
+     */
     fun setAudioProcessingEnabled(enabled: Boolean) {
-        return peerConnectionFactory.setAudioProcessingEnabled(enabled)
+        desiredAudioProcessingEnabled = enabled
+        _peerConnectionFactory?.setAudioProcessingEnabled(enabled)
     }
 
     fun toggleAudioProcessing(): Boolean {
-        return peerConnectionFactory.toggleAudioProcessing()
+        return peerConnectionFactory.toggleAudioProcessing().also { enabled ->
+            desiredAudioProcessingEnabled = enabled
+        }
     }
 
     /** Disables all local capture devices. Used when leaving the call. */
@@ -296,10 +326,6 @@ internal class CallMediaManager(
     }
 
     fun cleanup() {
-        // The audio processor is owned by the client and shared by every call, so this call's
-        // choice has to be cleared here or it carries into the next one. Reads the backing
-        // field directly: cleanup must never lazily build a factory just to reset it.
-        _peerConnectionFactory?.resetAudioProcessing()
         mediaManager.cleanup()
     }
 }

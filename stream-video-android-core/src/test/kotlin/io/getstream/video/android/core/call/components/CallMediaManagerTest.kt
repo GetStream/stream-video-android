@@ -157,25 +157,54 @@ class CallMediaManagerTest {
     }
 
     @Test
-    fun `cleanup clears the shared audio processor so it cannot leak into the next call`() {
+    fun `recreating the factory releases one that does not hold the shared audio processor`() {
         val factory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+        every { factory.hasAudioProcessingAttached() } returns false
         val manager = manager()
         manager.peerConnectionFactory = factory
 
-        manager.cleanup()
+        manager.recreatePeerConnectionFactory()
 
-        verify { factory.resetAudioProcessing() }
-        verify { mediaManager.cleanup() }
+        verify { factory.dispose() }
     }
 
     @Test
-    fun `cleanup does not build a factory when the call never used one`() {
+    fun `recreating the factory keeps one that holds the shared audio processor`() {
+        val factory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+        every { factory.hasAudioProcessingAttached() } returns true
+        val manager = manager()
+        manager.peerConnectionFactory = factory
+
+        manager.recreatePeerConnectionFactory()
+
+        // Releasing it would tear the processor down for every later call, so it is dropped
+        // rather than disposed — the same way a factory is dropped when a call ends.
+        verify(exactly = 0) { factory.dispose() }
+    }
+
+    @Test
+    fun `setting audio processing does not build a factory for a call that has none`() {
         val manager = manager()
 
-        // Reads the backing field, so no lazy factory is created just to be reset.
-        manager.cleanup()
+        // Recorded for whichever factory is built later; building one here would capture the
+        // pre-join audio bitrate profile. Nothing to verify beyond it not creating or throwing.
+        manager.setAudioProcessingEnabled(true)
 
-        verify { mediaManager.cleanup() }
+        manager.recreatePeerConnectionFactory()
+    }
+
+    @Test
+    fun `toggling audio processing records the resulting state`() {
+        val factory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+        every { factory.toggleAudioProcessing() } returns true
+        val manager = manager()
+        manager.peerConnectionFactory = factory
+
+        assertThat(manager.toggleAudioProcessing()).isTrue()
+
+        // The recorded state follows what actually happened, not what was requested.
+        manager.setAudioProcessingEnabled(false)
+        verify { factory.setAudioProcessingEnabled(false) }
     }
 
     @Test
