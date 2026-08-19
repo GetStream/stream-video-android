@@ -958,8 +958,12 @@ public class Call(
         scope.launch {
             session.collect { session ->
                 if (session == null) return@collect
-                if (noiseCancellationSignalPending || desiredNoiseCancellationEnabled) {
-                    notifyNoiseCancellationState(desiredNoiseCancellationEnabled)
+                // Reads the applied state rather than replaying the last signal: a state wanted
+                // before the factory existed is applied as the factory is built, which happens
+                // while joining and after the signal that found no session.
+                val applied = media.isAudioProcessingEnabledIfCreated()
+                if (noiseCancellationSignalPending || desiredNoiseCancellationEnabled || applied) {
+                    notifyNoiseCancellationState(applied)
                 }
             }
         }
