@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.permission
 
+import android.content.Context
 import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +36,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomPer
  *
  * - android.Manifest.permission.CAMERA
  * - android.Manifest.permission.RECORD_AUDIO
+ * - android.Manifest.permission.BLUETOOTH_CONNECT on Android 12 and above
  *
  * You can request those permissions by invoking `launchPermissionRequest()` method.
  */
@@ -42,7 +44,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomPer
 @Composable
 public fun rememberCallPermissionsState(
     call: Call,
-    permissions: List<String> = getPermissions(),
+    permissions: List<String> = getDefaultPermissionList(isVideoCall = true),
     onPermissionsResult: ((Map<String, Boolean>) -> Unit)? = null,
     onAllPermissionsGranted: (suspend () -> Unit)? = null,
 ): VideoPermissionsState {
@@ -86,8 +88,16 @@ public fun rememberCallPermissionsState(
 }
 
 @Composable
-private fun getPermissions(): List<String> {
-    val context = LocalContext.current
+internal fun getDefaultPermissionList(isVideoCall: Boolean): List<String> =
+    getDefaultPermissionList(
+        context = LocalContext.current,
+        isVideoCall = isVideoCall,
+    )
+
+internal fun getDefaultPermissionList(
+    context: Context,
+    isVideoCall: Boolean,
+): List<String> {
     val permissionsList = mutableListOf<String>()
     val telecomPermissions = TelecomPermissions()
 
@@ -100,19 +110,13 @@ private fun getPermissions(): List<String> {
         }
     }
 
-    permissionsList.addAll(
-        mutableListOf(
-            android.Manifest.permission.CAMERA,
-            android.Manifest.permission.RECORD_AUDIO,
-        ),
-    )
+    if (isVideoCall) {
+        permissionsList.add(android.Manifest.permission.CAMERA)
+    }
+    permissionsList.add(android.Manifest.permission.RECORD_AUDIO)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        permissionsList.addAll(
-            mutableListOf(
-                android.Manifest.permission.BLUETOOTH_CONNECT,
-            ),
-        )
+        permissionsList.add(android.Manifest.permission.BLUETOOTH_CONNECT)
     }
     return permissionsList
 }
@@ -122,6 +126,7 @@ private fun getPermissions(): List<String> {
  *
  * - android.Manifest.permission.CAMERA
  * - android.Manifest.permission.RECORD_AUDIO
+ * - android.Manifest.permission.BLUETOOTH_CONNECT on Android 12 and above
  */
 @Composable
 public fun LaunchCallPermissions(
