@@ -172,4 +172,25 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.stopNoiseCancellation() }
         assertEquals(false, signalled.last())
     }
+
+    @Test
+    fun `a state applied only once the factory exists is signalled on join`() = runTest {
+        val call = client.call("default", randomUUID())
+
+        // Wanted before any factory exists, so nothing is applied yet and the signal finds no
+        // session to send at.
+        call.setAudioProcessingEnabled(true)
+
+        // The factory is built while joining and applies the wanted state, so by the time a
+        // session appears noise cancellation really is running.
+        call.injectWorkingProcessor()
+        call.mediaAppliesWantedState()
+
+        val session = mockk<RtcSession>(relaxed = true)
+        val signalled = record(session)
+        call.injectSession(session)
+
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.startNoiseCancellation() }
+        assertEquals(listOf(true), signalled)
+    }
 }

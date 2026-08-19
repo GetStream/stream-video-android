@@ -114,3 +114,14 @@ private fun Call.mediaComponent(): CallMediaManager {
     field.isAccessible = true
     return field.get(this) as CallMediaManager
 }
+
+/**
+ * Applies the wanted audio-processing state to the installed factory, the way building one does in
+ * production. Tests install a factory directly, which bypasses that step.
+ */
+internal fun Call.mediaAppliesWantedState() {
+    val media = mediaComponent()
+    val field = CallMediaManager::class.java.getDeclaredField("desiredAudioProcessingEnabled")
+    field.isAccessible = true
+    media.peerConnectionFactory.setAudioProcessingEnabled(field.get(media) as Boolean)
+}
