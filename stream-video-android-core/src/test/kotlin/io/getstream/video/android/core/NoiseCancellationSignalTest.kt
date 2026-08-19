@@ -16,15 +16,21 @@
 
 package io.getstream.video.android.core
 
+import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertFalse
+import stream.video.sfu.signal.StartNoiseCancellationResponse
+import stream.video.sfu.signal.StopNoiseCancellationResponse
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = false) {
@@ -33,11 +39,48 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         const val SIGNAL_TIMEOUT_MS = 5_000L
     }
 
-    @Test
-    fun `enabling audio processing signals the SFU that noise cancellation started`() = runTest {
+    /**
+     * Installs a factory that actually tracks the audio-processing state, so what the SFU is told
+     * follows what was applied locally rather than a fixed answer.
+     */
+    private fun Call.injectWorkingProcessor() {
+        var processing = false
+        val factory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+        every { factory.isAudioProcessingEnabled() } answers { processing }
+        every { factory.setAudioProcessingEnabled(any()) } answers { processing = firstArg() }
+        every { factory.toggleAudioProcessing() } answers {
+            processing = !processing
+            processing
+        }
+        injectPeerConnectionFactory(factory)
+    }
+
+    /** A joined call whose audio processing can genuinely be turned on. */
+    private fun callWithProcessor(): Pair<Call, RtcSession> {
         val call = client.call("default", randomUUID())
+        call.injectWorkingProcessor()
         val session = mockk<RtcSession>(relaxed = true)
         call.injectSession(session)
+        return call to session
+    }
+
+    /** Records the state of every signal the SFU receives, in the order it receives them. */
+    private fun record(session: RtcSession): MutableList<Boolean> {
+        val signalled = mutableListOf<Boolean>()
+        coEvery { session.startNoiseCancellation() } coAnswers {
+            signalled += true
+            Result.Success(mockk<StartNoiseCancellationResponse>(relaxed = true))
+        }
+        coEvery { session.stopNoiseCancellation() } coAnswers {
+            signalled += false
+            Result.Success(mockk<StopNoiseCancellationResponse>(relaxed = true))
+        }
+        return signalled
+    }
+
+    @Test
+    fun `enabling audio processing signals the SFU that noise cancellation started`() = runTest {
+        val (call, session) = callWithProcessor()
 
         call.setAudioProcessingEnabled(true)
 
@@ -46,13 +89,25 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
 
     @Test
     fun `disabling audio processing signals the SFU that noise cancellation stopped`() = runTest {
-        val call = client.call("default", randomUUID())
-        val session = mockk<RtcSession>(relaxed = true)
-        call.injectSession(session)
+        val (call, session) = callWithProcessor()
 
         call.setAudioProcessingEnabled(false)
 
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.stopNoiseCancellation() }
+    }
+
+    @Test
+    fun `nothing is signalled as started when no processor is running`() = runTest {
+        val call = client.call("default", randomUUID())
+        val session = mockk<RtcSession>(relaxed = true)
+        call.injectSession(session)
+
+        // No ManagedAudioProcessingFactory is configured, so the request cannot take effect
+        // locally. The SFU must be told what is actually running, not what was asked for.
+        call.setAudioProcessingEnabled(true)
+
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.stopNoiseCancellation() }
+        coVerify(exactly = 0) { session.startNoiseCancellation() }
     }
 
     @Test
@@ -61,40 +116,60 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         val session = mockk<RtcSession>(relaxed = true)
         call.injectSession(session)
 
-        // No ManagedAudioProcessingFactory is supplied in tests, so the toggle cannot turn
-        // anything on — and the signal must follow what actually happened locally.
+        // No processor is configured, so the toggle cannot turn anything on — and the signal must
+        // follow what actually happened locally.
         val enabled = call.toggleAudioProcessing()
 
-        assertFalse(enabled)
+        assertEquals(false, enabled)
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.stopNoiseCancellation() }
     }
 
     @Test
-    fun `toggling with no active session does not signal or throw`() = runTest {
+    fun `state changed before a session exists is signalled once one is installed`() = runTest {
         val call = client.call("default", randomUUID())
-        val session = mockk<RtcSession>(relaxed = true)
-        call.injectSession(null)
+        call.injectWorkingProcessor()
 
+        // The call type's auto-on default and any pre-join change land while joining is still in
+        // progress, so the signal has nowhere to go yet.
         call.setAudioProcessingEnabled(true)
-        call.toggleAudioProcessing()
 
-        coVerify(exactly = 0) { session.startNoiseCancellation() }
-        coVerify(exactly = 0) { session.stopNoiseCancellation() }
+        val session = mockk<RtcSession>(relaxed = true)
+        val signalled = record(session)
+        call.injectSession(session)
+
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.startNoiseCancellation() }
+        assertEquals(listOf(true), signalled)
     }
 
     @Test
-    fun `rapid changes still leave the SFU holding the final state`() = runTest {
-        val call = client.call("default", randomUUID())
-        val session = mockk<RtcSession>(relaxed = true)
-        call.injectSession(session)
+    fun `a replacement session is told the current state`() = runTest {
+        val (call, first) = callWithProcessor()
+        call.setAudioProcessingEnabled(true)
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { first.startNoiseCancellation() }
 
-        // Signals are queued and each sends whatever was requested most recently, so whichever
-        // order the queued coroutines start in, the last one carries "off". Intermediate signals
-        // are legitimate — the state really was on for a moment — so this asserts convergence,
-        // not suppression.
+        // A rejoin or migration installs a session that was never told, which would leave the SFU
+        // out of step with what is still running locally.
+        val replacement = mockk<RtcSession>(relaxed = true)
+        val signalled = record(replacement)
+        call.injectSession(replacement)
+
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { replacement.startNoiseCancellation() }
+        assertEquals(listOf(true), signalled)
+    }
+
+    @Test
+    fun `rapid changes leave the SFU holding the final state`() = runTest {
+        val (call, session) = callWithProcessor()
+        val signalled = record(session)
+
+        // Signals are queued and each sends whatever was requested most recently. Intermediate
+        // signals are legitimate — the state really was on for a moment — so what matters is
+        // the last one the SFU is left holding.
         call.setAudioProcessingEnabled(true)
         call.setAudioProcessingEnabled(false)
 
+        // Waiting on the stop means every signal before it has already landed.
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.stopNoiseCancellation() }
+        assertEquals(false, signalled.last())
     }
 }

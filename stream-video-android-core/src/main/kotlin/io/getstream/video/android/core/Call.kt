@@ -492,11 +492,19 @@ public class Call(
     @Volatile
     private var desiredNoiseCancellationEnabled: Boolean = false
 
+    /**
+     * Set when a signal had nowhere to go because no session was installed yet, so the state can
+     * be sent once one is.
+     */
+    @Volatile
+    private var noiseCancellationSignalPending: Boolean = false
+
     init {
         media.startAudioLevelMonitoring()
         powerManager = safeCallWithDefault(null) {
             clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
+        observeNoiseCancellationSignalTarget()
     }
 
     /** Basic crud operations */
@@ -887,7 +895,9 @@ public class Call(
 
     fun setAudioProcessingEnabled(enabled: Boolean) {
         media.setAudioProcessingEnabled(enabled)
-        notifyNoiseCancellationState(enabled)
+        // Signals what was actually applied, not what was asked for: with no audio processor
+        // configured the request is a no-op locally, and the SFU must not be told otherwise.
+        notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
     }
 
     fun toggleAudioProcessing(): Boolean = media.toggleAudioProcessing().also { enabled ->
@@ -910,19 +920,46 @@ public class Call(
         scope.launch {
             noiseCancellationSignals.submit("noiseCancellation") {
                 val session = session.value
-                if (session != null) {
-                    val target = desiredNoiseCancellationEnabled
-                    val result = if (target) {
-                        session.startNoiseCancellation()
-                    } else {
-                        session.stopNoiseCancellation()
+                val target = desiredNoiseCancellationEnabled
+                if (session == null) {
+                    // Nothing to signal at yet. Sent by observeNoiseCancellationSignalTarget as
+                    // soon as a session is installed.
+                    noiseCancellationSignalPending = true
+                    return@submit
+                }
+                noiseCancellationSignalPending = false
+                val result = if (target) {
+                    session.startNoiseCancellation()
+                } else {
+                    session.stopNoiseCancellation()
+                }
+                if (result is Result.Failure) {
+                    logger.w {
+                        "[notifyNoiseCancellationState] #sfu; enabled: $target, " +
+                            "failed: ${result.value.message}"
                     }
-                    if (result is Result.Failure) {
-                        logger.w {
-                            "[notifyNoiseCancellationState] #sfu; enabled: $target, " +
-                                "failed: ${result.value.message}"
-                        }
-                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Sends the noise-cancellation state to each session as it is installed.
+     *
+     * Noise cancellation can be switched on before there is a session to signal at — the call
+     * type's auto-on default and any pre-join change both land while joining is still in progress
+     * — and a rejoin or migration replaces the session with one that was never told. Either way
+     * the SFU would be left out of step with what is running locally.
+     *
+     * Only signals when there is something to say: a signal that found no session, or noise
+     * cancellation actually being on. A call that never touches it costs no extra request.
+     */
+    private fun observeNoiseCancellationSignalTarget() {
+        scope.launch {
+            session.collect { session ->
+                if (session == null) return@collect
+                if (noiseCancellationSignalPending || desiredNoiseCancellationEnabled) {
+                    notifyNoiseCancellationState(desiredNoiseCancellationEnabled)
                 }
             }
         }
