@@ -948,6 +948,64 @@ public class Call(
             notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
         }
     }
+
+    /**
+     * Whether the server permits noise cancellation for this call, per the capability granted to
+     * the user and the call type's noise-cancellation mode.
+     */
+    private fun isNoiseCancellationAllowed(): Boolean = noiseCancellationPolicy.isAllowed(
+        capabilities = state.ownCapabilities.value,
+        settings = state.settings.value,
+    )
+
+    /**
+     * Publishes the state observers should see: what the call asked for while no factory exists,
+     * and what is actually processing once one does. Never builds a factory.
+     */
+    private fun publishAudioProcessingState() {
+        state.setAudioProcessingEnabled(media.isAudioProcessingEnabled())
+    }
+
+    /**
+     * Keeps noise cancellation inside what the server allows.
+     *
+     * Deliberately waits for settings to resolve before deciding anything: treating "not told
+     * yet" as "not allowed" would switch noise cancellation off and back on during join. Once
+     * resolved this applies the call type's auto-on default, and withdraws noise cancellation if
+     * the capability or the mode is taken away mid-call.
+     */
+    private fun observeNoiseCancellationPolicy() {
+        scope.launch {
+            state.settings
+                .filterNotNull()
+                .combine(
+                    state.ownCapabilities,
+                ) { settings, capabilities -> settings to capabilities }
+                .collect { (settings, capabilities) ->
+                    if (!noiseCancellationPolicy.isAllowed(capabilities, settings)) {
+                        // Withdraws unconditionally rather than only when something is already
+                        // processing: a state wanted before the factory existed is remembered and
+                        // would otherwise be applied the moment one is built, after the server
+                        // had withheld it.
+                        val wasProcessing = media.isAudioProcessingEnabledIfCreated()
+                        if (wasProcessing || media.isAudioProcessingWanted()) {
+                            logger.i {
+                                "[noiseCancellation] withdrawing, no longer allowed for this call"
+                            }
+                            media.setAudioProcessingEnabled(false)
+                            publishAudioProcessingState()
+                            notifyNoiseCancellationState(false)
+                        }
+                        return@collect
+                    }
+                    if (!autoOnApplied) {
+                        autoOnApplied = true
+                        if (noiseCancellationPolicy.isAutoOn(capabilities, settings)) {
+                            setAudioProcessingEnabled(true)
+                        }
+                    }
+                }
+        }
     }
 
     /**
@@ -1009,6 +1067,7 @@ public class Call(
                 // while joining and after the signal that found no session.
                 val applied = media.isAudioProcessingEnabledIfCreated()
                 if (noiseCancellationSignalPending || desiredNoiseCancellationEnabled || applied) {
+                    publishAudioProcessingState()
                     notifyNoiseCancellationState(applied)
                 }
             }

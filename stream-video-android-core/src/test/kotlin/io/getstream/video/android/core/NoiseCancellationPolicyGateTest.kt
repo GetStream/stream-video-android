@@ -22,11 +22,14 @@ import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Covers the core-level gate: noise cancellation may only be turned on when the server both
@@ -100,5 +103,39 @@ class NoiseCancellationPolicyGateTest : IntegrationTestBase(connectCoordinatorWS
         call.setAudioProcessingEnabled(false)
 
         coVerify(timeout = TIMEOUT_MS) { session.stopNoiseCancellation() }
+    }
+
+    @Test
+    fun `withdrawal clears a state wanted before any factory existed`() = runTest {
+        val (call, _) = call(
+            listOf(OwnCapability.EnableNoiseCancellation),
+            NoiseCancellationSettings.Mode.Available,
+        )
+
+        // Wanted while no factory exists, so nothing is processing yet and a withdrawal that only
+        // looks at what is running would find nothing to do.
+        call.setAudioProcessingEnabled(true)
+        assertTrue(call.isAudioProcessingWanted())
+
+        // The server then withholds it. The wanted state has to go, or the next factory applies
+        // it after the server said no.
+        call.state.injectServerState(capabilities = emptyList())
+
+        withTimeout(TIMEOUT_MS) {
+            while (call.isAudioProcessingWanted()) {
+                delay(10)
+            }
+        }
+        assertFalse(call.isAudioProcessingWanted())
+    }
+
+    @Test
+    fun `the toggle gate does not build a peer-connection factory`() = runTest {
+        val (call, _) = call(emptyList(), NoiseCancellationSettings.Mode.Available)
+
+        // Refused by the gate, and must not have created a factory on the way: one built before
+        // join captures the pre-join audio bitrate profile.
+        assertFalse(call.toggleAudioProcessing())
+        assertFalse(call.hasPeerConnectionFactory())
     }
 }

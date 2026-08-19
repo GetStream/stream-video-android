@@ -196,6 +196,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
     @Test
     fun `a state applied only once the factory exists is signalled on join`() = runTest {
         val call = client.call("default", randomUUID())
+        call.allowNoiseCancellation()
 
         // Wanted before any factory exists, so nothing is applied yet and the signal finds no
         // session to send at.

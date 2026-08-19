@@ -157,3 +157,13 @@ private fun <T> CallState.mutableStateField(name: String): MutableStateFlow<T> =
     CallState::class.java.getDeclaredField(name).apply {
         isAccessible = true
     }.get(this) as MutableStateFlow<T>
+
+/** Whether a peer-connection factory has been built for this call yet. */
+internal fun Call.hasPeerConnectionFactory(): Boolean {
+    val field = CallMediaManager::class.java.getDeclaredField("_peerConnectionFactory")
+    field.isAccessible = true
+    return field.get(mediaComponent()) != null
+}
+
+/** Whether this call still wants audio processing, independently of any factory existing. */
+internal fun Call.isAudioProcessingWanted(): Boolean = mediaComponent().isAudioProcessingWanted()

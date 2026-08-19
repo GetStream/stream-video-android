@@ -314,6 +314,19 @@ internal class CallMediaManager(
         _peerConnectionFactory?.isAudioProcessingEnabled() ?: false
 
     /**
+     * Whether this call wants audio processing, whether or not a factory exists to run it yet.
+     *
+     * The wanted state outlives the factory, so a policy that withholds noise cancellation has to
+     * clear it — otherwise the next factory applies it after the server said no.
+     */
+    fun isAudioProcessingWanted(): Boolean = desiredAudioProcessingEnabled
+
+    /** Forgets the wanted audio-processing state, so nothing is re-applied after the call ends. */
+    fun resetDesiredAudioProcessing() {
+        desiredAudioProcessingEnabled = false
+    }
+
+    /**
      * Records the wanted audio-processing state and applies it to the factory if one exists.
      * A factory built later picks the value up on creation, so this never has to build one.
      */
@@ -343,6 +356,9 @@ internal class CallMediaManager(
     }
 
     fun cleanup() {
+        // The wanted state must not outlive the call: a reused Call would otherwise re-apply it
+        // to the factory built for the next session.
+        resetDesiredAudioProcessing()
         mediaManager.cleanup()
     }
 }
