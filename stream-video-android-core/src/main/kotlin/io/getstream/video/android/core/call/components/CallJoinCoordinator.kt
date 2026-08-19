@@ -70,6 +70,10 @@ internal class CallJoinCoordinator(
     private val callRegistry: ClientCallRegistry,
     private val hasRequiredPermissions: () -> Boolean,
 ) {
+    private companion object {
+        const val JOIN_FLIGHT_KEY = "join"
+    }
+
     private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
 
     /**
@@ -485,9 +489,5 @@ internal class CallJoinCoordinator(
         }
         logger.d { "[_join] Reconnect after recoverable connection failure settled on $terminal" }
         return terminal is RealtimeConnection.Connected
-    }
-
-    private companion object {
-        const val JOIN_FLIGHT_KEY = "join"
     }
 }
