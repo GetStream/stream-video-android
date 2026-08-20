@@ -12,7 +12,6 @@
 
 ## stream-video-android
 ### 🐞 Fixed
-`Call.setAudioProcessingEnabled` and `Call.toggleAudioProcessing` now tell the SFU whether noise cancellation is running. Previously both only flipped the local WebRTC audio-processing module, so the server received no noise-cancellation signal from Android sessions. The signal is sent fire-and-forget and follows the state that was actually applied locally; failures are logged and never surfaced to the caller. State changed before joining is sent as soon as the session exists, and a session installed by a rejoin or migration is told the current state, so the server never holds a stale value. No public API change.
 Fix `NullPointerException` logged from `SortedParticipantsState.init` on every `Call` construction. The internal sort coroutine read `Call.events` before the field was initialized, racing against the rest of `Call`'s constructor on production dispatchers. The error was captured by the call scope's exception handler — calls continued to work — but the call-event-driven resort path was effectively dead.
 
 ### ⬆️ Improved
