@@ -19,12 +19,12 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import app.cash.paparazzi.Paparazzi
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
@@ -53,7 +53,10 @@ import org.junit.Test
 internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_4A_HDPI,
+        maxPercentDifference = MAX_PERCENT_DIFFERENCE,
+    )
 
     @Test
     fun `participant avatars`() {
@@ -217,11 +220,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 1`() {
+        val gridCall = previewGridCall(1)
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(1) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -239,11 +242,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 1 in dark mode`() {
+        val gridCall = previewGridCall(1)
         snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(1) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -261,11 +264,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 2`() {
+        val gridCall = previewGridCall(2)
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(2) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -283,11 +286,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 2 in dark mode`() {
+        val gridCall = previewGridCall(2)
         snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(2) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -305,11 +308,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 3`() {
+        val gridCall = previewGridCall(3)
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(3) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -327,11 +330,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 3 in dark mode`() {
+        val gridCall = previewGridCall(3)
         snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(3) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -349,11 +352,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 4`() {
+        val gridCall = previewGridCall(4)
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(4) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -371,11 +374,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 4 in dark mode`() {
+        val gridCall = previewGridCall(4)
         snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(4) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -393,11 +396,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 5`() {
+        val gridCall = previewGridCall(5)
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(5) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -415,11 +418,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 5 in dark mode`() {
+        val gridCall = previewGridCall(5)
         snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(5) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -437,11 +440,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 6`() {
+        val gridCall = previewGridCall(6)
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(6) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -459,11 +462,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 6 in dark mode`() {
+        val gridCall = previewGridCall(6)
         snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(6) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -481,11 +484,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 7`() {
+        val gridCall = previewGridCall(7)
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(7) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
@@ -503,11 +506,11 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `portrait participants 7 in dark mode`() {
+        val gridCall = previewGridCall(7)
         snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val gridCall = remember { previewGridCall(7) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),

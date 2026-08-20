@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Alignment
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
+import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
@@ -38,6 +39,7 @@ internal class IndicatorsTest : PaparazziComposeTest {
     override val paparazzi = Paparazzi(
         deviceConfig = PIXEL_4A_HDPI,
         renderingMode = SessionParams.RenderingMode.SHRINK,
+        maxPercentDifference = MAX_PERCENT_DIFFERENCE,
     )
 
     @Test

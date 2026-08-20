@@ -19,6 +19,7 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.layout.Box
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
+import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
 import io.getstream.video.android.compose.ui.PIXEL_2_LANDSCAPE_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
@@ -33,6 +34,7 @@ internal class LivestreamTest : PaparazziComposeTest {
     override val paparazzi = Paparazzi(
         deviceConfig = PIXEL_2_LANDSCAPE_HDPI,
         renderingMode = SessionParams.RenderingMode.SHRINK,
+        maxPercentDifference = MAX_PERCENT_DIFFERENCE,
     )
 
     @Test

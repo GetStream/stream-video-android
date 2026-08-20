@@ -44,6 +44,16 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import org.junit.Rule
 
 /**
+ * Goldens are recorded on developer machines (macOS) and verified on Linux CI. On the
+ * Paparazzi version this repo can use with Kotlin 1.9 (1.3.4), font antialiasing differs
+ * slightly between the two platforms: CI measured diffs of 0.10% to 0.30% on goldens that
+ * are pixel-identical intent-wise, against a default threshold of 0.1%. Real visual changes
+ * are far above 0.5%. Revisit after the Kotlin 2 / Paparazzi 1.3.5 upgrade (the chat repo
+ * runs that stack with the default threshold).
+ */
+internal const val MAX_PERCENT_DIFFERENCE = 0.5
+
+/**
  * [DeviceConfig.PIXEL_2] geometry (411x731dp) at hdpi. The dp layout is identical to the
  * Pixel 2, but rendering at 1.5x keeps the golden files small, which speeds up comparisons.
  */

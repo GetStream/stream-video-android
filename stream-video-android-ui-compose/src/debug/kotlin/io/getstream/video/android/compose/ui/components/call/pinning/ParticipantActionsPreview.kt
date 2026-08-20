@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
@@ -35,17 +34,15 @@ private fun ParticipantActionDialogRootPreview() {
     }
 }
 
+// The dialog content is previewed directly because its production wrapper renders through a
+// window-level Popup, which neither Android Studio previews nor Paparazzi can capture.
 @Composable
 internal fun ParticipantActionDialogPreview() {
     Box {
-        ParticipantActionsDialog(
+        ParticipantActionsDialogContent(
             call = previewCall,
             participant = previewParticipant,
             actions = participantActions,
-            offset = IntOffset(
-                x = 0,
-                y = 50,
-            ),
         )
     }
 }
@@ -66,29 +63,6 @@ internal fun ParticipantActionsPreview() {
             actions = participantActions,
             call = previewCall,
             participant = previewParticipant,
-            showDialog = true,
-        ) {
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun ParticipantActionsKickRootPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        ParticipantActionsKickPreview()
-    }
-}
-
-@Composable
-internal fun ParticipantActionsKickPreview() {
-    Box {
-        ParticipantActionsWithoutState(
-            actions = participantActions,
-            call = previewCall,
-            participant = previewParticipant,
-            showDialog = true,
         ) {
         }
     }

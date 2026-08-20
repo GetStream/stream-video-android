@@ -19,6 +19,9 @@ package io.getstream.video.android.mock
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 
 internal class PreviewGridCall(val call: Call, val participants: List<ParticipantState>)
 
@@ -47,5 +50,13 @@ internal fun previewGridCall(participantCount: Int): PreviewGridCall {
         )
     }
     call.state.upsertParticipants(participants)
+    // The sorted participants state propagates asynchronously on the call scope. Wait for it,
+    // otherwise the renderer can snapshot the transient empty state (the grid renderers return
+    // early while remoteParticipants is still empty), which depends on machine timing.
+    runBlocking {
+        withTimeout(5_000) {
+            call.state.participants.first { it.size == participantCount }
+        }
+    }
     return PreviewGridCall(call, participants)
 }

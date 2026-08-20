@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
+import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
@@ -43,6 +44,7 @@ internal class CallControlsTest : PaparazziComposeTest {
     override val paparazzi = Paparazzi(
         deviceConfig = PIXEL_4A_HDPI,
         renderingMode = SessionParams.RenderingMode.SHRINK,
+        maxPercentDifference = MAX_PERCENT_DIFFERENCE,
     )
 
     @Test

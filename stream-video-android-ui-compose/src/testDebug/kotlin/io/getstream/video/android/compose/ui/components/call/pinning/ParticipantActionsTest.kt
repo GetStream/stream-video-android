@@ -17,7 +17,9 @@
 package io.getstream.video.android.compose.ui.components.call.pinning
 
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
+import com.android.ide.common.rendering.api.SessionParams
+import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
+import io.getstream.video.android.compose.ui.PIXEL_2_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import org.junit.Rule
 import org.junit.Test
@@ -25,47 +27,23 @@ import org.junit.Test
 internal class ParticipantActionsTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_2_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+        maxPercentDifference = MAX_PERCENT_DIFFERENCE,
+    )
 
     @Test
     fun `participant actions dialog`() {
-        snapshot {
-            ParticipantActionDialogPreview()
-        }
-    }
-
-    @Test
-    fun `participant actions dialog in dark mode`() {
-        snapshot(isInDarkMode = true) {
+        snapshotWithDarkMode {
             ParticipantActionDialogPreview()
         }
     }
 
     @Test
     fun `participant actions`() {
-        snapshot {
+        snapshotWithDarkMode {
             ParticipantActionsPreview()
-        }
-    }
-
-    @Test
-    fun `participant actions in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            ParticipantActionsPreview()
-        }
-    }
-
-    @Test
-    fun `participant actions kick`() {
-        snapshot {
-            ParticipantActionsKickPreview()
-        }
-    }
-
-    @Test
-    fun `participant actions kick in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            ParticipantActionsKickPreview()
         }
     }
 }
