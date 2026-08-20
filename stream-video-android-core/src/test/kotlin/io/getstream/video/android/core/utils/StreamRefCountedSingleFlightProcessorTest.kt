@@ -20,6 +20,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -30,6 +31,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -332,5 +334,84 @@ class StreamRefCountedSingleFlightProcessorTest {
             )
             scope.cancel()
         }
+    }
+
+    @Test
+    fun `cancel key during NonCancellable cleanup starts a fresh flight`() = runTest(
+        testDispatcher,
+    ) {
+        val processor = StreamRefCountedSingleFlightProcessor(testScope)
+        val blockEntered = CompletableDeferred<Unit>()
+        val cleanupStarted = CompletableDeferred<Unit>()
+        val holdCleanup = CompletableDeferred<Unit>()
+        val hang = CompletableDeferred<Unit>()
+        val executions = AtomicInteger(0)
+
+        val first = async {
+            processor.run("key") {
+                executions.incrementAndGet()
+                try {
+                    blockEntered.complete(Unit)
+                    hang.await()
+                    "first"
+                } finally {
+                    withContext(NonCancellable) {
+                        cleanupStarted.complete(Unit)
+                        holdCleanup.await()
+                    }
+                }
+            }
+        }
+        advanceUntilIdle()
+        blockEntered.await()
+
+        processor.cancel("key")
+        advanceUntilIdle()
+        cleanupStarted.await()
+        assertFalse(processor.has("key"))
+
+        val second = processor.run("key") {
+            executions.incrementAndGet()
+            "second"
+        }
+        advanceUntilIdle()
+
+        assertEquals("second", second.getOrThrow())
+        assertEquals(2, executions.get())
+
+        holdCleanup.complete(Unit)
+        advanceUntilIdle()
+        assertFailsWith<CancellationException> { first.await() }
+    }
+
+    @Test
+    fun `stop rejects new runs while an old flight is still cleaning up`() = runTest(
+        testDispatcher,
+    ) {
+        val processor = StreamRefCountedSingleFlightProcessor(testScope)
+        val blockEntered = CompletableDeferred<Unit>()
+        val hang = CompletableDeferred<Unit>()
+
+        val first = async {
+            processor.run("key") {
+                blockEntered.complete(Unit)
+                hang.await()
+                "first"
+            }
+        }
+        advanceUntilIdle()
+        blockEntered.await()
+
+        assertTrue(processor.stop().isSuccess)
+        val second = processor.run("key") { error("should not run") }
+        assertTrue(second.isFailure)
+        assertTrue(second.exceptionOrNull() is ClosedSendChannelException)
+
+        hang.complete(Unit)
+        advanceUntilIdle()
+        assertFailsWith<CancellationException> { first.await() }
+
+        val third = processor.run("key") { "after-stop" }
+        assertTrue(third.exceptionOrNull() is ClosedSendChannelException)
     }
 }

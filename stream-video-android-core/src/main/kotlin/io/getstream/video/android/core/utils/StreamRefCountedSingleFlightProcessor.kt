@@ -55,6 +55,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  * └── awaitSharedResult
  *     └── releaseWaiter
  * ```
+ *
+ * All map mutations and the [closed] flag go through [mutex]. Callers only reuse a flight
+ * while its deferred is still [Deferred.isActive] — a `Cancelling` job is not joinable.
  */
 internal class StreamRefCountedSingleFlightProcessor(
     private val scope: CoroutineScope,
@@ -77,17 +80,18 @@ internal class StreamRefCountedSingleFlightProcessor(
      * job, including last-waiter cancel) is cancelled.
      */
     suspend fun <T> run(key: String, block: suspend () -> T): Result<T> {
-        if (closed.get()) {
-            return Result.failure(ClosedSendChannelException("RefCountedSingleFlight is closed"))
-        }
         val flight = acquireWaiter(key, block)
+            ?: return Result.failure(
+                ClosedSendChannelException("RefCountedSingleFlight is closed"),
+            )
         return awaitSharedResult(flight)
     }
 
     private suspend fun <T> acquireWaiter(
         key: String,
         block: suspend () -> T,
-    ): Flight<T> = mutex.withLock {
+    ): Flight<T>? = mutex.withLock {
+        if (closed.get()) return@withLock null
         selectFlightLocked(key, block)
     }
 
@@ -96,7 +100,7 @@ internal class StreamRefCountedSingleFlightProcessor(
         key: String,
         block: suspend () -> T,
     ): Flight<T> {
-        val running = flights[key]?.takeUnless { it.deferred.isCompleted } as Flight<T>?
+        val running = flights[key]?.takeIf { it.deferred.isActive } as Flight<T>?
         if (running != null) {
             running.waiters++
             return running
@@ -135,6 +139,11 @@ internal class StreamRefCountedSingleFlightProcessor(
         }
     }
 
+    private fun cancelAndDetachLocked(flight: Flight<*>) {
+        removeFlightIfCurrentLocked(flight.key, flight.deferred)
+        flight.deferred.cancel()
+    }
+
     private suspend fun <T> awaitSharedResult(flight: Flight<T>): Result<T> {
         var released = false
         suspend fun releaseWaiter(cancelIfLast: Boolean) {
@@ -145,8 +154,7 @@ internal class StreamRefCountedSingleFlightProcessor(
             mutex.withLock {
                 flight.waiters = (flight.waiters - 1).coerceAtLeast(0)
                 if (cancelIfLast && flight.waiters == 0 && flight.deferred.isActive) {
-                    removeFlightIfCurrentLocked(flight.key, flight.deferred)
-                    flight.deferred.cancel()
+                    cancelAndDetachLocked(flight)
                 }
             }
         }
@@ -168,20 +176,32 @@ internal class StreamRefCountedSingleFlightProcessor(
 
     fun has(key: String): Boolean = flights.containsKey(key)
 
-    fun cancel(key: String): Result<Unit> = runCatching {
-        flights[key]?.deferred?.cancel()
-    }
-
-    fun clear(cancelRunning: Boolean): Result<Unit> = runCatching {
-        if (cancelRunning) {
-            flights.values.forEach { it.deferred.cancel() }
+    suspend fun cancel(key: String): Result<Unit> = runCatching {
+        mutex.withLock {
+            val flight = flights[key] ?: return@withLock
+            cancelAndDetachLocked(flight)
         }
-        flights.clear()
     }
 
-    fun stop(): Result<Unit> = runCatching {
-        if (closed.compareAndSet(false, true)) {
-            clear(cancelRunning = true).getOrThrow()
+    suspend fun clear(cancelRunning: Boolean): Result<Unit> = runCatching {
+        mutex.withLock {
+            if (cancelRunning) {
+                val snapshot = flights.values.toList()
+                flights.clear()
+                snapshot.forEach { it.deferred.cancel() }
+            } else {
+                flights.clear()
+            }
+        }
+    }
+
+    suspend fun stop(): Result<Unit> = runCatching {
+        mutex.withLock {
+            if (closed.compareAndSet(false, true)) {
+                val snapshot = flights.values.toList()
+                flights.clear()
+                snapshot.forEach { it.deferred.cancel() }
+            }
         }
     }
 }
