@@ -21,25 +21,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.compose.base.BaseComposeTest
+import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
+import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.mock.previewParticipant
 import org.junit.Rule
 import org.junit.Test
 
-internal class AvatarTest : BaseComposeTest() {
+internal class AvatarTest : PaparazziComposeTest {
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
-
-    override fun basePaparazzi(): Paparazzi = paparazzi
+    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
 
     @Test
     fun `snapshot AvatarInitial composable`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Avatar(
                 modifier = Modifier.size(72.dp),
                 fallbackText = "Thierry",
@@ -49,7 +47,7 @@ internal class AvatarTest : BaseComposeTest() {
 
     @Test
     fun `snapshot UserAvatar composable`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             val name by previewParticipant.name.collectAsStateWithLifecycle()
             val image by previewParticipant.image.collectAsStateWithLifecycle()
             UserAvatar(

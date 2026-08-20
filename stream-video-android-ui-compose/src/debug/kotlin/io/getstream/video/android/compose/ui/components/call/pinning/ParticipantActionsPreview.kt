@@ -28,53 +28,68 @@ import io.getstream.video.android.mock.previewParticipant
 
 @Preview
 @Composable
-private fun ParticipantActionDialogPreview() {
+private fun ParticipantActionDialogRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        Box {
-            ParticipantActionsDialog(
-                call = previewCall,
-                participant = previewParticipant,
-                actions = participantActions,
-                offset = IntOffset(
-                    x = 0,
-                    y = 50,
-                ),
-            )
+        ParticipantActionDialogPreview()
+    }
+}
+
+@Composable
+internal fun ParticipantActionDialogPreview() {
+    Box {
+        ParticipantActionsDialog(
+            call = previewCall,
+            participant = previewParticipant,
+            actions = participantActions,
+            offset = IntOffset(
+                x = 0,
+                y = 50,
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun ParticipantActionsRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        ParticipantActionsPreview()
+    }
+}
+
+@Composable
+internal fun ParticipantActionsPreview() {
+    Box {
+        ParticipantActionsWithoutState(
+            actions = participantActions,
+            call = previewCall,
+            participant = previewParticipant,
+            showDialog = true,
+        ) {
         }
     }
 }
 
 @Preview
 @Composable
-private fun ParticipantActionsPreview() {
+private fun ParticipantActionsKickRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        Box {
-            ParticipantActionsWithoutState(
-                actions = participantActions,
-                call = previewCall,
-                participant = previewParticipant,
-                showDialog = true,
-            ) {
-            }
-        }
+        ParticipantActionsKickPreview()
     }
 }
 
-@Preview
 @Composable
-private fun ParticipantActionsKickPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        Box {
-            ParticipantActionsWithoutState(
-                actions = participantActions,
-                call = previewCall,
-                participant = previewParticipant,
-                showDialog = true,
-            ) {
-            }
+internal fun ParticipantActionsKickPreview() {
+    Box {
+        ParticipantActionsWithoutState(
+            actions = participantActions,
+            call = previewCall,
+            participant = previewParticipant,
+            showDialog = true,
+        ) {
         }
     }
 }

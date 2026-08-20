@@ -19,9 +19,9 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Alignment
-import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.compose.base.BaseComposeTest
+import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
+import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
@@ -31,16 +31,14 @@ import io.getstream.video.android.mock.previewParticipantsList
 import org.junit.Rule
 import org.junit.Test
 
-internal class IndicatorsTest : BaseComposeTest() {
+internal class IndicatorsTest : PaparazziComposeTest {
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
-
-    override fun basePaparazzi(): Paparazzi = paparazzi
+    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
 
     @Test
     fun `snapshot SoundIndicator composable`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Row {
                 SoundIndicator(
                     isSpeaking = true,
@@ -58,7 +56,7 @@ internal class IndicatorsTest : BaseComposeTest() {
 
     @Test
     fun `snapshot Connection ConnectionQualityIndicator composable`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Row {
                 NetworkQualityIndicator(
                     networkQuality = NetworkQuality.Poor(),
@@ -75,7 +73,7 @@ internal class IndicatorsTest : BaseComposeTest() {
 
     @Test
     fun `snapshot Connection ParticipantLabel composable`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Box {
                 ParticipantLabel(
                     call = previewCall,

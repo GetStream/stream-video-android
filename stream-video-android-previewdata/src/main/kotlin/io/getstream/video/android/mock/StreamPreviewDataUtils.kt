@@ -54,11 +54,13 @@ public val previewCall: Call = Call(
     id = "123",
     user = previewUsers[0],
 ).apply {
-    val participants = previewUsers.take(2).map { user ->
-        val sessionId = UUID.randomUUID().toString()
+    // Deterministic session ids keep the participant order stable across runs, so previews
+    // and snapshot goldens always render the same participants in the same positions.
+    sessionId = "session-0-${previewUsers[0].id}"
+    val participants = previewUsers.mapIndexed { index, user ->
         ParticipantState(
             initialUserId = user.id,
-            sessionId = sessionId,
+            sessionId = "session-$index-${user.id}",
             scope = this.state.scope,
             callActions = this.state.callActions,
         )
@@ -118,17 +120,11 @@ public val previewUsers: List<User>
 public val previewParticipantsList: List<ParticipantState>
     inline get() {
         val participants = arrayListOf<ParticipantState>()
-        previewCall.state.clearParticipants()
-        previewUsers.forEach { user ->
-            val sessionId = if (user == previewUsers.first()) {
-                previewCall.sessionId ?: UUID.randomUUID().toString()
-            } else {
-                UUID.randomUUID().toString()
-            }
+        previewUsers.forEachIndexed { index, user ->
             participants.add(
                 ParticipantState(
                     initialUserId = user.id,
-                    sessionId = sessionId,
+                    sessionId = "session-$index-${user.id}",
                     scope = previewCall.state.scope,
                     callActions = previewCall.state.callActions,
                 ).also { previewCall.state.updateParticipant(it) },
@@ -141,7 +137,6 @@ public val previewParticipantsList: List<ParticipantState>
 public val previewMemberListState: List<MemberState>
     inline get() {
         val participants = arrayListOf<MemberState>()
-        previewCall.state.clearParticipants()
         previewUsers.forEach { user ->
             participants.add(
                 MemberState(

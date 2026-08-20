@@ -19,9 +19,9 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.compose.base.BaseComposeTest
+import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
+import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallControls
@@ -34,24 +34,25 @@ import io.getstream.video.android.mock.previewMemberListState
 import org.junit.Rule
 import org.junit.Test
 
-internal class CallContentTest : BaseComposeTest() {
+internal class CallContentTest : PaparazziComposeTest {
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
-
-    override fun basePaparazzi(): Paparazzi = paparazzi
+    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
 
     @Test
     fun `snapshot IncomingCallContentDetails Video composable`() {
-        snapshot {
+        snapshotWithDarkMode {
             IncomingCallDetails(participants = previewMemberListState)
         }
     }
 
     @Test
     fun `snapshot IncomingCallContentDetails Audio composable`() {
-        snapshot {
-            IncomingCallDetails(participants = previewMemberListState)
+        snapshotWithDarkMode {
+            IncomingCallDetails(
+                isVideoType = false,
+                participants = previewMemberListState,
+            )
         }
     }
 
@@ -101,15 +102,18 @@ internal class CallContentTest : BaseComposeTest() {
 
     @Test
     fun `snapshot OutgoingCallDetails Video composable`() {
-        snapshot {
+        snapshotWithDarkMode {
             OutgoingCallDetails(participants = previewMemberListState)
         }
     }
 
     @Test
     fun `snapshot OutgoingCallDetails Audio composable`() {
-        snapshot {
-            OutgoingCallDetails(participants = previewMemberListState)
+        snapshotWithDarkMode {
+            OutgoingCallDetails(
+                isVideoType = false,
+                participants = previewMemberListState,
+            )
         }
     }
 
@@ -159,6 +163,36 @@ internal class CallContentTest : BaseComposeTest() {
     fun `snapshot CallContent with multiple participants composable`() {
         snapshot {
             CallContent(call = previewCall)
+        }
+    }
+
+    @Test
+    fun `snapshot CallContent with multiple participants dark composable`() {
+        snapshot(isInDarkMode = true) {
+            CallContent(call = previewCall)
+        }
+    }
+
+    @Test
+    fun `snapshot IncomingCallContent dark composable`() {
+        snapshot(isInDarkMode = true) {
+            IncomingCallContent(
+                call = previewCall,
+                participants = previewMemberListState,
+                isCameraEnabled = false,
+                onBackPressed = {},
+            ) {}
+        }
+    }
+
+    @Test
+    fun `snapshot OutgoingCallContent dark composable`() {
+        snapshot(isInDarkMode = true) {
+            OutgoingCallContent(
+                call = previewCall,
+                participants = previewMemberListState,
+                onBackPressed = {},
+            ) {}
         }
     }
 

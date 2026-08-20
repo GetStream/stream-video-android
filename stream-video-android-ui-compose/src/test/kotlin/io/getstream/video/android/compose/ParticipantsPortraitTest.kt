@@ -22,10 +22,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
-import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
+import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideoRenderer
@@ -39,22 +39,20 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Ca
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
+import io.getstream.video.android.compose.ui.previewSevenParticipants
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewMemberListState
 import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.mock.previewParticipantsList
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
-internal class ParticipantsPortraitTest : BaseComposeTest() {
+internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
-
-    override fun basePaparazzi(): Paparazzi = paparazzi
+    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
 
     @Test
     fun `snapshot ParticipantAvatars composable`() {
@@ -167,7 +165,6 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         }
     }
 
-    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot PortraitParticipants1 composable`() {
         snapshot {
@@ -190,7 +187,6 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         }
     }
 
-    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot PortraitParticipants2 composable`() {
         snapshot {
@@ -213,7 +209,6 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
         }
     }
 
-    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot PortraitParticipants3 composable`() {
         snapshot {
@@ -295,6 +290,28 @@ internal class ParticipantsPortraitTest : BaseComposeTest() {
                     call = previewCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(6),
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot PortraitParticipants7 composable`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val participants = previewSevenParticipants()
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                PortraitVideoRenderer(
+                    call = previewCall,
+                    dominantSpeaker = participants[0],
+                    callParticipants = participants.take(7),
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )

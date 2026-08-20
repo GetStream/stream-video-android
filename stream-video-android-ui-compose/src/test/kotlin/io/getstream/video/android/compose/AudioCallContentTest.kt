@@ -16,26 +16,34 @@
 
 package io.getstream.video.android.compose
 
-import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.compose.base.BaseComposeTest
+import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
+import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContent
 import io.getstream.video.android.mock.previewCall
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
-internal class AudioCallContentTest : BaseComposeTest() {
+internal class AudioCallContentTest : PaparazziComposeTest {
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
-
-    override fun basePaparazzi(): Paparazzi = paparazzi
+    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
 
     @Test
     fun `snapshot AudioCallContent in default state`() {
         snapshot {
+            AudioCallContent(
+                call = previewCall,
+                isMicrophoneEnabled = false,
+                durationPlaceholder = "11:45",
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot AudioCallContent in default state dark`() {
+        snapshot(isInDarkMode = true) {
             AudioCallContent(
                 call = previewCall,
                 isMicrophoneEnabled = false,
@@ -55,7 +63,6 @@ internal class AudioCallContentTest : BaseComposeTest() {
         }
     }
 
-    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot AudioOnlyCallContent in default state`() {
         snapshot {
@@ -67,7 +74,6 @@ internal class AudioCallContentTest : BaseComposeTest() {
         }
     }
 
-    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot AudioOnlyCallContent without header`() {
         snapshot {

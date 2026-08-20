@@ -44,10 +44,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
+import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.base.GenericContainer
 import io.getstream.video.android.compose.ui.components.base.StreamBadgeBox
 import io.getstream.video.android.compose.ui.components.base.StreamButton
@@ -62,16 +62,14 @@ import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import org.junit.Rule
 import org.junit.Test
 
-internal class BaseComponentsTest : BaseComposeTest() {
+internal class BaseComponentsTest : PaparazziComposeTest {
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
-
-    override fun basePaparazzi(): Paparazzi = paparazzi
+    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
 
     @Test
     fun `Regular icon buttons`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Column {
                 Row {
                     StreamIconButton(
@@ -146,7 +144,7 @@ internal class BaseComponentsTest : BaseComposeTest() {
 
     @Test
     fun `Regular buttons`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Column {
                 // Default
                 StreamButton(
@@ -201,7 +199,7 @@ internal class BaseComponentsTest : BaseComposeTest() {
 
     @Test
     fun `Button with icons`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Column {
                 // With icon
                 StreamButton(
@@ -227,7 +225,7 @@ internal class BaseComponentsTest : BaseComposeTest() {
 
     @Test
     fun `Different size buttons`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Column {
                 // Size
                 Spacer(modifier = Modifier.height(24.dp))
@@ -251,7 +249,7 @@ internal class BaseComponentsTest : BaseComposeTest() {
 
     @Test
     fun `Toggle icon buttons`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Row {
                 // Size
                 StreamIconToggleButton(
@@ -292,7 +290,7 @@ internal class BaseComponentsTest : BaseComposeTest() {
 
     @Test
     fun `Toggle buttons`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Column {
                 // Size
                 StreamToggleButton(
@@ -322,7 +320,7 @@ internal class BaseComponentsTest : BaseComposeTest() {
 
     @Test
     fun `Show progress into icon buttons`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Column {
                 StreamButton(text = "Progress", showProgress = true)
                 StreamIconButton(
@@ -336,7 +334,7 @@ internal class BaseComponentsTest : BaseComposeTest() {
 
     @Test
     fun `Input fields`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Column {
                 // Empty
                 StreamTextField(
@@ -413,7 +411,7 @@ internal class BaseComponentsTest : BaseComposeTest() {
 
     @Test
     fun `Generic container (for info messages)`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             GenericContainer {
                 Text(text = "Contained text!", color = Color.White)
             }
@@ -422,7 +420,7 @@ internal class BaseComponentsTest : BaseComposeTest() {
 
     @Test
     fun `Badges with buttons`() {
-        snapshot {
+        snapshotWithDarkModeRow {
             Column {
                 StreamBadgeBox(
                     text = "!",

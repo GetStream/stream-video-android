@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,16 +23,19 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-public fun ToggleCameraActionPreview() {
+private fun ToggleCameraActionRootPreview() {
     VideoTheme {
-        Column {
-            Row {
-                ToggleCameraAction(isCameraEnabled = false) {
-                }
+        ToggleCameraActionPreview()
+    }
+}
 
-                ToggleCameraAction(isCameraEnabled = true) {
-                }
-            }
+@Composable
+internal fun ToggleCameraActionPreview() {
+    Row {
+        ToggleCameraAction(isCameraEnabled = false) {
+        }
+
+        ToggleCameraAction(isCameraEnabled = true) {
         }
     }
 }

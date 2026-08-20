@@ -22,32 +22,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
-import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import com.android.resources.ScreenOrientation
-import io.getstream.video.android.compose.base.BaseComposeTest
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.PIXEL_2_LANDSCAPE_HDPI
+import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyRowVideoRenderer
+import io.getstream.video.android.compose.ui.previewSevenParticipants
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.mock.previewParticipantsList
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
-internal class ParticipantLandscapeTest : BaseComposeTest() {
+internal class ParticipantLandscapeTest : PaparazziComposeTest {
 
     @get:Rule
-    val paparazzi = Paparazzi(
-        deviceConfig = DeviceConfig.PIXEL_2.copy(orientation = ScreenOrientation.LANDSCAPE),
-    )
+    override val paparazzi = Paparazzi(deviceConfig = PIXEL_2_LANDSCAPE_HDPI)
 
-    override fun basePaparazzi(): Paparazzi = paparazzi
-
-    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot LandscapeParticipants1 composable`() {
         snapshot {
@@ -70,7 +64,6 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
         }
     }
 
-    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot LandscapeParticipants2 composable`() {
         snapshot {
@@ -93,7 +86,6 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
         }
     }
 
-    @Ignore("https://linear.app/stream/issue/AND-786/fix-video-snapshot-tests")
     @Test
     fun `snapshot LandscapeParticipants3 composable`() {
         snapshot {
@@ -175,6 +167,28 @@ internal class ParticipantLandscapeTest : BaseComposeTest() {
                     call = previewCall,
                     dominantSpeaker = participants[0],
                     callParticipants = participants.take(6),
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `snapshot LandscapeParticipants7 composable`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val participants = previewSevenParticipants()
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                LandscapeVideoRenderer(
+                    call = previewCall,
+                    dominantSpeaker = participants[0],
+                    callParticipants = participants.take(7),
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )

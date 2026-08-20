@@ -18,24 +18,43 @@ package io.getstream.video.android.compose
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Modifier
-import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.compose.base.BaseComposeTest
+import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
+import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.mock.previewCall
 import org.junit.Rule
 import org.junit.Test
 
-internal class CallLobbyTest : BaseComposeTest() {
+internal class CallLobbyTest : PaparazziComposeTest {
 
     @get:Rule
-    val paparazzi = Paparazzi(deviceConfig = DeviceConfig.PIXEL_4A)
-
-    override fun basePaparazzi(): Paparazzi = paparazzi
+    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
 
     @Test
     fun `snapshot CallLobby composable`() {
         snapshot {
+            CallLobby(
+                modifier = Modifier.fillMaxWidth(),
+                call = previewCall,
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot CallLobby composable with camera disabled`() {
+        snapshot {
+            CallLobby(
+                modifier = Modifier.fillMaxWidth(),
+                call = previewCall,
+                isCameraEnabled = false,
+            )
+        }
+    }
+
+    @Test
+    fun `snapshot CallLobby composable dark mode`() {
+        snapshot(isInDarkMode = true) {
             CallLobby(
                 modifier = Modifier.fillMaxWidth(),
                 call = previewCall,

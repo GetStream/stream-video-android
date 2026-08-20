@@ -17,24 +17,19 @@
 package io.getstream.video.android.compose
 
 import androidx.compose.foundation.layout.Box
-import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import com.android.resources.ScreenOrientation
-import io.getstream.video.android.compose.base.BaseComposeTest
+import io.getstream.video.android.compose.ui.PIXEL_2_LANDSCAPE_HDPI
+import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayerOverlay
 import io.getstream.video.android.mock.previewCall
 import org.junit.Rule
 import org.junit.Test
 
-internal class LivestreamTest : BaseComposeTest() {
+internal class LivestreamTest : PaparazziComposeTest {
 
     @get:Rule
-    val paparazzi = Paparazzi(
-        deviceConfig = DeviceConfig.PIXEL_2.copy(orientation = ScreenOrientation.LANDSCAPE),
-    )
-
-    override fun basePaparazzi(): Paparazzi = paparazzi
+    override val paparazzi = Paparazzi(deviceConfig = PIXEL_2_LANDSCAPE_HDPI)
 
     @Test
     fun `snapshot Livestream Player Overlay composable`() {
@@ -48,6 +43,13 @@ internal class LivestreamTest : BaseComposeTest() {
     @Test
     fun `snapshot Livestream Player composable`() {
         snapshot {
+            LivestreamPlayer(call = previewCall)
+        }
+    }
+
+    @Test
+    fun `snapshot Livestream Player dark composable`() {
+        snapshot(isInDarkMode = true) {
             LivestreamPlayer(call = previewCall)
         }
     }
