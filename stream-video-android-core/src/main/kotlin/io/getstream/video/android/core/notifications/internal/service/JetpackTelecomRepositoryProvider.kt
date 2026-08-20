@@ -31,7 +31,7 @@ internal class JetpackTelecomRepositoryProvider(private val context: Context) {
     fun get(callId: StreamCallId): JetpackTelecomRepository {
         val callsManager = CallsManager(context).apply {
             registerAppWithTelecom(
-                capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
+                capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING or
                     CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
             )
         }

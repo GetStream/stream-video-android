@@ -65,6 +65,7 @@ internal class CallSoundAndVibrationPlayer(private val context: Context) {
     }
 
     fun playCallSound(soundUri: Uri?, playIfMuted: Boolean = false) {
+        logger.d { "[playCallSound]" }
         try {
             synchronized(this) {
                 requestAudioFocus {
@@ -95,6 +96,7 @@ internal class CallSoundAndVibrationPlayer(private val context: Context) {
 
     @RequiresApi(Build.VERSION_CODES.P)
     private fun playWithRingtoneManager(soundUri: Uri?, playIfMuted: Boolean = false) {
+        logger.d { "[playWithRingtoneManager]" }
         soundUri?.let {
             if (ringtone?.isPlaying == true) ringtone?.stop()
 
@@ -120,6 +122,7 @@ internal class CallSoundAndVibrationPlayer(private val context: Context) {
     }
 
     private fun playWithMediaPlayer(soundUri: Uri?, playIfMuted: Boolean = false) {
+        logger.d { "[playWithMediaPlayer]" }
         soundUri?.let {
             mediaPlayer.let { mediaPlayer ->
                 if (!mediaPlayer.isPlaying) {

@@ -68,6 +68,22 @@ internal class ServiceLauncher(val context: Context) {
     private val throttler = Throttler()
 
     @SuppressLint("MissingPermission", "NewApi")
+    private fun initTelecomRepository(
+        call: Call,
+        callId: StreamCallId,
+        callServiceConfiguration: CallServiceConfig,
+    ) {
+        val canUseTelecom = telecomPermissions.canUseTelecom(
+            callServiceConfiguration,
+            context,
+        ) && telecomHelper.canUseJetpackTelecom()
+        if (canUseTelecom) {
+            val jetpackTelecomRepository = jetpackTelecomRepositoryProvider.get(callId)
+            call.state.jetpackTelecomRepository = jetpackTelecomRepository
+        }
+    }
+
+    @SuppressLint("MissingPermission", "NewApi")
     fun showIncomingCall(
         context: Context,
         callId: StreamCallId,
@@ -78,6 +94,10 @@ internal class ServiceLauncher(val context: Context) {
         streamVideo: StreamVideo,
         notification: Notification?,
     ) {
+        val call = streamVideo.call(callId.type, callId.id)
+
+        initTelecomRepository(call, callId, callServiceConfiguration)
+
         val result = incomingCallPresenter.showIncomingCall(
             context,
             callId,
@@ -92,18 +112,12 @@ internal class ServiceLauncher(val context: Context) {
                     ShowIncomingCallResult.FG_SERVICE -> {
                         updateIncomingCallNotification(notification, streamVideo, callId)
 
-                        val jetpackTelecomRepository = jetpackTelecomRepositoryProvider.get(callId)
-
                         val appSchema = (streamVideo as StreamVideoClient).telecomConfig?.schema
                         val addressUri = "$appSchema:${callId.id}".toUri()
                         val formattedCallDisplayName = callDisplayName?.takeIf { it.isNotBlank() } ?: DEFAULT_CALL_TEXT
 
-                        val call = streamVideo.call(callId.type, callId.id)
-
-                        call.state.jetpackTelecomRepository = (jetpackTelecomRepository)
-
                         call.scope.launch {
-                            jetpackTelecomRepository.registerCall(
+                            call.state.jetpackTelecomRepository?.registerCall(
                                 formattedCallDisplayName,
                                 addressUri,
                                 true,
