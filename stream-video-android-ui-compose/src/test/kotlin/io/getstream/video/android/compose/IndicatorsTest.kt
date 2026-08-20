@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.ui.Alignment
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
@@ -34,10 +35,13 @@ import org.junit.Test
 internal class IndicatorsTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_4A_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
-    fun `snapshot SoundIndicator composable`() {
+    fun `sound indicator`() {
         snapshotWithDarkModeRow {
             Row {
                 SoundIndicator(
@@ -55,7 +59,7 @@ internal class IndicatorsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot Connection ConnectionQualityIndicator composable`() {
+    fun `connection quality indicator`() {
         snapshotWithDarkModeRow {
             Row {
                 NetworkQualityIndicator(
@@ -72,7 +76,7 @@ internal class IndicatorsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot Connection ParticipantLabel composable`() {
+    fun `participant label`() {
         snapshotWithDarkModeRow {
             Box {
                 ParticipantLabel(

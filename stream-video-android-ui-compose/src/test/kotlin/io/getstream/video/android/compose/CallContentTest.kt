@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
@@ -37,17 +38,20 @@ import org.junit.Test
 internal class CallContentTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_4A_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
-    fun `snapshot IncomingCallContentDetails Video composable`() {
+    fun `incoming call details video`() {
         snapshotWithDarkMode {
             IncomingCallDetails(participants = previewMemberListState)
         }
     }
 
     @Test
-    fun `snapshot IncomingCallContentDetails Audio composable`() {
+    fun `incoming call details audio`() {
         snapshotWithDarkMode {
             IncomingCallDetails(
                 isVideoType = false,
@@ -57,7 +61,7 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot IncomingCallOptions composable`() {
+    fun `incoming call options`() {
         snapshotWithDarkMode {
             IncomingCallControls(
                 isVideoCall = true,
@@ -68,7 +72,7 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot IncomingCallContent with one participant composable`() {
+    fun `incoming call content with one participant`() {
         snapshot {
             IncomingCallContent(
                 call = previewCall,
@@ -80,7 +84,19 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot IncomingCallContent Video type with multiple participants composable`() {
+    fun `incoming call content with one participant in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            IncomingCallContent(
+                call = previewCall,
+                participants = previewMemberListState.takeLast(1),
+                isCameraEnabled = false,
+                onBackPressed = {},
+            ) {}
+        }
+    }
+
+    @Test
+    fun `incoming call content with multiple participants`() {
         snapshot {
             IncomingCallContent(
                 call = previewCall,
@@ -92,7 +108,19 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot IncomingCallContent with minimum parameters`() {
+    fun `incoming call content with multiple participants in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            IncomingCallContent(
+                call = previewCall,
+                participants = previewMemberListState,
+                isCameraEnabled = false,
+                onBackPressed = {},
+            ) {}
+        }
+    }
+
+    @Test
+    fun `incoming call content with minimum parameters`() {
         snapshot {
             IncomingCallContent(
                 call = previewCall,
@@ -101,14 +129,23 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot OutgoingCallDetails Video composable`() {
+    fun `incoming call content with minimum parameters in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            IncomingCallContent(
+                call = previewCall,
+            )
+        }
+    }
+
+    @Test
+    fun `outgoing call details video`() {
         snapshotWithDarkMode {
             OutgoingCallDetails(participants = previewMemberListState)
         }
     }
 
     @Test
-    fun `snapshot OutgoingCallDetails Audio composable`() {
+    fun `outgoing call details audio`() {
         snapshotWithDarkMode {
             OutgoingCallDetails(
                 isVideoType = false,
@@ -118,7 +155,7 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot OutgoingCallOptions composable`() {
+    fun `outgoing call options`() {
         snapshotWithDarkMode {
             Column {
                 OutgoingCallControls(
@@ -136,7 +173,7 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot OutgoingCallContent with one participant composable`() {
+    fun `outgoing call content with one participant`() {
         snapshot {
             OutgoingCallContent(
                 call = previewCall,
@@ -149,7 +186,20 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot OutgoingCallContent with multiple participants composable`() {
+    fun `outgoing call content with one participant in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            OutgoingCallContent(
+                call = previewCall,
+                participants = previewMemberListState.take(1),
+                modifier = Modifier.fillMaxSize(),
+                onBackPressed = {},
+                onCallAction = {},
+            )
+        }
+    }
+
+    @Test
+    fun `outgoing call content with multiple participants`() {
         snapshot {
             OutgoingCallContent(
                 call = previewCall,
@@ -160,33 +210,7 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot CallContent with multiple participants composable`() {
-        snapshot {
-            CallContent(call = previewCall)
-        }
-    }
-
-    @Test
-    fun `snapshot CallContent with multiple participants dark composable`() {
-        snapshot(isInDarkMode = true) {
-            CallContent(call = previewCall)
-        }
-    }
-
-    @Test
-    fun `snapshot IncomingCallContent dark composable`() {
-        snapshot(isInDarkMode = true) {
-            IncomingCallContent(
-                call = previewCall,
-                participants = previewMemberListState,
-                isCameraEnabled = false,
-                onBackPressed = {},
-            ) {}
-        }
-    }
-
-    @Test
-    fun `snapshot OutgoingCallContent dark composable`() {
+    fun `outgoing call content with multiple participants in dark mode`() {
         snapshot(isInDarkMode = true) {
             OutgoingCallContent(
                 call = previewCall,
@@ -197,7 +221,21 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot OutgoingCallContent with minimum parameters and video type`() {
+    fun `call content with multiple participants`() {
+        snapshot {
+            CallContent(call = previewCall)
+        }
+    }
+
+    @Test
+    fun `call content with multiple participants in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            CallContent(call = previewCall)
+        }
+    }
+
+    @Test
+    fun `outgoing call content with minimum parameters and video type`() {
         snapshot {
             OutgoingCallContent(
                 call = previewCall,
@@ -207,8 +245,28 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot OutgoingCallContent with minimum parameters and audio type`() {
+    fun `outgoing call content with minimum parameters and video type in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            OutgoingCallContent(
+                call = previewCall,
+                isVideoType = true,
+            )
+        }
+    }
+
+    @Test
+    fun `outgoing call content with minimum parameters and audio type`() {
         snapshot {
+            OutgoingCallContent(
+                call = previewCall,
+                isVideoType = false,
+            )
+        }
+    }
+
+    @Test
+    fun `outgoing call content with minimum parameters and audio type in dark mode`() {
+        snapshot(isInDarkMode = true) {
             OutgoingCallContent(
                 call = previewCall,
                 isVideoType = false,

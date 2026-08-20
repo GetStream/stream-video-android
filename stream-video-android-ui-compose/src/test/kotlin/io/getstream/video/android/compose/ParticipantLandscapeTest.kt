@@ -19,6 +19,7 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
@@ -29,9 +30,9 @@ import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyRowVideoRenderer
-import io.getstream.video.android.compose.ui.previewSevenParticipants
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewGridCall
 import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.mock.previewParticipantsList
 import org.junit.Rule
@@ -43,20 +44,20 @@ internal class ParticipantLandscapeTest : PaparazziComposeTest {
     override val paparazzi = Paparazzi(deviceConfig = PIXEL_2_LANDSCAPE_HDPI)
 
     @Test
-    fun `snapshot LandscapeParticipants1 composable`() {
+    fun `landscape participants 1`() {
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(1) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(1),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -65,20 +66,20 @@ internal class ParticipantLandscapeTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot LandscapeParticipants2 composable`() {
-        snapshot {
+    fun `landscape participants 1 in dark mode`() {
+        snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(1) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(2),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -87,20 +88,20 @@ internal class ParticipantLandscapeTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot LandscapeParticipants3 composable`() {
+    fun `landscape participants 2`() {
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(2) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(3),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -109,20 +110,20 @@ internal class ParticipantLandscapeTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot LandscapeParticipants4 composable`() {
-        snapshot {
+    fun `landscape participants 2 in dark mode`() {
+        snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(2) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(4),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -131,20 +132,20 @@ internal class ParticipantLandscapeTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot LandscapeParticipants5 composable`() {
+    fun `landscape participants 3`() {
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(3) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(5),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -153,20 +154,20 @@ internal class ParticipantLandscapeTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot LandscapeParticipants6 composable`() {
-        snapshot {
+    fun `landscape participants 3 in dark mode`() {
+        snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(3) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(6),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -175,20 +176,20 @@ internal class ParticipantLandscapeTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot LandscapeParticipants7 composable`() {
+    fun `landscape participants 4`() {
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewSevenParticipants()
+            val gridCall = remember { previewGridCall(4) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 LandscapeVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(7),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -197,7 +198,174 @@ internal class ParticipantLandscapeTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot LandscapeScreenSharingContent for other participant composable`() {
+    fun `landscape participants 4 in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(4) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                LandscapeVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `landscape participants 5`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(5) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                LandscapeVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `landscape participants 5 in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(5) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                LandscapeVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `landscape participants 6`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(6) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                LandscapeVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `landscape participants 6 in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(6) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                LandscapeVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `landscape participants 7`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(7) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                LandscapeVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `landscape participants 7 in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(7) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                LandscapeVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `landscape screen sharing content for other participant`() {
+        snapshot {
+            LandscapeScreenSharingVideoRenderer(
+                call = previewCall,
+                session = ScreenSharingSession(participant = previewParticipantsList[0]),
+                participants = previewParticipantsList,
+                dominantSpeaker = previewParticipant,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+
+    @Test
+    fun `landscape screen sharing content for other participant in dark mode`() {
         snapshot(isInDarkMode = true) {
             LandscapeScreenSharingVideoRenderer(
                 call = previewCall,
@@ -210,7 +378,20 @@ internal class ParticipantLandscapeTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot LandscapeScreenSharingContent for myself composable`() {
+    fun `landscape screen sharing content for myself`() {
+        snapshot {
+            LandscapeScreenSharingVideoRenderer(
+                call = previewCall,
+                session = ScreenSharingSession(participant = previewParticipantsList[0]),
+                participants = previewParticipantsList,
+                dominantSpeaker = previewParticipant,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+
+    @Test
+    fun `landscape screen sharing content for myself in dark mode`() {
         snapshot(isInDarkMode = true) {
             LandscapeScreenSharingVideoRenderer(
                 call = previewCall,
@@ -223,7 +404,7 @@ internal class ParticipantLandscapeTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot ParticipantsRow composable`() {
+    fun `participants row`() {
         snapshotWithDarkMode {
             LazyRowVideoRenderer(
                 call = previewCall,

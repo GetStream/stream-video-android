@@ -45,6 +45,7 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
@@ -65,10 +66,13 @@ import org.junit.Test
 internal class BaseComponentsTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_4A_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
-    fun `Regular icon buttons`() {
+    fun `regular icon buttons`() {
         snapshotWithDarkModeRow {
             Column {
                 Row {
@@ -143,7 +147,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `Regular buttons`() {
+    fun `regular buttons`() {
         snapshotWithDarkModeRow {
             Column {
                 // Default
@@ -198,7 +202,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `Button with icons`() {
+    fun `button with icons`() {
         snapshotWithDarkModeRow {
             Column {
                 // With icon
@@ -224,7 +228,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `Different size buttons`() {
+    fun `different size buttons`() {
         snapshotWithDarkModeRow {
             Column {
                 // Size
@@ -248,7 +252,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `Toggle icon buttons`() {
+    fun `toggle icon buttons`() {
         snapshotWithDarkModeRow {
             Row {
                 // Size
@@ -289,7 +293,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `Toggle buttons`() {
+    fun `toggle buttons`() {
         snapshotWithDarkModeRow {
             Column {
                 // Size
@@ -319,7 +323,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `Show progress into icon buttons`() {
+    fun `show progress into icon buttons`() {
         snapshotWithDarkModeRow {
             Column {
                 StreamButton(text = "Progress", showProgress = true)
@@ -333,7 +337,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `Input fields`() {
+    fun `input fields`() {
         snapshotWithDarkModeRow {
             Column {
                 // Empty
@@ -410,7 +414,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `Generic container (for info messages)`() {
+    fun `generic container`() {
         snapshotWithDarkModeRow {
             GenericContainer {
                 Text(text = "Contained text!", color = Color.White)
@@ -419,7 +423,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `Badges with buttons`() {
+    fun `badges with buttons`() {
         snapshotWithDarkModeRow {
             Column {
                 StreamBadgeBox(

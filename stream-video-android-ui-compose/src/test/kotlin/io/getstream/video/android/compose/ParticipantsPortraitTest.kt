@@ -19,6 +19,7 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
@@ -39,10 +40,10 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Ca
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsList
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
-import io.getstream.video.android.compose.ui.previewSevenParticipants
 import io.getstream.video.android.core.model.CallStatus
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewGridCall
 import io.getstream.video.android.mock.previewMemberListState
 import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.mock.previewParticipantsList
@@ -55,14 +56,14 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
 
     @Test
-    fun `snapshot ParticipantAvatars composable`() {
+    fun `participant avatars`() {
         snapshotWithDarkMode {
             ParticipantAvatars(members = previewMemberListState)
         }
     }
 
     @Test
-    fun `snapshot ParticipantInformation composable`() {
+    fun `participant information`() {
         snapshotWithDarkMode {
             ParticipantInformation(
                 callStatus = CallStatus.Incoming,
@@ -72,7 +73,7 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot InviteUserList composable`() {
+    fun `invite user list`() {
         snapshotWithDarkMode {
             InviteUserList(
                 previewParticipantsList,
@@ -83,7 +84,7 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot CallParticipantsInfoOptions composable`() {
+    fun `call participants info options`() {
         snapshotWithDarkMode {
             CallParticipantsInfoActions(
                 isLocalAudioEnabled = false,
@@ -94,7 +95,7 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot CallParticipantsInfoAppBar composable`() {
+    fun `call participants info app bar`() {
         snapshotWithDarkMode {
             CallParticipantListAppBar(
                 numberOfParticipants = 10,
@@ -104,7 +105,7 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot CallParticipant a local call composable`() {
+    fun `call participant local`() {
         snapshot {
             ParticipantVideo(
                 call = previewCall,
@@ -115,7 +116,18 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot CallParticipant a remote call composable`() {
+    fun `call participant local in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            ParticipantVideo(
+                call = previewCall,
+                participant = previewParticipantsList[0],
+                style = RegularVideoRendererStyle(isFocused = true),
+            )
+        }
+    }
+
+    @Test
+    fun `call participant remote`() {
         snapshot {
             ParticipantVideo(
                 call = previewCall,
@@ -126,7 +138,18 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot ParticipantVideo composable`() {
+    fun `call participant remote in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            ParticipantVideo(
+                call = previewCall,
+                participant = previewParticipantsList[1],
+                style = RegularVideoRendererStyle(isFocused = true),
+            )
+        }
+    }
+
+    @Test
+    fun `participant video`() {
         snapshot {
             ParticipantVideoRenderer(
                 call = previewCall,
@@ -136,7 +159,17 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot LocalVideoContent composable`() {
+    fun `participant video in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            ParticipantVideoRenderer(
+                call = previewCall,
+                participant = previewParticipant,
+            ) {}
+        }
+    }
+
+    @Test
+    fun `local video content`() {
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
@@ -153,7 +186,24 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot CallParticipantsList composable`() {
+    fun `local video content in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            Box {
+                FloatingParticipantVideo(
+                    call = previewCall,
+                    modifier = Modifier.fillMaxSize(),
+                    participant = previewParticipant,
+                    parentBounds = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `call participants list`() {
         snapshotWithDarkMode {
             CallParticipantsList(
                 participants = previewParticipantsList,
@@ -166,20 +216,20 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot PortraitParticipants1 composable`() {
+    fun `portrait participants 1`() {
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(1) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 PortraitVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(1),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -188,20 +238,20 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot PortraitParticipants2 composable`() {
-        snapshot {
+    fun `portrait participants 1 in dark mode`() {
+        snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(1) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 PortraitVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(2),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -210,20 +260,20 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot PortraitParticipants3 composable`() {
+    fun `portrait participants 2`() {
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(2) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 PortraitVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(3),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -232,20 +282,20 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot PortraitParticipants4 composable`() {
-        snapshot {
+    fun `portrait participants 2 in dark mode`() {
+        snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(2) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 PortraitVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(4),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -254,20 +304,20 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot PortraitParticipants5 composable`() {
+    fun `portrait participants 3`() {
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(3) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 PortraitVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(5),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -276,20 +326,20 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot PortraitParticipants6 composable`() {
-        snapshot {
+    fun `portrait participants 3 in dark mode`() {
+        snapshot(isInDarkMode = true) {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewParticipantsList
+            val gridCall = remember { previewGridCall(3) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 PortraitVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(6),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -298,20 +348,20 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot PortraitParticipants7 composable`() {
+    fun `portrait participants 4`() {
         snapshot {
             val configuration = LocalConfiguration.current
             val screenWidth = configuration.screenWidthDp
             val screenHeight = configuration.screenHeightDp
-            val participants = previewSevenParticipants()
+            val gridCall = remember { previewGridCall(4) }
 
             Box(
                 modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
             ) {
                 PortraitVideoRenderer(
-                    call = previewCall,
-                    dominantSpeaker = participants[0],
-                    callParticipants = participants.take(7),
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
                     modifier = Modifier.fillMaxSize(),
                     parentSize = IntSize(screenWidth, screenHeight),
                 )
@@ -320,7 +370,174 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot PortraitScreenSharingContent for other participant composable`() {
+    fun `portrait participants 4 in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(4) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                PortraitVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `portrait participants 5`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(5) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                PortraitVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `portrait participants 5 in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(5) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                PortraitVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `portrait participants 6`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(6) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                PortraitVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `portrait participants 6 in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(6) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                PortraitVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `portrait participants 7`() {
+        snapshot {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(7) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                PortraitVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `portrait participants 7 in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            val configuration = LocalConfiguration.current
+            val screenWidth = configuration.screenWidthDp
+            val screenHeight = configuration.screenHeightDp
+            val gridCall = remember { previewGridCall(7) }
+
+            Box(
+                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+            ) {
+                PortraitVideoRenderer(
+                    call = gridCall.call,
+                    dominantSpeaker = gridCall.participants[0],
+                    callParticipants = gridCall.participants,
+                    modifier = Modifier.fillMaxSize(),
+                    parentSize = IntSize(screenWidth, screenHeight),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `portrait screen sharing content for other participant`() {
+        snapshot {
+            PortraitScreenSharingVideoRenderer(
+                call = previewCall,
+                session = ScreenSharingSession(participant = previewParticipantsList[0]),
+                participants = previewParticipantsList,
+                dominantSpeaker = previewParticipantsList[1],
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+
+    @Test
+    fun `portrait screen sharing content for other participant in dark mode`() {
         snapshot(isInDarkMode = true) {
             PortraitScreenSharingVideoRenderer(
                 call = previewCall,
@@ -333,7 +550,20 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot PortraitScreenSharingContent for myself composable`() {
+    fun `portrait screen sharing content for myself`() {
+        snapshot {
+            PortraitScreenSharingVideoRenderer(
+                call = previewCall,
+                session = ScreenSharingSession(participant = previewParticipantsList[0]),
+                participants = previewParticipantsList,
+                dominantSpeaker = previewParticipantsList[0],
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+
+    @Test
+    fun `portrait screen sharing content for myself in dark mode`() {
         snapshot(isInDarkMode = true) {
             PortraitScreenSharingVideoRenderer(
                 call = previewCall,
@@ -346,7 +576,7 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot ParticipantsColumn composable`() {
+    fun `participants column`() {
         snapshotWithDarkModeRow {
             LazyColumnVideoRenderer(
                 call = previewCall,

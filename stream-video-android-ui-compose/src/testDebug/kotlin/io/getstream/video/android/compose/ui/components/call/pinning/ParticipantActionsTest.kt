@@ -35,7 +35,7 @@ internal class ParticipantActionsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `participant actions dialog dark`() {
+    fun `participant actions dialog in dark mode`() {
         snapshot(isInDarkMode = true) {
             ParticipantActionDialogPreview()
         }
@@ -49,7 +49,7 @@ internal class ParticipantActionsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `participant actions dark`() {
+    fun `participant actions in dark mode`() {
         snapshot(isInDarkMode = true) {
             ParticipantActionsPreview()
         }
@@ -63,7 +63,7 @@ internal class ParticipantActionsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `participant actions kick dark`() {
+    fun `participant actions kick in dark mode`() {
         snapshot(isInDarkMode = true) {
             ParticipantActionsKickPreview()
         }

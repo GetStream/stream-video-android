@@ -18,6 +18,7 @@ package io.getstream.video.android.compose
 
 import androidx.compose.foundation.layout.Box
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_2_LANDSCAPE_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
@@ -29,11 +30,14 @@ import org.junit.Test
 internal class LivestreamTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_2_LANDSCAPE_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_2_LANDSCAPE_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
-    fun `snapshot Livestream Player Overlay composable`() {
-        snapshot {
+    fun `livestream player overlay`() {
+        snapshotWithDarkMode {
             Box {
                 LivestreamPlayerOverlay(call = previewCall)
             }
@@ -41,14 +45,14 @@ internal class LivestreamTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot Livestream Player composable`() {
+    fun `livestream player`() {
         snapshot {
             LivestreamPlayer(call = previewCall)
         }
     }
 
     @Test
-    fun `snapshot Livestream Player dark composable`() {
+    fun `livestream player in dark mode`() {
         snapshot(isInDarkMode = true) {
             LivestreamPlayer(call = previewCall)
         }

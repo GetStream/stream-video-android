@@ -35,7 +35,7 @@ internal class DialogsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `stream dialog dark`() {
+    fun `stream dialog in dark mode`() {
         snapshot(isInDarkMode = true) {
             StreamDialogPreview()
         }
@@ -49,7 +49,7 @@ internal class DialogsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `stream dialog with input dark`() {
+    fun `stream dialog with input in dark mode`() {
         snapshot(isInDarkMode = true) {
             StreamDialogWithInputPreview()
         }

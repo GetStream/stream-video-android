@@ -17,10 +17,10 @@
 package io.getstream.video.android.compose
 
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
-import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.mock.previewCall
 import org.junit.Rule
 import org.junit.Test
@@ -28,32 +28,15 @@ import org.junit.Test
 internal class CallComponentsPortraitTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_4A_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
-    fun `snapshot CallAppBar composable`() {
+    fun `call app bar`() {
         snapshotWithDarkMode {
             CallAppBar(call = previewCall)
-        }
-    }
-
-    @Test
-    fun `snapshot RegularCallControls composable`() {
-        snapshotWithDarkMode {
-            ControlActions(
-                call = previewCall,
-                onCallAction = {},
-            )
-        }
-    }
-
-    @Test
-    fun `snapshot CallControls composable`() {
-        snapshotWithDarkMode {
-            ControlActions(
-                call = previewCall,
-                onCallAction = {},
-            )
         }
     }
 }

@@ -19,6 +19,7 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Modifier
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
@@ -29,11 +30,14 @@ import org.junit.Test
 internal class CallLobbyTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_4A_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
-    fun `snapshot CallLobby composable`() {
-        snapshot {
+    fun `call lobby`() {
+        snapshotWithDarkMode {
             CallLobby(
                 modifier = Modifier.fillMaxWidth(),
                 call = previewCall,
@@ -42,22 +46,12 @@ internal class CallLobbyTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot CallLobby composable with camera disabled`() {
-        snapshot {
+    fun `call lobby with camera disabled`() {
+        snapshotWithDarkMode {
             CallLobby(
                 modifier = Modifier.fillMaxWidth(),
                 call = previewCall,
                 isCameraEnabled = false,
-            )
-        }
-    }
-
-    @Test
-    fun `snapshot CallLobby composable dark mode`() {
-        snapshot(isInDarkMode = true) {
-            CallLobby(
-                modifier = Modifier.fillMaxWidth(),
-                call = previewCall,
             )
         }
     }

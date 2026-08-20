@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
@@ -39,17 +40,20 @@ import org.junit.Test
 internal class CallControlsTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_4A_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
-    fun `snapshot CallControls composable`() {
+    fun `call controls`() {
         snapshotWithDarkMode {
             ControlActions(call = previewCall, onCallAction = {})
         }
     }
 
     @Test
-    fun `snapshot CallControls Actions composable`() {
+    fun `call control actions`() {
         snapshotWithDarkModeRow {
             Column {
                 Row {

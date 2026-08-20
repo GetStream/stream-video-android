@@ -17,6 +17,7 @@
 package io.getstream.video.android.compose
 
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent
@@ -28,10 +29,13 @@ import org.junit.Test
 internal class AudioCallContentTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_4A_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
-    fun `snapshot AudioCallContent in default state`() {
+    fun `audio call content`() {
         snapshot {
             AudioCallContent(
                 call = previewCall,
@@ -42,7 +46,7 @@ internal class AudioCallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot AudioCallContent in default state dark`() {
+    fun `audio call content in dark mode`() {
         snapshot(isInDarkMode = true) {
             AudioCallContent(
                 call = previewCall,
@@ -53,7 +57,7 @@ internal class AudioCallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot AudioCallContent without header`() {
+    fun `audio call content without header`() {
         snapshot {
             AudioCallContent(
                 call = previewCall,
@@ -64,7 +68,18 @@ internal class AudioCallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot AudioOnlyCallContent in default state`() {
+    fun `audio call content without header in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            AudioCallContent(
+                call = previewCall,
+                isMicrophoneEnabled = false,
+                isShowingHeader = false,
+            )
+        }
+    }
+
+    @Test
+    fun `audio only call content`() {
         snapshot {
             AudioOnlyCallContent(
                 call = previewCall,
@@ -75,8 +90,30 @@ internal class AudioCallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot AudioOnlyCallContent without header`() {
+    fun `audio only call content in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            AudioOnlyCallContent(
+                call = previewCall,
+                isMicrophoneEnabled = false,
+                durationPlaceholder = "11:45",
+            )
+        }
+    }
+
+    @Test
+    fun `audio only call content without header`() {
         snapshot {
+            AudioOnlyCallContent(
+                call = previewCall,
+                isMicrophoneEnabled = false,
+                isShowingHeader = false,
+            )
+        }
+    }
+
+    @Test
+    fun `audio only call content without header in dark mode`() {
+        snapshot(isInDarkMode = true) {
             AudioOnlyCallContent(
                 call = previewCall,
                 isMicrophoneEnabled = false,

@@ -19,6 +19,7 @@ package io.getstream.video.android.compose
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_2_LANDSCAPE_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.audio.AudioAppBar
@@ -33,24 +34,34 @@ import org.junit.Test
 internal class AudioRoomTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_2_LANDSCAPE_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_2_LANDSCAPE_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
-    fun `snapshot AudioAppBar composable`() {
+    fun `audio app bar`() {
         snapshotWithDarkMode {
             AudioAppBar(title = "Audio Room Number 05")
         }
     }
 
     @Test
-    fun `snapshot AudioControlActions composable`() {
+    fun `audio control actions`() {
         snapshot {
             AudioControlActions(call = previewCall, modifier = Modifier.fillMaxSize())
         }
     }
 
     @Test
-    fun `snapshot AudioParticipantsGrid composable`() {
+    fun `audio control actions in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            AudioControlActions(call = previewCall, modifier = Modifier.fillMaxSize())
+        }
+    }
+
+    @Test
+    fun `audio participants grid`() {
         snapshot {
             AudioParticipantsGrid(
                 modifier = Modifier.fillMaxSize(),
@@ -60,7 +71,17 @@ internal class AudioRoomTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot AudioRoom composable`() {
+    fun `audio participants grid in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            AudioParticipantsGrid(
+                modifier = Modifier.fillMaxSize(),
+                participants = previewParticipantsList,
+            )
+        }
+    }
+
+    @Test
+    fun `audio room`() {
         snapshot {
             AudioRoomContent(
                 modifier = Modifier.fillMaxSize(),
@@ -70,7 +91,7 @@ internal class AudioRoomTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot AudioRoom DarkMode composable`() {
+    fun `audio room in dark mode`() {
         snapshot(isInDarkMode = true) {
             AudioRoomContent(
                 modifier = Modifier.fillMaxSize(),

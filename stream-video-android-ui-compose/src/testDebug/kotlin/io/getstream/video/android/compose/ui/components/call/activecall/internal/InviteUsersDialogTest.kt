@@ -35,7 +35,7 @@ internal class InviteUsersDialogTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `invite users dialog dark`() {
+    fun `invite users dialog in dark mode`() {
         snapshot(isInDarkMode = true) {
             InviteUsersDialogPreview()
         }

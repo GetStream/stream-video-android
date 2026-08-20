@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.avatar.Avatar
@@ -33,10 +34,13 @@ import org.junit.Test
 internal class AvatarTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_4A_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
-    fun `snapshot AvatarInitial composable`() {
+    fun `avatar initials`() {
         snapshotWithDarkModeRow {
             Avatar(
                 modifier = Modifier.size(72.dp),
@@ -46,7 +50,7 @@ internal class AvatarTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `snapshot UserAvatar composable`() {
+    fun `user avatar`() {
         snapshotWithDarkModeRow {
             val name by previewParticipant.name.collectAsStateWithLifecycle()
             val image by previewParticipant.image.collectAsStateWithLifecycle()

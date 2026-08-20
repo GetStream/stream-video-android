@@ -17,6 +17,7 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import org.junit.Rule
@@ -25,7 +26,10 @@ import org.junit.Test
 internal class SpotlightVideoRendererTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_4A_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
     fun `spotlight participants`() {
@@ -35,7 +39,7 @@ internal class SpotlightVideoRendererTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `spotlight participants dark`() {
+    fun `spotlight participants in dark mode`() {
         snapshot(isInDarkMode = true) {
             SpotlightParticipantsPreview()
         }
@@ -44,6 +48,13 @@ internal class SpotlightVideoRendererTest : PaparazziComposeTest {
     @Test
     fun `spotlight two participants`() {
         snapshot {
+            SpotlightTwoParticipantsPreview()
+        }
+    }
+
+    @Test
+    fun `spotlight two participants in dark mode`() {
+        snapshot(isInDarkMode = true) {
             SpotlightTwoParticipantsPreview()
         }
     }

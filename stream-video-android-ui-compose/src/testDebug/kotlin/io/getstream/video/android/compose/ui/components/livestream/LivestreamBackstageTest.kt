@@ -17,6 +17,7 @@
 package io.getstream.video.android.compose.ui.components.livestream
 
 import app.cash.paparazzi.Paparazzi
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import org.junit.Rule
@@ -25,7 +26,10 @@ import org.junit.Test
 internal class LivestreamBackstageTest : PaparazziComposeTest {
 
     @get:Rule
-    override val paparazzi = Paparazzi(deviceConfig = PIXEL_4A_HDPI)
+    override val paparazzi = Paparazzi(
+        deviceConfig = PIXEL_4A_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
+    )
 
     @Test
     fun `livestream backstage`() {
@@ -35,7 +39,7 @@ internal class LivestreamBackstageTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `livestream backstage dark`() {
+    fun `livestream backstage in dark mode`() {
         snapshot(isInDarkMode = true) {
             LivestreamBackstagePortraitPreview()
         }
