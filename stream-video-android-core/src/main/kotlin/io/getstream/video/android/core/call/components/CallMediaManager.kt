@@ -286,8 +286,17 @@ internal class CallMediaManager(
         mediaManager.screenShare.disable(fromUser = true)
     }
 
-    fun isAudioProcessingEnabled(): Boolean {
-        return peerConnectionFactory.isAudioProcessingEnabled()
+    /**
+     * Whether noise cancellation is on for this call: what is actually processing once a factory
+     * exists, and what the call asked for before then.
+     *
+     * Never builds a factory. Once one exists its answer wins, so a call under MUSIC_HIGH_QUALITY
+     * reports off even though it asked for on — nothing is attached to process its audio.
+     */
+    fun isAudioProcessingEnabled(): Boolean = if (_peerConnectionFactory != null) {
+        isAudioProcessingEnabledIfCreated()
+    } else {
+        desiredAudioProcessingEnabled
     }
 
     /**
@@ -312,10 +321,17 @@ internal class CallMediaManager(
         _peerConnectionFactory?.setAudioProcessingEnabled(enabled)
     }
 
+    /**
+     * Flips the wanted audio-processing state, applying it if a factory exists.
+     *
+     * Goes through [setAudioProcessingEnabled] rather than the factory so a toggle before joining
+     * cannot build one: a factory created there captures the pre-join audio bitrate profile, and
+     * one holding the shared processor is kept rather than released, so the profile would be
+     * pinned for the rest of the call.
+     */
     fun toggleAudioProcessing(): Boolean {
-        return peerConnectionFactory.toggleAudioProcessing().also { enabled ->
-            desiredAudioProcessingEnabled = enabled
-        }
+        setAudioProcessingEnabled(!desiredAudioProcessingEnabled)
+        return isAudioProcessingEnabled()
     }
 
     /** Disables all local capture devices. Used when leaving the call. */

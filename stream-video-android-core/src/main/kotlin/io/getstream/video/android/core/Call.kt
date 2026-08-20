@@ -913,8 +913,10 @@ public class Call(
         notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
     }
 
-    fun toggleAudioProcessing(): Boolean = media.toggleAudioProcessing().also { enabled ->
-        notifyNoiseCancellationState(enabled)
+    fun toggleAudioProcessing(): Boolean = media.toggleAudioProcessing().also {
+        // Signals what is running, not what the toggle now reports: before a factory exists the
+        // toggle reflects the wanted state, and the SFU must only hear about real processing.
+        notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
     }
 
     /**

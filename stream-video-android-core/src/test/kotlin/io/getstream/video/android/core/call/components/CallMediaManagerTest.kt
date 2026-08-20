@@ -138,10 +138,9 @@ class CallMediaManagerTest {
     }
 
     @Test
-    fun `audio-processing toggles delegate to the injected factory`() {
+    fun `audio-processing state and changes go through the injected factory`() {
         val factory = mockk<StreamPeerConnectionFactory>(relaxed = true)
         every { factory.isAudioProcessingEnabled() } returns true
-        every { factory.toggleAudioProcessing() } returns false
 
         val manager = manager()
         manager.peerConnectionFactory = factory
@@ -149,11 +148,9 @@ class CallMediaManagerTest {
         assertThat(manager.peerConnectionFactory).isSameInstanceAs(factory)
         assertThat(manager.isAudioProcessingEnabled()).isTrue()
         manager.setAudioProcessingEnabled(true)
-        assertThat(manager.toggleAudioProcessing()).isFalse()
 
         verify { factory.isAudioProcessingEnabled() }
         verify { factory.setAudioProcessingEnabled(true) }
-        verify { factory.toggleAudioProcessing() }
     }
 
     @Test
@@ -194,17 +191,17 @@ class CallMediaManagerTest {
     }
 
     @Test
-    fun `toggling audio processing records the resulting state`() {
+    fun `toggling flips the wanted state without asking the factory to toggle`() {
         val factory = mockk<StreamPeerConnectionFactory>(relaxed = true)
-        every { factory.toggleAudioProcessing() } returns true
+        every { factory.isAudioProcessingEnabled() } returns true
         val manager = manager()
         manager.peerConnectionFactory = factory
 
         assertThat(manager.toggleAudioProcessing()).isTrue()
 
-        // The recorded state follows what actually happened, not what was requested.
-        manager.setAudioProcessingEnabled(false)
-        verify { factory.setAudioProcessingEnabled(false) }
+        // Expressed as a set, so a toggle before joining can never build a factory.
+        verify { factory.setAudioProcessingEnabled(true) }
+        verify(exactly = 0) { factory.toggleAudioProcessing() }
     }
 
     @Test

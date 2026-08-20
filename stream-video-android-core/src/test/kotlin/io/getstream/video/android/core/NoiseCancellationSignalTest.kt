@@ -111,17 +111,19 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
     }
 
     @Test
-    fun `toggle signals the resolved state, not the requested one`() = runTest {
+    fun `toggle reports the wanted state but signals what is running`() = runTest {
         val call = client.call("default", randomUUID())
         val session = mockk<RtcSession>(relaxed = true)
         call.injectSession(session)
 
-        // No processor is configured, so the toggle cannot turn anything on — and the signal must
-        // follow what actually happened locally.
-        val enabled = call.toggleAudioProcessing()
+        // No factory exists yet, so the toggle records what the call wants and reports that —
+        // building one here would capture the pre-join audio bitrate profile. Nothing is
+        // processing, so the SFU is told noise cancellation is off.
+        val wanted = call.toggleAudioProcessing()
 
-        assertEquals(false, enabled)
+        assertEquals(true, wanted)
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.stopNoiseCancellation() }
+        coVerify(exactly = 0) { session.startNoiseCancellation() }
     }
 
     @Test
