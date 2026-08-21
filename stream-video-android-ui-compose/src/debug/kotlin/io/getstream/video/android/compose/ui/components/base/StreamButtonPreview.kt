@@ -24,12 +24,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.PhoneMissed
 import androidx.compose.material.icons.filled.AccessAlarm
 import androidx.compose.material.icons.filled.Camera
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.GroupAdd
-import androidx.compose.material.icons.filled.PhoneMissed
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.VideocamOff
@@ -64,7 +64,7 @@ internal fun RegularIconButtonsPreview() {
             )
             Spacer(modifier = Modifier.size(16.dp))
             StreamIconButton(
-                icon = Icons.Default.ExitToApp,
+                icon = Icons.AutoMirrored.Filled.ExitToApp,
                 style = ButtonStyles.secondaryIconButtonStyle(),
             )
             Spacer(modifier = Modifier.size(16.dp))
@@ -74,7 +74,7 @@ internal fun RegularIconButtonsPreview() {
             )
             Spacer(modifier = Modifier.size(16.dp))
             StreamIconButton(
-                icon = Icons.Default.PhoneMissed,
+                icon = Icons.AutoMirrored.Filled.PhoneMissed,
                 style = ButtonStyles.alertIconButtonStyle(),
             )
         }
@@ -89,7 +89,7 @@ internal fun RegularIconButtonsPreview() {
             Spacer(modifier = Modifier.size(16.dp))
             StreamIconButton(
                 enabled = false,
-                icon = Icons.Default.ExitToApp,
+                icon = Icons.AutoMirrored.Filled.ExitToApp,
                 style = ButtonStyles.secondaryIconButtonStyle(),
             )
             Spacer(modifier = Modifier.size(16.dp))
@@ -101,7 +101,7 @@ internal fun RegularIconButtonsPreview() {
             Spacer(modifier = Modifier.size(16.dp))
             StreamIconButton(
                 enabled = false,
-                icon = Icons.Default.PhoneMissed,
+                icon = Icons.AutoMirrored.Filled.PhoneMissed,
                 style = ButtonStyles.alertIconButtonStyle(),
             )
         }
@@ -110,17 +110,17 @@ internal fun RegularIconButtonsPreview() {
         Row {
             Spacer(modifier = Modifier.size(16.dp))
             StreamIconButton(
-                icon = Icons.Default.PhoneMissed,
+                icon = Icons.AutoMirrored.Filled.PhoneMissed,
                 style = ButtonStyles.alertIconButtonStyle(size = StyleSize.L),
             )
             Spacer(modifier = Modifier.size(16.dp))
             StreamIconButton(
-                icon = Icons.Default.PhoneMissed,
+                icon = Icons.AutoMirrored.Filled.PhoneMissed,
                 style = ButtonStyles.alertIconButtonStyle(size = StyleSize.M),
             )
             Spacer(modifier = Modifier.size(16.dp))
             StreamIconButton(
-                icon = Icons.Default.PhoneMissed,
+                icon = Icons.AutoMirrored.Filled.PhoneMissed,
                 style = ButtonStyles.alertIconButtonStyle(size = StyleSize.S),
             )
         }

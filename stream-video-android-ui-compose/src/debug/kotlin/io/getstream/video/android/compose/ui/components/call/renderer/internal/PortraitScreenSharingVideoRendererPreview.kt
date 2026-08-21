@@ -49,7 +49,7 @@ private fun PortraitScreenSharingMyContentRootPreview() {
 internal fun PortraitScreenSharingContentPreview() {
     PortraitScreenSharingVideoRenderer(
         call = previewCall,
-        session = ScreenSharingSession(participant = previewParticipantsList[0]),
+        session = ScreenSharingSession(participant = previewParticipantsList[1]),
         participants = previewParticipantsList,
         dominantSpeaker = previewParticipantsList[1],
         modifier = Modifier.fillMaxSize(),

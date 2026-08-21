@@ -56,9 +56,9 @@ private fun LandscapeScreenSharingMyContentRootPreview() {
 internal fun LandscapeScreenSharingContentPreview() {
     LandscapeScreenSharingVideoRenderer(
         call = previewCall,
-        session = ScreenSharingSession(participant = previewParticipantsList[0]),
+        session = ScreenSharingSession(participant = previewParticipantsList[1]),
         participants = previewParticipantsList,
-        dominantSpeaker = previewParticipant,
+        dominantSpeaker = previewParticipantsList[1],
         modifier = Modifier.fillMaxSize(),
     )
 }
