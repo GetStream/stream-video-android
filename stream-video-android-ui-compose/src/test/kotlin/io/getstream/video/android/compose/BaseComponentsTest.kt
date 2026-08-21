@@ -150,7 +150,62 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `regular buttons`() {
-        snapshotWithDarkMode {
+        snapshot {
+            Column {
+                // Default
+                StreamButton(
+                    text = "Primary Button",
+                    style = ButtonStyles.primaryButtonStyle(),
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                StreamButton(
+                    text = "Secondary Button",
+                    style = ButtonStyles.secondaryButtonStyle(),
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                StreamButton(
+                    text = "Tertiary Button",
+                    style = ButtonStyles.tertiaryButtonStyle(),
+                )
+                Spacer(modifier = Modifier.height(48.dp))
+                StreamButton(
+                    text = "Alert Button",
+                    style = ButtonStyles.alertButtonStyle(),
+                )
+                Spacer(modifier = Modifier.height(48.dp))
+
+                // Disabled
+                StreamButton(
+                    enabled = false,
+                    text = "Primary Button",
+                    style = ButtonStyles.primaryButtonStyle(),
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                StreamButton(
+                    enabled = false,
+                    text = "Secondary Button",
+                    style = ButtonStyles.secondaryButtonStyle(),
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                StreamButton(
+                    enabled = false,
+                    text = "Tertiary Button",
+                    style = ButtonStyles.tertiaryButtonStyle(),
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                StreamButton(
+                    enabled = false,
+                    text = "Alert Button",
+                    style = ButtonStyles.alertButtonStyle(),
+                )
+                Spacer(modifier = Modifier.height(48.dp))
+            }
+        }
+    }
+
+    @Test
+    fun `regular buttons in dark mode`() {
+        snapshot(isInDarkMode = true) {
             Column {
                 // Default
                 StreamButton(
@@ -340,7 +395,84 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `input fields`() {
-        snapshotWithDarkMode {
+        snapshot {
+            Column {
+                // Empty
+                StreamTextField(
+                    value = TextFieldValue(""),
+                    placeholder = "Call ID",
+                    onValueChange = { },
+                    style = StreamTextFieldStyles.defaultTextField(),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                StreamTextField(
+                    value = TextFieldValue(""),
+                    onValueChange = { },
+                    style = StreamTextFieldStyles.defaultTextField(),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+
+                StreamTextField(
+                    icon = Icons.Outlined.Phone,
+                    value = TextFieldValue(""),
+                    onValueChange = { },
+                    style = StreamTextFieldStyles.defaultTextField(),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+
+                // Not empty
+                StreamTextField(
+                    value = TextFieldValue("Some value"),
+                    placeholder = "Call ID",
+                    onValueChange = { },
+                    style = StreamTextFieldStyles.defaultTextField(),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+
+                StreamTextField(
+                    icon = Icons.Outlined.Phone,
+                    value = TextFieldValue("+ 123 456 789"),
+                    placeholder = "Call ID",
+                    onValueChange = { },
+                    style = StreamTextFieldStyles.defaultTextField(),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+
+                // Disabled
+                StreamTextField(
+                    enabled = false,
+                    value = TextFieldValue(""),
+                    placeholder = "Call ID",
+                    onValueChange = { },
+                    style = StreamTextFieldStyles.defaultTextField(),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+
+                // Error
+                StreamTextField(
+                    error = true,
+                    value = TextFieldValue("Wrong data"),
+                    placeholder = "Call ID",
+                    onValueChange = { },
+                    style = StreamTextFieldStyles.defaultTextField(),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+
+                StreamTextField(
+                    value = TextFieldValue(""),
+                    placeholder = "Message",
+                    onValueChange = { },
+                    minLines = 8,
+                    style = StreamTextFieldStyles.defaultTextField(),
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+            }
+        }
+    }
+
+    @Test
+    fun `input fields in dark mode`() {
+        snapshot(isInDarkMode = true) {
             Column {
                 // Empty
                 StreamTextField(
