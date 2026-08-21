@@ -171,6 +171,37 @@ class CallServiceRingingStateObserverTest {
     }
 
     @Test
+    fun `repeated identical outgoing states do not restart the outgoing sound`() = runTest {
+        observer.observe { }
+        advanceUntilIdle()
+
+        // Every call state recomputation resolves to the same outgoing state. Restarting the
+        // ringtone on each one makes the caller hear it from the beginning over and over.
+        repeat(3) {
+            ringingStateFlow.value = RingingState.Outgoing(acceptedByCallee = false)
+            advanceUntilIdle()
+        }
+
+        verify(exactly = 1) { soundPlayer.playCallSound(any(), true) }
+    }
+
+    @Test
+    fun `outgoing acceptance still handled after repeated identical states`() = runTest {
+        observer.observe { }
+        advanceUntilIdle()
+
+        repeat(3) {
+            ringingStateFlow.value = RingingState.Outgoing(acceptedByCallee = false)
+            advanceUntilIdle()
+        }
+        ringingStateFlow.value = RingingState.Outgoing(acceptedByCallee = true)
+        advanceUntilIdle()
+
+        verify(exactly = 1) { soundPlayer.playCallSound(any(), true) }
+        verify { soundPlayer.stopCallSound() }
+    }
+
+    @Test
     fun `active call stops sound`() = runTest {
         observer.observe { }
         advanceUntilIdle()
