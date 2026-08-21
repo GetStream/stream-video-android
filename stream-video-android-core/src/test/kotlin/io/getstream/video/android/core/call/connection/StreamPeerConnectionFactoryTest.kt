@@ -331,4 +331,39 @@ class StreamPeerConnectionFactoryTest {
         verify(exactly = 0) { mockAudioProc.createNative(any()) }
         verify(exactly = 0) { mockAudioProc.isEnabled = any() }
     }
+
+    @Test
+    fun `once the factory is built the attached flag decides what is reported`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        every { mockAudioProc.isEnabled } returns true
+        val callFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+            mockAudioProc,
+        )
+
+        // Before the factory is built the profile is the only evidence available. Once it is
+        // built, what it was actually wired with is what counts — the profile can have changed
+        // since, and a rebuilt factory may have left the processor off.
+        setPrivate(callFactory, "factoryCreated", true)
+        setPrivate(callFactory, "audioProcessingAttached", false)
+        assertFalse(
+            "Nothing attached, so nothing is processing",
+            callFactory.isAudioProcessingEnabled(),
+        )
+        assertFalse("Nothing to lose by releasing it", callFactory.hasAudioProcessingAttached())
+
+        setPrivate(callFactory, "audioProcessingAttached", true)
+        assertTrue("Attached and enabled", callFactory.isAudioProcessingEnabled())
+        assertTrue(
+            "Releasing it would take the shared processor down",
+            callFactory.hasAudioProcessingAttached(),
+        )
+    }
+
+    private fun setPrivate(target: StreamPeerConnectionFactory, name: String, value: Any) {
+        StreamPeerConnectionFactory::class.java.getDeclaredField(name).apply {
+            isAccessible = true
+            set(target, value)
+        }
+    }
 }

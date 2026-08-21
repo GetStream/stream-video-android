@@ -36,7 +36,9 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.webrtc.ManagedAudioProcessingFactory
 import org.webrtc.audio.JavaAudioDeviceModule.AudioSamples
+import stream.video.sfu.models.AudioBitrateProfile
 
 /**
  * Unit tests for [CallMediaManager], which owns the media pipeline: the peer-connection
@@ -248,5 +250,25 @@ class CallMediaManagerTest {
         advanceUntilIdle()
 
         verify { mediaManager.microphone.select(wired) }
+    }
+
+    @Test
+    fun `a factory built later applies the state the call already asked for`() {
+        val processor = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        every { clientImpl.audioProcessing } returns processor
+        every { mediaManager.microphone.audioBitrateProfile } returns MutableStateFlow(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+        )
+        val manager = manager()
+
+        // Recorded while no factory exists, so nothing is applied yet.
+        manager.setAudioProcessingEnabled(true)
+        verify(exactly = 0) { processor.isEnabled = any() }
+
+        // Building the factory is what applies it — that is how a call keeps its own state
+        // without the setter having to create one.
+        manager.peerConnectionFactory
+
+        verify { processor.isEnabled = true }
     }
 }
