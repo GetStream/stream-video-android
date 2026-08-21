@@ -17,7 +17,9 @@
 package io.getstream.video.android.core
 
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.components.CallMediaManager
 import io.getstream.video.android.core.call.components.CallSessionManager
+import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.mockk.every
@@ -94,4 +96,32 @@ internal fun Call.injectMockNetwork(connected: Boolean = true) {
     val monitorNetwork = monitor.javaClass.getDeclaredField("network\$delegate")
     monitorNetwork.isAccessible = true
     monitorNetwork.set(monitor, lazyOf(mockNetwork))
+}
+
+/**
+ * Installs a peer-connection factory on the call's media pipeline, so a test can decide what the
+ * shared audio processor reports without any native factory existing.
+ *
+ * The media component is built inside [Call] and never exposed. Reaching it reflectively keeps a
+ * test-only setter out of the production API.
+ */
+internal fun Call.injectPeerConnectionFactory(factory: StreamPeerConnectionFactory) {
+    mediaComponent().peerConnectionFactory = factory
+}
+
+private fun Call.mediaComponent(): CallMediaManager {
+    val field = Call::class.java.getDeclaredField("media")
+    field.isAccessible = true
+    return field.get(this) as CallMediaManager
+}
+
+/**
+ * Applies the wanted audio-processing state to the installed factory, the way building one does in
+ * production. Tests install a factory directly, which bypasses that step.
+ */
+internal fun Call.mediaAppliesWantedState() {
+    val media = mediaComponent()
+    val field = CallMediaManager::class.java.getDeclaredField("desiredAudioProcessingEnabled")
+    field.isAccessible = true
+    media.peerConnectionFactory.setAudioProcessingEnabled(field.get(media) as Boolean)
 }
