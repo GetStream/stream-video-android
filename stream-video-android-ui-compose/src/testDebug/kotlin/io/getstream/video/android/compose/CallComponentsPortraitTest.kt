@@ -19,32 +19,25 @@ package io.getstream.video.android.compose
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
-import io.getstream.video.android.compose.ui.PIXEL_2_LANDSCAPE_HDPI
+import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
-import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyRowVideoRenderer
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipant
-import io.getstream.video.android.mock.previewParticipantsList
+import io.getstream.video.android.compose.ui.components.call.CallAppBarPreview
 import org.junit.Rule
 import org.junit.Test
 
-internal class ParticipantLandscapeTest : PaparazziComposeTest {
+internal class CallComponentsPortraitTest : PaparazziComposeTest {
 
     @get:Rule
     override val paparazzi = Paparazzi(
-        deviceConfig = PIXEL_2_LANDSCAPE_HDPI,
+        deviceConfig = PIXEL_4A_HDPI,
         renderingMode = SessionParams.RenderingMode.SHRINK,
         maxPercentDifference = MAX_PERCENT_DIFFERENCE,
     )
 
     @Test
-    fun `participants row`() {
+    fun `call app bar`() {
         snapshotWithDarkMode {
-            LazyRowVideoRenderer(
-                call = previewCall,
-                participants = previewParticipantsList,
-                dominantSpeaker = previewParticipant,
-            )
+            CallAppBarPreview()
         }
     }
 }

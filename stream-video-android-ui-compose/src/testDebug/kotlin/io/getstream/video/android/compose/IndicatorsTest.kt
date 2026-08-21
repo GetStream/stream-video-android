@@ -16,20 +16,14 @@
 
 package io.getstream.video.android.compose
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.ui.Alignment
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
-import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
-import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
-import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
-import io.getstream.video.android.core.model.NetworkQuality
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipantsList
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabelPreview
+import io.getstream.video.android.compose.ui.components.indicator.ConnectionQualityIndicatorPreview
+import io.getstream.video.android.compose.ui.components.indicator.SoundIndicatorPreview
 import org.junit.Rule
 import org.junit.Test
 
@@ -45,48 +39,21 @@ internal class IndicatorsTest : PaparazziComposeTest {
     @Test
     fun `sound indicator`() {
         snapshotWithDarkModeRow {
-            Row {
-                SoundIndicator(
-                    isSpeaking = true,
-                    isAudioEnabled = true,
-                    audioLevel = 0f,
-                )
-                SoundIndicator(
-                    isSpeaking = true,
-                    isAudioEnabled = false,
-                    audioLevel = 0f,
-                )
-            }
+            SoundIndicatorPreview()
         }
     }
 
     @Test
     fun `connection quality indicator`() {
         snapshotWithDarkModeRow {
-            Row {
-                NetworkQualityIndicator(
-                    networkQuality = NetworkQuality.Poor(),
-                )
-                NetworkQualityIndicator(
-                    networkQuality = NetworkQuality.Good(),
-                )
-                NetworkQualityIndicator(
-                    networkQuality = NetworkQuality.Excellent(),
-                )
-            }
+            ConnectionQualityIndicatorPreview()
         }
     }
 
     @Test
     fun `participant label`() {
         snapshotWithDarkModeRow {
-            Box {
-                ParticipantLabel(
-                    call = previewCall,
-                    participant = previewParticipantsList[1],
-                    Alignment.BottomStart,
-                )
-            }
+            ParticipantLabelPreview()
         }
     }
 }

@@ -16,47 +16,36 @@
 
 package io.getstream.video.android.compose
 
-import androidx.compose.foundation.layout.Box
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
-import io.getstream.video.android.compose.ui.PIXEL_2_LANDSCAPE_HDPI
+import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
-import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayer
-import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayerOverlay
-import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.compose.ui.components.call.controls.CallControlActionsPreview
+import io.getstream.video.android.compose.ui.components.call.controls.CallControlsPreview
 import org.junit.Rule
 import org.junit.Test
 
-internal class LivestreamTest : PaparazziComposeTest {
+internal class CallControlsTest : PaparazziComposeTest {
 
     @get:Rule
     override val paparazzi = Paparazzi(
-        deviceConfig = PIXEL_2_LANDSCAPE_HDPI,
+        deviceConfig = PIXEL_4A_HDPI,
         renderingMode = SessionParams.RenderingMode.SHRINK,
         maxPercentDifference = MAX_PERCENT_DIFFERENCE,
     )
 
     @Test
-    fun `livestream player overlay`() {
+    fun `call controls`() {
         snapshotWithDarkMode {
-            Box {
-                LivestreamPlayerOverlay(call = previewCall)
-            }
+            CallControlsPreview()
         }
     }
 
     @Test
-    fun `livestream player`() {
-        snapshot {
-            LivestreamPlayer(call = previewCall)
-        }
-    }
-
-    @Test
-    fun `livestream player in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            LivestreamPlayer(call = previewCall)
+    fun `call control actions`() {
+        snapshotWithDarkMode {
+            CallControlActionsPreview()
         }
     }
 }

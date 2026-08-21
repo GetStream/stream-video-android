@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -29,36 +28,41 @@ import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipantsList
 
 @Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun PortraitScreenSharingContentPreview() {
+private fun PortraitScreenSharingContentRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        PortraitScreenSharingVideoRenderer(
-            call = previewCall,
-            session = ScreenSharingSession(
-                participant = previewParticipantsList[1],
-            ),
-            participants = previewParticipantsList,
-            dominantSpeaker = previewParticipantsList[1],
-            modifier = Modifier.fillMaxSize(),
-        )
+        PortraitScreenSharingContentPreview()
     }
 }
 
 @Preview
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun PortraitScreenSharingMyContentPreview() {
+private fun PortraitScreenSharingMyContentRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        PortraitScreenSharingVideoRenderer(
-            call = previewCall,
-            session = ScreenSharingSession(
-                participant = previewParticipantsList[0],
-            ),
-            participants = previewParticipantsList,
-            dominantSpeaker = previewParticipantsList[0],
-            modifier = Modifier.fillMaxSize(),
-        )
+        PortraitScreenSharingMyContentPreview()
     }
+}
+
+@Composable
+internal fun PortraitScreenSharingContentPreview() {
+    PortraitScreenSharingVideoRenderer(
+        call = previewCall,
+        session = ScreenSharingSession(participant = previewParticipantsList[0]),
+        participants = previewParticipantsList,
+        dominantSpeaker = previewParticipantsList[1],
+        modifier = Modifier.fillMaxSize(),
+    )
+}
+
+@Composable
+internal fun PortraitScreenSharingMyContentPreview() {
+    PortraitScreenSharingVideoRenderer(
+        call = previewCall,
+        session = ScreenSharingSession(participant = previewParticipantsList[0]),
+        participants = previewParticipantsList,
+        dominantSpeaker = previewParticipantsList[0],
+        modifier = Modifier.fillMaxSize(),
+    )
 }

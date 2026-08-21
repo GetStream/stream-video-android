@@ -16,19 +16,15 @@
 
 package io.getstream.video.android.compose
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
 import io.getstream.video.android.compose.ui.PIXEL_2_LANDSCAPE_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
-import io.getstream.video.android.compose.ui.components.audio.AudioAppBar
-import io.getstream.video.android.compose.ui.components.audio.AudioControlActions
-import io.getstream.video.android.compose.ui.components.audio.AudioParticipantsGrid
-import io.getstream.video.android.compose.ui.components.audio.AudioRoomContent
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipantsList
+import io.getstream.video.android.compose.ui.components.audio.AudioAppBarPreview
+import io.getstream.video.android.compose.ui.components.audio.AudioControlActionsPreview
+import io.getstream.video.android.compose.ui.components.audio.AudioParticipantsGridPreview
+import io.getstream.video.android.compose.ui.components.audio.AudioRoomContentPreview
 import org.junit.Rule
 import org.junit.Test
 
@@ -44,61 +40,49 @@ internal class AudioRoomTest : PaparazziComposeTest {
     @Test
     fun `audio app bar`() {
         snapshotWithDarkMode {
-            AudioAppBar(title = "Audio Room Number 05")
+            AudioAppBarPreview()
         }
     }
 
     @Test
     fun `audio control actions`() {
         snapshot {
-            AudioControlActions(call = previewCall, modifier = Modifier.fillMaxSize())
+            AudioControlActionsPreview()
         }
     }
 
     @Test
     fun `audio control actions in dark mode`() {
         snapshot(isInDarkMode = true) {
-            AudioControlActions(call = previewCall, modifier = Modifier.fillMaxSize())
+            AudioControlActionsPreview()
         }
     }
 
     @Test
     fun `audio participants grid`() {
         snapshot {
-            AudioParticipantsGrid(
-                modifier = Modifier.fillMaxSize(),
-                participants = previewParticipantsList,
-            )
+            AudioParticipantsGridPreview()
         }
     }
 
     @Test
     fun `audio participants grid in dark mode`() {
         snapshot(isInDarkMode = true) {
-            AudioParticipantsGrid(
-                modifier = Modifier.fillMaxSize(),
-                participants = previewParticipantsList,
-            )
+            AudioParticipantsGridPreview()
         }
     }
 
     @Test
     fun `audio room`() {
         snapshot {
-            AudioRoomContent(
-                modifier = Modifier.fillMaxSize(),
-                call = previewCall,
-            )
+            AudioRoomContentPreview()
         }
     }
 
     @Test
     fun `audio room in dark mode`() {
         snapshot(isInDarkMode = true) {
-            AudioRoomContent(
-                modifier = Modifier.fillMaxSize(),
-                call = previewCall,
-            )
+            AudioRoomContentPreview()
         }
     }
 }

@@ -25,6 +25,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.mock.previewParticipantsList
 
 @Preview(
@@ -32,17 +33,43 @@ import io.getstream.video.android.mock.previewParticipantsList
     heightDp = 720,
 )
 @Composable
-private fun LandscapeScreenSharingMyContentPreview() {
+private fun LandscapeScreenSharingContentRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        LandscapeScreenSharingVideoRenderer(
-            call = previewCall,
-            session = ScreenSharingSession(
-                participant = previewParticipantsList[0],
-            ),
-            participants = previewParticipantsList,
-            dominantSpeaker = previewParticipantsList[0],
-            modifier = Modifier.fillMaxSize(),
-        )
+        LandscapeScreenSharingContentPreview()
     }
+}
+
+@Preview(
+    widthDp = 1440,
+    heightDp = 720,
+)
+@Composable
+private fun LandscapeScreenSharingMyContentRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        LandscapeScreenSharingMyContentPreview()
+    }
+}
+
+@Composable
+internal fun LandscapeScreenSharingContentPreview() {
+    LandscapeScreenSharingVideoRenderer(
+        call = previewCall,
+        session = ScreenSharingSession(participant = previewParticipantsList[0]),
+        participants = previewParticipantsList,
+        dominantSpeaker = previewParticipant,
+        modifier = Modifier.fillMaxSize(),
+    )
+}
+
+@Composable
+internal fun LandscapeScreenSharingMyContentPreview() {
+    LandscapeScreenSharingVideoRenderer(
+        call = previewCall,
+        session = ScreenSharingSession(participant = previewParticipantsList[0]),
+        participants = previewParticipantsList,
+        dominantSpeaker = previewParticipant,
+        modifier = Modifier.fillMaxSize(),
+    )
 }

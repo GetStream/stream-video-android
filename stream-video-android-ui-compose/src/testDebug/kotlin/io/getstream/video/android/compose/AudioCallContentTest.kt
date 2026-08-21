@@ -21,9 +21,10 @@ import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
-import io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent
-import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContent
-import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContentPreview
+import io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContentWithoutHeaderPreview
+import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContentPreview
+import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContentWithoutHeaderPreview
 import org.junit.Rule
 import org.junit.Test
 
@@ -39,88 +40,56 @@ internal class AudioCallContentTest : PaparazziComposeTest {
     @Test
     fun `audio call content`() {
         snapshot {
-            AudioCallContent(
-                call = previewCall,
-                isMicrophoneEnabled = false,
-                durationPlaceholder = "11:45",
-            )
+            AudioCallContentPreview()
         }
     }
 
     @Test
     fun `audio call content in dark mode`() {
         snapshot(isInDarkMode = true) {
-            AudioCallContent(
-                call = previewCall,
-                isMicrophoneEnabled = false,
-                durationPlaceholder = "11:45",
-            )
+            AudioCallContentPreview()
         }
     }
 
     @Test
     fun `audio call content without header`() {
         snapshot {
-            AudioCallContent(
-                call = previewCall,
-                isMicrophoneEnabled = false,
-                isShowingHeader = false,
-            )
+            AudioCallContentWithoutHeaderPreview()
         }
     }
 
     @Test
     fun `audio call content without header in dark mode`() {
         snapshot(isInDarkMode = true) {
-            AudioCallContent(
-                call = previewCall,
-                isMicrophoneEnabled = false,
-                isShowingHeader = false,
-            )
+            AudioCallContentWithoutHeaderPreview()
         }
     }
 
     @Test
     fun `audio only call content`() {
         snapshot {
-            AudioOnlyCallContent(
-                call = previewCall,
-                isMicrophoneEnabled = false,
-                durationPlaceholder = "11:45",
-            )
+            AudioOnlyCallContentPreview()
         }
     }
 
     @Test
     fun `audio only call content in dark mode`() {
         snapshot(isInDarkMode = true) {
-            AudioOnlyCallContent(
-                call = previewCall,
-                isMicrophoneEnabled = false,
-                durationPlaceholder = "11:45",
-            )
+            AudioOnlyCallContentPreview()
         }
     }
 
     @Test
     fun `audio only call content without header`() {
         snapshot {
-            AudioOnlyCallContent(
-                call = previewCall,
-                isMicrophoneEnabled = false,
-                isShowingHeader = false,
-            )
+            AudioOnlyCallContentWithoutHeaderPreview()
         }
     }
 
     @Test
     fun `audio only call content without header in dark mode`() {
         snapshot(isInDarkMode = true) {
-            AudioOnlyCallContent(
-                call = previewCall,
-                isMicrophoneEnabled = false,
-                isShowingHeader = false,
-            )
+            AudioOnlyCallContentWithoutHeaderPreview()
         }
     }
 }

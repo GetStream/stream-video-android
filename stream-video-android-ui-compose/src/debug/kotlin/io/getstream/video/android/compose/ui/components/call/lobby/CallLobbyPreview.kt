@@ -16,31 +16,46 @@
 
 package io.getstream.video.android.compose.ui.components.call.lobby
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.ParticipantState
-import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 
 @Preview
 @Composable
-private fun CallLobbyPreview() {
+private fun CallLobbyRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallLobby(
-            call = previewCall,
-            video = ParticipantState.Video(
-                sessionId = previewCall.sessionId,
-                track = VideoTrack(
-                    streamId = previewCall.sessionId,
-                    video = org.webrtc.VideoTrack(1000L),
-                ),
-                enabled = true,
-                paused = false,
-            ),
-        )
+        CallLobbyPreview()
     }
+}
+
+@Preview
+@Composable
+private fun CallLobbyCameraDisabledRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallLobbyCameraDisabledPreview()
+    }
+}
+
+@Composable
+internal fun CallLobbyPreview() {
+    CallLobby(
+        modifier = Modifier.fillMaxWidth(),
+        call = previewCall,
+    )
+}
+
+@Composable
+internal fun CallLobbyCameraDisabledPreview() {
+    CallLobby(
+        modifier = Modifier.fillMaxWidth(),
+        call = previewCall,
+        isCameraEnabled = false,
+    )
 }

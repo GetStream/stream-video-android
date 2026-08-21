@@ -27,173 +27,122 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipantsList
+import io.getstream.video.android.mock.previewGridCall
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview1() {
+private fun PortraitParticipantsRootPreview1() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            PortraitVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(1),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        PortraitParticipantsPreview1()
     }
 }
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview2() {
+private fun PortraitParticipantsRootPreview2() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            PortraitVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = previewParticipantsList[0],
-                callParticipants = participants.take(2),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        PortraitParticipantsPreview2()
     }
 }
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview3() {
+private fun PortraitParticipantsRootPreview3() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            PortraitVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(3),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        PortraitParticipantsPreview3()
     }
 }
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview4() {
+private fun PortraitParticipantsRootPreview4() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            PortraitVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(4),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        PortraitParticipantsPreview4()
     }
 }
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview5() {
+private fun PortraitParticipantsRootPreview5() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            PortraitVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(5),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        PortraitParticipantsPreview5()
     }
 }
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview6() {
+private fun PortraitParticipantsRootPreview6() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            PortraitVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(6),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        PortraitParticipantsPreview6()
     }
 }
 
 @Preview
 @Composable
-private fun PortraitParticipantsPreview7() {
+private fun PortraitParticipantsRootPreview7() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
+        PortraitParticipantsPreview7()
+    }
+}
 
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            PortraitVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(7),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+@Composable
+internal fun PortraitParticipantsPreview1() {
+    PortraitParticipants(participantCount = 1)
+}
+
+@Composable
+internal fun PortraitParticipantsPreview2() {
+    PortraitParticipants(participantCount = 2)
+}
+
+@Composable
+internal fun PortraitParticipantsPreview3() {
+    PortraitParticipants(participantCount = 3)
+}
+
+@Composable
+internal fun PortraitParticipantsPreview4() {
+    PortraitParticipants(participantCount = 4)
+}
+
+@Composable
+internal fun PortraitParticipantsPreview5() {
+    PortraitParticipants(participantCount = 5)
+}
+
+@Composable
+internal fun PortraitParticipantsPreview6() {
+    PortraitParticipants(participantCount = 6)
+}
+
+@Composable
+internal fun PortraitParticipantsPreview7() {
+    PortraitParticipants(participantCount = 7)
+}
+
+@Composable
+private fun PortraitParticipants(participantCount: Int) {
+    val gridCall = previewGridCall(participantCount)
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+    val screenHeight = configuration.screenHeightDp
+
+    Box(
+        modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+    ) {
+        PortraitVideoRenderer(
+            call = gridCall.call,
+            dominantSpeaker = gridCall.participants[0],
+            callParticipants = gridCall.participants,
+            modifier = Modifier.fillMaxSize(),
+            parentSize = IntSize(screenWidth, screenHeight),
+        )
     }
 }

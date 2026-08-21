@@ -16,45 +16,28 @@
 
 package io.getstream.video.android.compose
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.ui.Modifier
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
-import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
+import io.getstream.video.android.compose.ui.PIXEL_2_LANDSCAPE_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
-import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
-import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.compose.ui.components.call.renderer.internal.ParticipantsRowPreview
 import org.junit.Rule
 import org.junit.Test
 
-internal class CallLobbyTest : PaparazziComposeTest {
+internal class ParticipantLandscapeTest : PaparazziComposeTest {
 
     @get:Rule
     override val paparazzi = Paparazzi(
-        deviceConfig = PIXEL_4A_HDPI,
+        deviceConfig = PIXEL_2_LANDSCAPE_HDPI,
         renderingMode = SessionParams.RenderingMode.SHRINK,
         maxPercentDifference = MAX_PERCENT_DIFFERENCE,
     )
 
     @Test
-    fun `call lobby`() {
+    fun `participants row`() {
         snapshotWithDarkMode {
-            CallLobby(
-                modifier = Modifier.fillMaxWidth(),
-                call = previewCall,
-            )
-        }
-    }
-
-    @Test
-    fun `call lobby with camera disabled`() {
-        snapshotWithDarkMode {
-            CallLobby(
-                modifier = Modifier.fillMaxWidth(),
-                call = previewCall,
-                isCameraEnabled = false,
-            )
+            ParticipantsRowPreview()
         }
     }
 }

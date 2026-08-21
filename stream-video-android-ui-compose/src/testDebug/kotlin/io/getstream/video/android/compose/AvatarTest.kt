@@ -16,19 +16,13 @@
 
 package io.getstream.video.android.compose
 
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
-import io.getstream.video.android.compose.ui.components.avatar.Avatar
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.mock.previewParticipant
+import io.getstream.video.android.compose.ui.components.avatar.AvatarInitialsPreview
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatarPreview
 import org.junit.Rule
 import org.junit.Test
 
@@ -44,24 +38,14 @@ internal class AvatarTest : PaparazziComposeTest {
     @Test
     fun `avatar initials`() {
         snapshotWithDarkModeRow {
-            Avatar(
-                modifier = Modifier.size(72.dp),
-                fallbackText = "Thierry",
-            )
+            AvatarInitialsPreview()
         }
     }
 
     @Test
     fun `user avatar`() {
         snapshotWithDarkModeRow {
-            val name by previewParticipant.name.collectAsStateWithLifecycle()
-            val image by previewParticipant.image.collectAsStateWithLifecycle()
-            UserAvatar(
-                modifier = Modifier.size(82.dp),
-                userImage = image,
-                userName = name,
-                isShowingOnlineIndicator = true,
-            )
+            UserAvatarPreview()
         }
     }
 }

@@ -26,11 +26,16 @@ import io.getstream.video.android.mock.previewCall
 
 @Preview
 @Composable
-private fun CallContentPreview() {
+private fun CallContentMultipleParticipantsRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallContent(call = previewCall)
+        CallContentMultipleParticipantsPreview()
     }
+}
+
+@Composable
+internal fun CallContentMultipleParticipantsPreview() {
+    CallContent(call = previewCall)
 }
 
 @Preview(
