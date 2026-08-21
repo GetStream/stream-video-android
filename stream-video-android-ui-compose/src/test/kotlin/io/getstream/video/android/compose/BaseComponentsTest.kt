@@ -75,7 +75,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `regular icon buttons`() {
-        snapshotWithDarkModeRow {
+        snapshotWithDarkMode {
             Column {
                 Row {
                     StreamIconButton(
@@ -150,7 +150,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `regular buttons`() {
-        snapshotWithDarkModeRow {
+        snapshotWithDarkMode {
             Column {
                 // Default
                 StreamButton(
@@ -205,7 +205,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `button with icons`() {
-        snapshotWithDarkModeRow {
+        snapshotWithDarkMode {
             Column {
                 // With icon
                 StreamButton(
@@ -231,7 +231,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `different size buttons`() {
-        snapshotWithDarkModeRow {
+        snapshotWithDarkMode {
             Column {
                 // Size
                 Spacer(modifier = Modifier.height(24.dp))
@@ -255,7 +255,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `toggle icon buttons`() {
-        snapshotWithDarkModeRow {
+        snapshotWithDarkMode {
             Row {
                 // Size
                 StreamIconToggleButton(
@@ -296,7 +296,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `toggle buttons`() {
-        snapshotWithDarkModeRow {
+        snapshotWithDarkMode {
             Column {
                 // Size
                 StreamToggleButton(
@@ -326,7 +326,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `show progress into icon buttons`() {
-        snapshotWithDarkModeRow {
+        snapshotWithDarkMode {
             Column {
                 StreamButton(text = "Progress", showProgress = true)
                 StreamIconButton(
@@ -340,7 +340,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `input fields`() {
-        snapshotWithDarkModeRow {
+        snapshotWithDarkMode {
             Column {
                 // Empty
                 StreamTextField(
@@ -417,7 +417,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `generic container`() {
-        snapshotWithDarkModeRow {
+        snapshotWithDarkMode {
             GenericContainer {
                 Text(text = "Contained text!", color = Color.White)
             }
@@ -426,7 +426,7 @@ internal class BaseComponentsTest : PaparazziComposeTest {
 
     @Test
     fun `badges with buttons`() {
-        snapshotWithDarkModeRow {
+        snapshotWithDarkMode {
             Column {
                 StreamBadgeBox(
                     text = "!",

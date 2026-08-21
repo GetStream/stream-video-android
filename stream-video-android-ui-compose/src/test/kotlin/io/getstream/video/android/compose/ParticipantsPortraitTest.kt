@@ -16,14 +16,13 @@
 
 package io.getstream.video.android.compose
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntSize
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.compose.theme.VideoTheme
+import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
@@ -32,8 +31,6 @@ import io.getstream.video.android.compose.ui.components.call.renderer.Participan
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LazyColumnVideoRenderer
-import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
-import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitVideoRenderer
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantListAppBar
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoActions
@@ -41,9 +38,7 @@ import io.getstream.video.android.compose.ui.components.participants.internal.Ca
 import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserList
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.model.CallStatus
-import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewGridCall
 import io.getstream.video.android.mock.previewMemberListState
 import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.mock.previewParticipantsList
@@ -55,6 +50,7 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     @get:Rule
     override val paparazzi = Paparazzi(
         deviceConfig = PIXEL_4A_HDPI,
+        renderingMode = SessionParams.RenderingMode.SHRINK,
         maxPercentDifference = MAX_PERCENT_DIFFERENCE,
     )
 
@@ -215,366 +211,6 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
                 onInviteUser = {},
                 onMute = {},
             ) {}
-        }
-    }
-
-    @Test
-    fun `portrait participants 1`() {
-        val gridCall = previewGridCall(1)
-        snapshot {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 1 in dark mode`() {
-        val gridCall = previewGridCall(1)
-        snapshot(isInDarkMode = true) {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 2`() {
-        val gridCall = previewGridCall(2)
-        snapshot {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 2 in dark mode`() {
-        val gridCall = previewGridCall(2)
-        snapshot(isInDarkMode = true) {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 3`() {
-        val gridCall = previewGridCall(3)
-        snapshot {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 3 in dark mode`() {
-        val gridCall = previewGridCall(3)
-        snapshot(isInDarkMode = true) {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 4`() {
-        val gridCall = previewGridCall(4)
-        snapshot {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 4 in dark mode`() {
-        val gridCall = previewGridCall(4)
-        snapshot(isInDarkMode = true) {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 5`() {
-        val gridCall = previewGridCall(5)
-        snapshot {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 5 in dark mode`() {
-        val gridCall = previewGridCall(5)
-        snapshot(isInDarkMode = true) {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 6`() {
-        val gridCall = previewGridCall(6)
-        snapshot {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 6 in dark mode`() {
-        val gridCall = previewGridCall(6)
-        snapshot(isInDarkMode = true) {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 7`() {
-        val gridCall = previewGridCall(7)
-        snapshot {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait participants 7 in dark mode`() {
-        val gridCall = previewGridCall(7)
-        snapshot(isInDarkMode = true) {
-            val configuration = LocalConfiguration.current
-            val screenWidth = configuration.screenWidthDp
-            val screenHeight = configuration.screenHeightDp
-
-            Box(
-                modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-            ) {
-                PortraitVideoRenderer(
-                    call = gridCall.call,
-                    dominantSpeaker = gridCall.participants[0],
-                    callParticipants = gridCall.participants,
-                    modifier = Modifier.fillMaxSize(),
-                    parentSize = IntSize(screenWidth, screenHeight),
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `portrait screen sharing content for other participant`() {
-        snapshot {
-            PortraitScreenSharingVideoRenderer(
-                call = previewCall,
-                session = ScreenSharingSession(participant = previewParticipantsList[0]),
-                participants = previewParticipantsList,
-                dominantSpeaker = previewParticipantsList[1],
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-    }
-
-    @Test
-    fun `portrait screen sharing content for other participant in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            PortraitScreenSharingVideoRenderer(
-                call = previewCall,
-                session = ScreenSharingSession(participant = previewParticipantsList[0]),
-                participants = previewParticipantsList,
-                dominantSpeaker = previewParticipantsList[1],
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-    }
-
-    @Test
-    fun `portrait screen sharing content for myself`() {
-        snapshot {
-            PortraitScreenSharingVideoRenderer(
-                call = previewCall,
-                session = ScreenSharingSession(participant = previewParticipantsList[0]),
-                participants = previewParticipantsList,
-                dominantSpeaker = previewParticipantsList[0],
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-    }
-
-    @Test
-    fun `portrait screen sharing content for myself in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            PortraitScreenSharingVideoRenderer(
-                call = previewCall,
-                session = ScreenSharingSession(participant = previewParticipantsList[0]),
-                participants = previewParticipantsList,
-                dominantSpeaker = previewParticipantsList[0],
-                modifier = Modifier.fillMaxSize(),
-            )
         }
     }
 

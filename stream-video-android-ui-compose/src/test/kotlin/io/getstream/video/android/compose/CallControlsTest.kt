@@ -56,7 +56,7 @@ internal class CallControlsTest : PaparazziComposeTest {
 
     @Test
     fun `call control actions`() {
-        snapshotWithDarkModeRow {
+        snapshotWithDarkMode {
             Column {
                 Row {
                     ToggleCameraAction(
