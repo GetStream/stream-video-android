@@ -269,6 +269,17 @@ internal class CallMediaManager(
         return peerConnectionFactory.isAudioProcessingEnabled()
     }
 
+    /**
+     * Audio-processing state as far as it is known, without forcing the peer-connection factory
+     * to be built. False before the factory exists — nothing can be processing yet.
+     *
+     * Used where the state is reported rather than changed, which must never bring a factory into
+     * existence: one created before join would be built with the pre-join audio bitrate profile
+     * and defeat [ensureFactoryMatchesAudioProfile].
+     */
+    fun isAudioProcessingEnabledIfCreated(): Boolean =
+        _peerConnectionFactory?.isAudioProcessingEnabled() ?: false
+
     fun setAudioProcessingEnabled(enabled: Boolean) {
         return peerConnectionFactory.setAudioProcessingEnabled(enabled)
     }

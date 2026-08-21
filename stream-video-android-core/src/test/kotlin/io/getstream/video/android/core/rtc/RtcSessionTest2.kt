@@ -28,6 +28,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
+import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
@@ -76,6 +77,8 @@ import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.WebsocketReconnectStrategy
+import stream.video.sfu.signal.StartNoiseCancellationRequest
+import stream.video.sfu.signal.StopNoiseCancellationRequest
 import java.io.InterruptedIOException
 
 class RtcSessionTest2 {
@@ -850,5 +853,67 @@ class RtcSessionTest2 {
         val publisherMock = mockk<Publisher>(relaxed = true)
         every { rtcSession["createPublisher"](any<List<PublishOption>>()) } returns publisherMock
         return rtcSession to publisherMock
+    }
+
+    @Test
+    fun `startNoiseCancellation sends the request to the SFU with the session id`() = runTest {
+        // Given
+        val signalService = mockk<SignalServerService>(relaxed = true)
+        val (rtcSession, _) = noiseCancellationSession(signalService)
+
+        // When
+        rtcSession.startNoiseCancellation()
+
+        // Then
+        coVerify(exactly = 1) {
+            signalService.startNoiseCancellation(
+                StartNoiseCancellationRequest(session_id = "session-id"),
+            )
+        }
+    }
+
+    @Test
+    fun `stopNoiseCancellation sends the request to the SFU with the session id`() = runTest {
+        // Given
+        val signalService = mockk<SignalServerService>(relaxed = true)
+        val (rtcSession, _) = noiseCancellationSession(signalService)
+
+        // When
+        rtcSession.stopNoiseCancellation()
+
+        // Then
+        coVerify(exactly = 1) {
+            signalService.stopNoiseCancellation(
+                StopNoiseCancellationRequest(session_id = "session-id"),
+            )
+        }
+    }
+
+    private fun noiseCancellationSession(
+        signalService: SignalServerService,
+    ): Pair<RtcSession, SfuConnectionModule> {
+        val mockModule = mockk<SfuConnectionModule>(relaxed = true) {
+            every { api } returns signalService
+        }
+        val rtcSession = RtcSession(
+            client = mockStreamVideo,
+            powerManager = mockPowerManager,
+            call = mockCall,
+            sessionManager = CallSessionManager(),
+            sessionId = "session-id",
+            apiKey = "api-key",
+            lifecycle = mockLifecycle,
+            sfuUrl = "https://test-sfu.stream.com",
+            sfuWsUrl = "wss://test-sfu.stream.com",
+            sfuToken = "fake-sfu-token",
+            sfuName = "test-sfu-edge",
+            clientImpl = mockVideoClient,
+            coroutineScope = testScope,
+            rtcSessionScope = testScope,
+            remoteIceServers = emptyList(),
+            sfuConnectionModuleProvider = { mockModule },
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+        )
+        return rtcSession to mockModule
     }
 }
