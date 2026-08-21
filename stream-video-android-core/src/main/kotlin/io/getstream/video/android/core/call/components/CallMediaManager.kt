@@ -76,7 +76,9 @@ internal class CallMediaManager(
 
     /**
      * Audio-processing state this call wants, remembered separately from the factory so it
-     * survives one not existing yet or being recreated.
+     * survives one not existing yet or being recreated. Applying it must never itself build a
+     * factory: one created before join captures the pre-join audio bitrate profile and defeats
+     * [ensureFactoryMatchesAudioProfile].
      *
      * The processor itself is owned by the client and shared by every call, and its enabled flag
      * lives on that one instance. Rather than clearing the flag when a call ends — which reaches
@@ -303,18 +305,30 @@ internal class CallMediaManager(
      * Audio-processing state as far as it is known, without forcing the peer-connection factory
      * to be built. False before the factory exists — nothing can be processing yet.
      *
-     * Used where the state is reported rather than changed, which must never bring a factory into
-     * existence: one created before join would be built with the pre-join audio bitrate profile
-     * and defeat [ensureFactoryMatchesAudioProfile].
+     * Used where the state is reported rather than changed — state publishing, the policy gate
+     * and signalling — which must never bring a factory into existence: one created before join
+     * would be built with the pre-join audio bitrate profile and defeat
+     * [ensureFactoryMatchesAudioProfile].
      */
     fun isAudioProcessingEnabledIfCreated(): Boolean =
         _peerConnectionFactory?.isAudioProcessingEnabled() ?: false
 
     /**
+     * Whether this call wants audio processing, whether or not a factory exists to run it yet.
+     *
+     * The wanted state outlives the factory, so a policy that withholds noise cancellation has to
+     * clear it — otherwise the next factory applies it after the server said no.
+     */
+    fun isAudioProcessingWanted(): Boolean = desiredAudioProcessingEnabled
+
+    /** Forgets the wanted audio-processing state, so nothing is re-applied after the call ends. */
+    fun resetDesiredAudioProcessing() {
+        desiredAudioProcessingEnabled = false
+    }
+
+    /**
      * Records the wanted audio-processing state and applies it to the factory if one exists.
-     * A factory built later picks the value up on creation, so this never has to build one:
-     * a factory created before join captures the pre-join audio bitrate profile and defeats
-     * [ensureFactoryMatchesAudioProfile].
+     * A factory built later picks the value up on creation, so this never has to build one.
      */
     fun setAudioProcessingEnabled(enabled: Boolean) {
         desiredAudioProcessingEnabled = enabled
@@ -342,6 +356,9 @@ internal class CallMediaManager(
     }
 
     fun cleanup() {
+        // The wanted state must not outlive the call: a reused Call would otherwise re-apply it
+        // to the factory built for the next session.
+        resetDesiredAudioProcessing()
         mediaManager.cleanup()
     }
 }
