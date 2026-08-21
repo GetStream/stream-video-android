@@ -111,17 +111,19 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
     }
 
     @Test
-    fun `toggle signals the resolved state, not the requested one`() = runTest {
+    fun `toggle reports the wanted state but signals what is running`() = runTest {
         val call = client.call("default", randomUUID())
         val session = mockk<RtcSession>(relaxed = true)
         call.injectSession(session)
 
-        // No processor is configured, so the toggle cannot turn anything on — and the signal must
-        // follow what actually happened locally.
-        val enabled = call.toggleAudioProcessing()
+        // No factory exists yet, so the toggle records what the call wants and reports that —
+        // building one here would capture the pre-join audio bitrate profile. Nothing is
+        // processing, so the SFU is told noise cancellation is off.
+        val wanted = call.toggleAudioProcessing()
 
-        assertEquals(false, enabled)
+        assertEquals(true, wanted)
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.stopNoiseCancellation() }
+        coVerify(exactly = 0) { session.startNoiseCancellation() }
     }
 
     @Test
@@ -171,5 +173,26 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         // Waiting on the stop means every signal before it has already landed.
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.stopNoiseCancellation() }
         assertEquals(false, signalled.last())
+    }
+
+    @Test
+    fun `a state applied only once the factory exists is signalled on join`() = runTest {
+        val call = client.call("default", randomUUID())
+
+        // Wanted before any factory exists, so nothing is applied yet and the signal finds no
+        // session to send at.
+        call.setAudioProcessingEnabled(true)
+
+        // The factory is built while joining and applies the wanted state, so by the time a
+        // session appears noise cancellation really is running.
+        call.injectWorkingProcessor()
+        call.mediaAppliesWantedState()
+
+        val session = mockk<RtcSession>(relaxed = true)
+        val signalled = record(session)
+        call.injectSession(session)
+
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.startNoiseCancellation() }
+        assertEquals(listOf(true), signalled)
     }
 }

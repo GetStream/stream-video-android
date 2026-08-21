@@ -891,8 +891,21 @@ public class Call(
         return state.settings.value?.video?.enabled ?: false
     }
 
+    /**
+     * Whether noise cancellation is running for this call.
+     *
+     * The audio processor supplied to [StreamVideoBuilder] is a single instance shared by every
+     * call, so this state is only meaningful for the call currently in progress. Two calls in
+     * progress at once cannot have different noise-cancellation states.
+     */
     fun isAudioProcessingEnabled(): Boolean = media.isAudioProcessingEnabled()
 
+    /**
+     * Turns noise cancellation on or off for this call, and tells the SFU about it.
+     *
+     * Takes effect for the call in progress; see [isAudioProcessingEnabled] for why the state
+     * cannot differ between two calls running at the same time.
+     */
     fun setAudioProcessingEnabled(enabled: Boolean) {
         media.setAudioProcessingEnabled(enabled)
         // Signals what was actually applied, not what was asked for: with no audio processor
@@ -900,8 +913,10 @@ public class Call(
         notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
     }
 
-    fun toggleAudioProcessing(): Boolean = media.toggleAudioProcessing().also { enabled ->
-        notifyNoiseCancellationState(enabled)
+    fun toggleAudioProcessing(): Boolean = media.toggleAudioProcessing().also {
+        // Signals what is running, not what the toggle now reports: before a factory exists the
+        // toggle reflects the wanted state, and the SFU must only hear about real processing.
+        notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
     }
 
     /**
