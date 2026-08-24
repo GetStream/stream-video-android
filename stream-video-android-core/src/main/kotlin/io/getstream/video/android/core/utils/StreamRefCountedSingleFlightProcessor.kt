@@ -34,14 +34,15 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * Compared to [StreamSingleFlightProcessorImpl]:
  * - Cancelling **one** waiter does **not** cancel the shared job (work is owned by [scope]).
- * - Cancelling the **last** waiter **does** cancel the shared job (sole-caller cancel still
- *   aborts the operation).
+ * - Cancelling the **last** waiter cancels the shared job only when [run] is called with
+ *   [cancelIfLastWaiter] (the default). Pass `false` when the work must outlive the last
+ *   UI waiter (Activity finish / screen handoff) and be torn down only by [scope] cancel
+ *   (leave / call cleanup).
  * - [CancellationException] is rethrown to the cancelled waiter instead of being wrapped in
  *   [Result.failure].
  *
  * Use this when the operation should survive Activity/ViewModel teardown of some waiters
- * (e.g. screen handoff, UI join + call-scoped auto-join) but should not keep running after
- * nobody is waiting — unless [scope] itself is cancelled (leave / call cleanup).
+ * (e.g. screen handoff, UI join + call-scoped auto-join).
  *
  * Candidate for Stream Android Core v2 alongside [StreamSingleFlightProcessorImpl].
  *
@@ -82,14 +83,19 @@ internal class StreamRefCountedSingleFlightProcessor(
      *
      * Returns [Result.failure] with a [ClosedSendChannelException] if [stop] has already
      * been called. [CancellationException] is still rethrown when this waiter (or the shared
-     * job, including last-waiter cancel) is cancelled.
+     * job, including last-waiter cancel when [cancelIfLastWaiter] is true) is cancelled.
      *
      * [onCoalesced] runs on this waiter when it attaches to an already-running flight
      * (before awaiting the shared result).
+     *
+     * When [cancelIfLastWaiter] is false, the last cancelled waiter leaves the shared job
+     * running and keeps the map entry so a later [run] can coalesce instead of starting a
+     * second execution.
      */
     suspend fun <T> run(
         key: String,
         onCoalesced: () -> Unit = {},
+        cancelIfLastWaiter: Boolean = true,
         block: suspend () -> T,
     ): Result<T> {
         val acquired = acquireWaiter(key, block)
@@ -97,7 +103,7 @@ internal class StreamRefCountedSingleFlightProcessor(
                 ClosedSendChannelException("RefCountedSingleFlight is closed"),
             )
         if (acquired.coalesced) onCoalesced()
-        return awaitSharedResult(acquired.flight)
+        return awaitSharedResult(acquired.flight, cancelIfLastWaiter)
     }
 
     private suspend fun <T> acquireWaiter(
@@ -157,7 +163,10 @@ internal class StreamRefCountedSingleFlightProcessor(
         flight.deferred.cancel()
     }
 
-    private suspend fun <T> awaitSharedResult(flight: Flight<T>): Result<T> {
+    private suspend fun <T> awaitSharedResult(
+        flight: Flight<T>,
+        cancelIfLastWaiter: Boolean,
+    ): Result<T> {
         var released = false
         suspend fun releaseWaiter(cancelIfLast: Boolean) {
             if (released) return
@@ -167,13 +176,15 @@ internal class StreamRefCountedSingleFlightProcessor(
             mutex.withLock {
                 flight.waiters = (flight.waiters - 1).coerceAtLeast(0)
                 if (flight.waiters != 0) return@withLock
-                // Always detach when the last waiter leaves. A deferred created on an already
-                // cancelled scope can die before its body/finally runs, which would otherwise
-                // leave a stale map entry (`has(key) == true`).
-                if (cancelIfLast && flight.deferred.isActive) {
-                    cancelAndDetachLocked(flight)
-                } else {
-                    removeFlightIfCurrentLocked(flight.key, flight.deferred)
+                when {
+                    cancelIfLast && flight.deferred.isActive -> cancelAndDetachLocked(flight)
+                    // Job already dead (completed, failed, or scope cancelled): drop the map
+                    // entry. A deferred created on an already-cancelled scope can die before
+                    // its body/finally runs, which would otherwise leave `has(key) == true`.
+                    !flight.deferred.isActive ->
+                        removeFlightIfCurrentLocked(flight.key, flight.deferred)
+                    // Last waiter left and the job is still running (cancelIfLastWaiter =
+                    // false): keep the entry so a later run() coalesces instead of double-joining.
                 }
             }
         }
@@ -183,7 +194,7 @@ internal class StreamRefCountedSingleFlightProcessor(
         } catch (ce: CancellationException) {
             // NonCancellable: waiter bookkeeping must run while this coroutine is cancelling.
             withContext(NonCancellable) {
-                releaseWaiter(cancelIfLast = true)
+                releaseWaiter(cancelIfLast = cancelIfLastWaiter)
             }
             throw ce
         } finally {

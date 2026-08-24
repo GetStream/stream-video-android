@@ -101,7 +101,10 @@ internal class CallJoinCoordinator(
      *
      * The shared work runs on the call [scope]. Each caller still awaits on its own coroutine,
      * so destroying one UI scope only drops that waiter; remaining waiters keep the join.
-     * Cancelling the last waiter cancels the shared job.
+     * The shared job is **not** cancelled when the last waiter leaves — incoming accept can
+     * finish/recreate the Activity after the SFU session is already in, and aborting then
+     * leaves ringing Idle (Connecting…) forever. Leave / call cleanup still cancel [scope]
+     * and abort the join.
      */
     suspend fun join(
         create: Boolean = false,
@@ -129,6 +132,7 @@ internal class CallJoinCoordinator(
                     }
                 }
             },
+            cancelIfLastWaiter = false,
         ) {
             executeJoin(
                 create,

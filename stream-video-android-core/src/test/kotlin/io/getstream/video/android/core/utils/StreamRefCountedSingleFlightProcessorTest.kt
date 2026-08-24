@@ -206,6 +206,42 @@ class StreamRefCountedSingleFlightProcessorTest {
     }
 
     @Test
+    fun `last waiter cancel with cancelIfLastWaiter false keeps the job and coalesces the next run`() =
+        runTest(testDispatcher) {
+            val processor = StreamRefCountedSingleFlightProcessor(testScope)
+            val executions = AtomicInteger(0)
+            val gate = CompletableDeferred<Unit>()
+
+            val first = async {
+                processor.run("key", cancelIfLastWaiter = false) {
+                    executions.incrementAndGet()
+                    gate.await()
+                    "ok"
+                }
+            }
+            advanceUntilIdle()
+            first.cancel()
+            advanceUntilIdle()
+            assertFailsWith<CancellationException> { first.await() }
+            assertTrue(processor.has("key"))
+            assertEquals(1, executions.get())
+
+            val second = async {
+                processor.run("key", cancelIfLastWaiter = false) {
+                    executions.incrementAndGet()
+                    gate.await()
+                    "should not run"
+                }
+            }
+            advanceUntilIdle()
+            gate.complete(Unit)
+            assertEquals("ok", second.await().getOrThrow())
+            advanceUntilIdle()
+            assertEquals(1, executions.get())
+            assertFalse(processor.has("key"))
+        }
+
+    @Test
     fun `a run after the previous one finished starts a fresh attempt`() = runTest(
         testDispatcher,
     ) {
