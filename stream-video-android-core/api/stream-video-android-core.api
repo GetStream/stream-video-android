@@ -9001,6 +9001,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun clearParticipants ()V
 	public final fun getAcceptedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getAudioProcessingEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBackstage ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBlockedUserIds ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getBlockedUsers ()Lkotlinx/coroutines/flow/StateFlow;

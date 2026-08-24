@@ -534,6 +534,22 @@ public class CallState(
     private val _settings: MutableStateFlow<CallSettingsResponse?> = MutableStateFlow(null)
     public val settings: StateFlow<CallSettingsResponse?> = _settings
 
+    private val _audioProcessingEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    /**
+     * Whether local audio processing (noise cancellation) is currently running for this call.
+     *
+     * The SDK changes this on its own, not only in response to the app: the call type's
+     * noise-cancellation mode and the user's `enable-noise-cancellation` capability can both
+     * withdraw it mid-call. Observe this instead of snapshotting
+     * [Call.isAudioProcessingEnabled], or UI bound to it will go stale.
+     */
+    public val audioProcessingEnabled: StateFlow<Boolean> = _audioProcessingEnabled
+
+    internal fun setAudioProcessingEnabled(enabled: Boolean) {
+        _audioProcessingEnabled.value = enabled
+    }
+
     private val _durationInMs = flow {
         while (currentCoroutineContext().isActive) {
             delay(1000)

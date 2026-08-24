@@ -74,6 +74,19 @@ internal class CallMediaManager(
     // peerConnectionFactory is nullable and recreated when audioBitrateProfile changes (before joining)
     private var _peerConnectionFactory: StreamPeerConnectionFactory? = null
 
+    /**
+     * Audio-processing state this call wants, remembered separately from the factory so it
+     * survives one not existing yet or being recreated. Applying it must never itself build a
+     * factory: one created before join captures the pre-join audio bitrate profile and defeats
+     * [ensureFactoryMatchesAudioProfile].
+     *
+     * The processor itself is owned by the client and shared by every call, and its enabled flag
+     * lives on that one instance. Rather than clearing the flag when a call ends — which reaches
+     * across into whatever call runs next — every factory applies the state its own call asked
+     * for as it is built. Defaults to off so a call that never asks does not inherit.
+     */
+    private var desiredAudioProcessingEnabled: Boolean = false
+
     var peerConnectionFactory: StreamPeerConnectionFactory
         get() {
             if (_peerConnectionFactory == null) {
@@ -85,7 +98,9 @@ internal class CallMediaManager(
                     audioBitrateProfileProvider = { mediaManager.microphone.audioBitrateProfile.value },
                     sharedEglBaseProvider = { eglBase() },
                     webRtcLoggingLevel = clientImpl.loggingLevel.webRtcLoggingLevel,
-                )
+                ).also { factory ->
+                    factory.setAudioProcessingEnabled(desiredAudioProcessingEnabled)
+                }
             }
             return _peerConnectionFactory!!
         }
@@ -171,9 +186,17 @@ internal class CallMediaManager(
      * This should only be called before the call is joined.
      */
     fun recreatePeerConnectionFactory() {
-        _peerConnectionFactory?.dispose()
-        _peerConnectionFactory = null
+        val previous = _peerConnectionFactory
         // Next access to peerConnectionFactory will recreate it with current profile
+        _peerConnectionFactory = null
+        if (previous?.hasAudioProcessingAttached() == true) {
+            // The shared audio processor is torn down when the native factory holding it is
+            // released, which would leave the client without one for every later call. Dropping
+            // the factory instead leaks it, the same way a factory is dropped on call cleanup.
+            logger.i { "Keeping the previous factory alive: it holds the shared audio processor" }
+            return
+        }
+        previous?.dispose()
     }
 
     /** Applies server-provided call settings to the local media manager. */
@@ -265,16 +288,64 @@ internal class CallMediaManager(
         mediaManager.screenShare.disable(fromUser = true)
     }
 
-    fun isAudioProcessingEnabled(): Boolean {
-        return peerConnectionFactory.isAudioProcessingEnabled()
+    /**
+     * Whether noise cancellation is on for this call: what is actually processing once a factory
+     * exists, and what the call asked for before then.
+     *
+     * Never builds a factory. Once one exists its answer wins, so a call under MUSIC_HIGH_QUALITY
+     * reports off even though it asked for on — nothing is attached to process its audio.
+     */
+    fun isAudioProcessingEnabled(): Boolean = if (_peerConnectionFactory != null) {
+        isAudioProcessingEnabledIfCreated()
+    } else {
+        desiredAudioProcessingEnabled
     }
 
+    /**
+     * Audio-processing state as far as it is known, without forcing the peer-connection factory
+     * to be built. False before the factory exists — nothing can be processing yet.
+     *
+     * Used where the state is reported rather than changed — state publishing, the policy gate
+     * and signalling — which must never bring a factory into existence: one created before join
+     * would be built with the pre-join audio bitrate profile and defeat
+     * [ensureFactoryMatchesAudioProfile].
+     */
+    fun isAudioProcessingEnabledIfCreated(): Boolean =
+        _peerConnectionFactory?.isAudioProcessingEnabled() ?: false
+
+    /**
+     * Whether this call wants audio processing, whether or not a factory exists to run it yet.
+     *
+     * The wanted state outlives the factory, so a policy that withholds noise cancellation has to
+     * clear it — otherwise the next factory applies it after the server said no.
+     */
+    fun isAudioProcessingWanted(): Boolean = desiredAudioProcessingEnabled
+
+    /** Forgets the wanted audio-processing state, so nothing is re-applied after the call ends. */
+    fun resetDesiredAudioProcessing() {
+        desiredAudioProcessingEnabled = false
+    }
+
+    /**
+     * Records the wanted audio-processing state and applies it to the factory if one exists.
+     * A factory built later picks the value up on creation, so this never has to build one.
+     */
     fun setAudioProcessingEnabled(enabled: Boolean) {
-        return peerConnectionFactory.setAudioProcessingEnabled(enabled)
+        desiredAudioProcessingEnabled = enabled
+        _peerConnectionFactory?.setAudioProcessingEnabled(enabled)
     }
 
+    /**
+     * Flips the wanted audio-processing state, applying it if a factory exists.
+     *
+     * Goes through [setAudioProcessingEnabled] rather than the factory so a toggle before joining
+     * cannot build one: a factory created there captures the pre-join audio bitrate profile, and
+     * one holding the shared processor is kept rather than released, so the profile would be
+     * pinned for the rest of the call.
+     */
     fun toggleAudioProcessing(): Boolean {
-        return peerConnectionFactory.toggleAudioProcessing()
+        setAudioProcessingEnabled(!desiredAudioProcessingEnabled)
+        return isAudioProcessingEnabled()
     }
 
     /** Disables all local capture devices. Used when leaving the call. */
@@ -285,6 +356,9 @@ internal class CallMediaManager(
     }
 
     fun cleanup() {
+        // The wanted state must not outlive the call: a reused Call would otherwise re-apply it
+        // to the factory built for the next session.
+        resetDesiredAudioProcessing()
         mediaManager.cleanup()
     }
 }
