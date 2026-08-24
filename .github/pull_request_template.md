@@ -62,7 +62,6 @@ Provide the patch code here
 - [ ] PR is linked to the GitHub issue it resolves
 
 #### Code & documentation
-- [ ] Changelog is updated with client-facing changes
 - [ ] New code is covered by unit tests
 - [ ] Comparison screenshots added for visual changes
 - [ ] Affected documentation updated (KDocs, docusaurus, tutorial)
