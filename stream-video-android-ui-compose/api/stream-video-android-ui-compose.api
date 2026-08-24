@@ -78,6 +78,508 @@ public final class io/getstream/video/android/compose/state/ui/participants/Invi
 public abstract interface class io/getstream/video/android/compose/state/ui/participants/ParticipantInfoAction {
 }
 
+public final class io/getstream/video/android/compose/theme/CallAppBarCenterContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Ljava/lang/String;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lio/getstream/video/android/core/Call;Ljava/lang/String;)Lio/getstream/video/android/compose/theme/CallAppBarCenterContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallAppBarCenterContentParams;Lio/getstream/video/android/core/Call;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallAppBarCenterContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallAppBarLeadingContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function0;)Lio/getstream/video/android/compose/theme/CallAppBarLeadingContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallAppBarLeadingContentParams;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallAppBarLeadingContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getOnBackPressed ()Lkotlin/jvm/functions/Function0;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallAppBarParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Ljava/lang/String;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Landroidx/compose/ui/Modifier;
+	public final fun component3 ()Lkotlin/jvm/functions/Function0;
+	public final fun component4 ()Lkotlin/jvm/functions/Function1;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Ljava/lang/String;)Lio/getstream/video/android/compose/theme/CallAppBarParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallAppBarParams;Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallAppBarParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getModifier ()Landroidx/compose/ui/Modifier;
+	public final fun getOnBackPressed ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnCallAction ()Lkotlin/jvm/functions/Function1;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallAppBarTrailingContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/theme/CallAppBarTrailingContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallAppBarTrailingContentParams;Lio/getstream/video/android/core/Call;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallAppBarTrailingContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getOnCallAction ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallContentClosedCaptionsParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun copy (Lio/getstream/video/android/core/Call;)Lio/getstream/video/android/compose/theme/CallContentClosedCaptionsParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallContentClosedCaptionsParams;Lio/getstream/video/android/core/Call;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallContentClosedCaptionsParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallContentPictureInPictureContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun copy (Lio/getstream/video/android/core/Call;)Lio/getstream/video/android/compose/theme/CallContentPictureInPictureContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallContentPictureInPictureContentParams;Lio/getstream/video/android/core/Call;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallContentPictureInPictureContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallContentVideoContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/compose/ui/components/call/renderer/LayoutType;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lkotlin/jvm/functions/Function6;Lkotlin/jvm/functions/Function5;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/compose/ui/components/call/renderer/LayoutType;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lkotlin/jvm/functions/Function6;Lkotlin/jvm/functions/Function5;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Lio/getstream/video/android/compose/ui/components/call/renderer/LayoutType;
+	public final fun component3 ()Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;
+	public final fun component4 ()Lkotlin/jvm/functions/Function6;
+	public final fun component5 ()Lkotlin/jvm/functions/Function5;
+	public final fun copy (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/compose/ui/components/call/renderer/LayoutType;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lkotlin/jvm/functions/Function6;Lkotlin/jvm/functions/Function5;)Lio/getstream/video/android/compose/theme/CallContentVideoContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallContentVideoContentParams;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/compose/ui/components/call/renderer/LayoutType;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lkotlin/jvm/functions/Function6;Lkotlin/jvm/functions/Function5;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallContentVideoContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getFloatingVideoRenderer ()Lkotlin/jvm/functions/Function5;
+	public final fun getLayoutType ()Lio/getstream/video/android/compose/ui/components/call/renderer/LayoutType;
+	public final fun getStyle ()Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;
+	public final fun getVideoRenderer ()Lkotlin/jvm/functions/Function6;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallContentVideoModerationBlurParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun copy (Lio/getstream/video/android/core/Call;)Lio/getstream/video/android/compose/theme/CallContentVideoModerationBlurParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallContentVideoModerationBlurParams;Lio/getstream/video/android/core/Call;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallContentVideoModerationBlurParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallContentVideoModerationWarningParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Ljava/lang/String;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lio/getstream/video/android/core/Call;Ljava/lang/String;)Lio/getstream/video/android/compose/theme/CallContentVideoModerationWarningParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallContentVideoModerationWarningParams;Lio/getstream/video/android/core/Call;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallContentVideoModerationWarningParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallContentVideoOverlayContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun copy (Lio/getstream/video/android/core/Call;)Lio/getstream/video/android/compose/theme/CallContentVideoOverlayContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallContentVideoOverlayContentParams;Lio/getstream/video/android/core/Call;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallContentVideoOverlayContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallLobbyControlsContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;ZZLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;ZZLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Z
+	public final fun component3 ()Z
+	public final fun component4 ()Landroidx/compose/ui/Modifier;
+	public final fun component5 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Lio/getstream/video/android/core/Call;ZZLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/theme/CallLobbyControlsContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallLobbyControlsContentParams;Lio/getstream/video/android/core/Call;ZZLandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallLobbyControlsContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getModifier ()Landroidx/compose/ui/Modifier;
+	public final fun getOnCallAction ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public final fun isCameraEnabled ()Z
+	public final fun isMicrophoneEnabled ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallLobbyOnDisabledContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/model/User;)V
+	public final fun component1 ()Lio/getstream/video/android/model/User;
+	public final fun copy (Lio/getstream/video/android/model/User;)Lio/getstream/video/android/compose/theme/CallLobbyOnDisabledContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallLobbyOnDisabledContentParams;Lio/getstream/video/android/model/User;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallLobbyOnDisabledContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUser ()Lio/getstream/video/android/model/User;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallLobbyOnRenderedContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState$Video;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState$Video;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Lio/getstream/video/android/core/ParticipantState$Video;
+	public final fun component3 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState$Video;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/theme/CallLobbyOnRenderedContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallLobbyOnRenderedContentParams;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState$Video;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallLobbyOnRenderedContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getOnRendered ()Lkotlin/jvm/functions/Function1;
+	public final fun getVideo ()Lio/getstream/video/android/core/ParticipantState$Video;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/CallLobbyParticipantLabelContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/model/User;ZLandroidx/compose/ui/Alignment;)V
+	public synthetic fun <init> (Lio/getstream/video/android/model/User;ZLandroidx/compose/ui/Alignment;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/model/User;
+	public final fun component2 ()Z
+	public final fun component3 ()Landroidx/compose/ui/Alignment;
+	public final fun copy (Lio/getstream/video/android/model/User;ZLandroidx/compose/ui/Alignment;)Lio/getstream/video/android/compose/theme/CallLobbyParticipantLabelContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/CallLobbyParticipantLabelContentParams;Lio/getstream/video/android/model/User;ZLandroidx/compose/ui/Alignment;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/CallLobbyParticipantLabelContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabelPosition ()Landroidx/compose/ui/Alignment;
+	public final fun getUser ()Lio/getstream/video/android/model/User;
+	public fun hashCode ()I
+	public final fun isMicrophoneEnabled ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/ComposableSingletons$VideoComponentFactoryParamsKt {
+	public static final field INSTANCE Lio/getstream/video/android/compose/theme/ComposableSingletons$VideoComponentFactoryParamsKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function6;
+	public fun <init> ()V
+	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function6;
+}
+
+public final class io/getstream/video/android/compose/theme/CompoundComponentFactoryKt {
+	public static final fun CompoundComponentFactory ([Ljava/lang/Object;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/getstream/video/android/compose/theme/ControlActionsParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Ljava/util/List;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Landroidx/compose/ui/Modifier;
+	public final fun component3 ()Lkotlin/jvm/functions/Function1;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Ljava/util/List;)Lio/getstream/video/android/compose/theme/ControlActionsParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/ControlActionsParams;Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/ControlActionsParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getActions ()Ljava/util/List;
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getModifier ()Landroidx/compose/ui/Modifier;
+	public final fun getOnCallAction ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/IncomingCallContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component10 ()Lkotlin/jvm/functions/Function1;
+	public final fun component2 ()Landroidx/compose/ui/Modifier;
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun component5 ()Lkotlin/jvm/functions/Function3;
+	public final fun component6 ()Lkotlin/jvm/functions/Function3;
+	public final fun component7 ()Lkotlin/jvm/functions/Function5;
+	public final fun component8 ()Lkotlin/jvm/functions/Function3;
+	public final fun component9 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/theme/IncomingCallContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/IncomingCallContentParams;Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/IncomingCallContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackgroundContent ()Lkotlin/jvm/functions/Function3;
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getControlsContent ()Lkotlin/jvm/functions/Function3;
+	public final fun getDetailsContent ()Lkotlin/jvm/functions/Function5;
+	public final fun getHeaderContent ()Lkotlin/jvm/functions/Function3;
+	public final fun getModifier ()Landroidx/compose/ui/Modifier;
+	public final fun getOnBackPressed ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnCallAction ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public final fun isShowingHeader ()Z
+	public final fun isVideoType ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/IncomingCallControlsContentParams {
+	public static final field $stable I
+	public fun <init> (ZLjava/lang/Boolean;ZLkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (ZLjava/lang/Boolean;ZLkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/Boolean;
+	public final fun component3 ()Z
+	public final fun component4 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (ZLjava/lang/Boolean;ZLkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/theme/IncomingCallControlsContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/IncomingCallControlsContentParams;ZLjava/lang/Boolean;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/IncomingCallControlsContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnCallAction ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public final fun isCameraEnabled ()Z
+	public final fun isMicrophoneEnabled ()Ljava/lang/Boolean;
+	public final fun isVideoCall ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/IncomingCallDetailsContentParams {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/util/List;FZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/util/List;FZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2-D9Ej5fM ()F
+	public final fun component3 ()Z
+	public final fun copy-lG28NQ4 (Ljava/util/List;FZ)Lio/getstream/video/android/compose/theme/IncomingCallDetailsContentParams;
+	public static synthetic fun copy-lG28NQ4$default (Lio/getstream/video/android/compose/theme/IncomingCallDetailsContentParams;Ljava/util/List;FZILjava/lang/Object;)Lio/getstream/video/android/compose/theme/IncomingCallDetailsContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getParticipants ()Ljava/util/List;
+	public final fun getTopPadding-D9Ej5fM ()F
+	public fun hashCode ()I
+	public final fun isVideoType ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/IncomingCallHeaderContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun copy (Lio/getstream/video/android/core/Call;)Lio/getstream/video/android/compose/theme/IncomingCallHeaderContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/IncomingCallHeaderContentParams;Lio/getstream/video/android/core/Call;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/IncomingCallHeaderContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/OutgoingCallContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component10 ()Lkotlin/jvm/functions/Function1;
+	public final fun component2 ()Landroidx/compose/ui/Modifier;
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun component5 ()Lkotlin/jvm/functions/Function3;
+	public final fun component6 ()Lkotlin/jvm/functions/Function3;
+	public final fun component7 ()Lkotlin/jvm/functions/Function5;
+	public final fun component8 ()Lkotlin/jvm/functions/Function3;
+	public final fun component9 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/theme/OutgoingCallContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/OutgoingCallContentParams;Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;ZZLkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function5;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/OutgoingCallContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackgroundContent ()Lkotlin/jvm/functions/Function3;
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getControlsContent ()Lkotlin/jvm/functions/Function3;
+	public final fun getDetailsContent ()Lkotlin/jvm/functions/Function5;
+	public final fun getHeaderContent ()Lkotlin/jvm/functions/Function3;
+	public final fun getModifier ()Landroidx/compose/ui/Modifier;
+	public final fun getOnBackPressed ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnCallAction ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public final fun isShowingHeader ()Z
+	public final fun isVideoType ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/OutgoingCallControlsContentParams {
+	public static final field $stable I
+	public fun <init> (ZZZLkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (ZZZLkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun component3 ()Z
+	public final fun component4 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (ZZZLkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/theme/OutgoingCallControlsContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/OutgoingCallControlsContentParams;ZZZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/OutgoingCallControlsContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnCallAction ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public final fun isCameraEnabled ()Z
+	public final fun isMicrophoneEnabled ()Z
+	public final fun isVideoCall ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/OutgoingCallDetailsContentParams {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/util/List;FZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/util/List;FZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2-D9Ej5fM ()F
+	public final fun component3 ()Z
+	public final fun copy-lG28NQ4 (Ljava/util/List;FZ)Lio/getstream/video/android/compose/theme/OutgoingCallDetailsContentParams;
+	public static synthetic fun copy-lG28NQ4$default (Lio/getstream/video/android/compose/theme/OutgoingCallDetailsContentParams;Ljava/util/List;FZILjava/lang/Object;)Lio/getstream/video/android/compose/theme/OutgoingCallDetailsContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getParticipants ()Ljava/util/List;
+	public final fun getTopPadding-D9Ej5fM ()F
+	public fun hashCode ()I
+	public final fun isVideoType ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/OutgoingCallHeaderContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun copy (Lio/getstream/video/android/core/Call;)Lio/getstream/video/android/compose/theme/OutgoingCallHeaderContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/OutgoingCallHeaderContentParams;Lio/getstream/video/android/core/Call;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/OutgoingCallHeaderContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/ParticipantVideoActionsContentParams {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Lio/getstream/video/android/core/Call;
+	public final fun component3 ()Lio/getstream/video/android/core/ParticipantState;
+	public final fun copy (Ljava/util/List;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;)Lio/getstream/video/android/compose/theme/ParticipantVideoActionsContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/ParticipantVideoActionsContentParams;Ljava/util/List;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/ParticipantVideoActionsContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getActions ()Ljava/util/List;
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getParticipant ()Lio/getstream/video/android/core/ParticipantState;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/ParticipantVideoConnectionIndicatorContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/model/NetworkQuality;)V
+	public final fun component1 ()Lio/getstream/video/android/core/model/NetworkQuality;
+	public final fun copy (Lio/getstream/video/android/core/model/NetworkQuality;)Lio/getstream/video/android/compose/theme/ParticipantVideoConnectionIndicatorContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/ParticipantVideoConnectionIndicatorContentParams;Lio/getstream/video/android/core/model/NetworkQuality;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/ParticipantVideoConnectionIndicatorContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNetworkQuality ()Lio/getstream/video/android/core/model/NetworkQuality;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/ParticipantVideoFallbackContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Lio/getstream/video/android/core/ParticipantState;
+	public final fun copy (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;)Lio/getstream/video/android/compose/theme/ParticipantVideoFallbackContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/ParticipantVideoFallbackContentParams;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/ParticipantVideoFallbackContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getParticipant ()Lio/getstream/video/android/core/ParticipantState;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/ParticipantVideoLabelContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Alignment;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Alignment;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Lio/getstream/video/android/core/ParticipantState;
+	public final fun component3 ()Landroidx/compose/ui/Alignment;
+	public final fun copy (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Alignment;)Lio/getstream/video/android/compose/theme/ParticipantVideoLabelContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/ParticipantVideoLabelContentParams;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Alignment;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/ParticipantVideoLabelContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getLabelPosition ()Landroidx/compose/ui/Alignment;
+	public final fun getParticipant ()Lio/getstream/video/android/core/ParticipantState;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/ParticipantVideoParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lio/getstream/video/android/compose/ui/components/call/renderer/MirrorMode;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lio/getstream/video/android/compose/ui/components/call/renderer/MirrorMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun component2 ()Lio/getstream/video/android/core/ParticipantState;
+	public final fun component3 ()Landroidx/compose/ui/Modifier;
+	public final fun component4 ()Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;
+	public final fun component5 ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public final fun component6 ()Lio/getstream/video/android/compose/ui/components/call/renderer/MirrorMode;
+	public final fun copy (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lio/getstream/video/android/compose/ui/components/call/renderer/MirrorMode;)Lio/getstream/video/android/compose/theme/ParticipantVideoParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/ParticipantVideoParams;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;Landroidx/compose/ui/Modifier;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;Lio/getstream/video/android/compose/ui/components/call/renderer/MirrorMode;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/ParticipantVideoParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public final fun getMirrorMode ()Lio/getstream/video/android/compose/ui/components/call/renderer/MirrorMode;
+	public final fun getModifier ()Landroidx/compose/ui/Modifier;
+	public final fun getParticipant ()Lio/getstream/video/android/core/ParticipantState;
+	public final fun getScalingType ()Lio/getstream/video/android/compose/ui/components/video/VideoScalingType;
+	public final fun getStyle ()Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/ParticipantVideoReactionContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/ParticipantState;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;)V
+	public synthetic fun <init> (Lio/getstream/video/android/core/ParticipantState;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/core/ParticipantState;
+	public final fun component2 ()Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;
+	public final fun copy (Lio/getstream/video/android/core/ParticipantState;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;)Lio/getstream/video/android/compose/theme/ParticipantVideoReactionContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/ParticipantVideoReactionContentParams;Lio/getstream/video/android/core/ParticipantState;Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/ParticipantVideoReactionContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getParticipant ()Lio/getstream/video/android/core/ParticipantState;
+	public final fun getStyle ()Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/compose/theme/StreamColors {
 	public static final field $stable I
 	public static final field Companion Lio/getstream/video/android/compose/theme/StreamColors$Companion;
@@ -305,6 +807,7 @@ public final class io/getstream/video/android/compose/theme/StreamShapes$Compani
 
 public abstract interface class io/getstream/video/android/compose/theme/StreamTheme {
 	public fun getColors (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamColors;
+	public fun getComponentFactory (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/VideoComponentFactory;
 	public fun getDimens (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamDimens;
 	public fun getReactionMapper (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/core/mapper/ReactionMapper;
 	public fun getRippleConfiguration (Landroidx/compose/runtime/Composer;I)Landroidx/compose/material/RippleConfiguration;
@@ -356,13 +859,46 @@ public final class io/getstream/video/android/compose/theme/StreamTypography$Com
 	public final fun defaultTypography (Lio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Landroidx/compose/ui/text/font/FontFamily;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/theme/StreamTypography;
 }
 
+public abstract interface class io/getstream/video/android/compose/theme/VideoComponentFactory {
+	public fun CallAppBar (Lio/getstream/video/android/compose/theme/CallAppBarParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallAppBarCenterContent (Landroidx/compose/foundation/layout/RowScope;Lio/getstream/video/android/compose/theme/CallAppBarCenterContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallAppBarLeadingContent (Landroidx/compose/foundation/layout/RowScope;Lio/getstream/video/android/compose/theme/CallAppBarLeadingContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallAppBarTrailingContent (Landroidx/compose/foundation/layout/RowScope;Lio/getstream/video/android/compose/theme/CallAppBarTrailingContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallContentClosedCaptions (Lio/getstream/video/android/compose/theme/CallContentClosedCaptionsParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallContentPictureInPictureContent (Lio/getstream/video/android/compose/theme/CallContentPictureInPictureContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallContentVideoContent (Landroidx/compose/foundation/layout/RowScope;Lio/getstream/video/android/compose/theme/CallContentVideoContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallContentVideoModerationBlur (Lio/getstream/video/android/compose/theme/CallContentVideoModerationBlurParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallContentVideoModerationWarning (Lio/getstream/video/android/compose/theme/CallContentVideoModerationWarningParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallContentVideoOverlayContent (Lio/getstream/video/android/compose/theme/CallContentVideoOverlayContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallLobbyControlsContent (Lio/getstream/video/android/compose/theme/CallLobbyControlsContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallLobbyOnDisabledContent (Lio/getstream/video/android/compose/theme/CallLobbyOnDisabledContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallLobbyOnRenderedContent (Lio/getstream/video/android/compose/theme/CallLobbyOnRenderedContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun CallLobbyParticipantLabelContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/CallLobbyParticipantLabelContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun ControlActions (Lio/getstream/video/android/compose/theme/ControlActionsParams;Landroidx/compose/runtime/Composer;I)V
+	public fun IncomingCallContent (Lio/getstream/video/android/compose/theme/IncomingCallContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun IncomingCallControlsContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/IncomingCallControlsContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun IncomingCallDetailsContent (Landroidx/compose/foundation/layout/ColumnScope;Lio/getstream/video/android/compose/theme/IncomingCallDetailsContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun IncomingCallHeaderContent (Landroidx/compose/foundation/layout/ColumnScope;Lio/getstream/video/android/compose/theme/IncomingCallHeaderContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun OutgoingCallContent (Lio/getstream/video/android/compose/theme/OutgoingCallContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun OutgoingCallControlsContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/OutgoingCallControlsContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun OutgoingCallDetailsContent (Landroidx/compose/foundation/layout/ColumnScope;Lio/getstream/video/android/compose/theme/OutgoingCallDetailsContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun OutgoingCallHeaderContent (Landroidx/compose/foundation/layout/ColumnScope;Lio/getstream/video/android/compose/theme/OutgoingCallHeaderContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun ParticipantVideo (Lio/getstream/video/android/compose/theme/ParticipantVideoParams;Landroidx/compose/runtime/Composer;I)V
+	public fun ParticipantVideoActionsContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/ParticipantVideoActionsContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun ParticipantVideoConnectionIndicatorContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/ParticipantVideoConnectionIndicatorContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun ParticipantVideoFallbackContent (Lio/getstream/video/android/compose/theme/ParticipantVideoFallbackContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun ParticipantVideoLabelContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/ParticipantVideoLabelContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun ParticipantVideoReactionContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/ParticipantVideoReactionContentParams;Landroidx/compose/runtime/Composer;I)V
+}
+
 public final class io/getstream/video/android/compose/theme/VideoTheme : io/getstream/video/android/compose/theme/StreamTheme {
 	public static final field $stable I
 	public static final field INSTANCE Lio/getstream/video/android/compose/theme/VideoTheme;
 }
 
 public final class io/getstream/video/android/compose/theme/VideoThemeKt {
-	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Lio/getstream/video/android/compose/theme/StreamRippleConfiguration;Lio/getstream/video/android/core/mapper/ReactionMapper;ZLio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Lio/getstream/video/android/compose/theme/StreamRippleConfiguration;Lio/getstream/video/android/core/mapper/ReactionMapper;ZLio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;Lio/getstream/video/android/compose/theme/VideoComponentFactory;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;III)V
+	public static final fun getLocalComponentFactory ()Landroidx/compose/runtime/ProvidableCompositionLocal;
 }
 
 public final class io/getstream/video/android/compose/ui/ComposableSingletons$StreamCallActivityComposeDelegateKt {
@@ -399,6 +935,7 @@ public class io/getstream/video/android/compose/ui/StreamCallActivityComposeDele
 	public fun RejectedContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun RootContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
 	public fun VideoCallContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;Landroidx/compose/runtime/Composer;I)V
+	public fun getComponentFactory ()Lio/getstream/video/android/compose/theme/VideoComponentFactory;
 	public fun loadingContent (Lio/getstream/video/android/ui/common/StreamCallActivity;)V
 	public fun setContent (Lio/getstream/video/android/ui/common/StreamCallActivity;Lio/getstream/video/android/core/Call;)V
 }
@@ -927,23 +1464,13 @@ public final class io/getstream/video/android/compose/ui/components/call/activec
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/activecall/ComposableSingletons$CallContentKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function6;
 	public static field lambda-2 Lkotlin/jvm/functions/Function3;
-	public static field lambda-3 Lkotlin/jvm/functions/Function3;
+	public static field lambda-3 Lkotlin/jvm/functions/Function6;
 	public static field lambda-4 Lkotlin/jvm/functions/Function3;
-	public static field lambda-5 Lkotlin/jvm/functions/Function3;
-	public static field lambda-6 Lkotlin/jvm/functions/Function6;
-	public static field lambda-7 Lkotlin/jvm/functions/Function3;
-	public static field lambda-8 Lkotlin/jvm/functions/Function3;
-	public static field lambda-9 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function6;
 	public final fun getLambda-2$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-3$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-3$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function6;
 	public final fun getLambda-4$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-5$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-6$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function6;
-	public final fun getLambda-7$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-8$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda-9$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class io/getstream/video/android/compose/ui/components/call/controls/ControlActionsKt {

@@ -21,6 +21,7 @@ import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
+import io.getstream.video.android.compose.ui.components.call.activecall.CallContentDeprecatedOverloadPreview
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContentMultipleParticipantsPreview
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContentMinimumPreview
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContentMultipleParticipantsPreview
@@ -162,6 +163,13 @@ internal class CallContentTest : PaparazziComposeTest {
     fun `call content with multiple participants in dark mode`() {
         snapshot(isInDarkMode = true) {
             CallContentMultipleParticipantsPreview()
+        }
+    }
+
+    @Test
+    fun `call content deprecated overload`() {
+        snapshot {
+            CallContentDeprecatedOverloadPreview()
         }
     }
 

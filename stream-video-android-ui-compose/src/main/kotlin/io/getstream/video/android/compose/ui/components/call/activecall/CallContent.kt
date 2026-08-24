@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.Scaffold
@@ -58,17 +57,23 @@ import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.pip.enterPictureInPicture
 import io.getstream.video.android.compose.pip.rememberIsInPipMode
+import io.getstream.video.android.compose.theme.CallAppBarParams
+import io.getstream.video.android.compose.theme.CallContentClosedCaptionsParams
+import io.getstream.video.android.compose.theme.CallContentPictureInPictureContentParams
+import io.getstream.video.android.compose.theme.CallContentVideoContentParams
+import io.getstream.video.android.compose.theme.CallContentVideoModerationBlurParams
+import io.getstream.video.android.compose.theme.CallContentVideoModerationWarningParams
+import io.getstream.video.android.compose.theme.CallContentVideoOverlayContentParams
+import io.getstream.video.android.compose.theme.ControlActionsParams
+import io.getstream.video.android.compose.theme.ParticipantVideoParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.DefaultPermissionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.diagnostics.CallDiagnosticsContent
-import io.getstream.video.android.compose.ui.components.call.moderation.DefaultModerationWarningUiContainer
-import io.getstream.video.android.compose.ui.components.call.moderation.ModerationWarningAnimationConfig
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
-import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantsLayout
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LocalVideoContentSize
@@ -115,11 +120,7 @@ public fun CallContent(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     appBarContent: @Composable (call: Call) -> Unit = {
-        CallAppBar(
-            call = call,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction,
-        )
+        DefaultAppBarSlot(call, onBackPressed, onCallAction)
     },
     style: VideoRendererStyle = RegularVideoRendererStyle(),
     videoRenderer: @Composable (
@@ -128,48 +129,35 @@ public fun CallContent(
         participant: ParticipantState,
         style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        ParticipantVideo(
-            modifier = videoModifier,
-            call = videoCall,
-            participant = videoParticipant,
-            style = videoStyle,
-        )
+        DefaultVideoRendererSlot(videoModifier, videoCall, videoParticipant, videoStyle)
     },
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
     videoContent: @Composable RowScope.(call: Call) -> Unit = {
-        ParticipantsLayout(
-            layoutType = layout,
-            call = call,
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-                .padding(bottom = VideoTheme.dimens.spacingXXs),
-            style = style,
-            videoRenderer = videoRenderer,
-            floatingVideoRenderer = floatingVideoRenderer,
-        )
+        DefaultVideoContentSlot(call, layout, style, videoRenderer, floatingVideoRenderer)
     },
-    videoOverlayContent: @Composable (call: Call) -> Unit = {},
+    videoOverlayContent: @Composable (call: Call) -> Unit = {
+        DefaultVideoOverlaySlot(call)
+    },
     controlsContent: @Composable (call: Call) -> Unit = {
-        ControlActions(
-            modifier = Modifier.wrapContentWidth(),
-            call = call,
-            onCallAction = onCallAction,
-        )
+        DefaultControlsSlot(call, onCallAction)
     },
     pictureInPictureConfiguration: PictureInPictureConfiguration =
         PictureInPictureConfiguration(true),
-    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
+    pictureInPictureContent: @Composable (Call) -> Unit = {
+        DefaultPictureInPictureSlot(it)
+    },
     enableDiagnostics: Boolean = false,
-    closedCaptionUi: @Composable (Call) -> Unit = {},
-    videoModerationBlurUi: @Composable (Call) -> Unit = {},
+    closedCaptionUi: @Composable (Call) -> Unit = {
+        DefaultClosedCaptionsSlot(call)
+    },
+    videoModerationBlurUi: @Composable (Call) -> Unit = {
+        VideoTheme.componentFactory.CallContentVideoModerationBlur(
+            params = CallContentVideoModerationBlurParams(call = call),
+        )
+    },
     videoModerationWarningUi: @Composable (Call, String?) -> Unit = { _, message ->
-        val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
-        val displayTime = callServiceConfig.moderationConfig.moderationWarningConfig.displayTime
-        DefaultModerationWarningUiContainer(
-            call,
-            message,
-            moderationWarningAnimationConfig = ModerationWarningAnimationConfig(displayTime),
+        VideoTheme.componentFactory.CallContentVideoModerationWarning(
+            params = CallContentVideoModerationWarningParams(call = call, message = message),
         )
     },
 ) {
@@ -265,6 +253,96 @@ public fun CallContent(
 }
 
 @Composable
+private fun DefaultAppBarSlot(
+    call: Call,
+    onBackPressed: () -> Unit,
+    onCallAction: (CallAction) -> Unit,
+) {
+    VideoTheme.componentFactory.CallAppBar(
+        params = CallAppBarParams(
+            call = call,
+            onBackPressed = onBackPressed,
+            onCallAction = onCallAction,
+        ),
+    )
+}
+
+@Composable
+private fun DefaultVideoRendererSlot(
+    modifier: Modifier,
+    call: Call,
+    participant: ParticipantState,
+    style: VideoRendererStyle,
+) {
+    VideoTheme.componentFactory.ParticipantVideo(
+        params = ParticipantVideoParams(
+            call = call,
+            participant = participant,
+            modifier = modifier,
+            style = style,
+        ),
+    )
+}
+
+@Composable
+private fun RowScope.DefaultVideoContentSlot(
+    call: Call,
+    layoutType: LayoutType,
+    style: VideoRendererStyle,
+    videoRenderer: @Composable (
+        modifier: Modifier,
+        call: Call,
+        participant: ParticipantState,
+        style: VideoRendererStyle,
+    ) -> Unit,
+    floatingVideoRenderer: (@Composable BoxScope.(call: Call, IntSize) -> Unit)?,
+) {
+    with(VideoTheme.componentFactory) {
+        CallContentVideoContent(
+            params = CallContentVideoContentParams(
+                call = call,
+                layoutType = layoutType,
+                style = style,
+                videoRenderer = videoRenderer,
+                floatingVideoRenderer = floatingVideoRenderer,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun DefaultVideoOverlaySlot(call: Call) {
+    VideoTheme.componentFactory.CallContentVideoOverlayContent(
+        params = CallContentVideoOverlayContentParams(call = call),
+    )
+}
+
+@Composable
+private fun DefaultControlsSlot(call: Call, onCallAction: (CallAction) -> Unit) {
+    VideoTheme.componentFactory.ControlActions(
+        params = ControlActionsParams(
+            call = call,
+            modifier = Modifier.wrapContentWidth(),
+            onCallAction = onCallAction,
+        ),
+    )
+}
+
+@Composable
+private fun DefaultPictureInPictureSlot(call: Call) {
+    VideoTheme.componentFactory.CallContentPictureInPictureContent(
+        params = CallContentPictureInPictureContentParams(call = call),
+    )
+}
+
+@Composable
+private fun DefaultClosedCaptionsSlot(call: Call) {
+    VideoTheme.componentFactory.CallContentClosedCaptions(
+        params = CallContentClosedCaptionsParams(call = call),
+    )
+}
+
+@Composable
 private fun ModerationBlurUi(call: Call, moderationBlurUi: @Composable (Call) -> Unit) {
     val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
     if (callServiceConfig.moderationConfig.videoModerationConfig.enable) {
@@ -323,11 +401,7 @@ public fun CallContent(
     onBackPressed: () -> Unit = {},
     onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
     appBarContent: @Composable (call: Call) -> Unit = {
-        CallAppBar(
-            call = call,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction,
-        )
+        DefaultAppBarSlot(call, onBackPressed, onCallAction)
     },
     style: VideoRendererStyle = RegularVideoRendererStyle(),
     videoRenderer: @Composable (
@@ -336,39 +410,26 @@ public fun CallContent(
         participant: ParticipantState,
         style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        ParticipantVideo(
-            modifier = videoModifier,
-            call = videoCall,
-            participant = videoParticipant,
-            style = videoStyle,
-        )
+        DefaultVideoRendererSlot(videoModifier, videoCall, videoParticipant, videoStyle)
     },
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
     videoContent: @Composable RowScope.(call: Call) -> Unit = {
-        ParticipantsLayout(
-            layoutType = layout,
-            call = call,
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-                .padding(bottom = VideoTheme.dimens.spacingXXs),
-            style = style,
-            videoRenderer = videoRenderer,
-            floatingVideoRenderer = floatingVideoRenderer,
-        )
+        DefaultVideoContentSlot(call, layout, style, videoRenderer, floatingVideoRenderer)
     },
-    videoOverlayContent: @Composable (call: Call) -> Unit = {},
+    videoOverlayContent: @Composable (call: Call) -> Unit = {
+        DefaultVideoOverlaySlot(call)
+    },
     controlsContent: @Composable (call: Call) -> Unit = {
-        ControlActions(
-            modifier = Modifier.wrapContentWidth(),
-            call = call,
-            onCallAction = onCallAction,
-        )
+        DefaultControlsSlot(call, onCallAction)
     },
     enableInPictureInPicture: Boolean,
-    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) },
+    pictureInPictureContent: @Composable (Call) -> Unit = {
+        DefaultPictureInPictureSlot(it)
+    },
     enableDiagnostics: Boolean = false,
-    closedCaptionUi: @Composable (Call) -> Unit = {},
+    closedCaptionUi: @Composable (Call) -> Unit = {
+        DefaultClosedCaptionsSlot(call)
+    },
 ) {
     CallContent(
         call, modifier, layout, permissions, onBackPressed, onCallAction, appBarContent, style,

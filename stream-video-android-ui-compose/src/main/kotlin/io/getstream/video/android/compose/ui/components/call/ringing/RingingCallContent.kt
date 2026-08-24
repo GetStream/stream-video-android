@@ -23,6 +23,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.theme.IncomingCallContentParams
+import io.getstream.video.android.compose.theme.OutgoingCallContentParams
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent
@@ -120,17 +123,21 @@ public fun RingingCallContent(
                 controlsContent,
                 onBackPressed,
                 onCallAction,
-            ) ?: IncomingCallContent(
-                call = call,
-                isVideoType = isVideoType,
-                modifier = modifier,
-                isShowingHeader = isShowingHeader,
-                headerContent = headerContent,
-                detailsContent = detailsContent,
-                controlsContent = controlsContent,
-                onBackPressed = onBackPressed,
-                onCallAction = onCallAction,
-            )
+            ) ?: with(VideoTheme.componentFactory) {
+                IncomingCallContent(
+                    params = IncomingCallContentParams(
+                        call = call,
+                        modifier = modifier,
+                        isVideoType = isVideoType,
+                        isShowingHeader = isShowingHeader,
+                        headerContent = headerContent,
+                        detailsContent = detailsContent,
+                        controlsContent = controlsContent,
+                        onBackPressed = onBackPressed,
+                        onCallAction = onCallAction,
+                    ),
+                )
+            }
         }
 
         is RingingState.Outgoing -> {
@@ -144,17 +151,21 @@ public fun RingingCallContent(
                 controlsContent,
                 onBackPressed,
                 onCallAction,
-            ) ?: OutgoingCallContent(
-                call = call,
-                isVideoType = isVideoType,
-                modifier = modifier,
-                isShowingHeader = isShowingHeader,
-                headerContent = headerContent,
-                detailsContent = detailsContent,
-                controlsContent = controlsContent,
-                onBackPressed = onBackPressed,
-                onCallAction = onCallAction,
-            )
+            ) ?: with(VideoTheme.componentFactory) {
+                OutgoingCallContent(
+                    params = OutgoingCallContentParams(
+                        call = call,
+                        modifier = modifier,
+                        isVideoType = isVideoType,
+                        isShowingHeader = isShowingHeader,
+                        headerContent = headerContent,
+                        detailsContent = detailsContent,
+                        controlsContent = controlsContent,
+                        onBackPressed = onBackPressed,
+                        onCallAction = onCallAction,
+                    ),
+                )
+            }
         }
 
         RingingState.RejectedByAll -> {

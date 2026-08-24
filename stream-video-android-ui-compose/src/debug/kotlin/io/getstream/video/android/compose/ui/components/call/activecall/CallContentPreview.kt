@@ -50,3 +50,25 @@ private fun CallContentPreviewLandscape() {
         CallContent(call = previewCall)
     }
 }
+
+@Preview
+@Composable
+private fun CallContentDeprecatedOverloadRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallContentDeprecatedOverloadPreview()
+    }
+}
+
+/**
+ * Pins the deprecated [CallContent] overload (the one taking `enableInPictureInPicture`), which
+ * must keep rendering exactly like the current overload until it is removed.
+ */
+@Suppress("DEPRECATION")
+@Composable
+internal fun CallContentDeprecatedOverloadPreview() {
+    CallContent(
+        call = previewCall,
+        enableInPictureInPicture = false,
+    )
+}

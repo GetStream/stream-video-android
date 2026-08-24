@@ -50,11 +50,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
-import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -70,14 +68,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.theme.ParticipantVideoActionsContentParams
+import io.getstream.video.android.compose.theme.ParticipantVideoConnectionIndicatorContentParams
+import io.getstream.video.android.compose.theme.ParticipantVideoFallbackContentParams
+import io.getstream.video.android.compose.theme.ParticipantVideoLabelContentParams
+import io.getstream.video.android.compose.theme.ParticipantVideoReactionContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
-import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantActions
 import io.getstream.video.android.compose.ui.components.call.pinning.participantActions
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
-import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
@@ -117,28 +117,17 @@ public fun ParticipantVideo(
     modifier: Modifier = Modifier,
     style: VideoRendererStyle = RegularVideoRendererStyle(),
     labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
-        ParticipantLabel(call, participant, style.labelPosition)
+        DefaultLabelSlot(call, participant, style)
     },
     connectionIndicatorContent: @Composable BoxScope.(NetworkQuality) -> Unit = {
-        NetworkQualityIndicator(
-            networkQuality = it,
-            modifier = Modifier
-                .align(BottomEnd)
-                .height(VideoTheme.dimens.componentHeightM)
-                .testTag("Stream_ParticipantNetworkQualityIndicator"),
-        )
+        DefaultConnectionIndicatorSlot(it)
     },
     scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
     videoFallbackContent: @Composable (Call) -> Unit = {
-        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
-        val userImage by participant.image.collectAsStateWithLifecycle()
-        UserAvatarBackground(userImage = userImage, userName = userName)
+        DefaultVideoFallbackSlot(call, participant)
     },
     reactionContent: @Composable BoxScope.(ParticipantState) -> Unit = {
-        DefaultReaction(
-            participant = participant,
-            style = style,
-        )
+        DefaultReactionSlot(participant, style)
     },
     mirrorMode: MirrorMode = MirrorMode.AUTO,
     actionsContent: @Composable BoxScope.(
@@ -146,15 +135,7 @@ public fun ParticipantVideo(
         call: Call,
         participant: ParticipantState,
     ) -> Unit = { actions, call, participant ->
-        ParticipantActions(
-            Modifier
-                .align(TopStart)
-                .padding(8.dp)
-                .testTag("Stream_ParticipantActionsIcon"),
-            actions,
-            call,
-            participant,
-        )
+        DefaultActionsSlot(actions, call, participant)
     },
 
 ) {
@@ -235,43 +216,24 @@ public fun ParticipantVideo(
     modifier: Modifier = Modifier,
     style: VideoRendererStyle = RegularVideoRendererStyle(),
     labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
-        ParticipantLabel(call, participant, style.labelPosition)
+        DefaultLabelSlot(call, participant, style)
     },
     connectionIndicatorContent: @Composable BoxScope.(NetworkQuality) -> Unit = {
-        NetworkQualityIndicator(
-            networkQuality = it,
-            modifier = Modifier
-                .align(BottomEnd)
-                .height(VideoTheme.dimens.componentHeightM)
-                .testTag("Stream_ParticipantNetworkQualityIndicator"),
-        )
+        DefaultConnectionIndicatorSlot(it)
     },
     scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
     videoFallbackContent: @Composable (Call) -> Unit = {
-        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
-        val userImage by participant.image.collectAsStateWithLifecycle()
-        UserAvatarBackground(userImage = userImage, userName = userName)
+        DefaultVideoFallbackSlot(call, participant)
     },
     reactionContent: @Composable BoxScope.(ParticipantState) -> Unit = {
-        DefaultReaction(
-            participant = participant,
-            style = style,
-        )
+        DefaultReactionSlot(participant, style)
     },
     actionsContent: @Composable BoxScope.(
         actions: List<ParticipantAction>,
         call: Call,
         participant: ParticipantState,
     ) -> Unit = { actions, call, participant ->
-        ParticipantActions(
-            Modifier
-                .align(TopStart)
-                .padding(8.dp)
-                .testTag("Stream_ParticipantActionsIcon"),
-            actions,
-            call,
-            participant,
-        )
+        DefaultActionsSlot(actions, call, participant)
     },
 ) {
     ParticipantVideo(
@@ -308,9 +270,7 @@ public fun ParticipantVideoRenderer(
     scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
     mirrorMode: MirrorMode = MirrorMode.AUTO,
     videoFallbackContent: @Composable (Call) -> Unit = {
-        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
-        val userImage by participant.image.collectAsStateWithLifecycle()
-        UserAvatarBackground(userImage = userImage, userName = userName)
+        DefaultVideoFallbackSlot(call, participant)
     },
 ) {
     if (LocalInspectionMode.current) {
@@ -494,7 +454,74 @@ public fun BoxScope.ParticipantLabel(
 }
 
 @Composable
-private fun BoxScope.DefaultReaction(
+private fun BoxScope.DefaultLabelSlot(
+    call: Call,
+    participant: ParticipantState,
+    style: VideoRendererStyle,
+) {
+    with(VideoTheme.componentFactory) {
+        ParticipantVideoLabelContent(
+            params = ParticipantVideoLabelContentParams(
+                call = call,
+                participant = participant,
+                labelPosition = style.labelPosition,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun BoxScope.DefaultConnectionIndicatorSlot(networkQuality: NetworkQuality) {
+    with(VideoTheme.componentFactory) {
+        ParticipantVideoConnectionIndicatorContent(
+            params = ParticipantVideoConnectionIndicatorContentParams(
+                networkQuality = networkQuality,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun DefaultVideoFallbackSlot(call: Call, participant: ParticipantState) {
+    VideoTheme.componentFactory.ParticipantVideoFallbackContent(
+        params = ParticipantVideoFallbackContentParams(call = call, participant = participant),
+    )
+}
+
+@Composable
+private fun BoxScope.DefaultReactionSlot(
+    participant: ParticipantState,
+    style: VideoRendererStyle,
+) {
+    with(VideoTheme.componentFactory) {
+        ParticipantVideoReactionContent(
+            params = ParticipantVideoReactionContentParams(
+                participant = participant,
+                style = style,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun BoxScope.DefaultActionsSlot(
+    actions: List<ParticipantAction>,
+    call: Call,
+    participant: ParticipantState,
+) {
+    with(VideoTheme.componentFactory) {
+        ParticipantVideoActionsContent(
+            params = ParticipantVideoActionsContentParams(
+                actions = actions,
+                call = call,
+                participant = participant,
+            ),
+        )
+    }
+}
+
+@Composable
+internal fun BoxScope.DefaultReaction(
     participant: ParticipantState,
     style: VideoRendererStyle,
 ) {

@@ -59,6 +59,8 @@ import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.permission.LaunchPermissionRequest
+import io.getstream.video.android.compose.theme.DefaultVideoComponentFactory
+import io.getstream.video.android.compose.theme.VideoComponentFactory
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
@@ -89,6 +91,11 @@ import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
  * A default implementation of the compose delegate for the call activity.
  * Can be extended.
  * Provides functions with the context of the activity.
+ *
+ * Override the methods of this delegate to replace whole screens (e.g. the video call or the
+ * ringing screens). To customize individual components inside those screens, override
+ * [componentFactory] instead; the screens rendered by this delegate resolve their components
+ * through that factory.
  */
 // We suppress build fails since we do not have default parameters in our abstract @Composable
 // Remove the @Suppress line once the listed issue is fixed.
@@ -100,6 +107,12 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     public companion object {
         private val logger by taggedLogger("StreamCallActivityComposeDelegate")
     }
+
+    /**
+     * The [VideoComponentFactory] provided to the [VideoTheme] that wraps all the screens
+     * rendered by this delegate. Override to customize individual components on those screens.
+     */
+    public open val componentFactory: VideoComponentFactory = DefaultVideoComponentFactory
 
     /**
      * Shows a progressbar until everything is set.
@@ -119,7 +132,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         logger.d { "[setContent(activity, call)] invoked from compose delegate." }
         activity.setContent {
             key(call.id) {
-                VideoTheme {
+                VideoTheme(componentFactory = componentFactory) {
                     Box(
                         modifier = Modifier
                             .background(VideoTheme.colors.baseSheetPrimary)
