@@ -699,9 +699,10 @@ fun CallScreen(
         }
 
         if (isShowingSettingMenu) {
-            var isNoiseCancellationEnabled by remember {
-                mutableStateOf(call.isAudioProcessingEnabled())
-            }
+            // Collected, not snapshotted: the SDK withdraws noise cancellation on its own when
+            // the capability or the call type's mode changes mid-call.
+            val isNoiseCancellationEnabled by call.state.audioProcessingEnabled
+                .collectAsStateWithLifecycle()
             val settings by call.state.settings.collectAsStateWithLifecycle()
             val noiseCancellationFeatureEnabled =
                 settings?.audio?.noiseCancellation?.isEnabled == true
@@ -735,7 +736,7 @@ fun CallScreen(
                     isShowingFeedbackDialog = true
                 },
                 onNoiseCancellation = {
-                    isNoiseCancellationEnabled = call.toggleAudioProcessing()
+                    call.toggleAudioProcessing()
                 },
                 selectedIncomingVideoResolution = selectedIncomingVideoResolution,
                 onSelectIncomingVideoResolution = {

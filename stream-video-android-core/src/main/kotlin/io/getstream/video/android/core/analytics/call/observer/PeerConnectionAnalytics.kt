@@ -162,6 +162,8 @@ internal class PeerConnectionAnalytics(
         iceState: VideoAnalyticsIceState,
         peerConnectionState: PeerConnection.PeerConnectionState?,
     ) {
+        val wasPrevConnected = stateHolder.isPcEverConnected(role)
+
         reporter.onPeerConnectionStateChanged(
             peerConnectionHashCode = peerConnectionHashCode,
             callId = callId,
@@ -172,8 +174,16 @@ internal class PeerConnectionAnalytics(
             joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId ?: "unknown",
             joinReason = joinAnalyticsStateHolder.state.value.joinReason ?: JoinReason.Unknown,
             sfuId = sfuAnalyticsStateHolder.sfuId.value,
+            wasPrevConnected = wasPrevConnected,
             callSessionId = joinAnalyticsStateHolder.state.value.callSessionId,
         )
+
+        when (peerConnectionState) {
+            PeerConnection.PeerConnectionState.CONNECTED -> {
+                stateHolder.setPcEverConnected(role, true)
+            }
+            else -> {}
+        }
     }
 
     fun stop() {

@@ -30,7 +30,6 @@ gradlew.bat                 @GetStream/android-developers
 settings.gradle.kts         @GetStream/android-developers
 
 # Docs
-CHANGELOG.md                            @GetStream/android-developers
 DEPRECATIONS.md                         @GetStream/android-developers
 CONTRIBUTING.md                         @GetStream/android-developers
 LICENSE                                 @GetStream/android-developers
