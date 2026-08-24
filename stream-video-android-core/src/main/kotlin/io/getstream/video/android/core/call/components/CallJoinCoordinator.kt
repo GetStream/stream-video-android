@@ -313,9 +313,9 @@ internal class CallJoinCoordinator(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         joinAnalyticsModel: JoinAnalyticsModel,
     ): Result<RtcSession> {
-        sessionManager.nonFastReconnectAttempts = 0
-        sessionMonitor.cancelSfuObservers()
-
+        // Gate before any teardown: cancelSfuObservers() would leave the live session without
+        // its SFU event subscription, and only monitorSession() (further down, on the new-session
+        // path) restores it.
         sessionManager.session.value?.let { existing ->
             logger.i { "[joinInternal] Call already joined — returning existing session" }
             existing.sfuTracer.trace(
@@ -324,6 +324,10 @@ internal class CallJoinCoordinator(
             )
             return Success(existing)
         }
+
+        sessionManager.nonFastReconnectAttempts = 0
+        sessionMonitor.cancelSfuObservers()
+
         logger.d {
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }

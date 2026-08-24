@@ -246,6 +246,9 @@ class CallJoinCoordinatorTest {
             apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
         }
         verify { existing.sfuTracer.trace("join-already-joined", any()) }
+        // The guard must not tear down the live session's SFU observers: nothing on this path
+        // re-registers them, so cancelling here would silently stop event monitoring.
+        verify(exactly = 0) { sessionMonitor.cancelSfuObservers() }
     }
 
     @Test

@@ -536,13 +536,13 @@ public class RtcSession internal constructor(
             return
         }
 
+        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
         val streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
         val audio = publisher.value?.publishStream(
             streamId,
             TrackType.TRACK_TYPE_AUDIO,
         ).asPublishedOrNull<org.webrtc.AudioTrack>(TrackType.TRACK_TYPE_AUDIO) ?: return
 
-        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
         setLocalTrack(
             TrackType.TRACK_TYPE_AUDIO,
             AudioTrack(
@@ -1134,7 +1134,9 @@ public class RtcSession internal constructor(
                         logger.d { "Camera resolution: $resolution" }
                     }
                     if (canUserSendVideo) {
+                        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
                         val streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
+
                         val video = publisher.value?.publishStream(
                             streamId,
                             TrackType.TRACK_TYPE_VIDEO,
@@ -1142,7 +1144,6 @@ public class RtcSession internal constructor(
                         ).asPublishedOrNull<org.webrtc.VideoTrack>(TrackType.TRACK_TYPE_VIDEO)
                             ?: return@collectLatest
 
-                        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
                         setLocalTrack(
                             TrackType.TRACK_TYPE_VIDEO,
                             VideoTrack(
@@ -1181,6 +1182,7 @@ public class RtcSession internal constructor(
 
                 if (it == DeviceStatus.Enabled) {
                     if (canUserShareScreen) {
+                        setMuteState(true, TrackType.TRACK_TYPE_SCREEN_SHARE)
                         val streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE)
                         val video = publisher.value?.publishStream(
                             streamId,
@@ -1189,7 +1191,6 @@ public class RtcSession internal constructor(
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
                         ) ?: return@collectLatest
 
-                        setMuteState(true, TrackType.TRACK_TYPE_SCREEN_SHARE)
                         setLocalTrack(
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
                             VideoTrack(
