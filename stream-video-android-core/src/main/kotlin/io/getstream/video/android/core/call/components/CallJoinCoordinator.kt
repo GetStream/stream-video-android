@@ -111,7 +111,25 @@ internal class CallJoinCoordinator(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
-        return joinFlight.run(JOIN_FLIGHT_KEY) {
+        var coalesced = false
+        return joinFlight.run(
+            JOIN_FLIGHT_KEY,
+            onCoalesced = {
+                coalesced = true
+                logger.w {
+                    "[join] Concurrent join coalesced into in-flight join " +
+                        "(interceptorIgnored=${callJoinInterceptor != null &&
+                            callJoinInterceptor !== state.callJoinInterceptor})"
+                }
+                if (callJoinInterceptor != null &&
+                    callJoinInterceptor !== state.callJoinInterceptor
+                ) {
+                    logger.w {
+                        "[join] Coalesced caller interceptor dropped; in-flight interceptor kept"
+                    }
+                }
+            },
+        ) {
             executeJoin(
                 create,
                 createOptions,
@@ -120,6 +138,13 @@ internal class CallJoinCoordinator(
                 hintHighScaleLivestreamPublisher,
                 callJoinInterceptor,
             )
+        }.also {
+            if (coalesced) {
+                sessionManager.session.value?.sfuTracer?.trace(
+                    "join-coalesced",
+                    "concurrent join awaited in-flight join",
+                )
+            }
         }.fold(
             onSuccess = { it },
             onFailure = { error ->
@@ -141,11 +166,11 @@ internal class CallJoinCoordinator(
         hintHighScaleLivestreamPublisher: Boolean?,
         callJoinInterceptor: CallJoinInterceptor?,
     ): Result<RtcSession> {
-        // Single already-joined gate for the whole join flow: subsequent join() calls while a
-        // session is live return that session instead of building a second one. Every retry
-        // below clears the session first, so [joinInternal] always starts without one.
+        // Subsequent join() calls while a session is live return that session instead of
+        // building a second one. [joinInternal] repeats the same check for direct callers.
         sessionManager.session.value?.let { existing ->
-            logger.i { "[join] Call already joined — returning existing session" }
+            logger.w { "[join] Call already joined — returning existing session" }
+            existing.sfuTracer.trace("join-already-joined", "join() while session already live")
             return Success(existing)
         }
 
@@ -277,10 +302,8 @@ internal class CallJoinCoordinator(
     /**
      * Performs one join attempt: coordinator round-trip, [RtcSession] creation and SFU connect.
      *
-     * Assumes no session is active — [executeJoin] owns the already-joined check and clears the
-     * session before every retry. Calling this with a live session would build a second
-     * [RtcSession] for the same `sessionId` and produce the SFU-evicted zombie this coordinator
-     * exists to prevent.
+     * Direct callers (tests, retry loop) must not build a second session while one is live.
+     * The already-joined check here enforces that; [executeJoin] also gates before setup.
      */
     suspend fun joinInternal(
         create: Boolean = false,
@@ -293,6 +316,14 @@ internal class CallJoinCoordinator(
         sessionManager.nonFastReconnectAttempts = 0
         sessionMonitor.cancelSfuObservers()
 
+        sessionManager.session.value?.let { existing ->
+            logger.i { "[joinInternal] Call already joined — returning existing session" }
+            existing.sfuTracer.trace(
+                "join-already-joined",
+                "joinInternal() while session already live",
+            )
+            return Success(existing)
+        }
         logger.d {
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }

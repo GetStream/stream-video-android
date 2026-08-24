@@ -225,6 +225,27 @@ class CallJoinCoordinatorTest {
         }
         // The single outer gate must also stop a second RtcSession from being installed.
         verify(exactly = 0) { sessionManager.setActiveSession(mockSession) }
+        verify { existing.sfuTracer.trace("join-already-joined", any()) }
+    }
+
+    @Test
+    fun `joinInternal returns the existing session when the call is already joined`() = runTest(
+        testDispatcher,
+    ) {
+        val existing = mockk<RtcSession>(relaxed = true)
+        sessionFlow.value = existing
+
+        val result = coordinator().joinInternal(
+            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
+        )
+        advanceUntilIdle()
+
+        assertThat(result).isInstanceOf(Success::class.java)
+        assertThat((result as Success).value).isSameInstanceAs(existing)
+        coVerify(exactly = 0) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+        verify { existing.sfuTracer.trace("join-already-joined", any()) }
     }
 
     @Test
@@ -281,6 +302,7 @@ class CallJoinCoordinatorTest {
         }
         coVerify(exactly = 1) { mockSession.connectInternal() }
         verify(exactly = 1) { sessionManager.setActiveSession(mockSession) }
+        verify(exactly = 4) { mockSession.sfuTracer.trace("join-coalesced", any()) }
     }
 
     @Test

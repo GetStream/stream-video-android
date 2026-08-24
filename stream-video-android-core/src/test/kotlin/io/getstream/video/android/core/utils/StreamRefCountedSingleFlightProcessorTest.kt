@@ -69,6 +69,48 @@ class StreamRefCountedSingleFlightProcessorTest {
     }
 
     @Test
+    fun `onCoalesced runs only for waiters that attach to an in-flight job`() = runTest(
+        testDispatcher,
+    ) {
+        val processor = StreamRefCountedSingleFlightProcessor(testScope)
+        val coalesced = AtomicInteger(0)
+        val gate = CompletableDeferred<Unit>()
+
+        val executions = AtomicInteger(0)
+        val jobs = (1..5).map {
+            async {
+                processor.run<String>("key", onCoalesced = { coalesced.incrementAndGet() }) {
+                    executions.incrementAndGet()
+                    gate.await()
+                    "ok"
+                }
+            }
+        }
+        advanceUntilIdle()
+        gate.complete(Unit)
+        val results = jobs.awaitAll()
+        advanceUntilIdle()
+
+        assertEquals(listOf("ok", "ok", "ok", "ok", "ok"), results.map { it.getOrThrow() })
+        assertEquals(1, executions.get())
+        assertEquals(4, coalesced.get())
+    }
+
+    @Test
+    fun `last waiter on a cancelled scope still removes the flight`() = runTest(testDispatcher) {
+        val cancelledScope = TestScope(testDispatcher)
+        cancelledScope.cancel()
+        val processor = StreamRefCountedSingleFlightProcessor(cancelledScope)
+
+        val result = runCatching {
+            processor.run("key") { "should not complete" }
+        }
+
+        assertTrue(result.exceptionOrNull() is CancellationException)
+        assertFalse(processor.has("key"))
+    }
+
+    @Test
     fun `cancelling one waiter leaves the shared job running`() = runTest(testDispatcher) {
         val processor = StreamRefCountedSingleFlightProcessor(testScope)
         val executions = AtomicInteger(0)

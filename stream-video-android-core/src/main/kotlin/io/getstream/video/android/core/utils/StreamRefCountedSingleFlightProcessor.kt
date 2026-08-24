@@ -68,6 +68,11 @@ internal class StreamRefCountedSingleFlightProcessor(
         var waiters: Int,
     )
 
+    private class Acquired<T>(
+        val flight: Flight<T>,
+        val coalesced: Boolean,
+    )
+
     private val mutex = Mutex()
     private val flights = ConcurrentHashMap<String, Flight<*>>()
     private val closed = AtomicBoolean(false)
@@ -78,19 +83,27 @@ internal class StreamRefCountedSingleFlightProcessor(
      * Returns [Result.failure] with a [ClosedSendChannelException] if [stop] has already
      * been called. [CancellationException] is still rethrown when this waiter (or the shared
      * job, including last-waiter cancel) is cancelled.
+     *
+     * [onCoalesced] runs on this waiter when it attaches to an already-running flight
+     * (before awaiting the shared result).
      */
-    suspend fun <T> run(key: String, block: suspend () -> T): Result<T> {
-        val flight = acquireWaiter(key, block)
+    suspend fun <T> run(
+        key: String,
+        onCoalesced: () -> Unit = {},
+        block: suspend () -> T,
+    ): Result<T> {
+        val acquired = acquireWaiter(key, block)
             ?: return Result.failure(
                 ClosedSendChannelException("RefCountedSingleFlight is closed"),
             )
-        return awaitSharedResult(flight)
+        if (acquired.coalesced) onCoalesced()
+        return awaitSharedResult(acquired.flight)
     }
 
     private suspend fun <T> acquireWaiter(
         key: String,
         block: suspend () -> T,
-    ): Flight<T>? = mutex.withLock {
+    ): Acquired<T>? = mutex.withLock {
         if (closed.get()) return@withLock null
         selectFlightLocked(key, block)
     }
@@ -99,13 +112,13 @@ internal class StreamRefCountedSingleFlightProcessor(
     private fun <T> selectFlightLocked(
         key: String,
         block: suspend () -> T,
-    ): Flight<T> {
+    ): Acquired<T> {
         val running = flights[key]?.takeIf { it.deferred.isActive } as Flight<T>?
         if (running != null) {
             running.waiters++
-            return running
+            return Acquired(running, coalesced = true)
         }
-        return createFlightLocked(key, block)
+        return Acquired(createFlightLocked(key, block), coalesced = false)
     }
 
     private fun <T> createFlightLocked(
@@ -153,8 +166,14 @@ internal class StreamRefCountedSingleFlightProcessor(
             // attach to a flight that is about to be cancelled (waiters already at 0).
             mutex.withLock {
                 flight.waiters = (flight.waiters - 1).coerceAtLeast(0)
-                if (cancelIfLast && flight.waiters == 0 && flight.deferred.isActive) {
+                if (flight.waiters != 0) return@withLock
+                // Always detach when the last waiter leaves. A deferred created on an already
+                // cancelled scope can die before its body/finally runs, which would otherwise
+                // leave a stale map entry (`has(key) == true`).
+                if (cancelIfLast && flight.deferred.isActive) {
                     cancelAndDetachLocked(flight)
+                } else {
+                    removeFlightIfCurrentLocked(flight.key, flight.deferred)
                 }
             }
         }
