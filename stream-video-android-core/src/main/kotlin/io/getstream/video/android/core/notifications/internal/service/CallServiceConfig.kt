@@ -17,7 +17,9 @@
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.media.AudioAttributes
+import android.os.Build
 import io.getstream.video.android.core.moderations.ModerationConfig
+import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
 import io.getstream.video.android.model.StreamCallId
 
 // Constants
@@ -47,10 +49,12 @@ public data class CallServiceConfig(
         Pair(ANY_MARKER, CallService::class.java),
     ),
     val serviceClass: Class<*> = CallService::class.java,
-    val enableTelecom: Boolean = false,
+    val enableTelecom: Boolean = defaultTelecomEnabled(),
     val moderationConfig: ModerationConfig = ModerationConfig(),
 )
 
+private fun defaultTelecomEnabled(): Boolean =
+    Build.VERSION.SDK_INT >= BUILD_VERSION_CODES_CINNAMON_BUN
 /**
  * Returns the default call foreground service configuration.
  * Uses: `FOREGROUND_SERVICE_TYPE_PHONE_CALL`.

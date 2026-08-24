@@ -16,9 +16,21 @@
 
 package io.getstream.video.android.core.notifications.internal.telecom
 
+import android.content.Context
+import android.os.Build
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
 
 data class TelecomConfig(val schema: String)
+
+internal class DefaultTelecomConfig(private val context: Context) {
+    fun get(): TelecomConfig? =
+        if (Build.VERSION.SDK_INT >= BUILD_VERSION_CODES_CINNAMON_BUN) {
+            TelecomConfig(context.packageName)
+        } else {
+            null
+        }
+}
 
 @InternalStreamVideoApi
 enum class TelecomIntegrationType {
