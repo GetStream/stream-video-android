@@ -775,6 +775,33 @@ class RtcSessionTest2 {
         verify(exactly = 0) { rtcSession["createPublisher"](any<List<PublishOption>>()) }
     }
 
+    @Test
+    fun `createAndPublishAudioTrack does not crash when publishStream returns null`() = runTest(
+        testDispatcher,
+    ) {
+        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+        val (rtcSession, publisherMock) = createRtcSessionSpyWithMockSocket()
+        rtcSession.publisher.value = publisherMock
+        coEvery {
+            publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
+        } returns null
+
+        rtcSession.createAndPublishAudioTrack()
+
+        coVerify { publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO) }
+    }
+
+    @Test
+    fun `createAndPublishAudioTrack does not crash when publisher is missing`() = runTest(
+        testDispatcher,
+    ) {
+        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+        val (rtcSession, _) = createRtcSessionSpyWithMockSocket()
+        rtcSession.publisher.value = null
+
+        rtcSession.createAndPublishAudioTrack()
+    }
+
     private fun <T> RtcSession.fieldValue(name: String): T? {
         val field = RtcSession::class.java.getDeclaredField(name)
         field.isAccessible = true

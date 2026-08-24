@@ -527,7 +527,8 @@ public class RtcSession internal constructor(
      * Creates and publishes an audio track for transmitting audio.
      * This is used both when microphone is enabled and when screen sharing starts with muted microphone.
      */
-    private suspend fun createAndPublishAudioTrack() {
+    @VisibleForTesting
+    internal suspend fun createAndPublishAudioTrack() {
         val canUserSendAudio = call.state.ownCapabilities.value.contains(
             OwnCapability.SendAudio,
         )
@@ -535,20 +536,33 @@ public class RtcSession internal constructor(
             return
         }
 
-        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
         val streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
-        val track = publisher.value?.publishStream(
+        val audio = publisher.value?.publishStream(
             streamId,
             TrackType.TRACK_TYPE_AUDIO,
-        )
+        ).asPublishedOrNull<org.webrtc.AudioTrack>(TrackType.TRACK_TYPE_AUDIO) ?: return
 
+        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
         setLocalTrack(
             TrackType.TRACK_TYPE_AUDIO,
             AudioTrack(
                 streamId = streamId,
-                audio = track as org.webrtc.AudioTrack,
+                audio = audio,
             ),
         )
+    }
+
+    private inline fun <reified T : MediaStreamTrack> MediaStreamTrack?.asPublishedOrNull(
+        trackType: TrackType,
+    ): T? {
+        val typed = this as? T
+        if (typed == null) {
+            logger.w {
+                "[trackPublishing] Skipping $trackType: no track from publisher " +
+                    "(publisher missing, no publish options, or publish failed)"
+            }
+        }
+        return typed
     }
 
     /**
@@ -1120,20 +1134,20 @@ public class RtcSession internal constructor(
                         logger.d { "Camera resolution: $resolution" }
                     }
                     if (canUserSendVideo) {
-                        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
                         val streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
-
-                        val track = publisher.value?.publishStream(
+                        val video = publisher.value?.publishStream(
                             streamId,
                             TrackType.TRACK_TYPE_VIDEO,
                             call.mediaManager.camera.resolution.value,
-                        )
+                        ).asPublishedOrNull<org.webrtc.VideoTrack>(TrackType.TRACK_TYPE_VIDEO)
+                            ?: return@collectLatest
 
+                        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
                         setLocalTrack(
                             TrackType.TRACK_TYPE_VIDEO,
                             VideoTrack(
                                 streamId = streamId,
-                                video = track as org.webrtc.VideoTrack,
+                                video = video,
                             ),
                         )
                     } else {
@@ -1167,18 +1181,20 @@ public class RtcSession internal constructor(
 
                 if (it == DeviceStatus.Enabled) {
                     if (canUserShareScreen) {
-                        setMuteState(true, TrackType.TRACK_TYPE_SCREEN_SHARE)
                         val streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE)
-                        val track = publisher.value?.publishStream(
+                        val video = publisher.value?.publishStream(
                             streamId,
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
-                        )
+                        ).asPublishedOrNull<org.webrtc.VideoTrack>(
+                            TrackType.TRACK_TYPE_SCREEN_SHARE,
+                        ) ?: return@collectLatest
 
+                        setMuteState(true, TrackType.TRACK_TYPE_SCREEN_SHARE)
                         setLocalTrack(
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
                             VideoTrack(
                                 streamId = streamId,
-                                video = track as org.webrtc.VideoTrack,
+                                video = video,
                             ),
                         )
                     }
