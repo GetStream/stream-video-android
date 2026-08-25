@@ -145,12 +145,10 @@ fun UserRobot.assertParticipantsCountOnCall(
 ): UserRobot {
     val user = 1
     val participants = (user + count).toString()
-    val actualCount = device.retryOnStaleObjectException {
-        CallPage.participantsCountBadge
-            .waitToAppear()
-            .waitForText(expectedText = participants, timeOutMillis = timeOutMillis)
-            .text
-    }
+    val actualCount = CallPage.participantsCountBadge.waitForText(
+        expectedText = participants,
+        timeOutMillis = timeOutMillis,
+    )
     assertEquals(participants, actualCount)
     return this
 }
@@ -200,7 +198,13 @@ fun UserRobot.assertRecordingView(isDisplayed: Boolean): UserRobot {
         // The backend composite recorder can take 20-30s to actually start and emit
         // call.recording_started, so the icon needs a longer window than the 5s default.
         assertTrue(CallPage.recordingIcon.waitToAppear(timeOutMillis = 30.seconds).isDisplayed())
-        assertEquals(label, CallPage.callInfoView.findObject().text)
+        // After a network drop the label can briefly read "Reconnecting.." before it settles
+        // back to "Recording", so poll instead of asserting on the first read.
+        val callInfoText = CallPage.callInfoView.waitForText(
+            expectedText = label,
+            timeOutMillis = 15.seconds,
+        )
+        assertEquals(label, callInfoText)
     } else {
         // The buddy records for ~60s, so the icon stays visible until the backend emits
         // call.recording_stopped. waitToDisappear returns as soon as the icon is gone, so
@@ -262,10 +266,10 @@ fun UserRobot.assertIncomingCall(isDisplayed: Boolean): UserRobot {
 fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean): UserRobot {
     if (isDisplayed) {
         // The outgoing ringing screen only renders after the call create/ring network
-        // round-trip completes, which can exceed 10s under CI load.
+        // round-trip completes, which can exceed 20s on the slower CI emulators (API 28).
         assertTrue(
             "Decline call button",
-            RingPage.declineCallButton.waitToAppear(timeOutMillis = 20.seconds).isDisplayed(),
+            RingPage.declineCallButton.waitToAppear(timeOutMillis = 30.seconds).isDisplayed(),
         )
         assertTrue("Call label", RingPage.outgoingCallLabel.isDisplayed())
         assertTrue("Avatar", RingPage.callParticipantAvatar.isDisplayed())

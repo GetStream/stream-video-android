@@ -75,16 +75,29 @@ lane :run_e2e_test do |options|
   orchestrator_package_name = 'androidx.test.orchestrator/.AndroidTestOrchestrator'
   androidx_test_services_path = sh('adb shell pm path androidx.test.services').strip
 
-  run_tests_in_batches = batch_tests(
-    batch: options[:batch],
-    batch_count: options[:batch_count],
-    test_apk_path: stream_test_path
-  )
+  targeted_class = options[:test_class].to_s
+  # The value is interpolated into a shell command, so only a class name is accepted,
+  # optionally with a single method. A typo also fails here instead of in the shell.
+  UI.user_error!("Invalid test_class: #{targeted_class}") unless
+    targeted_class.empty? || targeted_class.match?(/\A[\w.$]+(#\w+)?\z/)
+
+  test_filter =
+    if targeted_class.empty?
+      batch_tests(
+        batch: options[:batch],
+        batch_count: options[:batch_count],
+        test_apk_path: stream_test_path
+      )
+    else
+      # Targeted run: a single class and no batching, so every batch job runs it and gives an
+      # independent sample. Used to reproduce a failure that only shows on one API level.
+      "-e class #{targeted_class}"
+    end
 
   result = sh(
     "adb shell 'CLASSPATH=#{androidx_test_services_path}' " \
     'app_process / androidx.test.services.shellexecutor.ShellMain am instrument -w -e clearPackageData true ' \
-    "-e targetInstrumentation #{test_package_name}/#{runner_package_name} #{run_tests_in_batches} #{orchestrator_package_name}"
+    "-e targetInstrumentation #{test_package_name}/#{runner_package_name} #{test_filter} #{orchestrator_package_name}"
   )
 
   sh("adb exec-out sh -c 'cd #{adb_test_results_path} && tar cf - #{allure_results_path}' | tar xvf - -C .") if is_ci

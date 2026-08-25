@@ -32,11 +32,11 @@ import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
 import io.getstream.video.android.uiautomator.findObjects
 import io.getstream.video.android.uiautomator.isDisplayed
-import io.getstream.video.android.uiautomator.retryOnStaleObjectException
 import io.getstream.video.android.uiautomator.seconds
 import io.getstream.video.android.uiautomator.typeText
 import io.getstream.video.android.uiautomator.waitForText
 import io.getstream.video.android.uiautomator.waitToAppear
+import io.getstream.video.android.uiautomator.waitToAppearAndClick
 
 class UserRobot {
 
@@ -55,31 +55,31 @@ class UserRobot {
     // LoginPage actions
 
     fun loginWithEmail(email: String): UserRobot {
-        LoginPage.emailSignIn.waitToAppear().click()
+        LoginPage.emailSignIn.waitToAppearAndClick()
         device.typeText(email) // using shell because UIAutomator does not see the input field
-        LoginPage.loginButton.findObject().click()
+        LoginPage.loginButton.waitToAppearAndClick()
         return this
     }
 
     fun loginAsRandomUser(): UserRobot {
-        LoginPage.randomUserSignInButton.waitToAppear().click()
+        LoginPage.randomUserSignInButton.waitToAppearAndClick()
         return this
     }
 
     // CallDetailsPage actions
 
     fun logout(): UserRobot {
-        CallDetailsPage.wheelIcon.waitToAppear(timeOutMillis = 20.seconds).click()
-        CallDetailsPage.signOutButton.waitToAppear().click()
+        CallDetailsPage.wheelIcon.waitToAppearAndClick(timeOutMillis = 20.seconds)
+        CallDetailsPage.signOutButton.waitToAppearAndClick()
         return this
     }
 
     fun directCall(audioOnly: Boolean): UserRobot {
-        CallDetailsPage.wheelIcon.waitToAppear().click()
-        CallDetailsPage.directCallButton.waitToAppear().click()
-        DirectCallPage.participantName.waitToAppear().click()
+        CallDetailsPage.wheelIcon.waitToAppearAndClick()
+        CallDetailsPage.directCallButton.waitToAppearAndClick()
+        DirectCallPage.participantName.waitToAppearAndClick()
         val callButton = if (audioOnly) audioCallButton else videoCallButton
-        callButton.findObject().click()
+        callButton.waitToAppearAndClick()
         return this
     }
 
@@ -96,7 +96,6 @@ class UserRobot {
             microphone(microphone, hard = true)
         }
         joinCallFromLobby()
-        waitForCallToStart()
         return this
     }
 
@@ -104,7 +103,7 @@ class UserRobot {
         if (callId != null) {
             CallDetailsPage.callIdInputField.waitToAppear().typeText(callId)
         }
-        CallDetailsPage.joinCallButton.waitToAppear().click()
+        CallDetailsPage.joinCallButton.waitToAppearAndClick()
         waitForLobbyToOpen()
         return this
     }
@@ -117,7 +116,7 @@ class UserRobot {
     // LobbyPage actions
 
     fun joinCallFromLobby(): UserRobot {
-        LobbyPage.joinCallButton.findObject().click()
+        LobbyPage.joinCallButton.waitToAppearAndClick()
         waitForCallToStart()
         return this
     }
@@ -130,18 +129,18 @@ class UserRobot {
     // RingPage actions
 
     fun acceptIncomingCall(): UserRobot {
-        RingPage.acceptCallButton.waitToAppear().click()
+        RingPage.acceptCallButton.waitToAppearAndClick()
         return this
     }
 
     fun declineIncomingCall(): UserRobot {
-        RingPage.declineCallButton.waitToAppear().click()
+        RingPage.declineCallButton.waitToAppearAndClick()
         return this
     }
 
     fun declineIncomingCallIfExists(): UserRobot {
         if (RingPage.declineCallButton.isDisplayed()) {
-            RingPage.declineCallButton.findObject().click()
+            RingPage.declineCallButton.waitToAppearAndClick()
         }
         return this
     }
@@ -162,9 +161,9 @@ class UserRobot {
         val isFrontCamera = CallPage.cameraPositionToggleFront.findObjects().isNotEmpty()
 
         if (position == CameraPosition.BACK && isFrontCamera) {
-            CallPage.cameraPositionToggleFront.findObject().click()
+            CallPage.cameraPositionToggleFront.waitToAppearAndClick()
         } else if (position == CameraPosition.FRONT && !isFrontCamera) {
-            CallPage.cameraPositionToggleBack.findObject().click()
+            CallPage.cameraPositionToggleBack.waitToAppearAndClick()
         }
 
         return this
@@ -180,26 +179,26 @@ class UserRobot {
             hard -> when (action) {
                 UserControls.ENABLE -> {
                     if (isEnabled) {
-                        CallPage.cameraEnabledToggle.findObject().click()
-                        CallPage.cameraDisabledToggle.waitToAppear().click()
+                        CallPage.cameraEnabledToggle.waitToAppearAndClick()
+                        CallPage.cameraDisabledToggle.waitToAppearAndClick()
                     } else {
-                        CallPage.cameraDisabledToggle.findObject().click()
+                        CallPage.cameraDisabledToggle.waitToAppearAndClick()
                     }
                 }
                 UserControls.DISABLE -> {
                     if (isEnabled) {
-                        CallPage.cameraEnabledToggle.findObject().click()
+                        CallPage.cameraEnabledToggle.waitToAppearAndClick()
                     } else {
-                        CallPage.cameraDisabledToggle.findObject().click()
-                        CallPage.cameraEnabledToggle.waitToAppear().click()
+                        CallPage.cameraDisabledToggle.waitToAppearAndClick()
+                        CallPage.cameraEnabledToggle.waitToAppearAndClick()
                     }
                 }
             }
             action == UserControls.ENABLE && !isEnabled -> {
-                CallPage.cameraDisabledToggle.findObject().click()
+                CallPage.cameraDisabledToggle.waitToAppearAndClick()
             }
             action == UserControls.DISABLE && isEnabled -> {
-                CallPage.cameraEnabledToggle.findObject().click()
+                CallPage.cameraEnabledToggle.waitToAppearAndClick()
             }
         }
 
@@ -216,26 +215,26 @@ class UserRobot {
             hard -> when (action) {
                 UserControls.ENABLE -> {
                     if (isEnabled) {
-                        CallPage.microphoneEnabledToggle.findObject().click()
-                        CallPage.microphoneDisabledToggle.waitToAppear().click()
+                        CallPage.microphoneEnabledToggle.waitToAppearAndClick()
+                        CallPage.microphoneDisabledToggle.waitToAppearAndClick()
                     } else {
-                        CallPage.microphoneDisabledToggle.findObject().click()
+                        CallPage.microphoneDisabledToggle.waitToAppearAndClick()
                     }
                 }
                 UserControls.DISABLE -> {
                     if (isEnabled) {
-                        CallPage.microphoneEnabledToggle.findObject().click()
+                        CallPage.microphoneEnabledToggle.waitToAppearAndClick()
                     } else {
-                        CallPage.microphoneDisabledToggle.findObject().click()
-                        CallPage.microphoneEnabledToggle.waitToAppear().click()
+                        CallPage.microphoneDisabledToggle.waitToAppearAndClick()
+                        CallPage.microphoneEnabledToggle.waitToAppearAndClick()
                     }
                 }
             }
             action == UserControls.ENABLE && !isEnabled -> {
-                CallPage.microphoneDisabledToggle.findObject().click()
+                CallPage.microphoneDisabledToggle.waitToAppearAndClick()
             }
             action == UserControls.DISABLE && isEnabled -> {
-                CallPage.microphoneEnabledToggle.findObject().click()
+                CallPage.microphoneEnabledToggle.waitToAppearAndClick()
             }
         }
 
@@ -246,10 +245,10 @@ class UserRobot {
         val isEnabled = CallPage.callSettingsOpenToggle.findObjects().isNotEmpty()
 
         if (action == UserControls.ENABLE && !isEnabled) {
-            CallPage.callSettingsClosedToggle.findObject().click()
+            CallPage.callSettingsClosedToggle.waitToAppearAndClick()
             CallPage.callSettingsOpenToggle.waitToAppear()
         } else if (action == UserControls.DISABLE && isEnabled) {
-            CallPage.callSettingsOpenToggle.findObject().click()
+            CallPage.callSettingsOpenToggle.waitToAppearAndClick()
         }
 
         return this
@@ -265,7 +264,7 @@ class UserRobot {
         }
 
         if (locator.isDisplayed()) {
-            locator.findObject().click()
+            locator.waitToAppearAndClick()
         }
 
         settings(UserControls.DISABLE)
@@ -281,7 +280,7 @@ class UserRobot {
         }
 
         if (locator.isDisplayed()) {
-            locator.findObject().click()
+            locator.waitToAppearAndClick()
         }
 
         settings(UserControls.DISABLE)
@@ -289,14 +288,14 @@ class UserRobot {
     }
 
     fun endCall(): UserRobot {
-        CallPage.hangUpButton.waitToAppear().click()
+        CallPage.hangUpButton.waitToAppearAndClick()
         return this
     }
 
     fun raiseHand(): UserRobot {
         settings(UserControls.ENABLE)
         if (SettingsMenu.raiseHandButton.isDisplayed()) {
-            SettingsMenu.raiseHandButton.findObject().click()
+            SettingsMenu.raiseHandButton.waitToAppearAndClick()
         } else {
             settings(UserControls.DISABLE)
         }
@@ -306,7 +305,7 @@ class UserRobot {
     fun lowerHand(): UserRobot {
         settings(UserControls.ENABLE)
         if (SettingsMenu.lowerHandButton.isDisplayed()) {
-            SettingsMenu.lowerHandButton.findObject().click()
+            SettingsMenu.lowerHandButton.waitToAppearAndClick()
         } else {
             settings(UserControls.DISABLE)
         }
@@ -315,7 +314,7 @@ class UserRobot {
 
     fun switchNoiseCancellationToggle(): UserRobot {
         settings(UserControls.ENABLE)
-        SettingsMenu.noiseCancellationButton.findObject().click()
+        SettingsMenu.noiseCancellationButton.waitToAppearAndClick()
         settings(UserControls.DISABLE)
         return this
     }
@@ -328,7 +327,7 @@ class UserRobot {
             Background.BLUR -> SettingsMenu.blurBackgroundDisabledToggle
         }
         if (locator.isDisplayed()) {
-            locator.findObject().click()
+            locator.waitToAppearAndClick()
         } else {
             settings(UserControls.DISABLE)
         }
@@ -336,11 +335,11 @@ class UserRobot {
     }
 
     fun setView(mode: VideoView): UserRobot {
-        CallPage.callViewButton.waitToAppear().click()
+        CallPage.callViewButton.waitToAppearAndClick()
         when (mode) {
-            VideoView.DYNAMIC -> CallPage.ViewMenu.dynamic.waitToAppear().click()
-            VideoView.SPOTLIGHT -> CallPage.ViewMenu.spotlight.waitToAppear().click()
-            VideoView.GRID -> CallPage.ViewMenu.grid.waitToAppear().click()
+            VideoView.DYNAMIC -> CallPage.ViewMenu.dynamic.waitToAppearAndClick()
+            VideoView.SPOTLIGHT -> CallPage.ViewMenu.spotlight.waitToAppearAndClick()
+            VideoView.GRID -> CallPage.ViewMenu.grid.waitToAppearAndClick()
         }
         return this
     }
@@ -353,30 +352,31 @@ class UserRobot {
     fun acceptCallRecording(): UserRobot {
         // The recording-consent dialog only appears once the backend composite recorder
         // emits call.recording_started, which can take 20-30s, so 10s is too short.
-        CallPage.RecordingButtons.accept.waitToAppear(timeOutMillis = 30.seconds).click()
+        CallPage.RecordingButtons.accept.waitToAppearAndClick(timeOutMillis = 30.seconds)
         return this
     }
 
     fun declineCallRecording(): UserRobot {
         // See acceptCallRecording: the consent dialog is gated on the backend recorder
         // starting (call.recording_started), which can take 20-30s.
-        CallPage.RecordingButtons.leave.waitToAppear(timeOutMillis = 30.seconds).click()
+        CallPage.RecordingButtons.leave.waitToAppearAndClick(timeOutMillis = 30.seconds)
         return this
     }
 
     fun waitForParticipantsOnCall(count: Int = 1, timeOutMillis: Long = 100.seconds): UserRobot {
         val user = 1
         val participants = user + count
-        device.retryOnStaleObjectException {
-            CallPage.participantsCountBadge
-                .waitToAppear()
-                .waitForText(expectedText = participants.toString(), timeOutMillis = timeOutMillis)
-        }
+        CallPage.participantsCountBadge.waitForText(
+            expectedText = participants.toString(),
+            timeOutMillis = timeOutMillis,
+        )
         return this
     }
 
     private fun waitForCallToStart(): UserRobot {
-        CallPage.callInfoView.waitToAppear(timeOutMillis = 15.seconds)
+        // Joining goes through the call create/join round-trip plus the SFU connection,
+        // which can exceed 15s on a loaded CI emulator, so the window is deliberately wide.
+        CallPage.callInfoView.waitToAppear(timeOutMillis = 30.seconds)
         return this
     }
 }
