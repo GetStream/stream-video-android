@@ -46,6 +46,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -219,15 +220,28 @@ class CallJoinCoordinatorTest {
         assertThat(sessionFlow.value).isSameInstanceAs(existing)
         assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Connected)
         verify(exactly = 0) { sessionManager.setActiveSession(null) }
-        val joinAnalytics = callAnalytics.joinAnalytics
-        verify(exactly = 1) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false) }
-        verify(exactly = 0) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = true) }
+        verify(exactly = 1) { callAnalytics.joinAnalytics.onJoinFunctionStart() }
         coVerify(exactly = 0) {
             apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
         }
         // The single outer gate must also stop a second RtcSession from being installed.
         verify(exactly = 0) { sessionManager.setActiveSession(mockSession) }
         verify { existing.sfuTracer.trace("join-already-joined", any()) }
+    }
+
+    @Test
+    fun `join reports JoinInitiated even when the call scope is already cancelled`() = runTest(
+        testDispatcher,
+    ) {
+        testScope.cancel()
+
+        assertFailsWith<CancellationException> { coordinator().join() }
+
+        val joinAnalytics = callAnalytics.joinAnalytics
+        verify(exactly = 1) { joinAnalytics.onJoinFunctionStart() }
+        coVerify(exactly = 0) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
     }
 
     @Test
@@ -309,8 +323,7 @@ class CallJoinCoordinatorTest {
         verify(exactly = 1) { sessionManager.setActiveSession(mockSession) }
         verify(exactly = 4) { mockSession.sfuTracer.trace("join-coalesced", any()) }
         val joinAnalytics = callAnalytics.joinAnalytics
-        verify(exactly = 1) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = true) }
-        verify(exactly = 4) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false) }
+        verify(exactly = 5) { joinAnalytics.onJoinFunctionStart() }
     }
 
     @Test
@@ -336,8 +349,7 @@ class CallJoinCoordinatorTest {
 
         results.forEach { assertThat(it).isInstanceOf(Success::class.java) }
         val joinAnalytics = callAnalytics.joinAnalytics
-        verify(exactly = 1) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = true) }
-        verify(exactly = 1) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false) }
+        verify(exactly = 2) { joinAnalytics.onJoinFunctionStart() }
         verify(exactly = 1) { callAnalytics.mediaPermissionObserver.mediaPermissionStatus() }
         verify(exactly = 1) { lifecycle.resetLeaveGuard() }
         verify(exactly = 1) { state.callJoinInterceptor = interceptor }

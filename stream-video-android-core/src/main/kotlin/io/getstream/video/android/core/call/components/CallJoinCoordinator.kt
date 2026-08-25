@@ -87,7 +87,8 @@ internal class CallJoinCoordinator(
      * Coalescing the whole [join] also keeps once-per-join work once-only:
      * MediaDevicePermission analytics, installing [CallState.callJoinInterceptor], resetting
      * the leave guard, and moving to [RealtimeConnection.InProgress]. Each waiter still
-     * reports JoinInitiated so every integrator [join] call stays observable.
+     * reports JoinInitiated (with a fresh attempt id) so every integrator [join] call stays
+     * observable.
      *
      * [StreamRefCountedSingleFlightProcessor] keeps the join alive when one waiter (e.g. an
      * Activity) is cancelled while others still await, and cancels it when the last waiter
@@ -109,8 +110,8 @@ internal class CallJoinCoordinator(
      *
      * Analytics for the waiter that owns the join, in order:
      * 1. `JOIN_INITIATED`: [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinFunctionStart]
-     *    reports that public `Call.join()` was invoked. Coalesced and already-joined waiters also
-     *    report this, but reuse the stored joinStageAttemptId.
+     *    reports that public `Call.join()` was invoked. Every waiter (including coalesced and
+     *    already-joined) reports this with a new joinStageAttemptId.
      * 2. `MEDIA_DEVICE_PERMISSION`: [io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver.mediaPermissionStatus]
      *    reports camera and microphone permission state (leader only).
      * 3. `COORDINATOR_JOIN`: [joinInternal] calls [CallApiClient.joinRequest], which reports the
@@ -127,12 +128,12 @@ internal class CallJoinCoordinator(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
+        callAnalytics.joinAnalytics.onJoinFunctionStart()
         var coalesced = false
         return joinFlight.run(
             JOIN_FLIGHT_KEY,
             onCoalesced = {
                 coalesced = true
-                callAnalytics.joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false)
                 logger.w {
                     "[join] Concurrent join coalesced into in-flight join " +
                         "(interceptorIgnored=${callJoinInterceptor != null &&
@@ -189,12 +190,9 @@ internal class CallJoinCoordinator(
         sessionManager.session.value?.let { existing ->
             logger.w { "[join] Call already joined — returning existing session" }
             existing.sfuTracer.trace("join-already-joined", "join() while session already live")
-            // Integrator still called join(); do not rotate the completed attempt id.
-            callAnalytics.joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false)
             return Success(existing)
         }
 
-        callAnalytics.joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = true)
         callAnalytics.mediaPermissionObserver.mediaPermissionStatus()
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"

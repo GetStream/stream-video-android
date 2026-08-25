@@ -33,20 +33,12 @@ internal class JoinAnalytics(
     /**
      * Records the invocation of the public `Call.join()` API.
      *
-     * [ownsJoinAttempt] is true only for the waiter that will actually run the join. That
-     * waiter mints and stores [JoinTelemetryState.joinStageAttemptId]. Coalesced or
-     * already-joined callers still report so each integrator `join()` stays visible, but
-     * reuse that stored id so coordinator and SFU events stay correlated.
+     * Each invocation mints a new [JoinTelemetryState.joinStageAttemptId], including
+     * coalesced and already-joined calls.
      */
-    fun onJoinFunctionStart(ownsJoinAttempt: Boolean = true) {
-        val stageAttemptId = if (ownsJoinAttempt) {
-            UUID.randomUUID().toString().also { id ->
-                joinAnalyticsStateHolder.updateJoinStageAttemptId(id)
-            }
-        } else {
-            joinAnalyticsStateHolder.state.value.joinStageAttemptId
-                ?: UUID.randomUUID().toString()
-        }
+    fun onJoinFunctionStart() {
+        val stageAttemptId = UUID.randomUUID().toString()
+        joinAnalyticsStateHolder.updateJoinStageAttemptId(stageAttemptId)
         eventReporter.reportSdkMethodJoinInitiated(
             callType = callType,
             callId = callId,

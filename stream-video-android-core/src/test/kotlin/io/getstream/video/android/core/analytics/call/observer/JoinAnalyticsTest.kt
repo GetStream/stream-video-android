@@ -64,31 +64,28 @@ class JoinAnalyticsTest {
     }
 
     @Test
-    fun `onJoinFunctionStart without owning the attempt reports the stored id`() {
-        stateHolder.updateJoinStageAttemptId("in-flight")
+    fun `onJoinFunctionStart mints a new attempt id on every call`() {
+        joinAnalytics.onJoinFunctionStart()
+        val first = stateHolder.state.value.joinStageAttemptId
 
-        joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false)
+        joinAnalytics.onJoinFunctionStart()
+        val second = stateHolder.state.value.joinStageAttemptId
 
-        assertEquals("in-flight", stateHolder.state.value.joinStageAttemptId)
+        assertNotNull(first)
+        assertNotNull(second)
+        assertNotEquals(first, second)
         verify(exactly = 1) {
             reporter.reportSdkMethodJoinInitiated(
                 callId = "call-1",
                 callType = "default",
-                joinStageAttemptId = "in-flight",
+                joinStageAttemptId = first!!,
             )
         }
-    }
-
-    @Test
-    fun `onJoinFunctionStart without a stored id still reports and does not store`() {
-        joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false)
-
-        assertEquals(null, stateHolder.state.value.joinStageAttemptId)
         verify(exactly = 1) {
             reporter.reportSdkMethodJoinInitiated(
                 callId = "call-1",
                 callType = "default",
-                joinStageAttemptId = match { it.isNotEmpty() },
+                joinStageAttemptId = second!!,
             )
         }
     }
