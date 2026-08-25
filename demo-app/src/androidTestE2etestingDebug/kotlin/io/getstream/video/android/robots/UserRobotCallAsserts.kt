@@ -290,9 +290,11 @@ fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean
 
 fun UserRobot.assertConnectingView(): UserRobot {
     assertEquals("Connecting...", RingPage.callProgressBar.waitToAppear().text)
+    // Connecting covers the same call join round-trip as waitForCallToStart, which can
+    // exceed 10s on a loaded CI emulator, so both use the same 30s window.
     assertFalse(
         "Connecting screen should disappear",
-        RingPage.callProgressBar.waitToDisappear(timeOutMillis = 10000).isDisplayed(),
+        RingPage.callProgressBar.waitToDisappear(timeOutMillis = 30.seconds).isDisplayed(),
     )
     return this
 }
