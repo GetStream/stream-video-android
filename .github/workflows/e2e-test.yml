@@ -85,13 +85,17 @@ jobs:
       - name: Run tests
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
         timeout-minutes: 45
+        env:
+          # Passed through the environment and expanded quoted, so the value cannot
+          # inject shell commands into the script line; the Fastfile validates it too.
+          TEST_CLASS: ${{ inputs.test_class }}
         with:
           api-level: ${{ env.ANDROID_API_LEVEL }}
           disable-animations: true
           profile: pixel
           arch : x86_64
           emulator-options: -no-snapshot-save -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -camera-back none -camera-front none
-          script: bundle exec fastlane run_e2e_test batch:${{ matrix.batch }} batch_count:${{ strategy.job-total }} ${{ inputs.test_class && format('test_class:{0}', inputs.test_class) || '' }}
+          script: bundle exec fastlane run_e2e_test batch:${{ matrix.batch }} batch_count:${{ strategy.job-total }} test_class:"$TEST_CLASS"
       - name: Allure TestOps Upload
         if: ${{ env.LAUNCH_ID != '' && (success() || failure()) }}
         run: bundle exec fastlane allure_upload

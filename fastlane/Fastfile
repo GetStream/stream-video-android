@@ -76,10 +76,11 @@ lane :run_e2e_test do |options|
   androidx_test_services_path = sh('adb shell pm path androidx.test.services').strip
 
   targeted_class = options[:test_class].to_s
-  # The value is interpolated into a shell command, so only a class name is accepted,
-  # optionally with a single method. A typo also fails here instead of in the shell.
+  # The value is interpolated into a shell command, so only a top-level class name is
+  # accepted, optionally with a single method. No '$' (nested classes): the shell would
+  # expand it. A typo also fails here instead of in the shell.
   UI.user_error!("Invalid test_class: #{targeted_class}") unless
-    targeted_class.empty? || targeted_class.match?(/\A[\w.$]+(#\w+)?\z/)
+    targeted_class.empty? || targeted_class.match?(/\A[\w.]+(#\w+)?\z/)
 
   test_filter =
     if targeted_class.empty?

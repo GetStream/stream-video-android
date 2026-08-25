@@ -336,10 +336,13 @@ class UserRobot {
 
     fun setView(mode: VideoView): UserRobot {
         CallPage.callViewButton.waitToAppearAndClick()
+        // With many live video tiles the emulator UI is busy, and the opened menu can take
+        // several seconds to land in the accessibility tree, so the items get a wide window.
+        val timeOutMillis = 15.seconds
         when (mode) {
-            VideoView.DYNAMIC -> CallPage.ViewMenu.dynamic.waitToAppearAndClick()
-            VideoView.SPOTLIGHT -> CallPage.ViewMenu.spotlight.waitToAppearAndClick()
-            VideoView.GRID -> CallPage.ViewMenu.grid.waitToAppearAndClick()
+            VideoView.DYNAMIC -> CallPage.ViewMenu.dynamic.waitToAppearAndClick(timeOutMillis)
+            VideoView.SPOTLIGHT -> CallPage.ViewMenu.spotlight.waitToAppearAndClick(timeOutMillis)
+            VideoView.GRID -> CallPage.ViewMenu.grid.waitToAppearAndClick(timeOutMillis)
         }
         return this
     }
