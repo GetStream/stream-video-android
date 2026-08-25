@@ -22,10 +22,12 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -144,6 +146,35 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
     }
 
     @Test
+    fun `start is not signalled until the SFU has accepted the join`() = runTest {
+        val call = client.call("default", randomUUID())
+        call.allowNoiseCancellation()
+        call.injectWorkingProcessor()
+
+        // Session exists as soon as joinInternal installs it, which is before the SFU has
+        // delivered JoinCallResponseEvent. Signalling in Connecting or WebSocketConnected
+        // is PARTICIPANT_NOT_FOUND.
+        val session = mockk<RtcSession>(relaxed = true)
+        val signalled = record(session)
+        val sfuState = MutableStateFlow<SfuSocketState>(
+            SfuSocketState.Connecting(mockk(relaxed = true)),
+        )
+        call.injectSession(session, sfuState)
+
+        call.setAudioProcessingEnabled(true)
+
+        coVerify(timeout = 500, exactly = 0) { session.startNoiseCancellation() }
+
+        sfuState.value = SfuSocketState.WebSocketConnected
+        coVerify(timeout = 500, exactly = 0) { session.startNoiseCancellation() }
+
+        sfuState.value = SfuSocketState.Connected(mockk(relaxed = true))
+
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.startNoiseCancellation() }
+        assertEquals(listOf(true), signalled)
+    }
+
+    @Test
     fun `state changed before a session exists is signalled once one is installed`() = runTest {
         val call = client.call("default", randomUUID())
         call.allowNoiseCancellation()
@@ -172,6 +203,27 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         val replacement = mockk<RtcSession>(relaxed = true)
         val signalled = record(replacement)
         call.injectSession(replacement)
+
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { replacement.startNoiseCancellation() }
+        assertEquals(listOf(true), signalled)
+    }
+
+    @Test
+    fun `a replacement session is not signalled until the SFU has accepted the join`() = runTest {
+        val (call, first) = callWithProcessor()
+        call.setAudioProcessingEnabled(true)
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { first.startNoiseCancellation() }
+
+        val replacement = mockk<RtcSession>(relaxed = true)
+        val signalled = record(replacement)
+        val sfuState = MutableStateFlow<SfuSocketState>(
+            SfuSocketState.Connecting(mockk(relaxed = true)),
+        )
+        call.injectSession(replacement, sfuState)
+
+        coVerify(timeout = 500, exactly = 0) { replacement.startNoiseCancellation() }
+
+        sfuState.value = SfuSocketState.Connected(mockk(relaxed = true))
 
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { replacement.startNoiseCancellation() }
         assertEquals(listOf(true), signalled)

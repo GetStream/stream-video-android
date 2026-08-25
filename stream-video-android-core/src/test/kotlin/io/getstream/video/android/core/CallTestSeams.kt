@@ -25,20 +25,33 @@ import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Seeds an active [RtcSession] on a real [Call], for tests that start from an already-joined
  * call (reconnect, migrate, escalation).
+ *
+ * Defaults the SFU socket to [SfuSocketState.Connected]: noise-cancellation signals wait for
+ * that state, and most tests are exercising a call that has already joined.
  *
  * [CallSessionManager] is the single writer for the session and [Call] deliberately exposes no
  * setter — in production a session only ever appears by joining. Reaching the manager
  * reflectively keeps that write path out of the production API instead of adding a facade
  * method that exists purely for tests.
  */
-internal fun Call.injectSession(session: RtcSession?) {
+internal fun Call.injectSession(
+    session: RtcSession?,
+    sfuSocketState: StateFlow<SfuSocketState> = MutableStateFlow(
+        SfuSocketState.Connected(mockk(relaxed = true)),
+    ),
+) {
+    if (session != null) {
+        every { session.sfuSocketState } returns sfuSocketState
+    }
     sessionManager().setActiveSession(session)
 }
 
