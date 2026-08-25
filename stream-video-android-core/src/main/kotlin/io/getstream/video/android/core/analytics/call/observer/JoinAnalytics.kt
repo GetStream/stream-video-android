@@ -32,8 +32,6 @@ internal class JoinAnalytics(
 
     /**
      * Records the invocation of the public `Call.join()` API.
-     *
-     * Starts a new join attempt and reports the SDK join initiation event.
      */
     fun onJoinFunctionStart() {
         val stageAttemptId = UUID.randomUUID().toString()
