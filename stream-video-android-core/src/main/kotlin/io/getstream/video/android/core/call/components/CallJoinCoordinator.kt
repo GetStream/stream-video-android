@@ -106,6 +106,18 @@ internal class CallJoinCoordinator(
      * finish/recreate the Activity after the SFU session is already in, and aborting then
      * leaves ringing Idle (Connecting…) forever. Leave / call cleanup still cancel [scope]
      * and abort the join.
+     *
+     * Analytics for the waiter that owns the join, in order:
+     * 1. `JOIN_INITIATED`: [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinFunctionStart]
+     *    reports that public `Call.join()` was invoked. Coalesced and already-joined waiters also
+     *    report this, but reuse the stored joinStageAttemptId.
+     * 2. `MEDIA_DEVICE_PERMISSION`: [io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver.mediaPermissionStatus]
+     *    reports camera and microphone permission state (leader only).
+     * 3. `COORDINATOR_JOIN`: [joinInternal] calls [CallApiClient.joinRequest], which reports the
+     *    stage as initiated. A successful response completes it. A permanent error or exhausted
+     *    retry budget completes the active stage as failed through
+     *    [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinRequestPermanentError]
+     *    or [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinRequestRetryExhausted].
      */
     suspend fun join(
         create: Boolean = false,
