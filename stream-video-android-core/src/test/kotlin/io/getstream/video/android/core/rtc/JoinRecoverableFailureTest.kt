@@ -40,6 +40,7 @@ import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.components.ClientCallRegistry
 import io.getstream.video.android.core.call.components.RtcSessionFactory
 import io.getstream.video.android.core.call.components.SessionMonitor
+import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -84,6 +85,7 @@ class JoinRecoverableFailureTest {
     private lateinit var mockSession: RtcSession
     private lateinit var mockJoinResponse: JoinCallResponse
     private lateinit var connectionFlow: MutableStateFlow<RealtimeConnection>
+    private lateinit var joinSingleFlight: StreamRefCountedSingleFlightProcessor
 
     @Before
     fun setup() {
@@ -95,6 +97,7 @@ class JoinRecoverableFailureTest {
 
         sessionManager = CallSessionManager()
         apiClient = mockk(relaxed = true)
+        joinSingleFlight = StreamRefCountedSingleFlightProcessor(testScope)
         connectionFlow = MutableStateFlow(RealtimeConnection.InProgress)
 
         every { state._connection } returns connectionFlow
@@ -128,6 +131,7 @@ class JoinRecoverableFailureTest {
         reconnector = reconnector,
         sessionMonitor = mockk<SessionMonitor>(relaxed = true),
         callRegistry = mockk<ClientCallRegistry>(relaxed = true),
+        joinFlight = joinSingleFlight,
         hasRequiredPermissions = { true },
     )
 

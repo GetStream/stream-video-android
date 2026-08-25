@@ -36,6 +36,7 @@ import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -88,6 +89,7 @@ class CallJoinCoordinatorTest {
     private lateinit var connectionFlow: MutableStateFlow<RealtimeConnection>
     private lateinit var mockSession: RtcSession
     private lateinit var mockJoinResponse: JoinCallResponse
+    private lateinit var joinSingleFlight: StreamRefCountedSingleFlightProcessor
 
     @Before
     fun setup() {
@@ -103,6 +105,7 @@ class CallJoinCoordinatorTest {
         callRegistry = mockk(relaxed = true)
         mockSession = mockk(relaxed = true)
         mockJoinResponse = mockk(relaxed = true)
+        joinSingleFlight = StreamRefCountedSingleFlightProcessor(testScope)
 
         sessionFlow = MutableStateFlow(null)
         connectionFlow = MutableStateFlow(RealtimeConnection.InProgress)
@@ -135,6 +138,7 @@ class CallJoinCoordinatorTest {
         reconnector = reconnector,
         sessionMonitor = sessionMonitor,
         callRegistry = callRegistry,
+        joinFlight = joinSingleFlight,
         hasRequiredPermissions = { true },
     )
 

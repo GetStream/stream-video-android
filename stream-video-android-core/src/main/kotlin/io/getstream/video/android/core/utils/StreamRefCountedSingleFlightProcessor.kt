@@ -248,6 +248,16 @@ internal class StreamRefCountedSingleFlightProcessor(
 
     fun has(key: String): Boolean = flights.containsKey(key)
 
+    /**
+     * Returns whether [key] currently has a shared job that has neither completed nor begun
+     * cancellation.
+     *
+     * Unlike [has], this returns `false` for a cancelled or completed job that has not yet been
+     * removed from [flights] by its cleanup. This is a point-in-time snapshot; the job can complete
+     * or be cancelled immediately after this method returns.
+     */
+    fun isFlightActive(key: String): Boolean = flights[key]?.deferred?.isActive == true
+
     suspend fun cancel(key: String): Result<Unit> = runCatching {
         mutex.withLock {
             val flight = flights[key] ?: return@withLock

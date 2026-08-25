@@ -28,6 +28,7 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -57,6 +58,7 @@ class CallAnalyticsTest {
         participants = MutableStateFlow<List<ParticipantState>>(emptyList()),
         eventReporter = reporter,
         observerScope = scope,
+        joinFlight = mockk<StreamRefCountedSingleFlightProcessor>(relaxed = true),
     )
 
     @Test

@@ -68,34 +68,14 @@ internal class CallJoinCoordinator(
     private val reconnector: CallReconnector,
     private val sessionMonitor: SessionMonitor,
     private val callRegistry: ClientCallRegistry,
+    private val joinFlight: StreamRefCountedSingleFlightProcessor,
     private val hasRequiredPermissions: () -> Boolean,
 ) {
-    private companion object {
+    internal companion object {
         const val JOIN_FLIGHT_KEY = "join"
     }
 
     private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
-
-    /**
-     * Coalesces concurrent [join] calls into one attempt on the call [scope].
-     *
-     * Without this, overlapping joins each build an [RtcSession] while reusing
-     * [CallSessionManager.sessionId], which leaves SFU-evicted zombies that fail every RPC
-     * with PARTICIPANT_NOT_FOUND. Checking [CallSessionManager.session] is not enough — it
-     * is only set after the coordinator round-trip.
-     *
-     * Coalescing the whole [join] also keeps once-per-join work once-only:
-     * MediaDevicePermission analytics, installing [CallState.callJoinInterceptor], resetting
-     * the leave guard, and moving to [RealtimeConnection.InProgress]. Each waiter still
-     * reports JoinInitiated (with a fresh attempt id) so every integrator [join] call stays
-     * observable.
-     *
-     * [StreamRefCountedSingleFlightProcessor] keeps the join alive when any waiter (including
-     * the last) is cancelled. Only [scope] cancellation — [Call.leave] / call cleanup —
-     * aborts the shared job. Each waiter registers its [CallJoinInterceptor] on the flight;
-     * the first waiter whose job is not cancelled owns the interceptor (see [Call.join]).
-     */
-    private val joinFlight = StreamRefCountedSingleFlightProcessor(scope)
 
     private fun isVideoEnabled(): Boolean = state.settings.value?.video?.enabled ?: false
 

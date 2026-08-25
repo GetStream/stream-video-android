@@ -18,6 +18,7 @@ package io.getstream.video.android.core.analytics.reporting
 
 import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.video.android.core.analytics.call.observer.VideoAnalyticsIceState
+import io.getstream.video.android.core.analytics.call.observer.model.JoinInvocation
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.coordinator.CoordinatorAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
@@ -28,6 +29,7 @@ import io.getstream.video.android.core.analytics.reporting.model.EventType
 import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionRole
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -165,8 +167,12 @@ class ClientEventReporterTest {
     // --- SDK join + coordinator join ---
 
     @Test
-    fun `sdk method join initiated sends a JoinInitiated event`() {
-        reporter.reportSdkMethodJoinInitiated("call-1", "default", "attempt-1")
+    fun `sdk method join initiated for a single attempt sends JoinInitiated with no join reason`() {
+        reporter.reportSdkMethodJoinInitiated(
+            callId = "call-1",
+            callType = "default",
+            joinInvocation = JoinInvocation.Standalone(stageId = "attempt-1"),
+        )
 
         val event = dispatcher.sent.single()
         assertEquals(EventStage.Call.JOIN_INITIATED.value, event.stage)
@@ -174,6 +180,28 @@ class ClientEventReporterTest {
         assertEquals("call-1", event.id)
         assertEquals("default", event.type)
         assertEquals("attempt-1", event.joinAttemptId)
+        assertNull(event.joinReason)
+    }
+
+    @Test
+    fun `sdk method join initiated for a concurrent attempt carries the concurrent-with reason`() {
+        reporter.reportSdkMethodJoinInitiated(
+            callId = "call-1",
+            callType = "default",
+            joinInvocation = JoinInvocation.Concurrent(
+                activeStageAttemptId = "attempt-1",
+                stageId = "attempt-2",
+            ),
+        )
+
+        val event = dispatcher.sent.single()
+        assertEquals(EventStage.Call.JOIN_INITIATED.value, event.stage)
+        assertEquals(EventType.INITIATED.value, event.eventType)
+        assertEquals("attempt-2", event.joinAttemptId)
+        assertEquals(
+            JoinReason.ConcurrentWith("attempt-1").message,
+            event.joinReason,
+        )
     }
 
     @Test

@@ -35,6 +35,7 @@ import io.getstream.video.android.core.analytics.call.observer.toVideoAnalyticsI
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -47,15 +48,17 @@ internal class CallAnalytics(
     val participants: StateFlow<List<ParticipantState>>,
     val eventReporter: ClientEventReporter,
     val observerScope: CoroutineScope,
+    val joinFlight: StreamRefCountedSingleFlightProcessor,
 ) {
     val logger by taggedLogger("CallAnalyticsHooks")
 
     val joinAnalyticsStateHolder = JoinAnalyticsStateHolder()
     val sfuAnalyticsStateHolder = SfuAnalyticsStateHolder()
 
-    val joinAnalytics = JoinAnalytics(callId, callType, eventReporter, joinAnalyticsStateHolder) {
-        resetAfterJoinSuccess()
-    }
+    val joinAnalytics =
+        JoinAnalytics(callId, callType, eventReporter, joinAnalyticsStateHolder, joinFlight) {
+            resetAfterJoinSuccess()
+        }
     val sfuAnalytics =
         SfuAnalytics(
             true,

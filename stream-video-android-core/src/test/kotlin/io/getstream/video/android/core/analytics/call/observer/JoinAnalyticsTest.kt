@@ -17,10 +17,12 @@
 package io.getstream.video.android.core.analytics.call.observer
 
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
+import io.getstream.video.android.core.analytics.call.observer.model.JoinInvocation
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
+import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -33,6 +35,7 @@ import org.junit.Test
 class JoinAnalyticsTest {
 
     private val reporter = mockk<ClientEventReporter>(relaxed = true)
+    private val joinFlight = mockk<StreamRefCountedSingleFlightProcessor>(relaxed = true)
     private val stateHolder = JoinAnalyticsStateHolder()
     private var joinSuccessCount = 0
     private lateinit var joinAnalytics: JoinAnalytics
@@ -40,9 +43,14 @@ class JoinAnalyticsTest {
     @Before
     fun setup() {
         joinSuccessCount = 0
-        joinAnalytics = JoinAnalytics("call-1", "default", reporter, stateHolder) {
-            joinSuccessCount++
-        }
+        joinAnalytics = JoinAnalytics(
+            callId = "call-1",
+            callType = "default",
+            eventReporter = reporter,
+            joinAnalyticsStateHolder = stateHolder,
+            joinFlight = joinFlight,
+            onJoinSuccess = { joinSuccessCount++ },
+        )
         every {
             reporter.reportCoordinatorJoinInitiated(any(), any(), any(), any())
         } returns "stage-1"
@@ -58,7 +66,7 @@ class JoinAnalyticsTest {
             reporter.reportSdkMethodJoinInitiated(
                 callId = "call-1",
                 callType = "default",
-                joinStageAttemptId = attemptId!!,
+                joinInvocation = JoinInvocation.Standalone(attemptId!!),
             )
         }
     }
@@ -78,14 +86,53 @@ class JoinAnalyticsTest {
             reporter.reportSdkMethodJoinInitiated(
                 callId = "call-1",
                 callType = "default",
-                joinStageAttemptId = first!!,
+                joinInvocation = JoinInvocation.Standalone(first!!),
             )
         }
         verify(exactly = 1) {
             reporter.reportSdkMethodJoinInitiated(
                 callId = "call-1",
                 callType = "default",
-                joinStageAttemptId = second!!,
+                joinInvocation = JoinInvocation.Standalone(second!!),
+            )
+        }
+    }
+
+    @Test
+    fun `a concurrent join reports Concurrent and preserves the in-flight attempt id`() {
+        stateHolder.updateJoinStageAttemptId("first-attempt")
+        every { joinFlight.isFlightActive(any()) } returns true
+
+        joinAnalytics.onJoinFunctionStart()
+
+        // The stored id must NOT be overwritten while a join is in flight.
+        assertEquals("first-attempt", stateHolder.state.value.joinStageAttemptId)
+        verify(exactly = 1) {
+            reporter.reportSdkMethodJoinInitiated(
+                callId = "call-1",
+                callType = "default",
+                joinInvocation = match {
+                    it is JoinInvocation.Concurrent &&
+                        it.activeStageAttemptId == "first-attempt" &&
+                        it.stageId != "first-attempt"
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `a concurrent join with no prior attempt falls back to unknown`() {
+        every { joinFlight.isFlightActive(any()) } returns true
+
+        joinAnalytics.onJoinFunctionStart()
+
+        verify(exactly = 1) {
+            reporter.reportSdkMethodJoinInitiated(
+                callId = "call-1",
+                callType = "default",
+                joinInvocation = match {
+                    it is JoinInvocation.Concurrent && it.activeStageAttemptId == "unknown"
+                },
             )
         }
     }
