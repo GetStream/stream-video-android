@@ -88,6 +88,9 @@ internal class StreamRefCountedSingleFlightProcessor(
      * [onCoalesced] runs on this waiter when it attaches to an already-running flight
      * (before awaiting the shared result).
      *
+     * [onLeader] runs once, under the same lock as flight creation, before any coalescer
+     * can attach. Use it to snapshot leader-only state that [onCoalesced] will read.
+     *
      * When [cancelIfLastWaiter] is false, the last cancelled waiter leaves the shared job
      * running and keeps the map entry so a later [run] can coalesce instead of starting a
      * second execution.
@@ -95,10 +98,11 @@ internal class StreamRefCountedSingleFlightProcessor(
     suspend fun <T> run(
         key: String,
         onCoalesced: () -> Unit = {},
+        onLeader: () -> Unit = {},
         cancelIfLastWaiter: Boolean = true,
         block: suspend () -> T,
     ): Result<T> {
-        val acquired = acquireWaiter(key, block)
+        val acquired = acquireWaiter(key, onLeader, block)
             ?: return Result.failure(
                 ClosedSendChannelException("RefCountedSingleFlight is closed"),
             )
@@ -108,15 +112,17 @@ internal class StreamRefCountedSingleFlightProcessor(
 
     private suspend fun <T> acquireWaiter(
         key: String,
+        onLeader: () -> Unit,
         block: suspend () -> T,
     ): Acquired<T>? = mutex.withLock {
         if (closed.get()) return@withLock null
-        selectFlightLocked(key, block)
+        selectFlightLocked(key, onLeader, block)
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun <T> selectFlightLocked(
         key: String,
+        onLeader: () -> Unit,
         block: suspend () -> T,
     ): Acquired<T> {
         val running = flights[key]?.takeIf { it.deferred.isActive } as Flight<T>?
@@ -124,11 +130,12 @@ internal class StreamRefCountedSingleFlightProcessor(
             running.waiters++
             return Acquired(running, coalesced = true)
         }
-        return Acquired(createFlightLocked(key, block), coalesced = false)
+        return Acquired(createFlightLocked(key, onLeader, block), coalesced = false)
     }
 
     private fun <T> createFlightLocked(
         key: String,
+        onLeader: () -> Unit,
         block: suspend () -> T,
     ): Flight<T> {
         lateinit var deferred: Deferred<Result<T>>
@@ -149,7 +156,10 @@ internal class StreamRefCountedSingleFlightProcessor(
                 }
             }
         }
-        return Flight(key = key, deferred = deferred, waiters = 1).also { flights[key] = it }
+        return Flight(key = key, deferred = deferred, waiters = 1).also {
+            flights[key] = it
+            onLeader()
+        }
     }
 
     private fun removeFlightIfCurrentLocked(key: String, deferred: Deferred<*>) {

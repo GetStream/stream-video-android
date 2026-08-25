@@ -552,6 +552,11 @@ public class Call(
         startsAt: OffsetDateTime? = null,
     ): Result<UpdateCallResponse> = apiClient.update(custom, settingsOverride, startsAt)
 
+    /**
+     * Joins the call. Concurrent callers share one in-flight attempt.
+     *
+     * Cancelling this coroutine does not abort that attempt — only [leave] does.
+     */
     suspend fun join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,

@@ -90,23 +90,29 @@ internal class CallJoinCoordinator(
      * reports JoinInitiated (with a fresh attempt id) so every integrator [join] call stays
      * observable.
      *
-     * [StreamRefCountedSingleFlightProcessor] keeps the join alive when one waiter (e.g. an
-     * Activity) is cancelled while others still await, and cancels it when the last waiter
-     * leaves.
+     * [StreamRefCountedSingleFlightProcessor] keeps the join alive when any waiter (including
+     * the last) is cancelled. Only [scope] cancellation — [Call.leave] / call cleanup —
+     * aborts the shared job.
      */
     private val joinFlight = StreamRefCountedSingleFlightProcessor(scope)
+
+    /**
+     * Interceptor from the waiter that created the current join flight. Snapshotted in
+     * [onLeader] under the flight mutex so coalescers can compare against it before
+     * [executeJoin] assigns [CallState.callJoinInterceptor].
+     */
+    @Volatile
+    private var inFlightJoinInterceptor: CallJoinInterceptor? = null
 
     private fun isVideoEnabled(): Boolean = state.settings.value?.video?.enabled ?: false
 
     /**
      * Joins the call, coalescing concurrent callers into one in-flight execution (single-flight).
      *
-     * The shared work runs on the call [scope]. Each caller still awaits on its own coroutine,
-     * so destroying one UI scope only drops that waiter; remaining waiters keep the join.
-     * The shared job is **not** cancelled when the last waiter leaves — incoming accept can
-     * finish/recreate the Activity after the SFU session is already in, and aborting then
-     * leaves ringing Idle (Connecting…) forever. Leave / call cleanup still cancel [scope]
-     * and abort the join.
+     * The shared work runs on the call [scope]. Cancelling a caller (including the last
+     * waiter) does **not** abort the join — only [io.getstream.video.android.core.Call.leave]
+     * / call-scope cleanup does. Incoming accept can finish/recreate the Activity after the
+     * SFU session is already in; aborting then would leave ringing Idle (Connecting…) forever.
      *
      * Analytics for the waiter that owns the join, in order:
      * 1. `JOIN_INITIATED`: [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinFunctionStart]
@@ -137,16 +143,17 @@ internal class CallJoinCoordinator(
                 logger.w {
                     "[join] Concurrent join coalesced into in-flight join " +
                         "(interceptorIgnored=${callJoinInterceptor != null &&
-                            callJoinInterceptor !== state.callJoinInterceptor})"
+                            callJoinInterceptor !== inFlightJoinInterceptor})"
                 }
                 if (callJoinInterceptor != null &&
-                    callJoinInterceptor !== state.callJoinInterceptor
+                    callJoinInterceptor !== inFlightJoinInterceptor
                 ) {
                     logger.w {
                         "[join] Coalesced caller interceptor dropped; in-flight interceptor kept"
                     }
                 }
             },
+            onLeader = { inFlightJoinInterceptor = callJoinInterceptor },
             cancelIfLastWaiter = false,
         ) {
             executeJoin(
@@ -193,6 +200,10 @@ internal class CallJoinCoordinator(
             return Success(existing)
         }
 
+        // Before any suspend so coalesced waiters and SFU observers see this join's
+        // interceptor rather than a stale/null [CallState.callJoinInterceptor].
+        state.callJoinInterceptor = callJoinInterceptor
+
         callAnalytics.mediaPermissionObserver.mediaPermissionStatus()
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -213,8 +224,6 @@ internal class CallJoinCoordinator(
 
         // Ensure factory is created with the current audioBitrateProfile before joining
         media.ensureFactoryMatchesAudioProfile()
-
-        state.callJoinInterceptor = callJoinInterceptor
 
         // the join flow should retry up to 3 times
         // if the error is not permanent
@@ -396,7 +405,8 @@ internal class CallJoinCoordinator(
 
         state._connection.value = RealtimeConnection.Joined(localSession)
 
-        // Last-/sole-waiter cancel aborts this call-scoped job. If that happens after the
+        // [scope] cancellation (leave / call cleanup) aborts this call-scoped job. Waiter
+        // cancel does not — [join] uses cancelIfLastWaiter = false. If leave hits after the
         // session is installed, clear it — otherwise the idempotent join() path returns
         // Success(zombie) and we keep a half-joined participant (PARTICIPANT_NOT_FOUND).
         try {

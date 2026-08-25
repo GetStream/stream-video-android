@@ -97,6 +97,42 @@ class StreamRefCountedSingleFlightProcessorTest {
     }
 
     @Test
+    fun `onLeader runs once under the create lock before coalescers attach`() = runTest(
+        testDispatcher,
+    ) {
+        val processor = StreamRefCountedSingleFlightProcessor(testScope)
+        val leaderSnapshots = AtomicInteger(0)
+        val coalescedSawLeader = AtomicInteger(0)
+        val gate = CompletableDeferred<Unit>()
+        val leaderToken = java.util.concurrent.atomic.AtomicReference<String?>(null)
+
+        val jobs = (1..5).map { i ->
+            async {
+                processor.run(
+                    "key",
+                    onCoalesced = {
+                        if (leaderToken.get() == "leader") coalescedSawLeader.incrementAndGet()
+                    },
+                    onLeader = {
+                        leaderToken.set("leader")
+                        leaderSnapshots.incrementAndGet()
+                    },
+                ) {
+                    gate.await()
+                    "ok-$i"
+                }
+            }
+        }
+        advanceUntilIdle()
+        gate.complete(Unit)
+        jobs.awaitAll()
+        advanceUntilIdle()
+
+        assertEquals(1, leaderSnapshots.get())
+        assertEquals(4, coalescedSawLeader.get())
+    }
+
+    @Test
     fun `last waiter on a cancelled scope still removes the flight`() = runTest(testDispatcher) {
         val cancelledScope = TestScope(testDispatcher)
         cancelledScope.cancel()

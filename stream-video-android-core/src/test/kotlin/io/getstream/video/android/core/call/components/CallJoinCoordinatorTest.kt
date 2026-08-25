@@ -357,6 +357,30 @@ class CallJoinCoordinatorTest {
     }
 
     @Test
+    fun `leader installs interceptor before awaiting the guest token`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+        val guestGate = CompletableDeferred<Unit>()
+        every { clientImpl.guestUserJob } returns testScope.async { guestGate.await() }
+        val interceptor = mockk<CallJoinInterceptor>(relaxed = true)
+        val coordinator = coordinator()
+
+        val join = async { coordinator.join(callJoinInterceptor = interceptor) }
+        advanceUntilIdle()
+
+        verify(exactly = 1) { state.callJoinInterceptor = interceptor }
+        coVerify(exactly = 0) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+
+        guestGate.complete(Unit)
+        advanceUntilIdle()
+        assertThat(join.await()).isInstanceOf(Success::class.java)
+    }
+
+    @Test
     fun `a join after the previous one finished starts a fresh attempt`() = runTest(
         testDispatcher,
     ) {
