@@ -137,6 +137,8 @@ public class PictureInPictureTest {
         val builder = getPictureInPictureParams(Rational(16, 9), pipConfig)
         val params = builder.build()
 
+        // The PictureInPictureParams getters are only public from API 33,
+        // so the params values can only be asserted in the TIRAMISU tests.
         assertNotNull(params)
     }
 
@@ -145,7 +147,21 @@ public class PictureInPictureTest {
     public fun `should set title and seamless resize for TIRAMISU`() {
         val builder = getPictureInPictureParams(Rational(9, 16), pipConfig)
         val params = builder.build()
-        assertNotNull(params)
+
+        assertEquals(Rational(9, 16), params.aspectRatio)
+        assertEquals("Video Player", params.title.toString())
+        assertTrue(params.isSeamlessResizeEnabled)
+        assertTrue(params.isAutoEnterEnabled)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    public fun `should disable auto-enter when configuration disables it for TIRAMISU`() {
+        val config = PictureInPictureConfiguration(enable = true, autoEnterEnabled = false)
+
+        val params = getPictureInPictureParams(Rational(9, 16), config).build()
+
+        assertFalse(params.isAutoEnterEnabled)
     }
 
     @Test
