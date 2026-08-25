@@ -28,6 +28,7 @@ import io.getstream.video.android.core.sounds.MutedRingingConfig
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.RingingConfig
 import io.getstream.video.android.core.sounds.Sounds
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -194,11 +195,17 @@ class CallServiceRingingStateObserverTest {
             ringingStateFlow.value = RingingState.Outgoing(acceptedByCallee = false)
             advanceUntilIdle()
         }
+        verify(exactly = 1) { soundPlayer.playCallSound(any(), true) }
+
+        // The initial Idle emission already stopped the sound, so drop the recorded calls before
+        // asserting that the acceptance itself is what stops it.
+        clearMocks(soundPlayer, answers = false)
+
         ringingStateFlow.value = RingingState.Outgoing(acceptedByCallee = true)
         advanceUntilIdle()
 
-        verify(exactly = 1) { soundPlayer.playCallSound(any(), true) }
         verify { soundPlayer.stopCallSound() }
+        verify(exactly = 0) { soundPlayer.playCallSound(any(), any()) }
     }
 
     @Test
