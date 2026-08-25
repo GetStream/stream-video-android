@@ -219,7 +219,9 @@ class CallJoinCoordinatorTest {
         assertThat(sessionFlow.value).isSameInstanceAs(existing)
         assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Connected)
         verify(exactly = 0) { sessionManager.setActiveSession(null) }
-        verify(exactly = 0) { callAnalytics.joinAnalytics.onJoinFunctionStart() }
+        val joinAnalytics = callAnalytics.joinAnalytics
+        verify(exactly = 1) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false) }
+        verify(exactly = 0) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = true) }
         coVerify(exactly = 0) {
             apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
         }
@@ -306,6 +308,9 @@ class CallJoinCoordinatorTest {
         coVerify(exactly = 1) { mockSession.connectInternal() }
         verify(exactly = 1) { sessionManager.setActiveSession(mockSession) }
         verify(exactly = 4) { mockSession.sfuTracer.trace("join-coalesced", any()) }
+        val joinAnalytics = callAnalytics.joinAnalytics
+        verify(exactly = 1) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = true) }
+        verify(exactly = 4) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false) }
     }
 
     @Test
@@ -330,7 +335,9 @@ class CallJoinCoordinatorTest {
         advanceUntilIdle()
 
         results.forEach { assertThat(it).isInstanceOf(Success::class.java) }
-        verify(exactly = 1) { callAnalytics.joinAnalytics.onJoinFunctionStart() }
+        val joinAnalytics = callAnalytics.joinAnalytics
+        verify(exactly = 1) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = true) }
+        verify(exactly = 1) { joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false) }
         verify(exactly = 1) { callAnalytics.mediaPermissionObserver.mediaPermissionStatus() }
         verify(exactly = 1) { lifecycle.resetLeaveGuard() }
         verify(exactly = 1) { state.callJoinInterceptor = interceptor }

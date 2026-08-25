@@ -84,9 +84,10 @@ internal class CallJoinCoordinator(
      * with PARTICIPANT_NOT_FOUND. Checking [CallSessionManager.session] is not enough — it
      * is only set after the coordinator round-trip.
      *
-     * Coalescing the whole [join] also keeps once-per-join work once-only: JoinInitiated /
+     * Coalescing the whole [join] also keeps once-per-join work once-only:
      * MediaDevicePermission analytics, installing [CallState.callJoinInterceptor], resetting
-     * the leave guard, and moving to [RealtimeConnection.InProgress].
+     * the leave guard, and moving to [RealtimeConnection.InProgress]. Each waiter still
+     * reports JoinInitiated so every integrator [join] call stays observable.
      *
      * [StreamRefCountedSingleFlightProcessor] keeps the join alive when one waiter (e.g. an
      * Activity) is cancelled while others still await, and cancels it when the last waiter
@@ -119,6 +120,7 @@ internal class CallJoinCoordinator(
             JOIN_FLIGHT_KEY,
             onCoalesced = {
                 coalesced = true
+                callAnalytics.joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false)
                 logger.w {
                     "[join] Concurrent join coalesced into in-flight join " +
                         "(interceptorIgnored=${callJoinInterceptor != null &&
@@ -175,10 +177,12 @@ internal class CallJoinCoordinator(
         sessionManager.session.value?.let { existing ->
             logger.w { "[join] Call already joined — returning existing session" }
             existing.sfuTracer.trace("join-already-joined", "join() while session already live")
+            // Integrator still called join(); do not rotate the completed attempt id.
+            callAnalytics.joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false)
             return Success(existing)
         }
 
-        callAnalytics.joinAnalytics.onJoinFunctionStart()
+        callAnalytics.joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = true)
         callAnalytics.mediaPermissionObserver.mediaPermissionStatus()
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"

@@ -64,6 +64,36 @@ class JoinAnalyticsTest {
     }
 
     @Test
+    fun `onJoinFunctionStart without owning the attempt reports the stored id`() {
+        stateHolder.updateJoinStageAttemptId("in-flight")
+
+        joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false)
+
+        assertEquals("in-flight", stateHolder.state.value.joinStageAttemptId)
+        verify(exactly = 1) {
+            reporter.reportSdkMethodJoinInitiated(
+                callId = "call-1",
+                callType = "default",
+                joinStageAttemptId = "in-flight",
+            )
+        }
+    }
+
+    @Test
+    fun `onJoinFunctionStart without a stored id still reports and does not store`() {
+        joinAnalytics.onJoinFunctionStart(ownsJoinAttempt = false)
+
+        assertEquals(null, stateHolder.state.value.joinStageAttemptId)
+        verify(exactly = 1) {
+            reporter.reportSdkMethodJoinInitiated(
+                callId = "call-1",
+                callType = "default",
+                joinStageAttemptId = match { it.isNotEmpty() },
+            )
+        }
+    }
+
+    @Test
     fun `onJoinRequestStart reports the coordinator join and moves the stage in progress`() {
         joinAnalytics.onJoinRequestStart(JoinReason.FirstAttempt)
 
