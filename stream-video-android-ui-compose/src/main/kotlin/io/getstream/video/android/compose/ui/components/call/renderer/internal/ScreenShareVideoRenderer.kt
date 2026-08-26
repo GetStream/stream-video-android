@@ -26,8 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.ParticipantVideoConnectionIndicatorContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoLabelContentParams
-import io.getstream.video.android.compose.theme.ParticipantsLayoutScreenSharingFallbackContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.renderer.DefaultScreenSharingFallbackContent
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
@@ -53,9 +53,7 @@ public fun ScreenShareVideoRenderer(
     isShowConnectionQualityIndicator: Boolean = true,
     isZoomable: Boolean = true,
     fallbackContent: @Composable (ScreenSharingSession) -> Unit = {
-        VideoTheme.componentFactory.ParticipantsLayoutScreenSharingFallbackContent(
-            params = ParticipantsLayoutScreenSharingFallbackContentParams(session = it),
-        )
+        DefaultScreenSharingFallbackContent(session = it)
     },
 ) {
     val screenShareParticipant = session.participant

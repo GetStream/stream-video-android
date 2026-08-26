@@ -75,9 +75,7 @@ public fun ParticipantsLayout(
     },
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
     screenSharingFallbackContent: @Composable (ScreenSharingSession) -> Unit = {
-        VideoTheme.componentFactory.ParticipantsLayoutScreenSharingFallbackContent(
-            params = ParticipantsLayoutScreenSharingFallbackContentParams(session = it),
-        )
+        DefaultScreenSharingFallbackContent(session = it)
     },
 ) {
     val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()
@@ -128,4 +126,16 @@ public fun ParticipantsLayout(
             screenSharingFallbackContent = screenSharingFallbackContent,
         )
     }
+}
+
+/**
+ * The default fallback shown in place of the shared screen while the screen sharing session is
+ * loading or not available. Delegates to
+ * [io.getstream.video.android.compose.theme.VideoComponentFactory.ParticipantsLayoutScreenSharingFallbackContent].
+ */
+@Composable
+internal fun DefaultScreenSharingFallbackContent(session: ScreenSharingSession) {
+    VideoTheme.componentFactory.ParticipantsLayoutScreenSharingFallbackContent(
+        params = ParticipantsLayoutScreenSharingFallbackContentParams(session = session),
+    )
 }

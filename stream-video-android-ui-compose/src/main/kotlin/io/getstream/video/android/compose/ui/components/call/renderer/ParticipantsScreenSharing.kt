@@ -22,8 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.ParticipantsLayoutScreenSharingFallbackContentParams
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LandscapeScreenSharingVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.PortraitScreenSharingVideoRenderer
 import io.getstream.video.android.core.Call
@@ -64,9 +62,7 @@ public fun ParticipantsScreenSharing(
         )
     },
     screenSharingFallbackContent: @Composable (ScreenSharingSession) -> Unit = {
-        VideoTheme.componentFactory.ParticipantsLayoutScreenSharingFallbackContent(
-            params = ParticipantsLayoutScreenSharingFallbackContentParams(session = it),
-        )
+        DefaultScreenSharingFallbackContent(session = it)
     },
 ) {
     val configuration = LocalConfiguration.current
