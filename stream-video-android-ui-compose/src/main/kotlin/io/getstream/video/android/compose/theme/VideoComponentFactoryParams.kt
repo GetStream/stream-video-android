@@ -35,6 +35,7 @@ import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.model.NetworkQuality
+import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.model.User
 
 /**
@@ -217,6 +218,22 @@ public data class ParticipantVideoLabelContentParams(
 )
 
 /**
+ * Parameters for [VideoComponentFactory.ParticipantLabelSoundIndicatorContent].
+ *
+ * @param isSpeaking Whether the sound indicator animates as speaking.
+ * @param isAudioEnabled Whether the participant's microphone is enabled.
+ * @param audioLevel The audio level of the participant, between 0 and 1.
+ * @param modifier Modifier for styling. It carries the position and padding of the indicator
+ * inside the label, which differ between the label variants.
+ */
+public data class ParticipantLabelSoundIndicatorContentParams(
+    val isSpeaking: Boolean,
+    val isAudioEnabled: Boolean,
+    val audioLevel: Float = 0f,
+    val modifier: Modifier = Modifier,
+)
+
+/**
  * Parameters for [VideoComponentFactory.ParticipantVideoConnectionIndicatorContent].
  *
  * @param networkQuality The network quality of the participant connection.
@@ -258,6 +275,15 @@ public data class ParticipantVideoActionsContentParams(
     val actions: List<ParticipantAction>,
     val call: Call,
     val participant: ParticipantState,
+)
+
+/**
+ * Parameters for [VideoComponentFactory.ParticipantsLayoutScreenSharingFallbackContent].
+ *
+ * @param session The screen sharing session the fallback is rendered for.
+ */
+public data class ParticipantsLayoutScreenSharingFallbackContentParams(
+    val session: ScreenSharingSession,
 )
 
 /**
@@ -460,5 +486,39 @@ public data class OutgoingCallControlsContentParams(
     val isCameraEnabled: Boolean,
     val isMicrophoneEnabled: Boolean,
     val isVideoCall: Boolean = true,
+    val onCallAction: (CallAction) -> Unit = {},
+)
+
+/**
+ * Parameters for [VideoComponentFactory.AudioOnlyCallHeaderContent].
+ *
+ * @param call The call that contains all the participants state and tracks.
+ */
+public data class AudioOnlyCallHeaderContentParams(
+    val call: Call,
+)
+
+/**
+ * Parameters for [VideoComponentFactory.AudioOnlyCallDetailsContent].
+ *
+ * @param remoteParticipants List of the remote participants shown in the details.
+ * @param topPadding Suggested padding above the details content. The default implementation does
+ * not apply it; it is provided for custom implementations.
+ * @param duration The current duration of the call, formatted as text.
+ */
+public data class AudioOnlyCallDetailsContentParams(
+    val remoteParticipants: List<ParticipantState>,
+    val topPadding: Dp,
+    val duration: String = "",
+)
+
+/**
+ * Parameters for [VideoComponentFactory.AudioOnlyCallControlsContent].
+ *
+ * @param isMicrophoneEnabled Whether the microphone is enabled or not.
+ * @param onCallAction Handler used when the user interacts with Call UI.
+ */
+public data class AudioOnlyCallControlsContentParams(
+    val isMicrophoneEnabled: Boolean,
     val onCallAction: (CallAction) -> Unit = {},
 )

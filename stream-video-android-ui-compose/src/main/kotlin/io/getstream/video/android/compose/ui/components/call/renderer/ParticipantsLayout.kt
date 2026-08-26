@@ -25,7 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
+import io.getstream.video.android.compose.theme.ParticipantsLayoutScreenSharingFallbackContentParams
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
@@ -74,9 +75,9 @@ public fun ParticipantsLayout(
     },
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
     screenSharingFallbackContent: @Composable (ScreenSharingSession) -> Unit = {
-        val userName by it.participant.userNameOrId.collectAsStateWithLifecycle()
-        val userImage by it.participant.image.collectAsStateWithLifecycle()
-        UserAvatarBackground(userImage = userImage, userName = userName)
+        VideoTheme.componentFactory.ParticipantsLayoutScreenSharingFallbackContent(
+            params = ParticipantsLayoutScreenSharingFallbackContentParams(session = it),
+        )
     },
 ) {
     val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()

@@ -78,6 +78,50 @@ public final class io/getstream/video/android/compose/state/ui/participants/Invi
 public abstract interface class io/getstream/video/android/compose/state/ui/participants/ParticipantInfoAction {
 }
 
+public final class io/getstream/video/android/compose/theme/AudioOnlyCallControlsContentParams {
+	public static final field $stable I
+	public fun <init> (ZLkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (ZLkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (ZLkotlin/jvm/functions/Function1;)Lio/getstream/video/android/compose/theme/AudioOnlyCallControlsContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/AudioOnlyCallControlsContentParams;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/AudioOnlyCallControlsContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnCallAction ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public final fun isMicrophoneEnabled ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/AudioOnlyCallDetailsContentParams {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/util/List;FLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/util/List;FLjava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2-D9Ej5fM ()F
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy-lG28NQ4 (Ljava/util/List;FLjava/lang/String;)Lio/getstream/video/android/compose/theme/AudioOnlyCallDetailsContentParams;
+	public static synthetic fun copy-lG28NQ4$default (Lio/getstream/video/android/compose/theme/AudioOnlyCallDetailsContentParams;Ljava/util/List;FLjava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/AudioOnlyCallDetailsContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuration ()Ljava/lang/String;
+	public final fun getRemoteParticipants ()Ljava/util/List;
+	public final fun getTopPadding-D9Ej5fM ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/AudioOnlyCallHeaderContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/Call;)V
+	public final fun component1 ()Lio/getstream/video/android/core/Call;
+	public final fun copy (Lio/getstream/video/android/core/Call;)Lio/getstream/video/android/compose/theme/AudioOnlyCallHeaderContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/AudioOnlyCallHeaderContentParams;Lio/getstream/video/android/core/Call;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/AudioOnlyCallHeaderContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCall ()Lio/getstream/video/android/core/Call;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/compose/theme/CallAppBarCenterContentParams {
 	public static final field $stable I
 	public fun <init> (Lio/getstream/video/android/core/Call;Ljava/lang/String;)V
@@ -483,6 +527,25 @@ public final class io/getstream/video/android/compose/theme/OutgoingCallHeaderCo
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/getstream/video/android/compose/theme/ParticipantLabelSoundIndicatorContentParams {
+	public static final field $stable I
+	public fun <init> (ZZFLandroidx/compose/ui/Modifier;)V
+	public synthetic fun <init> (ZZFLandroidx/compose/ui/Modifier;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun component3 ()F
+	public final fun component4 ()Landroidx/compose/ui/Modifier;
+	public final fun copy (ZZFLandroidx/compose/ui/Modifier;)Lio/getstream/video/android/compose/theme/ParticipantLabelSoundIndicatorContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/ParticipantLabelSoundIndicatorContentParams;ZZFLandroidx/compose/ui/Modifier;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/ParticipantLabelSoundIndicatorContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudioLevel ()F
+	public final fun getModifier ()Landroidx/compose/ui/Modifier;
+	public fun hashCode ()I
+	public final fun isAudioEnabled ()Z
+	public final fun isSpeaking ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/compose/theme/ParticipantVideoActionsContentParams {
 	public static final field $stable I
 	public fun <init> (Ljava/util/List;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/ParticipantState;)V
@@ -576,6 +639,18 @@ public final class io/getstream/video/android/compose/theme/ParticipantVideoReac
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getParticipant ()Lio/getstream/video/android/core/ParticipantState;
 	public final fun getStyle ()Lio/getstream/video/android/compose/ui/components/call/renderer/VideoRendererStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/ParticipantsLayoutScreenSharingFallbackContentParams {
+	public static final field $stable I
+	public fun <init> (Lio/getstream/video/android/core/model/ScreenSharingSession;)V
+	public final fun component1 ()Lio/getstream/video/android/core/model/ScreenSharingSession;
+	public final fun copy (Lio/getstream/video/android/core/model/ScreenSharingSession;)Lio/getstream/video/android/compose/theme/ParticipantsLayoutScreenSharingFallbackContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/ParticipantsLayoutScreenSharingFallbackContentParams;Lio/getstream/video/android/core/model/ScreenSharingSession;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/ParticipantsLayoutScreenSharingFallbackContentParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSession ()Lio/getstream/video/android/core/model/ScreenSharingSession;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -860,6 +935,9 @@ public final class io/getstream/video/android/compose/theme/StreamTypography$Com
 }
 
 public abstract interface class io/getstream/video/android/compose/theme/VideoComponentFactory {
+	public fun AudioOnlyCallControlsContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/AudioOnlyCallControlsContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun AudioOnlyCallDetailsContent (Landroidx/compose/foundation/layout/ColumnScope;Lio/getstream/video/android/compose/theme/AudioOnlyCallDetailsContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun AudioOnlyCallHeaderContent (Landroidx/compose/foundation/layout/ColumnScope;Lio/getstream/video/android/compose/theme/AudioOnlyCallHeaderContentParams;Landroidx/compose/runtime/Composer;I)V
 	public fun CallAppBar (Lio/getstream/video/android/compose/theme/CallAppBarParams;Landroidx/compose/runtime/Composer;I)V
 	public fun CallAppBarCenterContent (Landroidx/compose/foundation/layout/RowScope;Lio/getstream/video/android/compose/theme/CallAppBarCenterContentParams;Landroidx/compose/runtime/Composer;I)V
 	public fun CallAppBarLeadingContent (Landroidx/compose/foundation/layout/RowScope;Lio/getstream/video/android/compose/theme/CallAppBarLeadingContentParams;Landroidx/compose/runtime/Composer;I)V
@@ -883,12 +961,14 @@ public abstract interface class io/getstream/video/android/compose/theme/VideoCo
 	public fun OutgoingCallControlsContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/OutgoingCallControlsContentParams;Landroidx/compose/runtime/Composer;I)V
 	public fun OutgoingCallDetailsContent (Landroidx/compose/foundation/layout/ColumnScope;Lio/getstream/video/android/compose/theme/OutgoingCallDetailsContentParams;Landroidx/compose/runtime/Composer;I)V
 	public fun OutgoingCallHeaderContent (Landroidx/compose/foundation/layout/ColumnScope;Lio/getstream/video/android/compose/theme/OutgoingCallHeaderContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun ParticipantLabelSoundIndicatorContent (Landroidx/compose/foundation/layout/RowScope;Lio/getstream/video/android/compose/theme/ParticipantLabelSoundIndicatorContentParams;Landroidx/compose/runtime/Composer;I)V
 	public fun ParticipantVideo (Lio/getstream/video/android/compose/theme/ParticipantVideoParams;Landroidx/compose/runtime/Composer;I)V
 	public fun ParticipantVideoActionsContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/ParticipantVideoActionsContentParams;Landroidx/compose/runtime/Composer;I)V
 	public fun ParticipantVideoConnectionIndicatorContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/ParticipantVideoConnectionIndicatorContentParams;Landroidx/compose/runtime/Composer;I)V
 	public fun ParticipantVideoFallbackContent (Lio/getstream/video/android/compose/theme/ParticipantVideoFallbackContentParams;Landroidx/compose/runtime/Composer;I)V
 	public fun ParticipantVideoLabelContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/ParticipantVideoLabelContentParams;Landroidx/compose/runtime/Composer;I)V
 	public fun ParticipantVideoReactionContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/ParticipantVideoReactionContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun ParticipantsLayoutScreenSharingFallbackContent (Lio/getstream/video/android/compose/theme/ParticipantsLayoutScreenSharingFallbackContentParams;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/theme/VideoTheme : io/getstream/video/android/compose/theme/StreamTheme {

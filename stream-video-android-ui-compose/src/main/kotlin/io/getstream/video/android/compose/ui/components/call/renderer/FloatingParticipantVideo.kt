@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.theme.ParticipantVideoParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.core.Call
@@ -67,6 +68,8 @@ import io.getstream.video.android.core.internal.InternalStreamVideoApi
  * when dragging the floating UI around the screen.
  * @param alignment Determines where the floating participant video will be placed.
  * @param style Defined properties for styling a single video call track.
+ * @param videoRenderer A single video renderer that renders the participant. Defaults to
+ * [io.getstream.video.android.compose.theme.VideoComponentFactory.ParticipantVideo].
  */
 @Composable
 public fun BoxScope.FloatingParticipantVideo(
@@ -78,13 +81,15 @@ public fun BoxScope.FloatingParticipantVideo(
     style: VideoRendererStyle =
         RegularVideoRendererStyle(isShowingConnectionQualityIndicator = false),
     videoRenderer: @Composable (ParticipantState) -> Unit = {
-        ParticipantVideo(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(VideoTheme.shapes.dialog),
-            call = call,
-            participant = participant,
-            style = style,
+        VideoTheme.componentFactory.ParticipantVideo(
+            params = ParticipantVideoParams(
+                call = call,
+                participant = participant,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(VideoTheme.shapes.dialog),
+                style = style,
+            ),
         )
     },
 ) {

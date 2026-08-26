@@ -24,9 +24,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
-import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
-import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
+import io.getstream.video.android.compose.theme.ParticipantVideoConnectionIndicatorContentParams
+import io.getstream.video.android.compose.theme.ParticipantVideoLabelContentParams
+import io.getstream.video.android.compose.theme.ParticipantsLayoutScreenSharingFallbackContentParams
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
@@ -52,9 +53,9 @@ public fun ScreenShareVideoRenderer(
     isShowConnectionQualityIndicator: Boolean = true,
     isZoomable: Boolean = true,
     fallbackContent: @Composable (ScreenSharingSession) -> Unit = {
-        val userName by it.participant.userNameOrId.collectAsStateWithLifecycle()
-        val userImage by it.participant.image.collectAsStateWithLifecycle()
-        UserAvatarBackground(userImage = userImage, userName = userName)
+        VideoTheme.componentFactory.ParticipantsLayoutScreenSharingFallbackContent(
+            params = ParticipantsLayoutScreenSharingFallbackContentParams(session = it),
+        )
     },
 ) {
     val screenShareParticipant = session.participant
@@ -82,14 +83,25 @@ public fun ScreenShareVideoRenderer(
             videoRendererConfig = videoRendererConfig,
         )
 
-        ParticipantLabel(call, screenShareParticipant, labelPosition)
+        with(VideoTheme.componentFactory) {
+            ParticipantVideoLabelContent(
+                params = ParticipantVideoLabelContentParams(
+                    call = call,
+                    participant = screenShareParticipant,
+                    labelPosition = labelPosition,
+                ),
+            )
+        }
 
         if (isShowConnectionQualityIndicator) {
             val connectionQuality by screenShareParticipant.networkQuality.collectAsStateWithLifecycle()
-            NetworkQualityIndicator(
-                networkQuality = connectionQuality,
-                modifier = Modifier.align(Alignment.BottomEnd),
-            )
+            with(VideoTheme.componentFactory) {
+                ParticipantVideoConnectionIndicatorContent(
+                    params = ParticipantVideoConnectionIndicatorContentParams(
+                        networkQuality = connectionQuality,
+                    ),
+                )
+            }
         }
     }
 }

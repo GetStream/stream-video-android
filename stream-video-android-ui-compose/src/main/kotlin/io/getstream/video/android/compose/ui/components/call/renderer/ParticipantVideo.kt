@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.theme.ParticipantLabelSoundIndicatorContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoActionsContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoConnectionIndicatorContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoFallbackContentParams
@@ -78,7 +79,6 @@ import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPrevie
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
 import io.getstream.video.android.compose.ui.components.call.pinning.participantActions
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
-import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
@@ -321,21 +321,25 @@ public fun BoxScope.ParticipantLabel(
         } else {
             participant.audioLevel.collectAsStateWithLifecycle()
         }
-        SoundIndicator(
-            // we always draw the audio indicator for the local participant for lower delay
-            // and for now don't draw the indicator for other participants due to the lag
-            // (so we ingore participant.isSpeaking)
-            isSpeaking = participant.isLocal,
-            isAudioEnabled = audioEnabled,
-            audioLevel = audioLevel,
-            modifier = Modifier
-                .align(CenterVertically)
-                .padding(
-                    vertical = VideoTheme.dimens.spacingXs,
-                    horizontal = VideoTheme.dimens.spacingS,
-                )
-                .testTag("Stream_ParticipantMicrophone_Enabled_$audioEnabled"),
-        )
+        with(VideoTheme.componentFactory) {
+            ParticipantLabelSoundIndicatorContent(
+                params = ParticipantLabelSoundIndicatorContentParams(
+                    // we always draw the audio indicator for the local participant for lower delay
+                    // and for now don't draw the indicator for other participants due to the lag
+                    // (so we ingore participant.isSpeaking)
+                    isSpeaking = participant.isLocal,
+                    isAudioEnabled = audioEnabled,
+                    audioLevel = audioLevel,
+                    modifier = Modifier
+                        .align(CenterVertically)
+                        .padding(
+                            vertical = VideoTheme.dimens.spacingXs,
+                            horizontal = VideoTheme.dimens.spacingS,
+                        )
+                        .testTag("Stream_ParticipantMicrophone_Enabled_$audioEnabled"),
+                ),
+            )
+        }
     },
 ) {
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
@@ -374,14 +378,18 @@ public fun BoxScope.ParticipantLabel(
     isPaused: Boolean = false,
     audioLevel: Float = 0f,
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
-        SoundIndicator(
-            isSpeaking = isSpeaking,
-            isAudioEnabled = hasAudio,
-            audioLevel = audioLevel,
-            modifier = Modifier
-                .align(CenterVertically)
-                .padding(horizontal = VideoTheme.dimens.spacingS),
-        )
+        with(VideoTheme.componentFactory) {
+            ParticipantLabelSoundIndicatorContent(
+                params = ParticipantLabelSoundIndicatorContentParams(
+                    isSpeaking = isSpeaking,
+                    isAudioEnabled = hasAudio,
+                    audioLevel = audioLevel,
+                    modifier = Modifier
+                        .align(CenterVertically)
+                        .padding(horizontal = VideoTheme.dimens.spacingS),
+                ),
+            )
+        }
     },
 ) {
     var componentWidth by remember { mutableStateOf(0.dp) }
