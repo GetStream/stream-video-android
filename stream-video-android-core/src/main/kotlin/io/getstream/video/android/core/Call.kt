@@ -931,6 +931,15 @@ public class Call(
         notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
     }
 
+    /**
+     * Applies a platform noise-suppressor change for this call.
+     *
+     * Internal bridge for [MicrophoneManager.setHardwareNoiseSuppressorEnabled], which is the
+     * public entry point; the media component is not reachable from there.
+     */
+    internal fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean =
+        media.setHardwareNoiseSuppressorEnabled(enabled)
+
     fun toggleAudioProcessing(): Boolean {
         // Reads without building a factory: the gate runs before join, and a factory created
         // there would capture the pre-join audio bitrate profile.

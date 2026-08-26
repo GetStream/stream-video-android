@@ -418,6 +418,71 @@ class MicrophoneManagerTest {
         )
     }
 
+    @Test
+    fun `setHardwareNoiseSuppressorEnabled reports what the platform applied`() {
+        val call = mockk<Call>(relaxed = true)
+        every { call.setHardwareNoiseSuppressorEnabled(false) } returns true
+        val mediaManager = mockMediaManager(call = call)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+
+        assertTrue(microphoneManager.setHardwareNoiseSuppressorEnabled(false))
+        assertFalse(microphoneManager.hardwareNoiseSuppressorEnabled.value)
+    }
+
+    @Test
+    fun `the requested noise suppressor state is reported even when the platform refuses`() {
+        val call = mockk<Call>(relaxed = true)
+        every { call.setHardwareNoiseSuppressorEnabled(any()) } returns false
+        val mediaManager = mockMediaManager(call = call)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+
+        // A device without a platform noise suppressor, or no capture running yet: the request is
+        // remembered and re-applied when capture (re)starts, so it is what we report.
+        assertFalse(microphoneManager.setHardwareNoiseSuppressorEnabled(false))
+        assertFalse(microphoneManager.hardwareNoiseSuppressorEnabled.value)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `the reported noise suppressor state follows the audio bitrate profile`() = runTest {
+        val mediaManager = mockMediaManager(
+            connection = MutableStateFlow(RealtimeConnection.PreJoin),
+            settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = true)),
+        )
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+
+        // On Q and above the audio device module is built with the platform effects on.
+        assertTrue(microphoneManager.hardwareNoiseSuppressorEnabled.value)
+
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        )
+
+        // MUSIC_HIGH_QUALITY builds it with them off, so reporting on would be a lie.
+        assertFalse(microphoneManager.hardwareNoiseSuppressorEnabled.value)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `an explicit noise suppressor choice survives an audio bitrate profile change`() = runTest {
+        val call = mockk<Call>(relaxed = true)
+        every { call.setHardwareNoiseSuppressorEnabled(any()) } returns true
+        val mediaManager = mockMediaManager(
+            connection = MutableStateFlow(RealtimeConnection.PreJoin),
+            settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = true)),
+            call = call,
+        )
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+
+        microphoneManager.setHardwareNoiseSuppressorEnabled(false)
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY,
+        )
+
+        // The profile default for VOICE_HIGH_QUALITY on Q is on, but an explicit choice wins.
+        assertFalse(microphoneManager.hardwareNoiseSuppressorEnabled.value)
+    }
+
     private fun microphoneManagerWithImmediateSetup(
         mediaManager: MediaManagerImpl = mockMediaManager(),
         audioTrack: AudioTrack = mockk(relaxed = true),

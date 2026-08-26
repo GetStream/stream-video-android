@@ -58,6 +58,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.jetpack.Te
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCallAction
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
+import io.getstream.video.android.core.utils.defaultHardwareAudioEffectsEnabled
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CoroutineScope
@@ -608,6 +609,29 @@ class MicrophoneManager(
     /** The current audio bitrate profile */
     val audioBitrateProfile: StateFlow<AudioBitrateProfile> = _audioBitrateProfile
 
+    /**
+     * True once [setHardwareNoiseSuppressorEnabled] has been called, after which the reported
+     * state stops following the audio bitrate profile's default.
+     */
+    private var hardwareNoiseSuppressorOverridden = false
+
+    private val _hardwareNoiseSuppressorEnabled = MutableStateFlow(
+        defaultHardwareAudioEffectsEnabled(_audioBitrateProfile.value),
+    )
+
+    /**
+     * The platform (hardware) noise suppressor state this call has requested.
+     *
+     * Starts at the default the audio device module is built with for the current
+     * [audioBitrateProfile] — on, except under MUSIC_HIGH_QUALITY or below Android Q — and
+     * follows that default until [setHardwareNoiseSuppressorEnabled] is called.
+     *
+     * This is the *requested* state. Whether it reached the platform is the return value of
+     * [setHardwareNoiseSuppressorEnabled]: on devices with no platform noise suppressor the
+     * request is refused and never takes effect.
+     */
+    val hardwareNoiseSuppressorEnabled: StateFlow<Boolean> = _hardwareNoiseSuppressorEnabled
+
     // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     internal fun enable(fromUser: Boolean = true) {
@@ -924,7 +948,42 @@ class MicrophoneManager(
 
         logger.i { "[setAudioBitrateProfile] Setting audio bitrate profile to: $profile" }
         _audioBitrateProfile.value = profile
+        // The profile decides how the audio device module is built, so the reported
+        // noise-suppressor state has to follow it — until a caller overrides it explicitly.
+        if (!hardwareNoiseSuppressorOverridden) {
+            _hardwareNoiseSuppressorEnabled.value = defaultHardwareAudioEffectsEnabled(profile)
+        }
         return Result.success(Unit)
+    }
+
+    /**
+     * Enables or disables the platform (hardware) noise suppressor while the call is running.
+     *
+     * The platform noise suppressor is aggressive on anything that is not speech, so music played
+     * into the microphone can be suppressed almost entirely. Unlike [setAudioBitrateProfile] this
+     * can be called at any time — the effect is attached to the live recording session — and it
+     * changes nothing else about the audio: the software audio processing, the noise-cancellation
+     * processor and the bitrate are all unaffected.
+     *
+     * The request is remembered and re-applied whenever audio capture restarts, so it survives a
+     * reconnect.
+     *
+     * @return true when the running capture session accepted the change. False means nothing
+     * changed: audio is not being captured yet, or this device has no platform noise suppressor
+     * (or ignores requests to change it). [hardwareNoiseSuppressorEnabled] reports the requested
+     * state either way.
+     */
+    fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean {
+        hardwareNoiseSuppressorOverridden = true
+        _hardwareNoiseSuppressorEnabled.value = enabled
+        val applied = mediaManager.call.setHardwareNoiseSuppressorEnabled(enabled)
+        if (!applied) {
+            logger.w {
+                "[setHardwareNoiseSuppressorEnabled] requested $enabled but the platform did " +
+                    "not apply it; it will be retried when capture restarts"
+            }
+        }
+        return applied
     }
 
     fun cleanup() {

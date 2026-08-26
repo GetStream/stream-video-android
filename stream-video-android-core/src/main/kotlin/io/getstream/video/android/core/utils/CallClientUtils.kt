@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.utils
 
+import android.os.Build
 import io.getstream.video.android.core.model.IceServer
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
@@ -193,6 +194,18 @@ internal val iceRestartConstraints = MediaConstraints().apply {
     mandatory.add(MediaConstraints.KeyValuePair("IceRestart", "true"))
     optional.add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"))
 }
+
+/**
+ * Whether the platform (hardware) audio effects are requested when the audio device module is
+ * built for [profile].
+ *
+ * Single source of truth for the builder defaults so the value reported to callers before any
+ * runtime change cannot drift from the value the module was actually built with.
+ */
+@JvmSynthetic
+internal fun defaultHardwareAudioEffectsEnabled(profile: AudioBitrateProfile?): Boolean =
+    profile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
 @JvmSynthetic
 internal fun buildAudioConstraints(

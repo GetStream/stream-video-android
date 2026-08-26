@@ -87,6 +87,13 @@ internal class CallMediaManager(
      */
     private var desiredAudioProcessingEnabled: Boolean = false
 
+    /**
+     * Platform noise-suppressor state this call asked for, or null while the builder default
+     * stands. Kept alongside [desiredAudioProcessingEnabled] and for the same reason: the wanted
+     * state has to outlive the factory so a recreation cannot silently drop it.
+     */
+    private var desiredHardwareNoiseSuppressorEnabled: Boolean? = null
+
     var peerConnectionFactory: StreamPeerConnectionFactory
         get() {
             if (_peerConnectionFactory == null) {
@@ -100,6 +107,9 @@ internal class CallMediaManager(
                     webRtcLoggingLevel = clientImpl.loggingLevel.webRtcLoggingLevel,
                 ).also { factory ->
                     factory.setAudioProcessingEnabled(desiredAudioProcessingEnabled)
+                    desiredHardwareNoiseSuppressorEnabled?.let {
+                        factory.setHardwareNoiseSuppressorEnabled(it)
+                    }
                 }
             }
             return _peerConnectionFactory!!
@@ -348,6 +358,24 @@ internal class CallMediaManager(
         return isAudioProcessingEnabled()
     }
 
+    /**
+     * Records the wanted platform noise-suppressor state and applies it if a factory exists.
+     *
+     * Never builds one: like [setAudioProcessingEnabled], a factory created here would capture the
+     * pre-join audio bitrate profile. A factory built later picks the value up on creation.
+     *
+     * @return true when the running capture session accepted the change.
+     */
+    fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean {
+        desiredHardwareNoiseSuppressorEnabled = enabled
+        return _peerConnectionFactory?.setHardwareNoiseSuppressorEnabled(enabled) ?: false
+    }
+
+    /** Forgets the wanted noise-suppressor state, so nothing is re-applied after the call ends. */
+    fun resetDesiredHardwareNoiseSuppressor() {
+        desiredHardwareNoiseSuppressorEnabled = null
+    }
+
     /** Disables all local capture devices. Used when leaving the call. */
     fun disableLocalCapture() {
         stopScreenSharing()
@@ -359,6 +387,7 @@ internal class CallMediaManager(
         // The wanted state must not outlive the call: a reused Call would otherwise re-apply it
         // to the factory built for the next session.
         resetDesiredAudioProcessing()
+        resetDesiredHardwareNoiseSuppressor()
         mediaManager.cleanup()
     }
 }
