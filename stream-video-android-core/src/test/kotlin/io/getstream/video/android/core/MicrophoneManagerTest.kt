@@ -546,6 +546,25 @@ class MicrophoneManagerTest {
         assertFalse(microphoneManager.softwareAudioProcessingEnabled.value)
     }
 
+    @Test
+    fun `communication audio mode should be on by default`() {
+        val microphoneManager =
+            MicrophoneManager(mockMediaManager(), audioUsage, audioUsageProvider)
+
+        assertTrue(microphoneManager.communicationAudioModeEnabled.value)
+    }
+
+    @Test
+    fun `setCommunicationAudioModeEnabled should report the requested state when refused`() {
+        val microphoneManager =
+            MicrophoneManager(mockMediaManager(), audioUsage, audioUsageProvider)
+
+        // No audio handler: this call does not manage routing, so the mode is left alone.
+        assertFalse(microphoneManager.setCommunicationAudioModeEnabled(false))
+        // Still reported, so the next handler to start picks the choice up.
+        assertFalse(microphoneManager.communicationAudioModeEnabled.value)
+    }
+
     private fun microphoneManagerWithImmediateSetup(
         mediaManager: MediaManagerImpl = mockMediaManager(),
         audioTrack: AudioTrack = mockk(relaxed = true),

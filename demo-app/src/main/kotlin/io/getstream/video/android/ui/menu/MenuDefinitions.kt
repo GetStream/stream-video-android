@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhoneInTalk
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RawOff
 import androidx.compose.material.icons.filled.RawOn
@@ -109,6 +110,8 @@ fun defaultStreamMenu(
     onToggleSoftwareAudioProcessing: (Boolean) -> Unit = {},
     audioMaxBitrateBps: Int? = null,
     onToggleAudioMaxBitrate: () -> Unit = {},
+    isCommunicationAudioModeEnabled: Boolean = true,
+    onToggleCommunicationAudioMode: (Boolean) -> Unit = {},
 ) = buildList<MenuItem> {
     if (noiseCancellationFeatureEnabled) {
         add(
@@ -194,6 +197,8 @@ fun defaultStreamMenu(
                     onToggleSoftwareAudioProcessing,
                     audioMaxBitrateBps,
                     onToggleAudioMaxBitrate,
+                    isCommunicationAudioModeEnabled,
+                    onToggleCommunicationAudioMode,
                 ),
             ),
         )
@@ -383,6 +388,8 @@ fun debugSubmenu(
     onToggleSoftwareAudioProcessing: (Boolean) -> Unit = {},
     audioMaxBitrateBps: Int? = null,
     onToggleAudioMaxBitrate: () -> Unit = {},
+    isCommunicationAudioModeEnabled: Boolean = true,
+    onToggleCommunicationAudioMode: (Boolean) -> Unit = {},
 ) = listOf(
     ActionMenuItem(
         title = when (audioMaxBitrateBps) {
@@ -412,6 +419,16 @@ fun debugSubmenu(
         icon = Icons.Default.Audiotrack,
         highlight = isSoftwareAudioProcessingEnabled,
         action = { onToggleSoftwareAudioProcessing(!isSoftwareAudioProcessingEnabled) },
+    ),
+    ActionMenuItem(
+        title = if (isCommunicationAudioModeEnabled) {
+            "Audio mode: IN_COMMUNICATION"
+        } else {
+            "Audio mode: NORMAL"
+        },
+        icon = Icons.Default.PhoneInTalk,
+        highlight = isCommunicationAudioModeEnabled,
+        action = { onToggleCommunicationAudioMode(!isCommunicationAudioModeEnabled) },
     ),
     DynamicSubMenuItem(
         title = "List Transcriptions",

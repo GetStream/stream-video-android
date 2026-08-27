@@ -9412,6 +9412,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun getAudioMaxBitrateBps ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getAudioUsage ()I
 	public final fun getAudioUsageProvider ()Lkotlin/jvm/functions/Function0;
+	public final fun getCommunicationAudioModeEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getHardwareNoiseSuppressorEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
@@ -9431,6 +9432,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun selectUsbDevice (Lio/getstream/video/android/core/audio/UsbAudioInputDevice;)Z
 	public final fun setAudioBitrateProfile-gIAlu-s (Lstream/video/sfu/models/AudioBitrateProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setAudioMaxBitrate (I)Z
+	public final fun setCommunicationAudioModeEnabled (Z)Z
 	public final fun setEnabled (ZZ)V
 	public static synthetic fun setEnabled$default (Lio/getstream/video/android/core/MicrophoneManager;ZZILjava/lang/Object;)V
 	public final fun setHardwareNoiseSuppressorEnabled (Z)Z

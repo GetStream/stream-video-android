@@ -665,6 +665,19 @@ class MicrophoneManager(
      */
     val audioMaxBitrateBps: StateFlow<Int?> = _audioMaxBitrateBps
 
+    private val _communicationAudioModeEnabled = MutableStateFlow(true)
+
+    /**
+     * Whether the device is being asked to stay in `AudioManager.MODE_IN_COMMUNICATION`, which is
+     * where a call puts it by default, rather than `AudioManager.MODE_NORMAL`.
+     *
+     * A stage of its own, below [hardwareNoiseSuppressorEnabled] and
+     * [softwareAudioProcessingEnabled]: on some devices the audio mode, not the requested capture
+     * source, is what selects the vendor's VoIP capture chain. Follows the default until
+     * [setCommunicationAudioModeEnabled] is called.
+     */
+    val communicationAudioModeEnabled: StateFlow<Boolean> = _communicationAudioModeEnabled
+
     // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     internal fun enable(fromUser: Boolean = true) {
@@ -1081,6 +1094,42 @@ class MicrophoneManager(
         return applied
     }
 
+    /**
+     * Switches the device between `AudioManager.MODE_IN_COMMUNICATION` and
+     * `AudioManager.MODE_NORMAL` while the call is running.
+     *
+     * Where the other controls turn off a processing stage, this one decides which capture chain
+     * the platform builds in the first place. Some vendors — Samsung in particular — key their
+     * VoIP processing off the audio mode rather than the requested capture source, and that
+     * processing sits below the `AudioEffect` API, so it survives
+     * [setHardwareNoiseSuppressorEnabled] and [setSoftwareAudioProcessingEnabled] alike. Leaving
+     * communication mode is the only lever that reaches it.
+     *
+     * **Costs echo cancellation and communication routing.** Bluetooth loses capture altogether:
+     * SCO only runs in communication mode. Prefer the narrower controls first and reach for this
+     * one when the platform is still gating audio after them.
+     *
+     * The request is re-applied on every route change, because the routing layer sets the mode
+     * itself whenever it activates a device.
+     *
+     * @return true when the mode was applied. False means audio routing is not running yet, or
+     * this call does not manage it at all because audio usage is `USAGE_MEDIA`. The request is
+     * still recorded and picked up if routing starts later;
+     * [communicationAudioModeEnabled] reports it either way.
+     */
+    fun setCommunicationAudioModeEnabled(enabled: Boolean): Boolean {
+        _communicationAudioModeEnabled.value = enabled
+        var applied = false
+        ifAudioHandlerInitialized { applied = it.setCommunicationModeEnabled(enabled) }
+        if (!applied) {
+            logger.w {
+                "[setCommunicationAudioModeEnabled] requested $enabled but audio routing is not " +
+                    "managed for this call; the mode was left alone"
+            }
+        }
+        return applied
+    }
+
     fun cleanup() {
         ifAudioHandlerInitialized { it.stop() }
         cleanupUsbDeviceDetection()
@@ -1139,6 +1188,14 @@ class MicrophoneManager(
                         },
                     ),
                 )
+
+                // A mode chosen before routing existed was reported but never applied. Hand it to
+                // the handler that can now hold it, rather than leaving the flow claiming a state
+                // the device is not in. Set before starting so the handler re-applies it over the
+                // communication mode it enters when it activates a device.
+                if (!_communicationAudioModeEnabled.value) {
+                    audioHandler.setCommunicationModeEnabled(false)
+                }
 
                 logger.d { "[setup] Calling start on instance $audioHandler" }
                 audioHandler.start()

@@ -143,6 +143,20 @@ internal fun SettingsMenu(
         }
     }
 
+    val isCommunicationAudioModeEnabled by call.microphone.communicationAudioModeEnabled
+        .collectAsStateWithLifecycle()
+
+    val onToggleCommunicationAudioMode: (Boolean) -> Unit = { enabled ->
+        val applied = call.microphone.setCommunicationAudioModeEnabled(enabled)
+        if (!applied) {
+            Toast.makeText(
+                context,
+                "Audio mode not applied — this call does not manage audio routing",
+                Toast.LENGTH_LONG,
+            ).show()
+        }
+    }
+
     val audioMaxBitrateBps by call.microphone.audioMaxBitrateBps.collectAsStateWithLifecycle()
 
     val onToggleAudioMaxBitrate: () -> Unit = {
@@ -418,6 +432,8 @@ internal fun SettingsMenu(
                 onToggleSoftwareAudioProcessing = onToggleSoftwareAudioProcessing,
                 audioMaxBitrateBps = audioMaxBitrateBps,
                 onToggleAudioMaxBitrate = onToggleAudioMaxBitrate,
+                isCommunicationAudioModeEnabled = isCommunicationAudioModeEnabled,
+                onToggleCommunicationAudioMode = onToggleCommunicationAudioMode,
             ),
         )
     }
