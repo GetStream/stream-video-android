@@ -24,6 +24,9 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.threeten.bp.OffsetDateTime
 import org.webrtc.VideoTrack
 import java.util.UUID
@@ -66,6 +69,13 @@ public val previewCall: Call = Call(
         )
     }
     state.upsertParticipants(participants)
+    // The sorted participants state is filled asynchronously on the call scope. Wait for it so
+    // composables that read call.state.participants never render the transient empty state.
+    runBlocking {
+        withTimeout(5_000) {
+            state.participants.first { it.size == participants.size }
+        }
+    }
 }
 
 /** Mock a new [MediaTrack]. */

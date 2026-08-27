@@ -20,6 +20,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -129,7 +130,7 @@ internal fun PortraitParticipantsPreview7() {
 
 @Composable
 private fun PortraitParticipants(participantCount: Int) {
-    val gridCall = previewGridCall(participantCount)
+    val gridCall = remember(participantCount) { previewGridCall(participantCount) }
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
     val screenHeight = configuration.screenHeightDp

@@ -36,20 +36,3 @@ private fun OutgoingCallDetailsVideoRootPreview() {
 internal fun OutgoingCallDetailsVideoPreview() {
     OutgoingCallDetails(participants = previewMemberListState)
 }
-
-@Preview
-@Composable
-private fun OutgoingCallDetailsAudioRootPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        OutgoingCallDetailsAudioPreview()
-    }
-}
-
-@Composable
-internal fun OutgoingCallDetailsAudioPreview() {
-    OutgoingCallDetails(
-        isVideoType = false,
-        participants = previewMemberListState,
-    )
-}

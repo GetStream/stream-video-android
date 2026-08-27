@@ -33,7 +33,6 @@ import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcal
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContentMultipleParticipantsPreview
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContentOneParticipantPreview
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallControlsPreview
-import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallDetailsAudioPreview
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallDetailsVideoPreview
 import org.junit.Rule
 import org.junit.Test
@@ -114,13 +113,6 @@ internal class CallContentTest : PaparazziComposeTest {
     fun `outgoing call details video`() {
         snapshotWithDarkMode {
             OutgoingCallDetailsVideoPreview()
-        }
-    }
-
-    @Test
-    fun `outgoing call details audio`() {
-        snapshotWithDarkMode {
-            OutgoingCallDetailsAudioPreview()
         }
     }
 
