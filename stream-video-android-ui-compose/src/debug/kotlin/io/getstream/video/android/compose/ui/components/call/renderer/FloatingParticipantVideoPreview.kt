@@ -31,20 +31,24 @@ import io.getstream.video.android.mock.previewParticipant
 
 @Preview
 @Composable
-private fun LocalVideoContentPreview() {
+private fun LocalVideoContentRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        LocalVideoContentPreview()
+    }
+}
+
+@Composable
+internal fun LocalVideoContentPreview() {
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
     val screenHeight = configuration.screenHeightDp
-
-    VideoTheme {
-        Box {
-            FloatingParticipantVideo(
-                call = previewCall,
-                modifier = Modifier.fillMaxSize(),
-                participant = previewParticipant,
-                parentBounds = IntSize(screenWidth, screenHeight),
-            )
-        }
+    Box {
+        FloatingParticipantVideo(
+            call = previewCall,
+            modifier = Modifier.fillMaxSize(),
+            participant = previewParticipant,
+            parentBounds = IntSize(screenWidth, screenHeight),
+        )
     }
 }

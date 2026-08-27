@@ -210,33 +210,48 @@ internal fun BoxScope.ParticipantActionsDialog(
     onDismiss: () -> Unit = {},
     offset: IntOffset,
 ) {
-    val coroutineScope = LocalLifecycleOwner.current.lifecycleScope
     Popup(
         offset = offset,
         onDismissRequest = onDismiss,
     ) {
-        Column(
-            Modifier
-                .background(VideoTheme.colors.baseSheetPrimary, shape = VideoTheme.shapes.dialog)
-                .align(Center)
-                .width(220.dp),
-        ) {
-            actions.forEach {
-                if (it.condition(call, participant)) {
-                    StreamToggleButton(
-                        modifier = Modifier.width(220.dp),
-                        toggleState = rememberUpdatedState(
-                            newValue = ToggleableState(!it.firstToggleAction),
-                        ),
-                        onIcon = it.icon,
-                        onText = it.label,
-                        offText = it.label,
-                        onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(),
-                        offStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOff(),
-                    ) { _ ->
-                        it.action.invoke(coroutineScope, call, participant)
-                        onDismiss()
-                    }
+        ParticipantActionsDialogContent(
+            call = call,
+            participant = participant,
+            actions = actions,
+            onDismiss = onDismiss,
+        )
+    }
+}
+
+@Composable
+internal fun BoxScope.ParticipantActionsDialogContent(
+    call: Call,
+    participant: ParticipantState,
+    actions: List<ParticipantAction>,
+    onDismiss: () -> Unit = {},
+) {
+    val coroutineScope = LocalLifecycleOwner.current.lifecycleScope
+    Column(
+        Modifier
+            .background(VideoTheme.colors.baseSheetPrimary, shape = VideoTheme.shapes.dialog)
+            .align(Center)
+            .width(220.dp),
+    ) {
+        actions.forEach {
+            if (it.condition(call, participant)) {
+                StreamToggleButton(
+                    modifier = Modifier.width(220.dp),
+                    toggleState = rememberUpdatedState(
+                        newValue = ToggleableState(!it.firstToggleAction),
+                    ),
+                    onIcon = it.icon,
+                    onText = it.label,
+                    offText = it.label,
+                    onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(),
+                    offStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOff(),
+                ) { _ ->
+                    it.action.invoke(coroutineScope, call, participant)
+                    onDismiss()
                 }
             }
         }

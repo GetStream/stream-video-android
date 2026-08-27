@@ -31,12 +31,17 @@ import io.getstream.video.android.mock.previewCall
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun AudioRoomPreview() {
+private fun AudioRoomContentRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        AudioRoomContent(
-            modifier = Modifier.fillMaxSize(),
-            call = previewCall,
-        )
+        AudioRoomContentPreview()
     }
+}
+
+@Composable
+internal fun AudioRoomContentPreview() {
+    AudioRoomContent(
+        modifier = Modifier.fillMaxSize(),
+        call = previewCall,
+    )
 }

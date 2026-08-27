@@ -24,15 +24,20 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-public fun ToggleMicrophoneActionPreview() {
+private fun ToggleMicrophoneActionRootPreview() {
     VideoTheme {
-        Column {
-            Row {
-                ToggleMicrophoneAction(isMicrophoneEnabled = false) {
-                }
+        ToggleMicrophoneActionPreview()
+    }
+}
 
-                ToggleMicrophoneAction(isMicrophoneEnabled = true) {
-                }
+@Composable
+internal fun ToggleMicrophoneActionPreview() {
+    Column {
+        Row {
+            ToggleMicrophoneAction(isMicrophoneEnabled = false) {
+            }
+
+            ToggleMicrophoneAction(isMicrophoneEnabled = true) {
             }
         }
     }
