@@ -17,8 +17,8 @@
 package io.getstream.video.android.compose.pip
 
 import android.app.Activity
-import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Build
 import android.util.Rational
 import io.getstream.video.android.core.Call
@@ -66,7 +66,7 @@ public class PictureInPictureTest {
     // enterPictureInPicture Test
     @Test
     @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
-    public fun `should enter pip mode with correct params`() {
+    public fun `should enter pip mode when O and above`() {
         val screenSharing = mockk<ScreenSharingSession>(relaxed = true)
         every { call.state.screenSharingSession.value } returns screenSharing
 
@@ -104,8 +104,8 @@ public class PictureInPictureTest {
         val screenSharing = mockk<ScreenSharingSession>()
         every { screenSharing.participant } returns localParticipant
 
-        val aspect1 = getAspect(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, null)
-        val aspect2 = getAspect(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, screenSharing)
+        val aspect1 = getAspect(Configuration.ORIENTATION_PORTRAIT, null)
+        val aspect2 = getAspect(Configuration.ORIENTATION_PORTRAIT, screenSharing)
 
         assertEquals(Rational(9, 16), aspect1)
         assertEquals(Rational(9, 16), aspect2)
@@ -113,7 +113,7 @@ public class PictureInPictureTest {
 
     @Test
     public fun `should return 16x9 when landscape`() {
-        val aspect = getAspect(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, null)
+        val aspect = getAspect(Configuration.ORIENTATION_LANDSCAPE, null)
         assertEquals(Rational(16, 9), aspect)
     }
 
@@ -125,7 +125,7 @@ public class PictureInPictureTest {
         val screenSharing = mockk<ScreenSharingSession>()
         every { screenSharing.participant } returns remoteParticipant
 
-        val aspect = getAspect(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, screenSharing)
+        val aspect = getAspect(Configuration.ORIENTATION_PORTRAIT, screenSharing)
         assertEquals(Rational(16, 9), aspect)
     }
 
@@ -133,35 +133,43 @@ public class PictureInPictureTest {
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.S]) // Android 12
-    public fun `should set aspect ratio and auto-enter when SDK S`() {
+    public fun `should enable auto-enter by default when SDK S`() {
         val builder = getPictureInPictureParams(Rational(16, 9), pipConfig)
         val params = builder.build()
 
-        // The PictureInPictureParams getters are only public from API 33,
-        // so the params values can only be asserted in the TIRAMISU tests.
-        assertNotNull(params)
-    }
-
-    @Test
-    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
-    public fun `should set title and seamless resize for TIRAMISU`() {
-        val builder = getPictureInPictureParams(Rational(9, 16), pipConfig)
-        val params = builder.build()
-
-        assertEquals(Rational(9, 16), params.aspectRatio)
-        assertEquals("Video Player", params.title.toString())
-        assertTrue(params.isSeamlessResizeEnabled)
+        // getAspectRatio() returns float until API 32 and Rational from 33, so calling it
+        // against the current SDK stubs throws NoSuchMethodError on the S runtime.
+        // Only the boolean getters can be asserted here.
         assertTrue(params.isAutoEnterEnabled)
     }
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
-    public fun `should disable auto-enter when configuration disables it for TIRAMISU`() {
-        val config = PictureInPictureConfiguration(enable = true, autoEnterEnabled = false)
+    public fun `should set aspect ratio and title for TIRAMISU`() {
+        val builder = getPictureInPictureParams(Rational(9, 16), pipConfig)
+        val params = builder.build()
 
-        val params = getPictureInPictureParams(Rational(9, 16), config).build()
+        assertEquals(Rational(9, 16), params.aspectRatio)
+        assertEquals("Video Player", params.title.toString())
+        // isSeamlessResizeEnabled() defaults to true when never set, so this only guards
+        // a regression to setSeamlessResizeEnabled(false); set-true is not observable.
+        assertTrue(params.isSeamlessResizeEnabled)
+    }
 
-        assertFalse(params.isAutoEnterEnabled)
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    public fun `should follow the configured auto-enter for TIRAMISU`() {
+        val enabled = getPictureInPictureParams(
+            Rational(9, 16),
+            PictureInPictureConfiguration(enable = true, autoEnterEnabled = true),
+        ).build()
+        val disabled = getPictureInPictureParams(
+            Rational(9, 16),
+            PictureInPictureConfiguration(enable = true, autoEnterEnabled = false),
+        ).build()
+
+        assertTrue(enabled.isAutoEnterEnabled)
+        assertFalse(disabled.isAutoEnterEnabled)
     }
 
     @Test
