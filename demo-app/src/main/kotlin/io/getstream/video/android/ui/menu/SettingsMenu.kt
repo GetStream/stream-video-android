@@ -114,6 +114,35 @@ internal fun SettingsMenu(
         call.speaker.setAudioUsage(newAudioUsage)
     }
 
+    val isHardwareNoiseSuppressorEnabled by call.microphone.hardwareNoiseSuppressorEnabled
+        .collectAsStateWithLifecycle()
+    val isSoftwareAudioProcessingEnabled by call.microphone.softwareAudioProcessingEnabled
+        .collectAsStateWithLifecycle()
+
+    val onToggleHardwareNoiseSuppressor: (Boolean) -> Unit = { enabled ->
+        val applied = call.microphone.setHardwareNoiseSuppressorEnabled(enabled)
+        // The platform refuses on devices without the effect, and before capture starts. Surface
+        // it — otherwise a toggle that did nothing looks identical to one that worked.
+        if (!applied) {
+            Toast.makeText(
+                context,
+                "Noise suppressor not applied — no active capture, or unsupported on this device",
+                Toast.LENGTH_LONG,
+            ).show()
+        }
+    }
+
+    val onToggleSoftwareAudioProcessing: (Boolean) -> Unit = { enabled ->
+        val applied = call.microphone.setSoftwareAudioProcessingEnabled(enabled)
+        if (!applied) {
+            Toast.makeText(
+                context,
+                "Software audio processing not applied — the audio pipeline was not rebuilt",
+                Toast.LENGTH_LONG,
+            ).show()
+        }
+    }
+
     val onToggleAudioFilterClick: () -> Unit = {
         if (call.audioFilter == null) {
             call.audioFilter = object : InputAudioFilter {
@@ -360,6 +389,10 @@ internal fun SettingsMenu(
                 onToggleAudioUsage = onToggleAudioUsage,
                 selectedRecordingTypes = enabledRecordingTypes,
                 onSelectRecordingType = onSelectRecordingType,
+                isHardwareNoiseSuppressorEnabled = isHardwareNoiseSuppressorEnabled,
+                onToggleHardwareNoiseSuppressor = onToggleHardwareNoiseSuppressor,
+                isSoftwareAudioProcessingEnabled = isSoftwareAudioProcessingEnabled,
+                onToggleSoftwareAudioProcessing = onToggleSoftwareAudioProcessing,
             ),
         )
     }

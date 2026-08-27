@@ -96,6 +96,10 @@ fun defaultStreamMenu(
     onToggleAudioUsage: () -> Unit = {},
     selectedRecordingTypes: Set<RecordingType> = emptySet(),
     onSelectRecordingType: (RecordingType) -> Unit = {},
+    isHardwareNoiseSuppressorEnabled: Boolean = false,
+    onToggleHardwareNoiseSuppressor: (Boolean) -> Unit = {},
+    isSoftwareAudioProcessingEnabled: Boolean = false,
+    onToggleSoftwareAudioProcessing: (Boolean) -> Unit = {},
 ) = buildList<MenuItem> {
     if (noiseCancellationFeatureEnabled) {
         add(
@@ -175,6 +179,10 @@ fun defaultStreamMenu(
                     onToggleAudioUsage,
                     selectedRecordingTypes,
                     onSelectRecordingType,
+                    isHardwareNoiseSuppressorEnabled,
+                    onToggleHardwareNoiseSuppressor,
+                    isSoftwareAudioProcessingEnabled,
+                    onToggleSoftwareAudioProcessing,
                 ),
             ),
         )
@@ -358,7 +366,31 @@ fun debugSubmenu(
     onToggleAudioUsage: () -> Unit,
     selectedRecordingTypes: Set<RecordingType>,
     onSelectRecordingType: (RecordingType) -> Unit,
+    isHardwareNoiseSuppressorEnabled: Boolean = false,
+    onToggleHardwareNoiseSuppressor: (Boolean) -> Unit = {},
+    isSoftwareAudioProcessingEnabled: Boolean = false,
+    onToggleSoftwareAudioProcessing: (Boolean) -> Unit = {},
 ) = listOf(
+    ActionMenuItem(
+        title = if (isHardwareNoiseSuppressorEnabled) {
+            "Hardware noise suppressor: ON"
+        } else {
+            "Hardware noise suppressor: OFF"
+        },
+        icon = Icons.Default.SpatialAudioOff,
+        highlight = isHardwareNoiseSuppressorEnabled,
+        action = { onToggleHardwareNoiseSuppressor(!isHardwareNoiseSuppressorEnabled) },
+    ),
+    ActionMenuItem(
+        title = if (isSoftwareAudioProcessingEnabled) {
+            "Software audio processing: ON"
+        } else {
+            "Software audio processing: OFF"
+        },
+        icon = Icons.Default.Audiotrack,
+        highlight = isSoftwareAudioProcessingEnabled,
+        action = { onToggleSoftwareAudioProcessing(!isSoftwareAudioProcessingEnabled) },
+    ),
     DynamicSubMenuItem(
         title = "List Transcriptions",
         icon = Icons.AutoMirrored.Filled.ReceiptLong,
