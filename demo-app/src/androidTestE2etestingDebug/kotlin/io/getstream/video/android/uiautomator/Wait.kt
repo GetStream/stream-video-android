@@ -114,6 +114,27 @@ public fun BySelector.waitToAppearAndClick(withIndex: Int, timeOutMillis: Long =
     }
 }
 
+/**
+ * Waits up to [timeOutMillis] for an object matching this selector to be displayed and reports
+ * the outcome. Stale reads during the lookup are absorbed and retried until the timeout;
+ * [StaleObjectException] never escapes.
+ *
+ * @param timeOutMillis Maximum time to keep polling before reporting `false`.
+ */
+public fun BySelector.waitDisplayed(timeOutMillis: Long = defaultTimeout): Boolean {
+    val endTime = System.currentTimeMillis() + timeOutMillis
+    while (System.currentTimeMillis() < endTime) {
+        try {
+            if (device.findObject(this)?.isDisplayed() == true) {
+                return true
+            }
+        } catch (_: StaleObjectException) {
+        }
+        Thread.sleep(POLL_INTERVAL_MILLIS)
+    }
+    return false
+}
+
 public fun BySelector.wait(timeOutMillis: Long = defaultTimeout): BySelector {
     device.wait(Until.hasObject(this), timeOutMillis)
     return this

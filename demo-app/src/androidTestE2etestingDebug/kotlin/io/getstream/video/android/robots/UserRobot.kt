@@ -34,7 +34,7 @@ import io.getstream.video.android.uiautomator.findObjects
 import io.getstream.video.android.uiautomator.isDisplayed
 import io.getstream.video.android.uiautomator.seconds
 import io.getstream.video.android.uiautomator.typeText
-import io.getstream.video.android.uiautomator.waitForText
+import io.getstream.video.android.uiautomator.waitDisplayed
 import io.getstream.video.android.uiautomator.waitToAppear
 import io.getstream.video.android.uiautomator.waitToAppearAndClick
 
@@ -256,14 +256,13 @@ class UserRobot {
 
     fun closedCaption(action: UserControls): UserRobot {
         settings(UserControls.ENABLE)
-        sleep()
 
         val locator = when (action) {
             UserControls.ENABLE -> SettingsMenu.startClosedCaptionButton
             UserControls.DISABLE -> SettingsMenu.stopClosedCaptionButton
         }
 
-        if (locator.isDisplayed()) {
+        if (locator.waitDisplayed()) {
             locator.waitToAppearAndClick()
         }
 
@@ -279,7 +278,7 @@ class UserRobot {
             UserControls.DISABLE -> SettingsMenu.stopTranscriptionButton
         }
 
-        if (locator.isDisplayed()) {
+        if (locator.waitDisplayed()) {
             locator.waitToAppearAndClick()
         }
 
@@ -294,7 +293,7 @@ class UserRobot {
 
     fun raiseHand(): UserRobot {
         settings(UserControls.ENABLE)
-        if (SettingsMenu.raiseHandButton.isDisplayed()) {
+        if (SettingsMenu.raiseHandButton.waitDisplayed()) {
             SettingsMenu.raiseHandButton.waitToAppearAndClick()
         } else {
             settings(UserControls.DISABLE)
@@ -304,7 +303,7 @@ class UserRobot {
 
     fun lowerHand(): UserRobot {
         settings(UserControls.ENABLE)
-        if (SettingsMenu.lowerHandButton.isDisplayed()) {
+        if (SettingsMenu.lowerHandButton.waitDisplayed()) {
             SettingsMenu.lowerHandButton.waitToAppearAndClick()
         } else {
             settings(UserControls.DISABLE)
@@ -326,7 +325,7 @@ class UserRobot {
             Background.IMAGE -> SettingsMenu.imageBackgroundDisabledToggle
             Background.BLUR -> SettingsMenu.blurBackgroundDisabledToggle
         }
-        if (locator.isDisplayed()) {
+        if (locator.waitDisplayed()) {
             locator.waitToAppearAndClick()
         } else {
             settings(UserControls.DISABLE)
@@ -367,13 +366,9 @@ class UserRobot {
     }
 
     fun waitForParticipantsOnCall(count: Int = 1, timeOutMillis: Long = 100.seconds): UserRobot {
-        val user = 1
-        val participants = user + count
-        CallPage.participantsCountBadge.waitForText(
-            expectedText = participants.toString(),
-            timeOutMillis = timeOutMillis,
-        )
-        return this
+        // Same badge and expected value; the assert makes a timeout fail here with a clear
+        // message instead of letting a later assertion fail further from the cause.
+        return assertParticipantsCountOnCall(count, timeOutMillis)
     }
 
     private fun waitForCallToStart(): UserRobot {
