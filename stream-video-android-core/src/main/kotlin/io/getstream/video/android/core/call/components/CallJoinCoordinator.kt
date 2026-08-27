@@ -328,6 +328,10 @@ internal class CallJoinCoordinator(
             apiClient.ring(RingCallRequest(isVideoEnabled(), members)).map {
                 logger.d { "[joinAndRing] Ringed #ringing; #track; ring: $members" }
                 callRegistry.markRinging()
+                // An event that arrived before the ring completed (e.g. call.session_started)
+                // computed the ringing state without the ringing call registered. Recompute so
+                // the state cannot stay Idle when no further coordinator event arrives.
+                state.updateRingingState()
                 rtcSession
             }.onError {
                 logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }

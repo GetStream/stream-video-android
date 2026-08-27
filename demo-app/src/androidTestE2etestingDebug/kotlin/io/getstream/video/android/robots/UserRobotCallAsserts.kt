@@ -29,6 +29,7 @@ import io.getstream.video.android.uiautomator.findObjects
 import io.getstream.video.android.uiautomator.isDisplayed
 import io.getstream.video.android.uiautomator.retryOnStaleObjectException
 import io.getstream.video.android.uiautomator.seconds
+import io.getstream.video.android.uiautomator.waitDisplayed
 import io.getstream.video.android.uiautomator.waitForCount
 import io.getstream.video.android.uiautomator.waitForText
 import io.getstream.video.android.uiautomator.waitToAppear
@@ -271,14 +272,17 @@ fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean
             "Decline call button",
             RingPage.declineCallButton.waitToAppear(timeOutMillis = 30.seconds).isDisplayed(),
         )
-        assertTrue("Call label", RingPage.outgoingCallLabel.isDisplayed())
-        assertTrue("Avatar", RingPage.callParticipantAvatar.isDisplayed())
-        assertTrue("Microphone", RingPage.microphoneEnabledToggle.isDisplayed())
-        assertEquals(
-            "Camera should be displayed: ${!audioOnly}",
-            !audioOnly,
-            RingPage.cameraEnabledToggle.isDisplayed(),
-        )
+        // The control toggles reflect async call state (the microphone can still show the
+        // muted state right after the screen renders), so poll instead of instant asserts.
+        assertTrue("Call label", RingPage.outgoingCallLabel.waitDisplayed())
+        assertTrue("Avatar", RingPage.callParticipantAvatar.waitDisplayed())
+        assertTrue("Microphone", RingPage.microphoneEnabledToggle.waitDisplayed())
+        if (audioOnly) {
+            assertFalse("Camera enabled toggle", RingPage.cameraEnabledToggle.isDisplayed())
+            assertFalse("Camera disabled toggle", RingPage.cameraDisabledToggle.isDisplayed())
+        } else {
+            assertTrue("Camera", RingPage.cameraEnabledToggle.waitDisplayed())
+        }
     } else {
         assertFalse(
             "Decline call button",

@@ -1430,6 +1430,11 @@ public class CallState(
         } else {
             if (_ringingState.value is RingingState.Incoming && !acceptedOnThisDevice) {
                 RingingState.TimeoutNoAnswer
+            } else if (isJoinAndRingInProgress.get() && _ringingState.value is RingingState.Outgoing) {
+                // During join-and-ring the SFU join sets Outgoing before the ring request has
+                // registered this call in client.state.ringingCall, so hasRingingCall is still
+                // false here. Falling back to Idle would hide the outgoing ringing UI.
+                _ringingState.value
             } else {
                 RingingState.Idle
             }
