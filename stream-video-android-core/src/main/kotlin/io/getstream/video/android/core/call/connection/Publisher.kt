@@ -343,6 +343,32 @@ internal class Publisher(
         }
     }
 
+    /**
+     * Swaps the track on the live audio sender, without renegotiating.
+     *
+     * Passes `takeOwnership = false` deliberately. [MediaManagerImpl] owns the audio track and is
+     * what disposes it, so the sender must not dispose it too: [RtpSender.setTrack] disposes the
+     * track it currently holds only when it owns it, and leaving ownership with the media manager
+     * keeps disposal in exactly one place. The replaced track therefore stays valid until the
+     * caller disposes it.
+     *
+     * @return true when a live audio sender was found and accepted the track.
+     */
+    internal fun replaceAudioTrack(newTrack: MediaStreamTrack): Boolean {
+        val senders = safeCallWithDefault(emptyList()) {
+            transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO).mapNotNull { it.sender }
+        }
+        if (senders.isEmpty()) {
+            logger.d { "[replaceAudioTrack] no audio sender to replace the track on" }
+            return false
+        }
+        return senders.any { sender ->
+            safeCallWithDefault(false) { sender.setTrack(newTrack, false) }.also { replaced ->
+                logger.d { "[replaceAudioTrack] replaced: $replaced, track: ${newTrack.id()}" }
+            }
+        }
+    }
+
     @VisibleForTesting
     public fun newTrackFromSource(trackType: TrackType): MediaStreamTrack {
         return when (trackType) {

@@ -9415,6 +9415,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSelectedUsbDevice ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getSoftwareAudioProcessingEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUsbInputDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isEnabled ()Lkotlinx/coroutines/flow/StateFlow;
@@ -9430,6 +9431,7 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun setEnabled (ZZ)V
 	public static synthetic fun setEnabled$default (Lio/getstream/video/android/core/MicrophoneManager;ZZILjava/lang/Object;)V
 	public final fun setHardwareNoiseSuppressorEnabled (Z)Z
+	public final fun setSoftwareAudioProcessingEnabled (Z)Z
 	public final fun setupUsbDeviceDetection ()V
 }
 

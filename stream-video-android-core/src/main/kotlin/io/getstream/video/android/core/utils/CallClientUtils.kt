@@ -207,14 +207,34 @@ internal fun defaultHardwareAudioEffectsEnabled(profile: AudioBitrateProfile?): 
     profile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY &&
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
+/**
+ * Whether WebRTC's own software audio processing is requested for a source built under [profile].
+ *
+ * Companion to [defaultHardwareAudioEffectsEnabled] for the software layer, which is a separate
+ * stage: the platform effects run in the audio device module, these run in WebRTC's audio
+ * processing module and are fixed for the lifetime of the audio source they are passed to.
+ */
+@JvmSynthetic
+internal fun defaultSoftwareAudioProcessingEnabled(profile: AudioBitrateProfile?): Boolean =
+    profile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+
 @JvmSynthetic
 internal fun buildAudioConstraints(
     audioBitrateProfileProvider: (() -> AudioBitrateProfile)? = null,
-): MediaConstraints {
+): MediaConstraints = buildAudioConstraints(
+    defaultSoftwareAudioProcessingEnabled(audioBitrateProfileProvider?.invoke()),
+)
+
+/**
+ * Builds the audio-source constraints with WebRTC's software audio processing explicitly on or off.
+ *
+ * These are fixed when the [org.webrtc.AudioSource] is created, so changing them means building a
+ * new source and swapping the published track.
+ */
+@JvmSynthetic
+internal fun buildAudioConstraints(softwareAudioProcessingEnabled: Boolean): MediaConstraints {
     val mediaConstraints = MediaConstraints()
-    val isMusicHighQuality = audioBitrateProfileProvider?.invoke() ==
-        AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
-    val constraintValue = if (isMusicHighQuality) false else true
+    val constraintValue = softwareAudioProcessingEnabled
 
     val items = listOf(
         MediaConstraints.KeyValuePair(

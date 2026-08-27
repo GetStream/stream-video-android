@@ -940,6 +940,16 @@ public class Call(
     internal fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean =
         media.setHardwareNoiseSuppressorEnabled(enabled)
 
+    /**
+     * Rebuilds the audio source and track so audio-source constraints take effect mid-call.
+     *
+     * Internal bridge for [MicrophoneManager.setSoftwareAudioProcessingEnabled]. Before a session
+     * exists the source is built lazily from the current constraints anyway, so there is nothing
+     * to rebuild and the change already holds.
+     */
+    internal fun rebuildAudioCapturePipeline(): Boolean =
+        session.value?.rebuildAudioCapturePipeline() ?: true
+
     fun toggleAudioProcessing(): Boolean {
         // Reads without building a factory: the gate runs before join, and a factory created
         // there would capture the pre-join audio bitrate profile.

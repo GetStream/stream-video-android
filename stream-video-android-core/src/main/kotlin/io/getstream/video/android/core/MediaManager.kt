@@ -59,6 +59,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.jetpack.Te
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.defaultHardwareAudioEffectsEnabled
+import io.getstream.video.android.core.utils.defaultSoftwareAudioProcessingEnabled
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.CoroutineScope
@@ -632,6 +633,30 @@ class MicrophoneManager(
      */
     val hardwareNoiseSuppressorEnabled: StateFlow<Boolean> = _hardwareNoiseSuppressorEnabled
 
+    /**
+     * True once [setSoftwareAudioProcessingEnabled] has been called, after which the reported
+     * state stops following the audio bitrate profile's default.
+     */
+    private var softwareAudioProcessingOverridden = false
+
+    private val _softwareAudioProcessingEnabled = MutableStateFlow(
+        defaultSoftwareAudioProcessingEnabled(_audioBitrateProfile.value),
+    )
+
+    /**
+     * Whether WebRTC's own software audio processing — echo cancellation, noise suppression,
+     * automatic gain control and the high-pass filter — is applied to captured audio.
+     *
+     * A separate stage from [hardwareNoiseSuppressorEnabled]: those effects run in the audio
+     * device module, these run in WebRTC's audio processing module. Follows the
+     * [audioBitrateProfile] default until [setSoftwareAudioProcessingEnabled] is called.
+     */
+    val softwareAudioProcessingEnabled: StateFlow<Boolean> = _softwareAudioProcessingEnabled
+
+    /** The value audio sources are built with; see [softwareAudioProcessingEnabled]. */
+    internal val effectiveSoftwareAudioProcessingEnabled: Boolean
+        get() = _softwareAudioProcessingEnabled.value
+
     // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     internal fun enable(fromUser: Boolean = true) {
@@ -953,7 +978,42 @@ class MicrophoneManager(
         if (!hardwareNoiseSuppressorOverridden) {
             _hardwareNoiseSuppressorEnabled.value = defaultHardwareAudioEffectsEnabled(profile)
         }
+        if (!softwareAudioProcessingOverridden) {
+            _softwareAudioProcessingEnabled.value = defaultSoftwareAudioProcessingEnabled(profile)
+        }
         return Result.success(Unit)
+    }
+
+    /**
+     * Enables or disables WebRTC's software audio processing while the call is running.
+     *
+     * Echo cancellation, noise suppression, automatic gain control and the high-pass filter are
+     * all tuned for speech; automatic gain control in particular audibly pumps sustained music.
+     * Unlike [setAudioBitrateProfile] this can be called at any time.
+     *
+     * These constraints are fixed when the audio source is created, so applying a change means
+     * building a new source and track and swapping them onto the live sender. **Expect a brief
+     * gap in captured audio.** Nothing else changes: the platform effects, the noise-cancellation
+     * processor and the bitrate are untouched.
+     *
+     * @return true when the change was applied. False means the audio pipeline could not be
+     * rebuilt — the previous source stays live and [softwareAudioProcessingEnabled] keeps
+     * reporting the requested value, which the next source picks up.
+     */
+    fun setSoftwareAudioProcessingEnabled(enabled: Boolean): Boolean {
+        softwareAudioProcessingOverridden = true
+        if (_softwareAudioProcessingEnabled.value == enabled) {
+            return true
+        }
+        _softwareAudioProcessingEnabled.value = enabled
+        val applied = mediaManager.call.rebuildAudioCapturePipeline()
+        if (!applied) {
+            logger.w {
+                "[setSoftwareAudioProcessingEnabled] requested $enabled but the audio pipeline " +
+                    "was not rebuilt; the next source built will use it"
+            }
+        }
+        return applied
     }
 
     /**
@@ -1678,10 +1738,54 @@ class MediaManagerImpl(
         get() = synchronized(mediaLock) {
             if (_audioSource == null) {
                 _audioSource = call.peerConnectionFactory.makeAudioSource(
-                    buildAudioConstraints { microphone.audioBitrateProfile.value },
+                    buildAudioConstraints(microphone.effectiveSoftwareAudioProcessingEnabled),
                 )
             }
             _audioSource!!
+        }
+
+    /**
+     * Rebuilds the audio source and track with the current audio constraints and hands the new
+     * track to [swap] so a live sender can be moved onto it.
+     *
+     * The constraints are fixed when a source is created, so this is the only way to change them
+     * without rejoining. Runs under [mediaLock] so a racing getter cannot observe a half-swapped
+     * pair, and rolls the new pair back if [swap] reports nothing was replaced — the live source
+     * is never torn down for a swap that did not happen.
+     *
+     * The replaced track and source are disposed here and nowhere else: the sender is handed the
+     * new track with ownership left behind, so disposal stays in one place.
+     *
+     * @param swap moves the published track over; true when it did, or when there is nothing
+     * published yet and the new pair should simply become current.
+     */
+    internal fun replaceAudioSourceAndTrack(swap: (AudioTrack) -> Boolean): Boolean =
+        synchronized(mediaLock) {
+            if (released) return false
+            val previousTrack = _audioTrack
+            val previousSource = _audioSource
+            val newSource = call.peerConnectionFactory.makeAudioSource(
+                buildAudioConstraints(microphone.effectiveSoftwareAudioProcessingEnabled),
+            )
+            val newTrack = call.peerConnectionFactory.makeAudioTrack(
+                source = newSource,
+                trackId = UUID.randomUUID().toString(),
+            )
+            // A fresh track starts enabled; a muted microphone must stay muted across the swap.
+            newTrack.trySetEnabled(microphone.isEnabled.value)
+            // A fresh track starts enabled; a muted microphone must stay muted across the swap.
+
+            if (!swap(newTrack)) {
+                newTrack.dispose()
+                newSource.dispose()
+                return false
+            }
+
+            _audioSource = newSource
+            _audioTrack = newTrack
+            previousTrack?.dispose()
+            previousSource?.dispose()
+            true
         }
 
     // for track ids we emulate the browser behaviour of random UUIDs, doing something different would be confusing

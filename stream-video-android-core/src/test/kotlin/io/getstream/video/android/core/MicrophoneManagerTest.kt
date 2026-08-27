@@ -483,6 +483,69 @@ class MicrophoneManagerTest {
         assertFalse(microphoneManager.hardwareNoiseSuppressorEnabled.value)
     }
 
+    @Test
+    fun `setSoftwareAudioProcessingEnabled rebuilds the capture pipeline`() {
+        val call = mockk<Call>(relaxed = true)
+        every { call.rebuildAudioCapturePipeline() } returns true
+        val mediaManager = mockMediaManager(call = call)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+
+        assertTrue(microphoneManager.setSoftwareAudioProcessingEnabled(false))
+        assertFalse(microphoneManager.softwareAudioProcessingEnabled.value)
+        verify { call.rebuildAudioCapturePipeline() }
+    }
+
+    @Test
+    fun `setSoftwareAudioProcessingEnabled does not rebuild when nothing changes`() {
+        val call = mockk<Call>(relaxed = true)
+        val mediaManager = mockMediaManager(call = call)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+
+        // Already on for the default profile — rebuilding would drop audio for no reason.
+        assertTrue(microphoneManager.setSoftwareAudioProcessingEnabled(true))
+
+        verify(exactly = 0) { call.rebuildAudioCapturePipeline() }
+    }
+
+    @Test
+    fun `the reported software audio processing state follows the audio bitrate profile`() =
+        runTest {
+            val mediaManager = mockMediaManager(
+                connection = MutableStateFlow(RealtimeConnection.PreJoin),
+                settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = true)),
+            )
+            val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+
+            assertTrue(microphoneManager.softwareAudioProcessingEnabled.value)
+
+            microphoneManager.setAudioBitrateProfile(
+                AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            )
+
+            // MUSIC_HIGH_QUALITY builds sources with the goog* constraints off.
+            assertFalse(microphoneManager.softwareAudioProcessingEnabled.value)
+        }
+
+    @Test
+    fun `an explicit software audio processing choice survives a profile change`() = runTest {
+        val call = mockk<Call>(relaxed = true)
+        every { call.rebuildAudioCapturePipeline() } returns true
+        val mediaManager = mockMediaManager(
+            connection = MutableStateFlow(RealtimeConnection.PreJoin),
+            settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = true)),
+            call = call,
+        )
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+
+        microphoneManager.setSoftwareAudioProcessingEnabled(false)
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY,
+        )
+
+        // VOICE_HIGH_QUALITY would default the constraints back on; an explicit choice wins.
+        assertFalse(microphoneManager.softwareAudioProcessingEnabled.value)
+    }
+
     private fun microphoneManagerWithImmediateSetup(
         mediaManager: MediaManagerImpl = mockMediaManager(),
         audioTrack: AudioTrack = mockk(relaxed = true),
