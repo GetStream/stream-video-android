@@ -113,6 +113,20 @@ internal class RingingStateJoinAndRingTest : TestBase() {
     }
 
     @Test
+    fun `a recompute before the SFU join sets Outgoing still yields Idle`() {
+        val callState = CallState(client, call, user, scope)
+        callState.updateFromResponse(call.toResponse(user.toResponse()))
+        callState.toggleJoinAndRingProgress(true)
+        activeCall.value = call
+
+        // Join-and-ring is in progress but nothing set Outgoing yet, so the guard must not
+        // apply and the state stays Idle (the UI legitimately shows the loading screen).
+        callState.updateRingingState()
+
+        assertTrue(callState.ringingState.value is RingingState.Idle)
+    }
+
+    @Test
     fun `an event arriving before the ring request completes keeps the Outgoing state`() {
         val callState = callStateInJoinAndRingWindow()
 

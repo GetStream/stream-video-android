@@ -347,10 +347,8 @@ internal class CallJoinCoordinator(
     }
 
     fun isPermanentError(error: Any): Boolean {
-        if (error is Error.ThrowableError) {
-            if (error.message.contains("Unable to resolve host")) {
-                return false
-            }
+        if (error is Error.ThrowableError && error.message.contains("Unable to resolve host")) {
+            return false
         }
         return true
     }
@@ -501,17 +499,17 @@ internal class CallJoinCoordinator(
                     }
                 }
 
-                if (sfuConnectionResult.cause != SfuConnectFailureCause.TerminalSocketFailure) {
-                    if (!didReconnectSucceed()) {
-                        logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
-                        sendJoinErrorAnalytics(sfuConnectionResult)
-                        discardFailedSession(localSession)
-                        return Failure(
-                            Error.GenericError(
-                                sfuConnectionResult.error.message ?: "SFU connection failed",
-                            ),
-                        )
-                    }
+                if (sfuConnectionResult.cause != SfuConnectFailureCause.TerminalSocketFailure &&
+                    !didReconnectSucceed()
+                ) {
+                    logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
+                    sendJoinErrorAnalytics(sfuConnectionResult)
+                    discardFailedSession(localSession)
+                    return Failure(
+                        Error.GenericError(
+                            sfuConnectionResult.error.message ?: "SFU connection failed",
+                        ),
+                    )
                 }
             }
         }
