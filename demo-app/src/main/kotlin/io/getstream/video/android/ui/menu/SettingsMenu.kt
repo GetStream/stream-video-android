@@ -143,6 +143,29 @@ internal fun SettingsMenu(
         }
     }
 
+    val audioMaxBitrateBps by call.microphone.audioMaxBitrateBps.collectAsStateWithLifecycle()
+
+    val onToggleAudioMaxBitrate: () -> Unit = {
+        // Flip between the SFU's rough voice and music values. Anything but the music value —
+        // including the untouched default — steps up, so the first tap always raises it.
+        val next = if (audioMaxBitrateBps == MUSIC_AUDIO_BITRATE_BPS) {
+            VOICE_AUDIO_BITRATE_BPS
+        } else {
+            MUSIC_AUDIO_BITRATE_BPS
+        }
+        val applied = call.microphone.setAudioMaxBitrate(next)
+        Toast.makeText(
+            context,
+            if (applied) {
+                "Audio bitrate set to ${next / 1000}k (applied: " +
+                    "${call.microphone.appliedAudioMaxBitrate()?.div(1000)}k)"
+            } else {
+                "Audio bitrate ${next / 1000}k not applied — nothing is publishing audio"
+            },
+            Toast.LENGTH_LONG,
+        ).show()
+    }
+
     val onToggleAudioFilterClick: () -> Unit = {
         if (call.audioFilter == null) {
             call.audioFilter = object : InputAudioFilter {
@@ -393,6 +416,8 @@ internal fun SettingsMenu(
                 onToggleHardwareNoiseSuppressor = onToggleHardwareNoiseSuppressor,
                 isSoftwareAudioProcessingEnabled = isSoftwareAudioProcessingEnabled,
                 onToggleSoftwareAudioProcessing = onToggleSoftwareAudioProcessing,
+                audioMaxBitrateBps = audioMaxBitrateBps,
+                onToggleAudioMaxBitrate = onToggleAudioMaxBitrate,
             ),
         )
     }

@@ -657,6 +657,14 @@ class MicrophoneManager(
     internal val effectiveSoftwareAudioProcessingEnabled: Boolean
         get() = _softwareAudioProcessingEnabled.value
 
+    private val _audioMaxBitrateBps = MutableStateFlow<Int?>(null)
+
+    /**
+     * The maximum audio bitrate this call has asked for, or null while the value the SFU picked
+     * for the current [audioBitrateProfile] stands.
+     */
+    val audioMaxBitrateBps: StateFlow<Int?> = _audioMaxBitrateBps
+
     // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
     internal fun enable(fromUser: Boolean = true) {
@@ -1000,6 +1008,33 @@ class MicrophoneManager(
      * rebuilt — the previous source stays live and [softwareAudioProcessingEnabled] keeps
      * reporting the requested value, which the next source picks up.
      */
+    /**
+     * Sets the maximum audio bitrate on the live publisher, while the call is running.
+     *
+     * The audio bitrate is carried on the sender's encoding, not in the SDP, so this takes effect
+     * on the running encoder with no renegotiation and no interruption. Raising it is what makes
+     * music sound like music once the processing stages are out of the way; on its own, with
+     * processing still running, it changes nothing audible.
+     *
+     * @param maxBitrateBps for reference, the SFU's own values are around 64000 for the standard
+     * voice profile and 128000 for music.
+     * @return true when a live audio sender accepted it. False means nothing is publishing audio
+     * yet; [audioMaxBitrateBps] reports the requested value either way.
+     */
+    fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean {
+        _audioMaxBitrateBps.value = maxBitrateBps
+        val applied = mediaManager.call.setAudioMaxBitrate(maxBitrateBps)
+        if (!applied) {
+            logger.w {
+                "[setAudioMaxBitrate] requested $maxBitrateBps but no live audio sender took it"
+            }
+        }
+        return applied
+    }
+
+    /** The maximum bitrate actually set on the live audio sender, or null when not publishing. */
+    fun appliedAudioMaxBitrate(): Int? = mediaManager.call.audioMaxBitrate()
+
     fun setSoftwareAudioProcessingEnabled(enabled: Boolean): Boolean {
         softwareAudioProcessingOverridden = true
         if (_softwareAudioProcessingEnabled.value == enabled) {

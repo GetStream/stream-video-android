@@ -369,6 +369,42 @@ internal class Publisher(
         }
     }
 
+    /**
+     * Sets the maximum bitrate on the live audio sender.
+     *
+     * Applied through the sender's [RtpParameters], the same way the video layers and the
+     * degradation preference are — so it takes effect on the running encoder with no renegotiation.
+     * The audio bitrate is not carried in the SDP on our side; it rides entirely on the encoding.
+     *
+     * @return true when a live audio sender accepted the new parameters.
+     */
+    internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean {
+        val senders = safeCallWithDefault(emptyList()) {
+            transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO).mapNotNull { it.sender }
+        }
+        if (senders.isEmpty()) {
+            logger.d { "[setAudioMaxBitrate] no audio sender to apply $maxBitrateBps to" }
+            return false
+        }
+        return senders.any { sender ->
+            safeCallWithDefault(false) {
+                val params = sender.parameters ?: return@safeCallWithDefault false
+                if (params.encodings.isEmpty()) return@safeCallWithDefault false
+                params.encodings.forEach { it.maxBitrateBps = maxBitrateBps }
+                sender.parameters = params
+                logger.d { "[setAudioMaxBitrate] applied maxBitrateBps: $maxBitrateBps" }
+                true
+            }
+        }
+    }
+
+    /** The maximum bitrate currently set on the live audio sender, or null when unknown. */
+    internal fun audioMaxBitrate(): Int? = safeCallWithDefault(null) {
+        transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO)
+            .mapNotNull { it.sender?.parameters?.encodings?.firstOrNull()?.maxBitrateBps }
+            .firstOrNull()
+    }
+
     @VisibleForTesting
     public fun newTrackFromSource(trackType: TrackType): MediaStreamTrack {
         return when (trackType) {

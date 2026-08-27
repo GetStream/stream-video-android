@@ -950,6 +950,17 @@ public class Call(
     internal fun rebuildAudioCapturePipeline(): Boolean =
         session.value?.rebuildAudioCapturePipeline() ?: true
 
+    /**
+     * Applies a maximum audio bitrate to the live publisher.
+     *
+     * Internal bridge for [MicrophoneManager.setAudioMaxBitrate].
+     */
+    internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean =
+        session.value?.setAudioMaxBitrate(maxBitrateBps) ?: false
+
+    /** The maximum bitrate on the live audio sender, or null when nothing is publishing audio. */
+    internal fun audioMaxBitrate(): Int? = session.value?.audioMaxBitrate()
+
     fun toggleAudioProcessing(): Boolean {
         // Reads without building a factory: the gate runs before join, and a factory created
         // there would capture the pre-join audio bitrate profile.

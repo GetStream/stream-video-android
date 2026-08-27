@@ -581,6 +581,17 @@ public class RtcSession internal constructor(
         }
 
     /**
+     * Applies a maximum audio bitrate to the live publisher, with no renegotiation.
+     *
+     * @return true when a live audio sender accepted it.
+     */
+    internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean =
+        publisher.value?.setAudioMaxBitrate(maxBitrateBps) ?: false
+
+    /** The maximum bitrate on the live audio sender, or null when nothing is publishing audio. */
+    internal fun audioMaxBitrate(): Int? = publisher.value?.audioMaxBitrate()
+
+    /**
      * Connection and WebRTC.
      */
 

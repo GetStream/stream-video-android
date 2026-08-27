@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.ClosedCaptionOff
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
+import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RawOff
@@ -57,6 +58,12 @@ import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.base.SubMenuItem
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+
+/** Roughly what the SFU offers for the standard voice profile. */
+const val VOICE_AUDIO_BITRATE_BPS: Int = 64_000
+
+/** Roughly what the SFU offers for the music profile. */
+const val MUSIC_AUDIO_BITRATE_BPS: Int = 128_000
 
 /**
  * Defines the default Stream menu for the demo app.
@@ -100,6 +107,8 @@ fun defaultStreamMenu(
     onToggleHardwareNoiseSuppressor: (Boolean) -> Unit = {},
     isSoftwareAudioProcessingEnabled: Boolean = false,
     onToggleSoftwareAudioProcessing: (Boolean) -> Unit = {},
+    audioMaxBitrateBps: Int? = null,
+    onToggleAudioMaxBitrate: () -> Unit = {},
 ) = buildList<MenuItem> {
     if (noiseCancellationFeatureEnabled) {
         add(
@@ -183,6 +192,8 @@ fun defaultStreamMenu(
                     onToggleHardwareNoiseSuppressor,
                     isSoftwareAudioProcessingEnabled,
                     onToggleSoftwareAudioProcessing,
+                    audioMaxBitrateBps,
+                    onToggleAudioMaxBitrate,
                 ),
             ),
         )
@@ -370,7 +381,18 @@ fun debugSubmenu(
     onToggleHardwareNoiseSuppressor: (Boolean) -> Unit = {},
     isSoftwareAudioProcessingEnabled: Boolean = false,
     onToggleSoftwareAudioProcessing: (Boolean) -> Unit = {},
+    audioMaxBitrateBps: Int? = null,
+    onToggleAudioMaxBitrate: () -> Unit = {},
 ) = listOf(
+    ActionMenuItem(
+        title = when (audioMaxBitrateBps) {
+            null -> "Audio bitrate: SFU default (tap for 128k)"
+            else -> "Audio bitrate: ${audioMaxBitrateBps / 1000}k"
+        },
+        icon = Icons.Default.GraphicEq,
+        highlight = audioMaxBitrateBps != null && audioMaxBitrateBps >= MUSIC_AUDIO_BITRATE_BPS,
+        action = onToggleAudioMaxBitrate,
+    ),
     ActionMenuItem(
         title = if (isHardwareNoiseSuppressorEnabled) {
             "Hardware noise suppressor: ON"
