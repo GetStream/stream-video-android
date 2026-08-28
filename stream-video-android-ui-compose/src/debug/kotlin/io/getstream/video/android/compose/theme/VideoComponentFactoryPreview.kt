@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipantsList
@@ -192,6 +193,26 @@ internal fun VideoComponentFactoryVideoFallbackPreview() {
 
 @Preview
 @Composable
+private fun VideoComponentFactoryScreenSharingFallbackRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        VideoComponentFactoryScreenSharingFallbackPreview()
+    }
+}
+
+@Composable
+internal fun VideoComponentFactoryScreenSharingFallbackPreview() {
+    Box(modifier = Modifier.size(220.dp)) {
+        VideoTheme.componentFactory.ScreenSharingFallbackContent(
+            params = ScreenSharingFallbackContentParams(
+                session = ScreenSharingSession(participant = previewParticipantsList[1]),
+            ),
+        )
+    }
+}
+
+@Preview
+@Composable
 private fun VideoComponentFactoryEmptyDefaultsRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
@@ -226,6 +247,9 @@ internal fun VideoComponentFactoryEmptyDefaultsPreview() {
             )
             OutgoingCallHeaderContent(
                 params = OutgoingCallHeaderContentParams(call = previewCall),
+            )
+            AudioOnlyCallHeaderContent(
+                params = AudioOnlyCallHeaderContentParams(call = previewCall),
             )
         }
     }

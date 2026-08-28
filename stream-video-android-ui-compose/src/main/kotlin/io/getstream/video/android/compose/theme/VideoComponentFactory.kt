@@ -33,6 +33,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.call.DefaultCallAppBarCenterContent
 import io.getstream.video.android.compose.ui.components.call.DefaultCallAppBarLeadingContent
+import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallControls
+import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallDetails
 import io.getstream.video.android.compose.ui.components.call.activecall.DefaultPictureInPictureContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
@@ -52,6 +54,7 @@ import io.getstream.video.android.compose.ui.components.call.ringing.incomingcal
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallControls
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallDetails
 import io.getstream.video.android.compose.ui.components.indicator.NetworkQualityIndicator
+import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
@@ -286,6 +289,24 @@ public interface VideoComponentFactory {
     }
 
     /**
+     * The sound indicator shown inside a participant label, showing the microphone state and
+     * audio level. The container applies the position and padding through [ParticipantLabelSoundIndicatorContentParams.modifier].
+     *
+     * @param params Parameters for this component.
+     */
+    @Composable
+    public fun RowScope.ParticipantLabelSoundIndicatorContent(
+        params: ParticipantLabelSoundIndicatorContentParams,
+    ) {
+        SoundIndicator(
+            isSpeaking = params.isSpeaking,
+            isAudioEnabled = params.isAudioEnabled,
+            audioLevel = params.audioLevel,
+            modifier = params.modifier,
+        )
+    }
+
+    /**
      * The indicator that shows the connection quality of a participant.
      *
      * @param params Parameters for this component.
@@ -349,6 +370,21 @@ public interface VideoComponentFactory {
             call = params.call,
             participant = params.participant,
         )
+    }
+
+    /**
+     * Content shown in place of the shared screen while the screen sharing session is loading or
+     * not available. The default implementation renders the sharing participant's avatar.
+     *
+     * @param params Parameters for this component.
+     */
+    @Composable
+    public fun ScreenSharingFallbackContent(
+        params: ScreenSharingFallbackContentParams,
+    ) {
+        val userName by params.session.participant.userNameOrId.collectAsStateWithLifecycle()
+        val userImage by params.session.participant.image.collectAsStateWithLifecycle()
+        UserAvatarBackground(userImage = userImage, userName = userName)
     }
 
     /**
@@ -546,6 +582,52 @@ public interface VideoComponentFactory {
                 .padding(bottom = VideoTheme.dimens.genericXxl),
             isVideoCall = params.isVideoCall,
             isCameraEnabled = params.isCameraEnabled,
+            isMicrophoneEnabled = params.isMicrophoneEnabled,
+            onCallAction = params.onCallAction,
+        )
+    }
+
+    /**
+     * The header of the audio-only call screen. Empty by default.
+     *
+     * @param params Parameters for this component.
+     */
+    @Composable
+    public fun ColumnScope.AudioOnlyCallHeaderContent(params: AudioOnlyCallHeaderContentParams) {
+    }
+
+    /**
+     * The details of the audio-only call screen, such as the participant avatars and the call
+     * duration.
+     *
+     * @param params Parameters for this component.
+     */
+    @Composable
+    public fun ColumnScope.AudioOnlyCallDetailsContent(
+        params: AudioOnlyCallDetailsContentParams,
+    ) {
+        AudioOnlyCallDetails(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally),
+            participants = params.remoteParticipants,
+            duration = params.duration,
+        )
+    }
+
+    /**
+     * The controls of the audio-only call screen, such as toggling the microphone or leaving
+     * the call.
+     *
+     * @param params Parameters for this component.
+     */
+    @Composable
+    public fun BoxScope.AudioOnlyCallControlsContent(
+        params: AudioOnlyCallControlsContentParams,
+    ) {
+        AudioOnlyCallControls(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = VideoTheme.dimens.genericXxl),
             isMicrophoneEnabled = params.isMicrophoneEnabled,
             onCallAction = params.onCallAction,
         )

@@ -116,6 +116,13 @@ internal class VideoComponentFactoryTest : PaparazziComposeTest {
     }
 
     @Test
+    fun `factory screen sharing fallback`() {
+        snapshotWithDarkMode {
+            VideoComponentFactoryScreenSharingFallbackPreview()
+        }
+    }
+
+    @Test
     fun `factory empty defaults`() {
         snapshotWithDarkMode {
             VideoComponentFactoryEmptyDefaultsPreview()

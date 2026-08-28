@@ -73,7 +73,6 @@ import io.getstream.video.android.compose.ui.components.call.controls.ControlAct
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.diagnostics.CallDiagnosticsContent
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
-import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.LocalVideoContentSize
@@ -485,10 +484,12 @@ internal fun DefaultPictureInPictureContent(call: Call) {
         }
         val participantToShow = notMeOfTwo ?: notMeActiveOrDominant ?: me
         if (participantToShow != null) {
-            ParticipantVideo(
-                call = call,
-                participant = participantToShow,
-                style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart),
+            VideoTheme.componentFactory.ParticipantVideo(
+                params = ParticipantVideoParams(
+                    call = call,
+                    participant = participantToShow,
+                    style = RegularVideoRendererStyle(labelPosition = Alignment.BottomStart),
+                ),
             )
         }
     }
