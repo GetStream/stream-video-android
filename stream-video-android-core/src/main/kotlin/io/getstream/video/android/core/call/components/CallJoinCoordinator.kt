@@ -154,6 +154,12 @@ internal class CallJoinCoordinator(
                 }
                 syncCallJoinInterceptor()
             },
+            onLeader = {
+                logger.d {
+                    "[join] Started in-flight join " +
+                        "(interceptor=${callJoinInterceptor != null})"
+                }
+            },
             cancelIfLastWaiter = false,
         ) {
             try {

@@ -144,33 +144,29 @@ internal class StreamRefCountedSingleFlightProcessor(
         block: suspend () -> T,
     ): Acquired<T>? = mutex.withLock {
         if (closed.get()) return@withLock null
-        selectFlightLocked(key, waiterJob, attachment, onLeader, block)
+        val acquired = selectFlightLocked(key, onLeader, block)
+        // Under the same lock as create/attach so a coalescer cannot read the list
+        // before this waiter's interceptor is registered.
+        acquired.flight.registrations.add(WaiterRegistration(waiterJob, attachment))
+        acquired
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun <T> selectFlightLocked(
         key: String,
-        waiterJob: Job,
-        attachment: Any?,
         onLeader: () -> Unit,
         block: suspend () -> T,
     ): Acquired<T> {
         val running = flights[key]?.takeIf { it.deferred.isActive } as Flight<T>?
         if (running != null) {
             running.waiters++
-            running.registrations.add(WaiterRegistration(waiterJob, attachment))
             return Acquired(running, coalesced = true)
         }
-        return Acquired(
-            createFlightLocked(key, waiterJob, attachment, onLeader, block),
-            coalesced = false,
-        )
+        return Acquired(createFlightLocked(key, onLeader, block), coalesced = false)
     }
 
     private fun <T> createFlightLocked(
         key: String,
-        waiterJob: Job,
-        attachment: Any?,
         onLeader: () -> Unit,
         block: suspend () -> T,
     ): Flight<T> {
@@ -193,7 +189,6 @@ internal class StreamRefCountedSingleFlightProcessor(
             }
         }
         return Flight(key = key, deferred = deferred, waiters = 1).also {
-            it.registrations.add(WaiterRegistration(waiterJob, attachment))
             flights[key] = it
             onLeader()
         }
