@@ -52,6 +52,13 @@ internal class ActiveStateGate(
         call: Call,
         interceptor: CallJoinInterceptor?,
         onReady: () -> Unit,
+    ) = awaitAndTransition(currentRingingState, call, { interceptor }, onReady)
+
+    internal fun awaitAndTransition(
+        currentRingingState: RingingState,
+        call: Call,
+        interceptorProvider: () -> CallJoinInterceptor?,
+        onReady: () -> Unit,
     ) {
         if (currentRingingState is RingingState.Active) {
             return
@@ -59,7 +66,7 @@ internal class ActiveStateGate(
         logger.d { "[awaitAndTransition], ringingState: $currentRingingState" }
 
         if (strategy == TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR) {
-            handleLegacyBehaviour(call, onReady, interceptor)
+            handleLegacyBehaviour(call, onReady, interceptorProvider)
             return
         }
 
@@ -67,20 +74,19 @@ internal class ActiveStateGate(
             it is RingingState.Incoming || it is RingingState.Outgoing
         }
 
-        launchGate(call, interceptor, waitForPublisherConnection = isRingingCall, onReady)
+        launchGate(call, interceptorProvider, waitForPublisherConnection = isRingingCall, onReady)
     }
 
-    private fun handleLegacyBehaviour(call: Call, onReady: () -> Unit, interceptor: CallJoinInterceptor?) {
+    private fun handleLegacyBehaviour(
+        call: Call,
+        onReady: () -> Unit,
+        interceptorProvider: () -> CallJoinInterceptor?,
+    ) {
         if (interceptorJob.get()?.isActive == true) return
-
-        if (interceptor == null) {
-            onReady()
-            return
-        }
 
         interceptorJob.set(
             coroutineScope.launch {
-                val shouldProceed = invokeInterceptor(call, interceptor)
+                val shouldProceed = invokeInterceptor(call, interceptorProvider)
                 if (!isActive) return@launch
 
                 if (shouldProceed) onReady()
@@ -91,7 +97,7 @@ internal class ActiveStateGate(
 
     private fun launchGate(
         call: Call,
-        interceptor: CallJoinInterceptor?,
+        interceptorProvider: () -> CallJoinInterceptor?,
         waitForPublisherConnection: Boolean,
         onReady: () -> Unit,
     ) {
@@ -104,7 +110,7 @@ internal class ActiveStateGate(
                     if (!isActive) return@launch
                 }
 
-                val shouldProceed = invokeInterceptor(call, interceptor)
+                val shouldProceed = invokeInterceptor(call, interceptorProvider)
                 if (!isActive) return@launch
 
                 if (shouldProceed) onReady()
@@ -133,8 +139,10 @@ internal class ActiveStateGate(
 
     private suspend fun invokeInterceptor(
         call: Call,
-        interceptor: CallJoinInterceptor?,
+        interceptorProvider: () -> CallJoinInterceptor?,
     ): Boolean {
+        // Freeze at invocation: a later waiter cancel must not swap the interceptor mid-call.
+        val interceptor = interceptorProvider()
         val startTime = System.currentTimeMillis()
         logger.d { "[invokeInterceptor] start at $startTime" }
         if (interceptor == null) return true

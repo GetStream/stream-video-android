@@ -24,6 +24,13 @@ import kotlin.jvm.Throws
  * Implement this to insert custom logic (e.g. waiting for user confirmation) between
  * the publisher peer connection becoming ready and the call going active.
  * Has no effect on non-ringing joins (livestream, direct join).
+ *
+ * Concurrent [Call.join] callers share one in-flight join. Interceptor ownership is
+ * **first non-cancelled wins**: the first `join(interceptor)` waiter whose coroutine is
+ * still not cancelled supplies the interceptor. If that waiter is cancelled (Activity
+ * destroyed / recreated) before the interceptor runs, the next still-active waiter's
+ * interceptor is used. `join(null)` does not erase an earlier interceptor. Once
+ * [callReadyToJoin] starts, the selected interceptor is frozen for that invocation.
  */
 public interface CallJoinInterceptor {
 

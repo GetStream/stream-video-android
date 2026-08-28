@@ -19,6 +19,7 @@ package io.getstream.video.android.core.utils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.ClosedSendChannelException
@@ -26,7 +27,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.coroutineContext
 
 /**
  * Single-flight that coalesces concurrent calls by key, runs the shared work on [scope],
@@ -63,10 +66,16 @@ import java.util.concurrent.atomic.AtomicBoolean
 internal class StreamRefCountedSingleFlightProcessor(
     private val scope: CoroutineScope,
 ) {
+    private class WaiterRegistration(
+        val job: Job,
+        val attachment: Any?,
+    )
+
     private class Flight<T>(
         val key: String,
         val deferred: Deferred<Result<T>>,
         var waiters: Int,
+        val registrations: CopyOnWriteArrayList<WaiterRegistration> = CopyOnWriteArrayList(),
     )
 
     private class Acquired<T>(
@@ -91,18 +100,24 @@ internal class StreamRefCountedSingleFlightProcessor(
      * [onLeader] runs once, under the same lock as flight creation, before any coalescer
      * can attach. Use it to snapshot leader-only state that [onCoalesced] will read.
      *
+     * [attachment] is stored on the flight with this waiter's [Job].
+     * [firstNonCancelledAttachment] returns the first non-null attachment whose waiter job
+     * is not cancelled (completed successfully still counts).
+     *
      * When [cancelIfLastWaiter] is false, the last cancelled waiter leaves the shared job
      * running and keeps the map entry so a later [run] can coalesce instead of starting a
      * second execution.
      */
     suspend fun <T> run(
         key: String,
+        attachment: Any? = null,
         onCoalesced: () -> Unit = {},
         onLeader: () -> Unit = {},
         cancelIfLastWaiter: Boolean = true,
         block: suspend () -> T,
     ): Result<T> {
-        val acquired = acquireWaiter(key, onLeader, block)
+        val waiterJob = coroutineContext[Job]!!
+        val acquired = acquireWaiter(key, waiterJob, attachment, onLeader, block)
             ?: return Result.failure(
                 ClosedSendChannelException("RefCountedSingleFlight is closed"),
             )
@@ -110,31 +125,52 @@ internal class StreamRefCountedSingleFlightProcessor(
         return awaitSharedResult(acquired.flight, cancelIfLastWaiter)
     }
 
+    /**
+     * First non-null [run] attachment whose waiter [Job] is not cancelled.
+     * Cancelled waiters are skipped so a later still-active waiter can take over.
+     */
+    fun firstNonCancelledAttachment(key: String): Any? {
+        val flight = flights[key] ?: return null
+        return flight.registrations.firstOrNull {
+            !it.job.isCancelled && it.attachment != null
+        }?.attachment
+    }
+
     private suspend fun <T> acquireWaiter(
         key: String,
+        waiterJob: Job,
+        attachment: Any?,
         onLeader: () -> Unit,
         block: suspend () -> T,
     ): Acquired<T>? = mutex.withLock {
         if (closed.get()) return@withLock null
-        selectFlightLocked(key, onLeader, block)
+        selectFlightLocked(key, waiterJob, attachment, onLeader, block)
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun <T> selectFlightLocked(
         key: String,
+        waiterJob: Job,
+        attachment: Any?,
         onLeader: () -> Unit,
         block: suspend () -> T,
     ): Acquired<T> {
         val running = flights[key]?.takeIf { it.deferred.isActive } as Flight<T>?
         if (running != null) {
             running.waiters++
+            running.registrations.add(WaiterRegistration(waiterJob, attachment))
             return Acquired(running, coalesced = true)
         }
-        return Acquired(createFlightLocked(key, onLeader, block), coalesced = false)
+        return Acquired(
+            createFlightLocked(key, waiterJob, attachment, onLeader, block),
+            coalesced = false,
+        )
     }
 
     private fun <T> createFlightLocked(
         key: String,
+        waiterJob: Job,
+        attachment: Any?,
         onLeader: () -> Unit,
         block: suspend () -> T,
     ): Flight<T> {
@@ -157,6 +193,7 @@ internal class StreamRefCountedSingleFlightProcessor(
             }
         }
         return Flight(key = key, deferred = deferred, waiters = 1).also {
+            it.registrations.add(WaiterRegistration(waiterJob, attachment))
             flights[key] = it
             onLeader()
         }

@@ -34,6 +34,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.concurrent.atomic.AtomicInteger
@@ -130,6 +131,40 @@ class StreamRefCountedSingleFlightProcessorTest {
 
         assertEquals(1, leaderSnapshots.get())
         assertEquals(4, coalescedSawLeader.get())
+    }
+
+    @Test
+    fun `firstNonCancelledAttachment skips cancelled waiters`() = runTest(testDispatcher) {
+        val processor = StreamRefCountedSingleFlightProcessor(testScope)
+        val gate = CompletableDeferred<Unit>()
+
+        val first = async {
+            processor.run("key", attachment = "first", cancelIfLastWaiter = false) {
+                gate.await()
+                "ok"
+            }
+        }
+        advanceUntilIdle()
+        assertEquals("first", processor.firstNonCancelledAttachment("key"))
+
+        first.cancel()
+        advanceUntilIdle()
+        assertFailsWith<CancellationException> { first.await() }
+        assertTrue(processor.has("key"))
+        assertNull(processor.firstNonCancelledAttachment("key"))
+
+        val second = async {
+            processor.run("key", attachment = "second", cancelIfLastWaiter = false) {
+                gate.await()
+                "should not run"
+            }
+        }
+        advanceUntilIdle()
+        assertEquals("second", processor.firstNonCancelledAttachment("key"))
+
+        gate.complete(Unit)
+        assertEquals("ok", second.await().getOrThrow())
+        advanceUntilIdle()
     }
 
     @Test

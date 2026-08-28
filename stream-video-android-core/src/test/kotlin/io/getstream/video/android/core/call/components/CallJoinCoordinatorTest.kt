@@ -352,8 +352,63 @@ class CallJoinCoordinatorTest {
         verify(exactly = 2) { joinAnalytics.onJoinFunctionStart() }
         verify(exactly = 1) { callAnalytics.mediaPermissionObserver.mediaPermissionStatus() }
         verify(exactly = 1) { lifecycle.resetLeaveGuard() }
-        verify(exactly = 1) { state.callJoinInterceptor = interceptor }
+        verify { state.callJoinInterceptor = interceptor }
         verify(exactly = 0) { state.callJoinInterceptor = null }
+    }
+
+    @Test
+    fun `cancelled first waiter yields the next still-active interceptor`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        val connectGate = CompletableDeferred<Unit>()
+        coEvery { mockSession.connectInternal() } coAnswers {
+            connectGate.await()
+            SfuConnectionResult.Success
+        }
+        val coordinator = coordinator()
+        val firstInterceptor = mockk<CallJoinInterceptor>(relaxed = true)
+        val secondInterceptor = mockk<CallJoinInterceptor>(relaxed = true)
+
+        val first = async { coordinator.join(callJoinInterceptor = firstInterceptor) }
+        advanceUntilIdle()
+        first.cancel()
+        advanceUntilIdle()
+        assertFailsWith<CancellationException> { first.await() }
+
+        val second = async { coordinator.join(callJoinInterceptor = secondInterceptor) }
+        advanceUntilIdle()
+        verify { state.callJoinInterceptor = secondInterceptor }
+
+        connectGate.complete(Unit)
+        assertThat(second.await()).isInstanceOf(Success::class.java)
+    }
+
+    @Test
+    fun `active first waiter keeps its interceptor when a later join coalesces`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        val connectGate = CompletableDeferred<Unit>()
+        coEvery { mockSession.connectInternal() } coAnswers {
+            connectGate.await()
+            SfuConnectionResult.Success
+        }
+        val coordinator = coordinator()
+        val firstInterceptor = mockk<CallJoinInterceptor>(relaxed = true)
+        val secondInterceptor = mockk<CallJoinInterceptor>(relaxed = true)
+
+        val first = async { coordinator.join(callJoinInterceptor = firstInterceptor) }
+        advanceUntilIdle()
+        val second = async { coordinator.join(callJoinInterceptor = secondInterceptor) }
+        advanceUntilIdle()
+
+        verify { state.callJoinInterceptor = firstInterceptor }
+
+        connectGate.complete(Unit)
+        listOf(first, second).awaitAll()
+        advanceUntilIdle()
+        verify { state.callJoinInterceptor = firstInterceptor }
     }
 
     @Test

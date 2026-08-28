@@ -92,17 +92,10 @@ internal class CallJoinCoordinator(
      *
      * [StreamRefCountedSingleFlightProcessor] keeps the join alive when any waiter (including
      * the last) is cancelled. Only [scope] cancellation — [Call.leave] / call cleanup —
-     * aborts the shared job.
+     * aborts the shared job. Each waiter registers its [CallJoinInterceptor] on the flight;
+     * the first waiter whose job is not cancelled owns the interceptor (see [Call.join]).
      */
     private val joinFlight = StreamRefCountedSingleFlightProcessor(scope)
-
-    /**
-     * Interceptor from the waiter that created the current join flight. Snapshotted in
-     * [onLeader] under the flight mutex so coalescers can compare against it before
-     * [executeJoin] assigns [CallState.callJoinInterceptor].
-     */
-    @Volatile
-    private var inFlightJoinInterceptor: CallJoinInterceptor? = null
 
     private fun isVideoEnabled(): Boolean = state.settings.value?.video?.enabled ?: false
 
@@ -113,6 +106,12 @@ internal class CallJoinCoordinator(
      * waiter) does **not** abort the join — only [io.getstream.video.android.core.Call.leave]
      * / call-scope cleanup does. Incoming accept can finish/recreate the Activity after the
      * SFU session is already in; aborting then would leave ringing Idle (Connecting…) forever.
+     *
+     * Concurrent callers share one attempt. Join flags (`create`, `ring`, …) come from the
+     * waiter that created the flight. [CallJoinInterceptor] is first-non-cancelled-wins:
+     * the first waiter whose coroutine is still not cancelled supplies it. A coalesced
+     * caller's interceptor is used only if every earlier waiter has been cancelled (e.g.
+     * Activity recreation). `join(null)` does not erase an earlier interceptor.
      *
      * Analytics for the waiter that owns the join, in order:
      * 1. `JOIN_INITIATED`: [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinFunctionStart]
@@ -138,32 +137,37 @@ internal class CallJoinCoordinator(
         var coalesced = false
         return joinFlight.run(
             JOIN_FLIGHT_KEY,
+            attachment = callJoinInterceptor,
             onCoalesced = {
                 coalesced = true
+                val selected = selectedJoinInterceptor()
                 logger.w {
                     "[join] Concurrent join coalesced into in-flight join " +
                         "(interceptorIgnored=${callJoinInterceptor != null &&
-                            callJoinInterceptor !== inFlightJoinInterceptor})"
+                            callJoinInterceptor !== selected})"
                 }
-                if (callJoinInterceptor != null &&
-                    callJoinInterceptor !== inFlightJoinInterceptor
-                ) {
+                if (callJoinInterceptor != null && callJoinInterceptor !== selected) {
                     logger.w {
-                        "[join] Coalesced caller interceptor dropped; in-flight interceptor kept"
+                        "[join] Coalesced caller interceptor not selected; " +
+                            "first non-cancelled waiter interceptor kept"
                     }
                 }
+                syncCallJoinInterceptor()
             },
-            onLeader = { inFlightJoinInterceptor = callJoinInterceptor },
             cancelIfLastWaiter = false,
         ) {
-            executeJoin(
-                create,
-                createOptions,
-                ring,
-                notify,
-                hintHighScaleLivestreamPublisher,
-                callJoinInterceptor,
-            )
+            try {
+                executeJoin(
+                    create,
+                    createOptions,
+                    ring,
+                    notify,
+                    hintHighScaleLivestreamPublisher,
+                )
+            } finally {
+                // Freeze the live selection onto CallState before the flight is removed.
+                syncCallJoinInterceptor()
+            }
         }.also {
             if (coalesced) {
                 sessionManager.session.value?.sfuTracer?.trace(
@@ -184,13 +188,28 @@ internal class CallJoinCoordinator(
         )
     }
 
+    private fun selectedJoinInterceptor(): CallJoinInterceptor? =
+        joinFlight.firstNonCancelledAttachment(JOIN_FLIGHT_KEY) as? CallJoinInterceptor
+
+    private fun resolveCallJoinInterceptor(): CallJoinInterceptor? {
+        return if (joinFlight.has(JOIN_FLIGHT_KEY)) {
+            selectedJoinInterceptor()
+        } else {
+            state.callJoinInterceptor
+        }
+    }
+
+    private fun syncCallJoinInterceptor() {
+        state.callJoinInterceptor = selectedJoinInterceptor()
+        state.callJoinInterceptorProvider = { resolveCallJoinInterceptor() }
+    }
+
     private suspend fun executeJoin(
         create: Boolean,
         createOptions: CreateCallOptions?,
         ring: Boolean,
         notify: Boolean,
         hintHighScaleLivestreamPublisher: Boolean?,
-        callJoinInterceptor: CallJoinInterceptor?,
     ): Result<RtcSession> {
         // Subsequent join() calls while a session is live return that session instead of
         // building a second one. [joinInternal] repeats the same check for direct callers.
@@ -200,9 +219,9 @@ internal class CallJoinCoordinator(
             return Success(existing)
         }
 
-        // Before any suspend so coalesced waiters and SFU observers see this join's
-        // interceptor rather than a stale/null [CallState.callJoinInterceptor].
-        state.callJoinInterceptor = callJoinInterceptor
+        // Live-select before any suspend so coalesced waiters and SFU observers see the
+        // first non-cancelled waiter's interceptor, not a stale leader after Activity death.
+        syncCallJoinInterceptor()
 
         callAnalytics.mediaPermissionObserver.mediaPermissionStatus()
         logger.d {

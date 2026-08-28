@@ -556,6 +556,12 @@ public class Call(
      * Joins the call. Concurrent callers share one in-flight attempt.
      *
      * Cancelling this coroutine does not abort that attempt — only [leave] does.
+     *
+     * Join flags (`create`, `ring`, and the rest) come from the caller that created the
+     * in-flight attempt. [CallJoinInterceptor] is first-non-cancelled-wins: the first
+     * waiter whose coroutine is not cancelled supplies it. A later `join(interceptor)`
+     * is used only if every earlier waiter has been cancelled. `join(null)` does not
+     * erase an earlier interceptor.
      */
     suspend fun join(
         create: Boolean = false,
