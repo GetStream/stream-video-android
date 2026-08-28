@@ -206,7 +206,12 @@ fun UserRobot.assertRecordingView(isDisplayed: Boolean): UserRobot {
     if (isDisplayed) {
         // The backend composite recorder can take 20-30s to actually start and emit
         // call.recording_started, so the icon needs a longer window than the 5s default.
-        assertTrue(CallPage.recordingIcon.waitToAppear(timeOutMillis = 30.seconds).isDisplayed())
+        // waitDisplayed also absorbs stale reads: the node returned by waitToAppear could
+        // go stale before isDisplayed() and leak a StaleObjectException.
+        assertTrue(
+            "Recording icon",
+            CallPage.recordingIcon.waitDisplayed(timeOutMillis = 30.seconds),
+        )
         // After a network drop the label can briefly read "Reconnecting.." before it settles
         // back to "Recording", so poll instead of asserting on the first read.
         val callInfoText = CallPage.callInfoView.waitForText(
