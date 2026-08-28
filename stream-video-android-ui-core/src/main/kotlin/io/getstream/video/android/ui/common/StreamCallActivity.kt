@@ -78,9 +78,9 @@ import io.getstream.video.android.ui.common.StreamCallActivity.Companion.callInt
 import io.getstream.video.android.ui.common.models.StreamCallActivityException
 import io.getstream.video.android.ui.common.permission.PermissionManager
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
+import io.getstream.video.android.ui.common.util.lastParticipantSignal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
@@ -88,7 +88,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -1478,15 +1477,17 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     /**
      * Processes participant leave events for the given [call].
      *
-     * Observes [cachedCall.state.participants] and triggers [onLastParticipant] if only
-     * one or fewer participants remain. Debouncing is applied to handle quick network
-     * disconnect/reconnect scenarios.
+     * Observes [cachedCall.state.participants] together with the connection state and triggers
+     * [onLastParticipant] if only one or fewer participants remain while the connection is
+     * settled. Debouncing is applied to handle quick network disconnect/reconnect scenarios,
+     * and the check is suppressed while the connection is reconnecting or migrating, because
+     * the roster is unreliable then and leaving would cancel the reconnect. See
+     * [lastParticipantSignal].
      *
      * @param call the active [Call] associated with the event.
      * @param event the [VideoEvent] that triggered this processing, typically a [ParticipantLeftEvent]
      *              or [CallSessionParticipantLeftEvent].
      */
-    @OptIn(FlowPreview::class)
     private fun processParticipantLeftEvent(call: Call, event: VideoEvent) {
         /**
          * - participantCountJob will be null when activity is newly created
@@ -1494,25 +1495,23 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
          */
         if (participantCountJob == null) {
             participantCountJob = lifecycleScope.launch(supervisorJob) {
-                cachedCall.state.participants
-                    /**
-                     * A debounce is applied here to handle quick disconnect/reconnect scenarios
-                     * caused by unstable network conditions. Without the debounce, other devices
-                     * may receive a [ParticipantLeftEvent] prematurely, which could trigger
-                     * unintended reactions in the call flow.
-                     */
-                    .debounce(getParticipantUpdateDebounce(call))
-                    .collect {
-                        logger.d { "Participant left, remaining: ${it.size}" }
+                lastParticipantSignal(
+                    participants = cachedCall.state.participants,
+                    connection = cachedCall.state.connection,
+                    debounceMs = getParticipantUpdateDebounce(call),
+                    onEvaluated = { roster, connection ->
+                        logger.d {
+                            "Participant left, remaining: ${roster.size}, connection: $connection"
+                        }
                         lifecycleScope.launch(Dispatchers.Default) {
-                            it.forEachIndexed { i, v ->
+                            roster.forEachIndexed { i, v ->
                                 logger.d { "Participant [$i]=${v.name.value}" }
                             }
                         }
-                        if (it.size <= 1) {
-                            onLastParticipant(call)
-                        }
-                    }
+                    },
+                ).collect {
+                    onLastParticipant(call)
+                }
             }
         }
     }
