@@ -71,15 +71,23 @@ fun UserRobot.assertThatCallIsEnded(): UserRobot {
 }
 
 fun UserRobot.assertUserMicrophone(isEnabled: Boolean, videoCall: Boolean = true): UserRobot {
+    // The participant view icon updates slightly after the control toggle, so both
+    // checks poll instead of asserting the icon at the instant the toggle appears.
     if (isEnabled) {
-        assertTrue(CallPage.microphoneEnabledToggle.waitToAppear().isDisplayed())
+        assertTrue("Microphone enabled toggle", CallPage.microphoneEnabledToggle.waitDisplayed())
         if (videoCall) {
-            assertTrue(CallPage.ParticipantView.microphoneEnabledIcon.isDisplayed())
+            assertTrue(
+                "Participant microphone enabled icon",
+                CallPage.ParticipantView.microphoneEnabledIcon.waitDisplayed(),
+            )
         }
     } else {
-        assertTrue(CallPage.microphoneDisabledToggle.waitToAppear().isDisplayed())
+        assertTrue("Microphone disabled toggle", CallPage.microphoneDisabledToggle.waitDisplayed())
         if (videoCall) {
-            assertTrue(CallPage.ParticipantView.microphoneDisabledIcon.isDisplayed())
+            assertTrue(
+                "Participant microphone disabled icon",
+                CallPage.ParticipantView.microphoneDisabledIcon.waitDisplayed(),
+            )
         }
     }
     return this
