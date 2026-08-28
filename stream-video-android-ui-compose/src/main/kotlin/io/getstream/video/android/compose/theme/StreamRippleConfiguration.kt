@@ -30,11 +30,11 @@ import androidx.compose.runtime.ReadOnlyComposable
  * A modified version of the default [RippleConfiguration] from [MaterialTheme] which
  * works in case the [MaterialTheme] is not initialized.
  */
-public object StreamRippleConfiguration {
+internal object StreamRippleConfiguration {
 
     @Composable
     @ReadOnlyComposable
-    public fun default(): RippleConfiguration {
+    fun default(): RippleConfiguration {
         val rippleConfiguration = LocalRippleConfiguration.current
         if (rippleConfiguration != null) return rippleConfiguration
 

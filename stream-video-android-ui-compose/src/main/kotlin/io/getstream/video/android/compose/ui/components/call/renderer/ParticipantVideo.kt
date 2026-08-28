@@ -580,7 +580,7 @@ internal fun BoxScope.DefaultReaction(
 
     val emojiCode = currentReaction?.response?.emojiCode
     if (currentReaction != null && emojiCode != null) {
-        val emojiMapper = VideoTheme.reactionMapper
+        val emojiMapper = VideoTheme.config.reactionMapper
         val emojiText = emojiMapper.map(emojiCode)
         Text(
             text = emojiText,

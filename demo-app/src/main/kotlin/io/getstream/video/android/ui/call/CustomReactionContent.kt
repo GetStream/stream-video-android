@@ -73,7 +73,7 @@ fun BoxScope.CustomReactionContent(
     val emojiCode = currentReaction?.response?.emojiCode
     if (currentReaction != null && emojiCode != null) {
         var isEmojiVisible by remember { mutableStateOf(true) }
-        val emojiMapper = VideoTheme.reactionMapper
+        val emojiMapper = VideoTheme.config.reactionMapper
         val emojiText = emojiMapper.map(emojiCode)
 
         LaunchedEffect(key1 = Unit) {
