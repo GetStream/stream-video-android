@@ -643,12 +643,12 @@ public final class io/getstream/video/android/compose/theme/ParticipantVideoReac
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/compose/theme/ParticipantsLayoutScreenSharingFallbackContentParams {
+public final class io/getstream/video/android/compose/theme/ScreenSharingFallbackContentParams {
 	public static final field $stable I
 	public fun <init> (Lio/getstream/video/android/core/model/ScreenSharingSession;)V
 	public final fun component1 ()Lio/getstream/video/android/core/model/ScreenSharingSession;
-	public final fun copy (Lio/getstream/video/android/core/model/ScreenSharingSession;)Lio/getstream/video/android/compose/theme/ParticipantsLayoutScreenSharingFallbackContentParams;
-	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/ParticipantsLayoutScreenSharingFallbackContentParams;Lio/getstream/video/android/core/model/ScreenSharingSession;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/ParticipantsLayoutScreenSharingFallbackContentParams;
+	public final fun copy (Lio/getstream/video/android/core/model/ScreenSharingSession;)Lio/getstream/video/android/compose/theme/ScreenSharingFallbackContentParams;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/ScreenSharingFallbackContentParams;Lio/getstream/video/android/core/model/ScreenSharingSession;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/ScreenSharingFallbackContentParams;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getSession ()Lio/getstream/video/android/core/model/ScreenSharingSession;
 	public fun hashCode ()I
@@ -968,7 +968,7 @@ public abstract interface class io/getstream/video/android/compose/theme/VideoCo
 	public fun ParticipantVideoFallbackContent (Lio/getstream/video/android/compose/theme/ParticipantVideoFallbackContentParams;Landroidx/compose/runtime/Composer;I)V
 	public fun ParticipantVideoLabelContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/ParticipantVideoLabelContentParams;Landroidx/compose/runtime/Composer;I)V
 	public fun ParticipantVideoReactionContent (Landroidx/compose/foundation/layout/BoxScope;Lio/getstream/video/android/compose/theme/ParticipantVideoReactionContentParams;Landroidx/compose/runtime/Composer;I)V
-	public fun ParticipantsLayoutScreenSharingFallbackContent (Lio/getstream/video/android/compose/theme/ParticipantsLayoutScreenSharingFallbackContentParams;Landroidx/compose/runtime/Composer;I)V
+	public fun ScreenSharingFallbackContent (Lio/getstream/video/android/compose/theme/ScreenSharingFallbackContentParams;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class io/getstream/video/android/compose/theme/VideoTheme : io/getstream/video/android/compose/theme/StreamTheme {

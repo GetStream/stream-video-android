@@ -278,11 +278,11 @@ public data class ParticipantVideoActionsContentParams(
 )
 
 /**
- * Parameters for [VideoComponentFactory.ParticipantsLayoutScreenSharingFallbackContent].
+ * Parameters for [VideoComponentFactory.ScreenSharingFallbackContent].
  *
  * @param session The screen sharing session the fallback is rendered for.
  */
-public data class ParticipantsLayoutScreenSharingFallbackContentParams(
+public data class ScreenSharingFallbackContentParams(
     val session: ScreenSharingSession,
 )
 

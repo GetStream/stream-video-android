@@ -66,7 +66,7 @@ public fun ScreenShareVideoRenderer(
     }
 
     Box(modifier = modifier) {
-        val videoRendererConfig = remember {
+        val videoRendererConfig = remember(session, fallbackContent) {
             videoRenderConfig {
                 this.fallbackContent = { fallbackContent(session) }
                 this.videoScalingType = VideoScalingType.SCALE_ASPECT_FIT

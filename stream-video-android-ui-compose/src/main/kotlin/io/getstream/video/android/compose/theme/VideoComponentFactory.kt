@@ -379,8 +379,8 @@ public interface VideoComponentFactory {
      * @param params Parameters for this component.
      */
     @Composable
-    public fun ParticipantsLayoutScreenSharingFallbackContent(
-        params: ParticipantsLayoutScreenSharingFallbackContentParams,
+    public fun ScreenSharingFallbackContent(
+        params: ScreenSharingFallbackContentParams,
     ) {
         val userName by params.session.participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by params.session.participant.image.collectAsStateWithLifecycle()

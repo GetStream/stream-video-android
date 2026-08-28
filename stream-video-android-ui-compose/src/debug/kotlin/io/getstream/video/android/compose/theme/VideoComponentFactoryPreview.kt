@@ -203,8 +203,8 @@ private fun VideoComponentFactoryScreenSharingFallbackRootPreview() {
 @Composable
 internal fun VideoComponentFactoryScreenSharingFallbackPreview() {
     Box(modifier = Modifier.size(220.dp)) {
-        VideoTheme.componentFactory.ParticipantsLayoutScreenSharingFallbackContent(
-            params = ParticipantsLayoutScreenSharingFallbackContentParams(
+        VideoTheme.componentFactory.ScreenSharingFallbackContent(
+            params = ScreenSharingFallbackContentParams(
                 session = ScreenSharingSession(participant = previewParticipantsList[1]),
             ),
         )
