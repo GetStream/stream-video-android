@@ -78,6 +78,8 @@ internal interface PaparazziComposeTest {
     val paparazzi: Paparazzi
 
     fun snapshot(
+        // Palette selector, currently a no-op: VideoTheme has a single dark palette until
+        // StreamDesign lands (AND-1419). Kept so the call sites don't churn twice.
         isInDarkMode: Boolean = false,
         contentAlignment: Alignment = Alignment.TopStart,
         backgroundColor: Color = Color.Unspecified,
@@ -85,7 +87,7 @@ internal interface PaparazziComposeTest {
     ) {
         paparazzi.snapshot {
             TestEnvironment {
-                VideoTheme(isInDarkMode = isInDarkMode) {
+                VideoTheme {
                     Box(
                         modifier = Modifier
                             .background(
@@ -112,7 +114,7 @@ internal interface PaparazziComposeTest {
         paparazzi.snapshot {
             TestEnvironment {
                 Column {
-                    VideoTheme(isInDarkMode = true) {
+                    VideoTheme {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
@@ -124,7 +126,7 @@ internal interface PaparazziComposeTest {
                             composable()
                         }
                     }
-                    VideoTheme(isInDarkMode = false) {
+                    VideoTheme {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
@@ -149,7 +151,7 @@ internal interface PaparazziComposeTest {
         paparazzi.snapshot {
             TestEnvironment {
                 Row {
-                    VideoTheme(isInDarkMode = true) {
+                    VideoTheme {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
@@ -161,7 +163,7 @@ internal interface PaparazziComposeTest {
                             composable()
                         }
                     }
-                    VideoTheme(isInDarkMode = false) {
+                    VideoTheme {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
