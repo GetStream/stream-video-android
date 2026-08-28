@@ -26,6 +26,7 @@ import androidx.compose.material.RippleConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -68,6 +69,17 @@ private val LocalStyles = compositionLocalOf<CompositeStyleProvider> {
 }
 
 /**
+ * The local composition containing the current [VideoComponentFactory].
+ */
+public val LocalComponentFactory: ProvidableCompositionLocal<VideoComponentFactory> =
+    compositionLocalOf {
+        error(
+            "No component factory provided! Make sure to wrap all usages of Stream components " +
+                "in a VideoTheme.",
+        )
+    }
+
+/**
  * Our theme that provides all the important properties for styling to the user.
  *
  * @param isInDarkMode If we're currently in the dark mode or not. Affects only the default color palette that's
@@ -78,6 +90,7 @@ private val LocalStyles = compositionLocalOf<CompositeStyleProvider> {
  * @param shapes The set of shapes we provide, wrapped in [StreamShapes].
  * @param rippleConfiguration Defines the appearance for ripples.
  * @param reactionMapper Defines a mapper of the emoji code from the reaction events.
+ * @param componentFactory Provide to customize the components used throughout the UI.
  * @param content The content shown within the theme wrapper.
  */
 @Composable
@@ -92,6 +105,7 @@ public fun VideoTheme(
     reactionMapper: ReactionMapper = ReactionMapper.defaultReactionMapper(),
     allowUIAutomationTest: Boolean = true,
     styles: CompositeStyleProvider = CompositeStyleProvider(),
+    componentFactory: VideoComponentFactory = DefaultVideoComponentFactory,
     content: @Composable () -> Unit,
 ) {
     LaunchedEffect(Unit) {
@@ -105,6 +119,7 @@ public fun VideoTheme(
         LocalRippleConfiguration provides rippleConfiguration.default(),
         LocalReactionMapper provides reactionMapper,
         LocalStyles provides styles,
+        LocalComponentFactory provides componentFactory,
     ) {
         Box(
             modifier = Modifier.semantics {
@@ -166,6 +181,13 @@ public interface StreamTheme {
     public val styles: CompositeStyleProvider
         @Composable @ReadOnlyComposable
         get() = LocalStyles.current
+
+    /**
+     * Retrieves the current [VideoComponentFactory] at the call site's position in the hierarchy.
+     */
+    public val componentFactory: VideoComponentFactory
+        @Composable @ReadOnlyComposable
+        get() = LocalComponentFactory.current
 }
 
 /**
