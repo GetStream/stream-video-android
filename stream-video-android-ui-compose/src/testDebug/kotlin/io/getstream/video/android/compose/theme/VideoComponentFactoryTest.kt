@@ -27,6 +27,14 @@ import org.junit.Test
 /**
  * Snapshots for the [VideoComponentFactory] default implementations that are not reached through
  * the component slots covered by the other snapshot tests.
+ *
+ * Some of these goldens are byte-identical to other goldens in the suite on purpose: the factory
+ * defaults delegate to the same built-in components with the same preview data, and that identity
+ * is exactly what these tests pin, together with the line and branch coverage of the default
+ * implementations (for example the null fallbacks for `title`, `onCallAction` and `actions`).
+ * Dark mode siblings also match their light counterparts until the light palette lands (see
+ * AND-1419); the pairs are kept so they start diverging with no test changes, like the rest of
+ * the suite.
  */
 internal class VideoComponentFactoryTest : PaparazziComposeTest {
 
