@@ -22,22 +22,25 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 /**
  * Emits the participant roster whenever the local user has become the last participant in the
- * call while the connection is settled.
+ * call while the connection is [RealtimeConnection.Connected].
  *
  * Roster changes are debounced by [debounceMs] to absorb quick disconnect/reconnect flaps.
- * Emissions are suppressed while the connection is [RealtimeConnection.Reconnecting] or
- * [RealtimeConnection.Migrating]: during a reconnect the roster is unreliable (the rejoin
- * removes the previous local participant record, and remote participants of the failing SFU
- * may not have rejoined yet), and acting on it would leave the call and cancel the reconnect
- * that is still running in the call scope. The connection state is part of the combined
- * stream, so the roster is re-evaluated once the reconnect settles and a genuine
- * last-participant state still emits.
+ * Emissions require a connected state because the roster is unreliable at any other point:
+ * during the initial join it is still being populated, and during a reconnect the rejoin
+ * removes the previous local participant record and remote participants of the failing SFU
+ * may not have rejoined yet. Acting on the roster then would leave the call and cancel the
+ * join or reconnect that is still running in the call scope. Terminal states need no signal
+ * from here: the reconnector leaves the call itself when retries are exhausted. The
+ * connection state is part of the combined stream, so the roster is re-evaluated once the
+ * connection settles and a genuine last-participant state still emits, while an unchanged
+ * roster is not emitted twice across connection transitions.
  *
  * @param participants the participant roster of the call.
  * @param connection the realtime connection state of the call.
@@ -55,9 +58,7 @@ internal fun lastParticipantSignal(
         .debounce(debounceMs)
         .onEach { (roster, connectionState) -> onEvaluated(roster, connectionState) }
         .filter { (roster, connectionState) ->
-            roster.size <= 1 && !connectionState.isReconnectInProgress()
+            roster.size <= 1 && connectionState is RealtimeConnection.Connected
         }
         .map { (roster, _) -> roster }
-
-private fun RealtimeConnection.isReconnectInProgress(): Boolean =
-    this is RealtimeConnection.Reconnecting || this is RealtimeConnection.Migrating
+        .distinctUntilChanged()

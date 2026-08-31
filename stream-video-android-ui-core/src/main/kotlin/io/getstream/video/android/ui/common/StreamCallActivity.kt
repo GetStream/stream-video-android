@@ -1479,10 +1479,10 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      *
      * Observes [cachedCall.state.participants] together with the connection state and triggers
      * [onLastParticipant] if only one or fewer participants remain while the connection is
-     * settled. Debouncing is applied to handle quick network disconnect/reconnect scenarios,
-     * and the check is suppressed while the connection is reconnecting or migrating, because
-     * the roster is unreliable then and leaving would cancel the reconnect. See
-     * [lastParticipantSignal].
+     * [RealtimeConnection.Connected]. Debouncing is applied to handle quick network
+     * disconnect/reconnect scenarios, and the check requires a connected state because the
+     * roster is unreliable while a join or reconnect is running and leaving would cancel it.
+     * See [lastParticipantSignal].
      *
      * @param call the active [Call] associated with the event.
      * @param event the [VideoEvent] that triggered this processing, typically a [ParticipantLeftEvent]
