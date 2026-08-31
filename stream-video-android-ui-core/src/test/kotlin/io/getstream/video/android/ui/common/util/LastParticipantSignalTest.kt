@@ -29,10 +29,10 @@ import kotlin.test.assertEquals
 
 /**
  * Regression tests for the [lastParticipantSignal] gating (AND-1455): with
- * `leaveWhenLastInCall = true`, a leave triggered while an SFU reconnect is in flight cancels
- * the reconnect loop in the call scope and leaves the UI stuck on "Connecting...". The signal
- * must stay silent while the connection is reconnecting or migrating and re-evaluate the
- * roster once the connection settles.
+ * `leaveWhenLastInCall = true`, a leave triggered while an SFU join or reconnect is running
+ * cancels the work in the call scope and leaves the UI stuck on "Connecting...". The signal
+ * must only act while the connection is connected, re-evaluate the roster once the connection
+ * settles, and not repeat an unchanged roster across connection transitions.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class LastParticipantSignalTest {
@@ -88,6 +88,52 @@ internal class LastParticipantSignalTest {
             connection.value = RealtimeConnection.Migrating
             participants.value = listOf(local)
 
+            advanceTimeBy(debounceMs + 1)
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `does not emit while the join is in progress`() = runTest {
+        val participants = MutableStateFlow(listOf(local))
+        val connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.PreJoin)
+
+        lastParticipantSignal(participants, connection, debounceMs).test {
+            advanceTimeBy(debounceMs + 1)
+            expectNoEvents()
+
+            connection.value = RealtimeConnection.InProgress
+            advanceTimeBy(debounceMs + 1)
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `does not emit when the reconnect fails terminally`() = runTest {
+        val participants = MutableStateFlow(listOf(local))
+        val connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.Reconnecting)
+
+        lastParticipantSignal(participants, connection, debounceMs).test {
+            connection.value = RealtimeConnection.ReconnectingFailed
+
+            advanceTimeBy(debounceMs + 1)
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `does not emit the same roster again after a reconnect flap`() = runTest {
+        val roster = listOf(local)
+        val participants = MutableStateFlow(roster)
+        val connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.Connected)
+
+        lastParticipantSignal(participants, connection, debounceMs).test {
+            advanceTimeBy(debounceMs + 1)
+            assertEquals(1, awaitItem().size)
+
+            connection.value = RealtimeConnection.Reconnecting
+            advanceTimeBy(debounceMs + 1)
+            connection.value = RealtimeConnection.Connected
             advanceTimeBy(debounceMs + 1)
             expectNoEvents()
         }
