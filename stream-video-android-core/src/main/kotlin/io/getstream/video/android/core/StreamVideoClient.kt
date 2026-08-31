@@ -280,26 +280,27 @@ internal class StreamVideoClient internal constructor(
         // cancel the StreamClient subscription before tearing down the socket
         streamClientSubscription?.cancel()
         streamClientSubscription = null
-        // Disconnect the StreamClient socket before cancelling the scope. The suspend call is
-        // bridged because cleanup() is non-suspending public API, but it must not park the main
-        // thread: StreamClient.disconnect() stops its lifecycle monitor by posting to the main
-        // looper and blocking on it with a 5 second safety timeout, so a runBlocking on the main
-        // thread deadlocks until that timeout fires and freezes the UI for the whole wait.
-        val disconnectStreamClient: suspend () -> Unit = {
-            runCatching { streamClient.disconnect() }
+        // Disconnect the StreamClient socket, then cancel the scope. Two constraints shape this:
+        // the StreamClient runs its internals (the disconnect included) on this same `scope`, so
+        // the scope must stay alive until the disconnect has finished; and the disconnect must
+        // not run inside runBlocking on the main thread, because it stops its lifecycle monitor
+        // by posting to the main looper and blocking on it with a 5 second safety timeout, which
+        // self-deadlocks until that timeout fires and freezes the UI for the whole wait. The
+        // suspend call is bridged because cleanup() is non-suspending public API.
+        val disconnectStreamClientThenCancelScope: suspend () -> Unit = {
+            runCatching { streamClient.disconnect().getOrThrow() }
                 .onFailure { logger.e(it) { "[cleanup] StreamClient.disconnect failed" } }
+            scope.cancel()
         }
         val mainLooper = Looper.getMainLooper()
         if (mainLooper != null && Looper.myLooper() === mainLooper) {
             CoroutineScope(SupervisorJob() + DispatcherProvider.IO)
                 .launch(CoroutineName("cleanup#streamClient.disconnect")) {
-                    disconnectStreamClient()
+                    disconnectStreamClientThenCancelScope()
                 }
         } else {
-            runBlocking { disconnectStreamClient() }
+            runBlocking { disconnectStreamClientThenCancelScope() }
         }
-        // stop all running coroutines
-        scope.cancel()
         // call cleanup on the active call
         val activeCall = state.activeCall.value
         // Stop the call service if it was running

@@ -31,11 +31,13 @@ import io.mockk.mockk
 import io.mockk.unmockkAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.isActive
 import org.junit.After
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.system.measureTimeMillis
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
@@ -92,5 +94,38 @@ class StreamVideoClientCleanupTest {
         )
         // The disconnect must still happen, detached from the calling thread.
         coVerify(timeout = 3_000, exactly = 1) { streamClient.disconnect() }
+    }
+
+    // The StreamClient executes its internals, the disconnect included, on the same scope the
+    // video client owns, so cancelling that scope before the disconnect finishes turns the
+    // disconnect into a silent no-op and leaks the coordinator socket.
+    @Test
+    fun `cleanup on the main thread cancels the client scope only after the disconnect finishes`() {
+        val streamClient = mockk<StreamClient>(relaxed = true)
+        every { streamClient.subscribe(any()) } returns
+            Result.success(mockk<StreamSubscription>(relaxed = true))
+        every { streamClient.connectionState } returns
+            MutableStateFlow(StreamConnectionState.Idle)
+        coEvery { streamClient.disconnect() } coAnswers {
+            delay(2_000)
+            Result.success(Unit)
+        }
+        val client = buildClient(streamClient)
+
+        client.cleanup()
+
+        assertTrue(
+            client.scope.isActive,
+            "the scope must stay alive while the disconnect is still in flight",
+        )
+        coVerify(timeout = 3_000, exactly = 1) { streamClient.disconnect() }
+        val deadline = System.currentTimeMillis() + 5_000
+        while (client.scope.isActive && System.currentTimeMillis() < deadline) {
+            Thread.sleep(20)
+        }
+        assertFalse(
+            client.scope.isActive,
+            "the scope must be cancelled once the disconnect has completed",
+        )
     }
 }
