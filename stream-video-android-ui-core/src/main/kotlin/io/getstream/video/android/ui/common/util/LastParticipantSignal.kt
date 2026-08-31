@@ -22,10 +22,9 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.runningFold
 
 /**
  * Emits the participant roster whenever the local user has become the last participant in the
@@ -39,8 +38,12 @@ import kotlinx.coroutines.flow.onEach
  * join or reconnect that is still running in the call scope. Terminal states need no signal
  * from here: the reconnector leaves the call itself when retries are exhausted. The
  * connection state is part of the combined stream, so the roster is re-evaluated once the
- * connection settles and a genuine last-participant state still emits, while an unchanged
- * roster is not emitted twice across connection transitions.
+ * connection settles and a genuine last-participant state still emits.
+ *
+ * The signal is a rising edge of the roster, not of the combined condition: becoming the last
+ * participant arms it, and it fires on the first connected evaluation after that. A connection
+ * transition with an unchanged roster therefore does not repeat the signal, while a remote
+ * participant joining and leaving again re-arms it and does signal a second time.
  *
  * @param participants the participant roster of the call.
  * @param connection the realtime connection state of the call.
@@ -57,8 +60,33 @@ internal fun lastParticipantSignal(
     combine(participants, connection) { roster, connectionState -> roster to connectionState }
         .debounce(debounceMs)
         .onEach { (roster, connectionState) -> onEvaluated(roster, connectionState) }
-        .filter { (roster, connectionState) ->
-            roster.size <= 1 && connectionState is RealtimeConnection.Connected
+        .runningFold(LastParticipantState()) { previous, (roster, connectionState) ->
+            val isLast = roster.size <= 1
+            // Arm on the rising edge of the roster and stay armed until a connected
+            // evaluation consumes it, so a signal found mid-reconnect is not lost.
+            val armed = when {
+                !isLast -> false
+                !previous.wasLast -> true
+                else -> previous.armed
+            }
+            val connected = connectionState is RealtimeConnection.Connected
+            LastParticipantState(
+                wasLast = isLast,
+                armed = armed && !connected,
+                signal = roster.takeIf { armed && connected },
+            )
         }
-        .map { (roster, _) -> roster }
-        .distinctUntilChanged()
+        .mapNotNull { it.signal }
+
+/**
+ * Fold state of [lastParticipantSignal].
+ *
+ * @param wasLast whether the previous evaluation saw a last-participant roster.
+ * @param armed whether a last-participant roster is waiting for a connected evaluation.
+ * @param signal the roster to emit for this evaluation, or null when there is nothing to emit.
+ */
+private data class LastParticipantState(
+    val wasLast: Boolean = false,
+    val armed: Boolean = false,
+    val signal: List<ParticipantState>? = null,
+)
