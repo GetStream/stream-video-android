@@ -136,7 +136,7 @@ landscapist-transformation = { group = "com.github.skydoves", name = "landscapis
 
 accompanist-permission = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 
-stream-video-android-noise-cancellation = { module = "io.getstream:stream-video-android-noise-cancellation-libwebrtc", version.ref = "streamNoiseCancellation" }
+stream-video-android-noise-cancellation = { module = "io.getstream:stream-video-android-noise-cancellation", version.ref = "streamNoiseCancellation" }
 telephoto = { group = "me.saket.telephoto", name = "zoomable", version.ref = "telephoto"  }
 
 libyuv = { group = "io.github.crow-misia.libyuv", name = "libyuv-android", version.ref = "libyuv"}

@@ -328,7 +328,7 @@ class StreamPeerConnectionFactoryTest {
         // processor and then tear it down for every later call.
         callFactory.dispose()
 
-        verify(exactly = 0) { mockAudioProc.createNative(any()) }
+        verify(exactly = 0) { mockAudioProc.createNative() }
         verify(exactly = 0) { mockAudioProc.isEnabled = any() }
     }
 
