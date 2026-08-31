@@ -35,6 +35,7 @@ import kotlinx.coroutines.isActive
 import org.junit.After
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -53,7 +54,30 @@ class StreamVideoClientCleanupTest {
         unmockkAll()
     }
 
-    private fun buildClient(streamClient: StreamClient): StreamVideoClient = StreamVideoClient(
+    private fun mockStreamClient(): StreamClient {
+        val streamClient = mockk<StreamClient>(relaxed = true)
+        every { streamClient.subscribe(any()) } returns
+            Result.success(mockk<StreamSubscription>(relaxed = true))
+        every { streamClient.connectionState } returns
+            MutableStateFlow(StreamConnectionState.Idle)
+        return streamClient
+    }
+
+    private fun awaitScopeCancelled(client: StreamVideoClient) {
+        val deadline = System.currentTimeMillis() + 5_000
+        while (client.scope.isActive && System.currentTimeMillis() < deadline) {
+            Thread.sleep(20)
+        }
+        assertFalse(
+            client.scope.isActive,
+            "the scope must be cancelled after the disconnect step",
+        )
+    }
+
+    private fun buildClient(
+        streamClient: StreamClient,
+        cleanupDisconnectTimeoutMs: Long = 10_000L,
+    ): StreamVideoClient = StreamVideoClient(
         context = mockk<Context>(relaxed = true),
         initialUser = User(id = "user-1", type = UserType.Authenticated),
         apiKey = "apikey",
@@ -67,6 +91,7 @@ class StreamVideoClientCleanupTest {
         sounds = mockk(relaxed = true),
         vibrationConfig = mockk(relaxed = true),
         analytics = mockk(relaxed = true),
+        cleanupDisconnectTimeoutMs = cleanupDisconnectTimeoutMs,
     )
 
     // Regression for AND-1466: cleanup() used to bridge streamClient.disconnect() with
@@ -127,5 +152,57 @@ class StreamVideoClientCleanupTest {
             client.scope.isActive,
             "the scope must be cancelled once the disconnect has completed",
         )
+    }
+
+    // A failed disconnect is logged but must not stop the teardown: the scope is cancelled
+    // regardless, otherwise a transient socket error would leak the whole client.
+    @Test
+    fun `cleanup still cancels the scope when the disconnect fails`() {
+        val streamClient = mockStreamClient()
+        coEvery { streamClient.disconnect() } returns Result.failure(RuntimeException("socket down"))
+        val client = buildClient(streamClient)
+
+        client.cleanup()
+
+        coVerify(timeout = 3_000, exactly = 1) { streamClient.disconnect() }
+        awaitScopeCancelled(client)
+    }
+
+    // Off the main thread there is no deadlock risk, so cleanup keeps the synchronous
+    // contract: the disconnect has completed and the scope is cancelled by the time it returns.
+    @Test
+    fun `cleanup off the main thread disconnects before returning`() {
+        val streamClient = mockStreamClient()
+        coEvery { streamClient.disconnect() } returns Result.success(Unit)
+        val client = buildClient(streamClient)
+
+        val worker = thread { client.cleanup() }
+        worker.join(10_000)
+
+        assertFalse(worker.isAlive, "cleanup must complete on a background thread")
+        coVerify(exactly = 1) { streamClient.disconnect() }
+        assertFalse(
+            client.scope.isActive,
+            "the scope must already be cancelled when cleanup returns off the main thread",
+        )
+    }
+
+    // A disconnect that never completes must not hold the teardown hostage: after the
+    // configured bound the scope is cancelled anyway.
+    @Test
+    fun `cleanup gives up on a disconnect that exceeds the timeout`() {
+        val streamClient = mockStreamClient()
+        coEvery { streamClient.disconnect() } coAnswers {
+            delay(60_000)
+            Result.success(Unit)
+        }
+        val client = buildClient(streamClient, cleanupDisconnectTimeoutMs = 200)
+
+        client.cleanup()
+
+        coVerify(timeout = 3_000, exactly = 1) { streamClient.disconnect() }
+        // The mock is still suspended in its delay, so reaching cancellation here proves the
+        // timeout branch ran instead of waiting for the disconnect.
+        awaitScopeCancelled(client)
     }
 }

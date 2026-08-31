@@ -214,6 +214,7 @@ internal class StreamVideoClient internal constructor(
         coordinatorConnectionModule.api,
         scope,
     ),
+    internal val cleanupDisconnectTimeoutMs: Long = CLEANUP_DISCONNECT_TIMEOUT_MS,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null
@@ -295,11 +296,11 @@ internal class StreamVideoClient internal constructor(
         // suspend call is bridged because cleanup() is non-suspending public API.
         val disconnectStreamClientThenCancelScope: suspend () -> Unit = {
             runCatching {
-                withTimeoutOrNull(CLEANUP_DISCONNECT_TIMEOUT_MS) {
+                withTimeoutOrNull(cleanupDisconnectTimeoutMs) {
                     streamClient.disconnect().getOrThrow()
                 } ?: logger.e {
                     "[cleanup] StreamClient.disconnect timed out " +
-                        "after ${CLEANUP_DISCONNECT_TIMEOUT_MS}ms"
+                        "after ${cleanupDisconnectTimeoutMs}ms"
                 }
             }.onFailure { logger.e(it) { "[cleanup] StreamClient.disconnect failed" } }
             scope.cancel()
