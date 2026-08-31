@@ -174,6 +174,12 @@ internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
 /**
  * @param lifecycle The lifecycle used to observe changes in the process
  */
+// Upper bound for the StreamClient disconnect during cleanup(), so a disconnect that never
+// completes cannot keep the detached teardown coroutine, and with it this client, alive
+// forever. Generous compared to the internal 5 second main-looper latch it may legitimately
+// wait on when cleanup() runs off the main thread.
+private const val CLEANUP_DISCONNECT_TIMEOUT_MS = 10_000L
+
 internal class StreamVideoClient internal constructor(
     override val context: Context,
     internal val scope: CoroutineScope = ClientScope(),
@@ -288,8 +294,14 @@ internal class StreamVideoClient internal constructor(
         // self-deadlocks until that timeout fires and freezes the UI for the whole wait. The
         // suspend call is bridged because cleanup() is non-suspending public API.
         val disconnectStreamClientThenCancelScope: suspend () -> Unit = {
-            runCatching { streamClient.disconnect().getOrThrow() }
-                .onFailure { logger.e(it) { "[cleanup] StreamClient.disconnect failed" } }
+            runCatching {
+                withTimeoutOrNull(CLEANUP_DISCONNECT_TIMEOUT_MS) {
+                    streamClient.disconnect().getOrThrow()
+                } ?: logger.e {
+                    "[cleanup] StreamClient.disconnect timed out " +
+                        "after ${CLEANUP_DISCONNECT_TIMEOUT_MS}ms"
+                }
+            }.onFailure { logger.e(it) { "[cleanup] StreamClient.disconnect failed" } }
             scope.cancel()
         }
         val mainLooper = Looper.getMainLooper()
