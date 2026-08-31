@@ -140,6 +140,25 @@ internal class LastParticipantSignalTest {
     }
 
     @Test
+    fun `emits again when a remote participant joins and leaves again`() = runTest {
+        val participants = MutableStateFlow(listOf(local))
+        val connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.Connected)
+
+        lastParticipantSignal(participants, connection, debounceMs).test {
+            advanceTimeBy(debounceMs + 1)
+            assertEquals(1, awaitItem().size)
+
+            participants.value = listOf(local, remote)
+            advanceTimeBy(debounceMs + 1)
+            expectNoEvents()
+
+            participants.value = listOf(local)
+            advanceTimeBy(debounceMs + 1)
+            assertEquals(1, awaitItem().size)
+        }
+    }
+
+    @Test
     fun `emits after the reconnect settles with the local user still alone`() = runTest {
         val participants = MutableStateFlow(listOf(local, remote))
         val connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.Connected)
