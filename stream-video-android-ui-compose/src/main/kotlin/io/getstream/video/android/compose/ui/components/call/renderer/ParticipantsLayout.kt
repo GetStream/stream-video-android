@@ -25,7 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
+import io.getstream.video.android.compose.theme.ParticipantVideoParams
+import io.getstream.video.android.compose.theme.ScreenSharingFallbackContentParams
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
@@ -65,18 +67,11 @@ public fun ParticipantsLayout(
         participant: ParticipantState,
         style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        ParticipantVideo(
-            modifier = videoModifier,
-            call = videoCall,
-            participant = videoParticipant,
-            style = videoStyle,
-        )
+        DefaultParticipantVideoRenderer(videoModifier, videoCall, videoParticipant, videoStyle)
     },
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
     screenSharingFallbackContent: @Composable (ScreenSharingSession) -> Unit = {
-        val userName by it.participant.userNameOrId.collectAsStateWithLifecycle()
-        val userImage by it.participant.image.collectAsStateWithLifecycle()
-        UserAvatarBackground(userImage = userImage, userName = userName)
+        DefaultScreenSharingFallbackContent(session = it)
     },
 ) {
     val screenSharingSession = call.state.screenSharingSession.collectAsStateWithLifecycle()
@@ -127,4 +122,37 @@ public fun ParticipantsLayout(
             screenSharingFallbackContent = screenSharingFallbackContent,
         )
     }
+}
+
+/**
+ * The default fallback shown in place of the shared screen while the screen sharing session is
+ * loading or not available. Delegates to
+ * [io.getstream.video.android.compose.theme.VideoComponentFactory.ScreenSharingFallbackContent].
+ */
+@Composable
+internal fun DefaultScreenSharingFallbackContent(session: ScreenSharingSession) {
+    VideoTheme.componentFactory.ScreenSharingFallbackContent(
+        params = ScreenSharingFallbackContentParams(session = session),
+    )
+}
+
+/**
+ * The default renderer for a single participant video. Delegates to
+ * [io.getstream.video.android.compose.theme.VideoComponentFactory.ParticipantVideo].
+ */
+@Composable
+internal fun DefaultParticipantVideoRenderer(
+    modifier: Modifier,
+    call: Call,
+    participant: ParticipantState,
+    style: VideoRendererStyle,
+) {
+    VideoTheme.componentFactory.ParticipantVideo(
+        params = ParticipantVideoParams(
+            call = call,
+            participant = participant,
+            modifier = modifier,
+            style = style,
+        ),
+    )
 }

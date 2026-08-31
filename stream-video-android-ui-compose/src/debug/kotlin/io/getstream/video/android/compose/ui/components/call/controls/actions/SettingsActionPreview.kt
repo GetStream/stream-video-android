@@ -24,15 +24,20 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-public fun ToggleSettingsActionPreview() {
+private fun ToggleSettingsActionRootPreview() {
     VideoTheme {
-        Column {
-            Row {
-                ToggleSettingsAction(isShowingSettings = false) {
-                }
+        ToggleSettingsActionPreview()
+    }
+}
 
-                ToggleSettingsAction(isShowingSettings = true) {
-                }
+@Composable
+internal fun ToggleSettingsActionPreview() {
+    Column {
+        Row {
+            ToggleSettingsAction(isShowingSettings = false) {
+            }
+
+            ToggleSettingsAction(isShowingSettings = true) {
             }
         }
     }

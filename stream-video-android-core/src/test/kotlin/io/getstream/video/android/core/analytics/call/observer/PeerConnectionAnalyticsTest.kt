@@ -103,6 +103,33 @@ class PeerConnectionAnalyticsTest {
                 joinReason = JoinReason.ReJoin,
                 role = PeerConnectionRole.SUBSCRIBE,
                 iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+                wasPrevConnected = false,
+                peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
+            )
+        }
+    }
+
+    @Test
+    fun `a new call starts with wasPrevConnected set to false`() {
+        analytics(CoroutineScope(Dispatchers.Unconfined)).onPeerConnectionStateChanged(
+            peerConnectionHashCode = 42,
+            role = PeerConnectionRole.PUBLISH,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+            peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
+        )
+
+        verify(exactly = 1) {
+            reporter.onPeerConnectionStateChanged(
+                peerConnectionHashCode = 42,
+                callId = "call-1",
+                callType = "default",
+                joinStageAttemptId = any(),
+                callSessionId = any(),
+                sfuId = any(),
+                joinReason = any(),
+                role = PeerConnectionRole.PUBLISH,
+                iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
             )
         }
@@ -131,6 +158,7 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.CONNECTED,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
             )
         }
@@ -161,6 +189,7 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTED,
             )
         }
@@ -191,6 +220,7 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
             )
         }
@@ -220,6 +250,7 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.FAILED,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.FAILED,
             )
         }
@@ -285,7 +316,46 @@ class PeerConnectionAnalyticsTest {
                 joinReason = any(),
                 role = PeerConnectionRole.PUBLISH,
                 iceState = VideoAnalyticsIceState.CONNECTED,
+                wasPrevConnected = false,
                 peerConnectionState = PeerConnection.PeerConnectionState.CONNECTED,
+            )
+        }
+        assertTrue(stateHolder.isPcEverConnected(PeerConnectionRole.PUBLISH))
+        scope.cancel()
+    }
+
+    @Test
+    fun `an existing call whose Publisher was previously connected sends wasPrevConnected as true`() {
+        val scope = CoroutineScope(Dispatchers.Unconfined)
+        val peerConnectionAnalytics = analytics(scope)
+
+        peerConnectionAnalytics.onPeerConnectionStateChanged(
+            peerConnectionHashCode = 42,
+            role = PeerConnectionRole.PUBLISH,
+            iceState = VideoAnalyticsIceState.CONNECTED,
+            peerConnectionState = PeerConnection.PeerConnectionState.CONNECTED,
+        )
+
+        peerConnectionAnalytics.onPeerConnectionStateChanged(
+            peerConnectionHashCode = 43,
+            role = PeerConnectionRole.PUBLISH,
+            iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+            peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
+        )
+
+        verify(exactly = 1) {
+            reporter.onPeerConnectionStateChanged(
+                peerConnectionHashCode = 43,
+                callId = "call-1",
+                callType = "default",
+                joinStageAttemptId = any(),
+                callSessionId = any(),
+                sfuId = any(),
+                joinReason = any(),
+                role = PeerConnectionRole.PUBLISH,
+                iceState = VideoAnalyticsIceState.NOT_CONNECTED,
+                wasPrevConnected = true,
+                peerConnectionState = PeerConnection.PeerConnectionState.CONNECTING,
             )
         }
         scope.cancel()

@@ -31,78 +31,83 @@ import io.getstream.video.android.compose.ui.components.base.styling.StreamTextF
 
 @Preview
 @Composable
-private fun StreamInputFieldsPreviews() {
+private fun InputFieldsRootPreview() {
     VideoTheme {
-        Column {
-            // Empty
-            StreamTextField(
-                value = TextFieldValue(""),
-                placeholder = "Call ID",
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            StreamTextField(
-                value = TextFieldValue(""),
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
+        InputFieldsPreview()
+    }
+}
 
-            StreamTextField(
-                icon = Icons.Outlined.Phone,
-                value = TextFieldValue(""),
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
+@Composable
+internal fun InputFieldsPreview() {
+    Column {
+        // Empty
+        StreamTextField(
+            value = TextFieldValue(""),
+            placeholder = "Call ID",
+            onValueChange = { },
+            style = StreamTextFieldStyles.defaultTextField(),
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        StreamTextField(
+            value = TextFieldValue(""),
+            onValueChange = { },
+            style = StreamTextFieldStyles.defaultTextField(),
+        )
+        Spacer(modifier = Modifier.size(16.dp))
 
-            // Not empty
-            StreamTextField(
-                value = TextFieldValue("Some value"),
-                placeholder = "Call ID",
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
+        StreamTextField(
+            icon = Icons.Outlined.Phone,
+            value = TextFieldValue(""),
+            onValueChange = { },
+            style = StreamTextFieldStyles.defaultTextField(),
+        )
+        Spacer(modifier = Modifier.size(16.dp))
 
-            StreamTextField(
-                icon = Icons.Outlined.Phone,
-                value = TextFieldValue("+ 123 456 789"),
-                placeholder = "Call ID",
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
+        // Not empty
+        StreamTextField(
+            value = TextFieldValue("Some value"),
+            placeholder = "Call ID",
+            onValueChange = { },
+            style = StreamTextFieldStyles.defaultTextField(),
+        )
+        Spacer(modifier = Modifier.size(16.dp))
 
-            // Disabled
-            StreamTextField(
-                enabled = false,
-                value = TextFieldValue(""),
-                placeholder = "Call ID",
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
+        StreamTextField(
+            icon = Icons.Outlined.Phone,
+            value = TextFieldValue("+ 123 456 789"),
+            placeholder = "Call ID",
+            onValueChange = { },
+            style = StreamTextFieldStyles.defaultTextField(),
+        )
+        Spacer(modifier = Modifier.size(16.dp))
 
-            // Error
-            StreamTextField(
-                error = true,
-                value = TextFieldValue("Wrong data"),
-                placeholder = "Call ID",
-                onValueChange = { },
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
+        // Disabled
+        StreamTextField(
+            enabled = false,
+            value = TextFieldValue(""),
+            placeholder = "Call ID",
+            onValueChange = { },
+            style = StreamTextFieldStyles.defaultTextField(),
+        )
+        Spacer(modifier = Modifier.size(16.dp))
 
-            StreamTextField(
-                value = TextFieldValue(""),
-                placeholder = "Message",
-                onValueChange = { },
-                minLines = 8,
-                style = StreamTextFieldStyles.defaultTextField(),
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-        }
+        // Error
+        StreamTextField(
+            error = true,
+            value = TextFieldValue("Wrong data"),
+            placeholder = "Call ID",
+            onValueChange = { },
+            style = StreamTextFieldStyles.defaultTextField(),
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+
+        StreamTextField(
+            value = TextFieldValue(""),
+            placeholder = "Message",
+            onValueChange = { },
+            minLines = 8,
+            style = StreamTextFieldStyles.defaultTextField(),
+        )
+        Spacer(modifier = Modifier.size(16.dp))
     }
 }

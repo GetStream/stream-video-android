@@ -24,15 +24,20 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-public fun ToggleHifiAudioActionPreview() {
+private fun ToggleHifiAudioActionRootPreview() {
     VideoTheme {
-        Column {
-            Row {
-                ToggleHifiAudioAction(isMusicHighQuality = false) {
-                }
+        ToggleHifiAudioActionPreview()
+    }
+}
 
-                ToggleHifiAudioAction(isMusicHighQuality = true) {
-                }
+@Composable
+internal fun ToggleHifiAudioActionPreview() {
+    Column {
+        Row {
+            ToggleHifiAudioAction(isMusicHighQuality = false) {
+            }
+
+            ToggleHifiAudioAction(isMusicHighQuality = true) {
             }
         }
     }
