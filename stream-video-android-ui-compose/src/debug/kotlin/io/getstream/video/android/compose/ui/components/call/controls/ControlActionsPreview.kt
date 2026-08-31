@@ -17,20 +17,67 @@
 package io.getstream.video.android.compose.ui.components.call.controls
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
+import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 
 @Preview
 @Composable
-private fun CallControlsPreview() {
+private fun CallControlsRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallControlsPreview()
+    }
+}
+
+@Composable
+internal fun CallControlsPreview() {
+    ControlActions(call = previewCall, onCallAction = {})
+}
+
+@Preview
+@Composable
+private fun CallControlActionsRootPreview() {
+    VideoTheme {
+        CallControlActionsPreview()
+    }
+}
+
+@Composable
+internal fun CallControlActionsPreview() {
     Column {
-        VideoTheme {
-            ControlActions(call = previewCall, onCallAction = {})
+        Row {
+            ToggleCameraAction(
+                modifier = Modifier.size(60.dp),
+                isCameraEnabled = true,
+                onCallAction = {},
+            )
+            ToggleMicrophoneAction(
+                modifier = Modifier.size(60.dp),
+                isMicrophoneEnabled = true,
+                onCallAction = {},
+            )
+            FlipCameraAction(modifier = Modifier.size(60.dp), onCallAction = {})
+            ChatDialogAction(modifier = Modifier.size(60.dp), onCallAction = {})
+        }
+        Row {
+            LeaveCallAction(modifier = Modifier.size(60.dp), onCallAction = {})
+            AcceptCallAction(modifier = Modifier.size(60.dp), onCallAction = {})
+            CancelCallAction(modifier = Modifier.size(60.dp), onCallAction = {})
         }
     }
 }

@@ -25,12 +25,14 @@ import io.getstream.video.android.mock.previewMemberListState
 
 @Preview
 @Composable
-private fun OutgoingCallDetailsPreview() {
+private fun OutgoingCallDetailsVideoRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        OutgoingCallDetails(
-            isVideoType = false,
-            participants = previewMemberListState,
-        )
+        OutgoingCallDetailsVideoPreview()
     }
+}
+
+@Composable
+internal fun OutgoingCallDetailsVideoPreview() {
+    OutgoingCallDetails(participants = previewMemberListState)
 }

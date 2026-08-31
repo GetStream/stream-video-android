@@ -29,28 +29,38 @@ import io.getstream.video.android.mock.previewParticipantsList
 
 @Preview
 @Composable
-private fun SpotlightParticipantsPreview() {
+private fun SpotlightParticipantsPreviewRoot() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        SpotlightVideoRenderer(
-            call = previewCall,
-            speaker = previewParticipant,
-            participants = previewParticipantsList,
-        )
+        SpotlightParticipantsPreview()
     }
+}
+
+@Composable
+internal fun SpotlightParticipantsPreview() {
+    SpotlightVideoRenderer(
+        call = previewCall,
+        speaker = previewParticipant,
+        participants = previewParticipantsList,
+    )
 }
 
 @Preview
 @Composable
-private fun SpotlightTwoParticipantsPreview() {
+private fun SpotlightTwoParticipantsPreviewRoot() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        SpotlightVideoRenderer(
-            call = previewCall,
-            speaker = previewParticipant,
-            participants = previewParticipantsList.take(3),
-        )
+        SpotlightTwoParticipantsPreview()
     }
+}
+
+@Composable
+internal fun SpotlightTwoParticipantsPreview() {
+    SpotlightVideoRenderer(
+        call = previewCall,
+        speaker = previewParticipant,
+        participants = previewParticipantsList.take(3),
+    )
 }
 
 @Preview(
@@ -59,16 +69,21 @@ private fun SpotlightTwoParticipantsPreview() {
     heightDp = 720,
 )
 @Composable
-private fun SpotlightParticipantsLandscapePreview() {
+private fun SpotlightParticipantsLandscapePreviewRoot() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        SpotlightVideoRenderer(
-            call = previewCall,
-            orientation = ORIENTATION_LANDSCAPE,
-            speaker = previewParticipant,
-            participants = previewParticipantsList,
-        )
+        SpotlightParticipantsLandscapePreview()
     }
+}
+
+@Composable
+internal fun SpotlightParticipantsLandscapePreview() {
+    SpotlightVideoRenderer(
+        call = previewCall,
+        orientation = ORIENTATION_LANDSCAPE,
+        speaker = previewParticipant,
+        participants = previewParticipantsList,
+    )
 }
 
 @Preview(
@@ -77,14 +92,19 @@ private fun SpotlightParticipantsLandscapePreview() {
     heightDp = 720,
 )
 @Composable
-private fun SpotlightThreeParticipantsLandscapePreview() {
+private fun SpotlightThreeParticipantsLandscapePreviewRoot() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        SpotlightVideoRenderer(
-            call = previewCall,
-            orientation = ORIENTATION_LANDSCAPE,
-            speaker = previewParticipant,
-            participants = previewParticipantsList.take(3),
-        )
+        SpotlightThreeParticipantsLandscapePreview()
     }
+}
+
+@Composable
+internal fun SpotlightThreeParticipantsLandscapePreview() {
+    SpotlightVideoRenderer(
+        call = previewCall,
+        orientation = ORIENTATION_LANDSCAPE,
+        speaker = previewParticipant,
+        participants = previewParticipantsList.take(3),
+    )
 }

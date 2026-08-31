@@ -158,6 +158,10 @@ import stream.video.sfu.signal.ICERestartResponse
 import stream.video.sfu.signal.ICETrickleResponse
 import stream.video.sfu.signal.Reconnection
 import stream.video.sfu.signal.SendStatsRequest
+import stream.video.sfu.signal.StartNoiseCancellationRequest
+import stream.video.sfu.signal.StartNoiseCancellationResponse
+import stream.video.sfu.signal.StopNoiseCancellationRequest
+import stream.video.sfu.signal.StopNoiseCancellationResponse
 import stream.video.sfu.signal.Telemetry
 import stream.video.sfu.signal.TrackMuteState
 import stream.video.sfu.signal.TrackSubscriptionDetails
@@ -1985,6 +1989,22 @@ public class RtcSession internal constructor(
 
     private suspend fun updateMuteState(request: UpdateMuteStatesRequest): Result<UpdateMuteStatesResponse> =
         safeApiCall { sfuConnectionModule.api.updateMuteStates(request) }
+
+    // tell the SFU that local noise cancellation started
+    internal suspend fun startNoiseCancellation(): Result<StartNoiseCancellationResponse> =
+        safeApiCall {
+            sfuConnectionModule.api.startNoiseCancellation(
+                StartNoiseCancellationRequest(session_id = sessionId),
+            )
+        }
+
+    // tell the SFU that local noise cancellation stopped
+    internal suspend fun stopNoiseCancellation(): Result<StopNoiseCancellationResponse> =
+        safeApiCall {
+            sfuConnectionModule.api.stopNoiseCancellation(
+                StopNoiseCancellationRequest(session_id = sessionId),
+            )
+        }
 
     // sets display track visibility
     @Synchronized

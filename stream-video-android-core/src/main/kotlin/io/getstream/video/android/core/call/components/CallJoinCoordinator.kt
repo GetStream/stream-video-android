@@ -69,6 +69,18 @@ internal class CallJoinCoordinator(
 
     private fun isVideoEnabled(): Boolean = state.settings.value?.video?.enabled ?: false
 
+    /**
+     * Runs the public `Call.join()` flow and emits analytics in the following order:
+     * 1. `JOIN_INITIATED`: `[io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinFunctionStart]` reports that the public SDK join method was
+     *    invoked.
+     * 2. `MEDIA_DEVICE_PERMISSION`: [io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver.mediaPermissionStatus] reports the current camera and
+     *    microphone permission state.
+     * 3. `COORDINATOR_JOIN`: [joinInternal] calls [CallApiClient.joinRequest], which reports the
+     *    stage as initiated. A successful response completes it successfully and sends `[io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinSuccess]`. A permanent error or
+     *    exhausted retry budget completes the active stage as failed through
+     *    [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinRequestPermanentError] or [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinRequestRetryExhausted] respectively.
+     *
+     */
     suspend fun join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,

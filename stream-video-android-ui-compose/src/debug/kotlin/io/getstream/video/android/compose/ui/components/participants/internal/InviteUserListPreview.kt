@@ -25,13 +25,18 @@ import io.getstream.video.android.mock.previewParticipantsList
 
 @Preview
 @Composable
-private fun InviteUserListPreview() {
+private fun InviteUserListRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        InviteUserList(
-            previewParticipantsList,
-            onUserSelected = {},
-            onUserUnSelected = {},
-        )
+        InviteUserListPreview()
     }
+}
+
+@Composable
+internal fun InviteUserListPreview() {
+    InviteUserList(
+        previewParticipantsList,
+        onUserSelected = {},
+        onUserUnSelected = {},
+    )
 }

@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,12 +27,14 @@ import io.getstream.video.android.mock.previewCall
 
 @Preview
 @Composable
-private fun AudioControlActionsPreview() {
+private fun AudioControlActionsRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        AudioControlActions(
-            modifier = Modifier.fillMaxWidth(),
-            call = previewCall,
-        )
+        AudioControlActionsPreview()
     }
+}
+
+@Composable
+internal fun AudioControlActionsPreview() {
+    AudioControlActions(call = previewCall, modifier = Modifier.fillMaxSize())
 }

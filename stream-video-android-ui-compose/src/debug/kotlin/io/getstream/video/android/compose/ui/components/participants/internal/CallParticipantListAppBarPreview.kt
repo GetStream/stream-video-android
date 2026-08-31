@@ -22,11 +22,16 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-private fun CallParticipantsInfoAppBarPreview() {
+private fun CallParticipantListAppBarRootPreview() {
     VideoTheme {
-        CallParticipantListAppBar(
-            numberOfParticipants = 10,
-            onBackPressed = {},
-        )
+        CallParticipantListAppBarPreview()
     }
+}
+
+@Composable
+internal fun CallParticipantListAppBarPreview() {
+    CallParticipantListAppBar(
+        numberOfParticipants = 10,
+        onBackPressed = {},
+    )
 }
