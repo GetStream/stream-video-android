@@ -84,9 +84,17 @@ internal class ActiveStateGate(
     ) {
         if (interceptorJob.get()?.isActive == true) return
 
+        // Snapshot now. Null means go Active immediately and synchronously — legacy
+        // does not wait for a later callJoinInterceptorProvider (unlike PUBLISHER_CONNECTED).
+        val interceptor = interceptorProvider()
+        if (interceptor == null) {
+            onReady()
+            return
+        }
+
         interceptorJob.set(
             coroutineScope.launch {
-                val shouldProceed = invokeInterceptor(call, interceptorProvider)
+                val shouldProceed = invokeInterceptor(call) { interceptor }
                 if (!isActive) return@launch
 
                 if (shouldProceed) onReady()
