@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.os.Looper
 import androidx.collection.LruCache
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.core.api.StreamClient
@@ -90,6 +91,7 @@ import io.getstream.result.Result.Success
 import io.getstream.video.android.core.analytics.AnalyticsModule
 import io.getstream.video.android.core.audio.AudioExecutionContext
 import io.getstream.video.android.core.call.CallBusyHandler
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
@@ -143,6 +145,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
@@ -277,11 +280,23 @@ internal class StreamVideoClient internal constructor(
         // cancel the StreamClient subscription before tearing down the socket
         streamClientSubscription?.cancel()
         streamClientSubscription = null
-        // disconnect the StreamClient socket before cancelling the scope; suspend bridged via
-        // runBlocking because cleanup() is non-suspending public API.
-        runBlocking {
+        // Disconnect the StreamClient socket before cancelling the scope. The suspend call is
+        // bridged because cleanup() is non-suspending public API, but it must not park the main
+        // thread: StreamClient.disconnect() stops its lifecycle monitor by posting to the main
+        // looper and blocking on it with a 5 second safety timeout, so a runBlocking on the main
+        // thread deadlocks until that timeout fires and freezes the UI for the whole wait.
+        val disconnectStreamClient: suspend () -> Unit = {
             runCatching { streamClient.disconnect() }
                 .onFailure { logger.e(it) { "[cleanup] StreamClient.disconnect failed" } }
+        }
+        val mainLooper = Looper.getMainLooper()
+        if (mainLooper != null && Looper.myLooper() === mainLooper) {
+            CoroutineScope(SupervisorJob() + DispatcherProvider.IO)
+                .launch(CoroutineName("cleanup#streamClient.disconnect")) {
+                    disconnectStreamClient()
+                }
+        } else {
+            runBlocking { disconnectStreamClient() }
         }
         // stop all running coroutines
         scope.cancel()
@@ -293,11 +308,11 @@ internal class StreamVideoClient internal constructor(
         val runCallServiceInForeground = callConfig.runCallServiceInForeground
         if (runCallServiceInForeground) {
             safeCall {
-                val serviceIntent = ServiceIntentBuilder().buildStopIntent(
+                // buildStopIntent returns null when the service is not running.
+                ServiceIntentBuilder().buildStopIntent(
                     context = context,
                     StopServiceParam(callServiceConfiguration = callConfig),
-                )
-                serviceIntent.let {
+                )?.let { serviceIntent ->
                     context.stopService(serviceIntent)
                 }
             }
