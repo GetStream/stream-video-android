@@ -327,7 +327,11 @@ internal class CallJoinCoordinator(
             logger.d { "[joinAndRing] Joined #ringing; #track; ring: $members" }
             apiClient.ring(RingCallRequest(isVideoEnabled(), members)).map {
                 logger.d { "[joinAndRing] Ringed #ringing; #track; ring: $members" }
-                callRegistry.markRinging()
+                // registerOutgoingRing registers the ringing call AND starts the outgoing call
+                // foreground service, like the create-with-ring path does. markRinging alone
+                // never started the service here, so the caller had no outgoing notification
+                // (setActiveCall logs "Outgoing call service should already be running").
+                callRegistry.registerOutgoingRing()
                 // An event that arrived before the ring completed (e.g. call.session_started)
                 // computed the ringing state without the ringing call registered. Recompute so
                 // the state cannot stay Idle when no further coordinator event arrives.

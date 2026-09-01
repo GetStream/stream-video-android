@@ -16,12 +16,15 @@
 
 package io.getstream.video.android.robots
 
+import android.app.Notification
+import android.app.NotificationManager
 import androidx.test.uiautomator.BySelector
 import io.getstream.video.android.pages.CallPage
 import io.getstream.video.android.pages.CallPage.SettingsMenu
 import io.getstream.video.android.pages.RingPage
 import io.getstream.video.android.robots.UserControls.DISABLE
 import io.getstream.video.android.robots.UserControls.ENABLE
+import io.getstream.video.android.uiautomator.appContext
 import io.getstream.video.android.uiautomator.defaultTimeout
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
@@ -302,6 +305,30 @@ fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean
             RingPage.declineCallButton.waitToDisappear().isDisplayed(),
         )
     }
+    return this
+}
+
+/**
+ * Asserts the presence of the outgoing call notification, which the outgoing call foreground
+ * service posts with the "Calling..." title (on the ongoing calls channel, see
+ * getSimpleOngoingCallNotification). The instrumentation runs inside the app process, so the
+ * check reads NotificationManager.activeNotifications directly instead of matching text in
+ * the notification shade, where the outgoing screen shows the same "Calling..." text.
+ * The service start and stop are asynchronous, so both directions poll.
+ */
+fun UserRobot.assertOutgoingCallNotification(isDisplayed: Boolean): UserRobot {
+    val title = appContext.getString(
+        io.getstream.video.android.core.R.string.stream_video_outgoing_call_notification_title,
+    )
+    val notificationManager = appContext.getSystemService(NotificationManager::class.java)
+    fun displayed() = notificationManager.activeNotifications.any {
+        it.notification.extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() == title
+    }
+    val endTime = System.currentTimeMillis() + defaultTimeout
+    while (displayed() != isDisplayed && System.currentTimeMillis() < endTime) {
+        Thread.sleep(250)
+    }
+    assertEquals("Outgoing call notification displayed", isDisplayed, displayed())
     return this
 }
 

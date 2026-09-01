@@ -677,6 +677,9 @@ class CallJoinCoordinatorTest {
 
         assertThat(result).isInstanceOf(Success::class.java)
         coVerify { apiClient.ring(any<RingCallRequest>()) }
+        // registerOutgoingRing (not markRinging) so the outgoing call foreground service
+        // starts and the caller gets the outgoing call notification, like create-with-ring.
+        verify { callRegistry.registerOutgoingRing() }
     }
 
     @Test
