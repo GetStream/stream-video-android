@@ -22,16 +22,19 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import stream.video.sfu.signal.StartNoiseCancellationResponse
 import stream.video.sfu.signal.StopNoiseCancellationResponse
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
@@ -39,6 +42,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
 
     private companion object {
         const val SIGNAL_TIMEOUT_MS = 5_000L
+        const val SIGNAL_POLL_MS = 10L
     }
 
     /**
@@ -80,8 +84,8 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
     }
 
     /** Records the state of every signal the SFU receives, in the order it receives them. */
-    private fun record(session: RtcSession): MutableList<Boolean> {
-        val signalled = mutableListOf<Boolean>()
+    private fun record(session: RtcSession): List<Boolean> {
+        val signalled = CopyOnWriteArrayList<Boolean>()
         coEvery { session.startNoiseCancellation() } coAnswers {
             signalled += true
             Result.Success(mockk<StartNoiseCancellationResponse>(relaxed = true))
@@ -91,6 +95,29 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
             Result.Success(mockk<StopNoiseCancellationResponse>(relaxed = true))
         }
         return signalled
+    }
+
+    /**
+     * MockK records the mocked call before the answer body runs, and the append to the list
+     * happens on the signal coroutine, so right after a passing coVerify the recorded signals
+     * may not be visible to the test thread yet. Polls until they match instead of asserting
+     * on a snapshot.
+     */
+    private fun awaitSignalled(signalled: List<Boolean>, expected: List<Boolean>) {
+        val deadline = System.currentTimeMillis() + SIGNAL_TIMEOUT_MS
+        while (signalled != expected && System.currentTimeMillis() < deadline) {
+            Thread.sleep(SIGNAL_POLL_MS)
+        }
+        assertEquals(expected, signalled.toList())
+    }
+
+    /** Same visibility caveat as [awaitSignalled], for a test where only the final state matters. */
+    private fun awaitFinalSignal(signalled: List<Boolean>, expected: Boolean) {
+        val deadline = System.currentTimeMillis() + SIGNAL_TIMEOUT_MS
+        while (signalled.lastOrNull() != expected && System.currentTimeMillis() < deadline) {
+            Thread.sleep(SIGNAL_POLL_MS)
+        }
+        assertEquals(expected, signalled.lastOrNull())
     }
 
     @Test
@@ -144,6 +171,35 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
     }
 
     @Test
+    fun `start is not signalled until the SFU has accepted the join`() = runTest {
+        val call = client.call("default", randomUUID())
+        call.allowNoiseCancellation()
+        call.injectWorkingProcessor()
+
+        // Session exists as soon as joinInternal installs it, which is before the SFU has
+        // delivered JoinCallResponseEvent. Signalling in Connecting or WebSocketConnected
+        // is PARTICIPANT_NOT_FOUND.
+        val session = mockk<RtcSession>(relaxed = true)
+        val signalled = record(session)
+        val sfuState = MutableStateFlow<SfuSocketState>(
+            SfuSocketState.Connecting(mockk(relaxed = true)),
+        )
+        call.injectSession(session, sfuState)
+
+        call.setAudioProcessingEnabled(true)
+
+        coVerify(timeout = 500, exactly = 0) { session.startNoiseCancellation() }
+
+        sfuState.value = SfuSocketState.WebSocketConnected
+        coVerify(timeout = 500, exactly = 0) { session.startNoiseCancellation() }
+
+        sfuState.value = SfuSocketState.Connected(mockk(relaxed = true))
+
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.startNoiseCancellation() }
+        assertEquals(listOf(true), signalled)
+    }
+
+    @Test
     fun `state changed before a session exists is signalled once one is installed`() = runTest {
         val call = client.call("default", randomUUID())
         call.allowNoiseCancellation()
@@ -158,7 +214,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         call.injectSession(session)
 
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.startNoiseCancellation() }
-        assertEquals(listOf(true), signalled)
+        awaitSignalled(signalled, listOf(true))
     }
 
     @Test
@@ -172,6 +228,27 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         val replacement = mockk<RtcSession>(relaxed = true)
         val signalled = record(replacement)
         call.injectSession(replacement)
+
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { replacement.startNoiseCancellation() }
+        awaitSignalled(signalled, listOf(true))
+    }
+
+    @Test
+    fun `a replacement session is not signalled until the SFU has accepted the join`() = runTest {
+        val (call, first) = callWithProcessor()
+        call.setAudioProcessingEnabled(true)
+        coVerify(timeout = SIGNAL_TIMEOUT_MS) { first.startNoiseCancellation() }
+
+        val replacement = mockk<RtcSession>(relaxed = true)
+        val signalled = record(replacement)
+        val sfuState = MutableStateFlow<SfuSocketState>(
+            SfuSocketState.Connecting(mockk(relaxed = true)),
+        )
+        call.injectSession(replacement, sfuState)
+
+        coVerify(timeout = 500, exactly = 0) { replacement.startNoiseCancellation() }
+
+        sfuState.value = SfuSocketState.Connected(mockk(relaxed = true))
 
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { replacement.startNoiseCancellation() }
         assertEquals(listOf(true), signalled)
@@ -190,7 +267,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
 
         // Waiting on the stop means every signal before it has already landed.
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.stopNoiseCancellation() }
-        assertEquals(false, signalled.last())
+        awaitFinalSignal(signalled, expected = false)
     }
 
     @Test
@@ -212,6 +289,6 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         call.injectSession(session)
 
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.startNoiseCancellation() }
-        assertEquals(listOf(true), signalled)
+        awaitSignalled(signalled, listOf(true))
     }
 }

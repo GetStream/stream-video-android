@@ -31,6 +31,7 @@ import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.isValidCallCid
 import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
+import io.getstream.video.android.util.InitializedState
 import io.getstream.video.android.util.NetworkMonitor
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.fcmToken
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.shareIn
@@ -69,7 +71,11 @@ class CallJoinViewModel @Inject constructor(
                 }
                 is CallJoinEvent.JoinCall -> {
                     val call = joinCall(event.callId)
-                    flowOf(CallJoinUiState.JoinCompleted(callId = call.cid))
+                    if (call != null) {
+                        flowOf(CallJoinUiState.JoinCompleted(callId = call.cid))
+                    } else {
+                        flowOf(CallJoinUiState.GoBackToLogin)
+                    }
                 }
                 is CallJoinEvent.JoinCompleted -> flowOf(
                     CallJoinUiState.JoinCompleted(event.callId),
@@ -110,8 +116,18 @@ class CallJoinViewModel @Inject constructor(
         viewModelScope.launch { this@CallJoinViewModel.event.emit(event) }
     }
 
-    private fun joinCall(callId: String? = null): Call {
-        val streamVideo = StreamVideo.instance()
+    private suspend fun joinCall(callId: String? = null): Call? {
+        // A fast re-login lands on this screen while StreamVideoInitHelper.loadSdk, started in
+        // init, is still rebuilding the SDK, so the instance may not be installed yet at tap
+        // time. loadSdk returns early when another initialization is already in flight, so the
+        // helper's terminal state must be awaited before reading the instance.
+        if (!StreamVideo.isInstalled) {
+            StreamVideoInitHelper.loadSdk(dataStore = dataStore)
+            StreamVideoInitHelper.initializedState.first {
+                it == InitializedState.FINISHED || it == InitializedState.FAILED
+            }
+        }
+        val streamVideo = StreamVideo.instanceOrNull() ?: return null
         val newCallId = callId ?: "default:${UUID.randomUUID()}"
         val (type, id) = if (newCallId.isValidCallCid()) {
             newCallId.toTypeAndId()

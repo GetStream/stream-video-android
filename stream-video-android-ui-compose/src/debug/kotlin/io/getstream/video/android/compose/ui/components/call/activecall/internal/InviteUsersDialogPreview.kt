@@ -23,9 +23,14 @@ import io.getstream.video.android.mock.previewUsers
 
 @Preview
 @Composable
-private fun InviteUsersDialogPreview() {
+private fun InviteUsersDialogRootPreview() {
     VideoTheme {
-        InviteUsersDialog(users = previewUsers, onDismiss = { }) {
-        }
+        InviteUsersDialogPreview()
+    }
+}
+
+@Composable
+internal fun InviteUsersDialogPreview() {
+    InviteUsersDialog(users = previewUsers, onDismiss = { }) {
     }
 }

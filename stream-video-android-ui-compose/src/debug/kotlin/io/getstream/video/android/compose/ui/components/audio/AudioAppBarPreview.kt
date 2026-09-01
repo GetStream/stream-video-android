@@ -16,19 +16,19 @@
 
 package io.getstream.video.android.compose.ui.components.audio
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-private fun AudioAppBarPreview() {
+private fun AudioAppBarRootPreview() {
     VideoTheme {
-        AudioAppBar(
-            modifier = Modifier.fillMaxWidth(),
-            title = "Audio Room Number 01",
-        )
+        AudioAppBarPreview()
     }
+}
+
+@Composable
+internal fun AudioAppBarPreview() {
+    AudioAppBar(title = "Audio Room Number 05")
 }

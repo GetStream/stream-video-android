@@ -25,9 +25,14 @@ import io.getstream.video.android.mock.previewCall
 
 @Preview
 @Composable
-private fun LivestreamPlayerPreview() {
+private fun LivestreamPlayerRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        LivestreamPlayer(call = previewCall)
+        LivestreamPlayerPreview()
     }
+}
+
+@Composable
+internal fun LivestreamPlayerPreview() {
+    LivestreamPlayer(call = previewCall)
 }
