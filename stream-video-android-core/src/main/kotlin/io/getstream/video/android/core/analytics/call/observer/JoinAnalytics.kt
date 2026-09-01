@@ -17,9 +17,12 @@
 package io.getstream.video.android.core.analytics.call.observer
 
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
+import io.getstream.video.android.core.analytics.call.observer.model.JoinInvocation
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
+import io.getstream.video.android.core.call.components.CallJoinCoordinator.Companion.JOIN_FLIGHT_KEY
+import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
 import java.util.UUID
 
 internal class JoinAnalytics(
@@ -27,23 +30,52 @@ internal class JoinAnalytics(
     val callType: String,
     val eventReporter: ClientEventReporter,
     val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
+    val joinFlight: StreamRefCountedSingleFlightProcessor,
     val onJoinSuccess: () -> Unit,
 ) {
 
     /**
      * Records the invocation of the public `Call.join()` API.
      *
-     * Each invocation mints a new [JoinTelemetryState.joinStageAttemptId], including
-     * coalesced and already-joined calls.
+     * A new stage-attempt ID is generated for every invocation. When no join is in flight, that ID
+     * becomes the active attempt ID used by subsequent join-stage events. When another join is
+     * already in flight, the invocation is reported as concurrent with the active attempt and the
+     * stored active attempt ID is preserved because both callers share the same join execution.
      */
     fun onJoinFunctionStart() {
+        val previousJoinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
+        val isConcurrentJoin = joinFlight.isFlightActive(JOIN_FLIGHT_KEY)
         val stageAttemptId = UUID.randomUUID().toString()
-        joinAnalyticsStateHolder.updateJoinStageAttemptId(stageAttemptId)
+
+        if (!isConcurrentJoin) {
+            joinAnalyticsStateHolder.updateJoinStageAttemptId(stageAttemptId)
+        }
+        val joinInvocation = getJoinInvocation(
+            isConcurrentJoin = isConcurrentJoin,
+            initialStageId = previousJoinStageAttemptId ?: "unknown",
+            stageId = stageAttemptId,
+        )
+
         eventReporter.reportSdkMethodJoinInitiated(
             callType = callType,
             callId = callId,
-            joinStageAttemptId = stageAttemptId,
+            joinInvocation = joinInvocation,
         )
+    }
+
+    private fun getJoinInvocation(
+        isConcurrentJoin: Boolean,
+        initialStageId: String,
+        stageId: String,
+    ): JoinInvocation {
+        return if (isConcurrentJoin) {
+            JoinInvocation.Concurrent(
+                activeStageAttemptId = initialStageId,
+                stageId = stageId,
+            )
+        } else {
+            JoinInvocation.Standalone(stageId)
+        }
     }
 
     /**

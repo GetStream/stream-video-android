@@ -89,6 +89,7 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.SerialProcessor
+import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
@@ -268,6 +269,27 @@ public class Call(
     /** The call state contains all state such as the participant list, reactions etc */
     val state = CallState(client, this, user, scope)
 
+    /**
+     * Coalesces concurrent [join] calls into one attempt on the call [scope].
+     *
+     * Without this, overlapping joins each build an [RtcSession] while reusing
+     * [CallSessionManager.sessionId], which leaves SFU-evicted zombies that fail every RPC
+     * with PARTICIPANT_NOT_FOUND. Checking [CallSessionManager.session] is not enough — it
+     * is only set after the coordinator round-trip.
+     *
+     * Coalescing the whole [join] also keeps once-per-join work once-only:
+     * MediaDevicePermission analytics, installing [CallState.callJoinInterceptor], resetting
+     * the leave guard, and moving to [RealtimeConnection.InProgress]. Each waiter still
+     * reports JoinInitiated (with a fresh attempt id) so every integrator [join] call stays
+     * observable.
+     *
+     * [StreamRefCountedSingleFlightProcessor] keeps the join alive when any waiter (including
+     * the last) is cancelled. Only [scope] cancellation — [Call.leave] / call cleanup —
+     * aborts the shared job. Each waiter registers its [CallJoinInterceptor] on the flight;
+     * the first waiter whose job is not cancelled owns the interceptor (see [Call.join]).
+     */
+    private val joinFlight = StreamRefCountedSingleFlightProcessor(scope)
+
     internal val callAnalytics =
         CallAnalytics(
             clientImpl.context,
@@ -278,6 +300,7 @@ public class Call(
             state.participants,
             client.state.clientEventReporter,
             scope,
+            joinFlight,
         )
 
     /** Delegate that periodically collects and reports WebRTC stats. */
@@ -471,6 +494,7 @@ public class Call(
         reconnector = reconnector,
         sessionMonitor = sessionMonitor,
         callRegistry = callRegistry,
+        joinFlight = joinFlight,
         hasRequiredPermissions = {
             clientImpl.permissionCheck
                 .checkAndroidPermissionsGroup(clientImpl.context, this@Call).first

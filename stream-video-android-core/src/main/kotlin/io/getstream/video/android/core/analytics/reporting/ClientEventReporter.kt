@@ -22,6 +22,7 @@ import io.getstream.android.video.generated.models.ClientEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.analytics.call.observer.VideoAnalyticsIceState
+import io.getstream.video.android.core.analytics.call.observer.model.JoinInvocation
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.coordinator.CoordinatorAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.reporting.dispatcher.EventDispatcher
@@ -129,18 +130,38 @@ internal class ClientEventReporter(
         }
     }
 
+    /**
+     * Reports that the public `Call.join()` API was invoked.
+     *
+     * A single attempt is reported without a join reason. A concurrent attempt is linked to the
+     * active attempt by reporting [JoinReason.ConcurrentWith] with the active attempt's stage ID.
+     * In both cases, [JoinInvocation.stageId] identifies this specific API invocation.
+     *
+     * @param callId The ID of the call being joined.
+     * @param callType The type of the call being joined.
+     * @param joinInvocation Metadata identifying this invocation and whether it overlaps an active
+     * join attempt.
+     */
     internal fun reportSdkMethodJoinInitiated(
         callId: String,
         callType: String,
-        joinStageAttemptId: String,
+        joinInvocation: JoinInvocation,
     ) {
+        val joinReason = when (joinInvocation) {
+            is JoinInvocation.Standalone -> null
+            is JoinInvocation.Concurrent -> JoinReason.ConcurrentWith(
+                joinInvocation.activeStageAttemptId,
+            )
+        }
+
         sender.send(
             clientEventFactory.buildRequest(
-                callId,
-                callType,
+                callId = callId,
+                callType = callType,
                 stage = EventStage.Call.JOIN_INITIATED,
                 eventType = EventType.INITIATED,
-                joinStageAttemptId = joinStageAttemptId,
+                joinStageAttemptId = joinInvocation.stageId,
+                joinReason = joinReason,
             ),
         )
     }

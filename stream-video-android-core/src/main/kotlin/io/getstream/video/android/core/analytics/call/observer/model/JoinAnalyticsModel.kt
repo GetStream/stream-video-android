@@ -40,4 +40,38 @@ internal sealed class JoinReason {
     data class Custom(
         override val message: String,
     ) : JoinReason()
+
+    /**
+     * Analytics-only reason for a `Call.join()` invocation made while another join attempt is active.
+     *
+     * [originalStageId] identifies the active attempt this invocation runs concurrently with.
+     * This should not be used as a Coordinator or SFU rejoin reason.
+     */
+    data class ConcurrentWith(
+        val originalStageId: String,
+        override val message: String = "concurrent-with:$originalStageId",
+    ) : JoinReason()
+}
+
+/**
+ * Describes the analytics metadata for one invocation of the public `Call.join()` API.
+ *
+ * [Standalone] represents an invocation made without another join in flight. [Concurrent] represents
+ * an invocation made while another join is active and links the new invocation to that active
+ * attempt. A concurrent attempt does not start a separate join execution because concurrent calls
+ * are coalesced by the join coordinator.
+ *
+ * @property stageId The unique stage-attempt ID assigned to this API invocation.
+ */
+internal sealed interface JoinInvocation {
+    val stageId: String
+
+    data class Standalone(
+        override val stageId: String,
+    ) : JoinInvocation
+
+    data class Concurrent(
+        val activeStageAttemptId: String,
+        override val stageId: String,
+    ) : JoinInvocation
 }
