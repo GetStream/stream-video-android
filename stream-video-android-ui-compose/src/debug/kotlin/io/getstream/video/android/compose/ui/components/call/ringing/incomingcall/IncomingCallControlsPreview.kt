@@ -16,39 +16,23 @@
 
 package io.getstream.video.android.compose.ui.components.call.ringing.incomingcall
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 
-@Preview(name = "Small Phone - 320dp", widthDp = 320)
-@Preview(name = "Normal Phone - 411dp", widthDp = 411)
+@Preview
 @Composable
-private fun IncomingCallOptionsPreview() {
+private fun IncomingCallControlsRootPreview() {
     VideoTheme {
-        Column {
-            IncomingCallControls(
-                isVideoCall = false,
-                isCameraEnabled = true,
-                onCallAction = { },
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            IncomingCallControls(
-                isVideoCall = true,
-                isCameraEnabled = false,
-                onCallAction = { },
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            IncomingCallControls(
-                isVideoCall = true,
-                isMicrophoneEnabled = true,
-                isCameraEnabled = true,
-                onCallAction = { },
-            )
-        }
+        IncomingCallControlsPreview()
     }
+}
+
+@Composable
+internal fun IncomingCallControlsPreview() {
+    IncomingCallControls(
+        isVideoCall = true,
+        isCameraEnabled = true,
+        onCallAction = { },
+    )
 }

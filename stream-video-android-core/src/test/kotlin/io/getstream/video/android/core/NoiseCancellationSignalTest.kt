@@ -34,6 +34,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import stream.video.sfu.signal.StartNoiseCancellationResponse
 import stream.video.sfu.signal.StopNoiseCancellationResponse
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
@@ -41,6 +42,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
 
     private companion object {
         const val SIGNAL_TIMEOUT_MS = 5_000L
+        const val SIGNAL_POLL_MS = 10L
     }
 
     /**
@@ -82,8 +84,8 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
     }
 
     /** Records the state of every signal the SFU receives, in the order it receives them. */
-    private fun record(session: RtcSession): MutableList<Boolean> {
-        val signalled = mutableListOf<Boolean>()
+    private fun record(session: RtcSession): List<Boolean> {
+        val signalled = CopyOnWriteArrayList<Boolean>()
         coEvery { session.startNoiseCancellation() } coAnswers {
             signalled += true
             Result.Success(mockk<StartNoiseCancellationResponse>(relaxed = true))
@@ -93,6 +95,29 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
             Result.Success(mockk<StopNoiseCancellationResponse>(relaxed = true))
         }
         return signalled
+    }
+
+    /**
+     * MockK records the mocked call before the answer body runs, and the append to the list
+     * happens on the signal coroutine, so right after a passing coVerify the recorded signals
+     * may not be visible to the test thread yet. Polls until they match instead of asserting
+     * on a snapshot.
+     */
+    private fun awaitSignalled(signalled: List<Boolean>, expected: List<Boolean>) {
+        val deadline = System.currentTimeMillis() + SIGNAL_TIMEOUT_MS
+        while (signalled != expected && System.currentTimeMillis() < deadline) {
+            Thread.sleep(SIGNAL_POLL_MS)
+        }
+        assertEquals(expected, signalled.toList())
+    }
+
+    /** Same visibility caveat as [awaitSignalled], for a test where only the final state matters. */
+    private fun awaitFinalSignal(signalled: List<Boolean>, expected: Boolean) {
+        val deadline = System.currentTimeMillis() + SIGNAL_TIMEOUT_MS
+        while (signalled.lastOrNull() != expected && System.currentTimeMillis() < deadline) {
+            Thread.sleep(SIGNAL_POLL_MS)
+        }
+        assertEquals(expected, signalled.lastOrNull())
     }
 
     @Test
@@ -189,7 +214,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         call.injectSession(session)
 
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.startNoiseCancellation() }
-        assertEquals(listOf(true), signalled)
+        awaitSignalled(signalled, listOf(true))
     }
 
     @Test
@@ -205,7 +230,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         call.injectSession(replacement)
 
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { replacement.startNoiseCancellation() }
-        assertEquals(listOf(true), signalled)
+        awaitSignalled(signalled, listOf(true))
     }
 
     @Test
@@ -242,7 +267,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
 
         // Waiting on the stop means every signal before it has already landed.
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.stopNoiseCancellation() }
-        assertEquals(false, signalled.last())
+        awaitFinalSignal(signalled, expected = false)
     }
 
     @Test
@@ -264,6 +289,6 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         call.injectSession(session)
 
         coVerify(timeout = SIGNAL_TIMEOUT_MS) { session.startNoiseCancellation() }
-        assertEquals(listOf(true), signalled)
+        awaitSignalled(signalled, listOf(true))
     }
 }

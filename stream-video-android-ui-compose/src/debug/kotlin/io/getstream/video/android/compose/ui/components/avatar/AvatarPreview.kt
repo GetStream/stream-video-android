@@ -26,13 +26,18 @@ import io.getstream.video.android.ui.common.R
 
 @Preview
 @Composable
-private fun AvatarInitialPreview() {
+private fun AvatarInitialsRootPreview() {
     VideoTheme {
-        Avatar(
-            modifier = Modifier.size(72.dp),
-            fallbackText = "Thierry",
-        )
+        AvatarInitialsPreview()
     }
+}
+
+@Composable
+internal fun AvatarInitialsPreview() {
+    Avatar(
+        modifier = Modifier.size(72.dp),
+        fallbackText = "Thierry",
+    )
 }
 
 @Preview
