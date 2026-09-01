@@ -164,7 +164,7 @@ private fun CallLobbyHeader(
         callLobbyViewModel = callLobbyViewModel,
     )
 
-    CallLobbyHeaderContent(user, onBack)
+    CallLobbyHeaderContent(user, callLobbyViewModel.call, onBack)
 
     LaunchedEffect(key1 = isLoggedOut) {
         if (isLoggedOut) {
@@ -176,6 +176,7 @@ private fun CallLobbyHeader(
 @Composable
 private fun CallLobbyHeaderContent(
     user: State<User?>,
+    call: Call,
     onBack: () -> Unit,
 ) {
     Row(
@@ -207,6 +208,8 @@ private fun CallLobbyHeaderContent(
             maxLines = 1,
             fontSize = 16.sp,
         )
+        E2EELobbyButton(call = call, modifier = Modifier.padding(8.dp))
+
         IconButton(
             modifier = Modifier
                 .padding(8.dp)
@@ -542,6 +545,7 @@ private fun CallLobbyHeaderPreview() {
             user = remember {
                 mutableStateOf(previewUsers[0])
             },
+            call = previewCall,
         ) {
         }
     }

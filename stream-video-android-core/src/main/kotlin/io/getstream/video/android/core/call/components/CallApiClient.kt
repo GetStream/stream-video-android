@@ -96,6 +96,7 @@ internal class CallApiClient(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
         joinAnalyticsModel: JoinAnalyticsModel,
+        e2ee: Boolean? = null,
     ): Result<JoinCallResponse> {
         val migratingFromList =
             migratingFromList ?: sessionManager.failedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
@@ -114,6 +115,7 @@ internal class CallApiClient(
             migratingFrom = migratingFrom,
             migratingFromList = migratingFromList,
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
+            e2ee = e2ee,
         )
         result.onSuccess {
             callAnalytics.joinAnalytics.onJoinRequestSuccess(

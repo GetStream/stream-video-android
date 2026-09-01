@@ -76,6 +76,9 @@ import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
+import io.getstream.video.android.core.e2ee.E2EEKeyProvider
+import io.getstream.video.android.core.e2ee.E2EEManager
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -89,6 +92,7 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.debugOnly
+import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -577,6 +581,127 @@ public class Call(
         callJoinInterceptor,
     )
 
+    // region End-to-end encryption
+
+    @Volatile
+    private var _e2eeManager: E2EEManager? = null
+
+    /**
+     * Whether this call created the manager itself through the key conveniences below. A manager
+     * handed to us by [setE2EEManager] belongs to the caller and is never disposed here, because
+     * the same instance is usually reused across calls.
+     */
+    @Volatile
+    private var ownsE2EEManager: Boolean = false
+
+    /** Read by [RtcSession] when it builds the publisher and the subscriber. */
+    internal val e2eeManager: E2EEManager? get() = _e2eeManager
+
+    /**
+     * Attaches an end-to-end encryption manager, so that media published from and received by this
+     * call is encrypted before it reaches Stream's infrastructure.
+     *
+     * Must be called before [join]. The publisher and subscriber capture the manager when they are
+     * built, and the join request tells the coordinator whether this call is encrypted — a
+     * mismatch there is rejected server side. The manager survives rejoins and migrations, so it
+     * only needs to be set once.
+     *
+     * Pass [StreamEncryptionManager] for Stream's default AES-GCM implementation, or your own
+     * [E2EEManager] to keep the SDK out of your encryption entirely:
+     *
+     * ```
+     * if (StreamEncryptionManager.isSupported()) {
+     *     val e2ee = StreamEncryptionManager.create(myUserId)
+     *     e2ee.setSharedKey(keyIndex = 0, key = myKeyBytes)
+     *     call.setE2EEManager(e2ee)
+     *     call.join()
+     * }
+     * ```
+     *
+     * Note that an encrypted call cannot be recorded, transcribed, closed-captioned, thumbnailed
+     * or broadcast over HLS: none of that content is readable by Stream, so the coordinator
+     * rejects those requests.
+     *
+     * @param manager The manager to use, or `null` to join unencrypted.
+     * @throws IllegalStateException if the call has already been joined.
+     */
+    public fun setE2EEManager(manager: E2EEManager?) {
+        check(session.value == null) {
+            "setE2EEManager must be called before join(). The publisher and subscriber capture " +
+                "the manager when the session is created, and the coordinator validates the " +
+                "call's encryption mode against the join request."
+        }
+        // A manager we created ourselves has no other owner, so it would leak its native keys.
+        disposeOwnedE2EEManager()
+        _e2eeManager = manager
+        ownsE2EEManager = false
+        state.setE2eeEnabled(manager != null)
+        logger.i { "[setE2EEManager] manager: ${manager?.javaClass?.simpleName ?: "none"}" }
+    }
+
+    /**
+     * Sets the key used for every participant without a per-user key, including your own outgoing
+     * media. Enables encryption on this call if no manager is attached yet, by creating a
+     * [StreamEncryptionManager] for the local user.
+     *
+     * Safe to call during a call to rotate keys: write the new key to the next index and peers
+     * that still hold the old index can decode frames that were already in flight.
+     *
+     * @throws IllegalStateException if a custom manager is attached that does not implement
+     * [E2EEKeyProvider] — manage that manager's keys through your own reference to it.
+     */
+    public fun setE2EESharedKey(keyIndex: Int, key: ByteArray): Unit =
+        e2eeKeyProvider("setE2EESharedKey").setSharedKey(keyIndex, key)
+
+    /** Sets [userId]'s key, which takes precedence over the shared key. See [setE2EESharedKey]. */
+    public fun setE2EEKey(userId: String, keyIndex: Int, key: ByteArray): Unit =
+        e2eeKeyProvider("setE2EEKey").setKey(userId, keyIndex, key)
+
+    /** Drops the shared key at [keyIndex]. See [setE2EESharedKey]. */
+    public fun removeE2EESharedKey(keyIndex: Int): Unit =
+        e2eeKeyProvider("removeE2EESharedKey").removeSharedKey(keyIndex)
+
+    /** Drops [userId]'s key at [keyIndex], falling back to the shared key. */
+    public fun removeE2EEKey(userId: String, keyIndex: Int): Unit =
+        e2eeKeyProvider("removeE2EEKey").removeKey(userId, keyIndex)
+
+    /** Drops every key. Media stops being decodable in both directions until a key is set again. */
+    public fun removeAllE2EEKeys(): Unit =
+        e2eeKeyProvider("removeAllE2EEKeys").removeAllKeys()
+
+    /**
+     * Resolves the manager to apply a key change to, creating the default one on first use so that
+     * setting a key is all it takes to enable encryption.
+     */
+    private fun e2eeKeyProvider(operation: String): E2EEKeyProvider {
+        _e2eeManager?.let { existing ->
+            return existing as? E2EEKeyProvider ?: error(
+                "$operation is not available: the attached ${existing.javaClass.simpleName} does " +
+                    "not implement E2EEKeyProvider. Manage its keys through your own reference.",
+            )
+        }
+        check(session.value == null) {
+            "$operation created the first key for this call, which enables encryption, but the " +
+                "call has already been joined. Set a key before join()."
+        }
+        val created = StreamEncryptionManager.create(user.id)
+        _e2eeManager = created
+        ownsE2EEManager = true
+        state.setE2eeEnabled(true)
+        logger.i { "[$operation] created the default encryption manager for ${user.id}" }
+        return created
+    }
+
+    private fun disposeOwnedE2EEManager() {
+        if (!ownsE2EEManager) return
+        ownsE2EEManager = false
+        val owned = _e2eeManager as? StreamEncryptionManager ?: return
+        _e2eeManager = null
+        safeCall { owned.dispose() }
+    }
+
+    // endregion
+
     internal suspend fun collectStats(): CallStatsReport = statsReporter.collectStats()
 
     // region Reconnection — unified loop
@@ -838,9 +963,17 @@ public class Call(
         notify,
         hintHighScaleLivestreamPublisher,
         joinAnalyticsModel,
+        // The coordinator rejects a join whose e2ee flag disagrees with the call's configuration,
+        // so this has to reflect what we will actually do with the media rather than what the app
+        // asked for. Sent on rejoin and migrate too, since those go through the same request.
+        e2ee = e2eeManager != null,
     )
 
-    fun cleanup() = lifecycle.cleanup()
+    fun cleanup() {
+        // Only disposes a manager this call created; an app-owned one outlives the call.
+        disposeOwnedE2EEManager()
+        lifecycle.cleanup()
+    }
 
     suspend fun ring(): Result<GetCallResponse> = apiClient.ring()
 

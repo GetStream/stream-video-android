@@ -48,6 +48,9 @@ data class CallSettingsRequest (
     @Json(name = "broadcasting")
     val broadcasting: io.getstream.android.video.generated.models.BroadcastSettingsRequest? = null,
 
+    @Json(name = "encryption")
+    val encryption: io.getstream.android.video.generated.models.EncryptionSettingsRequest? = null,
+
     @Json(name = "frame_recording")
     val frameRecording: io.getstream.android.video.generated.models.FrameRecordingSettingsRequest? = null,
 

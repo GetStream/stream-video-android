@@ -334,7 +334,7 @@ class CallApiClientTest {
     fun `joinRequest delegates to the coordinator client`() = runTest(testDispatcher) {
         coEvery {
             clientImpl.joinCall(
-                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
@@ -347,7 +347,7 @@ class CallApiClientTest {
         assertThat(result).isInstanceOf(Result.Failure::class.java)
         coVerify {
             clientImpl.joinCall(
-                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
                 any(), any(), any(), any(), any(), any(), any(),
             )
         }

@@ -1391,6 +1391,8 @@ public class RtcSession internal constructor(
                 // Empty, handled differently
             },
             onIceCandidateRequest = ::sendIceCandidate,
+            e2eeManager = call.e2eeManager,
+            userIdForSession = { call.state.getParticipantBySessionId(it)?.userId?.value },
         )
         return peerConnection
     }
@@ -1485,6 +1487,7 @@ public class RtcSession internal constructor(
                 // Empty on purpose
             },
             isHifiAudioEnabled = call.state.settings.value?.audio?.hifiAudioEnabled ?: false,
+            e2eeManager = call.e2eeManager,
         )
     }
 
