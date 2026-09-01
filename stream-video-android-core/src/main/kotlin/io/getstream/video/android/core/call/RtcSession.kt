@@ -326,7 +326,7 @@ public class RtcSession internal constructor(
         )
     },
 ) {
-    private var muteStateSyncJob: Job? = null
+    private val muteStateSyncJobs = TrackKeyedJobs()
     private val oneBasedSessionCounter = sessionCounter + 1
 
     /**
@@ -1341,6 +1341,10 @@ public class RtcSession internal constructor(
      * matches the web SDK, which only signals the track(s) that actually changed. On SFU
      * (re)connect/migration each enabled track is re-signalled individually via
      * [listenToMediaChanges], so the full state is still restored.
+     *
+     * Sync jobs are keyed by [trackType]. Cancelling a shared job used to drop an in-flight
+     * audio unmute when video (or screen-share) published a moment later — reconnect restarts
+     * [listenToMediaChanges] and fires those collectors together.
      */
     private fun setMuteState(isEnabled: Boolean, trackType: TrackType) {
         logger.d { "[setPublishState] #sfu; $trackType isEnabled: $isEnabled" }
@@ -1352,12 +1356,8 @@ public class RtcSession internal constructor(
         muteState.value = new
 
         val currentSfu = sfuUrl
-        // prevent running multiple of these at the same time
-        // if there's already a job active. cancel it
-        muteStateSyncJob?.cancel()
-        // start a new job
-        // this code is a bit more complicated due to the retry behaviour
-        muteStateSyncJob = coroutineScope.launch {
+        // Coalesce retries for this track only. Other tracks keep their in-flight RPCs.
+        muteStateSyncJobs.launch(coroutineScope, trackType) {
             flow {
                 val request = UpdateMuteStatesRequest(
                     session_id = sessionId,
@@ -1372,7 +1372,7 @@ public class RtcSession internal constructor(
                 emit(response)
             }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                 if (cause is SessionFatalException) return@retryWhen false
-                val sameValue = new == muteState.value
+                val sameValue = muteState.value[trackType] == isEnabled
                 val sameSfu = currentSfu == sfuUrl
                 val isPermanent = isPermanentError(cause)
                 val willRetry = !isPermanent && sameValue && sameSfu && attempt < 30
@@ -2121,8 +2121,7 @@ public class RtcSession internal constructor(
         if (cancelEventJob) eventJob?.cancel()
         iceMonitoringJob?.cancel()
         iceMonitoringJob = null
-        muteStateSyncJob?.cancel()
-        muteStateSyncJob = null
+        muteStateSyncJobs.cancelAll()
         participantsMonitoringJob?.cancel()
         participantsMonitoringJob = null
         serialProcessor.stop()
