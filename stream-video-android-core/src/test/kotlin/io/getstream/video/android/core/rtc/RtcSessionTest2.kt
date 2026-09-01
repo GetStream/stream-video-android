@@ -775,6 +775,60 @@ class RtcSessionTest2 {
         verify(exactly = 0) { rtcSession["createPublisher"](any<List<PublishOption>>()) }
     }
 
+    @Test
+    fun `createAndPublishAudioTrack does not crash when publishStream returns null`() = runTest(
+        testDispatcher,
+    ) {
+        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+        val (rtcSession, publisherMock) = createRtcSessionSpyWithMockSocket()
+        rtcSession.publisher.value = publisherMock
+        coEvery {
+            publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
+        } returns null
+
+        rtcSession.createAndPublishAudioTrack()
+
+        coVerify { publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO) }
+        // Unmuting before a failed publish would tell the SFU we are live with no track.
+        verify(exactly = 0) {
+            rtcSession["setMuteState"](true, TrackType.TRACK_TYPE_AUDIO)
+        }
+    }
+
+    @Test
+    fun `createAndPublishAudioTrack unmutes only after publishStream returns a track`() = runTest(
+        testDispatcher,
+    ) {
+        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+        val (rtcSession, publisherMock) = createRtcSessionSpyWithMockSocket()
+        rtcSession.publisher.value = publisherMock
+        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+        coEvery {
+            publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
+        } returns audioTrack
+
+        rtcSession.createAndPublishAudioTrack()
+
+        verify(exactly = 1) {
+            rtcSession["setMuteState"](true, TrackType.TRACK_TYPE_AUDIO)
+        }
+    }
+
+    @Test
+    fun `createAndPublishAudioTrack does not crash when publisher is missing`() = runTest(
+        testDispatcher,
+    ) {
+        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+        val (rtcSession, _) = createRtcSessionSpyWithMockSocket()
+        rtcSession.publisher.value = null
+
+        rtcSession.createAndPublishAudioTrack()
+
+        verify(exactly = 0) {
+            rtcSession["setMuteState"](true, TrackType.TRACK_TYPE_AUDIO)
+        }
+    }
+
     private fun <T> RtcSession.fieldValue(name: String): T? {
         val field = RtcSession::class.java.getDeclaredField(name)
         field.isAccessible = true
