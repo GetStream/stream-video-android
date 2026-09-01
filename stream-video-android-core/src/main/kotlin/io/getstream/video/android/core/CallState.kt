@@ -812,6 +812,14 @@ public class CallState(
     @Volatile
     internal var callJoinInterceptor: CallJoinInterceptor? = null
 
+    /**
+     * Live interceptor selection while a join flight is in progress. Falls back to
+     * [callJoinInterceptor] after the flight is removed. Resolved at interceptor
+     * invocation, not at ringing-Active entry.
+     */
+    @Volatile
+    internal var callJoinInterceptorProvider: (() -> CallJoinInterceptor?)? = null
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
 
@@ -1447,11 +1455,14 @@ public class CallState(
             activeStateGate.awaitAndTransition(
                 ringingState.value,
                 call,
-                callJoinInterceptor,
+                interceptorProvider = {
+                    callJoinInterceptorProvider?.invoke() ?: callJoinInterceptor
+                },
             ) {
                 _ringingState.value = state
                 activeStateGate.cleanup()
                 callJoinInterceptor = null
+                callJoinInterceptorProvider = null
             }
         } else {
             _ringingState.value = state
