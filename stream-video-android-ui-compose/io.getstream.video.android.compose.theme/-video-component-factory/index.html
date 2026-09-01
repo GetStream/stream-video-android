@@ -1,0 +1,636 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>VideoComponentFactory</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    stream-video-android
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">1.32.0
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":stream-video-android-ui-compose/main">androidJvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":stream-video-android-ui-compose/main" data-filter=":stream-video-android-ui-compose/main">
+                                <span class="checkbox--icon"></span>
+                                androidJvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    stream-video-android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="stream-video-android-ui-compose::io.getstream.video.android.compose.theme/VideoComponentFactory///PointingToDeclaration//-1353939899">
+  <div class="breadcrumbs"><a href="../../index.html">stream-video-android-ui-compose</a><span class="delimiter">/</span><a href="../index.html">io.getstream.video.android.compose.theme</a><span class="delimiter">/</span><span class="current">VideoComponentFactory</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Video</span><wbr><span>Component</span><wbr><span><span>Factory</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">VideoComponentFactory</a></div><p class="paragraph">A factory for creating the components used by the Video Compose SDK.</p><p class="paragraph">Each method has a default implementation that renders the built-in component, so you only need to override the components you want to customize. The factory is provided through <a href="../-video-theme/index.html">VideoTheme</a>, and the built-in components read it via <a href="../-stream-theme/component-factory.html">VideoTheme.componentFactory</a>.</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">VideoTheme(<br>    componentFactory = object : VideoComponentFactory {<br>        @Composable<br>        override fun RowScope.CallAppBarTrailingContent(<br>            params: CallAppBarTrailingContentParams,<br>        ) {<br>            // Custom trailing content<br>        }<br>    },<br>) {<br>    CallContent(call = call)<br>}</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><p class="paragraph">Use <a href="../-compound-component-factory.html">CompoundComponentFactory</a> to layer overrides on top of the current factory for a subtree.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="1897893078%2FFunctions%2F-1353939899" anchor-label="AudioOnlyCallControlsContent" id="1897893078%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-audio-only-call-controls-content.html"><span>Audio</span><wbr><span>Only</span><wbr><span>Call</span><wbr><span>Controls</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1897893078%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-audio-only-call-controls-content.html"><span class="token function">AudioOnlyCallControlsContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-audio-only-call-controls-content-params/index.html">AudioOnlyCallControlsContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The controls of the audio-only call screen, such as toggling the microphone or leaving the call.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1566729877%2FFunctions%2F-1353939899" anchor-label="AudioOnlyCallDetailsContent" id="-1566729877%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-audio-only-call-details-content.html"><span>Audio</span><wbr><span>Only</span><wbr><span>Call</span><wbr><span>Details</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1566729877%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/ColumnScope.html">ColumnScope</a><span class="token punctuation">.</span><a href="-audio-only-call-details-content.html"><span class="token function">AudioOnlyCallDetailsContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-audio-only-call-details-content-params/index.html">AudioOnlyCallDetailsContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The details of the audio-only call screen, such as the participant avatars and the call duration.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2068690387%2FFunctions%2F-1353939899" anchor-label="AudioOnlyCallHeaderContent" id="2068690387%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-audio-only-call-header-content.html"><span>Audio</span><wbr><span>Only</span><wbr><span>Call</span><wbr><span>Header</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2068690387%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/ColumnScope.html">ColumnScope</a><span class="token punctuation">.</span><a href="-audio-only-call-header-content.html"><span class="token function">AudioOnlyCallHeaderContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-audio-only-call-header-content-params/index.html">AudioOnlyCallHeaderContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The header of the audio-only call screen. Empty by default.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-512418809%2FFunctions%2F-1353939899" anchor-label="CallAppBar" id="-512418809%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-app-bar.html"><span>Call</span><wbr><span>App</span><wbr><span><span>Bar</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-512418809%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-call-app-bar.html"><span class="token function">CallAppBar</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-app-bar-params/index.html">CallAppBarParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The app bar shown in calls. The default implementation renders <a href="../../io.getstream.video.android.compose.ui.components.call/-call-app-bar.html">io.getstream.video.android.compose.ui.components.call.CallAppBar</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="573298389%2FFunctions%2F-1353939899" anchor-label="CallAppBarCenterContent" id="573298389%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-app-bar-center-content.html"><span>Call</span><wbr><span>App</span><wbr><span>Bar</span><wbr><span>Center</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="573298389%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><a href="-call-app-bar-center-content.html"><span class="token function">CallAppBarCenterContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-app-bar-center-content-params/index.html">CallAppBarCenterContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The center content of the call app bar. Usually the call duration or title, with the recording and reconnecting states.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1173324389%2FFunctions%2F-1353939899" anchor-label="CallAppBarLeadingContent" id="1173324389%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-app-bar-leading-content.html"><span>Call</span><wbr><span>App</span><wbr><span>Bar</span><wbr><span>Leading</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1173324389%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><a href="-call-app-bar-leading-content.html"><span class="token function">CallAppBarLeadingContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-app-bar-leading-content-params/index.html">CallAppBarLeadingContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The leading content of the call app bar. Usually the back button.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-184129739%2FFunctions%2F-1353939899" anchor-label="CallAppBarTrailingContent" id="-184129739%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-app-bar-trailing-content.html"><span>Call</span><wbr><span>App</span><wbr><span>Bar</span><wbr><span>Trailing</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-184129739%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><a href="-call-app-bar-trailing-content.html"><span class="token function">CallAppBarTrailingContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-app-bar-trailing-content-params/index.html">CallAppBarTrailingContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The trailing content of the call app bar. Usually the leave call button.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-507793155%2FFunctions%2F-1353939899" anchor-label="CallContentClosedCaptions" id="-507793155%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-content-closed-captions.html"><span>Call</span><wbr><span>Content</span><wbr><span>Closed</span><wbr><span><span>Captions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-507793155%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-call-content-closed-captions.html"><span class="token function">CallContentClosedCaptions</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-content-closed-captions-params/index.html">CallContentClosedCaptionsParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Content that renders closed captions in the active call. Empty by default.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1826843687%2FFunctions%2F-1353939899" anchor-label="CallContentPictureInPictureContent" id="1826843687%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-content-picture-in-picture-content.html"><span>Call</span><wbr><span>Content</span><wbr><span>Picture</span><wbr><span>In</span><wbr><span>Picture</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1826843687%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-call-content-picture-in-picture-content.html"><span class="token function">CallContentPictureInPictureContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-content-picture-in-picture-content-params/index.html">CallContentPictureInPictureContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Content shown when the user enters Picture in Picture mode.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-427370827%2FFunctions%2F-1353939899" anchor-label="CallContentVideoContent" id="-427370827%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-content-video-content.html"><span>Call</span><wbr><span>Content</span><wbr><span>Video</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-427370827%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><a href="-call-content-video-content.html"><span class="token function">CallContentVideoContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-content-video-content-params/index.html">CallContentVideoContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The video content of the active call. The default implementation renders <a href="../../io.getstream.video.android.compose.ui.components.call.renderer/-participants-layout.html">ParticipantsLayout</a> with all the participants' videos.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="923545063%2FFunctions%2F-1353939899" anchor-label="CallContentVideoModerationBlur" id="923545063%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-content-video-moderation-blur.html"><span>Call</span><wbr><span>Content</span><wbr><span>Video</span><wbr><span>Moderation</span><wbr><span><span>Blur</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="923545063%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-call-content-video-moderation-blur.html"><span class="token function">CallContentVideoModerationBlur</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-content-video-moderation-blur-params/index.html">CallContentVideoModerationBlurParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Content rendered on top of the video when it is blurred by moderation. Empty by default.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1495242631%2FFunctions%2F-1353939899" anchor-label="CallContentVideoModerationWarning" id="-1495242631%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-content-video-moderation-warning.html"><span>Call</span><wbr><span>Content</span><wbr><span>Video</span><wbr><span>Moderation</span><wbr><span><span>Warning</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1495242631%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-call-content-video-moderation-warning.html"><span class="token function">CallContentVideoModerationWarning</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-content-video-moderation-warning-params/index.html">CallContentVideoModerationWarningParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Content that renders the video moderation warning.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-329910681%2FFunctions%2F-1353939899" anchor-label="CallContentVideoOverlayContent" id="-329910681%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-content-video-overlay-content.html"><span>Call</span><wbr><span>Content</span><wbr><span>Video</span><wbr><span>Overlay</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-329910681%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-call-content-video-overlay-content.html"><span class="token function">CallContentVideoOverlayContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-content-video-overlay-content-params/index.html">CallContentVideoOverlayContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Content drawn over the video content of the active call, excluding the controls. Empty by default.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-63134297%2FFunctions%2F-1353939899" anchor-label="CallLobbyControlsContent" id="-63134297%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-lobby-controls-content.html"><span>Call</span><wbr><span>Lobby</span><wbr><span>Controls</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-63134297%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-call-lobby-controls-content.html"><span class="token function">CallLobbyControlsContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-lobby-controls-content-params/index.html">CallLobbyControlsContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The set of controls the user can use in the call lobby to change their audio and video device state before joining a call. Intentionally independent from <a href="-control-actions.html">ControlActions</a>, so overriding the in-call controls does not affect the lobby.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1398876089%2FFunctions%2F-1353939899" anchor-label="CallLobbyOnDisabledContent" id="-1398876089%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-lobby-on-disabled-content.html"><span>Call</span><wbr><span>Lobby</span><wbr><span>On</span><wbr><span>Disabled</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1398876089%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-call-lobby-on-disabled-content.html"><span class="token function">CallLobbyOnDisabledContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-lobby-on-disabled-content-params/index.html">CallLobbyOnDisabledContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Content shown in the call lobby when the local camera is disabled. It displays the user avatar by default.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1904817177%2FFunctions%2F-1353939899" anchor-label="CallLobbyOnRenderedContent" id="-1904817177%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-lobby-on-rendered-content.html"><span>Call</span><wbr><span>Lobby</span><wbr><span>On</span><wbr><span>Rendered</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1904817177%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-call-lobby-on-rendered-content.html"><span class="token function">CallLobbyOnRenderedContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-lobby-on-rendered-content-params/index.html">CallLobbyOnRenderedContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The video preview of the call lobby, rendering the local video track before joining a call.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="589860252%2FFunctions%2F-1353939899" anchor-label="CallLobbyParticipantLabelContent" id="589860252%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-call-lobby-participant-label-content.html"><span>Call</span><wbr><span>Lobby</span><wbr><span>Participant</span><wbr><span>Label</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="589860252%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-call-lobby-participant-label-content.html"><span class="token function">CallLobbyParticipantLabelContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-call-lobby-participant-label-content-params/index.html">CallLobbyParticipantLabelContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The participant label overlaid on the call lobby preview, showing the user's name and microphone state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-894329%2FFunctions%2F-1353939899" anchor-label="ControlActions" id="-894329%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-control-actions.html"><span>Control</span><wbr><span><span>Actions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-894329%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-control-actions.html"><span class="token function">ControlActions</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-control-actions-params/index.html">ControlActionsParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The set of controls the user can use to change their audio and video device state, browse other types of settings, or leave the call. The default implementation renders <a href="../../io.getstream.video.android.compose.ui.components.call.controls/-control-actions.html">io.getstream.video.android.compose.ui.components.call.controls.ControlActions</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1989829691%2FFunctions%2F-1353939899" anchor-label="IncomingCallContent" id="1989829691%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-incoming-call-content.html"><span>Incoming</span><wbr><span>Call</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1989829691%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-incoming-call-content.html"><span class="token function">IncomingCallContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-incoming-call-content-params/index.html">IncomingCallContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The incoming call screen, shown when the user receives a call from other people. The default implementation renders <a href="../../io.getstream.video.android.compose.ui.components.call.ringing.incomingcall/-incoming-call-content.html">io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContent</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1168254180%2FFunctions%2F-1353939899" anchor-label="IncomingCallControlsContent" id="1168254180%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-incoming-call-controls-content.html"><span>Incoming</span><wbr><span>Call</span><wbr><span>Controls</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1168254180%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-incoming-call-controls-content.html"><span class="token function">IncomingCallControlsContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-incoming-call-controls-content-params/index.html">IncomingCallControlsContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The controls of the incoming call screen, such as accepting or declining the call.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2094368205%2FFunctions%2F-1353939899" anchor-label="IncomingCallDetailsContent" id="-2094368205%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-incoming-call-details-content.html"><span>Incoming</span><wbr><span>Call</span><wbr><span>Details</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2094368205%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/ColumnScope.html">ColumnScope</a><span class="token punctuation">.</span><a href="-incoming-call-details-content.html"><span class="token function">IncomingCallDetailsContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-incoming-call-details-content-params/index.html">IncomingCallDetailsContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The details of the incoming call screen, such as call participant information.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="54322121%2FFunctions%2F-1353939899" anchor-label="IncomingCallHeaderContent" id="54322121%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-incoming-call-header-content.html"><span>Incoming</span><wbr><span>Call</span><wbr><span>Header</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="54322121%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/ColumnScope.html">ColumnScope</a><span class="token punctuation">.</span><a href="-incoming-call-header-content.html"><span class="token function">IncomingCallHeaderContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-incoming-call-header-content-params/index.html">IncomingCallHeaderContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The header of the incoming call screen. Empty by default.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1518352313%2FFunctions%2F-1353939899" anchor-label="OutgoingCallContent" id="-1518352313%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-outgoing-call-content.html"><span>Outgoing</span><wbr><span>Call</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1518352313%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-outgoing-call-content.html"><span class="token function">OutgoingCallContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-outgoing-call-content-params/index.html">OutgoingCallContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The outgoing call screen, shown when the user is calling other people. The default implementation renders <a href="../../io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall/-outgoing-call-content.html">io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContent</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-420372060%2FFunctions%2F-1353939899" anchor-label="OutgoingCallControlsContent" id="-420372060%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-outgoing-call-controls-content.html"><span>Outgoing</span><wbr><span>Call</span><wbr><span>Controls</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-420372060%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-outgoing-call-controls-content.html"><span class="token function">OutgoingCallControlsContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-outgoing-call-controls-content-params/index.html">OutgoingCallControlsContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The controls of the outgoing call screen, such as cancelling the call.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1100262387%2FFunctions%2F-1353939899" anchor-label="OutgoingCallDetailsContent" id="1100262387%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-outgoing-call-details-content.html"><span>Outgoing</span><wbr><span>Call</span><wbr><span>Details</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1100262387%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/ColumnScope.html">ColumnScope</a><span class="token punctuation">.</span><a href="-outgoing-call-details-content.html"><span class="token function">OutgoingCallDetailsContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-outgoing-call-details-content-params/index.html">OutgoingCallDetailsContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The details of the outgoing call screen, such as call participant information.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="324376533%2FFunctions%2F-1353939899" anchor-label="OutgoingCallHeaderContent" id="324376533%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-outgoing-call-header-content.html"><span>Outgoing</span><wbr><span>Call</span><wbr><span>Header</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="324376533%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/ColumnScope.html">ColumnScope</a><span class="token punctuation">.</span><a href="-outgoing-call-header-content.html"><span class="token function">OutgoingCallHeaderContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-outgoing-call-header-content-params/index.html">OutgoingCallHeaderContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The header of the outgoing call screen. Empty by default.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1427890197%2FFunctions%2F-1353939899" anchor-label="ParticipantLabelSoundIndicatorContent" id="1427890197%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-participant-label-sound-indicator-content.html"><span>Participant</span><wbr><span>Label</span><wbr><span>Sound</span><wbr><span>Indicator</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1427890197%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/RowScope.html">RowScope</a><span class="token punctuation">.</span><a href="-participant-label-sound-indicator-content.html"><span class="token function">ParticipantLabelSoundIndicatorContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-participant-label-sound-indicator-content-params/index.html">ParticipantLabelSoundIndicatorContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The sound indicator shown inside a participant label, showing the microphone state and audio level. The container applies the position and padding through <a href="../-participant-label-sound-indicator-content-params/modifier.html">ParticipantLabelSoundIndicatorContentParams.modifier</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1749986873%2FFunctions%2F-1353939899" anchor-label="ParticipantVideo" id="-1749986873%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-participant-video.html"><span>Participant</span><wbr><span><span>Video</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1749986873%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-participant-video.html"><span class="token function">ParticipantVideo</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-participant-video-params/index.html">ParticipantVideoParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A single participant video with a label, connection indicator, reactions and actions. The default implementation renders <a href="../../io.getstream.video.android.compose.ui.components.call.renderer/-participant-video.html">io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1395974316%2FFunctions%2F-1353939899" anchor-label="ParticipantVideoActionsContent" id="-1395974316%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-participant-video-actions-content.html"><span>Participant</span><wbr><span>Video</span><wbr><span>Actions</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1395974316%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-participant-video-actions-content.html"><span class="token function">ParticipantVideoActionsContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-participant-video-actions-content-params/index.html">ParticipantVideoActionsContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The action picker with call actions related to the selected participant.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1770452996%2FFunctions%2F-1353939899" anchor-label="ParticipantVideoConnectionIndicatorContent" id="-1770452996%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-participant-video-connection-indicator-content.html"><span>Participant</span><wbr><span>Video</span><wbr><span>Connection</span><wbr><span>Indicator</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1770452996%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-participant-video-connection-indicator-content.html"><span class="token function">ParticipantVideoConnectionIndicatorContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-participant-video-connection-indicator-content-params/index.html">ParticipantVideoConnectionIndicatorContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The indicator that shows the connection quality of a participant.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1485004679%2FFunctions%2F-1353939899" anchor-label="ParticipantVideoFallbackContent" id="1485004679%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-participant-video-fallback-content.html"><span>Participant</span><wbr><span>Video</span><wbr><span>Fallback</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1485004679%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-participant-video-fallback-content.html"><span class="token function">ParticipantVideoFallbackContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-participant-video-fallback-content-params/index.html">ParticipantVideoFallbackContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Content shown when the participant video track fails to load or is not available. The default implementation renders the participant's avatar.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1180690690%2FFunctions%2F-1353939899" anchor-label="ParticipantVideoLabelContent" id="1180690690%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-participant-video-label-content.html"><span>Participant</span><wbr><span>Video</span><wbr><span>Label</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1180690690%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-participant-video-label-content.html"><span class="token function">ParticipantVideoLabelContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-participant-video-label-content-params/index.html">ParticipantVideoLabelContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">The label of a participant video, showing the participant's name and device states.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1517375172%2FFunctions%2F-1353939899" anchor-label="ParticipantVideoReactionContent" id="1517375172%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-participant-video-reaction-content.html"><span>Participant</span><wbr><span>Video</span><wbr><span>Reaction</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1517375172%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/BoxScope.html">BoxScope</a><span class="token punctuation">.</span><a href="-participant-video-reaction-content.html"><span class="token function">ParticipantVideoReactionContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-participant-video-reaction-content-params/index.html">ParticipantVideoReactionContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Content shown for a participant's reaction.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="172297255%2FFunctions%2F-1353939899" anchor-label="ScreenSharingFallbackContent" id="172297255%2FFunctions%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-screen-sharing-fallback-content.html"><span>Screen</span><wbr><span>Sharing</span><wbr><span>Fallback</span><wbr><span><span>Content</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="172297255%2FFunctions%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="-screen-sharing-fallback-content.html"><span class="token function">ScreenSharingFallbackContent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">params<span class="token operator">: </span><a href="../-screen-sharing-fallback-content-params/index.html">ScreenSharingFallbackContentParams</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Content shown in place of the shared screen while the screen sharing session is loading or not available. The default implementation renders the sharing participant's avatar.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

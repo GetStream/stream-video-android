@@ -38,7 +38,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.31.0
+        <div class="library-version" id="library-version">1.32.0
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">stream-video-android-ui-compose</a><span class="delimiter">/</span><a href="../index.html">io.getstream.video.android.compose.ui</a><span class="delimiter">/</span><span class="current">StreamCallActivityComposeDelegate</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Stream</span><wbr><span>Call</span><wbr><span>Activity</span><wbr><span>Compose</span><wbr><span><span>Delegate</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">StreamCallActivityComposeDelegate</a> : <a href="../-stream-call-activity-compose-ui/index.html">StreamCallActivityComposeUi</a></div><p class="paragraph">A default implementation of the compose delegate for the call activity. Can be extended. Provides functions with the context of the activity.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">StreamCallActivityComposeDelegate</a> : <a href="../-stream-call-activity-compose-ui/index.html">StreamCallActivityComposeUi</a></div><p class="paragraph">A default implementation of the compose delegate for the call activity. Can be extended. Provides functions with the context of the activity.</p><p class="paragraph">Override the methods of this delegate to replace whole screens (e.g. the video call or the ringing screens). To customize individual components inside those screens, override <a href="component-factory.html">componentFactory</a> instead; the screens rendered by this delegate resolve their components through that factory.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -130,6 +130,25 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="853238494%2FProperties%2F-1353939899" anchor-label="componentFactory" id="853238494%2FProperties%2F-1353939899" data-filterable-set=":stream-video-android-ui-compose/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-ui-compose/main" data-filterable-set=":stream-video-android-ui-compose/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="component-factory.html"><span>component</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="853238494%2FProperties%2F-1353939899"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-ui-compose/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="component-factory.html">componentFactory</a><span class="token operator">: </span><a href="../../io.getstream.video.android.compose.theme/-video-component-factory/index.html">VideoComponentFactory</a></div><div class="brief "><p class="paragraph">The <a href="../../io.getstream.video.android.compose.theme/-video-component-factory/index.html">VideoComponentFactory</a> provided to the <a href="../../io.getstream.video.android.compose.theme/-video-theme/index.html">VideoTheme</a> that wraps all the screens rendered by this delegate. Override to customize individual components on those screens.</p></div></div></div>
                 </div>
               </div>
             </div>

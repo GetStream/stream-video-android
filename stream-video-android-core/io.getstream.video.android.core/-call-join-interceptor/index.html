@@ -38,7 +38,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.31.0
+        <div class="library-version" id="library-version">1.32.0
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">stream-video-android-core</a><span class="delimiter">/</span><a href="../index.html">io.getstream.video.android.core</a><span class="delimiter">/</span><span class="current">CallJoinInterceptor</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Call</span><wbr><span>Join</span><wbr><span><span>Interceptor</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">CallJoinInterceptor</a></div><p class="paragraph">Controls when a ringing call transitions to <a href="../-ringing-state/-active/index.html">RingingState.Active</a>.</p><p class="paragraph">Implement this to insert custom logic (e.g. waiting for user confirmation) between the publisher peer connection becoming ready and the call going active. Has no effect on non-ringing joins (livestream, direct join).</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">CallJoinInterceptor</a></div><p class="paragraph">Controls when a ringing call transitions to <a href="../-ringing-state/-active/index.html">RingingState.Active</a>.</p><p class="paragraph">Implement this to insert custom logic (e.g. waiting for user confirmation) between the publisher peer connection becoming ready and the call going active. Has no effect on non-ringing joins (livestream, direct join).</p><p class="paragraph">Concurrent <a href="../-call/join.html">Call.join</a> callers share one in-flight join. Interceptor ownership is <strong>first non-cancelled wins</strong>: the first <code class="lang-kotlin">join(interceptor)</code> waiter whose coroutine is still not cancelled supplies the interceptor. If that waiter is cancelled (Activity destroyed / recreated) before the interceptor runs, the next still-active waiter's interceptor is used. <code class="lang-kotlin">join(null)</code> does not erase an earlier interceptor. Once <a href="call-ready-to-join.html">callReadyToJoin</a> starts, the selected interceptor is frozen for that invocation.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
