@@ -51,7 +51,7 @@ include(":metrics:stream-video-android-metrics")
 buildCache {
     local {
         isEnabled = !System.getenv().containsKey("CI")
-        removeUnusedEntriesAfterDays = 7
+//        removeUnusedEntriesAfterDays = 7
     }
     val localProperties = java.util.Properties()
     val file = File("local.properties")

@@ -30,7 +30,10 @@ android {
 }
 
 baselineProfile {
-    baselineProfileOutputDir = "."
+    // Do not set baselineProfileOutputDir = "." — that points the baseline-profile source dir at
+    // the module's src/main root, and AGP 9's prepareReleaseArtProfile recursively parses every
+    // file there (e.g. res/*.webp, *.kt) as ART profile rules and fails with "Illegal token".
+    // The default output dir (generated/baselineProfiles) keeps the profile in its own folder.
     filter {
         include("io.getstream.video.android.model.**")
     }

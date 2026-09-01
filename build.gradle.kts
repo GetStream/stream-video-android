@@ -109,14 +109,12 @@ subprojects {
 
 afterEvaluate {
     println("Running Add Pre Commit Git Hook Script on Build")
-    exec {
-        if (System.getProperty("os.name").toLowerCase().contains("win")) {
-            // Windows-specific command
-            commandLine("cmd", "/c", "copy", ".\\scripts\\git-hooks\\pre-push", ".\\.git\\hooks")
-        } else {
-            // Unix-based systems
-            commandLine("cp", "./scripts/git-hooks/pre-push", "./.git/hooks")
-        }
+    val prePushSource = file("scripts/git-hooks/pre-push")
+    val gitHooksDir = file(".git/hooks")
+    if (prePushSource.exists() && gitHooksDir.isDirectory) {
+        val prePushTarget = File(gitHooksDir, "pre-push")
+        prePushSource.copyTo(prePushTarget, overwrite = true)
+        prePushTarget.setExecutable(true)
+        println("Added pre-push Git Hook Script.")
     }
-    println("Added pre-push Git Hook Script.")
 }

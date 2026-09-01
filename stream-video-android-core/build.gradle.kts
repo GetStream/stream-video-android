@@ -95,12 +95,10 @@ android {
         }
 
         managedDevices {
-            devices {
-                maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel2api31").apply {
-                    device = "Pixel 2"
-                    apiLevel = 31
-                    systemImageSource = "aosp"
-                }
+            localDevices.maybeCreate("pixel2api31").apply {
+                device = "Pixel 2"
+                apiLevel = 31
+                systemImageSource = "aosp"
             }
         }
     }
@@ -140,7 +138,10 @@ android {
 }
 
 baselineProfile {
-    baselineProfileOutputDir = "."
+    // Do not set baselineProfileOutputDir = "." — that points the baseline-profile source dir at
+    // the module's src/main root, and AGP 9's prepareReleaseArtProfile recursively parses every
+    // file there (e.g. res/*.webp, *.kt) as ART profile rules and fails with "Illegal token".
+    // The default output dir (generated/baselineProfiles) keeps the profile in its own folder.
     filter {
         include("io.getstream.video.android.core.**")
         include("io.getstream.video.android.datastore.**")
