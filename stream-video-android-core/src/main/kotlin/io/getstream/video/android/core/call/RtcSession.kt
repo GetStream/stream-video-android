@@ -121,6 +121,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -1345,15 +1346,14 @@ public class RtcSession internal constructor(
      * Sync jobs are keyed by [trackType]. Cancelling a shared job used to drop an in-flight
      * audio unmute when video (or screen-share) published a moment later — reconnect restarts
      * [listenToMediaChanges] and fires those collectors together.
+     *
+     * The local mute map is updated with [MutableStateFlow.update] so concurrent collectors
+     * cannot lose another track's bit via a stale read–copy–write.
      */
     private fun setMuteState(isEnabled: Boolean, trackType: TrackType) {
         logger.d { "[setPublishState] #sfu; $trackType isEnabled: $isEnabled" }
 
-        // update the local copy
-        val copy = muteState.value.toMutableMap()
-        copy[trackType] = isEnabled
-        val new = copy.toMap()
-        muteState.value = new
+        muteState.update { it + (trackType to isEnabled) }
 
         val currentSfu = sfuUrl
         // Coalesce retries for this track only. Other tracks keep their in-flight RPCs.
