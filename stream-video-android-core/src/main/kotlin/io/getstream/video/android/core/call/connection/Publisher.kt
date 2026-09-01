@@ -464,12 +464,15 @@ internal class Publisher(
     }
 
     /**
-     * Normalises a negotiated codec name into the lowercase form the encryption layer expects,
-     * dropping anything it doesn't recognise so a surprising value becomes "no hint" rather than
-     * an unusable hint.
+     * Normalises a negotiated codec name into the bare lowercase form the encryption layer expects
+     * ("vp9", not "video/VP9"). Publish options carry either spelling.
+     *
+     * Deliberately not filtered against a known-codec list: the encryption layer takes this string
+     * as-is and decides for itself, so a list here would silently drop the hint for anything added
+     * to the codec set later.
      */
     private fun String.asE2EECodecHint(): String? =
-        lowercase().takeIf { it in setOf("opus", "vp8", "vp9", "h264") }
+        lowercase().substringAfterLast('/').trim().takeIf { it.isNotEmpty() }
 
     fun syncPublishOptions(captureFormat: CaptureFormat?, publishOptions: List<PublishOption>) {
         // enable publishing with new options

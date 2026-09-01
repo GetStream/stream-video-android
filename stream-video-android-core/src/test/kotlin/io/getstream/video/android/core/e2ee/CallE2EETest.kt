@@ -66,36 +66,10 @@ class CallE2EETest {
     private lateinit var call: Call
 
     /** Encrypts nothing; the tests only care about what the SDK asks of a manager. */
-    private open class NoopE2EEManager : E2EEManager {
+    private class NoopE2EEManager : E2EEManager {
         override fun encrypt(sender: RtpSender, codec: String?, trackType: E2EETrackType?) = Unit
         override fun decrypt(receiver: RtpReceiver, userId: String, trackType: E2EETrackType?) =
             Unit
-    }
-
-    private class KeyedE2EEManager : NoopE2EEManager(), E2EEKeyProvider {
-        val sharedKeys = mutableMapOf<Int, ByteArray>()
-        val userKeys = mutableMapOf<Pair<String, Int>, ByteArray>()
-        var removedAll = false
-
-        override fun setSharedKey(keyIndex: Int, key: ByteArray) {
-            sharedKeys[keyIndex] = key
-        }
-
-        override fun setKey(userId: String, keyIndex: Int, key: ByteArray) {
-            userKeys[userId to keyIndex] = key
-        }
-
-        override fun removeSharedKey(keyIndex: Int) {
-            sharedKeys.remove(keyIndex)
-        }
-
-        override fun removeKey(userId: String, keyIndex: Int) {
-            userKeys.remove(userId to keyIndex)
-        }
-
-        override fun removeAllKeys() {
-            removedAll = true
-        }
     }
 
     @Before
@@ -167,35 +141,14 @@ class CallE2EETest {
     }
 
     @Test
-    fun `key helpers forward to a manager that provides keys`() {
-        val manager = KeyedE2EEManager()
-        call.setE2EEManager(manager)
-        val key = ByteArray(16) { it.toByte() }
-
-        call.setE2EESharedKey(keyIndex = 1, key = key)
-        call.setE2EEKey(userId = "alice", keyIndex = 2, key = key)
-
-        assertThat(manager.sharedKeys[1]).isEqualTo(key)
-        assertThat(manager.userKeys["alice" to 2]).isEqualTo(key)
-
-        call.removeE2EESharedKey(keyIndex = 1)
-        call.removeE2EEKey(userId = "alice", keyIndex = 2)
-        call.removeAllE2EEKeys()
-
-        assertThat(manager.sharedKeys).isEmpty()
-        assertThat(manager.userKeys).isEmpty()
-        assertThat(manager.removedAll).isTrue()
-    }
-
-    @Test
-    fun `key helpers are rejected for a manager that has no key provider`() {
+    fun `replacing the manager before join keeps the last one`() {
+        val replacement = NoopE2EEManager()
         call.setE2EEManager(NoopE2EEManager())
 
-        val failure = assertThrows(IllegalStateException::class.java) {
-            call.setE2EESharedKey(keyIndex = 0, key = ByteArray(16))
-        }
+        call.setE2EEManager(replacement)
 
-        assertThat(failure).hasMessageThat().contains("E2EEKeyProvider")
+        // The SDK must not dispose the one it replaced — per the spec the app owns both.
+        assertThat(call.e2eeManager).isSameInstanceAs(replacement)
     }
 
     @Test

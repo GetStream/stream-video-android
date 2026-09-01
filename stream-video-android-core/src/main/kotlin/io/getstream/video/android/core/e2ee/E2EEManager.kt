@@ -30,7 +30,9 @@ import org.webrtc.RtpSender
  *
  * Key generation and key distribution are deliberately **not** part of this interface. Stream's
  * infrastructure must stay isolated from that process, so it is the integrator's responsibility.
- * See [E2EEKeyProvider] for the key management surface the default manager exposes.
+ * Keys therefore live on the manager instance, not on the call: see
+ * [StreamEncryptionManager.setSharedKey] and [StreamEncryptionManager.setKey] for the default
+ * manager's surface, and give your own manager whichever key API suits your scheme.
  *
  * This mirrors the `E2EEManager` interface in the JavaScript SDK and `StreamE2EEManager` in the
  * iOS SDK, so the same integration shape works across all three platforms.
@@ -42,8 +44,9 @@ public interface E2EEManager {
      * implementation is expected to install a frame encryptor on [sender].
      *
      * @param sender The sender carrying the local track.
-     * @param codec The negotiated codec name (`opus`, `vp8`, `vp9`, `h264`), or `null` when the
-     * SDK cannot determine it. Implementations that do not need a codec hint may ignore it.
+     * @param codec The negotiated codec, lowercased and without a MIME prefix (`opus`, `vp8`,
+     * `av1`), or `null` when the SDK cannot determine it. Not restricted to a fixed set;
+     * implementations that do not need a codec hint may ignore it.
      * @param trackType Which kind of track this is, or `null` when it cannot be mapped.
      */
     public fun encrypt(sender: RtpSender, codec: String?, trackType: E2EETrackType?)

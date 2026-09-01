@@ -173,6 +173,24 @@ class E2EEMediaAttachmentTest {
     }
 
     @Test
+    fun `publisher passes through a mime-typed codec it has no special knowledge of`() = runTest {
+        val manager = RecordingE2EEManager()
+        stubAddTransceiver(mockk<RtpSender>(relaxed = true))
+        val option = videoPublishOption.copy(codec = Codec(name = "video/AV1"))
+
+        publisherWith(manager).addTransceiver(
+            streamIdList = listOf("stream-id"),
+            captureFormat = null,
+            track = mockk<MediaStreamTrack>(relaxed = true),
+            publishOption = option,
+        )
+
+        // Publish options carry either "AV1" or "video/AV1", and the hint must survive either way
+        // rather than being dropped for not being on a hard-coded codec list.
+        assertEquals("av1", manager.encrypted.single().second)
+    }
+
+    @Test
     fun `publisher drops the transceiver when the encryptor cannot be attached`() = runTest {
         val transceiver = stubAddTransceiver(mockk<RtpSender>(relaxed = true))
 

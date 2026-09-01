@@ -76,7 +76,6 @@ import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
-import io.getstream.video.android.core.e2ee.E2EEKeyProvider
 import io.getstream.video.android.core.e2ee.E2EEManager
 import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.events.VideoEventListener
@@ -92,7 +91,6 @@ import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.debugOnly
-import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
@@ -586,14 +584,6 @@ public class Call(
     @Volatile
     private var _e2eeManager: E2EEManager? = null
 
-    /**
-     * Whether this call created the manager itself through the key conveniences below. A manager
-     * handed to us by [setE2EEManager] belongs to the caller and is never disposed here, because
-     * the same instance is usually reused across calls.
-     */
-    @Volatile
-    private var ownsE2EEManager: Boolean = false
-
     /** Read by [RtcSession] when it builds the publisher and the subscriber. */
     internal val e2eeManager: E2EEManager? get() = _e2eeManager
 
@@ -618,6 +608,13 @@ public class Call(
      * }
      * ```
      *
+     * Keys stay on the manager, deliberately: keep your reference to it to add, remove and rotate
+     * keys, during the call as well as before it. Generating and distributing key material has to
+     * stay outside Stream's infrastructure, so the SDK never holds or transports it.
+     *
+     * You own the manager's lifecycle too — the SDK does not dispose it, since the same instance is
+     * normally reused across rejoins and often across calls.
+     *
      * Note that an encrypted call cannot be recorded, transcribed, closed-captioned, thumbnailed
      * or broadcast over HLS: none of that content is readable by Stream, so the coordinator
      * rejects those requests.
@@ -631,73 +628,9 @@ public class Call(
                 "the manager when the session is created, and the coordinator validates the " +
                 "call's encryption mode against the join request."
         }
-        // A manager we created ourselves has no other owner, so it would leak its native keys.
-        disposeOwnedE2EEManager()
         _e2eeManager = manager
-        ownsE2EEManager = false
         state.setE2eeEnabled(manager != null)
         logger.i { "[setE2EEManager] manager: ${manager?.javaClass?.simpleName ?: "none"}" }
-    }
-
-    /**
-     * Sets the key used for every participant without a per-user key, including your own outgoing
-     * media. Enables encryption on this call if no manager is attached yet, by creating a
-     * [StreamEncryptionManager] for the local user.
-     *
-     * Safe to call during a call to rotate keys: write the new key to the next index and peers
-     * that still hold the old index can decode frames that were already in flight.
-     *
-     * @throws IllegalStateException if a custom manager is attached that does not implement
-     * [E2EEKeyProvider] — manage that manager's keys through your own reference to it.
-     */
-    public fun setE2EESharedKey(keyIndex: Int, key: ByteArray): Unit =
-        e2eeKeyProvider("setE2EESharedKey").setSharedKey(keyIndex, key)
-
-    /** Sets [userId]'s key, which takes precedence over the shared key. See [setE2EESharedKey]. */
-    public fun setE2EEKey(userId: String, keyIndex: Int, key: ByteArray): Unit =
-        e2eeKeyProvider("setE2EEKey").setKey(userId, keyIndex, key)
-
-    /** Drops the shared key at [keyIndex]. See [setE2EESharedKey]. */
-    public fun removeE2EESharedKey(keyIndex: Int): Unit =
-        e2eeKeyProvider("removeE2EESharedKey").removeSharedKey(keyIndex)
-
-    /** Drops [userId]'s key at [keyIndex], falling back to the shared key. */
-    public fun removeE2EEKey(userId: String, keyIndex: Int): Unit =
-        e2eeKeyProvider("removeE2EEKey").removeKey(userId, keyIndex)
-
-    /** Drops every key. Media stops being decodable in both directions until a key is set again. */
-    public fun removeAllE2EEKeys(): Unit =
-        e2eeKeyProvider("removeAllE2EEKeys").removeAllKeys()
-
-    /**
-     * Resolves the manager to apply a key change to, creating the default one on first use so that
-     * setting a key is all it takes to enable encryption.
-     */
-    private fun e2eeKeyProvider(operation: String): E2EEKeyProvider {
-        _e2eeManager?.let { existing ->
-            return existing as? E2EEKeyProvider ?: error(
-                "$operation is not available: the attached ${existing.javaClass.simpleName} does " +
-                    "not implement E2EEKeyProvider. Manage its keys through your own reference.",
-            )
-        }
-        check(session.value == null) {
-            "$operation created the first key for this call, which enables encryption, but the " +
-                "call has already been joined. Set a key before join()."
-        }
-        val created = StreamEncryptionManager.create(user.id)
-        _e2eeManager = created
-        ownsE2EEManager = true
-        state.setE2eeEnabled(true)
-        logger.i { "[$operation] created the default encryption manager for ${user.id}" }
-        return created
-    }
-
-    private fun disposeOwnedE2EEManager() {
-        if (!ownsE2EEManager) return
-        ownsE2EEManager = false
-        val owned = _e2eeManager as? StreamEncryptionManager ?: return
-        _e2eeManager = null
-        safeCall { owned.dispose() }
     }
 
     // endregion
@@ -970,8 +903,6 @@ public class Call(
     )
 
     fun cleanup() {
-        // Only disposes a manager this call created; an app-owned one outlives the call.
-        disposeOwnedE2EEManager()
         lifecycle.cleanup()
     }
 

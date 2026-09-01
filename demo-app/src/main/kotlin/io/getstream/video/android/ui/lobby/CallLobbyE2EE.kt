@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +45,7 @@ import io.getstream.video.android.compose.ui.components.base.StreamTextField
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
@@ -79,11 +81,24 @@ internal fun E2EELobbyButton(call: Call, modifier: Modifier = Modifier) {
     val encrypted by call.state.e2eeEnabled.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    // The app owns the manager, so the demo has to hold it to dispose it. A real integration keeps
+    // it for the lifetime of its session and uses it to rotate keys.
+    var manager by remember { mutableStateOf<StreamEncryptionManager?>(null) }
+
+    DisposableEffect(Unit) {
+        onDispose { manager?.dispose() }
+    }
 
     IconButton(
         modifier = modifier.testTag("Stream_LobbyE2EEButton"),
         onClick = {
-            if (encrypted) call.setE2EEManager(null) else showDialog = true
+            if (encrypted) {
+                call.setE2EEManager(null)
+                manager?.dispose()
+                manager = null
+            } else {
+                showDialog = true
+            }
         },
     ) {
         Icon(
@@ -105,10 +120,18 @@ internal fun E2EELobbyButton(call: Call, modifier: Modifier = Modifier) {
                 error = null
             },
             onConfirm = { passphrase ->
-                // Fails on a WebRTC build without E2EE support, which is worth showing rather
-                // than joining a call the user believes is encrypted.
+                // Surfaced rather than swallowed: joining a call the user believes is encrypted
+                // when it is not would be worse than refusing to enable it.
                 val failure = runCatching {
-                    call.setE2EESharedKey(KEY_INDEX, deriveE2EEKey(passphrase))
+                    check(StreamEncryptionManager.isSupported()) {
+                        "This WebRTC build has no end-to-end encryption support."
+                    }
+                    // The key has to be in place before the manager reaches the call, so that the
+                    // publisher never gets a chance to send a frame without one.
+                    val created = StreamEncryptionManager.create(call.user.id)
+                    created.setSharedKey(KEY_INDEX, deriveE2EEKey(passphrase))
+                    call.setE2EEManager(created)
+                    manager = created
                 }.exceptionOrNull()
                 error = failure?.message ?: failure?.javaClass?.simpleName
                 showDialog = failure != null

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.e2ee
 
+import org.webrtc.EncryptionManager
 import stream.video.sfu.models.TrackType
 
 /**
@@ -42,4 +43,18 @@ internal fun TrackType.toE2EETrackType(): E2EETrackType? = when (this) {
     TrackType.TRACK_TYPE_SCREEN_SHARE -> E2EETrackType.SCREEN_SHARE
     TrackType.TRACK_TYPE_SCREEN_SHARE_AUDIO -> E2EETrackType.SCREEN_SHARE_AUDIO
     TrackType.TRACK_TYPE_UNSPECIFIED -> null
+}
+
+internal fun E2EETrackType.toNativeTrackType(): EncryptionManager.TrackType = when (this) {
+    E2EETrackType.AUDIO -> EncryptionManager.TrackType.AUDIO
+    E2EETrackType.VIDEO -> EncryptionManager.TrackType.VIDEO
+    E2EETrackType.SCREEN_SHARE -> EncryptionManager.TrackType.SCREEN_SHARE
+    E2EETrackType.SCREEN_SHARE_AUDIO -> EncryptionManager.TrackType.SCREEN_SHARE_AUDIO
+}
+
+internal fun EncryptionManager.TrackType.toE2EETrackType(): E2EETrackType = when (this) {
+    EncryptionManager.TrackType.AUDIO -> E2EETrackType.AUDIO
+    EncryptionManager.TrackType.VIDEO -> E2EETrackType.VIDEO
+    EncryptionManager.TrackType.SCREEN_SHARE -> E2EETrackType.SCREEN_SHARE
+    EncryptionManager.TrackType.SCREEN_SHARE_AUDIO -> E2EETrackType.SCREEN_SHARE_AUDIO
 }
