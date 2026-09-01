@@ -24,6 +24,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.model.streamCallId
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,10 +49,10 @@ internal abstract class GenericCallActionBroadcastReceiver : BroadcastReceiver()
             }
             // Extract call id
             val streamCallId = intent.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)
-            // We want the broadcast to stay alive so we can finish the coroutine.
-            val pendingResult = goAsync()
 
             if (streamCallId != null) {
+                // We want the broadcast to stay alive so we can finish the coroutine.
+                val pendingResult = goAsync()
                 scope.launch {
                     try {
                         // Get stream video
@@ -69,6 +70,8 @@ internal abstract class GenericCallActionBroadcastReceiver : BroadcastReceiver()
                             val call = streamVideo.call(streamCallId.type, streamCallId.id)
                             onReceive(call, context, intent) // Invoke the actual action handler
                         }
+                    } catch (e: CancellationException) {
+                        throw e
                     } catch (e: Throwable) {
                         // Something happened
                         logger.e(
@@ -78,9 +81,9 @@ internal abstract class GenericCallActionBroadcastReceiver : BroadcastReceiver()
                                 "An error occured while invoking the action.",
                             ),
                         )
+                    } finally {
+                        pendingResult.finish()
                     }
-                    // Finish the broadcast regardless
-                    pendingResult.finish()
                 }
             } else {
                 logger.w(createMessage(intentAction, "Stream call ID is not provided."))
