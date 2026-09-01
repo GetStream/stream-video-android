@@ -16,7 +16,9 @@
 
 package io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -26,28 +28,72 @@ import io.getstream.video.android.mock.previewMemberListState
 
 @Preview
 @Composable
-private fun OutgoingCallVideoPreview() {
+private fun OutgoingCallContentOneParticipantRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        OutgoingCallContent(
-            call = previewCall,
-            isVideoType = true,
-            participants = previewMemberListState,
-            onBackPressed = {},
-        ) {}
+        OutgoingCallContentOneParticipantPreview()
     }
+}
+
+@Composable
+internal fun OutgoingCallContentOneParticipantPreview() {
+    OutgoingCallContent(
+        call = previewCall,
+        participants = previewMemberListState.take(1),
+        modifier = Modifier.fillMaxSize(),
+        onBackPressed = {},
+        onCallAction = {},
+    )
 }
 
 @Preview
 @Composable
-private fun OutgoingCallAudioPreview() {
+private fun OutgoingCallContentMultipleParticipantsRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        OutgoingCallContent(
-            call = previewCall,
-            isVideoType = false,
-            participants = previewMemberListState,
-            onBackPressed = {},
-        ) {}
+        OutgoingCallContentMultipleParticipantsPreview()
     }
+}
+
+@Composable
+internal fun OutgoingCallContentMultipleParticipantsPreview() {
+    OutgoingCallContent(
+        call = previewCall,
+        participants = previewMemberListState,
+        onBackPressed = {},
+    ) {}
+}
+
+@Preview
+@Composable
+private fun OutgoingCallContentMinimumVideoRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        OutgoingCallContentMinimumVideoPreview()
+    }
+}
+
+@Composable
+internal fun OutgoingCallContentMinimumVideoPreview() {
+    OutgoingCallContent(
+        call = previewCall,
+        isVideoType = true,
+    )
+}
+
+@Preview
+@Composable
+private fun OutgoingCallContentMinimumAudioRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        OutgoingCallContentMinimumAudioPreview()
+    }
+}
+
+@Composable
+internal fun OutgoingCallContentMinimumAudioPreview() {
+    OutgoingCallContent(
+        call = previewCall,
+        isVideoType = false,
+    )
 }

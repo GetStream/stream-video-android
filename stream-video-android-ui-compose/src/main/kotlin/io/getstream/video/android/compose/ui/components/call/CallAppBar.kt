@@ -43,12 +43,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.theme.CallAppBarCenterContentParams
+import io.getstream.video.android.compose.theme.CallAppBarLeadingContentParams
+import io.getstream.video.android.compose.theme.CallAppBarTrailingContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.GenericContainer
-import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.ui.common.R
 
@@ -73,14 +74,33 @@ public fun CallAppBar(
     onCallAction: (CallAction) -> Unit = {},
     title: String = stringResource(id = R.string.stream_video_default_app_bar_title),
     leadingContent: (@Composable RowScope.() -> Unit)? = {
-        DefaultCallAppBarLeadingContent(onBackPressed)
+        with(VideoTheme.componentFactory) {
+            CallAppBarLeadingContent(
+                params = CallAppBarLeadingContentParams(
+                    call = call,
+                    onBackPressed = onBackPressed,
+                ),
+            )
+        }
     },
     centerContent: (@Composable (RowScope.() -> Unit))? = {
-        DefaultCallAppBarCenterContent(call, title)
+        with(VideoTheme.componentFactory) {
+            CallAppBarCenterContent(
+                params = CallAppBarCenterContentParams(
+                    call = call,
+                    title = title,
+                ),
+            )
+        }
     },
     trailingContent: (@Composable RowScope.() -> Unit)? = {
-        LeaveCallAction {
-            onCallAction(LeaveCall)
+        with(VideoTheme.componentFactory) {
+            CallAppBarTrailingContent(
+                params = CallAppBarTrailingContentParams(
+                    call = call,
+                    onCallAction = onCallAction,
+                ),
+            )
         }
     },
 ) {

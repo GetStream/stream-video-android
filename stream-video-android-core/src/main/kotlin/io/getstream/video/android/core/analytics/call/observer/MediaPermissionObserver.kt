@@ -31,6 +31,9 @@ internal class MediaPermissionObserver(
     val joinAnalyticsStateHolder: JoinAnalyticsStateHolder,
 ) {
 
+    /**
+     *  Reports the current camera and microphone permission state.
+     */
     fun mediaPermissionStatus() {
         eventReporter.reportMediaPermissionStatus(
             callId,
