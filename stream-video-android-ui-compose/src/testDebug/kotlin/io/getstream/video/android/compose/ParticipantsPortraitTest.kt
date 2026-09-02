@@ -135,7 +135,14 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
 
     @Test
     fun `call participants list`() {
-        snapshotWithDarkMode {
+        snapshot {
+            CallParticipantsListPreview()
+        }
+    }
+
+    @Test
+    fun `call participants list in dark mode`() {
+        snapshot(isInDarkMode = true) {
             CallParticipantsListPreview()
         }
     }

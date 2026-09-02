@@ -89,7 +89,7 @@ internal interface PaparazziComposeTest {
                     Box(
                         modifier = Modifier
                             .background(
-                                backgroundColor.takeOrElse { VideoTheme.colors.baseSheetPrimary },
+                                backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
                             ),
                         contentAlignment = contentAlignment,
                     ) {
@@ -100,8 +100,13 @@ internal interface PaparazziComposeTest {
         }
     }
 
+    /**
+     * Renders [composable] twice, dark above light. For components only: a full-screen composable
+     * takes the whole height and hides the second half; snapshot those in two files with [snapshot].
+     */
     fun snapshotWithDarkMode(
         contentAlignment: Alignment = Alignment.TopStart,
+        backgroundColor: Color = Color.Unspecified,
         composable: @Composable () -> Unit,
     ) {
         paparazzi.snapshot {
@@ -111,7 +116,9 @@ internal interface PaparazziComposeTest {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
-                                .background(VideoTheme.colors.baseSheetPrimary),
+                                .background(
+                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                ),
                             contentAlignment = contentAlignment,
                         ) {
                             composable()
@@ -121,7 +128,9 @@ internal interface PaparazziComposeTest {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
-                                .background(VideoTheme.colors.baseSheetPrimary),
+                                .background(
+                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                ),
                             contentAlignment = contentAlignment,
                         ) {
                             composable()
@@ -134,6 +143,7 @@ internal interface PaparazziComposeTest {
 
     fun snapshotWithDarkModeRow(
         contentAlignment: Alignment = Alignment.TopStart,
+        backgroundColor: Color = Color.Unspecified,
         composable: @Composable () -> Unit,
     ) {
         paparazzi.snapshot {
@@ -143,7 +153,9 @@ internal interface PaparazziComposeTest {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
-                                .background(VideoTheme.colors.baseSheetPrimary),
+                                .background(
+                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                ),
                             contentAlignment = contentAlignment,
                         ) {
                             composable()
@@ -153,7 +165,9 @@ internal interface PaparazziComposeTest {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
-                                .background(VideoTheme.colors.baseSheetPrimary),
+                                .background(
+                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                ),
                             contentAlignment = contentAlignment,
                         ) {
                             composable()

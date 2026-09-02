@@ -172,6 +172,13 @@ internal class CallContentTest : PaparazziComposeTest {
     }
 
     @Test
+    fun `call content deprecated overload in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            CallContentDeprecatedOverloadPreview()
+        }
+    }
+
+    @Test
     fun `outgoing call content with minimum parameters and video type`() {
         snapshot {
             OutgoingCallContentMinimumVideoPreview()

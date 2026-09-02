@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose
 
+import androidx.compose.ui.graphics.Color
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_2_LANDSCAPE_HDPI
@@ -35,7 +36,8 @@ internal class LivestreamTest : PaparazziComposeTest {
 
     @Test
     fun `livestream player overlay`() {
-        snapshotWithDarkMode {
+        // The overlay is drawn over video, so a dark background stands in for it.
+        snapshotWithDarkMode(backgroundColor = Color.Black) {
             LivestreamPlayerOverlayPreview()
         }
     }

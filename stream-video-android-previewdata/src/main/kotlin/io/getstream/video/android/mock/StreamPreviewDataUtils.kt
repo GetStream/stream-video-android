@@ -27,6 +27,7 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.VideoTrack
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.threeten.bp.OffsetDateTime
@@ -78,9 +79,13 @@ public val previewCall: Call = Call(
     state.upsertParticipants(participants)
     // The sorted participants state is filled asynchronously on the call scope. Wait for it so
     // composables that read call.state.participants never render the transient empty state.
+    // The duration flow emits its first value after a one second delay. Keep it subscribed and
+    // wait for that value once, so compositions never race between "no duration" and "0s".
+    state.scope.launch { state.duration.collect {} }
     runBlocking {
         withTimeout(5_000) {
             state.participants.first { it.size == participants.size }
+            state.duration.first { it != null }
         }
     }
 }
