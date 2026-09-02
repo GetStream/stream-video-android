@@ -255,6 +255,9 @@ internal class CallJoinCoordinator(
                 notify = notify,
                 hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
                 joinAnalyticsModel = joinAnalyticsModel,
+                // The coordinator rejects a join whose flag disagrees with the call. This is
+                // the first join; rejoin / migrate omit it and CallApiClient reads the manager.
+                e2ee = state.e2eeEnabled.value,
             )
 
         if (result !is Success) {

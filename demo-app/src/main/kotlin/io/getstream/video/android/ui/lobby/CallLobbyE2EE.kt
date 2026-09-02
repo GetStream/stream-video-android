@@ -27,10 +27,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -46,6 +46,7 @@ import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.e2ee.StreamEncryptionManager
+import kotlinx.coroutines.launch
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
@@ -81,13 +82,11 @@ internal fun E2EELobbyButton(call: Call, modifier: Modifier = Modifier) {
     val encrypted by call.state.e2eeEnabled.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    // The app owns the manager, so the demo has to hold it to dispose it. A real integration keeps
-    // it for the lifetime of its session and uses it to rotate keys.
+    // Held here so the demo can dispose it when the user turns encryption off. Do not dispose
+    // when this composable leaves the tree: Join starts CallActivity with CLEAR_TASK, which
+    // destroys the lobby and would free the native manager the Call still holds.
     var manager by remember { mutableStateOf<StreamEncryptionManager?>(null) }
-
-    DisposableEffect(Unit) {
-        onDispose { manager?.dispose() }
-    }
+    val scope = rememberCoroutineScope()
 
     IconButton(
         modifier = modifier.testTag("Stream_LobbyE2EEButton"),
@@ -122,19 +121,23 @@ internal fun E2EELobbyButton(call: Call, modifier: Modifier = Modifier) {
             onConfirm = { passphrase ->
                 // Surfaced rather than swallowed: joining a call the user believes is encrypted
                 // when it is not would be worse than refusing to enable it.
-                val failure = runCatching {
-                    check(StreamEncryptionManager.isSupported()) {
-                        "This WebRTC build has no end-to-end encryption support."
-                    }
-                    // The key has to be in place before the manager reaches the call, so that the
-                    // publisher never gets a chance to send a frame without one.
-                    val created = StreamEncryptionManager.create(call.user.id)
-                    created.setSharedKey(KEY_INDEX, deriveE2EEKey(passphrase))
-                    call.setE2EEManager(created)
-                    manager = created
-                }.exceptionOrNull()
-                error = failure?.message ?: failure?.javaClass?.simpleName
-                showDialog = failure != null
+                scope.launch {
+                    val failure = runCatching {
+                        check(StreamEncryptionManager.isSupported()) {
+                            "This WebRTC build has no end-to-end encryption support."
+                        }
+                        // The key has to be in place before the manager reaches the call, so that
+                        // the publisher never gets a chance to send a frame without one.
+                        // Encryption mode is a call/type setting, not something a regular user
+                        // can flip with UpdateCall — Pronto's `user` role is denied that.
+                        val created = StreamEncryptionManager.create(call.user.id)
+                        created.setSharedKey(KEY_INDEX, deriveE2EEKey(passphrase))
+                        call.setE2EEManager(created)
+                        manager = created
+                    }.exceptionOrNull()
+                    error = failure?.message ?: failure?.javaClass?.simpleName
+                    showDialog = failure != null
+                }
             },
         )
     }

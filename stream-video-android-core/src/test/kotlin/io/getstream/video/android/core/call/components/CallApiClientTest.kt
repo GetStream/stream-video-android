@@ -352,4 +352,55 @@ class CallApiClientTest {
             )
         }
     }
+
+    @Test
+    fun `joinRequest reports e2ee from the manager when the caller omits it`() = runTest(
+        testDispatcher,
+    ) {
+        // Rejoin / migrate omit e2ee. The flag still has to come from the attached manager
+        // — otherwise an encrypted call is rejected with "the join must request e2ee".
+        val encryptedClient = CallApiClient(
+            type = "default",
+            id = "call-id",
+            state = state,
+            clientImpl = clientImpl,
+            scope = testScope,
+            callSessionId = { "session-id" },
+            callRegistry = callRegistry,
+            callAnalytics = mockk(relaxed = true),
+            sessionManager = sessionManager,
+            e2eeRequested = { true },
+        )
+        coEvery {
+            clientImpl.joinCall(
+                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(),
+            )
+        } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
+
+        encryptedClient.joinRequest(
+            location = "test-location",
+            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
+        )
+
+        coVerify {
+            clientImpl.joinCall(
+                type = any(),
+                id = any(),
+                create = any(),
+                members = any(),
+                custom = any(),
+                settingsOverride = any(),
+                startsAt = any(),
+                team = any(),
+                ring = any(),
+                notify = any(),
+                location = any(),
+                migratingFrom = any(),
+                migratingFromList = any(),
+                hintHighScaleLivestreamPublisher = any(),
+                e2ee = true,
+            )
+        }
+    }
 }

@@ -80,6 +80,9 @@ internal class CallApiClient(
     private val callRegistry: ClientCallRegistry,
     private val callAnalytics: CallAnalytics,
     private val sessionManager: CallSessionManager,
+    // Used when a caller omits [e2ee] — rejoin and migrate. First join passes the flag
+    // itself. The manager lives on Call and is attached after this client is built.
+    private val e2eeRequested: () -> Boolean = { false },
 ) {
     private val logger by taggedLogger("Call:ApiClient:$type:$id")
 
@@ -100,6 +103,12 @@ internal class CallApiClient(
     ): Result<JoinCallResponse> {
         val migratingFromList =
             migratingFromList ?: sessionManager.failedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
+        // First join passes [e2ee] so the request matches what the session will encrypt.
+        // Rejoin / migrate omit it and we reuse the manager that survived the reconnect.
+        val requestE2ee = e2ee ?: e2eeRequested()
+        logger.i {
+            "[joinRequest] e2ee=$requestE2ee encryptionMode=${state.settings.value?.encryption?.mode}"
+        }
         callAnalytics.joinAnalytics.onJoinRequestStart(joinAnalyticsModel.joinReason)
         val result = clientImpl.joinCall(
             type, id,
@@ -115,7 +124,7 @@ internal class CallApiClient(
             migratingFrom = migratingFrom,
             migratingFromList = migratingFromList,
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
-            e2ee = e2ee,
+            e2ee = requestE2ee,
         )
         result.onSuccess {
             callAnalytics.joinAnalytics.onJoinRequestSuccess(

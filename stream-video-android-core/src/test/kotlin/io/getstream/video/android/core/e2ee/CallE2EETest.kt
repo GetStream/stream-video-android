@@ -153,6 +153,8 @@ class CallE2EETest {
 
     @Test
     fun `the join request reports e2ee when a manager is attached`() = runTest {
+        // Call.joinRequest and first join pass the flag. Rejoin / migrate omit it and
+        // CallApiClient reads the attached manager — see CallApiClientTest.
         call.setE2EEManager(NoopE2EEManager())
 
         call.joinRequest(

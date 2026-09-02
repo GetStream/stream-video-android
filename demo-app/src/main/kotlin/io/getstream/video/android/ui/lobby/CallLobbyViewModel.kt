@@ -66,6 +66,11 @@ class CallLobbyViewModel @Inject constructor(
             // this way the lobby screen can already display the right mic/camera settings
             // This also starts listening to the call events to get the participant count
             val callGetOrCreateResult = call.create()
+            Log.i(
+                "CallLobbyViewModel",
+                "Call ${call.cid} encryption mode=" +
+                    "${call.state.settings.value?.encryption?.mode}",
+            )
             if (callGetOrCreateResult.isFailure) {
                 // in demo we can ignore this. The lobby screen will just display default camera/video,
                 // but we will show an error

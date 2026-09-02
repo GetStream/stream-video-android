@@ -105,6 +105,7 @@ class CallJoinCoordinatorTest {
         every { state._connection } returns connectionFlow
         every { state.connection } returns connectionFlow
         every { state.settings } returns MutableStateFlow<CallSettingsResponse?>(null)
+        every { state.e2eeEnabled } returns MutableStateFlow(false)
         coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
     }
 
@@ -134,7 +135,7 @@ class CallJoinCoordinatorTest {
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {
         coEvery {
             apiClient.joinRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns result
     }
@@ -150,6 +151,30 @@ class CallJoinCoordinatorTest {
         assertThat(result).isInstanceOf(Success::class.java)
         assertThat((result as Success).value).isSameInstanceAs(mockSession)
         verify { sessionMonitor.monitorSession(mockJoinResponse) }
+    }
+
+    @Test
+    fun `first join passes e2ee from call state`() = runTest(testDispatcher) {
+        every { state.e2eeEnabled } returns MutableStateFlow(true)
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+
+        coordinator().join()
+        advanceUntilIdle()
+
+        coVerify {
+            apiClient.joinRequest(
+                create = any(),
+                location = any(),
+                migratingFrom = any(),
+                migratingFromList = any(),
+                ring = any(),
+                notify = any(),
+                hintHighScaleLivestreamPublisher = any(),
+                joinAnalyticsModel = any(),
+                e2ee = true,
+            )
+        }
     }
 
     @Test
@@ -185,6 +210,7 @@ class CallJoinCoordinatorTest {
         // The join request is issued once per retry (3 attempts total).
         coVerify(exactly = 3) {
             apiClient.joinRequest(
+                any(),
                 any(),
                 any(),
                 any(),

@@ -293,6 +293,7 @@ public class Call(
         callRegistry = callRegistry,
         callAnalytics = callAnalytics,
         sessionManager = sessionManager,
+        e2eeRequested = { e2eeManager != null },
     )
 
     /**
@@ -896,11 +897,13 @@ public class Call(
         notify,
         hintHighScaleLivestreamPublisher,
         joinAnalyticsModel,
-        // The coordinator rejects a join whose e2ee flag disagrees with the call's configuration,
-        // so this has to reflect what we will actually do with the media rather than what the app
-        // asked for. Sent on rejoin and migrate too, since those go through the same request.
         e2ee = e2eeManager != null,
-    )
+    ).also {
+        logger.i {
+            "[joinRequest] e2ee=${e2eeManager != null} " +
+                "encryptionMode=${state.settings.value?.encryption?.mode}"
+        }
+    }
 
     fun cleanup() {
         lifecycle.cleanup()
