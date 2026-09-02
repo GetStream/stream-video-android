@@ -305,7 +305,9 @@ private fun Body(
                         Text(stringResource(id = R.string.join_first), color = Color.White)
                         Checkbox(
                             callerJoinsFirst,
-                            modifier = Modifier.offset(x = 10.dp),
+                            modifier = Modifier
+                                .offset(x = 10.dp)
+                                .testTag("Stream_JoinAndRingCheckbox"),
                             colors = CheckboxDefaults.colors(
                                 uncheckedColor = Color.White, // Border color when unchecked
                                 checkedColor = Color.White, // Fill color when checked
