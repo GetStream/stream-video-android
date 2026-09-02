@@ -54,19 +54,19 @@ internal fun LivestreamBackstagePortraitPreview() {
                     id = R.string.stream_video_livestreaming_on_backstage,
                 ),
                 fontSize = 14.sp,
-                color = VideoTheme.colors.basePrimary,
+                color = VideoTheme.colors.textPrimary,
             )
             Text(
                 modifier = Modifier,
                 text = "2:00",
                 fontSize = 16.sp,
-                color = VideoTheme.colors.basePrimary,
+                color = VideoTheme.colors.textPrimary,
             )
             Text(
                 modifier = Modifier,
                 text = "2 participants have joined the call",
                 fontSize = 12.sp,
-                color = VideoTheme.colors.baseSecondary,
+                color = VideoTheme.colors.textSecondary,
             )
         }
     }

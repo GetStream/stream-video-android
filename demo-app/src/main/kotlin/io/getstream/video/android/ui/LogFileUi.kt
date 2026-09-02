@@ -101,20 +101,20 @@ fun LogFilesScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetPrimary),
+            .background(VideoTheme.colors.backgroundCoreApp),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(VideoTheme.colors.baseSheetSecondary)
+                .background(VideoTheme.colors.backgroundCoreElevation1)
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "Log Files",
-                style = VideoTheme.typography.subtitleM,
-                color = VideoTheme.colors.basePrimary,
+                style = VideoTheme.typography.headingSmall,
+                color = VideoTheme.colors.textPrimary,
             )
 
             Row(
@@ -131,14 +131,14 @@ fun LogFilesScreen(
                             reloadFiles()
                         }
                     },
-                    style = VideoTheme.typography.bodyS,
-                    color = VideoTheme.colors.brandPrimary,
+                    style = VideoTheme.typography.captionDefault,
+                    color = VideoTheme.colors.accentPrimary,
                 )
 
                 Box(
                     modifier = Modifier
                         .background(
-                            color = VideoTheme.colors.baseSheetTertiary,
+                            color = VideoTheme.colors.backgroundCoreSurfaceDefault,
                             shape = RoundedCornerShape(999.dp),
                         )
                         .clickable(onClick = onClose)
@@ -147,7 +147,7 @@ fun LogFilesScreen(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
-                        tint = VideoTheme.colors.basePrimary,
+                        tint = VideoTheme.colors.textPrimary,
                     )
                 }
             }
@@ -182,8 +182,8 @@ private fun LogFileRow(
     ) {
         Text(
             text = item.file.name,
-            style = VideoTheme.typography.labelL,
-            color = VideoTheme.colors.basePrimary,
+            style = VideoTheme.typography.headingLarge,
+            color = VideoTheme.colors.textPrimary,
         )
 
         Row(
@@ -200,8 +200,8 @@ private fun LogFileRow(
         Text(
             text = item.file.absolutePath,
             modifier = Modifier.padding(top = 10.dp),
-            style = VideoTheme.typography.labelM,
-            color = VideoTheme.colors.baseSecondary,
+            style = VideoTheme.typography.bodyEmphasis,
+            color = VideoTheme.colors.textSecondary,
         )
     }
 }
@@ -212,12 +212,12 @@ private fun LogMetaChip(text: String) {
         text = text,
         modifier = Modifier
             .background(
-                color = VideoTheme.colors.baseSheetTertiary,
+                color = VideoTheme.colors.backgroundCoreSurfaceDefault,
                 shape = RoundedCornerShape(999.dp),
             )
             .padding(horizontal = 10.dp, vertical = 6.dp),
-        style = VideoTheme.typography.bodyS,
-        color = VideoTheme.colors.basePrimary,
+        style = VideoTheme.typography.captionDefault,
+        color = VideoTheme.colors.textPrimary,
     )
 }
 

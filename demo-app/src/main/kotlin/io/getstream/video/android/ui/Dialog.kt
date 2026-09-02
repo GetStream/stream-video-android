@@ -58,7 +58,7 @@ fun SingleButtonDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    color = VideoTheme.colors.baseSheetPrimary,
+                    color = VideoTheme.colors.backgroundCoreApp,
                     fontWeight = FontWeight.Bold,
                     text = title,
                     fontSize = 18.sp,

@@ -44,6 +44,6 @@ public fun LeaveCallAction(
     style = style,
     onAction = { onCallAction(LeaveCall) },
     icon = Icons.Default.CallEnd,
-    color = VideoTheme.colors.alertWarning,
-    iconTint = VideoTheme.colors.basePrimary,
+    color = VideoTheme.colors.accentError,
+    iconTint = VideoTheme.colors.textPrimary,
 )

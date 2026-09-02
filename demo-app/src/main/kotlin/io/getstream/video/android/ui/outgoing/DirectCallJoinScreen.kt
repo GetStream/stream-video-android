@@ -105,12 +105,12 @@ fun DirectCallJoinScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(VideoTheme.colors.baseSheetPrimary),
+                .background(VideoTheme.colors.backgroundCoreApp),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(VideoTheme.colors.baseSheetPrimary),
+                    .background(VideoTheme.colors.backgroundCoreApp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Header(
@@ -139,7 +139,7 @@ private fun AddUserPopup(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        backgroundColor = VideoTheme.colors.baseSheetPrimary,
+        backgroundColor = VideoTheme.colors.backgroundCoreApp,
         title = {
             Text(
                 text = stringResource(id = R.string.add_user),
@@ -161,10 +161,10 @@ private fun AddUserPopup(
                     singleLine = true,
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         textColor = Color.White,
-                        focusedBorderColor = VideoTheme.colors.brandPrimary,
+                        focusedBorderColor = VideoTheme.colors.accentPrimary,
                         unfocusedBorderColor = Color(0xFF979797),
-                        cursorColor = VideoTheme.colors.brandPrimary,
-                        focusedLabelColor = VideoTheme.colors.brandPrimary,
+                        cursorColor = VideoTheme.colors.accentPrimary,
+                        focusedLabelColor = VideoTheme.colors.accentPrimary,
                     ),
                 )
                 OutlinedTextField(
@@ -179,10 +179,10 @@ private fun AddUserPopup(
                     singleLine = true,
                     colors = TextFieldDefaults.outlinedTextFieldColors(
                         textColor = Color.White,
-                        focusedBorderColor = VideoTheme.colors.brandPrimary,
+                        focusedBorderColor = VideoTheme.colors.accentPrimary,
                         unfocusedBorderColor = Color(0xFF979797),
-                        cursorColor = VideoTheme.colors.brandPrimary,
-                        focusedLabelColor = VideoTheme.colors.brandPrimary,
+                        cursorColor = VideoTheme.colors.accentPrimary,
+                        focusedLabelColor = VideoTheme.colors.accentPrimary,
                     ),
                 )
             }
@@ -195,7 +195,7 @@ private fun AddUserPopup(
                     }
                 },
             ) {
-                Text("Add", color = VideoTheme.colors.brandPrimary)
+                Text("Add", color = VideoTheme.colors.accentPrimary)
             }
         },
         dismissButton = {
@@ -287,7 +287,7 @@ private fun Body(
                 modifier = Modifier
                     .size(50.dp)
                     .align(Alignment.Center),
-                color = VideoTheme.colors.brandPrimary,
+                color = VideoTheme.colors.accentPrimary,
             )
         } else {
             uiState.otherUsers?.let { users ->
@@ -309,7 +309,7 @@ private fun Body(
                             colors = CheckboxDefaults.colors(
                                 uncheckedColor = Color.White, // Border color when unchecked
                                 checkedColor = Color.White, // Fill color when checked
-                                checkmarkColor = VideoTheme.colors.buttonBrandDefault, // Tick color
+                                checkmarkColor = VideoTheme.colors.accentPrimary, // Tick color
                             ),
                             onCheckedChange = {
                                 callerJoinsFirst = !callerJoinsFirst
@@ -330,7 +330,7 @@ private fun Body(
                             colors = CheckboxDefaults.colors(
                                 uncheckedColor = Color.White, // Border color when unchecked
                                 checkedColor = Color.White, // Fill color when checked
-                                checkmarkColor = VideoTheme.colors.buttonBrandDefault, // Tick color
+                                checkmarkColor = VideoTheme.colors.accentPrimary, // Tick color
                             ),
                             onCheckedChange = {
                                 useCallJoinInterceptor = !useCallJoinInterceptor
@@ -459,7 +459,7 @@ private fun UserRow(
             modifier = Modifier.size(20.dp),
             onClick = null,
             colors = RadioButtonDefaults.colors(
-                selectedColor = VideoTheme.colors.basePrimary,
+                selectedColor = VideoTheme.colors.textPrimary,
                 unselectedColor = Color.LightGray,
             ),
         )

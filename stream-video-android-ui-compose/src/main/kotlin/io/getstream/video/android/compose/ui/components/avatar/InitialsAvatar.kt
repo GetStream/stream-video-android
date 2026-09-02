@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.utils.initialsColors
 import io.getstream.video.android.core.utils.initials
 
@@ -55,9 +57,9 @@ import io.getstream.video.android.core.utils.initials
 internal fun InitialsAvatar(
     modifier: Modifier = Modifier,
     text: String,
-    textStyle: TextStyle = VideoTheme.typography.titleM,
+    textStyle: TextStyle = VideoTheme.typography.headingLarge,
     textOffset: DpOffset = DpOffset(0.dp, 0.dp),
-    shape: Shape = VideoTheme.shapes.circle,
+    shape: Shape = CircleShape,
     initialsTransformer: (String) -> String = { it.initials() },
 ) {
     val colors = initialsColors(text = text)
@@ -66,7 +68,7 @@ internal fun InitialsAvatar(
 
     Box(
         modifier = modifier
-            .widthIn(VideoTheme.dimens.genericS, VideoTheme.dimens.genericMax)
+            .widthIn(StreamTokens.size8, 100.dp)
             .aspectRatio(1f)
             .clip(shape)
             .background(color = colors.second),

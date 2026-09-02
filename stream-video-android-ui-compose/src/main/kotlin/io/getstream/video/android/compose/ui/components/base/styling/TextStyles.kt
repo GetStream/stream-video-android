@@ -43,9 +43,13 @@ public open class TextStyleProvider {
     public fun defaultLabel(
         size: StyleSize = StyleSize.L,
         default: TextStyleWrapper = when (size) {
-            StyleSize.XS, StyleSize.S -> VideoTheme.typography.labelS.wrapper()
-            StyleSize.M -> VideoTheme.typography.labelM.wrapper()
-            else -> VideoTheme.typography.labelL.wrapper()
+            StyleSize.XS, StyleSize.S -> VideoTheme.typography.captionEmphasis.withColor(
+                VideoTheme.colors.textPrimary,
+            )
+            StyleSize.M -> VideoTheme.typography.bodyEmphasis.withColor(
+                VideoTheme.colors.textPrimary,
+            )
+            else -> VideoTheme.typography.headingLarge.withColor(VideoTheme.colors.textPrimary)
         },
         pressed: TextStyleWrapper = default,
         disabled: TextStyleWrapper = default.disabledAlpha(),
@@ -55,9 +59,13 @@ public open class TextStyleProvider {
     public fun defaultButtonLabel(
         size: StyleSize = StyleSize.L,
         default: TextStyleWrapper = when (size) {
-            StyleSize.XS, StyleSize.S -> VideoTheme.typography.labelXS.wrapper()
-            StyleSize.M -> VideoTheme.typography.labelS.wrapper()
-            else -> VideoTheme.typography.labelM.wrapper()
+            StyleSize.XS, StyleSize.S -> VideoTheme.typography.metadataEmphasis.withColor(
+                VideoTheme.colors.textPrimary,
+            )
+            StyleSize.M -> VideoTheme.typography.captionEmphasis.withColor(
+                VideoTheme.colors.textPrimary,
+            )
+            else -> VideoTheme.typography.bodyEmphasis.withColor(VideoTheme.colors.textPrimary)
         },
         pressed: TextStyleWrapper = default,
         disabled: TextStyleWrapper = default.disabledAlpha(),
@@ -67,10 +75,10 @@ public open class TextStyleProvider {
     public fun defaultTitle(
         size: StyleSize = StyleSize.L,
         default: TextStyleWrapper = when (size) {
-            StyleSize.XS -> VideoTheme.typography.titleXs.wrapper()
-            StyleSize.S -> VideoTheme.typography.titleS.wrapper()
-            StyleSize.M -> VideoTheme.typography.titleM.wrapper()
-            else -> VideoTheme.typography.titleL.wrapper()
+            StyleSize.XS -> VideoTheme.typography.headingExtraSmall.withColor(
+                VideoTheme.colors.textPrimary,
+            )
+            else -> VideoTheme.typography.headingLarge.withColor(VideoTheme.colors.textPrimary)
         },
         pressed: TextStyleWrapper = default,
         disabled: TextStyleWrapper = default.disabledAlpha(),
@@ -80,10 +88,13 @@ public open class TextStyleProvider {
     public fun defaultSubtitle(
         size: StyleSize = StyleSize.M,
         default: TextStyleWrapper = when (size) {
-            StyleSize.XS -> VideoTheme.typography.subtitleS.wrapper()
-            StyleSize.S -> VideoTheme.typography.subtitleS.wrapper()
-            StyleSize.M -> VideoTheme.typography.subtitleM.wrapper()
-            else -> VideoTheme.typography.subtitleL.wrapper()
+            StyleSize.XS, StyleSize.S -> VideoTheme.typography.bodyDefault.withColor(
+                VideoTheme.colors.textSecondary,
+            )
+            StyleSize.M -> VideoTheme.typography.headingSmall.withColor(
+                VideoTheme.colors.textTertiary,
+            )
+            else -> VideoTheme.typography.headingMedium.withColor(VideoTheme.colors.textTertiary)
         },
         pressed: TextStyleWrapper = default,
         disabled: TextStyleWrapper = default.disabledAlpha(),
@@ -92,17 +103,18 @@ public open class TextStyleProvider {
     @Composable
     public fun defaultBody(
         size: StyleSize = StyleSize.L,
-        default: TextStyleWrapper = when (size) {
-            StyleSize.XS, StyleSize.S, StyleSize.M -> VideoTheme.typography.bodyM.wrapper()
-            else -> VideoTheme.typography.bodyL.wrapper()
-        },
+        default: TextStyleWrapper = VideoTheme.typography.bodyDefault.withColor(
+            VideoTheme.colors.textSecondary,
+        ),
         pressed: TextStyleWrapper = default,
         disabled: TextStyleWrapper = default.disabledAlpha(),
     ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
 
     @Composable
     public fun defaultBadgeTextStyle(
-        default: TextStyleWrapper = VideoTheme.typography.labelXS.wrapper(),
+        default: TextStyleWrapper = VideoTheme.typography.metadataEmphasis.withColor(
+            VideoTheme.colors.textPrimary,
+        ),
         pressed: TextStyleWrapper = default,
         disabled: TextStyleWrapper = default.disabledAlpha(),
     ): StreamTextStyle = StreamTextStyle(default, disabled, pressed)
@@ -111,10 +123,13 @@ public open class TextStyleProvider {
     public fun defaultTextField(
         size: StyleSize = StyleSize.M,
         default: TextStyleWrapper = when (size) {
-            StyleSize.XS -> VideoTheme.typography.subtitleS.withColor(VideoTheme.colors.basePrimary)
-            StyleSize.S -> VideoTheme.typography.subtitleS.withColor(VideoTheme.colors.basePrimary)
-            StyleSize.M -> VideoTheme.typography.subtitleM.withColor(VideoTheme.colors.basePrimary)
-            else -> VideoTheme.typography.subtitleL.withColor(VideoTheme.colors.basePrimary)
+            StyleSize.XS, StyleSize.S -> VideoTheme.typography.bodyDefault.withColor(
+                VideoTheme.colors.textPrimary,
+            )
+            StyleSize.M -> VideoTheme.typography.headingSmall.withColor(
+                VideoTheme.colors.textPrimary,
+            )
+            else -> VideoTheme.typography.headingMedium.withColor(VideoTheme.colors.textPrimary)
         },
         pressed: TextStyleWrapper = default,
         disabled: TextStyleWrapper = default.disabledAlpha(),

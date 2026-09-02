@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -101,21 +102,21 @@ public fun ShareSettingsBox(
     Box(
         modifier = modifier
             .background(
-                color = VideoTheme.colors.baseSheetTertiary,
-                shape = VideoTheme.shapes.dialog,
+                color = VideoTheme.colors.backgroundCoreSurfaceDefault,
+                shape = RoundedCornerShape(24.dp),
             ),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(VideoTheme.dimens.spacingL),
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = "Your meeting is live!",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                style = VideoTheme.typography.titleS.copy(fontSize = 20.sp),
+                style = VideoTheme.typography.headingLarge.copy(fontSize = 20.sp),
             )
             Spacer(modifier = Modifier.size(16.dp))
             StreamButton(
@@ -137,9 +138,9 @@ public fun ShareSettingsBox(
                 icon = Icons.Default.CopyAll,
                 style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle().copy(
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = VideoTheme.colors.baseSheetTertiary,
-                        contentColor = VideoTheme.colors.basePrimary,
-                        disabledBackgroundColor = VideoTheme.colors.baseSheetTertiary,
+                        backgroundColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
+                        contentColor = VideoTheme.colors.textPrimary,
+                        disabledBackgroundColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
                     ),
                 ),
                 onClick = {
@@ -164,22 +165,22 @@ public fun ShareSettingsBoxLandscape(
     Box(
         modifier = modifier
             .background(
-                color = VideoTheme.colors.baseSheetTertiary,
-                shape = VideoTheme.shapes.dialog,
+                color = VideoTheme.colors.backgroundCoreSurfaceDefault,
+                shape = RoundedCornerShape(24.dp),
             ),
     ) {
         Row {
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(VideoTheme.dimens.spacingXl),
+                    .padding(32.dp),
             ) {
                 JoinCallQRCode(shareUrl = shareUrl)
             }
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(VideoTheme.dimens.spacingL)
+                    .padding(24.dp)
                     .align(Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -187,7 +188,7 @@ public fun ShareSettingsBoxLandscape(
                     text = "Your meeting is live!",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    style = VideoTheme.typography.titleS.copy(fontSize = 20.sp),
+                    style = VideoTheme.typography.headingLarge.copy(fontSize = 20.sp),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 StreamButton(
@@ -209,9 +210,9 @@ public fun ShareSettingsBoxLandscape(
                     icon = Icons.Default.CopyAll,
                     style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle().copy(
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = VideoTheme.colors.baseSheetTertiary,
-                            contentColor = VideoTheme.colors.basePrimary,
-                            disabledBackgroundColor = VideoTheme.colors.baseSheetTertiary,
+                            backgroundColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
+                            contentColor = VideoTheme.colors.textPrimary,
+                            disabledBackgroundColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
                         ),
                     ),
                     onClick = {
@@ -230,15 +231,15 @@ private fun JoinCallQRCode(shareUrl: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = Color.Black, shape = VideoTheme.shapes.sheet)
-            .padding(VideoTheme.dimens.spacingM),
+            .background(color = Color.Black, shape = RoundedCornerShape(16.dp))
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         QRCode(content = shareUrl, size = 150.dp)
         Spacer(modifier = Modifier.size(16.dp))
         Text(
             text = "Scan the QR code to join from another device",
-            style = VideoTheme.typography.labelXS.copy(fontWeight = FontWeight.W400),
+            style = VideoTheme.typography.metadataEmphasis.copy(fontWeight = FontWeight.W400),
         )
     }
 }

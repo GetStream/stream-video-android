@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * Represents an icon style. Consists of color and padding.
@@ -59,10 +60,10 @@ public open class IconStyleProvider {
      */
     @Composable
     public fun defaultIconStyle(
-        padding: PaddingValues = PaddingValues(VideoTheme.dimens.spacingM),
-        default: Color = VideoTheme.colors.basePrimary,
-        pressed: Color = VideoTheme.colors.basePrimary,
-        disabled: Color = VideoTheme.colors.baseQuaternary,
+        padding: PaddingValues = PaddingValues(StreamTokens.spacingMd),
+        default: Color = VideoTheme.colors.textPrimary,
+        pressed: Color = VideoTheme.colors.textPrimary,
+        disabled: Color = VideoTheme.colors.textTertiary,
     ): StreamIconStyle = StreamIconStyle(
         default = IconStyle(default, padding),
         pressed = IconStyle(pressed, padding),

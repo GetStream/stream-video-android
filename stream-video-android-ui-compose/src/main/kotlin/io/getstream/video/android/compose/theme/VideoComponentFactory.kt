@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.call.DefaultCallAppBarCenterContent
 import io.getstream.video.android.compose.ui.components.call.DefaultCallAppBarLeadingContent
@@ -162,7 +163,7 @@ public interface VideoComponentFactory {
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f)
-                .padding(bottom = VideoTheme.dimens.spacingXXs),
+                .padding(bottom = StreamTokens.spacingXxxs),
             style = params.style,
             videoRenderer = params.videoRenderer,
             floatingVideoRenderer = params.floatingVideoRenderer,
@@ -319,7 +320,7 @@ public interface VideoComponentFactory {
             networkQuality = params.networkQuality,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .height(VideoTheme.dimens.componentHeightM)
+                .height(StreamTokens.size32)
                 .testTag("Stream_ParticipantNetworkQualityIndicator"),
         )
     }
@@ -512,7 +513,7 @@ public interface VideoComponentFactory {
         IncomingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = VideoTheme.dimens.genericXxl),
+                .padding(bottom = StreamTokens.size48),
             isVideoCall = params.isVideoCall,
             isMicrophoneEnabled = params.isMicrophoneEnabled,
             isCameraEnabled = params.isCameraEnabled,
@@ -579,7 +580,7 @@ public interface VideoComponentFactory {
         OutgoingCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = VideoTheme.dimens.genericXxl),
+                .padding(bottom = StreamTokens.size48),
             isVideoCall = params.isVideoCall,
             isCameraEnabled = params.isCameraEnabled,
             isMicrophoneEnabled = params.isMicrophoneEnabled,
@@ -627,7 +628,7 @@ public interface VideoComponentFactory {
         AudioOnlyCallControls(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = VideoTheme.dimens.genericXxl),
+                .padding(bottom = StreamTokens.size48),
             isMicrophoneEnabled = params.isMicrophoneEnabled,
             onCallAction = params.onCallAction,
         )

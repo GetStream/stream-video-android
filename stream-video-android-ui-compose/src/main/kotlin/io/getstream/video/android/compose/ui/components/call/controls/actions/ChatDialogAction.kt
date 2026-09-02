@@ -47,7 +47,7 @@ public fun ChatDialogAction(
 ): Unit = StreamBadgeBox(
     showWithoutValue = false,
     style = VideoTheme.styles.badgeStyles.defaultBadgeStyle().copy(
-        color = badgeColor ?: VideoTheme.colors.alertSuccess,
+        color = badgeColor ?: VideoTheme.colors.accentSuccess,
     ),
     text = messageCount?.toString(),
 ) {

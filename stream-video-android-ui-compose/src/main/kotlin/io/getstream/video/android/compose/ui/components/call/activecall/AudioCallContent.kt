@@ -42,6 +42,7 @@ import io.getstream.video.android.compose.theme.AudioOnlyCallControlsContentPara
 import io.getstream.video.android.compose.theme.AudioOnlyCallDetailsContentParams
 import io.getstream.video.android.compose.theme.AudioOnlyCallHeaderContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.DefaultPermissionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
@@ -117,7 +118,7 @@ public fun AudioCallContent(
         detailsContent = detailsContent ?: { members, topPadding ->
             Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center) {
                 ParticipantAvatars(members = members)
-                Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
+                Spacer(modifier = Modifier.height(StreamTokens.spacingMd))
                 ParticipantInformation(
                     isVideoType = false,
                     callStatus = CallStatus.Calling(durationText),
@@ -130,7 +131,7 @@ public fun AudioCallContent(
             OutgoingCallControls(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(VideoTheme.dimens.spacingM),
+                    .padding(StreamTokens.spacingMd),
                 isVideoCall = false,
                 isCameraEnabled = false,
                 isMicrophoneEnabled = isMicrophoneEnabled,
@@ -193,7 +194,7 @@ public fun AudioOnlyCallContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(color = VideoTheme.colors.baseSheetTertiary),
+            .background(color = VideoTheme.colors.backgroundCoreSurfaceDefault),
     ) {
         Column(
             modifier = modifier
@@ -209,12 +210,12 @@ public fun AudioOnlyCallContent(
                 }
             }
 
-            detailsContent?.invoke(this, remoteParticipants, VideoTheme.dimens.spacingM)
+            detailsContent?.invoke(this, remoteParticipants, StreamTokens.spacingMd)
                 ?: with(VideoTheme.componentFactory) {
                     AudioOnlyCallDetailsContent(
                         params = AudioOnlyCallDetailsContentParams(
                             remoteParticipants = remoteParticipants,
-                            topPadding = VideoTheme.dimens.spacingM,
+                            topPadding = StreamTokens.spacingMd,
                             duration = durationText,
                         ),
                     )

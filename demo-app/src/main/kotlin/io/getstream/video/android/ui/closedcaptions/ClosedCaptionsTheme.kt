@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.StreamColors
+import io.getstream.video.android.compose.theme.VideoTheme
 
 /**
  * Provides default configurations for the Closed Captions UI.
@@ -58,11 +58,11 @@ public object ClosedCaptionsDefaults {
 
     @Composable
     public fun streamThemeConfig(): ClosedCaptionsThemeConfig {
-        val colors = StreamColors.defaultColors()
+        val colors = VideoTheme.colors
         return config.copy(
-            backgroundColor = colors.baseSheetPrimary,
-            speakerColor = colors.baseQuaternary,
-            textColor = colors.basePrimary,
+            backgroundColor = colors.backgroundCoreApp,
+            speakerColor = colors.textTertiary,
+            textColor = colors.textPrimary,
         )
     }
 }

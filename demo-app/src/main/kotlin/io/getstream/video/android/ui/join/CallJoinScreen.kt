@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -137,7 +138,7 @@ fun CallJoinScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetPrimary),
+            .background(VideoTheme.colors.backgroundCoreApp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -239,7 +240,7 @@ private fun CallJoinHeader(
 ) {
     Row(
         modifier = Modifier
-            .padding(VideoTheme.dimens.spacingM)
+            .padding(16.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround,
@@ -258,7 +259,7 @@ private fun CallJoinHeader(
                 },
             ) {
                 UserAvatar(
-                    modifier = Modifier.size(VideoTheme.dimens.componentHeightL),
+                    modifier = Modifier.size(44.dp),
                     userImage = it.image,
                     userName = it.userNameOrId,
                 )
@@ -318,10 +319,10 @@ private fun CallJoinHeader(
                         modifier = Modifier
                             .width(200.dp)
                             .background(
-                                VideoTheme.colors.baseSheetTertiary,
-                                VideoTheme.shapes.dialog,
+                                VideoTheme.colors.backgroundCoreSurfaceDefault,
+                                RoundedCornerShape(24.dp),
                             )
-                            .padding(VideoTheme.dimens.spacingM),
+                            .padding(16.dp),
                     ) {
                         if (showDirectCall) {
                             StreamButton(
@@ -444,24 +445,24 @@ private fun CallActualContentPortrait(
     onNewCall: () -> Unit,
     gotoQR: () -> Unit,
     prefilledCallId: String? = null,
-) = Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
+) = Box(modifier = Modifier.background(VideoTheme.colors.backgroundCoreApp)) {
     Column(
         modifier = modifier
-            .padding(horizontal = VideoTheme.dimens.spacingM)
+            .padding(horizontal = 16.dp)
             .semantics { testTagsAsResourceId = true },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         StreamLogo(Modifier.size(102.dp))
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingL))
+        Spacer(modifier = Modifier.height(24.dp))
         AppName()
         Spacer(modifier = Modifier.height(20.dp))
         Description(text = stringResource(id = R.string.join_description))
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingL))
+        Spacer(modifier = Modifier.height(24.dp))
         JoinCallForm(prefilledCallId) {
             onJoinCall(it)
         }
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+        Spacer(modifier = Modifier.height(8.dp))
         StreamButton(
             modifier = Modifier
                 .fillMaxWidth()
@@ -470,7 +471,7 @@ private fun CallActualContentPortrait(
             icon = Icons.Default.VideoCall,
             onClick = { onNewCall() },
         )
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+        Spacer(modifier = Modifier.height(8.dp))
         StreamButton(
             style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
             modifier = Modifier
@@ -490,33 +491,33 @@ private fun CallActualContentLandscape(
     onNewCall: () -> Unit,
     gotoQR: () -> Unit,
     prefilledCallId: String? = null,
-) = Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
+) = Box(modifier = Modifier.background(VideoTheme.colors.backgroundCoreApp)) {
     Row {
         Column(
             modifier = modifier
-                .padding(horizontal = VideoTheme.dimens.spacingM)
+                .padding(horizontal = 16.dp)
                 .weight(1f)
                 .semantics { testTagsAsResourceId = true },
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             StreamLogo(Modifier.size(72.dp))
-            Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+            Spacer(modifier = Modifier.height(8.dp))
             AppName()
             Description(text = stringResource(id = R.string.join_description))
-            Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = VideoTheme.dimens.spacingM)
+                .padding(horizontal = 16.dp)
                 .align(Alignment.CenterVertically),
         ) {
             JoinCallForm(prefilledCallId) {
                 onJoinCall(it)
             }
-            Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+            Spacer(modifier = Modifier.height(8.dp))
             StreamButton(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -525,7 +526,7 @@ private fun CallActualContentLandscape(
                 icon = Icons.Default.VideoCall,
                 onClick = { onNewCall() },
             )
-            Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingS))
+            Spacer(modifier = Modifier.height(8.dp))
             StreamButton(
                 style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
                 modifier = Modifier
@@ -558,7 +559,7 @@ private fun AppName(env: StreamEnvironment? = null) {
             append(
                 AnnotatedString(
                     "[Video Calling]\n",
-                    spanStyle = SpanStyle(VideoTheme.colors.brandGreen),
+                    spanStyle = SpanStyle(VideoTheme.colors.accentSuccess),
                 ),
             )
             append(env?.displayName ?: "")
@@ -572,7 +573,7 @@ private fun AppName(env: StreamEnvironment? = null) {
 private fun Description(text: String) {
     Text(
         text = text,
-        style = VideoTheme.typography.bodyM,
+        style = VideoTheme.typography.bodyDefault,
         textAlign = TextAlign.Center,
         modifier = Modifier.widthIn(0.dp, 320.dp),
     )

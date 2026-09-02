@@ -90,7 +90,7 @@ public fun ParticipantsDialog(call: Call, onDismiss: () -> Unit) {
                     contentDescription = Icons.Default.Close.name,
                 )
             }
-            Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+            Spacer(modifier = Modifier.size(16.dp))
         }
     }
 }
@@ -116,7 +116,7 @@ fun ParticipantsListContent(
         item {
             Text(
                 text = "Participants (${participants.size})",
-                style = VideoTheme.typography.labelM,
+                style = VideoTheme.typography.bodyEmphasis,
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth(),
@@ -141,7 +141,7 @@ fun ParticipantsListContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = VideoTheme.dimens.spacingM),
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
@@ -150,20 +150,20 @@ fun ParticipantsListContent(
                     val userImage by participant.image.collectAsStateWithLifecycle()
                     UserAvatar(
                         modifier = Modifier
-                            .size(VideoTheme.dimens.genericXxl)
+                            .size(44.dp)
                             .testTag("Stream_ParticipantsListUserAvatar"),
                         userImage = userImage,
                         userName = userName,
                         isShowingOnlineIndicator = false,
                     )
-                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                    Spacer(modifier = Modifier.size(16.dp))
                     Text(
                         modifier = Modifier
                             .padding(start = 8.dp)
                             .testTag("Stream_ParticipantsListUserName"),
                         text = userName,
-                        style = VideoTheme.typography.bodyM,
-                        color = VideoTheme.colors.basePrimary,
+                        style = VideoTheme.typography.bodyDefault,
+                        color = VideoTheme.colors.textPrimary,
                         fontSize = 16.sp,
                         maxLines = 1,
                     )
@@ -183,7 +183,7 @@ fun ParticipantsListContent(
                     Icon(
                         modifier = Modifier
                             .testTag("Stream_ParticipantsListUserMicrophone_Enabled_$audioEnabled"),
-                        tint = VideoTheme.colors.basePrimary,
+                        tint = VideoTheme.colors.textPrimary,
                         imageVector = iconAudio,
                         contentDescription = null,
                     )
@@ -198,13 +198,13 @@ fun ParticipantsListContent(
                     Icon(
                         modifier = Modifier
                             .testTag("Stream_ParticipantsListUserCamera_Enabled_$videoEnabled"),
-                        tint = VideoTheme.colors.basePrimary,
+                        tint = VideoTheme.colors.textPrimary,
                         imageVector = iconVideo,
                         contentDescription = null,
                     )
                 }
             }
-            Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+            Spacer(modifier = Modifier.size(16.dp))
         }
     }
 }

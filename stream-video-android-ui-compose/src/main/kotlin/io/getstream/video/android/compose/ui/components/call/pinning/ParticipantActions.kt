@@ -21,6 +21,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PushPin
@@ -48,6 +50,7 @@ import androidx.compose.ui.window.Popup
 import androidx.lifecycle.lifecycleScope
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.core.Call
@@ -169,19 +172,19 @@ internal fun BoxScope.ParticipantActionsWithoutState(
         }
     ) {
         GenericIndicator(
-            backgroundColor = VideoTheme.colors.baseSheetPrimary,
-            shape = VideoTheme.shapes.circle,
+            backgroundColor = VideoTheme.colors.backgroundCoreApp,
+            shape = CircleShape,
             modifier = modifier.clickable {
                 onClick()
             }.onGloballyPositioned { coordinates ->
                 buttonPosition.value = coordinates.positionInParent()
                 buttonSize.value = coordinates.size
-            }.clip(VideoTheme.shapes.circle),
+            }.clip(CircleShape),
         ) {
             Icon(
                 imageVector = Icons.Outlined.MoreHoriz,
                 contentDescription = "Call actions",
-                tint = VideoTheme.colors.basePrimary,
+                tint = VideoTheme.colors.textPrimary,
             )
         }
 
@@ -233,7 +236,10 @@ internal fun BoxScope.ParticipantActionsDialogContent(
     val coroutineScope = LocalLifecycleOwner.current.lifecycleScope
     Column(
         Modifier
-            .background(VideoTheme.colors.baseSheetPrimary, shape = VideoTheme.shapes.dialog)
+            .background(
+                VideoTheme.colors.backgroundCoreApp,
+                shape = RoundedCornerShape(StreamTokens.radius3xl),
+            )
             .align(Center)
             .width(220.dp),
     ) {

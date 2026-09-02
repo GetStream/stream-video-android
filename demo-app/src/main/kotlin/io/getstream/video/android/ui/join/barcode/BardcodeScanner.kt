@@ -98,7 +98,7 @@ internal fun BarcodeScanner(navigateBack: () -> Unit = {}) {
 
     when (val cameraPermissionStatus = cameraPermissionState.status) {
         PermissionStatus.Granted -> {
-            val color = VideoTheme.colors.brandPrimary
+            val color = VideoTheme.colors.accentPrimary
             Box(modifier = Modifier.fillMaxSize()) {
                 CameraPreview(imageAnalysis = imageAnalysis)
                 CornerRectWithArcs(color = color, cornerRadius = 32f, strokeWidth = 12f)

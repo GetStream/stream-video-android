@@ -41,6 +41,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.call.renderer.DefaultParticipantVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.SpotlightVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
@@ -71,7 +72,7 @@ internal fun SpotlightVideoRenderer(
     if (participants.size == 1) {
         // Just display the one participant
         videoRenderer.invoke(
-            modifier.fillMaxSize().padding(VideoTheme.dimens.spacingS),
+            modifier.fillMaxSize().padding(StreamTokens.spacingXs),
             call,
             participants[0],
             style,
@@ -94,7 +95,7 @@ internal fun SpotlightVideoRenderer(
             Row {
                 SpotlightContentLandscape(
                     modifier = modifier.weight(0.7f),
-                    background = VideoTheme.colors.baseSheetSecondary,
+                    background = VideoTheme.colors.backgroundCoreElevation1,
                 ) {
                     SpeakerSpotlight(speaker, videoRenderer, isZoomable, call, style)
                 }
@@ -114,11 +115,11 @@ internal fun SpotlightVideoRenderer(
         } else {
             // *2 to account for the controls
             Column(
-                modifier = Modifier.padding(bottom = VideoTheme.dimens.spacingXXs * 2),
+                modifier = Modifier.padding(bottom = StreamTokens.spacingXxxs * 2),
             ) {
                 SpotlightContentPortrait(
                     modifier = modifier.weight(1f),
-                    background = VideoTheme.colors.baseSheetSecondary,
+                    background = VideoTheme.colors.backgroundCoreElevation1,
                 ) {
                     SpeakerSpotlight(
                         speaker = speaker,
@@ -134,7 +135,7 @@ internal fun SpotlightVideoRenderer(
                     modifier = Modifier
                         .wrapContentWidth()
                         .align(CenterHorizontally)
-                        .height(VideoTheme.dimens.genericMax),
+                        .height(100.dp),
                     call = call,
                     participants = derivedParticipants,
                     dominantSpeaker = speaker,
@@ -177,8 +178,8 @@ private fun Modifier.fillWidthIfParticipantCount(fillCount: Int, totalCount: Int
     when (totalCount) {
         fillCount -> this.fillMaxHeight().width(itemWidth.dp)
         else -> this.size(
-            VideoTheme.dimens.genericMax * 1.5f,
-            VideoTheme.dimens.genericMax,
+            100.dp * 1.5f,
+            100.dp,
         )
     }
 }
@@ -190,12 +191,12 @@ private fun Modifier.fillHeightIfParticipantsCount(
     val itemHeight = LocalConfiguration.current.screenHeightDp / max(fillCount - 1, 1)
     when (totalCount) {
         fillCount -> this.size(
-            VideoTheme.dimens.genericMax * 1.5f,
+            100.dp * 1.5f,
             itemHeight.dp,
         )
         else -> this.size(
-            VideoTheme.dimens.genericMax * 1.5f,
-            VideoTheme.dimens.genericMax,
+            100.dp * 1.5f,
+            100.dp,
         )
     }
 }

@@ -46,6 +46,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
@@ -111,7 +112,7 @@ public fun StreamButton(
     if (showProgress) {
         CircularProgressIndicator(
             color = textStyle.value.platform.color,
-            modifier = Modifier.height(VideoTheme.dimens.genericS),
+            modifier = Modifier.height(StreamTokens.size8),
         )
     }
 }

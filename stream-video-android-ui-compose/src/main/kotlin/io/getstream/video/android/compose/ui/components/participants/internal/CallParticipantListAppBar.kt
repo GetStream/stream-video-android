@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.ui.common.R
 
@@ -49,23 +50,23 @@ internal fun CallParticipantListAppBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(VideoTheme.colors.baseSheetPrimary),
+            .background(VideoTheme.colors.backgroundCoreApp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
             modifier = Modifier
                 .padding(
-                    start = VideoTheme.dimens.componentPaddingStart,
-                    end = VideoTheme.dimens.componentPaddingEnd,
+                    start = StreamTokens.spacingMd,
+                    end = StreamTokens.spacingMd,
                 ),
             text = resources.getQuantityString(
                 R.plurals.stream_video_call_participants_info_number_of_participants,
                 numberOfParticipants,
                 numberOfParticipants,
             ),
-            style = VideoTheme.typography.titleS,
-            color = VideoTheme.colors.basePrimary,
+            style = VideoTheme.typography.headingLarge,
+            color = VideoTheme.colors.textPrimary,
         )
 
         StreamIconButton(

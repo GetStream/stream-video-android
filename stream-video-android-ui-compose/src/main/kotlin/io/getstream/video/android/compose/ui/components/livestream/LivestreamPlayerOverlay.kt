@@ -27,13 +27,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSpeakerphoneAction
 import io.getstream.video.android.core.Call
 
@@ -77,14 +78,14 @@ private fun BoxScope.LiveBadge(call: Call) {
         Text(
             modifier = Modifier
                 .background(
-                    color = VideoTheme.colors.brandPrimary,
-                    shape = VideoTheme.shapes.container,
+                    color = VideoTheme.colors.accentPrimary,
+                    shape = RoundedCornerShape(StreamTokens.radius4xl),
                 )
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             text = stringResource(
                 id = io.getstream.video.android.ui.common.R.string.stream_video_live,
             ),
-            color = Color.White,
+            color = VideoTheme.colors.textOnAccent,
         )
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -102,7 +103,7 @@ private fun BoxScope.LiveBadge(call: Call) {
         Text(
             modifier = Modifier.padding(horizontal = 8.dp),
             text = totalParticipants.toString(),
-            color = Color.White,
+            color = VideoTheme.colors.textOnAccent,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
         )
@@ -121,13 +122,13 @@ private fun BoxScope.LiveDuration(call: Call) {
             modifier = Modifier
                 .size(8.dp)
                 .clip(CircleShape)
-                .background(VideoTheme.colors.alertWarning),
+                .background(VideoTheme.colors.accentError),
         )
 
         Text(
             modifier = Modifier.padding(horizontal = 6.dp),
             text = (duration ?: 0).toString(),
-            color = Color.White,
+            color = VideoTheme.colors.textOnAccent,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
         )

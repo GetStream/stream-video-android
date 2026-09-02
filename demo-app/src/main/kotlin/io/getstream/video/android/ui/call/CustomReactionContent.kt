@@ -28,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -88,7 +89,7 @@ fun BoxScope.CustomReactionContent(
                     modifier = Modifier
                         .padding(top = maxHeight * 0.10f)
                         .align(style.reactionPosition),
-                    fontSize = VideoTheme.dimens.componentHeightM.value.sp,
+                    fontSize = 32.dp.value.sp,
                 )
             }
         }

@@ -301,8 +301,8 @@ internal fun ToggleIconButtonsPreview() {
         Spacer(modifier = Modifier.width(24.dp))
         StreamBadgeBox(
             style = StreamBadgeStyles.defaultBadgeStyle().copy(
-                color = VideoTheme.colors.alertCaution,
-                textStyle = VideoTheme.typography.labelXS.copy(color = Color.Black),
+                color = VideoTheme.colors.accentWarning,
+                textStyle = VideoTheme.typography.metadataEmphasis.copy(color = Color.Black),
             ),
             text = "!",
         ) {

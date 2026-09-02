@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -315,7 +316,7 @@ fun CallScreen(
                             .fillMaxSize()
                             .padding(paddings)
                             .background(
-                                color = VideoTheme.colors.baseSheetPrimary,
+                                color = VideoTheme.colors.backgroundCoreApp,
                             ),
                         call = call,
                         layout = layout,
@@ -352,7 +353,7 @@ fun CallScreen(
 
                                         Spacer(
                                             modifier = Modifier.size(
-                                                VideoTheme.dimens.spacingM,
+                                                16.dp,
                                             ),
                                         )
 
@@ -404,7 +405,7 @@ fun CallScreen(
                                             isShowingSettingMenu = !isShowingSettingMenu
                                         },
                                     )
-                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                    Spacer(modifier = Modifier.size(16.dp))
                                     if (isTablet()) {
                                         ScreenShareToggleAction(
                                             active = isScreenSharing,
@@ -426,7 +427,7 @@ fun CallScreen(
                                         )
                                         Spacer(
                                             modifier = Modifier.size(
-                                                VideoTheme.dimens.spacingM,
+                                                16.dp,
                                             ),
                                         )
                                     }
@@ -438,7 +439,7 @@ fun CallScreen(
                                         isCameraEnabled = isCameraEnabled,
                                         onCallAction = { call.camera.setEnabled(it.isEnabled) },
                                     )
-                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                    Spacer(modifier = Modifier.size(16.dp))
                                     ToggleMicrophoneAction(
                                         modifier = Modifier
                                             .testTag(
@@ -451,7 +452,7 @@ fun CallScreen(
                                             )
                                         },
                                     )
-                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                    Spacer(modifier = Modifier.size(16.dp))
                                 }
                                 Row {
                                     StreamBadgeBox(
@@ -461,7 +462,7 @@ fun CallScreen(
                                             showParticipants = !showParticipants
                                         }
                                     }
-                                    Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                                    Spacer(modifier = Modifier.size(16.dp))
                                     ChatDialogAction(
                                         modifier = Modifier.testTag("Stream_ChatButton"),
                                         messageCount = unreadCount,
@@ -494,7 +495,7 @@ fun CallScreen(
                                         ParticipantVideo(
                                             modifier = Modifier
                                                 .fillMaxSize()
-                                                .clip(VideoTheme.shapes.dialog)
+                                                .clip(RoundedCornerShape(24.dp))
                                                 .testTag("Stream_FloatingVideoView"),
                                             call = call,
                                             participant = participant,
@@ -536,7 +537,7 @@ fun CallScreen(
                         StreamIconToggleButton(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .padding(VideoTheme.dimens.spacingM),
+                                .padding(16.dp),
                             toggleState = rememberUpdatedState(
                                 newValue = ToggleableState(
                                     showingLandscapeControls,
@@ -589,7 +590,7 @@ fun CallScreen(
                 val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
                 val popupYOffset = if (isPortrait) {
-                    -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx()
+                    -(44.dp + 8.dp).toPx()
                         .toInt()
                 } else {
                     0
@@ -869,8 +870,8 @@ private fun BadNetworkLabel(
                 .align(Alignment.BottomCenter)
                 .padding(vertical = 90.dp, horizontal = 16.dp)
                 .background(
-                    color = VideoTheme.colors.baseSheetQuarternary,
-                    shape = VideoTheme.shapes.sheet,
+                    color = VideoTheme.colors.backgroundCoreOverlayDarkStrong,
+                    shape = RoundedCornerShape(16.dp),
                 )
                 .testTag("video_renderer_fallback_bad_network"),
             horizontalArrangement = Arrangement.Center,
@@ -882,14 +883,14 @@ private fun BadNetworkLabel(
                     .align(CenterVertically),
                 imageVector = Icons.Default.SignalWifiBad,
                 contentDescription = null,
-                tint = VideoTheme.colors.basePrimary,
+                tint = VideoTheme.colors.textPrimary,
             )
             Text(
                 modifier = Modifier.padding(12.dp),
                 text = stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network,
                 ),
-                color = VideoTheme.colors.basePrimary,
+                color = VideoTheme.colors.textPrimary,
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
             )

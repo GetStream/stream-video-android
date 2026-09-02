@@ -34,7 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.Call
 import kotlinx.coroutines.flow.Flow
 
@@ -122,7 +122,7 @@ internal fun SpotlightContentLandscape(
 ) {
     Row(
         modifier = modifier
-            .padding(end = VideoTheme.dimens.spacingXs),
+            .padding(end = StreamTokens.spacingXxs),
     ) {
         Box(
             modifier = Modifier

@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamDrawableToggleButton
@@ -47,7 +48,7 @@ internal fun VideoFiltersMenu(selectedFilterIndex: Int = 0, onSelectFilter: (Int
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(state = rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(VideoTheme.dimens.spacingM),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         availableVideoFilters.forEachIndexed { index, filter ->

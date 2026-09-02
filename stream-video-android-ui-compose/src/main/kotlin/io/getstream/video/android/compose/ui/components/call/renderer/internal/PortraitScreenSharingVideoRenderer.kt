@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.call.renderer.DefaultParticipantVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.DefaultScreenSharingFallbackContent
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
@@ -89,7 +90,7 @@ internal fun PortraitScreenSharingVideoRenderer(
         ?.collectAsStateWithLifecycle(initialValue = false)
         ?: remember { mutableStateOf(false) }
 
-    val paddedModifier = modifier.padding(VideoTheme.dimens.spacingXXs)
+    val paddedModifier = modifier.padding(StreamTokens.spacingXxxs)
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         LazyVerticalGrid(
             modifier = Modifier.fillMaxSize(),
@@ -143,12 +144,12 @@ private fun BoxWithConstraintsScope.ScreenSharingContent(
     }
     Column(
         modifier = modifier
-            .padding(VideoTheme.dimens.spacingXXs),
+            .padding(StreamTokens.spacingXxxs),
     ) {
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(VideoTheme.colors.baseSheetSecondary)
+                .background(VideoTheme.colors.backgroundCoreElevation1)
                 .fillMaxWidth()
                 .height(itemHeight),
         ) {

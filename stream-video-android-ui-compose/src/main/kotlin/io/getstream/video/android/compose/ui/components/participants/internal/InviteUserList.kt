@@ -35,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.ui.common.R
@@ -100,7 +101,7 @@ internal fun InviteUserItem(
         val userImage by user.image.collectAsStateWithLifecycle()
 
         UserAvatar(
-            modifier = Modifier.size(VideoTheme.dimens.componentHeightL),
+            modifier = Modifier.size(StreamTokens.size48),
             userImage = userImage,
             userName = userName,
             isShowingOnlineIndicator = true,
@@ -111,8 +112,8 @@ internal fun InviteUserItem(
         Text(
             modifier = Modifier.weight(1f),
             text = userName,
-            style = VideoTheme.typography.bodyM,
-            color = VideoTheme.colors.basePrimary,
+            style = VideoTheme.typography.bodyDefault,
+            color = VideoTheme.colors.textPrimary,
         )
 
         Spacer(modifier = Modifier.width(8.dp))

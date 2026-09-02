@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
 
@@ -84,7 +85,7 @@ public fun ParticipantAudio(
             UserAvatar(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(VideoTheme.dimens.spacingM),
+                    .padding(StreamTokens.spacingMd),
                 userImage = userImage,
                 userName = nameOrId,
             )
@@ -99,7 +100,7 @@ public fun ParticipantAudio(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(VideoTheme.dimens.spacingM),
+                        .padding(StreamTokens.spacingMd),
                 ) {
                     microphoneIndicatorContent.invoke(this, participant)
                 }
@@ -113,7 +114,7 @@ public fun ParticipantAudio(
             text = nameOrId,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = VideoTheme.colors.basePrimary,
+            color = VideoTheme.colors.textPrimary,
             textAlign = TextAlign.Center,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
@@ -133,7 +134,7 @@ public fun ParticipantAudio(
                 modifier = Modifier.fillMaxWidth(),
                 text = roles.firstOrNull().orEmpty(),
                 fontSize = 11.sp,
-                color = VideoTheme.colors.basePrimary,
+                color = VideoTheme.colors.textPrimary,
                 textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
@@ -149,15 +150,15 @@ private fun BoxScope.DefaultMicrophoneIndicator(
     Box(
         modifier = Modifier
             .clip(CircleShape)
-            .background(VideoTheme.colors.baseSheetPrimary)
-            .size(VideoTheme.dimens.componentHeightM)
+            .background(VideoTheme.colors.backgroundCoreApp)
+            .size(StreamTokens.size32)
             .align(alignment),
     ) {
         Icon(
 
-            modifier = Modifier.align(alignment).fillMaxSize().padding(VideoTheme.dimens.spacingS),
+            modifier = Modifier.align(alignment).fillMaxSize().padding(StreamTokens.spacingXs),
             imageVector = Icons.Default.MicOff,
-            tint = VideoTheme.colors.alertWarning,
+            tint = VideoTheme.colors.accentError,
             contentDescription = null,
         )
     }

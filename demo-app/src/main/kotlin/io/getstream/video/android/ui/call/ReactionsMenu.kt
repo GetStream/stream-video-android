@@ -31,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
@@ -127,8 +128,8 @@ private fun ReactionItem(
         Modifier.fillMaxWidth()
     } else {
         Modifier
-            .requiredWidth(VideoTheme.dimens.componentHeightL)
-            .requiredHeight(VideoTheme.dimens.componentHeightL)
+            .requiredWidth(44.dp)
+            .requiredHeight(44.dp)
     }
     StreamButton(
         modifier = modifier,

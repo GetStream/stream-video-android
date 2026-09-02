@@ -78,8 +78,6 @@ internal interface PaparazziComposeTest {
     val paparazzi: Paparazzi
 
     fun snapshot(
-        // Palette selector, currently a no-op: VideoTheme has a single dark palette until
-        // StreamDesign lands (AND-1419). Kept so the call sites don't churn twice.
         isInDarkMode: Boolean = false,
         contentAlignment: Alignment = Alignment.TopStart,
         backgroundColor: Color = Color.Unspecified,
@@ -87,11 +85,11 @@ internal interface PaparazziComposeTest {
     ) {
         paparazzi.snapshot {
             TestEnvironment {
-                VideoTheme {
+                VideoTheme(isInDarkMode = isInDarkMode) {
                     Box(
                         modifier = Modifier
                             .background(
-                                backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                backgroundColor.takeOrElse(VideoTheme.colors::backgroundCoreApp),
                             ),
                         contentAlignment = contentAlignment,
                     ) {
@@ -114,24 +112,28 @@ internal interface PaparazziComposeTest {
         paparazzi.snapshot {
             TestEnvironment {
                 Column {
-                    VideoTheme {
+                    VideoTheme(isInDarkMode = true) {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
                                 .background(
-                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                    backgroundColor.takeOrElse(
+                                        VideoTheme.colors::backgroundCoreApp,
+                                    ),
                                 ),
                             contentAlignment = contentAlignment,
                         ) {
                             composable()
                         }
                     }
-                    VideoTheme {
+                    VideoTheme(isInDarkMode = false) {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
                                 .background(
-                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                    backgroundColor.takeOrElse(
+                                        VideoTheme.colors::backgroundCoreApp,
+                                    ),
                                 ),
                             contentAlignment = contentAlignment,
                         ) {
@@ -151,24 +153,28 @@ internal interface PaparazziComposeTest {
         paparazzi.snapshot {
             TestEnvironment {
                 Row {
-                    VideoTheme {
+                    VideoTheme(isInDarkMode = true) {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
                                 .background(
-                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                    backgroundColor.takeOrElse(
+                                        VideoTheme.colors::backgroundCoreApp,
+                                    ),
                                 ),
                             contentAlignment = contentAlignment,
                         ) {
                             composable()
                         }
                     }
-                    VideoTheme {
+                    VideoTheme(isInDarkMode = false) {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
                                 .background(
-                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                    backgroundColor.takeOrElse(
+                                        VideoTheme.colors::backgroundCoreApp,
+                                    ),
                                 ),
                             contentAlignment = contentAlignment,
                         ) {

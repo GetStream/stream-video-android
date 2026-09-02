@@ -23,11 +23,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.model.NetworkQuality
 import stream.video.sfu.models.ConnectionQuality
 
@@ -44,7 +46,12 @@ public fun NetworkQualityIndicator(
 ) {
     val colors = barColorsFromQuality(networkQuality)
     GenericIndicator(
-        shape = RoundedCornerShape(topStart = VideoTheme.dimens.roundnessM),
+        shape = RoundedCornerShape(
+            topStart = StreamTokens.radiusXl,
+            topEnd = ZeroCornerSize,
+            bottomEnd = ZeroCornerSize,
+            bottomStart = ZeroCornerSize,
+        ),
         modifier = modifier,
     ) {
         ConnectionBars(colors = colors)
@@ -56,58 +63,58 @@ internal fun barColorsFromQuality(
     networkQuality: NetworkQuality,
 ): Triple<Color, Color, Color> = when (networkQuality) {
     is NetworkQuality.Excellent -> Triple(
-        VideoTheme.colors.brandGreen,
-        VideoTheme.colors.brandGreen,
-        VideoTheme.colors.brandGreen,
+        VideoTheme.colors.accentSuccess,
+        VideoTheme.colors.accentSuccess,
+        VideoTheme.colors.accentSuccess,
     )
     is NetworkQuality.Good -> Triple(
-        VideoTheme.colors.brandYellow,
-        VideoTheme.colors.brandYellow,
-        VideoTheme.colors.basePrimary,
+        VideoTheme.colors.accentWarning,
+        VideoTheme.colors.accentWarning,
+        VideoTheme.colors.textPrimary,
     )
     is NetworkQuality.Poor -> Triple(
-        VideoTheme.colors.brandRed,
-        VideoTheme.colors.basePrimary,
-        VideoTheme.colors.basePrimary,
+        VideoTheme.colors.accentError,
+        VideoTheme.colors.textPrimary,
+        VideoTheme.colors.textPrimary,
     )
     is NetworkQuality.UnSpecified -> Triple(
-        VideoTheme.colors.basePrimary,
-        VideoTheme.colors.basePrimary,
-        VideoTheme.colors.basePrimary,
+        VideoTheme.colors.textPrimary,
+        VideoTheme.colors.textPrimary,
+        VideoTheme.colors.textPrimary,
     )
 }
 
 @Composable
 internal fun ConnectionBars(modifier: Modifier = Modifier, colors: Triple<Color, Color, Color>) {
-    val shape = RoundedCornerShape(VideoTheme.dimens.roundnessM)
+    val shape = RoundedCornerShape(StreamTokens.radiusXl)
     Row(
         modifier = modifier
-            .height(height = VideoTheme.dimens.genericS),
+            .height(height = StreamTokens.size8),
         verticalAlignment = Alignment.Bottom,
     ) {
         Spacer(
             modifier = Modifier
-                .width(VideoTheme.dimens.genericXXs)
+                .width(StreamTokens.size2)
                 .fillMaxHeight(0.4f)
                 .background(
                     color = colors.first,
                     shape = shape,
                 ),
         )
-        Spacer(modifier = Modifier.width(VideoTheme.dimens.genericXXs))
+        Spacer(modifier = Modifier.width(StreamTokens.size2))
         Spacer(
             modifier = Modifier
-                .width(VideoTheme.dimens.genericXXs)
+                .width(StreamTokens.size2)
                 .fillMaxHeight(fraction = 0.7f)
                 .background(
                     color = colors.second,
                     shape = shape,
                 ),
         )
-        Spacer(modifier = Modifier.width(VideoTheme.dimens.genericXXs))
+        Spacer(modifier = Modifier.width(StreamTokens.size2))
         Spacer(
             modifier = Modifier
-                .width(VideoTheme.dimens.genericXXs)
+                .width(StreamTokens.size2)
                 .fillMaxHeight(fraction = 1f)
                 .background(
                     color = colors.third,

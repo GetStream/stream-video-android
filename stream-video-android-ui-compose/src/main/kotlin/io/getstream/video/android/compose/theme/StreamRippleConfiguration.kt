@@ -14,31 +14,35 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalMaterialApi::class)
-
 package io.getstream.video.android.compose.theme
 
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.LocalRippleConfiguration
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RippleConfiguration
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.material.ripple.RippleAlpha
+import io.getstream.video.android.compose.theme.design.StreamDesign
 
 /**
- * A modified version of the default [RippleConfiguration] from [MaterialTheme] which
- * works in case the [MaterialTheme] is not initialized.
+ * The ripple derived from the theme colors, so pressed states follow the palette.
  */
-internal object StreamRippleConfiguration {
+@OptIn(ExperimentalMaterialApi::class)
+internal fun streamRippleConfiguration(
+    colors: StreamDesign.Colors,
+    lightTheme: Boolean,
+): RippleConfiguration = RippleConfiguration(
+    color = if (lightTheme) colors.chrome.s900 else colors.chrome.s1000,
+    rippleAlpha = if (lightTheme) LightRippleAlpha else DarkRippleAlpha,
+)
 
-    @Composable
-    @ReadOnlyComposable
-    fun default(): RippleConfiguration {
-        val rippleConfiguration = LocalRippleConfiguration.current
-        if (rippleConfiguration != null) return rippleConfiguration
+private val LightRippleAlpha = RippleAlpha(
+    pressedAlpha = 0.15f,
+    focusedAlpha = 0.15f,
+    draggedAlpha = 0.10f,
+    hoveredAlpha = 0.10f,
+)
 
-        val contentColor = LocalContentColor.current
-        return RippleConfiguration(color = contentColor)
-    }
-}
+private val DarkRippleAlpha = RippleAlpha(
+    pressedAlpha = 0.20f,
+    focusedAlpha = 0.20f,
+    draggedAlpha = 0.15f,
+    hoveredAlpha = 0.15f,
+)
