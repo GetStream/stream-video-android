@@ -22,6 +22,7 @@ class DirectCallPage {
 
     companion object {
         val participantName = By.res("Stream_DirectCallUserName")
+        val joinAndRingCheckbox = By.res("Stream_JoinAndRingCheckbox")
         val audioCallButton = By.res("Stream_AudioCallButton")
         val videoCallButton = By.res("Stream_VideoCallButton")
     }

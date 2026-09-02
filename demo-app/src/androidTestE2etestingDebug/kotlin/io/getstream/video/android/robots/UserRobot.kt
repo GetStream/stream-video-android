@@ -74,9 +74,14 @@ class UserRobot {
         return this
     }
 
-    fun directCall(audioOnly: Boolean): UserRobot {
+    fun directCall(audioOnly: Boolean, joinAndRing: Boolean = false): UserRobot {
         CallDetailsPage.wheelIcon.waitToAppearAndClick()
         CallDetailsPage.directCallButton.waitToAppearAndClick()
+        DirectCallPage.joinAndRingCheckbox.waitToAppear().let { checkbox ->
+            if (checkbox.isChecked != joinAndRing) {
+                checkbox.click()
+            }
+        }
         DirectCallPage.participantName.waitToAppearAndClick()
         val callButton = if (audioOnly) audioCallButton else videoCallButton
         callButton.waitToAppearAndClick()
