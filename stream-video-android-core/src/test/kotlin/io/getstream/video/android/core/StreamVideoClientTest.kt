@@ -25,11 +25,13 @@ import io.getstream.android.video.generated.models.CallSessionStartedEvent
 import io.getstream.android.video.generated.models.CreateGuestResponse
 import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.result.Result
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
+import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.Sounds
@@ -50,9 +52,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After
 import org.junit.Before
 import org.threeten.bp.OffsetDateTime
+import retrofit2.HttpException
+import retrofit2.Response
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -80,7 +86,9 @@ class StreamVideoClientTest {
         unmockkAll()
     }
 
-    private fun prepareClient(): StreamVideoClient {
+    private fun prepareClient(
+        tokenProvider: TokenProvider = mockk(relaxed = true),
+    ): StreamVideoClient {
         val context = mockk<Context>(relaxed = true)
         val lifecycle = mockk<Lifecycle>(relaxed = true)
         val coordinator = mockk<CoordinatorConnectionModule>(relaxed = true)
@@ -98,6 +106,7 @@ class StreamVideoClientTest {
                 lifecycle = lifecycle,
                 coordinatorConnectionModule = coordinator,
                 tokenRepository = tokenRepo,
+                tokenProvider = tokenProvider,
                 streamNotificationManager = notificationManager,
                 enableCallNotificationUpdates = false,
                 sounds = sounds,
@@ -356,9 +365,51 @@ class StreamVideoClientTest {
 
         assertFalse(blockRan, "apiCall must not invoke the request block when guest setup failed")
         assertTrue(
-            result is io.getstream.result.Result.Failure,
+            result is Result.Failure,
             "expected Result.Failure, got $result",
         )
+    }
+
+    // parseError consumes the response body. The old path parsed it only to decide
+    // whether to refresh the token, then rethrew the raw HttpException — callers
+    // saw "HTTP 400" and lost the coordinator's reason.
+    @Test
+    fun `apiCall surfaces the coordinator error message instead of a raw HTTP status`() = runTest {
+        val reason = "User 'marcelo' with role 'user' is not allowed to perform action UpdateCall"
+        val result = client.apiCall<String> {
+            throw coordinatorHttpException(code = 403, message = reason, serverCode = 4)
+        }
+
+        assertTrue(result is Result.Failure, "expected Failure, got $result")
+        val error = (result as Result.Failure).value
+        assertTrue(
+            error.message.contains(reason),
+            "expected coordinator reason in ${error.message}",
+        )
+    }
+
+    @Test
+    fun `apiCall retries once after an auth error`() = runTest {
+        val tokenProvider = mockk<TokenProvider>()
+        coEvery { tokenProvider.loadToken() } returns "refreshed-token"
+        val client = prepareClient(tokenProvider = tokenProvider)
+        var attempts = 0
+
+        val result = client.apiCall {
+            attempts++
+            if (attempts == 1) {
+                throw coordinatorHttpException(
+                    code = 401,
+                    message = "token expired",
+                    serverCode = 40,
+                )
+            }
+            "ok"
+        }
+
+        assertEquals("ok", (result as Result.Success).value)
+        assertEquals(2, attempts)
+        coVerify(exactly = 1) { tokenProvider.loadToken() }
     }
 
     // Regression: StreamNotificationManager.createDevice() calls api.createDevice() directly
@@ -444,5 +495,15 @@ class StreamVideoClientTest {
         // adopted identity automatically — no separate mirror to keep in sync.
         assertEquals("server_normalized_id", client.state.user.value?.id)
         assertEquals(UserType.Guest, client.state.user.value?.type)
+    }
+
+    private fun coordinatorHttpException(
+        code: Int,
+        message: String,
+        serverCode: Int,
+    ): HttpException {
+        val json = """{"code":$serverCode,"message":"$message","StatusCode":$code,"more_info":""}"""
+        val body = json.toResponseBody("application/json".toMediaType())
+        return HttpException(Response.error<Unit>(code, body))
     }
 }

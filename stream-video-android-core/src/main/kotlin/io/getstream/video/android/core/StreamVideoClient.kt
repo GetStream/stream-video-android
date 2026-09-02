@@ -317,23 +317,27 @@ internal class StreamVideoClient internal constructor(
         try {
             apiCall()
         } catch (e: HttpException) {
-            // Retry once with a new token if the token is expired
-            if (e.isAuthError()) {
+            // parseError consumes the body, so this has to happen once. Rethrowing the raw
+            // HttpException would leave callers with only "HTTP 400" and drop the
+            // coordinator's actual reason.
+            val failure = parseError(e)
+            val networkError = failure.value as? Error.NetworkError
+            if (networkError != null && networkError.isAuthError()) {
                 val newToken = tokenProvider.loadToken()
                 tokenRepository.updateToken(newToken)
                 token = newToken
                 coordinatorConnectionModule.updateToken(newToken)
                 apiCall()
             } else {
-                throw e
+                val serverMessage = networkError?.message ?: e.message
+                logger.e { "[apiCall] HTTP ${e.code()}: $serverMessage" }
+                throw Exception(serverMessage, e)
             }
         }
     }
 
-    private fun HttpException.isAuthError(): Boolean {
-        val failure = parseError(this)
-        val parsedError = failure.value as Error.NetworkError
-        return when (parsedError.serverErrorCode) {
+    private fun Error.NetworkError.isAuthError(): Boolean {
+        return when (serverErrorCode) {
             VideoErrorCode.AUTHENTICATION_ERROR.code,
             VideoErrorCode.TOKEN_EXPIRED.code,
             VideoErrorCode.TOKEN_NOT_VALID.code,
