@@ -101,10 +101,10 @@ private fun LiveHostContent(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetPrimary)
+            .background(VideoTheme.colors.backgroundCoreApp)
             .padding(6.dp),
-        contentColor = VideoTheme.colors.baseSheetPrimary,
-        backgroundColor = VideoTheme.colors.baseSheetPrimary,
+        contentColor = VideoTheme.colors.backgroundCoreApp,
+        backgroundColor = VideoTheme.colors.backgroundCoreApp,
         topBar = {
             if (connection == RealtimeConnection.Connected) {
                 if (!backstage) {
@@ -117,7 +117,7 @@ private fun LiveHostContent(
                             modifier = Modifier
                                 .align(Alignment.CenterEnd)
                                 .background(
-                                    color = VideoTheme.colors.brandPrimary,
+                                    color = VideoTheme.colors.accentPrimary,
                                     shape = RoundedCornerShape(6.dp),
                                 )
                                 .padding(horizontal = 12.dp, vertical = 4.dp),
@@ -128,19 +128,19 @@ private fun LiveHostContent(
                         Text(
                             modifier = Modifier.align(Alignment.Center),
                             text = "Live for $duration",
-                            color = VideoTheme.colors.basePrimary,
+                            color = VideoTheme.colors.textPrimary,
                         )
                     }
                 } else {
                     Text(
                         text = "Backstage",
-                        color = VideoTheme.colors.basePrimary,
+                        color = VideoTheme.colors.textPrimary,
                     )
                 }
             } else if (connection is RealtimeConnection.Failed) {
                 Text(
                     text = "Connection failed",
-                    color = VideoTheme.colors.basePrimary,
+                    color = VideoTheme.colors.textPrimary,
                 )
             }
         },
@@ -150,8 +150,8 @@ private fun LiveHostContent(
             Row {
                 Button(
                     colors = ButtonDefaults.buttonColors(
-                        contentColor = VideoTheme.colors.brandPrimary,
-                        backgroundColor = VideoTheme.colors.brandPrimary,
+                        contentColor = VideoTheme.colors.accentPrimary,
+                        backgroundColor = VideoTheme.colors.accentPrimary,
                     ),
                     onClick = {
                         scope.launch {

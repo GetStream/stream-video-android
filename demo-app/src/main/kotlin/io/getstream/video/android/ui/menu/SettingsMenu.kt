@@ -319,7 +319,7 @@ internal fun SettingsMenu(
     Popup(
         offset = IntOffset(
             0,
-            -(VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt(),
+            -(44.dp + 8.dp).toPx().toInt(),
         ),
         alignment = Alignment.BottomStart,
         onDismissRequest = { onDismissed.invoke() },
@@ -345,7 +345,7 @@ internal fun SettingsMenu(
                 ) {
                     onDismissed()
                 }
-                Spacer(Modifier.height(VideoTheme.dimens.spacingS))
+                Spacer(Modifier.height(8.dp))
                 VideoFiltersMenu(
                     selectedFilterIndex = selectedVideoFilter,
                     onSelectFilter = { filterIndex ->
@@ -353,7 +353,7 @@ internal fun SettingsMenu(
                         onSelectVideoFilter(filterIndex)
                     },
                 )
-                Spacer(Modifier.height(VideoTheme.dimens.spacingS))
+                Spacer(Modifier.height(8.dp))
             },
             items = defaultStreamMenu(
                 showDebugOptions = showDebugOptions,

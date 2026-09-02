@@ -155,26 +155,26 @@ private fun CallSettingsContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetPrimary),
+            .background(VideoTheme.colors.backgroundCoreApp),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(VideoTheme.colors.baseSheetSecondary)
+                .background(VideoTheme.colors.backgroundCoreElevation1)
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "Call Settings",
-                style = VideoTheme.typography.subtitleM,
-                color = VideoTheme.colors.basePrimary,
+                style = VideoTheme.typography.headingSmall,
+                color = VideoTheme.colors.textPrimary,
             )
 
             Box(
                 modifier = Modifier
                     .background(
-                        color = VideoTheme.colors.baseSheetTertiary,
+                        color = VideoTheme.colors.backgroundCoreSurfaceDefault,
                         shape = RoundedCornerShape(999.dp),
                     )
                     .clickable(onClick = onClose)
@@ -183,7 +183,7 @@ private fun CallSettingsContent(
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Close",
-                    tint = VideoTheme.colors.basePrimary,
+                    tint = VideoTheme.colors.textPrimary,
                 )
             }
         }
@@ -193,8 +193,8 @@ private fun CallSettingsContent(
                 text = "Call service config registry is not available yet. " +
                     "Sign in / start the SDK first.",
                 modifier = Modifier.padding(16.dp),
-                style = VideoTheme.typography.bodyM,
-                color = VideoTheme.colors.baseSecondary,
+                style = VideoTheme.typography.bodyDefault,
+                color = VideoTheme.colors.textSecondary,
             )
             return@Column
         }
@@ -233,27 +233,27 @@ private fun CallTypeConfigCard(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = VideoTheme.colors.baseSheetSecondary,
+                color = VideoTheme.colors.backgroundCoreElevation1,
                 shape = RoundedCornerShape(16.dp),
             )
             .padding(16.dp),
     ) {
         Text(
             text = item.label,
-            style = VideoTheme.typography.labelL,
-            color = VideoTheme.colors.basePrimary,
+            style = VideoTheme.typography.headingLarge,
+            color = VideoTheme.colors.textPrimary,
         )
         Text(
             text = "type: ${item.callType.name}",
             modifier = Modifier.padding(top = 2.dp),
-            style = VideoTheme.typography.labelM,
-            color = VideoTheme.colors.baseSecondary,
+            style = VideoTheme.typography.bodyEmphasis,
+            color = VideoTheme.colors.textSecondary,
         )
         Text(
             text = "service: ${item.config.serviceClass.simpleName}",
             modifier = Modifier.padding(top = 2.dp, bottom = 8.dp),
-            style = VideoTheme.typography.labelM,
-            color = VideoTheme.colors.baseSecondary,
+            style = VideoTheme.typography.bodyEmphasis,
+            color = VideoTheme.colors.textSecondary,
         )
 
         ToggleRow(
@@ -270,8 +270,8 @@ private fun CallTypeConfigCard(
         Text(
             text = "Audio usage",
             modifier = Modifier.padding(top = 12.dp, bottom = 8.dp),
-            style = VideoTheme.typography.bodyS,
-            color = VideoTheme.colors.basePrimary,
+            style = VideoTheme.typography.captionDefault,
+            color = VideoTheme.colors.textPrimary,
         )
         AudioUsageSelector(
             selected = item.config.audioUsage,
@@ -295,17 +295,17 @@ private fun ToggleRow(
     ) {
         Text(
             text = label,
-            style = VideoTheme.typography.bodyS,
-            color = VideoTheme.colors.basePrimary,
+            style = VideoTheme.typography.captionDefault,
+            color = VideoTheme.colors.textPrimary,
         )
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = VideoTheme.colors.brandPrimary,
-                checkedTrackColor = VideoTheme.colors.brandPrimary,
-                uncheckedThumbColor = VideoTheme.colors.baseSecondary,
-                uncheckedTrackColor = VideoTheme.colors.baseSheetTertiary,
+                checkedThumbColor = VideoTheme.colors.accentPrimary,
+                checkedTrackColor = VideoTheme.colors.accentPrimary,
+                uncheckedThumbColor = VideoTheme.colors.textSecondary,
+                uncheckedTrackColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
             ),
         )
     }
@@ -329,19 +329,19 @@ private fun AudioUsageSelector(
                 modifier = Modifier
                     .background(
                         color = if (isSelected) {
-                            VideoTheme.colors.brandPrimary
+                            VideoTheme.colors.accentPrimary
                         } else {
-                            VideoTheme.colors.baseSheetTertiary
+                            VideoTheme.colors.backgroundCoreSurfaceDefault
                         },
                         shape = RoundedCornerShape(999.dp),
                     )
                     .clickable { onSelected(option.value) }
                     .padding(horizontal = 12.dp, vertical = 8.dp),
-                style = VideoTheme.typography.bodyS,
+                style = VideoTheme.typography.captionDefault,
                 color = if (isSelected) {
-                    VideoTheme.colors.baseSheetPrimary
+                    VideoTheme.colors.backgroundCoreApp
                 } else {
-                    VideoTheme.colors.basePrimary
+                    VideoTheme.colors.textPrimary
                 },
             )
         }

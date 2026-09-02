@@ -43,7 +43,7 @@ fun FullScreenCircleProgressBar(text: String) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetPrimary),
+            .background(VideoTheme.colors.backgroundCoreApp),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -56,11 +56,11 @@ fun FullScreenCircleProgressBar(text: String) {
                 contentScale = ContentScale.FillWidth,
             )
             Spacer(modifier = Modifier.size(32.dp))
-            CircularProgressIndicator(color = VideoTheme.colors.brandPrimary)
+            CircularProgressIndicator(color = VideoTheme.colors.accentPrimary)
             Text(
                 modifier = Modifier.testTag("Stream_CallProgressBar"),
                 text = text,
-                style = VideoTheme.typography.bodyL,
+                style = VideoTheme.typography.bodyDefault,
             )
         }
     }

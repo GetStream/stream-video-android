@@ -58,7 +58,7 @@ internal fun ExceptionTraceScreen(packageName: String, message: String) {
         modifier =
         Modifier
             .verticalScroll(scrollState)
-            .background(VideoTheme.colors.baseSheetPrimary)
+            .background(VideoTheme.colors.backgroundCoreApp)
             .padding(16.dp),
     ) {
         val context: Context = LocalContext.current
@@ -75,7 +75,7 @@ internal fun ExceptionTraceScreen(packageName: String, message: String) {
             Text(
                 modifier = Modifier.align(Alignment.CenterStart),
                 text = stringResource(id = R.string.stream_video_tooling_exception_log),
-                color = VideoTheme.colors.basePrimary,
+                color = VideoTheme.colors.textPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
             )
@@ -90,7 +90,7 @@ internal fun ExceptionTraceScreen(packageName: String, message: String) {
                         context.toast(R.string.stream_video_tooling_copy_into_clipboard)
                     },
                 imageVector = Icons.Filled.ContentCopy,
-                tint = VideoTheme.colors.basePrimary,
+                tint = VideoTheme.colors.textPrimary,
                 contentDescription = null,
             )
         }
@@ -101,12 +101,12 @@ internal fun ExceptionTraceScreen(packageName: String, message: String) {
             modifier =
             Modifier
                 .border(
-                    border = BorderStroke(2.dp, VideoTheme.colors.brandPrimary),
+                    border = BorderStroke(2.dp, VideoTheme.colors.accentPrimary),
                     shape = RoundedCornerShape(6.dp),
                 )
                 .padding(12.dp),
             text = message,
-            color = VideoTheme.colors.basePrimary,
+            color = VideoTheme.colors.textPrimary,
             fontSize = 14.sp,
         )
     }

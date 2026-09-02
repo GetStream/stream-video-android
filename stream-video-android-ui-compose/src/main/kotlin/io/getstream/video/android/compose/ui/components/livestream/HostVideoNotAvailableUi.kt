@@ -35,7 +35,7 @@ internal fun BoxScope.HostVideoNotAvailableUi(call: Call) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = VideoTheme.colors.baseSheetPrimary),
+            .background(color = VideoTheme.colors.backgroundCoreApp),
     ) {
         Text(
             modifier = Modifier.align(Alignment.Center),
@@ -43,7 +43,7 @@ internal fun BoxScope.HostVideoNotAvailableUi(call: Call) {
                 id = R.string.stream_video_livestreaming_host_video_not_available,
             ),
             fontSize = 18.sp,
-            color = VideoTheme.colors.basePrimary,
+            color = VideoTheme.colors.textPrimary,
         )
     }
 }

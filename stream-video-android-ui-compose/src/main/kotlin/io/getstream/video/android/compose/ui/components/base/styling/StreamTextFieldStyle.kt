@@ -18,12 +18,14 @@ package io.getstream.video.android.compose.ui.components.base.styling
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TextFieldColors
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 public data class TextFieldStyle(
     val textStyle: StreamTextStyle,
@@ -48,28 +50,28 @@ public open class TextFieldStyleProvider {
             textStyle = textStyle,
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 // Background
-                backgroundColor = VideoTheme.colors.baseSheetPrimary,
+                backgroundColor = VideoTheme.colors.backgroundCoreApp,
                 // Border
-                focusedBorderColor = VideoTheme.colors.brandPrimary,
-                unfocusedBorderColor = VideoTheme.colors.baseSenary,
-                disabledBorderColor = VideoTheme.colors.baseSenary.copy(alpha = 0.16f),
-                errorBorderColor = VideoTheme.colors.alertWarning,
+                focusedBorderColor = VideoTheme.colors.accentPrimary,
+                unfocusedBorderColor = VideoTheme.colors.borderCoreDefault,
+                disabledBorderColor = VideoTheme.colors.borderCoreDefault.copy(alpha = 0.16f),
+                errorBorderColor = VideoTheme.colors.accentError,
                 // Cursor
-                cursorColor = VideoTheme.colors.basePrimary,
-                errorCursorColor = VideoTheme.colors.alertWarning,
+                cursorColor = VideoTheme.colors.textPrimary,
+                errorCursorColor = VideoTheme.colors.accentError,
                 // Text
-                textColor = VideoTheme.colors.basePrimary,
-                disabledTextColor = VideoTheme.colors.baseTertiary.copy(alpha = 0.16f),
-                errorLabelColor = VideoTheme.colors.alertWarning,
-                focusedLabelColor = VideoTheme.colors.basePrimary,
-                unfocusedLabelColor = VideoTheme.colors.basePrimary,
-                placeholderColor = VideoTheme.colors.baseTertiary,
-                disabledPlaceholderColor = VideoTheme.colors.baseTertiary.copy(alpha = 0.16f),
+                textColor = VideoTheme.colors.textPrimary,
+                disabledTextColor = VideoTheme.colors.textTertiary.copy(alpha = 0.16f),
+                errorLabelColor = VideoTheme.colors.accentError,
+                focusedLabelColor = VideoTheme.colors.textPrimary,
+                unfocusedLabelColor = VideoTheme.colors.textPrimary,
+                placeholderColor = VideoTheme.colors.textTertiary,
+                disabledPlaceholderColor = VideoTheme.colors.textTertiary.copy(alpha = 0.16f),
             ),
-            borderStroke = BorderStroke(2.dp, VideoTheme.colors.baseSenary),
-            shape = VideoTheme.shapes.input,
+            borderStroke = BorderStroke(2.dp, VideoTheme.colors.borderCoreDefault),
+            shape = RoundedCornerShape(StreamTokens.inputRadiusTextInput),
             placeholderStyle = placeholderStyle,
-            paddings = PaddingValues(VideoTheme.dimens.componentPaddingFixed),
+            paddings = PaddingValues(StreamTokens.spacingXs),
             iconStyle = iconStyle,
         )
 }

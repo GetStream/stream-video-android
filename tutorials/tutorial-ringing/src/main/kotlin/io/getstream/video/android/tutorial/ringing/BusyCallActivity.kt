@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
@@ -99,7 +100,7 @@ class BusyCallActivity : ComposeStreamCallActivity() {
                     Row(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .padding(bottom = VideoTheme.dimens.componentHeightM)
+                            .padding(bottom = 32.dp)
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -146,8 +147,8 @@ fun BusyCallAction(
     enabled = enabled,
     onAction = { onCallAction(BusyCall) },
     icon = icon ?: Icons.Default.Close,
-    color = bgColor ?: VideoTheme.colors.alertWarning,
-    iconTint = iconTint ?: VideoTheme.colors.basePrimary,
+    color = bgColor ?: VideoTheme.colors.accentError,
+    iconTint = iconTint ?: VideoTheme.colors.textPrimary,
 )
 
 data object BusyCall : CustomAction(tag = "busy")

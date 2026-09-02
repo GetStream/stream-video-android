@@ -26,7 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.ParticipantState
 
 /**
@@ -56,13 +56,13 @@ public fun AudioParticipantsGrid(
 
     LazyVerticalGrid(
         modifier = modifier,
-        columns = GridCells.Adaptive(VideoTheme.dimens.genericMax),
+        columns = GridCells.Adaptive(100.dp),
         contentPadding = PaddingValues(vertical = 32.dp),
         verticalArrangement = Arrangement.spacedBy(
-            VideoTheme.dimens.spacingM,
+            StreamTokens.spacingMd,
         ),
         horizontalArrangement = if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            Arrangement.spacedBy(VideoTheme.dimens.spacingM)
+            Arrangement.spacedBy(StreamTokens.spacingMd)
         } else {
             Arrangement.spacedBy(0.dp)
         },

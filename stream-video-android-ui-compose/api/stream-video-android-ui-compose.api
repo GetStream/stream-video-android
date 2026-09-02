@@ -650,276 +650,12 @@ public final class io/getstream/video/android/compose/theme/ScreenSharingFallbac
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/compose/theme/StreamColors {
-	public static final field $stable I
-	public static final field Companion Lio/getstream/video/android/compose/theme/StreamColors$Companion;
-	public synthetic fun <init> (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1-0d7_KjU ()J
-	public final fun component10-0d7_KjU ()J
-	public final fun component11-0d7_KjU ()J
-	public final fun component12-0d7_KjU ()J
-	public final fun component13-0d7_KjU ()J
-	public final fun component14-0d7_KjU ()J
-	public final fun component15-0d7_KjU ()J
-	public final fun component16-0d7_KjU ()J
-	public final fun component17-0d7_KjU ()J
-	public final fun component18-0d7_KjU ()J
-	public final fun component19-0d7_KjU ()J
-	public final fun component2-0d7_KjU ()J
-	public final fun component20-0d7_KjU ()J
-	public final fun component21-0d7_KjU ()J
-	public final fun component22-0d7_KjU ()J
-	public final fun component23-0d7_KjU ()J
-	public final fun component24-0d7_KjU ()J
-	public final fun component25-0d7_KjU ()J
-	public final fun component26-0d7_KjU ()J
-	public final fun component27-0d7_KjU ()J
-	public final fun component28-0d7_KjU ()J
-	public final fun component29-0d7_KjU ()J
-	public final fun component3-0d7_KjU ()J
-	public final fun component30-0d7_KjU ()J
-	public final fun component31-0d7_KjU ()J
-	public final fun component32-0d7_KjU ()J
-	public final fun component33-0d7_KjU ()J
-	public final fun component34-0d7_KjU ()J
-	public final fun component35-0d7_KjU ()J
-	public final fun component36-0d7_KjU ()J
-	public final fun component37-0d7_KjU ()J
-	public final fun component38-0d7_KjU ()J
-	public final fun component39-0d7_KjU ()J
-	public final fun component4-0d7_KjU ()J
-	public final fun component40-0d7_KjU ()J
-	public final fun component5-0d7_KjU ()J
-	public final fun component6-0d7_KjU ()J
-	public final fun component7-0d7_KjU ()J
-	public final fun component8-0d7_KjU ()J
-	public final fun component9-0d7_KjU ()J
-	public final fun copy-KR53e2g (JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/StreamColors;
-	public static synthetic fun copy-KR53e2g$default (Lio/getstream/video/android/compose/theme/StreamColors;JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamColors;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAlertCaution-0d7_KjU ()J
-	public final fun getAlertSuccess-0d7_KjU ()J
-	public final fun getAlertWarning-0d7_KjU ()J
-	public final fun getBasePrimary-0d7_KjU ()J
-	public final fun getBaseQuaternary-0d7_KjU ()J
-	public final fun getBaseQuinary-0d7_KjU ()J
-	public final fun getBaseSecondary-0d7_KjU ()J
-	public final fun getBaseSenary-0d7_KjU ()J
-	public final fun getBaseSheetPrimary-0d7_KjU ()J
-	public final fun getBaseSheetQuarternary-0d7_KjU ()J
-	public final fun getBaseSheetSecondary-0d7_KjU ()J
-	public final fun getBaseSheetTertiary-0d7_KjU ()J
-	public final fun getBaseTertiary-0d7_KjU ()J
-	public final fun getBrandCyan-0d7_KjU ()J
-	public final fun getBrandGreen-0d7_KjU ()J
-	public final fun getBrandMaroon-0d7_KjU ()J
-	public final fun getBrandPrimary-0d7_KjU ()J
-	public final fun getBrandPrimaryDk-0d7_KjU ()J
-	public final fun getBrandPrimaryLt-0d7_KjU ()J
-	public final fun getBrandRed-0d7_KjU ()J
-	public final fun getBrandRedDk-0d7_KjU ()J
-	public final fun getBrandRedLt-0d7_KjU ()J
-	public final fun getBrandSecondary-0d7_KjU ()J
-	public final fun getBrandSecondaryTransparent-0d7_KjU ()J
-	public final fun getBrandViolet-0d7_KjU ()J
-	public final fun getBrandYellow-0d7_KjU ()J
-	public final fun getButtonAlertDefault-0d7_KjU ()J
-	public final fun getButtonAlertDisabled-0d7_KjU ()J
-	public final fun getButtonAlertPressed-0d7_KjU ()J
-	public final fun getButtonBrandDefault-0d7_KjU ()J
-	public final fun getButtonBrandDisabled-0d7_KjU ()J
-	public final fun getButtonBrandPressed-0d7_KjU ()J
-	public final fun getButtonPrimaryDefault-0d7_KjU ()J
-	public final fun getButtonPrimaryDisabled-0d7_KjU ()J
-	public final fun getButtonPrimaryPressed-0d7_KjU ()J
-	public final fun getIconActive-0d7_KjU ()J
-	public final fun getIconAlert-0d7_KjU ()J
-	public final fun getIconDefault-0d7_KjU ()J
-	public final fun getIconDisabled-0d7_KjU ()J
-	public final fun getIconPressed-0d7_KjU ()J
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/compose/theme/StreamColors$Companion {
-	public final fun defaultColors (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamColors;
-}
-
-public final class io/getstream/video/android/compose/theme/StreamDimens {
-	public static final field $stable I
-	public static final field Companion Lio/getstream/video/android/compose/theme/StreamDimens$Companion;
-	public synthetic fun <init> (FFFFFFFFFFFFFFFFFFFFFFFFFFFJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1-D9Ej5fM ()F
-	public final fun component10-D9Ej5fM ()F
-	public final fun component11-D9Ej5fM ()F
-	public final fun component12-D9Ej5fM ()F
-	public final fun component13-D9Ej5fM ()F
-	public final fun component14-D9Ej5fM ()F
-	public final fun component15-D9Ej5fM ()F
-	public final fun component16-D9Ej5fM ()F
-	public final fun component17-D9Ej5fM ()F
-	public final fun component18-D9Ej5fM ()F
-	public final fun component19-D9Ej5fM ()F
-	public final fun component2-D9Ej5fM ()F
-	public final fun component20-D9Ej5fM ()F
-	public final fun component21-D9Ej5fM ()F
-	public final fun component22-D9Ej5fM ()F
-	public final fun component23-D9Ej5fM ()F
-	public final fun component24-D9Ej5fM ()F
-	public final fun component25-D9Ej5fM ()F
-	public final fun component26-D9Ej5fM ()F
-	public final fun component27-D9Ej5fM ()F
-	public final fun component28-XSAIIZE ()J
-	public final fun component29-XSAIIZE ()J
-	public final fun component3-D9Ej5fM ()F
-	public final fun component30-XSAIIZE ()J
-	public final fun component31-XSAIIZE ()J
-	public final fun component32-XSAIIZE ()J
-	public final fun component33-XSAIIZE ()J
-	public final fun component34-XSAIIZE ()J
-	public final fun component35-XSAIIZE ()J
-	public final fun component36-XSAIIZE ()J
-	public final fun component37-XSAIIZE ()J
-	public final fun component38-XSAIIZE ()J
-	public final fun component39-XSAIIZE ()J
-	public final fun component4-D9Ej5fM ()F
-	public final fun component5-D9Ej5fM ()F
-	public final fun component6-D9Ej5fM ()F
-	public final fun component7-D9Ej5fM ()F
-	public final fun component8-D9Ej5fM ()F
-	public final fun component9-D9Ej5fM ()F
-	public final fun copy-unn3US4 (FFFFFFFFFFFFFFFFFFFFFFFFFFFJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/StreamDimens;
-	public static synthetic fun copy-unn3US4$default (Lio/getstream/video/android/compose/theme/StreamDimens;FFFFFFFFFFFFFFFFFFFFFFFFFFFJJJJJJJJJJJJIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamDimens;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getComponentHeightL-D9Ej5fM ()F
-	public final fun getComponentHeightM-D9Ej5fM ()F
-	public final fun getComponentHeightS-D9Ej5fM ()F
-	public final fun getComponentPaddingBottom-D9Ej5fM ()F
-	public final fun getComponentPaddingEnd-D9Ej5fM ()F
-	public final fun getComponentPaddingFixed-D9Ej5fM ()F
-	public final fun getComponentPaddingStart-D9Ej5fM ()F
-	public final fun getComponentPaddingTop-D9Ej5fM ()F
-	public final fun getGeneric3xl-D9Ej5fM ()F
-	public final fun getGenericL-D9Ej5fM ()F
-	public final fun getGenericM-D9Ej5fM ()F
-	public final fun getGenericMax-D9Ej5fM ()F
-	public final fun getGenericS-D9Ej5fM ()F
-	public final fun getGenericXXs-D9Ej5fM ()F
-	public final fun getGenericXl-D9Ej5fM ()F
-	public final fun getGenericXs-D9Ej5fM ()F
-	public final fun getGenericXxl-D9Ej5fM ()F
-	public final fun getLineHeightL-XSAIIZE ()J
-	public final fun getLineHeightM-XSAIIZE ()J
-	public final fun getLineHeightS-XSAIIZE ()J
-	public final fun getLineHeightXl-XSAIIZE ()J
-	public final fun getLineHeightXs-XSAIIZE ()J
-	public final fun getLineHeightXxl-XSAIIZE ()J
-	public final fun getRoundnessL-D9Ej5fM ()F
-	public final fun getRoundnessM-D9Ej5fM ()F
-	public final fun getRoundnessS-D9Ej5fM ()F
-	public final fun getRoundnessXl-D9Ej5fM ()F
-	public final fun getSpacingL-D9Ej5fM ()F
-	public final fun getSpacingM-D9Ej5fM ()F
-	public final fun getSpacingS-D9Ej5fM ()F
-	public final fun getSpacingXXs-D9Ej5fM ()F
-	public final fun getSpacingXl-D9Ej5fM ()F
-	public final fun getSpacingXs-D9Ej5fM ()F
-	public final fun getTextSizeL-XSAIIZE ()J
-	public final fun getTextSizeM-XSAIIZE ()J
-	public final fun getTextSizeS-XSAIIZE ()J
-	public final fun getTextSizeXl-XSAIIZE ()J
-	public final fun getTextSizeXs-XSAIIZE ()J
-	public final fun getTextSizeXxl-XSAIIZE ()J
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/compose/theme/StreamDimens$Companion {
-	public final fun defaultDimens (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamDimens;
-}
-
-public final class io/getstream/video/android/compose/theme/StreamShapes {
-	public static final field $stable I
-	public static final field Companion Lio/getstream/video/android/compose/theme/StreamShapes$Companion;
-	public fun <init> (Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;)V
-	public final fun component1 ()Landroidx/compose/ui/graphics/Shape;
-	public final fun component2 ()Landroidx/compose/ui/graphics/Shape;
-	public final fun component3 ()Landroidx/compose/ui/graphics/Shape;
-	public final fun component4 ()Landroidx/compose/ui/graphics/Shape;
-	public final fun component5 ()Landroidx/compose/ui/graphics/Shape;
-	public final fun component6 ()Landroidx/compose/ui/graphics/Shape;
-	public final fun component7 ()Landroidx/compose/ui/graphics/Shape;
-	public final fun component8 ()Landroidx/compose/ui/graphics/Shape;
-	public final fun copy (Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;)Lio/getstream/video/android/compose/theme/StreamShapes;
-	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/StreamShapes;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;Landroidx/compose/ui/graphics/Shape;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamShapes;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getButton ()Landroidx/compose/ui/graphics/Shape;
-	public final fun getCircle ()Landroidx/compose/ui/graphics/Shape;
-	public final fun getContainer ()Landroidx/compose/ui/graphics/Shape;
-	public final fun getDialog ()Landroidx/compose/ui/graphics/Shape;
-	public final fun getIndicator ()Landroidx/compose/ui/graphics/Shape;
-	public final fun getInput ()Landroidx/compose/ui/graphics/Shape;
-	public final fun getSheet ()Landroidx/compose/ui/graphics/Shape;
-	public final fun getSquare ()Landroidx/compose/ui/graphics/Shape;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/compose/theme/StreamShapes$Companion {
-	public final fun defaultShapes (Lio/getstream/video/android/compose/theme/StreamDimens;Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamShapes;
-}
-
 public abstract interface class io/getstream/video/android/compose/theme/StreamTheme {
-	public fun getColors (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamColors;
+	public fun getColors (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors;
 	public fun getComponentFactory (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/VideoComponentFactory;
 	public fun getConfig (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/VideoUiConfig;
-	public fun getDimens (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamDimens;
-	public fun getShapes (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamShapes;
 	public fun getStyles (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;
-	public fun getTypography (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/StreamTypography;
-}
-
-public final class io/getstream/video/android/compose/theme/StreamTypography {
-	public static final field $stable I
-	public static final field Companion Lio/getstream/video/android/compose/theme/StreamTypography$Companion;
-	public fun <init> (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)V
-	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component10 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component11 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component12 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component13 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component14 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component4 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component5 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component6 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component7 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component8 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun component9 ()Landroidx/compose/ui/text/TextStyle;
-	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lio/getstream/video/android/compose/theme/StreamTypography;
-	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/StreamTypography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/StreamTypography;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBodyL ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getBodyM ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getBodyS ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getLabelL ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getLabelM ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getLabelS ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getLabelXS ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getSubtitleL ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getSubtitleM ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getSubtitleS ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getTitleL ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getTitleM ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getTitleS ()Landroidx/compose/ui/text/TextStyle;
-	public final fun getTitleXs ()Landroidx/compose/ui/text/TextStyle;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/compose/theme/StreamTypography$Companion {
-	public final fun defaultTypography (Lio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Landroidx/compose/ui/text/font/FontFamily;Landroidx/compose/runtime/Composer;II)Lio/getstream/video/android/compose/theme/StreamTypography;
+	public fun getTypography (Landroidx/compose/runtime/Composer;I)Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography;
 }
 
 public abstract interface class io/getstream/video/android/compose/theme/VideoComponentFactory {
@@ -965,7 +701,7 @@ public final class io/getstream/video/android/compose/theme/VideoTheme : io/gets
 }
 
 public final class io/getstream/video/android/compose/theme/VideoThemeKt {
-	public static final fun VideoTheme (Lio/getstream/video/android/compose/theme/VideoUiConfig;Lio/getstream/video/android/compose/theme/StreamColors;Lio/getstream/video/android/compose/theme/StreamDimens;Lio/getstream/video/android/compose/theme/StreamTypography;Lio/getstream/video/android/compose/theme/StreamShapes;Lio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;Lio/getstream/video/android/compose/theme/VideoComponentFactory;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun VideoTheme (ZLio/getstream/video/android/compose/theme/VideoUiConfig;Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors;Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography;Lio/getstream/video/android/compose/ui/components/base/styling/CompositeStyleProvider;Lio/getstream/video/android/compose/theme/VideoComponentFactory;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 	public static final fun getLocalComponentFactory ()Landroidx/compose/runtime/ProvidableCompositionLocal;
 	public static final fun getLocalVideoUiConfig ()Landroidx/compose/runtime/ProvidableCompositionLocal;
 }
@@ -984,6 +720,279 @@ public final class io/getstream/video/android/compose/theme/VideoUiConfig {
 	public final fun getReactionMapper ()Lio/getstream/video/android/core/mapper/ReactionMapper;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/design/StreamDesign {
+	public static final field $stable I
+	public static final field INSTANCE Lio/getstream/video/android/compose/theme/design/StreamDesign;
+}
+
+public final class io/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale {
+	public static final field $stable I
+	public static final field Companion Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale$Companion;
+	public synthetic fun <init> (JJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-0d7_KjU ()J
+	public final fun component10-0d7_KjU ()J
+	public final fun component11-0d7_KjU ()J
+	public final fun component12-0d7_KjU ()J
+	public final fun component13-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component4-0d7_KjU ()J
+	public final fun component5-0d7_KjU ()J
+	public final fun component6-0d7_KjU ()J
+	public final fun component7-0d7_KjU ()J
+	public final fun component8-0d7_KjU ()J
+	public final fun component9-0d7_KjU ()J
+	public final fun copy-daRQuJA (JJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;
+	public static synthetic fun copy-daRQuJA$default (Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;JJJJJJJJJJJJJILjava/lang/Object;)Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getS0-0d7_KjU ()J
+	public final fun getS100-0d7_KjU ()J
+	public final fun getS1000-0d7_KjU ()J
+	public final fun getS150-0d7_KjU ()J
+	public final fun getS200-0d7_KjU ()J
+	public final fun getS300-0d7_KjU ()J
+	public final fun getS400-0d7_KjU ()J
+	public final fun getS50-0d7_KjU ()J
+	public final fun getS500-0d7_KjU ()J
+	public final fun getS600-0d7_KjU ()J
+	public final fun getS700-0d7_KjU ()J
+	public final fun getS800-0d7_KjU ()J
+	public final fun getS900-0d7_KjU ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale$Companion {
+	public final fun defaultDark ()Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;
+	public final fun defaultLight ()Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;
+}
+
+public final class io/getstream/video/android/compose/theme/design/StreamDesign$ColorScale {
+	public static final field $stable I
+	public static final field Companion Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale$Companion;
+	public synthetic fun <init> (JJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1-0d7_KjU ()J
+	public final fun component10-0d7_KjU ()J
+	public final fun component11-0d7_KjU ()J
+	public final fun component2-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component4-0d7_KjU ()J
+	public final fun component5-0d7_KjU ()J
+	public final fun component6-0d7_KjU ()J
+	public final fun component7-0d7_KjU ()J
+	public final fun component8-0d7_KjU ()J
+	public final fun component9-0d7_KjU ()J
+	public final fun copy-KpyCeHw (JJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;
+	public static synthetic fun copy-KpyCeHw$default (Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;JJJJJJJJJJJILjava/lang/Object;)Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getS100-0d7_KjU ()J
+	public final fun getS150-0d7_KjU ()J
+	public final fun getS200-0d7_KjU ()J
+	public final fun getS300-0d7_KjU ()J
+	public final fun getS400-0d7_KjU ()J
+	public final fun getS50-0d7_KjU ()J
+	public final fun getS500-0d7_KjU ()J
+	public final fun getS600-0d7_KjU ()J
+	public final fun getS700-0d7_KjU ()J
+	public final fun getS800-0d7_KjU ()J
+	public final fun getS900-0d7_KjU ()J
+	public fun hashCode ()I
+	public final fun inverted ()Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/design/StreamDesign$ColorScale$Companion {
+	public final fun defaultDark ()Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;
+	public final fun defaultLight ()Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;
+	public final fun from-8_81llA (J)Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;
+}
+
+public final class io/getstream/video/android/compose/theme/design/StreamDesign$Colors {
+	public static final field $stable I
+	public static final field Companion Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors$Companion;
+	public synthetic fun <init> (Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;
+	public final fun component10-0d7_KjU ()J
+	public final fun component11-0d7_KjU ()J
+	public final fun component12-0d7_KjU ()J
+	public final fun component13-0d7_KjU ()J
+	public final fun component14-0d7_KjU ()J
+	public final fun component15-0d7_KjU ()J
+	public final fun component16-0d7_KjU ()J
+	public final fun component17-0d7_KjU ()J
+	public final fun component18-0d7_KjU ()J
+	public final fun component19-0d7_KjU ()J
+	public final fun component2 ()Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;
+	public final fun component20-0d7_KjU ()J
+	public final fun component21-0d7_KjU ()J
+	public final fun component22-0d7_KjU ()J
+	public final fun component23-0d7_KjU ()J
+	public final fun component24-0d7_KjU ()J
+	public final fun component25-0d7_KjU ()J
+	public final fun component26-0d7_KjU ()J
+	public final fun component27-0d7_KjU ()J
+	public final fun component28-0d7_KjU ()J
+	public final fun component29-0d7_KjU ()J
+	public final fun component3-0d7_KjU ()J
+	public final fun component30-0d7_KjU ()J
+	public final fun component31-0d7_KjU ()J
+	public final fun component32-0d7_KjU ()J
+	public final fun component33-0d7_KjU ()J
+	public final fun component34-0d7_KjU ()J
+	public final fun component35-0d7_KjU ()J
+	public final fun component36-0d7_KjU ()J
+	public final fun component37-0d7_KjU ()J
+	public final fun component38-0d7_KjU ()J
+	public final fun component39-0d7_KjU ()J
+	public final fun component4-0d7_KjU ()J
+	public final fun component40-0d7_KjU ()J
+	public final fun component41-0d7_KjU ()J
+	public final fun component42-0d7_KjU ()J
+	public final fun component43-0d7_KjU ()J
+	public final fun component44-0d7_KjU ()J
+	public final fun component45-0d7_KjU ()J
+	public final fun component46-0d7_KjU ()J
+	public final fun component47-0d7_KjU ()J
+	public final fun component48-0d7_KjU ()J
+	public final fun component49-0d7_KjU ()J
+	public final fun component5-0d7_KjU ()J
+	public final fun component50-0d7_KjU ()J
+	public final fun component51-0d7_KjU ()J
+	public final fun component52-0d7_KjU ()J
+	public final fun component53-0d7_KjU ()J
+	public final fun component54-0d7_KjU ()J
+	public final fun component55-0d7_KjU ()J
+	public final fun component56-0d7_KjU ()J
+	public final fun component57-0d7_KjU ()J
+	public final fun component58-0d7_KjU ()J
+	public final fun component59-0d7_KjU ()J
+	public final fun component6-0d7_KjU ()J
+	public final fun component60-0d7_KjU ()J
+	public final fun component61-0d7_KjU ()J
+	public final fun component62-0d7_KjU ()J
+	public final fun component7-0d7_KjU ()J
+	public final fun component8-0d7_KjU ()J
+	public final fun component9-0d7_KjU ()J
+	public final fun copy-Gzxa-5A (Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ)Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors;
+	public static synthetic fun copy-Gzxa-5A$default (Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors;Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJIILjava/lang/Object;)Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAccentError-0d7_KjU ()J
+	public final fun getAccentNeutral-0d7_KjU ()J
+	public final fun getAccentPrimary-0d7_KjU ()J
+	public final fun getAccentSuccess-0d7_KjU ()J
+	public final fun getAccentWarning-0d7_KjU ()J
+	public final fun getAvatarBgDefault-0d7_KjU ()J
+	public final fun getAvatarBgPlaceholder-0d7_KjU ()J
+	public final fun getAvatarPresenceBorder-0d7_KjU ()J
+	public final fun getAvatarTextDefault-0d7_KjU ()J
+	public final fun getAvatarTextPlaceholder-0d7_KjU ()J
+	public final fun getBackgroundCoreApp-0d7_KjU ()J
+	public final fun getBackgroundCoreElevation0-0d7_KjU ()J
+	public final fun getBackgroundCoreElevation1-0d7_KjU ()J
+	public final fun getBackgroundCoreElevation2-0d7_KjU ()J
+	public final fun getBackgroundCoreElevation3-0d7_KjU ()J
+	public final fun getBackgroundCoreHighlight-0d7_KjU ()J
+	public final fun getBackgroundCoreInverse-0d7_KjU ()J
+	public final fun getBackgroundCoreOnAccent-0d7_KjU ()J
+	public final fun getBackgroundCoreOverlayDark-0d7_KjU ()J
+	public final fun getBackgroundCoreOverlayDarkStrong-0d7_KjU ()J
+	public final fun getBackgroundCoreOverlayLight-0d7_KjU ()J
+	public final fun getBackgroundCoreScrim-0d7_KjU ()J
+	public final fun getBackgroundCoreSurfaceCard-0d7_KjU ()J
+	public final fun getBackgroundCoreSurfaceDefault-0d7_KjU ()J
+	public final fun getBackgroundCoreSurfaceStrong-0d7_KjU ()J
+	public final fun getBackgroundCoreSurfaceSubtle-0d7_KjU ()J
+	public final fun getBackgroundUtilityDisabled-0d7_KjU ()J
+	public final fun getBackgroundUtilityHover-0d7_KjU ()J
+	public final fun getBackgroundUtilityPressed-0d7_KjU ()J
+	public final fun getBackgroundUtilitySelected-0d7_KjU ()J
+	public final fun getBackgroundUtilitySkeletonLoadingBase-0d7_KjU ()J
+	public final fun getBackgroundUtilitySkeletonLoadingHighlight-0d7_KjU ()J
+	public final fun getBorderCoreDefault-0d7_KjU ()J
+	public final fun getBorderCoreOnAccent-0d7_KjU ()J
+	public final fun getBorderCoreOnInverse-0d7_KjU ()J
+	public final fun getBorderCoreOnSurface-0d7_KjU ()J
+	public final fun getBorderCoreOpacityStrong-0d7_KjU ()J
+	public final fun getBorderCoreOpacitySubtle-0d7_KjU ()J
+	public final fun getBorderCoreStrong-0d7_KjU ()J
+	public final fun getBorderCoreSubtle-0d7_KjU ()J
+	public final fun getBorderUtilityActive-0d7_KjU ()J
+	public final fun getBorderUtilityDisabled-0d7_KjU ()J
+	public final fun getBorderUtilityDisabledOnSurface-0d7_KjU ()J
+	public final fun getBorderUtilityError-0d7_KjU ()J
+	public final fun getBorderUtilityFocused-0d7_KjU ()J
+	public final fun getBorderUtilityHover-0d7_KjU ()J
+	public final fun getBorderUtilityPressed-0d7_KjU ()J
+	public final fun getBorderUtilitySelected-0d7_KjU ()J
+	public final fun getBorderUtilitySuccess-0d7_KjU ()J
+	public final fun getBorderUtilityWarning-0d7_KjU ()J
+	public final fun getBrand ()Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;
+	public final fun getChrome ()Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;
+	public final fun getSystemBgBlur-0d7_KjU ()J
+	public final fun getSystemCaret-0d7_KjU ()J
+	public final fun getSystemScrollbar-0d7_KjU ()J
+	public final fun getTextDisabled-0d7_KjU ()J
+	public final fun getTextLink-0d7_KjU ()J
+	public final fun getTextOnAccent-0d7_KjU ()J
+	public final fun getTextOnInverse-0d7_KjU ()J
+	public final fun getTextPrimary-0d7_KjU ()J
+	public final fun getTextSecondary-0d7_KjU ()J
+	public final fun getTextTertiary-0d7_KjU ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/design/StreamDesign$Colors$Companion {
+	public final fun default (Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;)Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors;
+	public static synthetic fun default$default (Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors$Companion;Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors;
+	public final fun defaultDark (Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;)Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors;
+	public static synthetic fun defaultDark$default (Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors$Companion;Lio/getstream/video/android/compose/theme/design/StreamDesign$ColorScale;Lio/getstream/video/android/compose/theme/design/StreamDesign$ChromeScale;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/design/StreamDesign$Colors;
+}
+
+public final class io/getstream/video/android/compose/theme/design/StreamDesign$Typography {
+	public static final field $stable I
+	public static final field Companion Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography$Companion;
+	public fun <init> (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)V
+	public final fun component1 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component10 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component11 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component12 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component13 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component14 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component2 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component3 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component4 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component5 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component6 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component7 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component8 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun component9 ()Landroidx/compose/ui/text/TextStyle;
+	public final fun copy (Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;)Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography;
+	public static synthetic fun copy$default (Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;Landroidx/compose/ui/text/TextStyle;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBodyDefault ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getBodyEmphasis ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getCaptionDefault ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getCaptionEmphasis ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getHeadingExtraSmall ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getHeadingLarge ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getHeadingMedium ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getHeadingSmall ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getMetadataDefault ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getMetadataEmphasis ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getNumericExtraLarge ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getNumericLarge ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getNumericMedium ()Landroidx/compose/ui/text/TextStyle;
+	public final fun getNumericSmall ()Landroidx/compose/ui/text/TextStyle;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/compose/theme/design/StreamDesign$Typography$Companion {
+	public final fun default (Landroidx/compose/ui/text/font/FontFamily;)Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography;
+	public static synthetic fun default$default (Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography$Companion;Landroidx/compose/ui/text/font/FontFamily;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography;
 }
 
 public final class io/getstream/video/android/compose/ui/ComposableSingletons$StreamCallActivityComposeDelegateKt {
@@ -1153,7 +1162,7 @@ public final class io/getstream/video/android/compose/ui/components/base/BadgeKt
 }
 
 public final class io/getstream/video/android/compose/ui/components/base/ContainerKt {
-	public static final fun GenericContainer-BazWgJc (Landroidx/compose/ui/Modifier;JFLkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
+	public static final fun GenericContainer-sW7UJKQ (Landroidx/compose/ui/Modifier;JLandroidx/compose/foundation/shape/CornerSize;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/base/DialogsKt {

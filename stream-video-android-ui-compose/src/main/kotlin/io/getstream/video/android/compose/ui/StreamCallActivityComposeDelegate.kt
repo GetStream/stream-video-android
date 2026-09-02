@@ -135,7 +135,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                 VideoTheme(componentFactory = componentFactory) {
                     Box(
                         modifier = Modifier
-                            .background(VideoTheme.colors.baseSheetPrimary)
+                            .background(VideoTheme.colors.backgroundCoreApp)
                             .systemBarsPadding(),
                     ) {
                         logger.d { "[setContent] with RootContent" }
@@ -191,14 +191,14 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .background(
-                                                color = VideoTheme.colors.baseSheetPrimary,
+                                                color = VideoTheme.colors.backgroundCoreApp,
                                             ),
                                     ) {
                                         CircularProgressIndicator(
                                             modifier = Modifier
                                                 .size(48.dp)
                                                 .align(Alignment.Center),
-                                            color = VideoTheme.colors.basePrimary,
+                                            color = VideoTheme.colors.textPrimary,
                                         )
                                     }
                                 }
@@ -211,19 +211,19 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .background(
-                                                    color = VideoTheme.colors.baseSheetPrimary,
+                                                    color = VideoTheme.colors.backgroundCoreApp,
                                                 )
                                                 .align(Alignment.Center),
                                             horizontalAlignment = CenterHorizontally,
                                             verticalArrangement = Arrangement.Center,
                                         ) {
                                             Icon(
-                                                tint = VideoTheme.colors.basePrimary,
+                                                tint = VideoTheme.colors.textPrimary,
                                                 imageVector = Icons.Default.SignalWifiBad,
                                                 contentDescription = null,
                                             )
                                             Text(
-                                                color = VideoTheme.colors.basePrimary,
+                                                color = VideoTheme.colors.textPrimary,
                                                 modifier = Modifier.padding(top = 16.dp),
                                                 text = getString(io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network_single_video),
                                             )
@@ -267,7 +267,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                 isVideoType = isVideoCall(call),
                                 call = call,
                                 modifier = Modifier.background(
-                                    color = VideoTheme.colors.baseSheetPrimary,
+                                    color = VideoTheme.colors.backgroundCoreApp,
                                 ),
                                 onBackPressed = {
                                     onBackPressed(call)
@@ -602,7 +602,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(VideoTheme.colors.baseSheetSecondary),
+                .background(VideoTheme.colors.backgroundCoreElevation1),
         ) {
             // Proceed as normal
             StreamDialogPositiveNegative(
@@ -615,7 +615,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                             fontSize = 24.sp,
                             lineHeight = 28.sp,
                             fontWeight = FontWeight(500),
-                            color = VideoTheme.colors.basePrimary,
+                            color = VideoTheme.colors.textPrimary,
                             textAlign = TextAlign.Center,
                         ),
                     )
@@ -628,7 +628,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                             fontSize = 16.sp,
                             lineHeight = 18.5.sp,
                             fontWeight = FontWeight(400),
-                            color = VideoTheme.colors.baseSecondary,
+                            color = VideoTheme.colors.textSecondary,
                             textAlign = TextAlign.Center,
                         ),
                     )

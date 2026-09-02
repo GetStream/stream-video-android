@@ -19,6 +19,7 @@ package io.getstream.video.android.ui.call
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.runtime.Composable
@@ -65,14 +66,14 @@ internal fun LayoutChooser(
     Popup(
         offset = IntOffset(
             0,
-            (VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingS).toPx().toInt(),
+            (44.dp + 8.dp).toPx().toInt(),
         ),
         onDismissRequest = onDismiss,
     ) {
         Column(
             Modifier.background(
-                color = VideoTheme.colors.baseSheetPrimary,
-                shape = VideoTheme.shapes.sheet,
+                color = VideoTheme.colors.backgroundCoreApp,
+                shape = RoundedCornerShape(16.dp),
             )
                 .width(300.dp),
         ) {

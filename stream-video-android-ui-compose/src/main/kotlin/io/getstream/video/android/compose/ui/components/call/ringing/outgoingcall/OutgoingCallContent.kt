@@ -33,6 +33,7 @@ import io.getstream.video.android.compose.theme.OutgoingCallControlsContentParam
 import io.getstream.video.android.compose.theme.OutgoingCallDetailsContentParams
 import io.getstream.video.android.compose.theme.OutgoingCallHeaderContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
@@ -147,9 +148,9 @@ public fun OutgoingCallContent(
             }
 
             val topPadding = if (participants.size == 1 || isVideoType) {
-                VideoTheme.dimens.spacingL
+                StreamTokens.spacingXl
             } else {
-                VideoTheme.dimens.spacingM
+                StreamTokens.spacingMd
             }
 
             detailsContent?.invoke(this, participants, topPadding)

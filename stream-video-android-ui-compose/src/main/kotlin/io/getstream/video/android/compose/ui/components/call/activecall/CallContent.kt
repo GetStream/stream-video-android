@@ -67,6 +67,7 @@ import io.getstream.video.android.compose.theme.CallContentVideoOverlayContentPa
 import io.getstream.video.android.compose.theme.ControlActionsParams
 import io.getstream.video.android.compose.theme.ParticipantVideoParams
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.DefaultPermissionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
@@ -190,8 +191,8 @@ public fun CallContent(
         pictureInPictureContent(call)
     } else {
         Scaffold(
-            backgroundColor = VideoTheme.colors.baseSheetPrimary,
-            contentColor = VideoTheme.colors.baseSheetPrimary,
+            backgroundColor = VideoTheme.colors.backgroundCoreApp,
+            contentColor = VideoTheme.colors.backgroundCoreApp,
             topBar = {
                 if (orientation == ORIENTATION_PORTRAIT) {
                     appBarContent.invoke(call)
@@ -204,7 +205,7 @@ public fun CallContent(
             },
             content = {
                 val paddings = PaddingValues(
-                    top = (it.calculateTopPadding() - VideoTheme.dimens.spacingS)
+                    top = (it.calculateTopPadding() - StreamTokens.spacingXs)
                         .coerceAtLeast(0.dp),
                     start = it.calculateStartPadding(
                         layoutDirection = LocalLayoutDirection.current,
@@ -212,13 +213,13 @@ public fun CallContent(
                     end = it.calculateEndPadding(
                         layoutDirection = LocalLayoutDirection.current,
                     ),
-                    bottom = (it.calculateBottomPadding() - VideoTheme.dimens.spacingS)
+                    bottom = (it.calculateBottomPadding() - StreamTokens.spacingXs)
                         .coerceAtLeast(0.dp),
                 )
                 var showDiagnostics by remember { mutableStateOf(false) }
                 Row(
                     modifier = modifier
-                        .background(color = VideoTheme.colors.baseSheetPrimary)
+                        .background(color = VideoTheme.colors.backgroundCoreApp)
                         .padding(paddings)
                         .pointerInput(Unit) {
                             detectTapGestures(

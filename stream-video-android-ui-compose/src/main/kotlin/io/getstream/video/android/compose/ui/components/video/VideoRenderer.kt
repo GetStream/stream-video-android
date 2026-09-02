@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -53,6 +54,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.log.StreamLog
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType.Companion.toCommonScalingType
 import io.getstream.video.android.compose.ui.components.video.config.VideoRendererConfig
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
@@ -273,13 +275,13 @@ internal fun DefaultMediaTrackFallbackContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetTertiary)
+            .background(VideoTheme.colors.backgroundCoreSurfaceDefault)
             .testTag("video_renderer_fallback"),
         contentAlignment = Alignment.Center,
     ) {
         CircularProgressIndicator(
             modifier = Modifier.size(48.dp),
-            color = VideoTheme.colors.basePrimary,
+            color = VideoTheme.colors.textPrimary,
         )
     }
 }
@@ -293,8 +295,8 @@ internal fun DefaultBadNetworkFallbackContent(
         modifier = modifier
             .padding(16.dp)
             .background(
-                color = VideoTheme.colors.baseSheetQuarternary,
-                shape = VideoTheme.shapes.sheet,
+                color = VideoTheme.colors.backgroundCoreOverlayDarkStrong,
+                shape = RoundedCornerShape(StreamTokens.radiusXl),
             )
             .testTag("video_renderer_fallback_bad_network"),
         horizontalArrangement = Arrangement.Center,
@@ -306,7 +308,7 @@ internal fun DefaultBadNetworkFallbackContent(
                 .align(CenterVertically),
             imageVector = Icons.Default.SignalWifiBad,
             contentDescription = null,
-            tint = VideoTheme.colors.basePrimary,
+            tint = VideoTheme.colors.textPrimary,
         )
         Text(
             modifier = Modifier.padding(12.dp),
@@ -314,7 +316,7 @@ internal fun DefaultBadNetworkFallbackContent(
                 id = io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network,
                 call.sessionId,
             ),
-            color = VideoTheme.colors.basePrimary,
+            color = VideoTheme.colors.textPrimary,
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
         )

@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -55,7 +56,6 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -75,6 +75,7 @@ import io.getstream.video.android.compose.theme.ParticipantVideoFallbackContentP
 import io.getstream.video.android.compose.theme.ParticipantVideoLabelContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoReactionContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
 import io.getstream.video.android.compose.ui.components.call.pinning.participantActions
@@ -155,18 +156,18 @@ public fun ParticipantVideo(
         }
     }
 
-    val containerShape = VideoTheme.shapes.sheet
+    val containerShape = RoundedCornerShape(StreamTokens.radiusXl)
     val containerModifier = if (style.isFocused && participants.size > 1) {
         modifier.border(
             border = if (style.isScreenSharing) {
                 BorderStroke(
-                    VideoTheme.dimens.genericXXs,
-                    VideoTheme.colors.brandPrimary,
+                    StreamTokens.size2,
+                    VideoTheme.colors.accentPrimary,
                 )
             } else {
                 BorderStroke(
-                    VideoTheme.dimens.genericXXs,
-                    VideoTheme.colors.brandPrimary,
+                    StreamTokens.size2,
+                    VideoTheme.colors.accentPrimary,
                 )
             },
             shape = containerShape,
@@ -177,7 +178,7 @@ public fun ParticipantVideo(
     Box(
         modifier = containerModifier
             .clip(containerShape)
-            .background(VideoTheme.colors.baseSheetTertiary),
+            .background(VideoTheme.colors.backgroundCoreSurfaceDefault),
     ) {
         ParticipantVideoRenderer(
             call = call,
@@ -333,8 +334,8 @@ public fun BoxScope.ParticipantLabel(
                     modifier = Modifier
                         .align(CenterVertically)
                         .padding(
-                            vertical = VideoTheme.dimens.spacingXs,
-                            horizontal = VideoTheme.dimens.spacingS,
+                            vertical = StreamTokens.spacingXxs,
+                            horizontal = StreamTokens.spacingXs,
                         )
                         .testTag("Stream_ParticipantMicrophone_Enabled_$audioEnabled"),
                 ),
@@ -386,24 +387,29 @@ public fun BoxScope.ParticipantLabel(
                     audioLevel = audioLevel,
                     modifier = Modifier
                         .align(CenterVertically)
-                        .padding(horizontal = VideoTheme.dimens.spacingS),
+                        .padding(horizontal = StreamTokens.spacingXs),
                 ),
             )
         }
     },
 ) {
     var componentWidth by remember { mutableStateOf(0.dp) }
-    componentWidth = VideoTheme.dimens.genericMax
+    componentWidth = 100.dp
     // get local density from composable
     val density = LocalDensity.current
     Box(
         modifier = Modifier
             .align(labelPosition)
-            .height(VideoTheme.dimens.componentHeightM)
+            .height(StreamTokens.size32)
             .wrapContentWidth()
             .background(
-                VideoTheme.colors.baseSheetQuarternary,
-                shape = RoundedCornerShape(topEnd = VideoTheme.dimens.roundnessM),
+                VideoTheme.colors.backgroundCoreOverlayDarkStrong,
+                shape = RoundedCornerShape(
+                    topStart = ZeroCornerSize,
+                    topEnd = StreamTokens.radiusXl,
+                    bottomEnd = ZeroCornerSize,
+                    bottomStart = ZeroCornerSize,
+                ),
             )
             .onGloballyPositioned {
                 componentWidth = with(density) {
@@ -418,41 +424,41 @@ public fun BoxScope.ParticipantLabel(
             Text(
                 modifier = Modifier
                     .widthIn(max = componentWidth)
-                    .padding(start = VideoTheme.dimens.spacingM)
+                    .padding(start = StreamTokens.spacingMd)
                     .align(CenterVertically)
                     .testTag("Stream_ParticipantName"),
                 text = nameLabel,
-                style = VideoTheme.typography.bodyS,
-                color = VideoTheme.colors.basePrimary,
+                style = VideoTheme.typography.captionDefault,
+                color = VideoTheme.colors.textOnAccent,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
 
             if (isPinned) {
-                Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
                 GenericIndicator {
                     Icon(
 
                         modifier = Modifier
                             .padding(horizontal = 4.dp)
-                            .size(VideoTheme.dimens.genericM),
+                            .size(StreamTokens.size16),
                         imageVector = Icons.Filled.PushPin,
                         contentDescription = "Pin",
-                        tint = Color.White,
+                        tint = VideoTheme.colors.textOnAccent,
                     )
                 }
             }
 
             if (isPaused) {
-                Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+                Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
                 GenericIndicator {
                     Icon(
                         modifier = Modifier
                             .padding(horizontal = 4.dp)
-                            .size(VideoTheme.dimens.genericM),
+                            .size(StreamTokens.size16),
                         imageVector = Icons.Filled.SignalWifiBad,
                         contentDescription = "Pause",
-                        tint = Color.White,
+                        tint = VideoTheme.colors.textOnAccent,
                     )
                 }
             }
@@ -563,7 +569,7 @@ internal fun BoxScope.DefaultReaction(
 
     val size: Dp by animateDpAsState(
         targetValue = if (currentReaction != null) {
-            VideoTheme.dimens.componentHeightL
+            StreamTokens.size48
         } else {
             0.dp
         },

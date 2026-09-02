@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.ui.components.base.styling
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ButtonElevation
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 public object ButtonStyles : ButtonStyleProvider()
 
@@ -155,7 +157,7 @@ public open class ButtonStyleProvider {
     public fun genericButtonStyle(
         size: StyleSize = StyleSize.L,
         elevation: ButtonElevation? = null,
-        shape: Shape = VideoTheme.shapes.button,
+        shape: Shape = RoundedCornerShape(StreamTokens.radiusMax),
         border: BorderStroke? = null,
         colors: ButtonColors = ButtonDefaults.buttonColors(),
         contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
@@ -174,17 +176,17 @@ public open class ButtonStyleProvider {
     public fun primaryButtonStyle(size: StyleSize = StyleSize.L): StreamButtonStyle =
         genericButtonStyle(
             size = size,
-            shape = VideoTheme.shapes.button,
+            shape = RoundedCornerShape(StreamTokens.radiusMax),
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = VideoTheme.colors.buttonPrimaryDefault,
-                contentColor = VideoTheme.colors.basePrimary,
-                disabledBackgroundColor = VideoTheme.colors.buttonPrimaryDisabled,
+                backgroundColor = VideoTheme.colors.buttonSecondaryBg,
+                contentColor = VideoTheme.colors.textPrimary,
+                disabledBackgroundColor = VideoTheme.colors.backgroundUtilityDisabled,
             ),
             contentPadding = PaddingValues(
-                start = VideoTheme.dimens.componentPaddingStart,
-                end = VideoTheme.dimens.componentPaddingEnd,
-                top = VideoTheme.dimens.componentPaddingTop,
-                bottom = VideoTheme.dimens.componentPaddingBottom,
+                start = StreamTokens.spacingMd,
+                end = StreamTokens.spacingMd,
+                top = StreamTokens.spacingXs,
+                bottom = StreamTokens.spacingXs,
             ),
         )
 
@@ -192,9 +194,9 @@ public open class ButtonStyleProvider {
     public fun secondaryButtonStyle(size: StyleSize = StyleSize.L): StreamButtonStyle =
         genericButtonStyle(size = size).copy(
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = VideoTheme.colors.buttonBrandDefault,
-                contentColor = VideoTheme.colors.basePrimary,
-                disabledBackgroundColor = VideoTheme.colors.buttonBrandDisabled,
+                backgroundColor = VideoTheme.colors.buttonPrimaryBg,
+                contentColor = VideoTheme.colors.textPrimary,
+                disabledBackgroundColor = VideoTheme.colors.backgroundUtilityDisabled,
             ),
         )
 
@@ -202,23 +204,23 @@ public open class ButtonStyleProvider {
     public fun tertiaryButtonStyle(size: StyleSize = StyleSize.L): StreamButtonStyle =
         genericButtonStyle(size = size).copy(
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = VideoTheme.colors.baseSheetPrimary,
-                contentColor = VideoTheme.colors.basePrimary,
-                disabledBackgroundColor = VideoTheme.colors.baseSheetPrimary,
+                backgroundColor = VideoTheme.colors.backgroundCoreApp,
+                contentColor = VideoTheme.colors.textPrimary,
+                disabledBackgroundColor = VideoTheme.colors.backgroundCoreApp,
             ),
-            border = BorderStroke(1.dp, VideoTheme.colors.baseSenary),
+            border = BorderStroke(1.dp, VideoTheme.colors.borderCoreDefault),
         )
 
     @Composable
     public fun toggleButtonStyleOn(size: StyleSize = StyleSize.L): StreamButtonStyle =
         genericButtonStyle(size = size).copy(
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = VideoTheme.colors.buttonPrimaryDefault,
-                contentColor = VideoTheme.colors.basePrimary,
-                disabledBackgroundColor = VideoTheme.colors.buttonPrimaryDisabled,
+                backgroundColor = VideoTheme.colors.buttonSecondaryBg,
+                contentColor = VideoTheme.colors.textPrimary,
+                disabledBackgroundColor = VideoTheme.colors.backgroundUtilityDisabled,
             ),
             iconStyle = IconStyles.customColorIconStyle(
-                color = VideoTheme.colors.brandPrimary,
+                color = VideoTheme.colors.accentPrimary,
             ),
         )
 
@@ -226,9 +228,9 @@ public open class ButtonStyleProvider {
     public fun toggleButtonStyleOff(size: StyleSize = StyleSize.L): StreamButtonStyle =
         genericButtonStyle(size = size).copy(
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = VideoTheme.colors.baseSheetPrimary,
-                contentColor = VideoTheme.colors.basePrimary,
-                disabledBackgroundColor = VideoTheme.colors.baseSheetPrimary,
+                backgroundColor = VideoTheme.colors.backgroundCoreApp,
+                contentColor = VideoTheme.colors.textPrimary,
+                disabledBackgroundColor = VideoTheme.colors.backgroundCoreApp,
             ),
         )
 
@@ -236,9 +238,9 @@ public open class ButtonStyleProvider {
     public fun alertButtonStyle(size: StyleSize = StyleSize.L): StreamButtonStyle =
         genericButtonStyle(size = size).copy(
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = VideoTheme.colors.buttonAlertDefault,
-                contentColor = VideoTheme.colors.basePrimary,
-                disabledBackgroundColor = VideoTheme.colors.buttonAlertDisabled,
+                backgroundColor = VideoTheme.colors.buttonDestructiveBg,
+                contentColor = VideoTheme.colors.textPrimary,
+                disabledBackgroundColor = VideoTheme.colors.backgroundUtilityDisabled,
             ),
         )
 
@@ -246,18 +248,18 @@ public open class ButtonStyleProvider {
     public fun primaryIconButtonStyle(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             height = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             origin = primaryButtonStyle(size = size).copy(
                 iconStyle = IconStyles.defaultIconStyle(
-                    padding = PaddingValues(VideoTheme.dimens.spacingXs),
+                    padding = PaddingValues(StreamTokens.spacingXxs),
                 ),
             ),
         )
@@ -266,18 +268,18 @@ public open class ButtonStyleProvider {
     public fun secondaryIconButtonStyle(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             height = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             origin = secondaryButtonStyle(size = size).copy(
                 iconStyle = IconStyles.defaultIconStyle(
-                    padding = PaddingValues(VideoTheme.dimens.spacingXs),
+                    padding = PaddingValues(StreamTokens.spacingXxs),
                 ),
             ),
         )
@@ -286,18 +288,18 @@ public open class ButtonStyleProvider {
     public fun tertiaryIconButtonStyle(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             height = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             origin = tertiaryButtonStyle(size = size).copy(
                 iconStyle = IconStyles.defaultIconStyle(
-                    padding = PaddingValues(VideoTheme.dimens.spacingXs),
+                    padding = PaddingValues(StreamTokens.spacingXxs),
                 ),
             ),
         )
@@ -306,18 +308,18 @@ public open class ButtonStyleProvider {
     public fun onlyIconIconButtonStyle(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             height = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             origin = tertiaryButtonStyle(size = size).copy(
                 iconStyle = IconStyles.defaultIconStyle(
-                    padding = PaddingValues(VideoTheme.dimens.spacingXs),
+                    padding = PaddingValues(StreamTokens.spacingXxs),
                 ),
                 border = null,
             ),
@@ -327,18 +329,18 @@ public open class ButtonStyleProvider {
     public fun alertIconButtonStyle(size: StyleSize = StyleSize.L): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             height = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             origin = alertButtonStyle(size = size).copy(
                 iconStyle = IconStyles.defaultIconStyle(
-                    padding = PaddingValues(VideoTheme.dimens.spacingXs),
+                    padding = PaddingValues(StreamTokens.spacingXxs),
                 ),
             ),
         )
@@ -349,14 +351,14 @@ public open class ButtonStyleProvider {
     ): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             height = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             origin = genericButtonStyle(size = size),
         )
@@ -367,20 +369,20 @@ public open class ButtonStyleProvider {
     ): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             height = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             origin = genericButtonStyle(size = size).copy(
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = VideoTheme.colors.buttonPrimaryDefault,
-                    contentColor = VideoTheme.colors.basePrimary,
-                    disabledBackgroundColor = VideoTheme.colors.buttonPrimaryDisabled,
+                    backgroundColor = VideoTheme.colors.buttonSecondaryBg,
+                    contentColor = VideoTheme.colors.textPrimary,
+                    disabledBackgroundColor = VideoTheme.colors.backgroundUtilityDisabled,
                 ),
                 drawableStyle = ButtonDrawableStyles.defaultButtonDrawableStyle(),
             ),
@@ -392,20 +394,20 @@ public open class ButtonStyleProvider {
     ): StreamFixedSizeButtonStyle =
         StreamFixedSizeButtonStyle.of(
             width = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             height = when (size) {
-                StyleSize.XS, StyleSize.S -> VideoTheme.dimens.componentHeightS
-                StyleSize.M -> VideoTheme.dimens.componentHeightM
-                else -> VideoTheme.dimens.componentHeightL
+                StyleSize.XS, StyleSize.S -> StreamTokens.size24
+                StyleSize.M -> StreamTokens.size32
+                else -> StreamTokens.size48
             },
             origin = genericButtonStyle(size = size).copy(
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = VideoTheme.colors.baseSheetPrimary,
-                    contentColor = VideoTheme.colors.basePrimary,
-                    disabledBackgroundColor = VideoTheme.colors.baseSheetPrimary,
+                    backgroundColor = VideoTheme.colors.backgroundCoreApp,
+                    contentColor = VideoTheme.colors.textPrimary,
+                    disabledBackgroundColor = VideoTheme.colors.backgroundCoreApp,
                 ),
                 drawableStyle = ButtonDrawableStyles.customColorFilterButtonDrawableStyle(
                     colorFilter = ColorFilter.lighting(Color.Gray, Color.Transparent),

@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * Used to indicate the microphone state of a given participant.
@@ -40,20 +41,20 @@ public fun MicrophoneIndicator(
 ) {
     Box(
         modifier = modifier
-            .size(VideoTheme.dimens.genericM),
+            .size(StreamTokens.size16),
     ) {
         if (isMicrophoneEnabled) {
             Icon(
                 modifier = Modifier.align(Alignment.Center),
                 imageVector = Icons.Default.Mic,
-                tint = VideoTheme.colors.basePrimary,
+                tint = VideoTheme.colors.textPrimary,
                 contentDescription = Icons.Default.Mic.name,
             )
         } else {
             Icon(
                 modifier = Modifier.align(Alignment.Center),
                 imageVector = Icons.Default.MicOff,
-                tint = VideoTheme.colors.basePrimary,
+                tint = VideoTheme.colors.textPrimary,
                 contentDescription = Icons.Default.MicOff.name,
             )
         }

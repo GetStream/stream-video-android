@@ -44,7 +44,7 @@ internal fun LivestreamErrorUi(call: Call, onRetryJoin: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = VideoTheme.colors.baseSheetPrimary),
+            .background(color = VideoTheme.colors.backgroundCoreApp),
     ) {
         Column(
             modifier = Modifier
@@ -58,7 +58,7 @@ internal fun LivestreamErrorUi(call: Call, onRetryJoin: () -> Unit) {
                     id = R.string.stream_video_livestreaming_error_joining,
                 ),
                 fontSize = 18.sp,
-                color = VideoTheme.colors.basePrimary,
+                color = VideoTheme.colors.textPrimary,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(12.dp))

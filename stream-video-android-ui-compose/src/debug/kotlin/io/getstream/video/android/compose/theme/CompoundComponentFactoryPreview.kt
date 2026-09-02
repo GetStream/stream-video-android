@@ -50,8 +50,8 @@ internal fun CompoundComponentFactoryPreview() {
                 ) {
                     Text(
                         text = "Compound center content",
-                        style = VideoTheme.typography.bodyS,
-                        color = VideoTheme.colors.basePrimary,
+                        style = VideoTheme.typography.captionDefault,
+                        color = VideoTheme.colors.textPrimary,
                     )
                 }
             }

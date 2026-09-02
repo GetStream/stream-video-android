@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(VideoTheme.colors.baseSenary)
+                        .background(VideoTheme.colors.borderCoreDefault)
                         .onSizeChanged { parentSize = it },
                 ) {
                     if (remoteParticipant != null) {
@@ -116,14 +116,14 @@ class MainActivity : ComponentActivity() {
                             Text(
                                 text = "waiting for a remote participant...",
                                 fontSize = 30.sp,
-                                color = VideoTheme.colors.basePrimary,
+                                color = VideoTheme.colors.textPrimary,
                             )
                         } else {
                             Text(
                                 modifier = Modifier.padding(30.dp),
                                 text = "Join call ${call.id} in your browser to see the video here",
                                 fontSize = 30.sp,
-                                color = VideoTheme.colors.basePrimary,
+                                color = VideoTheme.colors.textPrimary,
                                 textAlign = TextAlign.Center,
                             )
                         }

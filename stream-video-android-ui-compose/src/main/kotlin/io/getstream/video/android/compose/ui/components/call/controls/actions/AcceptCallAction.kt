@@ -49,6 +49,6 @@ public fun AcceptCallAction(
     style = style,
     onAction = { onCallAction(AcceptCall) },
     icon = icon ?: Icons.Default.Call,
-    color = bgColor ?: VideoTheme.colors.alertSuccess,
-    iconTint = iconTint ?: VideoTheme.colors.basePrimary,
+    color = bgColor ?: VideoTheme.colors.accentSuccess,
+    iconTint = iconTint ?: VideoTheme.colors.textPrimary,
 )

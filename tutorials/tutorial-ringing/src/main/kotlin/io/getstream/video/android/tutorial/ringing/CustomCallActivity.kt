@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
@@ -96,7 +97,7 @@ class CustomCallActivity : ComposeStreamCallActivity() {
                     Row(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .padding(bottom = VideoTheme.dimens.componentHeightM)
+                            .padding(bottom = 32.dp)
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -140,7 +141,7 @@ class CustomCallActivity : ComposeStreamCallActivity() {
                     Row(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .padding(bottom = VideoTheme.dimens.componentHeightM)
+                            .padding(bottom = 32.dp)
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -176,8 +177,8 @@ public fun CustomRejectAction(
     enabled = enabled,
     onAction = { onCallAction(CustomRejectCall(reason)) },
     icon = icon ?: Icons.Default.Call,
-    color = bgColor ?: VideoTheme.colors.alertWarning,
-    iconTint = iconTint ?: VideoTheme.colors.basePrimary,
+    color = bgColor ?: VideoTheme.colors.accentError,
+    iconTint = iconTint ?: VideoTheme.colors.textPrimary,
 )
 
 data class CustomRejectCall(val reason: String) : CustomAction(tag = "custom-reject")

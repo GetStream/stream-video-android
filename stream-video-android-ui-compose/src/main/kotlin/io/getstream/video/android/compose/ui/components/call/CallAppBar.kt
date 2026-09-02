@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -47,6 +48,7 @@ import io.getstream.video.android.compose.theme.CallAppBarCenterContentParams
 import io.getstream.video.android.compose.theme.CallAppBarLeadingContentParams
 import io.getstream.video.android.compose.theme.CallAppBarTrailingContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.GenericContainer
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
@@ -107,7 +109,7 @@ public fun CallAppBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(VideoTheme.dimens.componentHeightL),
+            .height(StreamTokens.size48),
         verticalAlignment = CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -132,7 +134,7 @@ internal fun DefaultCallAppBarLeadingContent(
             contentDescription = stringResource(
                 id = R.string.stream_video_back_button_content_description,
             ),
-            tint = VideoTheme.colors.basePrimary,
+            tint = VideoTheme.colors.textPrimary,
         )
     }
 }
@@ -177,21 +179,21 @@ internal fun CalLCenterContent(
             if (isRecording) {
                 Box(
                     modifier = Modifier
-                        .size(VideoTheme.dimens.componentHeightS)
-                        .clip(VideoTheme.shapes.circle)
+                        .size(StreamTokens.size24)
+                        .clip(CircleShape)
                         .background(
-                            color = VideoTheme.colors.alertWarning,
-                            shape = VideoTheme.shapes.circle,
+                            color = VideoTheme.colors.accentError,
+                            shape = CircleShape,
                         )
-                        .border(2.dp, VideoTheme.colors.basePrimary, VideoTheme.shapes.circle)
+                        .border(2.dp, VideoTheme.colors.textPrimary, CircleShape)
                         .testTag("Stream_RecordingIcon"),
                 )
             }
             Text(
                 modifier = Modifier
                     .padding(
-                        start = VideoTheme.dimens.componentPaddingStart,
-                        end = VideoTheme.dimens.componentPaddingEnd,
+                        start = StreamTokens.spacingMd,
+                        end = StreamTokens.spacingMd,
                     )
                     .testTag("Stream_CallInfoView"),
                 text = if (isReconnecting) {
@@ -201,8 +203,8 @@ internal fun CalLCenterContent(
                 } else {
                     text
                 },
-                fontSize = VideoTheme.dimens.textSizeS,
-                color = VideoTheme.colors.baseSecondary,
+                fontSize = StreamTokens.fontSizeMd,
+                color = VideoTheme.colors.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Start,

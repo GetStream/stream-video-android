@@ -55,13 +55,13 @@ fun LiveButton(
             modifier = modifier,
             colors = if (isBackstage) {
                 ButtonDefaults.buttonColors(
-                    backgroundColor = VideoTheme.colors.brandPrimary,
-                    contentColor = VideoTheme.colors.brandPrimary,
+                    backgroundColor = VideoTheme.colors.accentPrimary,
+                    contentColor = VideoTheme.colors.accentPrimary,
                 )
             } else {
                 ButtonDefaults.buttonColors(
-                    backgroundColor = VideoTheme.colors.brandPrimary,
-                    contentColor = VideoTheme.colors.brandPrimary,
+                    backgroundColor = VideoTheme.colors.accentPrimary,
+                    contentColor = VideoTheme.colors.accentPrimary,
                 )
             },
             onClick = onClick,

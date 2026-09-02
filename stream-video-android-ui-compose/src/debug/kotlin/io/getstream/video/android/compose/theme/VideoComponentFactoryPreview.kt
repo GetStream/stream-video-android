@@ -229,8 +229,8 @@ internal fun VideoComponentFactoryEmptyDefaultsPreview() {
     Column {
         Text(
             text = "Empty factory defaults render nothing below:",
-            style = VideoTheme.typography.bodyS,
-            color = VideoTheme.colors.basePrimary,
+            style = VideoTheme.typography.captionDefault,
+            color = VideoTheme.colors.textPrimary,
         )
         with(VideoTheme.componentFactory) {
             CallContentVideoOverlayContent(

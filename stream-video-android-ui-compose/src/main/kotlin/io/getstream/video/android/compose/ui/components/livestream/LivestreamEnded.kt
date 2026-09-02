@@ -56,7 +56,7 @@ internal fun BoxScope.LivestreamEndedUi(call: Call) {
                 id = R.string.stream_video_livestreaming_ended,
             ),
             fontSize = 18.sp,
-            color = VideoTheme.colors.basePrimary,
+            color = VideoTheme.colors.textPrimary,
         )
         Spacer(modifier = Modifier.height(18.dp))
         LivestreamRecordingsUi(call)
@@ -84,7 +84,7 @@ internal fun LivestreamRecordingsUi(call: Call) {
                     id = R.string.stream_video_livestreaming_watch_recording,
                 ),
                 fontSize = 16.sp,
-                color = VideoTheme.colors.basePrimary,
+                color = VideoTheme.colors.textPrimary,
             )
             recordingListItems.forEach {
                 Spacer(modifier = Modifier.height(8.dp))
@@ -98,7 +98,7 @@ internal fun LivestreamRecordingsUi(call: Call) {
                         .align(Alignment.CenterHorizontally),
                     text = it.url,
                     fontSize = 14.sp,
-                    color = VideoTheme.colors.baseSecondary,
+                    color = VideoTheme.colors.textSecondary,
                 )
             }
         }
