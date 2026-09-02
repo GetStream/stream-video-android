@@ -22,12 +22,17 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-private fun CallParticipantsInfoOptionsPreview() {
+private fun CallParticipantsInfoActionsRootPreview() {
     VideoTheme {
-        CallParticipantsInfoActions(
-            isLocalAudioEnabled = false,
-            onInviteUser = {},
-            onMute = {},
-        )
+        CallParticipantsInfoActionsPreview()
     }
+}
+
+@Composable
+internal fun CallParticipantsInfoActionsPreview() {
+    CallParticipantsInfoActions(
+        isLocalAudioEnabled = false,
+        onInviteUser = {},
+        onMute = {},
+    )
 }

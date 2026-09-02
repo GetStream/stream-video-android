@@ -46,9 +46,12 @@ import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
+import io.getstream.video.android.compose.theme.CallLobbyControlsContentParams
+import io.getstream.video.android.compose.theme.CallLobbyOnDisabledContentParams
+import io.getstream.video.android.compose.theme.CallLobbyOnRenderedContentParams
+import io.getstream.video.android.compose.theme.CallLobbyParticipantLabelContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.indicator.MicrophoneIndicator
@@ -117,33 +120,20 @@ public fun CallLobby(
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onRendered: (View) -> Unit = {},
     onRenderedContent: @Composable (video: ParticipantState.Video) -> Unit = {
-        OnRenderedContent(call = call, video = it, onRendered = onRendered)
+        DefaultOnRenderedSlot(call, it, onRendered)
     },
     onDisabledContent: @Composable () -> Unit = {
-        OnDisabledContent(user = user)
+        DefaultOnDisabledSlot(user)
     },
     videoPreviewModifier: Modifier = defaultVideoPreviewModifier(),
     participantLabelContent: @Composable BoxScope.() -> Unit = {
-        DefaultParticipantLabel(
-            user = user,
-            isMicrophoneEnabled = isMicrophoneEnabled,
-            labelPosition = Alignment.BottomStart,
-        )
+        DefaultParticipantLabelSlot(user, isMicrophoneEnabled, Alignment.BottomStart)
     },
     onCallAction: (CallAction) -> Unit = {
         DefaultOnCallActionHandler.onCallAction(call, it)
     },
     lobbyControlsContent: @Composable (modifier: Modifier, call: Call) -> Unit = { modifier, call ->
-        ControlActions(
-            modifier = modifier,
-            call = call,
-            actions = buildDefaultLobbyControlActions(
-                call = call,
-                onCallAction = onCallAction,
-                isCameraEnabled = isCameraEnabled,
-                isMicrophoneEnabled = isMicrophoneEnabled,
-            ),
-        )
+        DefaultLobbyControlsSlot(modifier, call, isCameraEnabled, isMicrophoneEnabled, onCallAction)
     },
 ) {
     DefaultPermissionHandler(videoPermission = permissions)
@@ -212,25 +202,16 @@ public fun CallLobby(
     permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
     onRendered: (View) -> Unit = {},
     onRenderedContent: @Composable (video: ParticipantState.Video) -> Unit = {
-        OnRenderedContent(call = call, video = it, onRendered = onRendered)
+        DefaultOnRenderedSlot(call, it, onRendered)
     },
     onDisabledContent: @Composable () -> Unit = {
-        OnDisabledContent(user = user)
+        DefaultOnDisabledSlot(user)
     },
     onCallAction: (CallAction) -> Unit = {
         DefaultOnCallActionHandler.onCallAction(call, it)
     },
     lobbyControlsContent: @Composable (modifier: Modifier, call: Call) -> Unit = { modifier, call ->
-        ControlActions(
-            modifier = modifier,
-            call = call,
-            actions = buildDefaultLobbyControlActions(
-                call = call,
-                onCallAction = onCallAction,
-                isCameraEnabled = isCameraEnabled,
-                isMicrophoneEnabled = isMicrophoneEnabled,
-            ),
-        )
+        DefaultLobbyControlsSlot(modifier, call, isCameraEnabled, isMicrophoneEnabled, onCallAction)
     },
 ) {
     CallLobby(
@@ -245,11 +226,7 @@ public fun CallLobby(
         onRenderedContent = onRenderedContent,
         onDisabledContent = onDisabledContent,
         participantLabelContent = {
-            DefaultParticipantLabel(
-                user = user,
-                isMicrophoneEnabled = isMicrophoneEnabled,
-                labelPosition = labelPosition,
-            )
+            DefaultParticipantLabelSlot(user, isMicrophoneEnabled, labelPosition)
         },
         onCallAction = onCallAction,
         lobbyControlsContent = lobbyControlsContent,
@@ -257,7 +234,65 @@ public fun CallLobby(
 }
 
 @Composable
-private fun BoxScope.DefaultParticipantLabel(
+private fun DefaultOnRenderedSlot(
+    call: Call,
+    video: ParticipantState.Video,
+    onRendered: (View) -> Unit,
+) {
+    VideoTheme.componentFactory.CallLobbyOnRenderedContent(
+        params = CallLobbyOnRenderedContentParams(
+            call = call,
+            video = video,
+            onRendered = onRendered,
+        ),
+    )
+}
+
+@Composable
+private fun DefaultOnDisabledSlot(user: User) {
+    VideoTheme.componentFactory.CallLobbyOnDisabledContent(
+        params = CallLobbyOnDisabledContentParams(user = user),
+    )
+}
+
+@Composable
+private fun BoxScope.DefaultParticipantLabelSlot(
+    user: User,
+    isMicrophoneEnabled: Boolean,
+    labelPosition: Alignment,
+) {
+    with(VideoTheme.componentFactory) {
+        CallLobbyParticipantLabelContent(
+            params = CallLobbyParticipantLabelContentParams(
+                user = user,
+                isMicrophoneEnabled = isMicrophoneEnabled,
+                labelPosition = labelPosition,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun DefaultLobbyControlsSlot(
+    modifier: Modifier,
+    call: Call,
+    isCameraEnabled: Boolean,
+    isMicrophoneEnabled: Boolean,
+    onCallAction: (CallAction) -> Unit,
+) {
+    VideoTheme.componentFactory.CallLobbyControlsContent(
+        params = CallLobbyControlsContentParams(
+            call = call,
+            isCameraEnabled = isCameraEnabled,
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            modifier = modifier,
+            onCallAction = onCallAction,
+        ),
+    )
+}
+
+@Composable
+internal fun BoxScope.DefaultParticipantLabel(
     user: User,
     isMicrophoneEnabled: Boolean,
     labelPosition: Alignment,
@@ -294,7 +329,7 @@ private fun DefaultPermissionHandler(
 }
 
 @Composable
-private fun OnRenderedContent(
+internal fun OnRenderedContent(
     call: Call,
     video: ParticipantState.Video,
     onRendered: (View) -> Unit = {},
@@ -338,7 +373,7 @@ private fun OnRenderedContent(
 }
 
 @Composable
-private fun OnDisabledContent(user: User) {
+internal fun OnDisabledContent(user: User) {
     Box(
         modifier = Modifier
             .fillMaxSize()

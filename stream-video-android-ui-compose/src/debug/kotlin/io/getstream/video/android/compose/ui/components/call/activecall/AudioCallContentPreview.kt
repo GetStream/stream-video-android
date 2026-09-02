@@ -25,27 +25,72 @@ import io.getstream.video.android.mock.previewCall
 
 @Preview
 @Composable
-private fun AudioCallContentPreview() {
-    val context = LocalContext.current
-    StreamPreviewDataUtils.initializeStreamVideo(context)
+private fun AudioCallContentRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        AudioCallContent(
-            call = previewCall,
-            isMicrophoneEnabled = false,
-            durationPlaceholder = "11:45",
-        )
+        AudioCallContentPreview()
     }
 }
 
 @Preview
 @Composable
-private fun AudioOnlyCallContentPreview() {
-    val context = LocalContext.current
-    StreamPreviewDataUtils.initializeStreamVideo(context)
+private fun AudioCallContentWithoutHeaderRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        AudioOnlyCallContent(
-            call = previewCall,
-            isMicrophoneEnabled = false,
-        )
+        AudioCallContentWithoutHeaderPreview()
     }
+}
+
+@Preview
+@Composable
+private fun AudioOnlyCallContentRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        AudioOnlyCallContentPreview()
+    }
+}
+
+@Preview
+@Composable
+private fun AudioOnlyCallContentWithoutHeaderRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        AudioOnlyCallContentWithoutHeaderPreview()
+    }
+}
+
+@Composable
+internal fun AudioCallContentPreview() {
+    AudioCallContent(
+        call = previewCall,
+        isMicrophoneEnabled = false,
+        durationPlaceholder = "11:45",
+    )
+}
+
+@Composable
+internal fun AudioCallContentWithoutHeaderPreview() {
+    AudioCallContent(
+        call = previewCall,
+        isMicrophoneEnabled = false,
+        isShowingHeader = false,
+    )
+}
+
+@Composable
+internal fun AudioOnlyCallContentPreview() {
+    AudioOnlyCallContent(
+        call = previewCall,
+        isMicrophoneEnabled = false,
+        durationPlaceholder = "11:45",
+    )
+}
+
+@Composable
+internal fun AudioOnlyCallContentWithoutHeaderPreview() {
+    AudioOnlyCallContent(
+        call = previewCall,
+        isMicrophoneEnabled = false,
+        isShowingHeader = false,
+    )
 }

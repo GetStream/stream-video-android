@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -85,8 +85,12 @@ jobs:
         if: failure()
         with:
           name: test_artifacts_${{ env.ANDROID_API_LEVEL }}
+          # The allure results carry the retry rule's failure artifacts (logcat,
+          # screenshot, hierarchy per failed attempt), which TestOps deduplicates
+          # away when the same test passes on another API level.
           path: |
             fastlane/recordings/*
+            fastlane/allure-results/*
             fastlane/video-buddy-server.log
             fastlane/video-buddy-console.log
   slack:

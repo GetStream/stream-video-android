@@ -16,12 +16,15 @@
 
 package io.getstream.video.android.core
 
+import android.app.ActivityManager
+import android.content.ComponentName
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.core.api.StreamClient
 import io.getstream.android.core.api.model.connection.StreamConnectionState
 import io.getstream.android.core.api.subscribe.StreamSubscription
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 import io.mockk.coEvery
@@ -29,6 +32,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
@@ -44,7 +48,8 @@ import kotlin.test.assertTrue
 /**
  * Runs under Robolectric so a real main looper exists and the test thread is the main thread,
  * which is exactly the situation an app is in when it calls StreamVideo.removeClient() from
- * a logout button handler.
+ * a logout button handler. The stop intent inside cleanup() is also a real Intent instead of
+ * a stubbed one that returns null from every builder call.
  */
 @RunWith(RobolectricTestRunner::class)
 class StreamVideoClientCleanupTest {
@@ -74,11 +79,20 @@ class StreamVideoClientCleanupTest {
         )
     }
 
+    private fun mockContext(runningServices: List<ActivityManager.RunningServiceInfo>): Context {
+        val context = mockk<Context>(relaxed = true)
+        val activityManager = mockk<ActivityManager>()
+        every { context.getSystemService(Context.ACTIVITY_SERVICE) } returns activityManager
+        every { activityManager.getRunningServices(any()) } returns runningServices
+        return context
+    }
+
     private fun buildClient(
         streamClient: StreamClient,
+        context: Context = mockk(relaxed = true),
         cleanupDisconnectTimeoutMs: Long = 10_000L,
     ): StreamVideoClient = StreamVideoClient(
-        context = mockk<Context>(relaxed = true),
+        context = context,
         initialUser = User(id = "user-1", type = UserType.Authenticated),
         apiKey = "apikey",
         token = "token",
@@ -204,5 +218,31 @@ class StreamVideoClientCleanupTest {
         // The mock is still suspended in its delay, so reaching cancellation here proves the
         // timeout branch ran instead of waiting for the disconnect.
         awaitScopeCancelled(client)
+    }
+
+    // buildStopIntent returns null when the call service is not running. Passing the null
+    // through to stopService used to throw a NullPointerException, swallowed by safeCall,
+    // on every logout without a running call service. AND-1466 / #1794.
+    @Test
+    fun `cleanup does not call stopService when the call service is not running`() {
+        val context = mockContext(runningServices = emptyList())
+        val client = buildClient(mockStreamClient(), context)
+
+        client.cleanup()
+
+        verify(exactly = 0) { context.stopService(any()) }
+    }
+
+    @Test
+    fun `cleanup stops the call service when it is running`() {
+        val runningService = ActivityManager.RunningServiceInfo().apply {
+            service = ComponentName("io.getstream.video.android", CallService::class.java.name)
+        }
+        val context = mockContext(runningServices = listOf(runningService))
+        val client = buildClient(mockStreamClient(), context)
+
+        client.cleanup()
+
+        verify(exactly = 1) { context.stopService(any()) }
     }
 }

@@ -381,6 +381,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             streamClient = streamClient,
             tokenProvider = tokenProvider,
             streamNotificationManager = streamNotificationManager,
+            userRepository = userRepository,
             enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
             callServiceConfigRegistry = callConfigRegistry,
             sounds = sounds,
@@ -397,7 +398,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableStereoForSubscriber = enableStereoForSubscriber,
             telecomConfig = telecomConfig,
             tokenRepository = tokenRepository,
-            userRepository = userRepository,
             rejectCallWhenBusy = rejectCallWhenBusy,
         )
 

@@ -41,6 +41,7 @@ import kotlinx.coroutines.test.TestScope
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.PublishOption
 
 class StreamPeerConnectionFactoryTest {
@@ -242,5 +243,127 @@ class StreamPeerConnectionFactoryTest {
         val first = factory.toggleAudioProcessing()
         assertTrue("Should now be enabled", first)
         verify { mockAudioProc.isEnabled = true }
+    }
+
+    // 10) Audio processing is only reported / mutated when the processor is actually attached
+
+    private fun factoryWithProfile(
+        profile: AudioBitrateProfile,
+        audioProcessing: ManagedAudioProcessingFactory?,
+    ): StreamPeerConnectionFactory = StreamPeerConnectionFactory(
+        context = mockContext,
+        audioProcessing = audioProcessing,
+        audioBitrateProfileProvider = { profile },
+        sharedEglBaseProvider = { mockk(relaxed = true) },
+    )
+
+    @Test
+    fun `isAudioProcessingEnabled is false under MUSIC_HIGH_QUALITY even when the module is on`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        every { mockAudioProc.isEnabled } returns true
+
+        val musicFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            mockAudioProc,
+        )
+
+        assertFalse(
+            "Processor is never attached under MUSIC_HIGH_QUALITY, so nothing is processing",
+            musicFactory.isAudioProcessingEnabled(),
+        )
+    }
+
+    @Test
+    fun `setAudioProcessingEnabled leaves the shared module alone under MUSIC_HIGH_QUALITY`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        val musicFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            mockAudioProc,
+        )
+
+        musicFactory.setAudioProcessingEnabled(true)
+
+        verify(exactly = 0) { mockAudioProc.isEnabled = any() }
+    }
+
+    @Test
+    fun `toggleAudioProcessing is a no-op under MUSIC_HIGH_QUALITY`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        val musicFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            mockAudioProc,
+        )
+
+        assertFalse("Nothing to toggle when unattached", musicFactory.toggleAudioProcessing())
+        verify(exactly = 0) { mockAudioProc.isEnabled = any() }
+    }
+
+    // 11) The shared processor is only considered held once a native factory really owns it
+
+    @Test
+    fun `hasAudioProcessingAttached is false until a native factory has been built`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        val callFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+            mockAudioProc,
+        )
+
+        // The profile says the processor *would* be attached, but nothing has been built yet, so
+        // releasing this factory could not take the shared processor down with it.
+        assertFalse(
+            "Nothing owns the processor before the native factory exists",
+            callFactory.hasAudioProcessingAttached(),
+        )
+    }
+
+    @Test
+    fun `dispose leaves the shared module alone when no native factory was built`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        val callFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+            mockAudioProc,
+        )
+
+        // Must not build a factory just to release it: doing so would attach the shared
+        // processor and then tear it down for every later call.
+        callFactory.dispose()
+
+        verify(exactly = 0) { mockAudioProc.createNative() }
+        verify(exactly = 0) { mockAudioProc.isEnabled = any() }
+    }
+
+    @Test
+    fun `once the factory is built the attached flag decides what is reported`() {
+        val mockAudioProc = mockk<ManagedAudioProcessingFactory>(relaxed = true)
+        every { mockAudioProc.isEnabled } returns true
+        val callFactory = factoryWithProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+            mockAudioProc,
+        )
+
+        // Before the factory is built the profile is the only evidence available. Once it is
+        // built, what it was actually wired with is what counts — the profile can have changed
+        // since, and a rebuilt factory may have left the processor off.
+        setPrivate(callFactory, "factoryCreated", true)
+        setPrivate(callFactory, "audioProcessingAttached", false)
+        assertFalse(
+            "Nothing attached, so nothing is processing",
+            callFactory.isAudioProcessingEnabled(),
+        )
+        assertFalse("Nothing to lose by releasing it", callFactory.hasAudioProcessingAttached())
+
+        setPrivate(callFactory, "audioProcessingAttached", true)
+        assertTrue("Attached and enabled", callFactory.isAudioProcessingEnabled())
+        assertTrue(
+            "Releasing it would take the shared processor down",
+            callFactory.hasAudioProcessingAttached(),
+        )
+    }
+
+    private fun setPrivate(target: StreamPeerConnectionFactory, name: String, value: Any) {
+        StreamPeerConnectionFactory::class.java.getDeclaredField(name).apply {
+            isAccessible = true
+            set(target, value)
+        }
     }
 }

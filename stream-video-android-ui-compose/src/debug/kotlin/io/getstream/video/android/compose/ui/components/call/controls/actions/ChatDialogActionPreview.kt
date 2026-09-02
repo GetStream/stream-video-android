@@ -16,14 +16,22 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-private fun ChatActionPreview() {
+private fun ChatActionRootPreview() {
     VideoTheme {
+        ChatActionPreview()
+    }
+}
+
+@Composable
+internal fun ChatActionPreview() {
+    Row {
         ChatDialogAction {
         }
         ChatDialogAction(messageCount = 15) {

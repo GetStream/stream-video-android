@@ -24,10 +24,15 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-private fun GenericContainerPreview() {
+private fun GenericContainerRootPreview() {
     VideoTheme {
-        GenericContainer {
-            Text(text = "Contained text!", color = Color.White)
-        }
+        GenericContainerPreview()
+    }
+}
+
+@Composable
+internal fun GenericContainerPreview() {
+    GenericContainer {
+        Text(text = "Contained text!", color = Color.White)
     }
 }

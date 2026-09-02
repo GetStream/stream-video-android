@@ -23,16 +23,17 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.theme.IncomingCallControlsContentParams
+import io.getstream.video.android.compose.theme.IncomingCallDetailsContentParams
+import io.getstream.video.android.compose.theme.IncomingCallHeaderContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.core.Call
@@ -144,7 +145,11 @@ public fun IncomingCallContent(
     ) {
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
             if (isShowingHeader) {
-                headerContent?.invoke(this)
+                headerContent?.invoke(this) ?: with(VideoTheme.componentFactory) {
+                    IncomingCallHeaderContent(
+                        params = IncomingCallHeaderContentParams(call = call),
+                    )
+                }
             }
 
             val topPadding = if (participants.size == 1) {
@@ -152,23 +157,28 @@ public fun IncomingCallContent(
             } else {
                 VideoTheme.dimens.spacingM
             }
-            detailsContent?.invoke(this, participants, topPadding) ?: IncomingCallDetails(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally),
-                isVideoType = isVideoType,
-                participants = participants,
-            )
+            detailsContent?.invoke(this, participants, topPadding)
+                ?: with(VideoTheme.componentFactory) {
+                    IncomingCallDetailsContent(
+                        params = IncomingCallDetailsContentParams(
+                            participants = participants,
+                            topPadding = topPadding,
+                            isVideoType = isVideoType,
+                        ),
+                    )
+                }
             Spacer(modifier = Modifier.height(VideoTheme.dimens.genericMax))
         }
 
-        controlsContent?.invoke(this) ?: IncomingCallControls(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = VideoTheme.dimens.genericXxl),
-            isVideoCall = isVideoType,
-            isMicrophoneEnabled = isMicrophoneEnabled,
-            isCameraEnabled = isCameraEnabled,
-            onCallAction = onCallAction,
-        )
+        controlsContent?.invoke(this) ?: with(VideoTheme.componentFactory) {
+            IncomingCallControlsContent(
+                params = IncomingCallControlsContentParams(
+                    isCameraEnabled = isCameraEnabled,
+                    isMicrophoneEnabled = isMicrophoneEnabled,
+                    isVideoCall = isVideoType,
+                    onCallAction = onCallAction,
+                ),
+            )
+        }
     }
 }

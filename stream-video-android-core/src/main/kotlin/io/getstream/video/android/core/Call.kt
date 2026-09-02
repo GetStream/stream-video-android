@@ -68,6 +68,7 @@ import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.components.CallStatsReporter
 import io.getstream.video.android.core.call.components.ClientCallRegistry
 import io.getstream.video.android.core.call.components.MediaManagerFactory
+import io.getstream.video.android.core.call.components.NoiseCancellationPolicy
 import io.getstream.video.android.core.call.components.RtcSessionFactory
 import io.getstream.video.android.core.call.components.SessionMonitor
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -86,6 +87,8 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomCal
 import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
@@ -98,6 +101,10 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
@@ -476,11 +483,40 @@ public class Call(
             sessionManager.reconnectDeadlineMillis = value
         }
 
+    /**
+     * Serializes noise-cancellation signals to the SFU. Without it each signal races on its own
+     * coroutine, and a retried start can land after a stop — leaving the SFU holding a state the
+     * client left behind.
+     */
+    private val noiseCancellationSignals = SerialProcessor(scope)
+
+    /**
+     * Latest requested noise-cancellation state, written synchronously on the caller's thread so
+     * a queued signal always sends the most recent request regardless of the order the queued
+     * coroutines happened to start in.
+     */
+    @Volatile
+    private var desiredNoiseCancellationEnabled: Boolean = false
+
+    /**
+     * Set when a signal had nowhere to go because the SFU has not accepted this session yet, so
+     * the state can be sent once [JoinCallResponseEvent] arrives.
+     */
+    @Volatile
+    private var noiseCancellationSignalPending: Boolean = false
+
+    private val noiseCancellationPolicy = NoiseCancellationPolicy()
+
+    /** Guards the call type's auto-on default so it is applied at most once per call. */
+    private var autoOnApplied: Boolean = false
+
     init {
         media.startAudioLevelMonitoring()
         powerManager = safeCallWithDefault(null) {
             clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
+        observeNoiseCancellationSignalTarget()
+        observeNoiseCancellationPolicy()
     }
 
     /** Basic crud operations */
@@ -516,6 +552,17 @@ public class Call(
         startsAt: OffsetDateTime? = null,
     ): Result<UpdateCallResponse> = apiClient.update(custom, settingsOverride, startsAt)
 
+    /**
+     * Joins the call. Concurrent callers share one in-flight attempt.
+     *
+     * Cancelling this coroutine does not abort that attempt — only [leave] does.
+     *
+     * Join flags (`create`, `ring`, and the rest) come from the caller that created the
+     * in-flight attempt. [CallJoinInterceptor] is first-non-cancelled-wins: the first
+     * waiter whose coroutine is not cancelled supplies it. A later `join(interceptor)`
+     * is used only if every earlier waiter has been cancelled. `join(null)` does not
+     * erase an earlier interceptor.
+     */
     suspend fun join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
@@ -867,11 +914,192 @@ public class Call(
         return state.settings.value?.video?.enabled ?: false
     }
 
+    /**
+     * Whether noise cancellation is running for this call.
+     *
+     * The audio processor supplied to [StreamVideoBuilder] is a single instance shared by every
+     * call, so this state is only meaningful for the call currently in progress. Two calls in
+     * progress at once cannot have different noise-cancellation states.
+     */
     fun isAudioProcessingEnabled(): Boolean = media.isAudioProcessingEnabled()
 
-    fun setAudioProcessingEnabled(enabled: Boolean) = media.setAudioProcessingEnabled(enabled)
+    /**
+     * Turns noise cancellation on or off for this call, and tells the SFU about it.
+     *
+     * Takes effect for the call in progress; see [isAudioProcessingEnabled] for why the state
+     * cannot differ between two calls running at the same time.
+     */
+    fun setAudioProcessingEnabled(enabled: Boolean) {
+        if (enabled && !isNoiseCancellationAllowed()) {
+            logger.w {
+                "[setAudioProcessingEnabled] #sfu; rejected, noise cancellation is not " +
+                    "available for this call"
+            }
+            return
+        }
+        media.setAudioProcessingEnabled(enabled)
+        // Publishes and signals what was actually applied, not what was asked for: with no audio
+        // processor configured the request is a no-op locally, and neither the state flow nor the
+        // SFU must be told otherwise.
+        publishAudioProcessingState()
+        notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
+    }
 
-    fun toggleAudioProcessing(): Boolean = media.toggleAudioProcessing()
+    fun toggleAudioProcessing(): Boolean {
+        // Reads without building a factory: the gate runs before join, and a factory created
+        // there would capture the pre-join audio bitrate profile.
+        if (!media.isAudioProcessingEnabled() && !isNoiseCancellationAllowed()) {
+            logger.w {
+                "[toggleAudioProcessing] #sfu; rejected, noise cancellation is not " +
+                    "available for this call"
+            }
+            return false
+        }
+        return media.toggleAudioProcessing().also {
+            publishAudioProcessingState()
+            // Signals what is running, not what the toggle now reports: before a factory exists
+            // the toggle reflects the wanted state, and the SFU must only hear real processing.
+            notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
+        }
+    }
+
+    /**
+     * Whether the server permits noise cancellation for this call, per the capability granted to
+     * the user and the call type's noise-cancellation mode.
+     */
+    private fun isNoiseCancellationAllowed(): Boolean = noiseCancellationPolicy.isAllowed(
+        capabilities = state.ownCapabilities.value,
+        settings = state.settings.value,
+    )
+
+    /**
+     * Publishes the state observers should see: what the call asked for while no factory exists,
+     * and what is actually processing once one does. Never builds a factory.
+     */
+    private fun publishAudioProcessingState() {
+        state.setAudioProcessingEnabled(media.isAudioProcessingEnabled())
+    }
+
+    /**
+     * Keeps noise cancellation inside what the server allows.
+     *
+     * Deliberately waits for settings to resolve before deciding anything: treating "not told
+     * yet" as "not allowed" would switch noise cancellation off and back on during join. Once
+     * resolved this applies the call type's auto-on default, and withdraws noise cancellation if
+     * the capability or the mode is taken away mid-call.
+     */
+    private fun observeNoiseCancellationPolicy() {
+        scope.launch {
+            state.settings
+                .filterNotNull()
+                .combine(
+                    state.ownCapabilities,
+                ) { settings, capabilities -> settings to capabilities }
+                .collect { (settings, capabilities) ->
+                    if (!noiseCancellationPolicy.isAllowed(capabilities, settings)) {
+                        // Withdraws unconditionally rather than only when something is already
+                        // processing: a state wanted before the factory existed is remembered and
+                        // would otherwise be applied the moment one is built, after the server
+                        // had withheld it.
+                        val wasProcessing = media.isAudioProcessingEnabledIfCreated()
+                        if (wasProcessing || media.isAudioProcessingWanted()) {
+                            logger.i {
+                                "[noiseCancellation] withdrawing, no longer allowed for this call"
+                            }
+                            media.setAudioProcessingEnabled(false)
+                            publishAudioProcessingState()
+                            notifyNoiseCancellationState(false)
+                        }
+                        return@collect
+                    }
+                    if (!autoOnApplied) {
+                        autoOnApplied = true
+                        if (noiseCancellationPolicy.isAutoOn(capabilities, settings)) {
+                            setAudioProcessingEnabled(true)
+                        }
+                    }
+                }
+        }
+    }
+
+    /**
+     * Tells the SFU whether local noise cancellation is running.
+     *
+     * Fire-and-forget: the local audio-processing module is already updated by the time this runs,
+     * so a failed signal is logged rather than surfaced to the caller.
+     *
+     * Signals run one at a time and each sends the latest requested state, so rapid toggles
+     * converge on the right value instead of racing. The session is resolved as the signal runs,
+     * not when it was requested — a rejoin in between must not send the request at a session that
+     * has already been replaced.
+     */
+    private fun notifyNoiseCancellationState(enabled: Boolean) {
+        desiredNoiseCancellationEnabled = enabled
+        scope.launch {
+            noiseCancellationSignals.submit("noiseCancellation") {
+                val session = session.value
+                val target = desiredNoiseCancellationEnabled
+                // RtcSession is installed before the SFU has accepted the join. Signalling in
+                // that window returns PARTICIPANT_NOT_FOUND and used to trigger a full rejoin.
+                if (session == null || !session.isSfuJoinComplete()) {
+                    // Nothing to signal at yet. Sent by observeNoiseCancellationSignalTarget as
+                    // soon as the SFU delivers JoinCallResponseEvent.
+                    noiseCancellationSignalPending = true
+                    return@submit
+                }
+                noiseCancellationSignalPending = false
+                val result = if (target) {
+                    session.startNoiseCancellation()
+                } else {
+                    session.stopNoiseCancellation()
+                }
+                if (result is Result.Failure) {
+                    logger.w {
+                        "[notifyNoiseCancellationState] #sfu; enabled: $target, " +
+                            "failed: ${result.value.message}"
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Sends the noise-cancellation state once the SFU has accepted each session.
+     *
+     * Noise cancellation can be switched on before there is a participant on the SFU — the call
+     * type's auto-on default and any pre-join change both land while joining is still in progress
+     * — and a rejoin or migration replaces the session with one that was never told. Either way
+     * the SFU would be left out of step with what is running locally.
+     *
+     * Only signals when there is something to say: a signal that found no joined session, or
+     * noise cancellation actually being on. A call that never touches it costs no extra request.
+     */
+    private fun observeNoiseCancellationSignalTarget() {
+        scope.launch {
+            session.flatMapLatest { session ->
+                if (session == null) {
+                    flowOf(null)
+                } else {
+                    session.sfuSocketState.map { state ->
+                        session.takeIf { state is SfuSocketState.Connected }
+                    }
+                }
+            }.collect { joinedSession ->
+                if (joinedSession == null) return@collect
+                // Reads the applied state rather than replaying the last signal: a state wanted
+                // before the factory existed is applied as the factory is built, which happens
+                // while joining and after the signal that found no joined session.
+                val applied = media.isAudioProcessingEnabledIfCreated()
+                if (noiseCancellationSignalPending || desiredNoiseCancellationEnabled || applied) {
+                    publishAudioProcessingState()
+                    notifyNoiseCancellationState(applied)
+                }
+            }
+        }
+    }
+
+    private fun RtcSession.isSfuJoinComplete(): Boolean =
+        sfuSocketState.value is SfuSocketState.Connected
 
     suspend fun startTranscription(): Result<StartTranscriptionResponse> =
         apiClient.startTranscription()

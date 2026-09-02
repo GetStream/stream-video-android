@@ -191,6 +191,35 @@ class ActiveStateGateTest {
     }
 
     @Test
+    fun `interceptor provider is resolved at invocation not at gate start`() = runTest(
+        testDispatcher,
+    ) {
+        val data = fakeCall()
+        val events = mutableListOf<String>()
+        var interceptor: CallJoinInterceptor? = null
+        val late = object : CallJoinInterceptor {
+            override suspend fun callReadyToJoin(call: Call) {
+                events += "late"
+            }
+        }
+
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+        )
+
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptorProvider = { interceptor },
+        ) { events += "ready" }
+
+        interceptor = late
+        advanceUntilIdle()
+        assertEquals(listOf("late", "ready"), events)
+    }
+
+    @Test
     fun `should proceed when interceptor throws generic exception`() = runTest(testDispatcher) {
         val data = fakeCall()
         var readyCalled = false
@@ -364,8 +393,36 @@ class ActiveStateGateTest {
             interceptor = null,
         ) { readyCalled = true }
 
-        runCurrent()
+        // No job / interceptor invocation: onReady is synchronous.
         assertTrue(readyCalled)
+    }
+
+    @Test
+    fun `legacy behaviour does not wait for a later interceptor provider`() = runTest {
+        val data = fakeCall()
+        val events = mutableListOf<String>()
+        var interceptor: CallJoinInterceptor? = null
+        val late = object : CallJoinInterceptor {
+            override suspend fun callReadyToJoin(call: Call) {
+                events += "late"
+            }
+        }
+
+        val gate = ActiveStateGate(
+            coroutineScope = this,
+            previousRingingStates = emptySet(),
+            strategy = TransitionToRingingStateStrategy.LEGACY_BEHAVIOUR,
+        )
+
+        gate.awaitAndTransition(
+            currentRingingState = RingingState.Idle,
+            call = data.call,
+            interceptorProvider = { interceptor },
+        ) { events += "ready" }
+
+        interceptor = late
+        advanceUntilIdle()
+        assertEquals(listOf("ready"), events)
     }
 
     @Test

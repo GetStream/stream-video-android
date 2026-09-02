@@ -51,7 +51,7 @@ streamProject {
             "stream-video-android-core",
             "stream-video-android-ui-compose",
         )
-        sonarCoverageExclusions = listOf(
+        sonarExclusions = listOf(
             "**/*.mp3",
             "**/*.webp",
             "**/generated/**",

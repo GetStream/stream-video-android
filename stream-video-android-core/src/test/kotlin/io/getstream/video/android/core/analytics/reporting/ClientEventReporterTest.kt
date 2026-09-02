@@ -87,6 +87,7 @@ class ClientEventReporterTest {
         iceState: VideoAnalyticsIceState,
         role: PeerConnectionRole = PeerConnectionRole.PUBLISH,
         pcHashCode: Int = 100,
+        wasPrevConnected: Boolean = false,
     ) = reporter.onPeerConnectionStateChanged(
         peerConnectionHashCode = pcHashCode,
         callId = "call-1",
@@ -97,6 +98,7 @@ class ClientEventReporterTest {
         joinReason = JoinReason.FirstAttempt,
         role = role,
         iceState = iceState,
+        wasPrevConnected = wasPrevConnected,
         peerConnectionState = pcState,
     )
 
@@ -329,6 +331,7 @@ class ClientEventReporterTest {
             pcState = PeerConnection.PeerConnectionState.CONNECTING,
             iceState = VideoAnalyticsIceState.NOT_CONNECTED,
             pcHashCode = 2,
+            wasPrevConnected = true,
         )
 
         val reconnectInitiated = dispatcher.sent.last()

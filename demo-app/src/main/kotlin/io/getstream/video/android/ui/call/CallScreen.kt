@@ -46,7 +46,6 @@ import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.GroupRemove
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.SignalWifiBad
@@ -84,7 +83,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.BuildConfig
@@ -106,12 +104,9 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.To
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleSettingsAction
-import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
-import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantActions
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
-import io.getstream.video.android.compose.ui.components.call.renderer.RegularVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.copy
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
@@ -309,7 +304,7 @@ fun CallScreen(
             }
     }
 
-    VideoTheme {
+    VideoTheme(componentFactory = DemoComponentFactory) {
         ChatDialog(
             state = chatState,
             call = call,
@@ -476,48 +471,14 @@ fun CallScreen(
                             }
                         },
                         videoRenderer = { modifier, call, participant, style ->
+                            // Reactions and participant actions are customized once for the whole
+                            // screen in DemoComponentFactory.
                             ParticipantVideo(
                                 modifier = modifier.testTag("Stream_VideoView"),
                                 call = call,
                                 participant = participant,
                                 style = style,
                                 scalingType = preferredScaleType,
-                                reactionContent = {
-                                    CustomReactionContent(
-                                        participant = participant,
-                                        style = style.copy(
-                                            reactionPosition = Alignment.TopCenter,
-                                            reactionDuration = 5000,
-                                        ),
-                                    )
-                                },
-                                actionsContent = { actions, call, participant ->
-                                    ParticipantActions(
-                                        modifier = Modifier
-                                            .align(Alignment.TopStart)
-                                            .padding(8.dp)
-                                            .testTag("Stream_ParticipantActionsIcon"),
-                                        actions = actions + listOf(
-                                            ParticipantAction(
-                                                icon = Icons.Filled.GroupRemove,
-                                                label = "Kick",
-                                                condition = { call, participantState ->
-                                                    call.hasCapability(OwnCapability.KickUser)
-                                                },
-                                                action = { call, participantState ->
-                                                    launch {
-                                                        call.kickUser(
-                                                            participantState.userId.value,
-                                                            false,
-                                                        )
-                                                    }
-                                                },
-                                            ),
-                                        ),
-                                        call = call,
-                                        participant = participant,
-                                    )
-                                },
                             )
                         },
                         floatingVideoRenderer = { _, _ ->
@@ -537,16 +498,6 @@ fun CallScreen(
                                                 .testTag("Stream_FloatingVideoView"),
                                             call = call,
                                             participant = participant,
-                                            reactionContent = {
-                                                CustomReactionContent(
-                                                    participant = participant,
-                                                    style = RegularVideoRendererStyle().copy(
-                                                        isShowingConnectionQualityIndicator = false,
-                                                        reactionPosition = Alignment.TopCenter,
-                                                        reactionDuration = 5000,
-                                                    ),
-                                                )
-                                            },
                                         )
                                     },
                                 )
@@ -699,9 +650,10 @@ fun CallScreen(
         }
 
         if (isShowingSettingMenu) {
-            var isNoiseCancellationEnabled by remember {
-                mutableStateOf(call.isAudioProcessingEnabled())
-            }
+            // Collected, not snapshotted: the SDK withdraws noise cancellation on its own when
+            // the capability or the call type's mode changes mid-call.
+            val isNoiseCancellationEnabled by call.state.audioProcessingEnabled
+                .collectAsStateWithLifecycle()
             val settings by call.state.settings.collectAsStateWithLifecycle()
             val noiseCancellationFeatureEnabled =
                 settings?.audio?.noiseCancellation?.isEnabled == true
@@ -735,7 +687,7 @@ fun CallScreen(
                     isShowingFeedbackDialog = true
                 },
                 onNoiseCancellation = {
-                    isNoiseCancellationEnabled = call.toggleAudioProcessing()
+                    call.toggleAudioProcessing()
                 },
                 selectedIncomingVideoResolution = selectedIncomingVideoResolution,
                 onSelectIncomingVideoResolution = {
