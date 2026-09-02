@@ -25,6 +25,7 @@ import io.getstream.android.video.generated.models.CallSessionStartedEvent
 import io.getstream.android.video.generated.models.CreateGuestResponse
 import io.getstream.android.video.generated.models.UserResponse
 import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.call.RtcSession
@@ -376,16 +377,21 @@ class StreamVideoClientTest {
     @Test
     fun `apiCall surfaces the coordinator error message instead of a raw HTTP status`() = runTest {
         val reason = "User 'marcelo' with role 'user' is not allowed to perform action UpdateCall"
-        val result = client.apiCall<String> {
-            throw coordinatorHttpException(code = 403, message = reason, serverCode = 4)
-        }
+        val thrown = coordinatorHttpException(code = 403, message = reason, serverCode = 4)
+        val result = client.apiCall<String> { throw thrown }
 
         assertTrue(result is Result.Failure, "expected Failure, got $result")
-        val error = (result as Result.Failure).value
+        val error = result.value
+        assertTrue(error is Error.ThrowableError, "expected ThrowableError, got $error")
         assertTrue(
             error.message.contains(reason),
             "expected coordinator reason in ${error.message}",
         )
+        assertTrue(
+            error.cause is HttpException,
+            "HTTP failures must keep HttpException as the cause, got ${error.cause}",
+        )
+        assertEquals(thrown, error.cause)
     }
 
     @Test
@@ -408,6 +414,41 @@ class StreamVideoClientTest {
         }
 
         assertEquals("ok", (result as Result.Success).value)
+        assertEquals(2, attempts)
+        coVerify(exactly = 1) { tokenProvider.loadToken() }
+    }
+
+    @Test
+    fun `apiCall surfaces coordinator message when the post-refresh request also fails`() = runTest {
+        val tokenProvider = mockk<TokenProvider>()
+        coEvery { tokenProvider.loadToken() } returns "refreshed-token"
+        val client = prepareClient(tokenProvider = tokenProvider)
+        val reason = "User 'marcelo' with role 'user' is not allowed to perform action UpdateCall"
+        var attempts = 0
+
+        val result = client.apiCall<String> {
+            attempts++
+            if (attempts == 1) {
+                throw coordinatorHttpException(
+                    code = 401,
+                    message = "token expired",
+                    serverCode = 40,
+                )
+            }
+            throw coordinatorHttpException(code = 403, message = reason, serverCode = 4)
+        }
+
+        assertTrue(result is Result.Failure, "expected Failure, got $result")
+        val error = result.value
+        assertTrue(error is Error.ThrowableError, "expected ThrowableError, got $error")
+        assertTrue(
+            error.message.contains(reason),
+            "expected coordinator reason after refresh in ${error.message}",
+        )
+        assertTrue(
+            error.cause is HttpException,
+            "post-refresh HTTP failures must keep HttpException as the cause, got ${error.cause}",
+        )
         assertEquals(2, attempts)
         coVerify(exactly = 1) { tokenProvider.loadToken() }
     }
