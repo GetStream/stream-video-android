@@ -27,6 +27,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.core.app.ActivityCompat
@@ -48,7 +49,9 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
-import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
+import io.getstream.video.android.core.notifications.handlers.defaultIncomingCallChannelIdRes
+import io.getstream.video.android.core.notifications.handlers.incomingCallNotificationFlags
+import io.getstream.video.android.core.notifications.handlers.shouldNotificationOwnIncomingRingtone
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
@@ -88,7 +91,6 @@ public open class DefaultNotificationHandler(
     private val logger by taggedLogger("Call:NotificationHandler")
     val intentResolver =
         DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver())
-    private val serviceLauncher = ServiceLauncher(application)
 
     protected val notificationManager: NotificationManagerCompat by lazy {
         NotificationManagerCompat.from(application).also {
@@ -113,22 +115,26 @@ public open class DefaultNotificationHandler(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        val streamVideo = StreamVideo.instance()
-        serviceLauncher.showIncomingCall(
-            application,
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient ?: return
+        val notificationPreparer = IncomingCallNotificationPreparer(streamVideo)
+        streamVideo.state.serviceLauncher.showIncomingCall(
             callId,
             callDisplayName,
             streamVideo.state.callConfigRegistry.get(callId.type),
             isVideo = isVideoCall(callId, payload),
             payload = payload,
-            streamVideo,
-            notification = getRingingCallNotification(
-                RingingState.Incoming(),
-                callId,
-                callDisplayName,
-                shouldHaveContentIntent = true,
-                payload,
-            ),
+            notificationProvider = { owner ->
+                val ringingState = RingingState.Incoming()
+                getRingingCallNotification(
+                    ringingState,
+                    callId,
+                    callDisplayName,
+                    shouldHaveContentIntent = true,
+                    payload,
+                )?.let { notification ->
+                    notificationPreparer.prepare(notification, owner, ringingState)
+                }
+            },
         )
     }
 
@@ -138,6 +144,7 @@ public open class DefaultNotificationHandler(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
+        notificationManager.cancel(callId.getNotificationId(NotificationType.Incoming))
         val notificationId = callId.hashCode()
         val notification = getMissedCallNotification(callId, callDisplayName, payload)
         if (notification != null && ActivityCompat.checkSelfPermission(
@@ -179,7 +186,14 @@ public open class DefaultNotificationHandler(
                     callDisplayName,
                     shouldHaveContentIntent,
                     payload,
-                )
+                ).apply {
+                    if (shouldUseNotificationRingtone()) {
+                        flags = incomingCallNotificationFlags(
+                            flags,
+                            ringingState,
+                        )
+                    }
+                }
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
                 null
@@ -216,13 +230,14 @@ public open class DefaultNotificationHandler(
             ?: intentResolver.getDefaultPendingIntent()
 
         val showAsHighPriority = !hideRingingNotificationInForeground || !isInForeground()
-        val channelId = application.getString(
+        val baseChannelId = application.getString(
             if (showAsHighPriority) {
                 R.string.stream_video_incoming_call_notification_channel_id
             } else {
                 R.string.stream_video_incoming_call_low_priority_notification_channel_id
             },
         )
+        val channelId = baseChannelId
 
         createIncomingCallChannel(channelId, showAsHighPriority)
 
@@ -353,7 +368,7 @@ public open class DefaultNotificationHandler(
         val showAsHighPriority = !hideRingingNotificationInForeground || !isInForeground()
         val channelId = application.getString(
             if (showAsHighPriority) {
-                R.string.stream_video_incoming_call_notification_channel_id
+                defaultIncomingCallChannelIdRes()
             } else {
                 R.string.stream_video_incoming_call_low_priority_notification_channel_id
             },
@@ -363,6 +378,14 @@ public open class DefaultNotificationHandler(
 
         return getNotification {
             priority = NotificationCompat.PRIORITY_HIGH
+            if (shouldUseNotificationRingtone() && Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+                setSound(streamVideo?.sounds?.ringingConfig?.incomingCallSoundUri)
+                streamVideo?.vibrationConfig
+                    ?.takeIf { it.enabled }
+                    ?.vibratePattern
+                    ?.let { setVibrate(it) }
+            }
             setContentTitle(callerName)
             setContentText(
                 application.getString(R.string.stream_video_incoming_call_notification_description),
@@ -410,6 +433,21 @@ public open class DefaultNotificationHandler(
                     }
                     this.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                     this.setShowBadge(true)
+                    if (shouldUseNotificationRingtone()) {
+                        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+                        val audioAttributes = AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build()
+                        setSound(
+                            streamVideo?.sounds?.ringingConfig?.incomingCallSoundUri,
+                            audioAttributes,
+                        )
+                        streamVideo?.vibrationConfig
+                            ?.takeIf { it.enabled }
+                            ?.vibratePattern
+                            ?.let { vibrationPattern = it }
+                    }
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     this.setAllowBubbles(true)
@@ -891,6 +929,15 @@ public open class DefaultNotificationHandler(
     open fun getChannelDescription(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_description,
     )
+
+    private fun shouldUseNotificationRingtone(): Boolean {
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+        return shouldNotificationOwnIncomingRingtone(
+            notificationRingtoneEnabled =
+            streamVideo?.debugUseNotificationRingtoneForIncomingCalls == true,
+            telecomFirstEnabled = streamVideo?.debugUseTelecomFirstForIncomingCalls == true,
+        )
+    }
 
     override fun createMinimalMediaStyleNotification(
         callId: StreamCallId,

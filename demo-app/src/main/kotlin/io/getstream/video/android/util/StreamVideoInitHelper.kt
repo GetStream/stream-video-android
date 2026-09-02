@@ -18,6 +18,7 @@ package io.getstream.video.android.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
@@ -401,6 +402,9 @@ object StreamVideoInitHelper {
         }
         this.callServiceConfigRegistry = callServiceConfigRegistry
 
+        val debugUseAndroid15IncomingCallFlow =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
+
         return StreamVideoBuilder(
             context = context,
             apiKey = apiKey,
@@ -506,6 +510,9 @@ object StreamVideoInitHelper {
             telecomConfig = TelecomConfig(context.packageName),
             connectOnInit = false,
             rejectCallWhenBusy = false,
-        ).build()
+        )
+            .debugUseTelecomFirstForIncomingCalls(debugUseAndroid15IncomingCallFlow)
+            .debugUseNotificationRingtoneForIncomingCalls(debugUseAndroid15IncomingCallFlow)
+            .build()
     }
 }

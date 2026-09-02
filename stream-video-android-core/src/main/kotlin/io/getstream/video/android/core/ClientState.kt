@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.os.Build
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.CallCreatedEvent
 import io.getstream.android.video.generated.models.CallRingEvent
@@ -29,6 +30,7 @@ import io.getstream.video.android.core.notifications.internal.service.ServiceInt
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomIntegrationType
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
+import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
@@ -86,7 +88,7 @@ class ClientState(private val client: StreamVideo) {
     public val activeCall: StateFlow<Call?> = _activeCall
 
     public val callConfigRegistry = (client as StreamVideoClient).callServiceConfigRegistry
-    private val serviceLauncher = ServiceLauncher(client.context)
+    internal val serviceLauncher = ServiceLauncher(client.context, client as StreamVideoClient)
 
     internal val clientEventReporter = (client as StreamVideoClient).analytics.clientEventReporter
 
@@ -293,13 +295,11 @@ class ClientState(private val client: StreamVideo) {
             CallService.TRIGGER_ONGOING_CALL -> serviceLauncher.showOnGoingCall(
                 call,
                 trigger,
-                streamVideoClient,
             )
 
             CallService.TRIGGER_OUTGOING_CALL -> serviceLauncher.showOutgoingCall(
                 call,
                 trigger,
-                streamVideoClient,
             )
 
             else -> {}
@@ -311,11 +311,10 @@ class ClientState(private val client: StreamVideo) {
      */
     internal fun maybeStopForegroundService(call: Call) {
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
-        if (callConfig.runCallServiceInForeground) {
-            val context = streamVideoClient.context
-
+        if (callConfig.runCallServiceInForeground ||
+            Build.VERSION.SDK_INT >= BUILD_VERSION_CODES_CINNAMON_BUN
+        ) {
             logger.d { "Building stop intent for call_id: ${call.cid}" }
-            val serviceLauncher = ServiceLauncher(context)
             serviceLauncher.stopService(call)
         }
     }

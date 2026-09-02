@@ -29,6 +29,7 @@ import androidx.core.telecom.CallsManager
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.internal.telecom.IncomingCallTelecomAction
 import io.getstream.video.android.model.StreamCallId
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,6 +60,28 @@ internal class JetpackTelecomRepository(
         address: Uri,
         isIncoming: Boolean,
         isVideoCall: Boolean,
+    ) = registerCall(
+        displayName = displayName,
+        address = address,
+        isIncoming = isIncoming,
+        isVideoCall = isVideoCall,
+        onRegistered = {},
+        onException = {},
+    )
+
+    /**
+     * Registers a call and invokes [onRegistered] from the Telecom call-control scope after the
+     * platform has accepted the call. [registerCall] itself does not return until the call ends.
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_OWN_CALLS)
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun registerCall(
+        displayName: String,
+        address: Uri,
+        isIncoming: Boolean,
+        isVideoCall: Boolean,
+        onRegistered: () -> Unit,
+        onException: (Exception) -> Unit,
     ) {
         logger.d { "[registerCall]" }
         // For simplicity we don't support multiple calls
@@ -118,6 +141,7 @@ internal class JetpackTelecomRepository(
                     actionSource = actionSource,
                 )
                 logger.d { "[registerCall] _currentCall set to Registered" }
+                onRegistered()
                 launch {
                     currentCallEndpoint.collect {
                         updateCurrentCall {
@@ -140,7 +164,10 @@ internal class JetpackTelecomRepository(
                     }
                 }
             }
+        } catch (ex: CancellationException) {
+            throw ex
         } catch (ex: Exception) {
+            onException(ex)
             logger.e(ex) { "[registerCall] exception: ${ex.message}" }
         } finally {
             logger.d { "[registerCall] finally" }

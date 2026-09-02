@@ -21,6 +21,7 @@ import android.app.NotificationManager
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.video.android.core.R
+import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -108,6 +109,30 @@ class StreamNotificationChannelsTest {
 
         // Then
         assertEquals(NotificationManager.IMPORTANCE_LOW, channelInfo.importance)
+    }
+
+    @Test
+    fun `incoming call channel uses the existing id before Android 17`() {
+        val channelIdRes = defaultIncomingCallChannelIdRes(
+            sdkInt = BUILD_VERSION_CODES_CINNAMON_BUN - 1,
+        )
+
+        assertEquals(
+            R.string.stream_video_incoming_call_notification_channel_id,
+            channelIdRes,
+        )
+    }
+
+    @Test
+    fun `incoming call channel uses the ringing id from Android 17`() {
+        val channelIdRes = defaultIncomingCallChannelIdRes(
+            sdkInt = BUILD_VERSION_CODES_CINNAMON_BUN,
+        )
+
+        assertEquals(
+            R.string.stream_video_incoming_call_ringing_notification_channel_id,
+            channelIdRes,
+        )
     }
 
     @Test

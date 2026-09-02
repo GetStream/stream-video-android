@@ -23,13 +23,11 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.RejectReason
-import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
+import io.getstream.video.android.core.notifications.handlers.shouldNotificationOwnIncomingRingtone
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 
 internal class CallServiceRingingStateObserver(
     private val call: Call,
@@ -58,7 +56,7 @@ internal class CallServiceRingingStateObserver(
     /**
      * Handles different ringing states.
      */
-    private suspend fun handleRingingState(state: RingingState, onStopService: () -> Unit) {
+    private fun handleRingingState(state: RingingState, onStopService: () -> Unit) {
         when (state) {
             is RingingState.Incoming -> handleIncomingState(state)
             is RingingState.Outgoing -> handleOutgoingState(state)
@@ -72,16 +70,13 @@ internal class CallServiceRingingStateObserver(
     /**
      * Handles incoming call state - plays ringtone and vibrates.
      */
-    private suspend fun handleIncomingState(state: RingingState.Incoming) {
+    private fun handleIncomingState(state: RingingState.Incoming) {
         if (!state.acceptedByMe) {
-            if (!awaitTelecomRegistration()) {
-                logger.w {
-                    "Telecom registration timed out; suppressing incoming ringtone"
-                }
-            }
-
-            val currentState = call.state.ringingState.value
-            if (currentState !is RingingState.Incoming || currentState.acceptedByMe) {
+            val notificationOwnsRingtone = shouldNotificationOwnIncomingRingtone(
+                notificationRingtoneEnabled = streamVideo.debugUseNotificationRingtoneForIncomingCalls,
+                telecomFirstEnabled = streamVideo.debugUseTelecomFirstForIncomingCalls,
+            )
+            if (notificationOwnsRingtone) {
                 return
             }
 
@@ -100,24 +95,6 @@ internal class CallServiceRingingStateObserver(
             // Call accepted - stop sounds immediately for better responsiveness
             soundPlayer?.stopCallSound()
         }
-    }
-
-    private fun shouldWaitForTelecomRegistration(): Boolean =
-        call.state.jetpackTelecomRepository != null
-
-    /**
-     * Android 17 requires an incoming call to be registered with Telecom before background
-     * ringtone playback starts. Calls without Jetpack Telecom keep the existing behavior.
-     */
-    private suspend fun awaitTelecomRegistration(): Boolean {
-        if (!shouldWaitForTelecomRegistration()) return true
-
-        val repository = call.state.jetpackTelecomRepository ?: return true
-        return withTimeoutOrNull(TELECOM_REGISTRATION_TIMEOUT_MS) {
-            repository.currentCall.first { it is TelecomCall.Registered }
-            logger.d { "[awaitTelecomRegistration], Registered with telecom" }
-            true
-        } ?: false
     }
 
     /**

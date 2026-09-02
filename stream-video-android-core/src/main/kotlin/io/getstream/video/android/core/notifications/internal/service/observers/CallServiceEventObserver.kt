@@ -25,14 +25,12 @@ import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.utils.toUser
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 internal class CallServiceEventObserver(
     private val call: Call,
     private val streamVideo: StreamVideoClient,
-    private val scope: CoroutineScope,
 ) {
 
     private val logger by taggedLogger("CallEventObserver")

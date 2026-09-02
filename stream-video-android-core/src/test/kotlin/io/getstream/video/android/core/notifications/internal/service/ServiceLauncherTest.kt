@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
+import android.app.ActivityManager
 import android.app.Notification
 import android.content.Context
 import android.content.Intent
@@ -23,20 +24,30 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.telecom.TelecomManager
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallState
+import io.getstream.video.android.core.ClientState
+import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.notifications.NotificationType
+import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceRingingStateObserver
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomPermissions
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
+import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
 import io.getstream.video.android.model.StreamCallId
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +61,7 @@ import org.junit.Before
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.util.ReflectionHelpers
 import kotlin.test.Test
 
 /**
@@ -95,6 +107,8 @@ class ServiceLauncherTest {
         mockkConstructor(JetpackTelecomRepository::class)
         mockkConstructor(JetpackTelecomRepositoryProvider::class)
         mockkConstructor(IncomingCallPresenter::class)
+        mockkConstructor(CallServiceRingingStateObserver::class)
+        mockkConstructor(TelecomCallController::class)
         mockkConstructor(TelecomPermissions::class)
         mockkConstructor(TelecomHelper::class)
 
@@ -116,12 +130,33 @@ class ServiceLauncherTest {
             )
         } returns ShowIncomingCallResult.FG_SERVICE
         every {
+            anyConstructed<IncomingCallPresenter>().showIncomingCallNotification(
+                any(),
+                any(),
+                any(),
+            )
+        } returns ShowIncomingCallResult.ONLY_NOTIFICATION
+        every {
             anyConstructed<JetpackTelecomRepositoryProvider>().get(any())
         } returns jetpackTelecomRepository
+        every { anyConstructed<TelecomCallController>().leaveCall(any()) } returns Unit
+        every { anyConstructed<CallServiceRingingStateObserver>().observe(any()) } returns Unit
 
         every { StreamVideo.instanceOrNull() } returns streamVideo
         every { StreamVideo.instance() } returns streamVideo
+        every { streamVideo.debugUseNotificationRingtoneForIncomingCalls } returns true
         every { jetpackTelecomRepositoryProvider.get(any()) } returns jetpackTelecomRepository
+        coEvery {
+            jetpackTelecomRepository.registerCall(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } coAnswers {
+            arg<() -> Unit>(4).invoke()
+        }
 
         serviceLauncher = ServiceLauncher(context)
     }
@@ -153,7 +188,6 @@ class ServiceLauncherTest {
         } returns mockk()
 
         serviceLauncher.showIncomingCall(
-            context = context,
             callId = callId,
             callDisplayName = "Test Caller",
             callServiceConfiguration = callServiceConfig,
@@ -168,11 +202,212 @@ class ServiceLauncherTest {
     }
 
     @Test
-    fun `showIncomingCall skips telecom when permissions fail`() = runTest {
-        every { anyConstructed<TelecomPermissions>().canUseTelecom(any(), any()) } returns false
+    fun `Android 17 incoming call registers Telecom and posts notification without starting service`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val testScope = TestScope(testDispatcher)
+        val callState = mockk<CallState>(relaxed = true)
+        val call = mockk<Call>(relaxed = true) {
+            every { state } returns callState
+            every { scope } returns testScope
+        }
+        val clientState = mockk<ClientState>(relaxed = true)
+        every { streamVideo.call(any(), any()) } returns call
+        every { streamVideo.state } returns clientState
+        serviceLauncher = createAndroid17ServiceLauncher()
 
         serviceLauncher.showIncomingCall(
-            context,
+            callId = callId,
+            callDisplayName = "Test Caller",
+            callServiceConfiguration = callServiceConfig,
+            isVideo = true,
+            payload = emptyMap(),
+            streamVideo = streamVideo,
+            notification = notification,
+        )
+        testScheduler.advanceUntilIdle()
+
+        verify(exactly = 0) { ContextCompat.startForegroundService(any(), any()) }
+        verify(exactly = 0) {
+            anyConstructed<IncomingCallPresenter>().showIncomingCall(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+        verify {
+            clientState.addRingingCall(call, any<RingingState.Incoming>())
+            callState.updateRingingState()
+            anyConstructed<IncomingCallPresenter>().showIncomingCallNotification(
+                context,
+                callId,
+                notification,
+            )
+        }
+        coVerify {
+            jetpackTelecomRepository.registerCall(
+                "Test Caller",
+                any<Uri>(),
+                true,
+                true,
+                any(),
+            )
+            streamVideo.connectIfNotAlreadyConnected()
+        }
+    }
+
+    @Test
+    fun `Android 17 connects WebSocket only after Telecom registration is confirmed`() = runTest {
+        val onRegistered = slot<() -> Unit>()
+        coEvery {
+            jetpackTelecomRepository.registerCall(
+                any(),
+                any(),
+                any(),
+                any(),
+                capture(onRegistered),
+            )
+        } returns Unit
+
+        val callState = mockk<CallState>(relaxed = true)
+        val call = mockk<Call>(relaxed = true) {
+            every { state } returns callState
+            every { scope } returns TestScope(StandardTestDispatcher(testScheduler))
+        }
+        every { streamVideo.call(any(), any()) } returns call
+        every { streamVideo.state } returns mockk<ClientState>(relaxed = true)
+        serviceLauncher = createAndroid17ServiceLauncher()
+
+        serviceLauncher.showIncomingCall(
+            callId = callId,
+            callDisplayName = "Test Caller",
+            callServiceConfiguration = callServiceConfig,
+            isVideo = true,
+            payload = emptyMap(),
+            streamVideo = streamVideo,
+            notification = notification,
+        )
+        testScheduler.advanceUntilIdle()
+
+        verify(exactly = 0) {
+            anyConstructed<IncomingCallPresenter>().showIncomingCallNotification(
+                any(),
+                any(),
+                any(),
+            )
+        }
+        coVerify(exactly = 0) { streamVideo.connectIfNotAlreadyConnected() }
+
+        onRegistered.captured.invoke()
+        testScheduler.advanceUntilIdle()
+
+        verify(exactly = 1) {
+            anyConstructed<IncomingCallPresenter>().showIncomingCallNotification(
+                context,
+                callId,
+                notification,
+            )
+        }
+        coVerify(exactly = 1) { streamVideo.connectIfNotAlreadyConnected() }
+        verify(exactly = 0) { ContextCompat.startForegroundService(any(), any()) }
+        verify(exactly = 0) {
+            anyConstructed<CallServiceRingingStateObserver>().observe(any())
+        }
+    }
+
+    @Test
+    fun `Android 17 notification ringtone disabled keeps coordinator and observes manual sound`() = runTest {
+        val callState = mockk<CallState>(relaxed = true)
+        val call = mockk<Call>(relaxed = true) {
+            every { state } returns callState
+            every { scope } returns TestScope(StandardTestDispatcher(testScheduler))
+        }
+        val clientState = mockk<ClientState>(relaxed = true)
+        every { streamVideo.call(any(), any()) } returns call
+        every { streamVideo.state } returns clientState
+        every { streamVideo.debugUseNotificationRingtoneForIncomingCalls } returns false
+        serviceLauncher = createAndroid17ServiceLauncher()
+
+        serviceLauncher.showIncomingCall(
+            callId = callId,
+            callDisplayName = "Test Caller",
+            callServiceConfiguration = callServiceConfig,
+            isVideo = true,
+            payload = emptyMap(),
+            streamVideo = streamVideo,
+            notification = notification,
+        )
+        testScheduler.advanceUntilIdle()
+
+        verify {
+            clientState.addRingingCall(call, any<RingingState.Incoming>())
+            callState.updateRingingState()
+            anyConstructed<IncomingCallPresenter>().showIncomingCallNotification(
+                context,
+                callId,
+                notification,
+            )
+            anyConstructed<CallServiceRingingStateObserver>().observe(any())
+        }
+        verify(exactly = 0) {
+            anyConstructed<IncomingCallPresenter>().showIncomingCall(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
+    fun `Android 17 incoming removal cancels notification without starting service`() {
+        val notificationManager = mockk<NotificationManagerCompat>(relaxed = true)
+        mockkStatic(NotificationManagerCompat::class)
+        every { NotificationManagerCompat.from(context) } returns notificationManager
+        serviceLauncher = createAndroid17ServiceLauncher()
+
+        serviceLauncher.removeIncomingCall(callId, callServiceConfig)
+
+        verify {
+            notificationManager.cancel(callId.getNotificationId(NotificationType.Incoming))
+        }
+        verify(exactly = 0) { context.startService(any()) }
+    }
+
+    @Test
+    fun `Android 17 terminal cleanup unregisters Telecom when call service is disabled`() {
+        val notificationManager = mockk<NotificationManagerCompat>(relaxed = true)
+        val activityManager = mockk<ActivityManager>(relaxed = true)
+        val call = mockk<Call>(relaxed = true) {
+            every { type } returns callId.type
+            every { cid } returns callId.cid
+        }
+        every { streamVideo.context } returns context
+        every { streamVideo.callServiceConfigRegistry.get(callId.type) } returns
+            callServiceConfig.copy(runCallServiceInForeground = false)
+        every { context.getSystemService(Context.ACTIVITY_SERVICE) } returns activityManager
+        every { activityManager.getRunningServices(any()) } returns emptyList()
+        mockkStatic(NotificationManagerCompat::class)
+        every { NotificationManagerCompat.from(context) } returns notificationManager
+        serviceLauncher = createAndroid17ServiceLauncher()
+
+        serviceLauncher.stopService(call)
+
+        verify {
+            notificationManager.cancel(callId.getNotificationId(NotificationType.Incoming))
+            anyConstructed<TelecomCallController>().leaveCall(call)
+        }
+        verify(exactly = 0) { context.stopService(any()) }
+    }
+
+    @Test
+    fun `Android 17 falls back to pre Android 17 route when Telecom permissions fail`() = runTest {
+        every { anyConstructed<TelecomPermissions>().canUseTelecom(any(), any()) } returns false
+        serviceLauncher = createAndroid17ServiceLauncher()
+
+        serviceLauncher.showIncomingCall(
             callId,
             "Test Caller",
             callServiceConfig,
@@ -183,9 +418,28 @@ class ServiceLauncherTest {
         )
 
         coVerify(exactly = 0) { jetpackTelecomRepository.registerCall(any(), any(), any(), any()) }
+        verify(exactly = 1) {
+            anyConstructed<IncomingCallPresenter>().showIncomingCall(
+                context,
+                callId,
+                "Test Caller",
+                callServiceConfig,
+                notification,
+            )
+        }
     }
 
     //
+
+    private fun createAndroid17ServiceLauncher(): ServiceLauncher {
+        ReflectionHelpers.setStaticField(
+            Build.VERSION::class.java,
+            "SDK_INT",
+            BUILD_VERSION_CODES_CINNAMON_BUN,
+        )
+        return ServiceLauncher(context)
+    }
+
 //    // endregion
 //
 //    // region showOutgoingCall()

@@ -137,6 +137,26 @@ class IncomingCallPresenterTest {
     }
 
     @Test
+    fun `notification-only path posts notification without starting service`() {
+        mockNotificationPermission(granted = true)
+        val dispatcher = mockk<DefaultNotificationDispatcher>(relaxed = true)
+        every {
+            StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()
+        } returns dispatcher
+
+        val result = presenter.showIncomingCallNotification(
+            context = context,
+            callId = callId,
+            notification = notification,
+        )
+
+        assertEquals(ShowIncomingCallResult.ONLY_NOTIFICATION, result)
+        verify { dispatcher.notify(callId, any(), notification) }
+        verify(exactly = 0) { ContextCompat.startForegroundService(any(), any()) }
+        verify(exactly = 0) { context.startService(any()) }
+    }
+
+    @Test
     fun `returns SERVICE when active call and service not running`() {
         // given
         mockActiveCall()

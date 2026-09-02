@@ -111,6 +111,7 @@ class CallServiceRingingStateObserverTest {
             every { this@mockk.context } returns testContext
             every { this@mockk.vibrationConfig } returns vibrationConfig
             every { this@mockk.sounds } returns sounds
+            every { this@mockk.debugUseNotificationRingtoneForIncomingCalls } returns false
         }
 
         observer = CallServiceRingingStateObserver(
@@ -132,6 +133,21 @@ class CallServiceRingingStateObserverTest {
         verify {
             soundPlayer.vibrate(any())
             soundPlayer.playCallSound(any(), true)
+        }
+    }
+
+    @Test
+    fun `incoming notification ringtone suppresses manual sound and vibration`() = runTest {
+        every { streamVideo.debugUseNotificationRingtoneForIncomingCalls } returns true
+        observer.observe { onStopServiceInvoked.add(Unit) }
+        advanceUntilIdle()
+
+        ringingStateFlow.value = RingingState.Incoming(acceptedByMe = false)
+        advanceUntilIdle()
+
+        verify(exactly = 0) {
+            soundPlayer.vibrate(any())
+            soundPlayer.playCallSound(any(), any())
         }
     }
 

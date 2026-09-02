@@ -55,6 +55,7 @@ public data class CallServiceConfig(
 
 private fun defaultTelecomEnabled(): Boolean =
     Build.VERSION.SDK_INT >= BUILD_VERSION_CODES_CINNAMON_BUN
+
 /**
  * Returns the default call foreground service configuration.
  * Uses: `FOREGROUND_SERVICE_TYPE_PHONE_CALL`.

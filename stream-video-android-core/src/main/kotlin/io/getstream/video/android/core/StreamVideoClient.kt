@@ -106,6 +106,7 @@ import io.getstream.video.android.core.notifications.internal.service.ANY_MARKER
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.ServiceIntentBuilder
 import io.getstream.video.android.core.notifications.internal.service.StopServiceParam
+import io.getstream.video.android.core.notifications.internal.telecom.DefaultTelecomConfig
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
@@ -194,8 +195,10 @@ internal class StreamVideoClient internal constructor(
     internal val enableCallUpdatesAfterLeave: Boolean = false,
     internal val enableStatsCollection: Boolean = true,
     internal val enableStereoForSubscriber: Boolean = true,
-    internal val telecomConfig: TelecomConfig? = null,
+    internal val telecomConfig: TelecomConfig? = DefaultTelecomConfig(context).get(),
     internal val rejectCallWhenBusy: Boolean = false,
+    internal val debugUseNotificationRingtoneForIncomingCalls: Boolean = true,
+    internal val debugUseTelecomFirstForIncomingCalls: Boolean = false,
     internal val analytics: AnalyticsModule = AnalyticsModule.getDefault(
         coordinatorConnectionModule.api,
         scope,

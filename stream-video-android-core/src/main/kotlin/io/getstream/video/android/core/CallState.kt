@@ -114,6 +114,7 @@ import io.getstream.video.android.core.moderations.ModerationManager
 import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.models.ServiceRoute
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.permission.PermissionRequest
@@ -795,6 +796,11 @@ public class CallState(
 
     @Volatile
     internal var callJoinInterceptor: CallJoinInterceptor? = null
+
+    private val _serviceRoute = MutableStateFlow(ServiceRoute.UNDECIDED)
+
+    internal val serviceRoute: StateFlow<ServiceRoute> =
+        _serviceRoute.asStateFlow()
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
@@ -1885,6 +1891,10 @@ public class CallState(
                     }
                 }
         }
+    }
+
+    internal fun updateServiceRoute(route: ServiceRoute) {
+        _serviceRoute.value = route
     }
 
     internal fun cleanup() {

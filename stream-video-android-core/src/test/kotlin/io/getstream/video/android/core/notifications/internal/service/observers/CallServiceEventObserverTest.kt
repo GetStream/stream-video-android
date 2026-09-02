@@ -105,7 +105,7 @@ class CallServiceEventObserverTest {
             onRemoveIncomingInvoked = true
         }
 
-        observer = CallServiceEventObserver(call, streamVideo, testScope)
+        observer = CallServiceEventObserver(call, streamVideo)
     }
 
     @After

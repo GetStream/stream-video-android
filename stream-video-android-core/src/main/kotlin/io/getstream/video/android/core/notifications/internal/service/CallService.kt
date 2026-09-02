@@ -40,6 +40,8 @@ import io.getstream.video.android.core.notifications.internal.service.controller
 import io.getstream.video.android.core.notifications.internal.service.managers.CallServiceLifecycleManager
 import io.getstream.video.android.core.notifications.internal.service.managers.CallServiceNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.models.CallIntentParams
+import io.getstream.video.android.core.notifications.internal.service.models.ServiceRoute
+import io.getstream.video.android.core.notifications.internal.service.observers.CallRejectionObserver
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceEventObserver
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceNotificationUpdateObserver
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceRingingStateObserver
@@ -535,42 +537,47 @@ internal open class CallService : Service() {
     }
 
     private fun observeCall(call: Call, streamVideo: StreamVideoClient) {
-        CallServiceRingingStateObserver(
-            call,
-            serviceStateController.soundPlayer,
-            streamVideo,
-            serviceScope,
-        )
-            .observe { stopServiceGracefully() }
-
-        CallServiceEventObserver(call, streamVideo, serviceScope)
-            .observe(
-                onServiceStop = { stopServiceGracefully() },
-                onRemoveIncoming = {
-                    removeIncomingCall(call)
-                },
-            )
-
-        if (streamVideo.enableCallNotificationUpdates) {
-            CallServiceNotificationUpdateObserver(
+        if (call.state.serviceRoute.value == ServiceRoute.LEGACY_CALL_SERVICE) {
+            CallServiceRingingStateObserver(
                 call,
+                serviceStateController.soundPlayer,
                 streamVideo,
                 serviceScope,
-                permissionManager,
-            ) {
-                    notificationId: Int,
-                    notification: Notification,
-                    trigger: String,
-                    foregroundServiceType: Int,
-                ->
-                startForegroundWithServiceType(
-                    notificationId,
-                    notification,
-                    trigger,
-                    foregroundServiceType,
+            )
+                .observe { stopServiceGracefully() }
+
+            CallRejectionObserver(call, streamVideo)
+                .observe()
+
+            CallServiceEventObserver(call, streamVideo)
+                .observe(
+                    onServiceStop = { stopServiceGracefully() },
+                    onRemoveIncoming = {
+                        removeIncomingCall(call)
+                    },
                 )
+
+            if (streamVideo.enableCallNotificationUpdates) {
+                CallServiceNotificationUpdateObserver(
+                    call,
+                    streamVideo,
+                    serviceScope,
+                    permissionManager,
+                ) {
+                        notificationId: Int,
+                        notification: Notification,
+                        trigger: String,
+                        foregroundServiceType: Int,
+                    ->
+                    startForegroundWithServiceType(
+                        notificationId,
+                        notification,
+                        trigger,
+                        foregroundServiceType,
+                    )
+                }
+                    .observe()
             }
-                .observe(baseContext)
         }
     }
 

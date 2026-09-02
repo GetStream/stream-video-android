@@ -22,14 +22,18 @@ import android.os.Bundle
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.RejectReason
-import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.model.StreamCallId
 
 internal class ExternalCallRejectionHandler() {
     private val logger by taggedLogger("CallRejectionHandler")
 
-    suspend fun onRejectCall(source: ExternalCallRejectionSource, call: Call, context: Context, intent: Intent = Intent()) {
+    suspend fun onRejectCall(
+        source: ExternalCallRejectionSource,
+        call: Call,
+        context: Context,
+        intent: Intent = Intent(),
+    ) {
         when (
             val rejectResult = call.reject(
                 source = "ExternalCallRejectionHandler.$source",
@@ -45,34 +49,35 @@ internal class ExternalCallRejectionHandler() {
                 }
                 logger.d { "[onRejectCall] source:$source rejectCall, Success: $rejectResult" }
             }
+
             is Result.Failure -> {
                 logger.d { "[onRejectCall] source:$source, rejectCall, Failure: $rejectResult" }
             }
         }
         logger.d { "[onRejectCall] source:$source, #ringing; callId: ${call.id}, action: ${intent.action}" }
+        StreamVideo.instanceOrNull()?.let { streamVideo ->
+            streamVideo.state.serviceLauncher.removeIncomingCall(
+                StreamCallId.fromCallCid(call.cid),
+                StreamVideo.instance().state.callConfigRegistry.get(call.type),
+            )
+            when (source) {
+                ExternalCallRejectionSource.NOTIFICATION -> {
+                    TelecomCallController(context)
+                        .leaveCall(call)
+                }
 
-        val serviceLauncher = ServiceLauncher(context)
-        serviceLauncher.removeIncomingCall(
-            context,
-            StreamCallId.fromCallCid(call.cid),
-            StreamVideo.instance().state.callConfigRegistry.get(call.type),
-        )
-        when (source) {
-            ExternalCallRejectionSource.NOTIFICATION -> {
-                TelecomCallController(context)
-                    .leaveCall(call)
-            }
-            ExternalCallRejectionSource.WEARABLE -> {
-                /**
-                 * Following the same logic from StreamCallActivity.reject(Call, RejectReason?,
-                 *         onSuccess: (suspend (Call) -> Unit)?,
-                 *         onError: (suspend (Exception) -> Unit)?,)
-                 */
-                call.leave(
-                    CallLeaveReason.UserAction(
-                        cause = UserActionCause.WEARABLE_REJECTED,
-                    ),
-                )
+                ExternalCallRejectionSource.WEARABLE -> {
+                    /**
+                     * Following the same logic from StreamCallActivity.reject(Call, RejectReason?,
+                     *         onSuccess: (suspend (Call) -> Unit)?,
+                     *         onError: (suspend (Exception) -> Unit)?,)
+                     */
+                    call.leave(
+                        CallLeaveReason.UserAction(
+                            cause = UserActionCause.WEARABLE_REJECTED,
+                        ),
+                    )
+                }
             }
         }
     }
