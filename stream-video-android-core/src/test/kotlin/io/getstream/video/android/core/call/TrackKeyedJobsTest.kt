@@ -79,4 +79,34 @@ class TrackKeyedJobsTest {
             scope.coroutineContext[Job]?.cancel()
         }
     }
+
+    @Test
+    fun `cancelAll cancels every track job and clears the map`() = runTest {
+        val scope = CoroutineScope(UnconfinedTestDispatcher(testScheduler) + Job())
+        val jobs = TrackKeyedJobs()
+        val audioHold = CompletableDeferred<Unit>()
+        val videoHold = CompletableDeferred<Unit>()
+        val audioDone = AtomicBoolean(false)
+        val videoDone = AtomicBoolean(false)
+
+        try {
+            jobs.launch(scope, TrackType.TRACK_TYPE_AUDIO) {
+                audioHold.await()
+                audioDone.set(true)
+            }
+            jobs.launch(scope, TrackType.TRACK_TYPE_VIDEO) {
+                videoHold.await()
+                videoDone.set(true)
+            }
+
+            jobs.cancelAll()
+            audioHold.complete(Unit)
+            videoHold.complete(Unit)
+
+            assertThat(audioDone.get()).isFalse()
+            assertThat(videoDone.get()).isFalse()
+        } finally {
+            scope.coroutineContext[Job]?.cancel()
+        }
+    }
 }

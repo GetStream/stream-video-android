@@ -173,6 +173,7 @@ import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.io.InterruptedIOException
 import java.net.SocketTimeoutException
 import java.util.Collections
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 /**
  * Keeps track of which track is being rendered at what resolution.
@@ -328,6 +329,13 @@ public class RtcSession internal constructor(
     },
 ) {
     private val muteStateSyncJobs = TrackKeyedJobs()
+
+    /**
+     * When false, [setMuteState] still records the latest desired mute bits locally but does
+     * not POST [UpdateMuteStatesRequest] — used while this session's SFU is being torn down
+     * for reconnect/migration so a media collector cannot target the old connection.
+     */
+    private val muteSyncEnabled = AtomicBoolean(true)
     private val oneBasedSessionCounter = sessionCounter + 1
 
     /**
@@ -1210,6 +1218,7 @@ public class RtcSession internal constructor(
 
     private suspend fun connectRtc() {
         logger.d { "[connectRtc] #sfu; #track; no args" }
+        resumeMuteSync()
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
         publisher.value?.let {
             listenToMediaChanges()
@@ -1304,6 +1313,8 @@ public class RtcSession internal constructor(
         }
 
         mediaScope.cancel()
+        muteSyncEnabled.set(false)
+        muteStateSyncJobs.cancelAll()
 
         // cleanup all non-local tracks
         supervisorJob.cancel()
@@ -1349,15 +1360,30 @@ public class RtcSession internal constructor(
      *
      * The local mute map is updated with [MutableStateFlow.update] so concurrent collectors
      * cannot lose another track's bit via a stale read–copy–write.
+     *
+     * During reconnect/migration, [cancelActiveWork] pauses SFU sync so collectors can keep
+     * recording the latest desired bits without posting to a stale connection. Sync resumes
+     * from [connectRtc] once the active SFU is ready.
      */
     private fun setMuteState(isEnabled: Boolean, trackType: TrackType) {
         logger.d { "[setPublishState] #sfu; $trackType isEnabled: $isEnabled" }
 
         muteState.update { it + (trackType to isEnabled) }
+        syncMuteStateToSfu(trackType, isEnabled)
+    }
+
+    private fun syncMuteStateToSfu(trackType: TrackType, isEnabled: Boolean) {
+        if (!muteSyncEnabled.get()) {
+            logger.d {
+                "[syncMuteStateToSfu] deferred until SFU is ready; $trackType isEnabled: $isEnabled"
+            }
+            return
+        }
 
         val currentSfu = sfuUrl
         // Coalesce retries for this track only. Other tracks keep their in-flight RPCs.
         muteStateSyncJobs.launch(coroutineScope, trackType) {
+            if (!muteSyncEnabled.get()) return@launch
             flow {
                 val request = UpdateMuteStatesRequest(
                     session_id = sessionId,
@@ -1372,6 +1398,7 @@ public class RtcSession internal constructor(
                 emit(response)
             }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                 if (cause is SessionFatalException) return@retryWhen false
+                if (!muteSyncEnabled.get()) return@retryWhen false
                 val sameValue = muteState.value[trackType] == isEnabled
                 val sameSfu = currentSfu == sfuUrl
                 val isPermanent = isPermanentError(cause)
@@ -1383,6 +1410,14 @@ public class RtcSession internal constructor(
                 delay(delayInMs)
                 willRetry
             }.collect()
+        }
+    }
+
+    private fun resumeMuteSync() {
+        if (!muteSyncEnabled.compareAndSet(false, true)) return
+        logger.d { "[resumeMuteSync] flushing latest mute state to the active SFU" }
+        muteState.value.forEach { (trackType, isEnabled) ->
+            syncMuteStateToSfu(trackType, isEnabled)
         }
     }
 
@@ -2121,6 +2156,7 @@ public class RtcSession internal constructor(
         if (cancelEventJob) eventJob?.cancel()
         iceMonitoringJob?.cancel()
         iceMonitoringJob = null
+        muteSyncEnabled.set(false)
         muteStateSyncJobs.cancelAll()
         participantsMonitoringJob?.cancel()
         participantsMonitoringJob = null

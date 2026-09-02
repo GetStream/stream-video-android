@@ -80,6 +80,7 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
 import stream.video.sfu.signal.StartNoiseCancellationRequest
 import stream.video.sfu.signal.StopNoiseCancellationRequest
 import java.io.InterruptedIOException
+import java.util.concurrent.atomic.AtomicBoolean
 
 class RtcSessionTest2 {
 
@@ -927,6 +928,53 @@ class RtcSessionTest2 {
     }
 
     @Test
+    fun `mute collectors during migration keep local state and do not call the old SFU`() =
+        runTest(testDispatcher) {
+            val signalService = mockk<SignalServerService>(relaxed = true)
+            ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+            val (rtcSession, publisherMock) = muteSyncSession(signalService)
+            rtcSession.publisher.value = publisherMock
+            val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+            coEvery {
+                publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
+            } returns audioTrack
+
+            rtcSession.enterMigration()
+            rtcSession.createAndPublishAudioTrack()
+            testScheduler.advanceUntilIdle()
+
+            assertEquals(true, rtcSession.muteState.value[TrackType.TRACK_TYPE_AUDIO])
+            coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
+        }
+
+    @Test
+    fun `mute sync resumes and flushes local state once the SFU is ready`() = runTest(
+        testDispatcher,
+    ) {
+        val signalService = mockk<SignalServerService>(relaxed = true)
+        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+        val (rtcSession, publisherMock) = muteSyncSession(signalService)
+        rtcSession.publisher.value = publisherMock
+        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+        coEvery {
+            publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
+        } returns audioTrack
+
+        rtcSession.enterMigration()
+        rtcSession.createAndPublishAudioTrack()
+        testScheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
+        assertEquals(false, muteSyncEnabled(rtcSession).get())
+
+        RtcSession::class.java.getDeclaredMethod("resumeMuteSync").apply {
+            isAccessible = true
+            invoke(rtcSession)
+        }
+
+        assertEquals(true, muteSyncEnabled(rtcSession).get())
+    }
+
+    @Test
     fun `stopNoiseCancellation sends the request to the SFU with the session id`() = runTest {
         // Given
         val signalService = mockk<SignalServerService>(relaxed = true)
@@ -941,6 +989,44 @@ class RtcSessionTest2 {
                 StopNoiseCancellationRequest(session_id = "session-id"),
             )
         }
+    }
+
+    private fun muteSyncEnabled(rtcSession: RtcSession): AtomicBoolean {
+        val field = RtcSession::class.java.getDeclaredField("muteSyncEnabled")
+        field.isAccessible = true
+        return field.get(rtcSession) as AtomicBoolean
+    }
+
+    private fun muteSyncSession(
+        signalService: SignalServerService,
+    ): Pair<RtcSession, Publisher> {
+        val mockModule = mockk<SfuConnectionModule>(relaxed = true) {
+            every { api } returns signalService
+        }
+        val rtcSession = spyk(
+            RtcSession(
+                client = mockStreamVideo,
+                powerManager = mockPowerManager,
+                call = mockCall,
+                sessionManager = CallSessionManager(),
+                sessionId = "session-id",
+                apiKey = "api-key",
+                lifecycle = mockLifecycle,
+                sfuUrl = "https://test-sfu.stream.com",
+                sfuWsUrl = "wss://test-sfu.stream.com",
+                sfuToken = "fake-sfu-token",
+                sfuName = "test-sfu-edge",
+                clientImpl = mockVideoClient,
+                coroutineScope = testScope,
+                rtcSessionScope = testScope,
+                remoteIceServers = emptyList(),
+                sfuConnectionModuleProvider = { mockModule },
+                sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+            ),
+            recordPrivateCalls = true,
+        )
+        val publisherMock = mockk<Publisher>(relaxed = true)
+        return rtcSession to publisherMock
     }
 
     private fun noiseCancellationSession(
