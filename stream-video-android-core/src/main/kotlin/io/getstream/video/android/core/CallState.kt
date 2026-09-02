@@ -86,6 +86,7 @@ import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ConnectionQualityChangeEvent
@@ -131,7 +132,6 @@ import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.currentCoroutineContext
@@ -1354,7 +1354,6 @@ public class CallState(
             _session.value?.participants?.find { it.user.id == client.userId } != null
         val outgoingMembersCount = _members.value.filter { it.value.user.id != client.userId }.size
         val isCallEnded: Boolean = _endedAt.value != null
-        val createdBySelf = createdBy?.id == client.userId
 
         ringingLogger.d { "Current: ${_ringingState.value}, call_id: ${call.cid}" }
 
@@ -1430,6 +1429,11 @@ public class CallState(
         } else {
             if (_ringingState.value is RingingState.Incoming && !acceptedOnThisDevice) {
                 RingingState.TimeoutNoAnswer
+            } else if (isJoinAndRingInProgress.get() && _ringingState.value is RingingState.Outgoing) {
+                // During join-and-ring the SFU join sets Outgoing before the ring request has
+                // registered this call in client.state.ringingCall, so hasRingingCall is still
+                // false here. Falling back to Idle would hide the outgoing ringing UI.
+                _ringingState.value
             } else {
                 RingingState.Idle
             }
@@ -1898,12 +1902,12 @@ public class CallState(
     private fun observeTelecomHold(repo: JetpackTelecomRepository) {
         telecomHoldObserverJob?.cancel()
 
-        telecomHoldObserverJob = scope.launch(Dispatchers.Default) {
+        telecomHoldObserverJob = scope.launch(DispatcherProvider.Default) {
             repo.currentCall
                 .map { (it as? TelecomCall.Registered)?.isOnHold == true }
                 .distinctUntilChanged()
                 .filter { it }
-                .collect { isOnHold ->
+                .collect { _ ->
                     when (ringingState.value) {
                         is RingingState.Active -> {
                             call.leave(CallLeaveReason.SdkDriven(cause = SdkCause.CALL_ON_HOLD))

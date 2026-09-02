@@ -285,9 +285,11 @@ class CallJoinCoordinatorTest {
     ) {
         val coordinator = coordinator()
         val transient = Error.ThrowableError("Unable to resolve host", Exception("dns"))
+        val permanentThrowable = Error.ThrowableError("socket reset", Exception("io"))
         val permanent = Error.GenericError("server error")
 
         assertThat(coordinator.isPermanentError(transient)).isFalse()
+        assertThat(coordinator.isPermanentError(permanentThrowable)).isTrue()
         assertThat(coordinator.isPermanentError(permanent)).isTrue()
     }
 
@@ -642,6 +644,28 @@ class CallJoinCoordinatorTest {
     }
 
     @Test
+    fun `join succeeds when a recoverable socket failure recovers`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } coAnswers {
+            // The reconnect settled as Connected before recovery was evaluated.
+            connectionFlow.value = RealtimeConnection.Connected
+            SfuConnectionResult.Failure(
+                Exception("recoverable socket failure"),
+                cause = SfuConnectFailureCause.RecoverableSocketFailure,
+            )
+        }
+
+        val result = coordinator().joinInternal(
+            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
+        )
+        advanceUntilIdle()
+
+        assertThat(result).isInstanceOf(Success::class.java)
+    }
+
+    @Test
     fun `joinAndRing joins then rings the members`() = runTest(testDispatcher) {
         stubJoinCall(Success(mockJoinResponse))
         coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
@@ -653,6 +677,9 @@ class CallJoinCoordinatorTest {
 
         assertThat(result).isInstanceOf(Success::class.java)
         coVerify { apiClient.ring(any<RingCallRequest>()) }
+        // registerOutgoingRing (not markRinging) so the outgoing call foreground service
+        // starts and the caller gets the outgoing call notification, like create-with-ring.
+        verify { callRegistry.registerOutgoingRing() }
     }
 
     @Test
