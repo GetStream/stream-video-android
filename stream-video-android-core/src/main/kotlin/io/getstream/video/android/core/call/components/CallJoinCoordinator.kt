@@ -503,9 +503,9 @@ internal class CallJoinCoordinator(
                     }
                 }
 
-                if (sfuConnectionResult.cause != SfuConnectFailureCause.TerminalSocketFailure &&
-                    !didReconnectSucceed()
-                ) {
+                // A terminal failure already returned above, so only recoverable causes
+                // reach this point and the recovery outcome is the only condition left.
+                if (!didReconnectSucceed()) {
                     logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
                     sendJoinErrorAnalytics(sfuConnectionResult)
                     discardFailedSession(localSession)
