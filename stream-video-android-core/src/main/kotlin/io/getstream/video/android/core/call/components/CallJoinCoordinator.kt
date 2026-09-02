@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.call.components
 
+import io.getstream.android.video.generated.models.JoinCallResponse
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -38,10 +39,14 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
@@ -65,21 +70,60 @@ internal class CallJoinCoordinator(
     private val callRegistry: ClientCallRegistry,
     private val hasRequiredPermissions: () -> Boolean,
 ) {
+    private companion object {
+        const val JOIN_FLIGHT_KEY = "join"
+    }
+
     private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
+
+    /**
+     * Coalesces concurrent [join] calls into one attempt on the call [scope].
+     *
+     * Without this, overlapping joins each build an [RtcSession] while reusing
+     * [CallSessionManager.sessionId], which leaves SFU-evicted zombies that fail every RPC
+     * with PARTICIPANT_NOT_FOUND. Checking [CallSessionManager.session] is not enough — it
+     * is only set after the coordinator round-trip.
+     *
+     * Coalescing the whole [join] also keeps once-per-join work once-only:
+     * MediaDevicePermission analytics, installing [CallState.callJoinInterceptor], resetting
+     * the leave guard, and moving to [RealtimeConnection.InProgress]. Each waiter still
+     * reports JoinInitiated (with a fresh attempt id) so every integrator [join] call stays
+     * observable.
+     *
+     * [StreamRefCountedSingleFlightProcessor] keeps the join alive when any waiter (including
+     * the last) is cancelled. Only [scope] cancellation — [Call.leave] / call cleanup —
+     * aborts the shared job. Each waiter registers its [CallJoinInterceptor] on the flight;
+     * the first waiter whose job is not cancelled owns the interceptor (see [Call.join]).
+     */
+    private val joinFlight = StreamRefCountedSingleFlightProcessor(scope)
 
     private fun isVideoEnabled(): Boolean = state.settings.value?.video?.enabled ?: false
 
     /**
-     * Runs the public `Call.join()` flow and emits analytics in the following order:
-     * 1. `JOIN_INITIATED`: `[io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinFunctionStart]` reports that the public SDK join method was
-     *    invoked.
-     * 2. `MEDIA_DEVICE_PERMISSION`: [io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver.mediaPermissionStatus] reports the current camera and
-     *    microphone permission state.
-     * 3. `COORDINATOR_JOIN`: [joinInternal] calls [CallApiClient.joinRequest], which reports the
-     *    stage as initiated. A successful response completes it successfully and sends `[io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinSuccess]`. A permanent error or
-     *    exhausted retry budget completes the active stage as failed through
-     *    [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinRequestPermanentError] or [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinRequestRetryExhausted] respectively.
+     * Joins the call, coalescing concurrent callers into one in-flight execution (single-flight).
      *
+     * The shared work runs on the call [scope]. Cancelling a caller (including the last
+     * waiter) does **not** abort the join — only [io.getstream.video.android.core.Call.leave]
+     * / call-scope cleanup does. Incoming accept can finish/recreate the Activity after the
+     * SFU session is already in; aborting then would leave ringing Idle (Connecting…) forever.
+     *
+     * Concurrent callers share one attempt. Join flags (`create`, `ring`, …) come from the
+     * waiter that created the flight. [CallJoinInterceptor] is first-non-cancelled-wins:
+     * the first waiter whose coroutine is still not cancelled supplies it. A coalesced
+     * caller's interceptor is used only if every earlier waiter has been cancelled (e.g.
+     * Activity recreation). `join(null)` does not erase an earlier interceptor.
+     *
+     * Analytics for the waiter that owns the join, in order:
+     * 1. `JOIN_INITIATED`: [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinFunctionStart]
+     *    reports that public `Call.join()` was invoked. Every waiter (including coalesced and
+     *    already-joined) reports this with a new joinStageAttemptId.
+     * 2. `MEDIA_DEVICE_PERMISSION`: [io.getstream.video.android.core.analytics.call.observer.MediaPermissionObserver.mediaPermissionStatus]
+     *    reports camera and microphone permission state (leader only).
+     * 3. `COORDINATOR_JOIN`: [joinInternal] calls [CallApiClient.joinRequest], which reports the
+     *    stage as initiated. A successful response completes it. A permanent error or exhausted
+     *    retry budget completes the active stage as failed through
+     *    [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinRequestPermanentError]
+     *    or [io.getstream.video.android.core.analytics.call.observer.JoinAnalytics.onJoinRequestRetryExhausted].
      */
     suspend fun join(
         create: Boolean = false,
@@ -90,6 +134,101 @@ internal class CallJoinCoordinator(
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
         callAnalytics.joinAnalytics.onJoinFunctionStart()
+        var coalesced = false
+        return joinFlight.run(
+            JOIN_FLIGHT_KEY,
+            attachment = callJoinInterceptor,
+            onCoalesced = {
+                coalesced = true
+                val selected = selectedJoinInterceptor()
+                logger.w {
+                    "[join] Concurrent join coalesced into in-flight join " +
+                        "(interceptorIgnored=${callJoinInterceptor != null &&
+                            callJoinInterceptor !== selected})"
+                }
+                if (callJoinInterceptor != null && callJoinInterceptor !== selected) {
+                    logger.w {
+                        "[join] Coalesced caller interceptor not selected; " +
+                            "first non-cancelled waiter interceptor kept"
+                    }
+                }
+                syncCallJoinInterceptor()
+            },
+            onLeader = {
+                logger.d {
+                    "[join] Started in-flight join " +
+                        "(interceptor=${callJoinInterceptor != null})"
+                }
+            },
+            cancelIfLastWaiter = false,
+        ) {
+            try {
+                executeJoin(
+                    create,
+                    createOptions,
+                    ring,
+                    notify,
+                    hintHighScaleLivestreamPublisher,
+                )
+            } finally {
+                // Freeze the live selection onto CallState before the flight is removed.
+                syncCallJoinInterceptor()
+            }
+        }.also {
+            if (coalesced) {
+                sessionManager.session.value?.sfuTracer?.trace(
+                    "join-coalesced",
+                    "concurrent join awaited in-flight join",
+                )
+            }
+        }.fold(
+            onSuccess = { it },
+            onFailure = { error ->
+                Failure(
+                    Error.ThrowableError(
+                        message = error.message ?: "Join single-flight failed",
+                        cause = error,
+                    ),
+                )
+            },
+        )
+    }
+
+    private fun selectedJoinInterceptor(): CallJoinInterceptor? =
+        joinFlight.firstNonCancelledAttachment(JOIN_FLIGHT_KEY) as? CallJoinInterceptor
+
+    private fun resolveCallJoinInterceptor(): CallJoinInterceptor? {
+        return if (joinFlight.has(JOIN_FLIGHT_KEY)) {
+            selectedJoinInterceptor()
+        } else {
+            state.callJoinInterceptor
+        }
+    }
+
+    private fun syncCallJoinInterceptor() {
+        state.callJoinInterceptor = selectedJoinInterceptor()
+        state.callJoinInterceptorProvider = { resolveCallJoinInterceptor() }
+    }
+
+    private suspend fun executeJoin(
+        create: Boolean,
+        createOptions: CreateCallOptions?,
+        ring: Boolean,
+        notify: Boolean,
+        hintHighScaleLivestreamPublisher: Boolean?,
+    ): Result<RtcSession> {
+        // Subsequent join() calls while a session is live return that session instead of
+        // building a second one. [joinInternal] repeats the same check for direct callers.
+        sessionManager.session.value?.let { existing ->
+            logger.w { "[join] Call already joined — returning existing session" }
+            existing.sfuTracer.trace("join-already-joined", "join() while session already live")
+            return Success(existing)
+        }
+
+        // Live-select before any suspend so coalesced waiters and SFU observers see the
+        // first non-cancelled waiter's interceptor, not a stale leader after Activity death.
+        syncCallJoinInterceptor()
+
         callAnalytics.mediaPermissionObserver.mediaPermissionStatus()
         logger.d {
             "[join] #ringing; #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
@@ -110,8 +249,6 @@ internal class CallJoinCoordinator(
 
         // Ensure factory is created with the current audioBitrateProfile before joining
         media.ensureFactoryMatchesAudioProfile()
-
-        state.callJoinInterceptor = callJoinInterceptor
 
         // the join flow should retry up to 3 times
         // if the error is not permanent
@@ -190,7 +327,15 @@ internal class CallJoinCoordinator(
             logger.d { "[joinAndRing] Joined #ringing; #track; ring: $members" }
             apiClient.ring(RingCallRequest(isVideoEnabled(), members)).map {
                 logger.d { "[joinAndRing] Ringed #ringing; #track; ring: $members" }
-                callRegistry.markRinging()
+                // registerOutgoingRing registers the ringing call AND starts the outgoing call
+                // foreground service, like the create-with-ring path does. markRinging alone
+                // never started the service here, so the caller had no outgoing notification
+                // (setActiveCall logs "Outgoing call service should already be running").
+                callRegistry.registerOutgoingRing()
+                // An event that arrived before the ring completed (e.g. call.session_started)
+                // computed the ringing state without the ringing call registered. Recompute so
+                // the state cannot stay Idle when no further coordinator event arrives.
+                state.updateRingingState()
                 rtcSession
             }.onError {
                 logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
@@ -206,14 +351,18 @@ internal class CallJoinCoordinator(
     }
 
     fun isPermanentError(error: Any): Boolean {
-        if (error is Error.ThrowableError) {
-            if (error.message.contains("Unable to resolve host")) {
-                return false
-            }
+        if (error is Error.ThrowableError && error.message.contains("Unable to resolve host")) {
+            return false
         }
         return true
     }
 
+    /**
+     * Performs one join attempt: coordinator round-trip, [RtcSession] creation and SFU connect.
+     *
+     * Direct callers (tests, retry loop) must not build a second session while one is live.
+     * The already-joined check here enforces that; [executeJoin] also gates before setup.
+     */
     suspend fun joinInternal(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
@@ -222,12 +371,21 @@ internal class CallJoinCoordinator(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         joinAnalyticsModel: JoinAnalyticsModel,
     ): Result<RtcSession> {
+        // Gate before any teardown: cancelSfuObservers() would leave the live session without
+        // its SFU event subscription, and only monitorSession() (further down, on the new-session
+        // path) restores it.
+        sessionManager.session.value?.let { existing ->
+            logger.i { "[joinInternal] Call already joined — returning existing session" }
+            existing.sfuTracer.trace(
+                "join-already-joined",
+                "joinInternal() while session already live",
+            )
+            return Success(existing)
+        }
+
         sessionManager.nonFastReconnectAttempts = 0
         sessionMonitor.cancelSfuObservers()
 
-        if (sessionManager.session.value != null) {
-            return Failure(Error.GenericError("Call $type:$id has already been joined"))
-        }
         logger.d {
             "[joinInternal] #track; create: $create, ring: $ring, notify: $notify, createOptions: $createOptions"
         }
@@ -278,6 +436,30 @@ internal class CallJoinCoordinator(
 
         state._connection.value = RealtimeConnection.Joined(localSession)
 
+        // [scope] cancellation (leave / call cleanup) aborts this call-scoped job. Waiter
+        // cancel does not — [join] uses cancelIfLastWaiter = false. If leave hits after the
+        // session is installed, clear it — otherwise the idempotent join() path returns
+        // Success(zombie) and we keep a half-joined participant (PARTICIPANT_NOT_FOUND).
+        try {
+            return completeJoinAfterSessionInstall(localSession, result.value)
+        } catch (ce: CancellationException) {
+            withContext(NonCancellable) {
+                logger.w {
+                    "[joinInternal] Join cancelled after session install — discarding session"
+                }
+                discardFailedSession(localSession)
+                if (state._connection.value is RealtimeConnection.Joined) {
+                    state._connection.value = RealtimeConnection.Disconnected
+                }
+            }
+            throw ce
+        }
+    }
+
+    private suspend fun completeJoinAfterSessionInstall(
+        localSession: RtcSession,
+        joinResponse: JoinCallResponse,
+    ): Result<RtcSession> {
         // This is the SFU ws connection
         val sfuConnectionResult = localSession.connectInternal()
 
@@ -312,6 +494,7 @@ internal class CallJoinCoordinator(
                             "[_join] Got terminal error while connecting to SFU. Error : $sfuConnectionResult"
                         }
                         sendJoinErrorAnalytics(sfuConnectionResult)
+                        discardFailedSession(localSession)
                         return Failure(
                             Error.GenericError(
                                 sfuConnectionResult.error.message ?: "RtcSession error occurred.",
@@ -320,16 +503,17 @@ internal class CallJoinCoordinator(
                     }
                 }
 
-                if (sfuConnectionResult.cause != SfuConnectFailureCause.TerminalSocketFailure) {
-                    if (!didReconnectSucceed()) {
-                        logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
-                        sendJoinErrorAnalytics(sfuConnectionResult)
-                        return Failure(
-                            Error.GenericError(
-                                sfuConnectionResult.error.message ?: "SFU connection failed",
-                            ),
-                        )
-                    }
+                // A terminal failure already returned above, so only recoverable causes
+                // reach this point and the recovery outcome is the only condition left.
+                if (!didReconnectSucceed()) {
+                    logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
+                    sendJoinErrorAnalytics(sfuConnectionResult)
+                    discardFailedSession(localSession)
+                    return Failure(
+                        Error.GenericError(
+                            sfuConnectionResult.error.message ?: "SFU connection failed",
+                        ),
+                    )
                 }
             }
         }
@@ -342,9 +526,31 @@ internal class CallJoinCoordinator(
         // (re)establish monitoring when the session is unchanged, using the response that
         // still matches it, so we neither double-register nor monitor with a stale response.
         if (connectedSession === localSession) {
-            sessionMonitor.monitorSession(result.value)
+            sessionMonitor.monitorSession(joinResponse)
         }
         return Success(value = connectedSession)
+    }
+
+    /**
+     * Tears down every session left after a failed join connect. Clearing the reference
+     * alone is not enough: sockets and peer connections stay alive and keep issuing SFU
+     * RPCs for a participant that is gone, which the SFU answers with PARTICIPANT_NOT_FOUND.
+     *
+     * Recoverable failures may already have swapped in a replacement via [CallReconnector]
+     * before [didReconnectSucceed] settles as failed. That replacement is not useful once
+     * join is returning Failure — tear it down too so nothing live is left behind.
+     */
+    private fun discardFailedSession(localSession: RtcSession) {
+        val active = sessionManager.session.value
+        logger.d {
+            "[joinInternal] Discarding session(s) after failed join connect " +
+                "(activeIsJoinSession=${active === localSession})"
+        }
+        sessionManager.setActiveSession(null)
+        if (active != null && active !== localSession) {
+            active.cleanup()
+        }
+        localSession.cleanup()
     }
 
     /**

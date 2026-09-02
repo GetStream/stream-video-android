@@ -87,6 +87,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomCal
 import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -102,6 +103,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
@@ -496,8 +499,8 @@ public class Call(
     private var desiredNoiseCancellationEnabled: Boolean = false
 
     /**
-     * Set when a signal had nowhere to go because no session was installed yet, so the state can
-     * be sent once one is.
+     * Set when a signal had nowhere to go because the SFU has not accepted this session yet, so
+     * the state can be sent once [JoinCallResponseEvent] arrives.
      */
     @Volatile
     private var noiseCancellationSignalPending: Boolean = false
@@ -549,6 +552,17 @@ public class Call(
         startsAt: OffsetDateTime? = null,
     ): Result<UpdateCallResponse> = apiClient.update(custom, settingsOverride, startsAt)
 
+    /**
+     * Joins the call. Concurrent callers share one in-flight attempt.
+     *
+     * Cancelling this coroutine does not abort that attempt — only [leave] does.
+     *
+     * Join flags (`create`, `ring`, and the rest) come from the caller that created the
+     * in-flight attempt. [CallJoinInterceptor] is first-non-cancelled-wins: the first
+     * waiter whose coroutine is not cancelled supplies it. A later `join(interceptor)`
+     * is used only if every earlier waiter has been cancelled. `join(null)` does not
+     * erase an earlier interceptor.
+     */
     suspend fun join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
@@ -1025,9 +1039,11 @@ public class Call(
             noiseCancellationSignals.submit("noiseCancellation") {
                 val session = session.value
                 val target = desiredNoiseCancellationEnabled
-                if (session == null) {
+                // RtcSession is installed before the SFU has accepted the join. Signalling in
+                // that window returns PARTICIPANT_NOT_FOUND and used to trigger a full rejoin.
+                if (session == null || !session.isSfuJoinComplete()) {
                     // Nothing to signal at yet. Sent by observeNoiseCancellationSignalTarget as
-                    // soon as a session is installed.
+                    // soon as the SFU delivers JoinCallResponseEvent.
                     noiseCancellationSignalPending = true
                     return@submit
                 }
@@ -1048,23 +1064,31 @@ public class Call(
     }
 
     /**
-     * Sends the noise-cancellation state to each session as it is installed.
+     * Sends the noise-cancellation state once the SFU has accepted each session.
      *
-     * Noise cancellation can be switched on before there is a session to signal at — the call
+     * Noise cancellation can be switched on before there is a participant on the SFU — the call
      * type's auto-on default and any pre-join change both land while joining is still in progress
      * — and a rejoin or migration replaces the session with one that was never told. Either way
      * the SFU would be left out of step with what is running locally.
      *
-     * Only signals when there is something to say: a signal that found no session, or noise
-     * cancellation actually being on. A call that never touches it costs no extra request.
+     * Only signals when there is something to say: a signal that found no joined session, or
+     * noise cancellation actually being on. A call that never touches it costs no extra request.
      */
     private fun observeNoiseCancellationSignalTarget() {
         scope.launch {
-            session.collect { session ->
-                if (session == null) return@collect
+            session.flatMapLatest { session ->
+                if (session == null) {
+                    flowOf(null)
+                } else {
+                    session.sfuSocketState.map { state ->
+                        session.takeIf { state is SfuSocketState.Connected }
+                    }
+                }
+            }.collect { joinedSession ->
+                if (joinedSession == null) return@collect
                 // Reads the applied state rather than replaying the last signal: a state wanted
                 // before the factory existed is applied as the factory is built, which happens
-                // while joining and after the signal that found no session.
+                // while joining and after the signal that found no joined session.
                 val applied = media.isAudioProcessingEnabledIfCreated()
                 if (noiseCancellationSignalPending || desiredNoiseCancellationEnabled || applied) {
                     publishAudioProcessingState()
@@ -1073,6 +1097,9 @@ public class Call(
             }
         }
     }
+
+    private fun RtcSession.isSfuJoinComplete(): Boolean =
+        sfuSocketState.value is SfuSocketState.Connected
 
     suspend fun startTranscription(): Result<StartTranscriptionResponse> =
         apiClient.startTranscription()
