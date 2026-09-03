@@ -16,12 +16,15 @@
 
 package io.getstream.video.android.compose.ui.components.call.activecall.internal
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GroupAdd
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamDialog
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.R
 
@@ -39,22 +42,26 @@ internal fun InviteUsersDialog(
     onDismiss: () -> Unit,
     onInviteUsers: (List<User>) -> Unit,
 ) {
-    StreamDialogPositiveNegative(
-        icon = Icons.Default.GroupAdd,
+    StreamDialog(
+        onDismissRequest = onDismiss,
+        icon = painterResource(
+            io.getstream.video.android.compose.R.drawable.stream_design_ic_user_add_fill,
+        ),
         title = stringResource(R.string.stream_video_invite_users_title),
-        positiveButton = Triple(
-            stringResource(R.string.stream_video_invite_users_accept),
-            VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
-        ) {
-            onInviteUsers(users)
-        },
-        negativeButton = Triple(
-            stringResource(R.string.stream_video_invite_users_cancel),
-            VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
-        ) {
-            onDismiss()
-        },
-        contentText = stringResource(R.string.stream_video_invite_users_message, users.size),
-        style = VideoTheme.styles.dialogStyles.defaultDialogStyle(),
-    )
+        message = stringResource(R.string.stream_video_invite_users_message, users.size),
+    ) {
+        StreamTextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { onInviteUsers(users) },
+            text = stringResource(R.string.stream_video_invite_users_accept),
+            size = StreamButtonSize.Large,
+        )
+        StreamTextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onDismiss,
+            text = stringResource(R.string.stream_video_invite_users_cancel),
+            style = StreamButtonStyleDefaults.secondaryOutline,
+            size = StreamButtonSize.Large,
+        )
+    }
 }

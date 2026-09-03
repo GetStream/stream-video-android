@@ -18,8 +18,6 @@ package io.getstream.video.android.ui.call
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GroupRemove
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,7 +64,7 @@ object DemoComponentFactory : VideoComponentFactory {
                 .testTag("Stream_ParticipantActionsIcon"),
             actions = params.actions + listOf(
                 ParticipantAction(
-                    icon = Icons.Filled.GroupRemove,
+                    icon = io.getstream.video.android.compose.R.drawable.stream_design_ic_user_remove_fill,
                     label = "Kick",
                     condition = { call, participantState ->
                         call.hasCapability(OwnCapability.KickUser) && !participantState.isLocal

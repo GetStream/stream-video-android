@@ -30,8 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -306,9 +304,11 @@ internal fun DefaultBadNetworkFallbackContent(
             modifier = Modifier
                 .padding(12.dp)
                 .align(CenterVertically),
-            imageVector = Icons.Default.SignalWifiBad,
+            painter = painterResource(
+                io.getstream.video.android.compose.R.drawable.stream_design_ic_exclamation_triangle_fill,
+            ),
             contentDescription = null,
-            tint = VideoTheme.colors.textPrimary,
+            tint = VideoTheme.colors.textOnAccent,
         )
         Text(
             modifier = Modifier.padding(12.dp),
@@ -316,7 +316,7 @@ internal fun DefaultBadNetworkFallbackContent(
                 id = io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network,
                 call.sessionId,
             ),
-            color = VideoTheme.colors.textPrimary,
+            color = VideoTheme.colors.textOnAccent,
             textAlign = TextAlign.Center,
             fontSize = 14.sp,
         )

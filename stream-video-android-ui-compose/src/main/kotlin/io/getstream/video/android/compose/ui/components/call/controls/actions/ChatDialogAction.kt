@@ -16,47 +16,47 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.ui.components.base.StreamBadgeBox
-import io.getstream.video.android.core.call.state.CallAction
-import io.getstream.video.android.core.call.state.CancelCall
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.core.call.state.ChatDialog
 
 /**
- * A call action button represents displaying a chat dialog.
+ * Opens the in-call chat, with an unread count badge.
  *
- * @param modifier Optional Modifier for this action button.
- * @param enabled Whether or not this action button will handle input events.
- * @param onCallAction A [CallAction] event that will be fired.
+ * @param modifier The modifier applied to the button.
+ * @param enabled Whether the action accepts clicks.
+ * @param messageCount The unread message count shown in the badge, or null to hide the badge.
+ * @param icon The icon of the action, or null for the default one.
+ * @param style The colors of the button. See [StreamButtonStyleDefaults].
+ * @param size The visual size of the button.
+ * @param onCallAction Called with [ChatDialog] when the action is clicked.
  */
 @Composable
 public fun ChatDialogAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     messageCount: Int? = null,
-    icon: ImageVector? = null,
-    bgColor: Color? = null,
-    iconTint: Color? = null,
-    badgeColor: Color? = null,
-    onCallAction: (CancelCall) -> Unit,
+    icon: Painter? = null,
+    style: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
+    size: StreamButtonSize = StreamButtonSize.Medium,
+    onCallAction: (ChatDialog) -> Unit,
 ): Unit = StreamBadgeBox(
     showWithoutValue = false,
-    style = VideoTheme.styles.badgeStyles.defaultBadgeStyle().copy(
-        color = badgeColor ?: VideoTheme.colors.accentSuccess,
-    ),
     text = messageCount?.toString(),
 ) {
     GenericAction(
         modifier = modifier,
+        icon = icon ?: painterResource(R.drawable.stream_design_ic_message_bubbles_fill),
         enabled = enabled,
-        onAction = { onCallAction(CancelCall) },
-        icon = icon ?: Icons.Default.QuestionAnswer,
-        color = bgColor,
-        iconTint = iconTint,
+        style = style,
+        size = size,
+        onAction = { onCallAction(ChatDialog) },
     )
 }

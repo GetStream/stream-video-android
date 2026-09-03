@@ -28,10 +28,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.model.User
 
 /**
@@ -47,9 +45,7 @@ import io.getstream.video.android.model.User
  * @param imageRequestSize The image size to be requested. Original size by default.
  * @param loadingPlaceholder Placeholder image to be displayed while loading the remote image.
  * @param previewModePlaceholder Placeholder image to be displayed in Compose previews (IDE).
- * @param textStyle The [TextStyle] to be used for the initials text fallback. The `fontSize`, `fontFamily` and `fontWeight` properties are used.
- * If the font size is too large, it will be gradually decreased automatically.
- * @param textOffset Offset to be applied to the initials text.
+ * @param textStyle The typography of the initials fallback, or null to pick one from the avatar size.
  *
  * @see [UserAvatar]
  */
@@ -65,8 +61,7 @@ public fun UserAvatarBackground(
     imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
     @DrawableRes previewModePlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
-    textStyle: TextStyle = VideoTheme.typography.headingLarge,
-    textOffset: DpOffset = DpOffset(0.dp, 0.dp),
+    textStyle: TextStyle? = null,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         Box(
@@ -84,7 +79,6 @@ public fun UserAvatarBackground(
                 loadingPlaceholder = loadingPlaceholder,
                 previewModePlaceholder = previewModePlaceholder,
                 textStyle = textStyle,
-                textOffset = textOffset,
             )
         }
     }

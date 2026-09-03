@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.ui.components.avatar
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,34 +34,20 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.placeholder.placeholder.PlaceholderPlugin
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
- * An avatar that renders an image or a fallback text. In case the image URL
- * is empty or there was an error loading the image, it falls back to showing initials.
- * If needed, the initials font size is gradually decreased automatically until the text fits within the avatar boundaries.
+ * Loads the [imageUrl] into a clipped image with a subtle border, and falls back to an
+ * [InitialsAvatar] built from [fallbackText] when there is no image or loading fails.
  *
- * @param modifier Modifier used for styling.
- * @param imageUrl The URL of the image to be displayed.
- * @param fallbackText The fallback text to be used for the initials avatar.
- * @param shape The shape of the avatar.
- * @param imageScale The scale rule used for the image.
- * @param imageDescription Accessibility description for the image.
- * @param imageRequestSize The image size to be requested.
- * @param loadingPlaceholder Placeholder image to be displayed while loading the remote image.
- * @param previewModePlaceholder Placeholder image to be displayed in Compose previews (IDE).
- * @param textStyle The text style of the [fallbackText] text. The `fontSize`, `fontFamily` and `fontWeight` properties are used.
- * If the font size is too large, it will be gradually decreased automatically.
- * @param textOffset Offset to be applied to the initials text.
- * @param onClick Handler to be called when the user clicks on the avatar.
+ * In inspection mode the image is replaced with [previewModePlaceholder].
  */
 @Composable
 internal fun Avatar(
@@ -73,15 +60,15 @@ internal fun Avatar(
     imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
     @DrawableRes previewModePlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
-    textStyle: TextStyle = VideoTheme.typography.headingLarge,
-    textOffset: DpOffset = DpOffset(0.dp, 0.dp),
+    textStyle: TextStyle? = null,
     onClick: (() -> Unit)? = null,
 ) {
     if (LocalInspectionMode.current && !imageUrl.isNullOrEmpty()) {
         Image(
             modifier = modifier
                 .fillMaxSize()
-                .clip(CircleShape)
+                .avatarBorder(shape)
+                .clip(shape)
                 .testTag("avatar"),
             painter = painterResource(id = previewModePlaceholder),
             contentScale = ContentScale.Crop,
@@ -95,7 +82,6 @@ internal fun Avatar(
             modifier = modifier,
             text = fallbackText,
             textStyle = textStyle,
-            textOffset = textOffset,
             shape = shape,
         )
         return
@@ -112,7 +98,7 @@ internal fun Avatar(
     }
 
     CoilImage(
-        modifier = clickableModifier.clip(shape),
+        modifier = clickableModifier.avatarBorder(shape).clip(shape),
         imageModel = { imageUrl },
         imageOptions = ImageOptions(
             contentDescription = imageDescription,
@@ -131,11 +117,14 @@ internal fun Avatar(
                 modifier = modifier,
                 text = fallbackText.orEmpty(),
                 textStyle = textStyle,
-                textOffset = textOffset,
                 shape = shape,
             )
         },
     )
 }
+
+@Composable
+private fun Modifier.avatarBorder(shape: Shape): Modifier =
+    border(StreamTokens.strokeW100, VideoTheme.colors.borderCoreOpacitySubtle, shape)
 
 internal const val DEFAULT_IMAGE_SIZE = -1

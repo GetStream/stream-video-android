@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
@@ -93,7 +92,6 @@ fun LiveButton(
             ToggleCameraAction(
                 modifier = Modifier.size(45.dp),
                 isCameraEnabled = isCameraEnabled,
-                shape = RoundedCornerShape(8.dp),
                 onCallAction = { callAction -> call.camera.setEnabled(callAction.isEnabled) },
             )
 
@@ -102,7 +100,6 @@ fun LiveButton(
                     .padding(horizontal = 12.dp)
                     .size(45.dp),
                 isMicrophoneEnabled = isMicrophoneEnabled,
-                shape = RoundedCornerShape(8.dp),
                 onCallAction = { callAction -> call.microphone.setEnabled(callAction.isEnabled) },
             )
         }

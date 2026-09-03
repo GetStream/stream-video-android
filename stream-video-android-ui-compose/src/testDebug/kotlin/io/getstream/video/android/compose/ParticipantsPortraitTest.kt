@@ -20,7 +20,6 @@ import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
-import io.getstream.video.android.compose.ui.components.call.renderer.CallParticipantLocalPreview
 import io.getstream.video.android.compose.ui.components.call.renderer.CallParticipantRemotePreview
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContentPreview
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideoPreview
@@ -74,20 +73,6 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     fun `call participants info app bar`() {
         snapshotWithDarkMode {
             CallParticipantListAppBarPreview()
-        }
-    }
-
-    @Test
-    fun `call participant local`() {
-        snapshot {
-            CallParticipantLocalPreview()
-        }
-    }
-
-    @Test
-    fun `call participant local in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            CallParticipantLocalPreview()
         }
     }
 

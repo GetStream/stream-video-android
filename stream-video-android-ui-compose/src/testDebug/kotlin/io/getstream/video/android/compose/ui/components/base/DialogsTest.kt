@@ -22,6 +22,9 @@ import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * Dialogs and sheets open their own window, so each palette gets its own full screen snapshot.
+ */
 internal class DialogsTest : PaparazziComposeTest {
 
     @get:Rule
@@ -54,6 +57,20 @@ internal class DialogsTest : PaparazziComposeTest {
     fun `stream dialog with input in dark mode`() {
         snapshot(isInDarkMode = true) {
             StreamDialogWithInputPreview()
+        }
+    }
+
+    @Test
+    fun `stream bottom sheet`() {
+        snapshot {
+            StreamBottomSheetPreview()
+        }
+    }
+
+    @Test
+    fun `stream bottom sheet in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            StreamBottomSheetPreview()
         }
     }
 }

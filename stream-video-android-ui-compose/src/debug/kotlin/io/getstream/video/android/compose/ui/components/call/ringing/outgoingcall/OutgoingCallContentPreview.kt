@@ -80,20 +80,3 @@ internal fun OutgoingCallContentMinimumVideoPreview() {
         isVideoType = true,
     )
 }
-
-@Preview
-@Composable
-private fun OutgoingCallContentMinimumAudioRootPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        OutgoingCallContentMinimumAudioPreview()
-    }
-}
-
-@Composable
-internal fun OutgoingCallContentMinimumAudioPreview() {
-    OutgoingCallContent(
-        call = previewCall,
-        isVideoType = false,
-    )
-}

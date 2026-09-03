@@ -19,12 +19,12 @@ package io.getstream.video.android.compose.ui.components.indicator
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 
@@ -46,16 +46,20 @@ public fun MicrophoneIndicator(
         if (isMicrophoneEnabled) {
             Icon(
                 modifier = Modifier.align(Alignment.Center),
-                imageVector = Icons.Default.Mic,
-                tint = VideoTheme.colors.textPrimary,
-                contentDescription = Icons.Default.Mic.name,
+                painter = painterResource(R.drawable.stream_design_ic_voice_fill),
+                tint = VideoTheme.colors.textOnAccent,
+                contentDescription = stringResource(
+                    io.getstream.video.android.ui.common.R.string.stream_video_call_participants_info_options_mute,
+                ),
             )
         } else {
             Icon(
                 modifier = Modifier.align(Alignment.Center),
-                imageVector = Icons.Default.MicOff,
-                tint = VideoTheme.colors.textPrimary,
-                contentDescription = Icons.Default.MicOff.name,
+                painter = painterResource(R.drawable.stream_design_ic_voice_off_fill),
+                tint = VideoTheme.colors.textOnAccent,
+                contentDescription = stringResource(
+                    io.getstream.video.android.ui.common.R.string.stream_video_call_participants_info_options_unmute,
+                ),
             )
         }
     }

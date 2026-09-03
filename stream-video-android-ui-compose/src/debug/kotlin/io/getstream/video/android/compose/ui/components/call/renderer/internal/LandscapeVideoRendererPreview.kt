@@ -76,21 +76,17 @@ private fun LandscapeParticipantsRootPreview5() {
     }
 }
 
+@Composable
+internal fun LandscapeParticipantsPreview5() {
+    LandscapeParticipants(participantCount = 5)
+}
+
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
 private fun LandscapeParticipantsRootPreview6() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         LandscapeParticipantsPreview6()
-    }
-}
-
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
-@Composable
-private fun LandscapeParticipantsRootPreview7() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        LandscapeParticipantsPreview7()
     }
 }
 
@@ -115,18 +111,8 @@ internal fun LandscapeParticipantsPreview4() {
 }
 
 @Composable
-internal fun LandscapeParticipantsPreview5() {
-    LandscapeParticipants(participantCount = 5)
-}
-
-@Composable
 internal fun LandscapeParticipantsPreview6() {
     LandscapeParticipants(participantCount = 6)
-}
-
-@Composable
-internal fun LandscapeParticipantsPreview7() {
-    LandscapeParticipants(participantCount = 7)
 }
 
 @Composable
@@ -147,4 +133,18 @@ private fun LandscapeParticipants(participantCount: Int) {
             parentSize = IntSize(screenWidth, screenHeight),
         )
     }
+}
+
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
+@Composable
+private fun LandscapeParticipantsRootPreview7() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        LandscapeParticipantsPreview7()
+    }
+}
+
+@Composable
+internal fun LandscapeParticipantsPreview7() {
+    LandscapeParticipants(participantCount = 7)
 }

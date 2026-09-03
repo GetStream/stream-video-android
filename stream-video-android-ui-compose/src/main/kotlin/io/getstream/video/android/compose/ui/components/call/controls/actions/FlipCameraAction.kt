@@ -16,34 +16,40 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FlipCameraIos
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import io.getstream.video.android.core.call.state.CallAction
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.core.call.state.FlipCamera
 
 /**
- * A call action button represents flipping a camera.
+ * Flips between the front and the back camera.
  *
- * @param modifier Optional Modifier for this action button.
- * @param enabled Whether or not this action button will handle input events.
- * @param onCallAction A [CallAction] event that will be fired.
+ * @param modifier The modifier applied to the button.
+ * @param enabled Whether the action accepts clicks.
+ * @param style The colors of the button. See [StreamButtonStyleDefaults].
+ * @param size The visual size of the button.
+ * @param onCallAction Called with [FlipCamera] when the action is clicked.
  */
 @Composable
 public fun FlipCameraAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    color: Color? = null,
-    iconTint: Color? = null,
+    style: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
+    size: StreamButtonSize = StreamButtonSize.Medium,
     onCallAction: (FlipCamera) -> Unit,
 ): Unit = GenericAction(
     modifier = modifier,
+    icon = painterResource(R.drawable.stream_design_ic_camera_flip_fill),
+    contentDescription = stringResource(
+        io.getstream.video.android.ui.common.R.string.stream_video_call_controls_flip_camera,
+    ),
     enabled = enabled,
-    color = color,
-    iconTint = iconTint,
-    icon = Icons.Default.FlipCameraIos,
-) {
-    onCallAction(FlipCamera)
-}
+    style = style,
+    size = size,
+    onAction = { onCallAction(FlipCamera) },
+)

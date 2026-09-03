@@ -61,7 +61,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -69,13 +68,12 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -91,8 +89,11 @@ import io.getstream.video.android.R
 import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamBadgeBox
-import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
-import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamDialog
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
@@ -337,13 +338,11 @@ fun CallScreen(
                                 modifier = Modifier.padding(horizontal = 8.dp),
                                 call = call,
                                 leadingContent = {
-                                    val iconOnOff = ImageVector.vectorResource(
-                                        R.drawable.ic_layout_grid,
-                                    )
+                                    val iconOnOff = painterResource(R.drawable.ic_layout_grid)
                                     Row {
                                         ToggleAction(
                                             modifier = Modifier.testTag("Stream_CallViewButton"),
-                                            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                                            offStyle = StreamButtonStyleDefaults.primarySolid,
                                             isActionActive = !isShowingLayoutChooseMenu,
                                             iconOnOff = Pair(iconOnOff, iconOnOff),
                                         ) {
@@ -458,7 +457,9 @@ fun CallScreen(
                                     StreamBadgeBox(
                                         text = participantsSize.size.toString(),
                                     ) {
-                                        GenericAction(icon = Icons.Default.People) {
+                                        GenericAction(
+                                            icon = rememberVectorPainter(Icons.Default.People),
+                                        ) {
                                             showParticipants = !showParticipants
                                         }
                                     }
@@ -534,25 +535,19 @@ fun CallScreen(
                         },
                     )
                     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                        StreamIconToggleButton(
+                        StreamIconButton(
+                            onClick = { showingLandscapeControls = !showingLandscapeControls },
+                            icon = rememberVectorPainter(Icons.Default.MoreVert),
+                            contentDescription = null,
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(16.dp),
-                            toggleState = rememberUpdatedState(
-                                newValue = ToggleableState(
-                                    showingLandscapeControls,
-                                ),
-                            ),
-                            onIcon = Icons.Default.MoreVert,
-                            onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-                            offStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
-                        ) {
-                            showingLandscapeControls = when (it) {
-                                ToggleableState.On -> false
-                                ToggleableState.Off -> true
-                                ToggleableState.Indeterminate -> false
-                            }
-                        }
+                            style = if (showingLandscapeControls) {
+                                StreamButtonStyleDefaults.primarySolid
+                            } else {
+                                StreamButtonStyleDefaults.secondaryGhost
+                            },
+                        )
                     }
                 }
             },
@@ -764,46 +759,61 @@ fun CallScreen(
         }
         // TODO: AAP, move recording and actions in separate composables.
         if (isRecording && !showRecordingWarning) {
-            StreamDialogPositiveNegative(
+            StreamDialog(
+                onDismissRequest = {},
                 title = "This call is being recorded",
-                contentText = "By staying in the call you’re consenting to being recorded.",
-                positiveButton = Triple(
-                    "Continue",
-                    VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
-                ) {
-                    showRecordingWarning = true
-                    acceptedCallRecording = true
-                },
-                negativeButton = Triple(
-                    "Leave",
-                    VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
-                ) {
-                    showRecordingWarning = false
-                    acceptedCallRecording = false
-                    call.leave()
-                },
-            )
+                message = "By staying in the call you’re consenting to being recorded.",
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+            ) {
+                StreamTextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        showRecordingWarning = true
+                        acceptedCallRecording = true
+                    },
+                    text = "Continue",
+                    size = StreamButtonSize.Large,
+                )
+                StreamTextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        showRecordingWarning = false
+                        acceptedCallRecording = false
+                        call.leave()
+                    },
+                    text = "Leave",
+                    style = StreamButtonStyleDefaults.secondaryOutline,
+                    size = StreamButtonSize.Large,
+                )
+            }
         }
         if (showEndRecordingDialog) {
-            StreamDialogPositiveNegative(
+            StreamDialog(
+                onDismissRequest = { showEndRecordingDialog = false },
                 title = "End recording",
-                contentText = "Are you sure you want to end the recording?",
-                positiveButton = Triple(
-                    "End",
-                    VideoTheme.styles.buttonStyles.alertButtonStyle(),
-                ) {
-                    scope.launch {
-                        call.stopRecording()
-                    }
-                    showEndRecordingDialog = false
-                },
-                negativeButton = Triple(
-                    "Cancel",
-                    VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
-                ) {
-                    showEndRecordingDialog = false
-                },
-            )
+                message = "Are you sure you want to end the recording?",
+            ) {
+                StreamTextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        scope.launch {
+                            call.stopRecording()
+                        }
+                        showEndRecordingDialog = false
+                    },
+                    text = "End",
+                    style = StreamButtonStyleDefaults.destructiveSolid,
+                    size = StreamButtonSize.Large,
+                )
+                StreamTextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { showEndRecordingDialog = false },
+                    text = "Cancel",
+                    style = StreamButtonStyleDefaults.secondaryOutline,
+                    size = StreamButtonSize.Large,
+                )
+            }
         }
     }
 }

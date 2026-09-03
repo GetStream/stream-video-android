@@ -70,17 +70,17 @@ internal fun barColorsFromQuality(
     is NetworkQuality.Good -> Triple(
         VideoTheme.colors.accentWarning,
         VideoTheme.colors.accentWarning,
-        VideoTheme.colors.textPrimary,
+        VideoTheme.colors.textOnAccent,
     )
     is NetworkQuality.Poor -> Triple(
         VideoTheme.colors.accentError,
-        VideoTheme.colors.textPrimary,
-        VideoTheme.colors.textPrimary,
+        VideoTheme.colors.textOnAccent,
+        VideoTheme.colors.textOnAccent,
     )
     is NetworkQuality.UnSpecified -> Triple(
-        VideoTheme.colors.textPrimary,
-        VideoTheme.colors.textPrimary,
-        VideoTheme.colors.textPrimary,
+        VideoTheme.colors.textOnAccent,
+        VideoTheme.colors.textOnAccent,
+        VideoTheme.colors.textOnAccent,
     )
 }
 

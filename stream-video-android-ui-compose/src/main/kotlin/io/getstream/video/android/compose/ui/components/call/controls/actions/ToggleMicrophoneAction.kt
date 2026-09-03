@@ -16,50 +16,49 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
-import io.getstream.video.android.core.call.state.CallAction
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.core.call.state.ToggleMicrophone
 
 /**
- * A call action button represents toggling a microphone.
+ * Mutes and unmutes the microphone.
  *
- * @param modifier Optional Modifier for this action button.
- * @param isMicrophoneEnabled Represent is camera enabled.
- * @param enabled Whether or not this action button will handle input events.
- * @param onCallAction A [CallAction] event that will be fired.
+ * @param modifier The modifier applied to the button.
+ * @param isMicrophoneEnabled Whether the action is in its active state.
+ * @param enabled Whether the action accepts clicks.
+ * @param onStyle The colors of the active state. See [StreamButtonStyleDefaults].
+ * @param offStyle The colors of the inactive state. See [StreamButtonStyleDefaults].
+ * @param size The visual size of the button.
+ * @param onCallAction Called with [ToggleMicrophone] when the action is clicked.
  */
 @Composable
 public fun ToggleMicrophoneAction(
     modifier: Modifier = Modifier,
     isMicrophoneEnabled: Boolean,
     enabled: Boolean = true,
-    shape: Shape? = null,
-    enabledColor: Color? = null,
-    disabledColor: Color? = null,
-    enabledIconTint: Color? = null,
-    disabledIconTint: Color? = null,
-    onStyle: StreamFixedSizeButtonStyle? = null,
-    offStyle: StreamFixedSizeButtonStyle? = null,
+    onStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
+    offStyle: StreamButtonStyle = StreamButtonStyleDefaults.destructiveSolid,
+    size: StreamButtonSize = StreamButtonSize.Medium,
     onCallAction: (ToggleMicrophone) -> Unit,
 ): Unit = ToggleAction(
     modifier = modifier,
-    enabled = enabled,
-    shape = shape,
-    enabledColor = enabledColor,
-    disabledColor = disabledColor,
-    enabledIconTint = enabledIconTint,
-    disabledIconTint = disabledIconTint,
     isActionActive = isMicrophoneEnabled,
+    iconOnOff = Pair(
+        painterResource(R.drawable.stream_design_ic_voice_fill),
+        painterResource(R.drawable.stream_design_ic_voice_off_fill),
+    ),
+    contentDescription = stringResource(
+        io.getstream.video.android.ui.common.R.string.stream_video_call_controls_toggle_microphone,
+    ),
+    enabled = enabled,
     onStyle = onStyle,
     offStyle = offStyle,
-    iconOnOff = Pair(Icons.Default.Mic, Icons.Default.MicOff),
-) {
-    onCallAction(ToggleMicrophone(isMicrophoneEnabled.not()))
-}
+    size = size,
+    onAction = { onCallAction(ToggleMicrophone(isMicrophoneEnabled.not())) },
+)

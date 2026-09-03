@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
+
+    Licensed under the Stream License;
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+      https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M15.8 11.7L10.38 6.28C10.33 6.23 10.27 6.19 10.21 6.17 10.14 6.14 10.07 6.12 10 6.12 9.93 6.12 9.86 6.14 9.79 6.17 9.73 6.19 9.67 6.23 9.62 6.28L4.2 11.7C4.12 11.78 4.07 11.87 4.05 11.98 4.03 12.08 4.04 12.19 4.08 12.29 4.12 12.39 4.19 12.47 4.28 12.53 4.37 12.59 4.48 12.62 4.58 12.62H15.42C15.52 12.62 15.63 12.59 15.72 12.53 15.81 12.47 15.88 12.39 15.92 12.29 15.96 12.19 15.97 12.08 15.95 11.98 15.93 11.87 15.88 11.78 15.8 11.7Z"/>
+</vector>

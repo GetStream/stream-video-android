@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
+
+    Licensed under the Stream License;
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+      https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20">
+    <path
+        android:fillColor="#FF000000"
+        android:fillType="evenOdd"
+        android:pathData="M10.31 1.88C12.38 1.88 14.37 2.7 15.84 4.16 17.3 5.63 18.13 7.62 18.13 9.69 18.12 11.76 17.3 13.74 15.83 15.21 14.37 16.67 12.38 17.5 10.31 17.5H3.75C3.42 17.5 3.1 17.37 2.87 17.13 2.63 16.9 2.5 16.58 2.5 16.25V9.69C2.5 7.62 3.32 5.63 4.79 4.16 6.25 2.7 8.24 1.88 10.31 1.88ZM10.34 13.21C10.17 13.14 9.98 13.12 9.8 13.16 9.62 13.2 9.45 13.29 9.32 13.42 9.19 13.55 9.1 13.71 9.06 13.9 9.02 14.08 9.04 14.27 9.11 14.44 9.19 14.61 9.31 14.76 9.46 14.86 9.61 14.96 9.8 15.02 9.98 15.02 10.23 15.02 10.47 14.92 10.64 14.74 10.82 14.57 10.92 14.33 10.92 14.08 10.92 13.89 10.86 13.71 10.76 13.56 10.66 13.4 10.51 13.28 10.34 13.21ZM9.98 5.64C8.26 5.64 6.86 6.9 6.86 8.45V8.77C6.86 8.93 6.92 9.09 7.04 9.21 7.16 9.33 7.31 9.39 7.48 9.39 7.65 9.39 7.81 9.33 7.92 9.21 8.04 9.09 8.11 8.93 8.11 8.77V8.45C8.11 7.59 8.95 6.89 9.98 6.89 11.01 6.89 11.86 7.59 11.86 8.45 11.86 9.31 11.01 10.02 9.98 10.02 9.81 10.02 9.66 10.08 9.54 10.2 9.42 10.32 9.36 10.48 9.36 10.64V11.27C9.36 11.43 9.42 11.59 9.54 11.71 9.66 11.83 9.81 11.89 9.98 11.89 10.15 11.89 10.31 11.83 10.42 11.71 10.54 11.59 10.61 11.43 10.61 11.27V11.21C12.03 10.95 13.11 9.81 13.11 8.45 13.11 6.9 11.7 5.64 9.98 5.64Z"/>
+</vector>

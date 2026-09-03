@@ -114,20 +114,6 @@ internal class PortraitVideoRendererTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `portrait participants 7`() {
-        snapshot {
-            PortraitParticipantsPreview7()
-        }
-    }
-
-    @Test
-    fun `portrait participants 7 in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            PortraitParticipantsPreview7()
-        }
-    }
-
-    @Test
     fun `portrait screen sharing content for other participant`() {
         snapshot {
             PortraitScreenSharingContentPreview()
@@ -138,6 +124,20 @@ internal class PortraitVideoRendererTest : PaparazziComposeTest {
     fun `portrait screen sharing content for other participant in dark mode`() {
         snapshot(isInDarkMode = true) {
             PortraitScreenSharingContentPreview()
+        }
+    }
+
+    @Test
+    fun `portrait participants 7`() {
+        snapshot {
+            PortraitParticipantsPreview7()
+        }
+    }
+
+    @Test
+    fun `portrait participants 7 in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            PortraitParticipantsPreview7()
         }
     }
 

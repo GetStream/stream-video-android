@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -45,7 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
@@ -154,17 +156,17 @@ fun LandscapeControlsContent(
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                StreamButton(
+                StreamTextButton(
                     modifier = Modifier.fillMaxWidth(),
-                    style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
-                    icon = Icons.Default.Settings,
+                    style = StreamButtonStyleDefaults.secondarySolid,
+                    leadingIcon = rememberVectorPainter(Icons.Default.Settings),
                     text = "Settings",
                     onClick = onSettings,
                 )
-                StreamButton(
+                StreamTextButton(
                     modifier = Modifier.fillMaxWidth(),
-                    style = VideoTheme.styles.buttonStyles.alertButtonStyle(),
-                    icon = Icons.Default.CallEnd,
+                    style = StreamButtonStyleDefaults.destructiveSolid,
+                    leadingIcon = rememberVectorPainter(Icons.Default.CallEnd),
                     text = "Leave call",
                     onClick = onClick,
                 )

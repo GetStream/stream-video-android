@@ -16,42 +16,39 @@
 
 package io.getstream.video.android.compose.ui.components.call.pinning
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.outlined.MoreHoriz
-import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.lifecycleScope
 import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
-import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
+import io.getstream.video.android.compose.ui.components.base.StreamListItem
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -69,7 +66,7 @@ import kotlinx.coroutines.launch
  * @param action the action (i.e. callable)
  */
 public class ParticipantAction(
-    public val icon: ImageVector,
+    @DrawableRes public val icon: Int,
     public val label: String,
     public val firstToggleAction: Boolean = true,
     public val condition: (Call, ParticipantState) -> Boolean = { _, _ -> true },
@@ -81,7 +78,7 @@ public class ParticipantAction(
  */
 internal val participantActions: List<ParticipantAction> = listOf(
     ParticipantAction(
-        icon = Icons.Outlined.PushPin,
+        icon = R.drawable.stream_design_ic_pin,
         label = "Pin",
         condition = { call, participantState ->
             !call.isLocalPin(participantState.sessionId)
@@ -93,7 +90,7 @@ internal val participantActions: List<ParticipantAction> = listOf(
         },
     ),
     ParticipantAction(
-        icon = Icons.Filled.PushPin,
+        icon = R.drawable.stream_design_ic_pin_fill,
         label = "Unpin",
         firstToggleAction = false,
         condition = { call, participantState ->
@@ -106,7 +103,7 @@ internal val participantActions: List<ParticipantAction> = listOf(
         },
     ),
     ParticipantAction(
-        icon = Icons.Outlined.PushPin,
+        icon = R.drawable.stream_design_ic_pin,
         label = "Pin for everyone",
         condition = { call, participantState ->
             call.hasCapability(OwnCapability.PinForEveryone) && !call.isServerPin(participantState.sessionId)
@@ -118,7 +115,7 @@ internal val participantActions: List<ParticipantAction> = listOf(
         },
     ),
     ParticipantAction(
-        icon = Icons.Filled.PushPin,
+        icon = R.drawable.stream_design_ic_pin_fill,
         label = "Unpin for everyone",
         firstToggleAction = false,
         condition = { call, participantState ->
@@ -182,7 +179,7 @@ internal fun BoxScope.ParticipantActionsWithoutState(
             }.clip(CircleShape),
         ) {
             Icon(
-                imageVector = Icons.Outlined.MoreHoriz,
+                painter = painterResource(R.drawable.stream_design_ic_more_horizontal),
                 contentDescription = "Call actions",
                 tint = VideoTheme.colors.textPrimary,
             )
@@ -237,28 +234,28 @@ internal fun BoxScope.ParticipantActionsDialogContent(
     Column(
         Modifier
             .background(
-                VideoTheme.colors.backgroundCoreApp,
-                shape = RoundedCornerShape(StreamTokens.radius3xl),
+                VideoTheme.colors.backgroundCoreElevation1,
+                shape = RoundedCornerShape(StreamTokens.radiusLg),
             )
             .align(Center)
             .width(220.dp),
     ) {
         actions.forEach {
             if (it.condition(call, participant)) {
-                StreamToggleButton(
-                    modifier = Modifier.width(220.dp),
-                    toggleState = rememberUpdatedState(
-                        newValue = ToggleableState(!it.firstToggleAction),
-                    ),
-                    onIcon = it.icon,
-                    onText = it.label,
-                    offText = it.label,
-                    onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(),
-                    offStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOff(),
-                ) { _ ->
-                    it.action.invoke(coroutineScope, call, participant)
-                    onDismiss()
-                }
+                StreamListItem(
+                    title = it.label,
+                    onClick = {
+                        it.action.invoke(coroutineScope, call, participant)
+                        onDismiss()
+                    },
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(it.icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(StreamTokens.iconSizeMd),
+                        )
+                    },
+                )
             }
         }
     }

@@ -21,9 +21,7 @@ import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContentPreview
-import io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContentWithoutHeaderPreview
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContentPreview
-import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContentWithoutHeaderPreview
 import org.junit.Rule
 import org.junit.Test
 
@@ -50,20 +48,6 @@ internal class AudioCallContentTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `audio call content without header`() {
-        snapshot {
-            AudioCallContentWithoutHeaderPreview()
-        }
-    }
-
-    @Test
-    fun `audio call content without header in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            AudioCallContentWithoutHeaderPreview()
-        }
-    }
-
-    @Test
     fun `audio only call content`() {
         snapshot {
             AudioOnlyCallContentPreview()
@@ -74,20 +58,6 @@ internal class AudioCallContentTest : PaparazziComposeTest {
     fun `audio only call content in dark mode`() {
         snapshot(isInDarkMode = true) {
             AudioOnlyCallContentPreview()
-        }
-    }
-
-    @Test
-    fun `audio only call content without header`() {
-        snapshot {
-            AudioOnlyCallContentWithoutHeaderPreview()
-        }
-    }
-
-    @Test
-    fun `audio only call content without header in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            AudioOnlyCallContentWithoutHeaderPreview()
         }
     }
 }
