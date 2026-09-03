@@ -38,6 +38,16 @@ internal fun defaultIncomingCallChannelIdRes(
         R.string.stream_video_incoming_call_notification_channel_id
     }
 
+@StringRes
+internal fun defaultIncomingCallLowImportanceChannelIdRes(
+    sdkInt: Int = Build.VERSION.SDK_INT,
+): Int =
+    if (sdkInt >= BUILD_VERSION_CODES_CINNAMON_BUN) {
+        R.string.stream_video_incoming_call_ringing_low_priority_notification_channel_id
+    } else {
+        R.string.stream_video_incoming_call_low_priority_notification_channel_id
+    }
+
 internal fun shouldNotificationOwnIncomingRingtone(
     notificationRingtoneEnabled: Boolean,
     telecomFirstEnabled: Boolean = false,

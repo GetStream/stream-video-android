@@ -29,6 +29,7 @@
     <string name="stream_video_incoming_call_ringing_notification_channel_id" translatable="false">incoming_calls_ringing</string>
     <string name="stream_video_incoming_call_notification_channel_title">Incoming Calls</string>
     <string name="stream_video_incoming_call_low_priority_notification_channel_id" translatable="false">incoming_calls_low_priority</string>
+    <string name="stream_video_incoming_call_ringing_low_priority_notification_channel_id" translatable="false">incoming_calls_low_priority_ringing</string>
     <string name="stream_video_incoming_call_low_priority_notification_channel_description">Incoming audio and video call alerts</string>
     <string name="stream_video_incoming_call_notification_channel_description">Incoming audio and video call alerts</string>
     <string name="stream_video_incoming_call_notification_description">Incoming call</string>

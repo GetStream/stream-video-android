@@ -23,10 +23,13 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.NotificationType
+import io.getstream.video.android.core.notifications.handlers.shouldNotificationOwnIncomingRingtone
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.permissions.ForegroundServicePermissionManager
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -51,6 +54,17 @@ internal open class CallServiceNotificationUpdateObserver(
 ) : NotificationUpdateObserver {
 
     private val logger by taggedLogger("NotificationUpdateObserver")
+    private val incomingRingingNotificationStabilization by lazy {
+        scope.async {
+            val delayMillis = streamVideo.streamNotificationManager
+                .notificationConfig
+                .incomingRingingNotificationUpdateDelayMillis
+
+            if (delayMillis > 0 && call.state.notificationIdFlow.value != null) {
+                delay(delayMillis)
+            }
+        }
+    }
 
     /**
      * Starts observing notification update triggers.
@@ -63,8 +77,26 @@ internal open class CallServiceNotificationUpdateObserver(
             val updateTriggers = getUpdateTriggers()
 
             updateTriggers.collectLatest { _ ->
+                deferIncomingRingingNotificationUpdateIfRequired()
                 updateNotification()
             }
+        }
+    }
+
+    private suspend fun deferIncomingRingingNotificationUpdateIfRequired() {
+        val ringingState = call.state.ringingState.value
+        val notificationOwnsRingtone = shouldNotificationOwnIncomingRingtone(
+            notificationRingtoneEnabled =
+            streamVideo.debugUseNotificationRingtoneForIncomingCalls,
+            telecomFirstEnabled = streamVideo.debugUseTelecomFirstForIncomingCalls,
+        )
+
+        if (
+            ringingState is RingingState.Incoming &&
+            !ringingState.acceptedByMe &&
+            notificationOwnsRingtone
+        ) {
+            incomingRingingNotificationStabilization.await()
         }
     }
 
