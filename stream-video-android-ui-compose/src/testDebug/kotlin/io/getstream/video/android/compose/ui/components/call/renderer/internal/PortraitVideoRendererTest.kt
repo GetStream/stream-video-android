@@ -17,7 +17,6 @@
 package io.getstream.video.android.compose.ui.components.call.renderer.internal
 
 import app.cash.paparazzi.Paparazzi
-import io.getstream.video.android.compose.ui.MAX_PERCENT_DIFFERENCE
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import org.junit.Rule
@@ -28,7 +27,6 @@ internal class PortraitVideoRendererTest : PaparazziComposeTest {
     @get:Rule
     override val paparazzi = Paparazzi(
         deviceConfig = PIXEL_4A_HDPI,
-        maxPercentDifference = MAX_PERCENT_DIFFERENCE,
     )
 
     @Test

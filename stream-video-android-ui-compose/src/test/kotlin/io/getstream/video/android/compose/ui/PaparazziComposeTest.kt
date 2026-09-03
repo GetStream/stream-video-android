@@ -44,16 +44,6 @@ import io.getstream.video.android.mock.StreamPreviewDataUtils
 import org.junit.Rule
 
 /**
- * Goldens are recorded on developer machines (macOS) and verified on Linux CI. On the
- * Paparazzi version this repo can use with Kotlin 1.9 (1.3.4), font antialiasing differs
- * slightly between the two platforms: CI measured diffs of 0.10% to 0.30% on goldens that
- * are pixel-identical intent-wise, against a default threshold of 0.1%. Real visual changes
- * are far above 0.5%. Revisit after the Kotlin 2 / Paparazzi 1.3.5 upgrade (the chat repo
- * runs that stack with the default threshold).
- */
-internal const val MAX_PERCENT_DIFFERENCE = 0.5
-
-/**
  * [DeviceConfig.PIXEL_2] geometry (411x731dp) at hdpi. The dp layout is identical to the
  * Pixel 2, but rendering at 1.5x keeps the golden files small, which speeds up comparisons.
  */
@@ -99,7 +89,7 @@ internal interface PaparazziComposeTest {
                     Box(
                         modifier = Modifier
                             .background(
-                                backgroundColor.takeOrElse { VideoTheme.colors.baseSheetPrimary },
+                                backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
                             ),
                         contentAlignment = contentAlignment,
                     ) {
@@ -110,8 +100,13 @@ internal interface PaparazziComposeTest {
         }
     }
 
+    /**
+     * Renders [composable] twice, dark above light. For components only: a full-screen composable
+     * takes the whole height and hides the second half; snapshot those in two files with [snapshot].
+     */
     fun snapshotWithDarkMode(
         contentAlignment: Alignment = Alignment.TopStart,
+        backgroundColor: Color = Color.Unspecified,
         composable: @Composable () -> Unit,
     ) {
         paparazzi.snapshot {
@@ -121,7 +116,9 @@ internal interface PaparazziComposeTest {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
-                                .background(VideoTheme.colors.baseSheetPrimary),
+                                .background(
+                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                ),
                             contentAlignment = contentAlignment,
                         ) {
                             composable()
@@ -131,7 +128,9 @@ internal interface PaparazziComposeTest {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
-                                .background(VideoTheme.colors.baseSheetPrimary),
+                                .background(
+                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                ),
                             contentAlignment = contentAlignment,
                         ) {
                             composable()
@@ -144,6 +143,7 @@ internal interface PaparazziComposeTest {
 
     fun snapshotWithDarkModeRow(
         contentAlignment: Alignment = Alignment.TopStart,
+        backgroundColor: Color = Color.Unspecified,
         composable: @Composable () -> Unit,
     ) {
         paparazzi.snapshot {
@@ -153,7 +153,9 @@ internal interface PaparazziComposeTest {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
-                                .background(VideoTheme.colors.baseSheetPrimary),
+                                .background(
+                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                ),
                             contentAlignment = contentAlignment,
                         ) {
                             composable()
@@ -163,7 +165,9 @@ internal interface PaparazziComposeTest {
                         Box(
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
-                                .background(VideoTheme.colors.baseSheetPrimary),
+                                .background(
+                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                ),
                             contentAlignment = contentAlignment,
                         ) {
                             composable()
