@@ -162,14 +162,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun LoginScreen(onUserSelected: (TutorialUser) -> Unit) {
-    Surface(modifier = Modifier.fillMaxSize(), color = VideoTheme.colors.baseTertiary) {
+    Surface(modifier = Modifier.fillMaxSize(), color = VideoTheme.colors.textTertiary) {
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
             Text(
                 text = "Select a User",
-                style = VideoTheme.typography.titleM,
-                color = VideoTheme.colors.basePrimary,
+                style = VideoTheme.typography.headingLarge,
+                color = VideoTheme.colors.textPrimary,
                 modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -184,7 +184,7 @@ fun LoginScreen(onUserSelected: (TutorialUser) -> Unit) {
 
 @Composable
 fun HomeScreen(onLogoutClick: () -> Unit, onDialClick: (callees: List<String>) -> Unit) {
-    Surface(modifier = Modifier.fillMaxSize(), color = VideoTheme.colors.baseTertiary) {
+    Surface(modifier = Modifier.fillMaxSize(), color = VideoTheme.colors.textTertiary) {
         Column(modifier = Modifier.fillMaxSize()) {
             HomeHeader(onLogoutClick)
             Spacer(modifier = Modifier.weight(1f))
@@ -235,7 +235,7 @@ private fun UserList(
                 text = {
                     Text(
                         text = user.name.orEmpty(),
-                        style = VideoTheme.typography.titleS,
+                        style = VideoTheme.typography.headingLarge,
                     )
                 },
                 trailing = {
@@ -243,13 +243,13 @@ private fun UserList(
                         Icon(
                             Icons.Rounded.Check,
                             contentDescription = null,
-                            tint = VideoTheme.colors.iconDefault,
+                            tint = VideoTheme.colors.textPrimary,
                         )
                     }
                 },
             )
             if (idx < users.lastIndex) {
-                Divider(color = VideoTheme.colors.baseQuinary, thickness = 1.dp)
+                Divider(color = VideoTheme.colors.textSecondary, thickness = 1.dp)
             }
         }
     }
@@ -266,8 +266,8 @@ private fun HomeHeader(onLogoutClick: () -> Unit) {
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = RingingApp.caller.name.orEmpty(),
-            style = VideoTheme.typography.titleS,
-            color = VideoTheme.colors.basePrimary,
+            style = VideoTheme.typography.headingLarge,
+            color = VideoTheme.colors.textPrimary,
         )
         Spacer(modifier = Modifier.weight(1f))
         IconButton(
@@ -276,7 +276,7 @@ private fun HomeHeader(onLogoutClick: () -> Unit) {
         ) {
             Icon(
                 Icons.AutoMirrored.Outlined.ExitToApp,
-                tint = VideoTheme.colors.iconDefault,
+                tint = VideoTheme.colors.textPrimary,
                 contentDescription = null,
             )
         }

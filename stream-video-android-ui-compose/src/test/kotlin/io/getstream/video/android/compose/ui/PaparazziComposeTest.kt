@@ -89,7 +89,7 @@ internal interface PaparazziComposeTest {
                     Box(
                         modifier = Modifier
                             .background(
-                                backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                backgroundColor.takeOrElse(VideoTheme.colors::backgroundCoreApp),
                             ),
                         contentAlignment = contentAlignment,
                     ) {
@@ -117,7 +117,9 @@ internal interface PaparazziComposeTest {
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
                                 .background(
-                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                    backgroundColor.takeOrElse(
+                                        VideoTheme.colors::backgroundCoreApp,
+                                    ),
                                 ),
                             contentAlignment = contentAlignment,
                         ) {
@@ -129,7 +131,9 @@ internal interface PaparazziComposeTest {
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
                                 .background(
-                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                    backgroundColor.takeOrElse(
+                                        VideoTheme.colors::backgroundCoreApp,
+                                    ),
                                 ),
                             contentAlignment = contentAlignment,
                         ) {
@@ -154,7 +158,9 @@ internal interface PaparazziComposeTest {
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
                                 .background(
-                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                    backgroundColor.takeOrElse(
+                                        VideoTheme.colors::backgroundCoreApp,
+                                    ),
                                 ),
                             contentAlignment = contentAlignment,
                         ) {
@@ -166,7 +172,9 @@ internal interface PaparazziComposeTest {
                             modifier = Modifier
                                 .weight(weight = .5f, fill = false)
                                 .background(
-                                    backgroundColor.takeOrElse(VideoTheme.colors::baseSheetPrimary),
+                                    backgroundColor.takeOrElse(
+                                        VideoTheme.colors::backgroundCoreApp,
+                                    ),
                                 ),
                             contentAlignment = contentAlignment,
                         ) {

@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.call.renderer.DefaultParticipantVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.DefaultScreenSharingFallbackContent
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle
@@ -79,11 +80,11 @@ internal fun LandscapeScreenSharingVideoRenderer(
     ) {
         Box(
             modifier = Modifier
-                .padding(VideoTheme.dimens.spacingXs)
+                .padding(StreamTokens.spacingXxs)
                 .clip(RoundedCornerShape(16.dp))
                 .fillMaxWidth()
                 .weight(0.65f)
-                .background(VideoTheme.colors.baseSheetSecondary),
+                .background(VideoTheme.colors.backgroundCoreElevation1),
         ) {
             ScreenShareVideoRenderer(
                 modifier = Modifier.fillMaxSize(),

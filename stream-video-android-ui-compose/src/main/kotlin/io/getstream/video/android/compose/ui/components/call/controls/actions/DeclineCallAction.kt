@@ -49,6 +49,6 @@ public fun DeclineCallAction(
     style = style,
     onAction = { onCallAction(DeclineCall) },
     icon = icon ?: Icons.Default.Call,
-    color = bgColor ?: VideoTheme.colors.alertWarning,
-    iconTint = iconTint ?: VideoTheme.colors.basePrimary,
+    color = bgColor ?: VideoTheme.colors.accentError,
+    iconTint = iconTint ?: VideoTheme.colors.textPrimary,
 )

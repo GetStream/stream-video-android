@@ -54,7 +54,7 @@ public fun ParticipantsRegularGrid(
     },
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
 ) {
-    Box(modifier = modifier.background(color = VideoTheme.colors.baseSheetPrimary)) {
+    Box(modifier = modifier.background(color = VideoTheme.colors.backgroundCoreApp)) {
         val roomParticipants by call.state.participants.collectAsStateWithLifecycle()
 
         if (roomParticipants.isNotEmpty()) {

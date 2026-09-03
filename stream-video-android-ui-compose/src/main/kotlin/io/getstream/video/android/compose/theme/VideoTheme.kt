@@ -21,8 +21,8 @@ package io.getstream.video.android.compose.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.LocalRippleConfiguration
-import androidx.compose.material.RippleConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -33,32 +33,21 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import io.getstream.video.android.compose.theme.design.StreamDesign
 import io.getstream.video.android.compose.ui.components.base.styling.CompositeStyleProvider
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.header.VersionPrefixHeader
-import io.getstream.video.android.core.mapper.ReactionMapper
 
 /**
  * Local providers for various properties we connect to our components, for styling.
  */
-private val LocalColors = compositionLocalOf<StreamColors> {
+private val LocalColors = compositionLocalOf<StreamDesign.Colors> {
     error("No colors provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
 }
 
-private val LocalDimens = compositionLocalOf<StreamDimens> {
-    error("No dimens provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
-}
-private val LocalTypography = compositionLocalOf<StreamTypography> {
+private val LocalTypography = compositionLocalOf<StreamDesign.Typography> {
     error(
         "No typography provided! Make sure to wrap all usages of Stream components in a VideoTheme.",
-    )
-}
-private val LocalShapes = compositionLocalOf<StreamShapes> {
-    error("No shapes provided! Make sure to wrap all usages of Stream components in a VideoTheme.")
-}
-private val LocalReactionMapper = compositionLocalOf<ReactionMapper> {
-    error(
-        "No reaction mapper provided! Make sure to wrap all usages of Stream components in a VideoTheme.",
     )
 }
 
@@ -80,16 +69,25 @@ public val LocalComponentFactory: ProvidableCompositionLocal<VideoComponentFacto
     }
 
 /**
+ * The local composition containing the current [VideoUiConfig].
+ */
+public val LocalVideoUiConfig: ProvidableCompositionLocal<VideoUiConfig> =
+    compositionLocalOf {
+        error(
+            "No VideoUiConfig provided! Make sure to wrap all usages of Stream components " +
+                "in a VideoTheme.",
+        )
+    }
+
+/**
  * Our theme that provides all the important properties for styling to the user.
  *
- * @param isInDarkMode If we're currently in the dark mode or not. Affects only the default color palette that's
- * provided. If you customize [colors], make sure to add your own logic for dark/light colors.
- * @param colors The set of colors we provide, wrapped in [StreamColors].
- * @param dimens The set of dimens we provide, wrapped in [StreamDimens].
- * @param typography The set of typography styles we provide, wrapped in [StreamTypography].
- * @param shapes The set of shapes we provide, wrapped in [StreamShapes].
- * @param rippleConfiguration Defines the appearance for ripples.
- * @param reactionMapper Defines a mapper of the emoji code from the reaction events.
+ * @param isInDarkMode Whether the dark palette is selected. Affects only the default [colors]; a
+ * custom [colors] value is used as is.
+ * @param config Central behavioral configuration for the Video SDK. See [VideoUiConfig].
+ * @param colors The semantic color tokens. See [StreamDesign.Colors].
+ * @param typography The text styles. See [StreamDesign.Typography].
+ * @param styles The component style providers.
  * @param componentFactory Provide to customize the components used throughout the UI.
  * @param content The content shown within the theme wrapper.
  */
@@ -97,13 +95,13 @@ public val LocalComponentFactory: ProvidableCompositionLocal<VideoComponentFacto
 @OptIn(ExperimentalMaterialApi::class)
 public fun VideoTheme(
     isInDarkMode: Boolean = isSystemInDarkTheme(),
-    colors: StreamColors = StreamColors.defaultColors(),
-    dimens: StreamDimens = StreamDimens.defaultDimens(),
-    typography: StreamTypography = StreamTypography.defaultTypography(colors, dimens),
-    shapes: StreamShapes = StreamShapes.defaultShapes(dimens),
-    rippleConfiguration: StreamRippleConfiguration = StreamRippleConfiguration,
-    reactionMapper: ReactionMapper = ReactionMapper.defaultReactionMapper(),
-    allowUIAutomationTest: Boolean = true,
+    config: VideoUiConfig = VideoUiConfig(),
+    colors: StreamDesign.Colors = if (isInDarkMode) {
+        StreamDesign.Colors.defaultDark()
+    } else {
+        StreamDesign.Colors.default()
+    },
+    typography: StreamDesign.Typography = StreamDesign.Typography.default(),
     styles: CompositeStyleProvider = CompositeStyleProvider(),
     componentFactory: VideoComponentFactory = DefaultVideoComponentFactory,
     content: @Composable () -> Unit,
@@ -112,18 +110,17 @@ public fun VideoTheme(
         HeadersUtil.VERSION_PREFIX_HEADER = VersionPrefixHeader.Compose
     }
     CompositionLocalProvider(
+        LocalVideoUiConfig provides config,
         LocalColors provides colors,
-        LocalDimens provides dimens,
         LocalTypography provides typography,
-        LocalShapes provides shapes,
-        LocalRippleConfiguration provides rippleConfiguration.default(),
-        LocalReactionMapper provides reactionMapper,
+        LocalContentColor provides colors.textPrimary,
+        LocalRippleConfiguration provides streamRippleConfiguration(colors, lightTheme = !isInDarkMode),
         LocalStyles provides styles,
         LocalComponentFactory provides componentFactory,
     ) {
         Box(
             modifier = Modifier.semantics {
-                testTagsAsResourceId = allowUIAutomationTest
+                testTagsAsResourceId = config.allowUIAutomationTest
             },
         ) {
             content()
@@ -131,52 +128,30 @@ public fun VideoTheme(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 public interface StreamTheme {
     /**
-     * Retrieves the current [StreamColors] at the call site's position in the hierarchy.
+     * Retrieves the current [VideoUiConfig] at the call site's position in the hierarchy.
      */
-    public val colors: StreamColors
+    public val config: VideoUiConfig
+        @Composable @ReadOnlyComposable
+        get() = LocalVideoUiConfig.current
+
+    /**
+     * Retrieves the current [StreamDesign.Colors] at the call site's position in the hierarchy.
+     */
+    public val colors: StreamDesign.Colors
         @Composable @ReadOnlyComposable
         get() = LocalColors.current
 
     /**
-     * Retrieves the current [StreamDimens] at the call site's position in the hierarchy.
+     * Retrieves the current [StreamDesign.Typography] at the call site's position in the hierarchy.
      */
-    public val dimens: StreamDimens
-        @Composable @ReadOnlyComposable
-        get() = LocalDimens.current
-
-    /**
-     * Retrieves the current [StreamTypography] at the call site's position in the hierarchy.
-     */
-    public val typography: StreamTypography
+    public val typography: StreamDesign.Typography
         @Composable @ReadOnlyComposable
         get() = LocalTypography.current
 
     /**
-     * Retrieves the current [StreamShapes] at the call site's position in the hierarchy.
-     */
-    public val shapes: StreamShapes
-        @Composable @ReadOnlyComposable
-        get() = LocalShapes.current
-
-    /**
-     * Retrieves the current [RippleConfiguration] at the call site's position in the hierarchy.
-     */
-    public val rippleConfiguration: RippleConfiguration?
-        @Composable @ReadOnlyComposable
-        get() = StreamRippleConfiguration.default()
-
-    /**
-     * Retrieves the current [ReactionMapper] at the call site's position in the hierarchy.
-     */
-    public val reactionMapper: ReactionMapper
-        @Composable @ReadOnlyComposable
-        get() = LocalReactionMapper.current
-
-    /**
-     * Retrieves the current [ReactionMapper] at the call site's position in the hierarchy.
+     * Retrieves the current [CompositeStyleProvider] at the call site's position in the hierarchy.
      */
     public val styles: CompositeStyleProvider
         @Composable @ReadOnlyComposable

@@ -253,7 +253,7 @@ private fun LoginContentPortrait(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = VideoTheme.colors.baseSheetPrimary),
+            .background(color = VideoTheme.colors.backgroundCoreApp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         EnvironmentSelectionDialog(
@@ -282,7 +282,7 @@ private fun LoadingIndicator(modifier: Modifier, isLoading: Boolean) {
     if (isLoading) {
         CircularProgressIndicator(
             modifier = modifier,
-            color = VideoTheme.colors.brandPrimary,
+            color = VideoTheme.colors.accentPrimary,
         )
     }
 }
@@ -333,7 +333,7 @@ private fun Logo(modifier: Modifier, selectedEnv: StreamEnvironment?) {
                 append(
                     AnnotatedString(
                         "[Video Calling]\n",
-                        spanStyle = SpanStyle(VideoTheme.colors.brandGreen),
+                        spanStyle = SpanStyle(VideoTheme.colors.accentSuccess),
                     ),
                 )
                 append(selectedEnv?.displayName ?: "")
@@ -361,7 +361,7 @@ private fun LoginButtons(
         Column(
             modifier = modifier
                 .background(
-                    color = VideoTheme.colors.baseSheetSecondary,
+                    color = VideoTheme.colors.backgroundCoreElevation1,
                     shape = if (isLandscape) {
                         RoundedCornerShape(24.dp)
                     } else {
@@ -376,10 +376,10 @@ private fun LoginButtons(
                     .wrapContentHeight()
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(
-                    VideoTheme.dimens.spacingM,
+                    16.dp,
                 ),
                 verticalArrangement = Arrangement.spacedBy(
-                    VideoTheme.dimens.spacingM,
+                    16.dp,
                 ),
             ) {
                 items(availableLogins.size) { index ->
@@ -463,7 +463,7 @@ private fun LoginButtons(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
@@ -604,8 +604,8 @@ private fun BuiltInUsersLoginDialog(
                         Text(
                             modifier = Modifier.align(Alignment.CenterVertically),
                             text = user.name.orEmpty(),
-                            color = VideoTheme.colors.basePrimary,
-                            style = VideoTheme.typography.subtitleS,
+                            color = VideoTheme.colors.textPrimary,
+                            style = VideoTheme.typography.bodyDefault,
                         )
                         Spacer(modifier = Modifier.width(16.dp))
                     }
@@ -647,15 +647,15 @@ fun SelectableDialog(
                     alignment = Alignment.TopEnd,
                     offset = IntOffset(
                         0,
-                        (VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingL).toPx()
+                        (44.dp + 24.dp).toPx()
                             .toInt(),
                     ),
                 ) {
                     Column(
                         Modifier
                             .background(
-                                color = VideoTheme.colors.baseSheetTertiary,
-                                shape = VideoTheme.shapes.dialog,
+                                color = VideoTheme.colors.backgroundCoreSurfaceDefault,
+                                shape = RoundedCornerShape(24.dp),
                             )
                             .width(180.dp),
                     ) {

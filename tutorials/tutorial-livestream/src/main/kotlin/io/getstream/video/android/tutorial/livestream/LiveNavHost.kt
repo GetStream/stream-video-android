@@ -81,7 +81,7 @@ fun LiveNavHost(
     NavHost(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetPrimary)
+            .background(VideoTheme.colors.backgroundCoreApp)
             .systemBarsPadding(),
         navController = navController,
         startDestination = startDestination,

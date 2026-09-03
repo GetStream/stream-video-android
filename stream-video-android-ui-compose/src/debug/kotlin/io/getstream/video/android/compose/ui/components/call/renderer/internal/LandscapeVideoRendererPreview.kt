@@ -137,7 +137,7 @@ private fun LandscapeParticipants(participantCount: Int) {
     val screenHeight = configuration.screenHeightDp
 
     Box(
-        modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+        modifier = Modifier.background(color = VideoTheme.colors.backgroundCoreApp),
     ) {
         LandscapeVideoRenderer(
             call = gridCall.call,

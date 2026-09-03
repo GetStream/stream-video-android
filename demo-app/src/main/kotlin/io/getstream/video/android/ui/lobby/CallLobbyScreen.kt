@@ -106,7 +106,7 @@ fun CallLobbyScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(VideoTheme.colors.baseSheetPrimary)
+                .background(VideoTheme.colors.backgroundCoreApp)
                 .testTag("call_lobby"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -144,7 +144,7 @@ fun CallLobbyScreen(
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center),
-                color = VideoTheme.colors.brandPrimary,
+                color = VideoTheme.colors.accentPrimary,
             )
         }
     }
@@ -181,8 +181,8 @@ private fun CallLobbyHeaderContent(
     Row(
         modifier = Modifier
             .padding(
-                horizontal = VideoTheme.dimens.spacingM,
-                vertical = VideoTheme.dimens.spacingXs,
+                horizontal = 16.dp,
+                vertical = 4.dp,
             )
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -218,7 +218,7 @@ private fun CallLobbyHeaderContent(
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = null,
-                tint = VideoTheme.colors.basePrimary,
+                tint = VideoTheme.colors.textPrimary,
             )
         }
     }
@@ -282,7 +282,7 @@ private fun CallLobbyBodyPortrait(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetPrimary)
+            .background(VideoTheme.colors.backgroundCoreApp)
             .semantics { testTagsAsResourceId = true },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -295,13 +295,13 @@ private fun CallLobbyBodyPortrait(
         Icon(
             modifier = Modifier.size(36.dp),
             imageVector = Icons.Default.Language,
-            tint = VideoTheme.colors.brandGreen,
+            tint = VideoTheme.colors.accentSuccess,
             contentDescription = "",
         )
         Text(
-            modifier = Modifier.padding(VideoTheme.dimens.spacingM),
+            modifier = Modifier.padding(16.dp),
             text = "Set up your test call",
-            style = VideoTheme.typography.titleS,
+            style = VideoTheme.typography.headingLarge,
         )
         val onCallAction: (CallAction) -> Unit = { action ->
             when (action) {
@@ -315,7 +315,7 @@ private fun CallLobbyBodyPortrait(
             call = call,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(VideoTheme.dimens.spacingM),
+                .padding(16.dp),
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
             onCallAction = onCallAction,
@@ -357,7 +357,7 @@ private fun CallLobbyBodyLandscape(
     onToggleHifiAudio: (Boolean) -> Unit,
     description: @Composable () -> Unit,
 ) {
-    Box(modifier = Modifier.background(VideoTheme.colors.baseSheetPrimary)) {
+    Box(modifier = Modifier.background(VideoTheme.colors.backgroundCoreApp)) {
         Row() {
             Column(
                 modifier = modifier
@@ -380,8 +380,8 @@ private fun CallLobbyBodyLandscape(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            start = VideoTheme.dimens.spacingM,
-                            end = VideoTheme.dimens.spacingM,
+                            start = 16.dp,
+                            end = 16.dp,
                         ),
                     isCameraEnabled = isCameraEnabled,
                     isMicrophoneEnabled = isMicrophoneEnabled,
@@ -422,13 +422,13 @@ private fun CallLobbyBodyLandscape(
                 Icon(
                     modifier = Modifier.size(36.dp),
                     imageVector = Icons.Default.Language,
-                    tint = VideoTheme.colors.brandGreen,
+                    tint = VideoTheme.colors.accentSuccess,
                     contentDescription = "",
                 )
                 Text(
-                    modifier = Modifier.padding(VideoTheme.dimens.spacingM),
+                    modifier = Modifier.padding(16.dp),
                     text = "Set up your test call",
-                    style = VideoTheme.typography.titleS,
+                    style = VideoTheme.typography.headingLarge,
                 )
                 description()
             }
@@ -470,7 +470,7 @@ private fun LobbyDescriptionContent(participantCounts: ParticipantCount?, onClic
         )
     }
     Column(
-        modifier = Modifier.padding(VideoTheme.dimens.spacingM),
+        modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -483,17 +483,17 @@ private fun LobbyDescriptionContent(participantCounts: ParticipantCount?, onClic
         ) {
             Icon(
                 imageVector = Icons.Default.LockPerson,
-                tint = VideoTheme.colors.basePrimary,
+                tint = VideoTheme.colors.textPrimary,
                 contentDescription = "",
             )
 
             Text(
-                modifier = Modifier.padding(horizontal = VideoTheme.dimens.spacingM),
+                modifier = Modifier.padding(horizontal = 16.dp),
                 text = text.first,
-                style = VideoTheme.typography.bodyS,
+                style = VideoTheme.typography.captionDefault,
             )
         }
-        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+        Spacer(modifier = Modifier.size(16.dp))
         StreamButton(
             style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
             modifier = Modifier

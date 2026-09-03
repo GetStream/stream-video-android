@@ -35,6 +35,7 @@ import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.CallStatus
@@ -65,20 +66,20 @@ public fun ParticipantInformation(
         }
 
         val fontSize = if (participants.size == 1) {
-            VideoTheme.dimens.textSizeL
+            StreamTokens.fontSize2xl
         } else {
-            VideoTheme.dimens.textSizeM
+            StreamTokens.fontSizeXl
         }
 
         Text(
-            modifier = Modifier.padding(horizontal = VideoTheme.dimens.spacingM),
+            modifier = Modifier.padding(horizontal = StreamTokens.spacingMd),
             text = text,
             fontSize = fontSize,
-            color = VideoTheme.colors.basePrimary,
+            color = VideoTheme.colors.textPrimary,
             textAlign = TextAlign.Center,
         )
 
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingMd))
 
         val callType = if (isVideoType) {
             "video"
@@ -99,7 +100,7 @@ public fun ParticipantInformation(
 
                 is CallStatus.Calling -> callStatus.duration
             },
-            style = VideoTheme.typography.bodyM,
+            style = VideoTheme.typography.bodyDefault,
             textAlign = TextAlign.Center,
         )
     }
@@ -138,22 +139,22 @@ public fun ParticipantInformation(
         }
 
         val fontSize = if (callUsers.size == 1) {
-            VideoTheme.dimens.textSizeL
+            StreamTokens.fontSize2xl
         } else {
-            VideoTheme.dimens.textSizeM
+            StreamTokens.fontSizeXl
         }
 
         Text(
             modifier = Modifier
-                .padding(horizontal = VideoTheme.dimens.spacingM)
+                .padding(horizontal = StreamTokens.spacingMd)
                 .testTag("Stream_ParticipantInformation"),
             text = text,
             fontSize = fontSize,
-            color = VideoTheme.colors.basePrimary,
+            color = VideoTheme.colors.textPrimary,
             textAlign = TextAlign.Center,
         )
 
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingMd))
 
         val callType = if (isVideoType) {
             "video"
@@ -179,7 +180,7 @@ public fun ParticipantInformation(
 
                 is CallStatus.Calling -> callStatus.duration
             },
-            style = VideoTheme.typography.bodyM,
+            style = VideoTheme.typography.bodyDefault,
             textAlign = TextAlign.Center,
         )
     }

@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * Used to indicate the active sound levels of a given participant.
@@ -41,16 +42,16 @@ import io.getstream.video.android.compose.theme.VideoTheme
 public fun AudioVolumeIndicator(
     modifier: Modifier = Modifier,
     audioLevels: Float,
-    color: Color = VideoTheme.colors.brandPrimary,
+    color: Color = VideoTheme.colors.accentPrimary,
 ) {
     val defaultBarHeight = 0.1f
     Row(
         modifier = modifier
-            .height(height = VideoTheme.dimens.componentHeightS)
-            .padding(horizontal = VideoTheme.dimens.spacingXXs),
+            .height(height = StreamTokens.size24)
+            .padding(horizontal = StreamTokens.spacingXxxs),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(
-            VideoTheme.dimens.spacingXXs,
+            StreamTokens.spacingXxxs,
         ),
     ) {
         repeat(3) { index ->
@@ -71,7 +72,7 @@ public fun AudioVolumeIndicator(
                 }
             Spacer(
                 modifier = Modifier
-                    .width(VideoTheme.dimens.spacingXXs)
+                    .width(StreamTokens.spacingXxxs)
                     .fillMaxHeight(
                         if (audioLevel == 0f) {
                             defaultBarHeight
@@ -81,7 +82,7 @@ public fun AudioVolumeIndicator(
                     )
                     .background(
                         color = color,
-                        shape = RoundedCornerShape(VideoTheme.dimens.roundnessM),
+                        shape = RoundedCornerShape(StreamTokens.radiusXl),
                     ),
             )
         }

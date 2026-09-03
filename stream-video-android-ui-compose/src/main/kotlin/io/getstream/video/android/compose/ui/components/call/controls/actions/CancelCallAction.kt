@@ -49,6 +49,6 @@ public fun CancelCallAction(
     style = style,
     onAction = { onCallAction(CancelCall) },
     icon = icon ?: Icons.Default.Call,
-    color = bgColor ?: VideoTheme.colors.alertWarning,
-    iconTint = iconTint ?: VideoTheme.colors.basePrimary,
+    color = bgColor ?: VideoTheme.colors.accentError,
+    iconTint = iconTint ?: VideoTheme.colors.textPrimary,
 )

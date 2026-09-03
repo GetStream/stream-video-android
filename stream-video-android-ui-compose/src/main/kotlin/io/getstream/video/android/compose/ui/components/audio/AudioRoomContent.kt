@@ -153,9 +153,9 @@ public fun AudioRoomContent(
     } else {
         Scaffold(
             modifier = modifier
-                .background(VideoTheme.colors.baseSheetPrimary)
+                .background(VideoTheme.colors.backgroundCoreApp)
                 .padding(32.dp),
-            contentColor = VideoTheme.colors.baseSheetPrimary,
+            contentColor = VideoTheme.colors.backgroundCoreApp,
             topBar = {
                 if (isShowingAppBar) {
                     appBarContent.invoke(call)
@@ -165,7 +165,7 @@ public fun AudioRoomContent(
             content = { paddings ->
                 Box(
                     modifier = Modifier
-                        .background(color = VideoTheme.colors.baseSheetPrimary)
+                        .background(color = VideoTheme.colors.backgroundCoreApp)
                         .padding(paddings),
                 ) {
                     audioContent.invoke(this, call)
@@ -245,7 +245,7 @@ internal fun DefaultPictureInPictureContent(
     audioContent: @Composable BoxScope.(call: Call) -> Unit,
 ) {
     Box(
-        modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+        modifier = Modifier.background(color = VideoTheme.colors.backgroundCoreApp),
     ) {
         audioContent.invoke(this, call)
     }

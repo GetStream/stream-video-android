@@ -75,13 +75,13 @@ public fun CallParticipantsInfoMenu(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = VideoTheme.colors.baseSheetPrimary),
+            .background(color = VideoTheme.colors.backgroundCoreApp),
     ) {
         Column(modifier) {
             val listModifier = Modifier
                 .weight(2f)
                 .fillMaxWidth()
-                .background(VideoTheme.colors.baseSheetPrimary)
+                .background(VideoTheme.colors.backgroundCoreApp)
 
             if (infoStateMode is ParticipantListMode) {
                 CallParticipantsList(

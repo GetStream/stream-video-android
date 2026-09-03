@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * A composable that wraps its content into a rounded semi-transparent background.
@@ -35,13 +37,13 @@ import io.getstream.video.android.compose.theme.VideoTheme
 @Composable
 internal fun GenericIndicator(
     modifier: Modifier = Modifier,
-    shape: Shape = VideoTheme.shapes.indicator,
-    backgroundColor: Color = VideoTheme.colors.baseSheetQuarternary,
+    shape: Shape = RoundedCornerShape(StreamTokens.radiusMd),
+    backgroundColor: Color = VideoTheme.colors.backgroundCoreOverlayDarkStrong,
     content: @Composable BoxScope.() -> Unit,
 ) {
     // val alphaColor = backgroundColor.copy(alpha = 0.3f)
     Box(
-        modifier = modifier.size(VideoTheme.dimens.componentHeightM),
+        modifier = modifier.size(StreamTokens.size32),
     ) {
         // Ensure content is center aligned and padded
         Box(

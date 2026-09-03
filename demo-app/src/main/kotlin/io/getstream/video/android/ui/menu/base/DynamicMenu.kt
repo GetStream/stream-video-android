@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
@@ -73,8 +74,8 @@ fun DynamicMenu(header: (@Composable LazyItemScope.() -> Unit)? = null, items: L
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = VideoTheme.colors.baseSheetPrimary,
-                shape = VideoTheme.shapes.dialog,
+                color = VideoTheme.colors.backgroundCoreApp,
+                shape = RoundedCornerShape(24.dp),
             )
             .semantics { testTagsAsResourceId = true },
     ) {
@@ -82,8 +83,8 @@ fun DynamicMenu(header: (@Composable LazyItemScope.() -> Unit)? = null, items: L
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    shape = VideoTheme.shapes.sheet,
-                    color = VideoTheme.colors.baseSheetPrimary,
+                    shape = RoundedCornerShape(16.dp),
+                    color = VideoTheme.colors.backgroundCoreApp,
                 )
                 .padding(12.dp),
         ) {
@@ -128,20 +129,20 @@ private fun LazyListScope.submenuStickyHeader(currentTitle: String, onBackClick:
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .background(VideoTheme.colors.baseSheetPrimary)
+                .background(VideoTheme.colors.backgroundCoreApp)
                 .fillMaxWidth(),
         ) {
             IconButton(onClick = onBackClick) {
                 Icon(
-                    tint = VideoTheme.colors.basePrimary,
+                    tint = VideoTheme.colors.textPrimary,
                     imageVector = Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = "Back",
                 )
             }
             Text(
                 text = currentTitle,
-                style = VideoTheme.typography.subtitleS,
-                color = VideoTheme.colors.basePrimary,
+                style = VideoTheme.typography.bodyDefault,
+                color = VideoTheme.colors.textPrimary,
             )
         }
     }
@@ -216,7 +217,7 @@ private fun LazyListScope.loadingItems(
             modifier = Modifier
                 .padding(33.dp)
                 .fillMaxWidth(),
-            color = VideoTheme.colors.basePrimary,
+            color = VideoTheme.colors.textPrimary,
         )
     }
 }
@@ -229,8 +230,8 @@ private fun LazyListScope.noItems() {
                 .padding(32.dp),
             textAlign = TextAlign.Center,
             text = "No items",
-            style = VideoTheme.typography.subtitleS,
-            color = VideoTheme.colors.basePrimary,
+            style = VideoTheme.typography.bodyDefault,
+            color = VideoTheme.colors.textPrimary,
         )
     }
 }
@@ -248,7 +249,7 @@ private fun LazyListScope.menuItems(
             onIcon = item.icon,
             onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(StyleSize.XS).copy(
                 iconStyle = VideoTheme.styles.iconStyles.customColorIconStyle(
-                    color = if (highlight) VideoTheme.colors.brandPrimary else VideoTheme.colors.basePrimary,
+                    color = if (highlight) VideoTheme.colors.accentPrimary else VideoTheme.colors.textPrimary,
                 ),
             ),
             onClick = {

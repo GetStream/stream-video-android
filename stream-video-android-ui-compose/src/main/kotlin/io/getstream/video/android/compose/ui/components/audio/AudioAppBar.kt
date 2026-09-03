@@ -40,12 +40,12 @@ public fun AudioAppBar(
     modifier: Modifier = Modifier,
     title: String,
 ) {
-    Column(modifier.background(VideoTheme.colors.baseSheetSecondary)) {
+    Column(modifier.background(VideoTheme.colors.backgroundCoreElevation1)) {
         Text(
             text = title,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = VideoTheme.colors.basePrimary,
+            color = VideoTheme.colors.textPrimary,
         )
 
         Spacer(modifier = Modifier.height(18.dp))
@@ -54,7 +54,7 @@ public fun AudioAppBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(VideoTheme.colors.basePrimary),
+                .background(VideoTheme.colors.textPrimary),
         )
     }
 }

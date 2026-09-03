@@ -90,7 +90,7 @@ class MainActivity : ComponentActivity() {
                 VideoTheme {
                     AppNavHost(
                         modifier = Modifier
-                            .background(VideoTheme.colors.baseSheetPrimary)
+                            .background(VideoTheme.colors.backgroundCoreApp)
                             .systemBarsPadding(),
                         startDestination = if (!isLoggedIn) {
                             AppScreens.Login.routeWithArg(true) // Pass true for autoLogIn
