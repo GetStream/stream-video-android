@@ -45,7 +45,6 @@ import io.getstream.video.android.compose.ui.components.base.StreamTextField
 import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
 import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import kotlinx.coroutines.launch
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
@@ -59,7 +58,6 @@ import javax.crypto.spec.PBEKeySpec
 private const val KDF_SALT = "stream-e2ee"
 private const val KDF_ITERATIONS = 100_000
 private const val KDF_KEY_BITS = 128
-private const val KEY_INDEX = 0
 
 /** Derives the AES-128 key that the demo shares between participants. */
 internal fun deriveE2EEKey(passphrase: String): ByteArray {
@@ -78,23 +76,22 @@ internal fun deriveE2EEKey(passphrase: String): ByteArray {
  * manager when the session is created.
  */
 @Composable
-internal fun E2EELobbyButton(call: Call, modifier: Modifier = Modifier) {
+internal fun E2EELobbyButton(
+    call: Call,
+    onEnable: suspend (String) -> Unit,
+    onDisable: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val encrypted by call.state.e2eeEnabled.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    // Held here so the demo can dispose it when the user turns encryption off. Do not dispose
-    // when this composable leaves the tree: Join starts CallActivity with CLEAR_TASK, which
-    // destroys the lobby and would free the native manager the Call still holds.
-    var manager by remember { mutableStateOf<StreamEncryptionManager?>(null) }
     val scope = rememberCoroutineScope()
 
     IconButton(
         modifier = modifier.testTag("Stream_LobbyE2EEButton"),
         onClick = {
             if (encrypted) {
-                call.setE2EEManager(null)
-                manager?.dispose()
-                manager = null
+                onDisable()
             } else {
                 showDialog = true
             }
@@ -123,17 +120,7 @@ internal fun E2EELobbyButton(call: Call, modifier: Modifier = Modifier) {
                 // when it is not would be worse than refusing to enable it.
                 scope.launch {
                     val failure = runCatching {
-                        check(StreamEncryptionManager.isSupported()) {
-                            "This WebRTC build has no end-to-end encryption support."
-                        }
-                        // The key has to be in place before the manager reaches the call, so that
-                        // the publisher never gets a chance to send a frame without one.
-                        // Encryption mode is a call/type setting, not something a regular user
-                        // can flip with UpdateCall — Pronto's `user` role is denied that.
-                        val created = StreamEncryptionManager.create(call.user.id)
-                        created.setSharedKey(KEY_INDEX, deriveE2EEKey(passphrase))
-                        call.setE2EEManager(created)
-                        manager = created
+                        onEnable(passphrase)
                     }.exceptionOrNull()
                     error = failure?.message ?: failure?.javaClass?.simpleName
                     showDialog = failure != null
@@ -150,6 +137,8 @@ private fun E2EEPassphraseDialog(
     onConfirm: (String) -> Unit,
 ) {
     var passphrase by remember { mutableStateOf(TextFieldValue("")) }
+    var validationError by remember { mutableStateOf<String?>(null) }
+    val fieldError = validationError ?: error
 
     StreamDialogPositiveNegative(
         style = StreamDialogStyles.defaultDialogStyle(),
@@ -166,18 +155,21 @@ private fun E2EEPassphraseDialog(
                         .padding(16.dp)
                         .testTag("Stream_E2EEPassphraseField"),
                     value = passphrase,
-                    onValueChange = { passphrase = it },
+                    onValueChange = {
+                        passphrase = it
+                        validationError = null
+                    },
                     placeholder = "Passphrase",
-                    error = error != null,
+                    error = fieldError != null,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Password,
                     ),
                 )
-                if (error != null) {
+                if (fieldError != null) {
                     Text(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        text = error,
+                        text = fieldError,
                         style = VideoTheme.typography.bodyS,
                         color = VideoTheme.colors.alertWarning,
                     )
@@ -185,7 +177,11 @@ private fun E2EEPassphraseDialog(
             }
         },
         positiveButton = Triple("Enable", ButtonStyles.secondaryButtonStyle()) {
-            onConfirm(passphrase.text)
+            if (passphrase.text.isBlank()) {
+                validationError = "Passphrase cannot be empty."
+            } else {
+                onConfirm(passphrase.text)
+            }
         },
         negativeButton = Triple("Cancel", ButtonStyles.tertiaryButtonStyle()) {
             onDismiss()

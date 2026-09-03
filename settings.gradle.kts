@@ -17,10 +17,6 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven(url = "https://plugins.gradle.org/m2/")
-        // TODO(e2ee): drop once a stable WebRTC carrying EncryptionManager is on Maven Central.
-        maven(url = "https://central.sonatype.com/repository/maven-snapshots/") {
-            mavenContent { snapshotsOnly() }
-        }
     }
 }
 

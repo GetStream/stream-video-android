@@ -104,9 +104,13 @@ public class StreamEncryptionManager private constructor(
     public val algorithm: E2EEAlgorithm get() = native.algorithm().toE2EEAlgorithm()
 
     override fun encrypt(sender: RtpSender, codec: String?, trackType: E2EETrackType?) {
-        ifActive("encrypt") {
+        check(!native.isDisposed) { "Cannot attach an encryptor: manager is disposed." }
+        try {
             logger.d { "[encrypt] trackType: $trackType, codec: $codec" }
             native.encrypt(sender, codec, trackType?.toNativeTrackType())
+        } catch (error: Throwable) {
+            logger.e(error) { "[encrypt] failed" }
+            throw error
         }
     }
 
@@ -190,19 +194,21 @@ public class StreamEncryptionManager private constructor(
     }
 
     /**
-     * Releases the native manager and wipes its keys. Subsequent calls on this instance are
-     * no-ops, so a manager disposed while a call is still running degrades to unencrypted-looking
-     * media rather than crashing. Dispose only once you are done with every call that uses it.
+     * Releases the native manager and wipes its keys. Subsequent key and decrypt operations are
+     * ignored; attempting to attach an encryptor fails so the publisher cannot cache and negotiate
+     * a sender without encryption. Dispose only once you are done with every call that uses it.
      */
     public fun dispose() {
         if (native.isDisposed) return
+        val disposedUserId = userId
         safeCall { native.dispose() }
-        logger.d { "[dispose] released native manager for $userId" }
+        logger.d { "[dispose] released native manager for $disposedUserId" }
     }
 
     /**
-     * Native calls after [dispose] would reach freed memory, and a native failure must not
-     * propagate into the publish/subscribe paths, so every entry point funnels through here.
+     * Native calls after [dispose] would reach freed memory. Non-publisher operations are
+     * best-effort, so they are ignored or logged here; [encrypt] deliberately propagates failure
+     * so the publisher refuses to negotiate an unprotected sender.
      */
     private inline fun ifActive(operation: String, block: () -> Unit) {
         if (native.isDisposed) {

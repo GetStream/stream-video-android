@@ -26,9 +26,11 @@ import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -44,6 +46,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import stream.video.sfu.models.AudioBitrateProfile
 import javax.inject.Inject
 
@@ -53,6 +56,12 @@ class CallLobbyViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore,
     private val googleSignInClient: GoogleSignInClient,
 ) : ViewModel() {
+
+    private companion object {
+        const val E2EE_KEY_INDEX = 0
+    }
+
+    private var e2eeManager: StreamEncryptionManager? = null
 
     private val cid: String = checkNotNull(savedStateHandle["cid"])
     val callId: StreamCallId = StreamCallId.fromCallCid(cid)
@@ -194,6 +203,31 @@ class CallLobbyViewModel @Inject constructor(
                     "Failed to set audio bitrate profile: ${result.exceptionOrNull()?.message}",
                 )
             }
+        }
+    }
+
+    suspend fun enableE2EE(passphrase: String) {
+        val key = withContext(Dispatchers.Default) { deriveE2EEKey(passphrase) }
+        val created = StreamEncryptionManager.create(call.user.id)
+        try {
+            created.setSharedKey(E2EE_KEY_INDEX, key)
+            call.setE2EEManager(created)
+            val previous = e2eeManager
+            e2eeManager = created
+            previous?.dispose()
+        } catch (error: Throwable) {
+            created.dispose()
+            throw error
+        }
+    }
+
+    fun disableE2EE() {
+        val current = e2eeManager
+        call.setE2EEManager(null)
+        try {
+            current?.dispose()
+        } finally {
+            e2eeManager = null
         }
     }
 
