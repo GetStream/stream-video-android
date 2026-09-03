@@ -74,6 +74,7 @@ import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateManager
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
+import stream.video.sfu.models.AudioBitrateProfile
 import java.nio.ByteBuffer
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -175,6 +176,35 @@ internal fun SettingsMenu(
                     "${call.microphone.appliedAudioMaxBitrate()?.div(1000)}k)"
             } else {
                 "Audio bitrate ${next / 1000}k not applied — nothing is publishing audio"
+            },
+            Toast.LENGTH_LONG,
+        ).show()
+    }
+
+    val audioBitrateProfile by call.microphone.audioBitrateProfile.collectAsStateWithLifecycle()
+    val isMusicAudioProfile =
+        audioBitrateProfile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+
+    val onToggleAudioProfile: () -> Unit = {
+        val next = if (isMusicAudioProfile) {
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED
+        } else {
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+        }
+        val result = call.microphone.applyAudioProfile(next)
+        // Name the stages that did not move — a partial switch sounds like a failed one.
+        val missed = buildList {
+            if (!result.noiseCancellationApplied) add("noise cancellation")
+            if (!result.platformNoiseSuppressorApplied) add("hardware NS")
+            if (!result.softwareAudioProcessingApplied) add("software APM")
+            if (!result.audioMaxBitrateApplied) add("bitrate")
+        }
+        Toast.makeText(
+            context,
+            if (result.complete) {
+                "Audio profile: $next at ${result.audioMaxBitrateBps / 1000}k"
+            } else {
+                "Audio profile: $next — not applied: ${missed.joinToString()}"
             },
             Toast.LENGTH_LONG,
         ).show()
@@ -434,6 +464,8 @@ internal fun SettingsMenu(
                 onToggleAudioMaxBitrate = onToggleAudioMaxBitrate,
                 isCommunicationAudioModeEnabled = isCommunicationAudioModeEnabled,
                 onToggleCommunicationAudioMode = onToggleCommunicationAudioMode,
+                isMusicAudioProfile = isMusicAudioProfile,
+                onToggleAudioProfile = onToggleAudioProfile,
             ),
         )
     }

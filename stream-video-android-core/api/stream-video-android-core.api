@@ -8844,6 +8844,28 @@ public abstract interface class io/getstream/android/video/generated/models/WSCa
 public abstract interface class io/getstream/android/video/generated/models/WSClientEvent {
 }
 
+public final class io/getstream/video/android/core/AudioProfileResult {
+	public fun <init> (Lstream/video/sfu/models/AudioBitrateProfile;IZZZZ)V
+	public final fun component1 ()Lstream/video/sfu/models/AudioBitrateProfile;
+	public final fun component2 ()I
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun component5 ()Z
+	public final fun component6 ()Z
+	public final fun copy (Lstream/video/sfu/models/AudioBitrateProfile;IZZZZ)Lio/getstream/video/android/core/AudioProfileResult;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/AudioProfileResult;Lstream/video/sfu/models/AudioBitrateProfile;IZZZZILjava/lang/Object;)Lio/getstream/video/android/core/AudioProfileResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudioMaxBitrateApplied ()Z
+	public final fun getAudioMaxBitrateBps ()I
+	public final fun getComplete ()Z
+	public final fun getNoiseCancellationApplied ()Z
+	public final fun getPlatformNoiseSuppressorApplied ()Z
+	public final fun getProfile ()Lstream/video/sfu/models/AudioBitrateProfile;
+	public final fun getSoftwareAudioProcessingApplied ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/getstream/video/android/core/Call {
 	public static final field Companion Lio/getstream/video/android/core/Call$Companion;
 	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;Lio/getstream/video/android/model/User;)V
@@ -9403,6 +9425,7 @@ public final class io/getstream/video/android/core/MemberState {
 public final class io/getstream/video/android/core/MicrophoneManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;ILkotlin/jvm/functions/Function0;)V
 	public final fun appliedAudioMaxBitrate ()Ljava/lang/Integer;
+	public final fun applyAudioProfile (Lstream/video/sfu/models/AudioBitrateProfile;)Lio/getstream/video/android/core/AudioProfileResult;
 	public final fun canHandleDeviceSwitch ()Z
 	public final fun cleanup ()V
 	public final fun clearUsbDeviceSelection ()V

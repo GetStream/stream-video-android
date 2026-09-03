@@ -591,6 +591,9 @@ public class RtcSession internal constructor(
     /** The maximum bitrate on the live audio sender, or null when nothing is publishing audio. */
     internal fun audioMaxBitrate(): Int? = publisher.value?.audioMaxBitrate()
 
+    /** The audio bitrate the SFU negotiated at join, or null when nothing publishes audio. */
+    internal fun negotiatedAudioBitrate(): Int? = publisher.value?.negotiatedAudioBitrate()
+
     /**
      * Connection and WebRTC.
      */

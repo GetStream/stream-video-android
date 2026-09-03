@@ -398,6 +398,16 @@ internal class Publisher(
         }
     }
 
+    /**
+     * The audio bitrate the SFU negotiated for this publisher, or null when it publishes no audio.
+     *
+     * This is what the server asked for at join, for the audio bitrate profile the call joined
+     * with — the value to restore when a mid-call switch to music is undone.
+     */
+    internal fun negotiatedAudioBitrate(): Int? = safeCallWithDefault(null) {
+        publishOptions.firstOrNull { it.track_type == TrackType.TRACK_TYPE_AUDIO }?.bitrate
+    }
+
     /** The maximum bitrate currently set on the live audio sender, or null when unknown. */
     internal fun audioMaxBitrate(): Int? = safeCallWithDefault(null) {
         transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO)

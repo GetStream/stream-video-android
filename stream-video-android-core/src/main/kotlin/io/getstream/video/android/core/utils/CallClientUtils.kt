@@ -218,6 +218,29 @@ internal fun defaultHardwareAudioEffectsEnabled(profile: AudioBitrateProfile?): 
 internal fun defaultSoftwareAudioProcessingEnabled(profile: AudioBitrateProfile?): Boolean =
     profile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
 
+/** Roughly what the SFU asks for on the standard voice profile. */
+internal const val VOICE_MAX_AUDIO_BITRATE_BPS: Int = 64_000
+
+/** Roughly what the SFU asks for on the music profile. */
+internal const val MUSIC_MAX_AUDIO_BITRATE_BPS: Int = 128_000
+
+/**
+ * The maximum audio bitrate to put on the publisher for [profile].
+ *
+ * The SFU picks the audio bitrate from the publish options it negotiated at join, and mid-call it
+ * is not asked again — so switching to music has to raise the encoder's own ceiling. Going back the
+ * other way restores exactly what was negotiated, [negotiatedBitrateBps], rather than a guess at it.
+ */
+@JvmSynthetic
+internal fun targetAudioMaxBitrateBps(
+    profile: AudioBitrateProfile,
+    negotiatedBitrateBps: Int?,
+): Int = if (profile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY) {
+    maxOf(MUSIC_MAX_AUDIO_BITRATE_BPS, negotiatedBitrateBps ?: 0)
+} else {
+    negotiatedBitrateBps?.takeIf { it > 0 } ?: VOICE_MAX_AUDIO_BITRATE_BPS
+}
+
 @JvmSynthetic
 internal fun buildAudioConstraints(
     audioBitrateProfileProvider: (() -> AudioBitrateProfile)? = null,

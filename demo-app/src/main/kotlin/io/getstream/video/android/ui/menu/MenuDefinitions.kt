@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhoneInTalk
 import androidx.compose.material.icons.filled.RadioButtonChecked
@@ -112,6 +113,8 @@ fun defaultStreamMenu(
     onToggleAudioMaxBitrate: () -> Unit = {},
     isCommunicationAudioModeEnabled: Boolean = true,
     onToggleCommunicationAudioMode: (Boolean) -> Unit = {},
+    isMusicAudioProfile: Boolean = false,
+    onToggleAudioProfile: () -> Unit = {},
 ) = buildList<MenuItem> {
     if (noiseCancellationFeatureEnabled) {
         add(
@@ -199,6 +202,8 @@ fun defaultStreamMenu(
                     onToggleAudioMaxBitrate,
                     isCommunicationAudioModeEnabled,
                     onToggleCommunicationAudioMode,
+                    isMusicAudioProfile,
+                    onToggleAudioProfile,
                 ),
             ),
         )
@@ -390,7 +395,22 @@ fun debugSubmenu(
     onToggleAudioMaxBitrate: () -> Unit = {},
     isCommunicationAudioModeEnabled: Boolean = true,
     onToggleCommunicationAudioMode: (Boolean) -> Unit = {},
+    isMusicAudioProfile: Boolean = false,
+    onToggleAudioProfile: () -> Unit = {},
 ) = listOf(
+    // The one-call switch, then the individual stages it moves — kept so a stage can still be
+    // isolated when something sounds wrong. "Audio mode" is not one of them: it is the lever below
+    // all of these, and it costs echo cancellation and Bluetooth capture.
+    ActionMenuItem(
+        title = if (isMusicAudioProfile) {
+            "Audio profile: MUSIC (tap for voice)"
+        } else {
+            "Audio profile: VOICE (tap for music)"
+        },
+        icon = Icons.Default.MusicNote,
+        highlight = isMusicAudioProfile,
+        action = onToggleAudioProfile,
+    ),
     ActionMenuItem(
         title = when (audioMaxBitrateBps) {
             null -> "Audio bitrate: SFU default (tap for 128k)"

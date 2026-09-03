@@ -961,6 +961,17 @@ public class Call(
     /** The maximum bitrate on the live audio sender, or null when nothing is publishing audio. */
     internal fun audioMaxBitrate(): Int? = session.value?.audioMaxBitrate()
 
+    /** The audio bitrate the SFU negotiated at join, or null when nothing publishes audio. */
+    internal fun negotiatedAudioBitrate(): Int? = session.value?.negotiatedAudioBitrate()
+
+    /**
+     * Whether a noise-cancellation processor is wired into this call and can be turned on or off.
+     *
+     * Internal bridge for [MicrophoneManager.applyAudioProfile], which reports a stage it could not
+     * reach — and an absent processor is not a stage that failed.
+     */
+    internal fun isAudioProcessingReachable(): Boolean = media.isAudioProcessingReachable()
+
     fun toggleAudioProcessing(): Boolean {
         // Reads without building a factory: the gate runs before join, and a factory created
         // there would capture the pre-join audio bitrate profile.
