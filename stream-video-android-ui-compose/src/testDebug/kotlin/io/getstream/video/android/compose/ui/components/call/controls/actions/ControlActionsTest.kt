@@ -74,6 +74,20 @@ internal class ControlActionsTest : PaparazziComposeTest {
     }
 
     @Test
+    fun `screen share toggle action`() {
+        snapshotWithDarkModeRow {
+            ScreenShareToggleActionPreview()
+        }
+    }
+
+    @Test
+    fun `toggle action in progress`() {
+        snapshotWithDarkMode {
+            ToggleActionInProgressPreview()
+        }
+    }
+
+    @Test
     fun `settings action`() {
         snapshotWithDarkModeRow {
             ToggleSettingsActionPreview()
