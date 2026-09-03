@@ -86,6 +86,16 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
+
+            all {
+                // Robolectric builds a full Android sandbox per SDK level named in @Config, and
+                // this module's suite spans six of them in one JVM — nothing sets forkEvery here,
+                // so they accumulate. On CI that runs out of heap while loading an android-all
+                // jar, and which class reports it depends on execution order, which is why the
+                // telecom and notification tests kept getting blamed. The Xmx in
+                // gradle.properties is the daemon's, not the test JVM's, so it never applied.
+                it.maxHeapSize = "2g"
+            }
         }
 
         managedDevices {
