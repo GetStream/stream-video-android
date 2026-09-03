@@ -16,42 +16,23 @@
 
 package io.getstream.video.android.ui.call
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamDialog
-import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
-import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
-import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
-import io.getstream.video.android.compose.ui.components.base.styling.StreamTextFieldStyles
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
@@ -67,134 +48,65 @@ fun FeedbackDialog(call: Call, onDismiss: () -> Unit) {
     val sender = remember { FeedbackSender() }
 
     if (feedbackFinished) {
-        StreamDialog(style = VideoTheme.styles.dialogStyles.defaultDialogStyle()) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(
-                    painter = painterResource(id = R.drawable.feedback_artwork),
-                    contentDescription = "artwork",
-                )
-                if (feedbackError) {
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Icon(
-                        imageVector = Icons.Default.ErrorOutline,
-                        contentDescription = "alert",
-                        tint = VideoTheme.colors.accentError,
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
-                }
-                Text(
-                    text = "Your message was successfully sent",
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        lineHeight = 28.sp,
-                        fontWeight = FontWeight(500),
-                        color = VideoTheme.colors.textPrimary,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text =
-                    if (feedbackError) {
-                        "Something happened and we could not process your request.\n Please try agian later."
-                    } else {
-                        "Thank you for letting us know how we can continue to improve our\n" +
-                            "product and deliver the best calling experience possible. Hope you had\n" +
-                            "a good call."
-                    },
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        lineHeight = 18.5.sp,
-                        fontWeight = FontWeight(400),
-                        color = VideoTheme.colors.textSecondary,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-
-                Spacer(modifier = Modifier.size(24.dp))
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    StreamButton(
-                        modifier = Modifier.align(Alignment.BottomEnd),
-                        text = "Close",
-                        style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
-                    ) {
-                        onDismiss()
-                    }
-                }
-            }
+        StreamDialog(
+            onDismissRequest = onDismiss,
+            title = if (feedbackError) "Something went wrong" else "Your message was successfully sent",
+            message = if (feedbackError) {
+                "Something happened and we could not process your request. Please try again later."
+            } else {
+                "Thank you for letting us know how we can continue to improve our product and " +
+                    "deliver the best calling experience possible. Hope you had a good call."
+            },
+        ) {
+            StreamTextButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onDismiss,
+                text = "Close",
+                style = StreamButtonStyleDefaults.secondaryOutline,
+                size = StreamButtonSize.Large,
+            )
         }
     } else {
-        StreamDialogPositiveNegative(
-            onDismiss = onDismiss,
-            content = {
-                Image(
-                    painter = painterResource(id = R.drawable.feedback_artwork),
-                    contentDescription = "artwork",
-                )
-                Text(
-                    text = "How is your call Going?",
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        lineHeight = 28.sp,
-                        fontWeight = FontWeight(500),
-                        color = VideoTheme.colors.textPrimary,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = "All feedback is celebrated!",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        lineHeight = 18.5.sp,
-                        fontWeight = FontWeight(400),
-                        color = VideoTheme.colors.textSecondary,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-                Spacer(modifier = Modifier.size(16.dp))
-                StreamTextField(
-                    value = email,
-                    placeholder = "Email address (required)",
-                    onValueChange = {
-                        email = it
-                    },
-                    error = isError,
-                    style = StreamTextFieldStyles.defaultTextField(StyleSize.S),
-                )
-
-                Spacer(modifier = Modifier.size(16.dp))
-                StreamTextField(
-                    value = message,
-                    placeholder = "Message",
-                    onValueChange = {
-                        message = it
-                    },
-                    minLines = 7,
-                    style = StreamTextFieldStyles.defaultTextField(StyleSize.S),
-                )
-            },
-            style = StreamDialogStyles.defaultDialogStyle(),
-            positiveButton = Triple(
-                "Submit",
-                ButtonStyles.secondaryButtonStyle(StyleSize.S),
-            ) {
-                if (email.text.isEmpty() || !sender.isValidEmail(email.text)) {
-                    isError = true
-                } else {
-                    sender.sendFeedback(email.text, message.text, call.cid) {
-                        feedbackError = it
-                        feedbackFinished = true
+        StreamDialog(
+            onDismissRequest = onDismiss,
+            title = "How is your call going?",
+            message = "All feedback is celebrated!",
+        ) {
+            StreamTextField(
+                value = email,
+                onValueChange = { email = it },
+                placeholder = "Email address (required)",
+                errorText = if (isError) "Enter a valid email address." else null,
+            )
+            StreamTextField(
+                value = message,
+                onValueChange = { message = it },
+                placeholder = "Message",
+                minLines = 4,
+            )
+            StreamTextButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    if (email.text.isEmpty() || !sender.isValidEmail(email.text)) {
+                        isError = true
+                    } else {
+                        sender.sendFeedback(email.text, message.text, call.cid) {
+                            feedbackError = it
+                            feedbackFinished = true
+                        }
                     }
-                }
-            },
-            negativeButton = Triple(
-                "Not now",
-                ButtonStyles.tertiaryButtonStyle(StyleSize.S),
-            ) {
-                onDismiss()
-            },
-        )
+                },
+                text = "Submit",
+                size = StreamButtonSize.Large,
+            )
+            StreamTextButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onDismiss,
+                text = "Not now",
+                style = StreamButtonStyleDefaults.secondaryGhost,
+                size = StreamButtonSize.Large,
+            )
+        }
     }
 }
 

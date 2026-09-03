@@ -41,9 +41,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.theme.UserAvatarParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.ui.common.R
 
@@ -118,11 +118,13 @@ private fun CallParticipantInfoItem(
 
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
-        UserAvatar(
-            modifier = Modifier.size(StreamTokens.size24),
-            userImage = userImage,
-            userName = userName,
-            isShowingOnlineIndicator = true,
+        VideoTheme.componentFactory.UserAvatar(
+            UserAvatarParams(
+                userImage = userImage,
+                userName = userName,
+                modifier = Modifier.size(StreamTokens.size24),
+                isShowingOnlineIndicator = true,
+            ),
         )
 
         Text(
@@ -140,7 +142,9 @@ private fun CallParticipantInfoItem(
             val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
             if (!audioEnabled) {
                 Icon(
-                    painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
+                    painter = painterResource(
+                        id = io.getstream.video.android.compose.R.drawable.stream_design_ic_voice_off_fill,
+                    ),
                     tint = VideoTheme.colors.accentError,
                     contentDescription = null,
                 )
@@ -151,7 +155,9 @@ private fun CallParticipantInfoItem(
             val videoEnabled by participant.videoEnabled.collectAsStateWithLifecycle()
             if (!videoEnabled) {
                 Icon(
-                    painter = painterResource(id = R.drawable.stream_video_ic_videocam_off),
+                    painter = painterResource(
+                        id = io.getstream.video.android.compose.R.drawable.stream_design_ic_video_off_fill,
+                    ),
                     tint = VideoTheme.colors.accentError,
                     contentDescription = null,
                 )
@@ -162,7 +168,9 @@ private fun CallParticipantInfoItem(
             onUserOptionsSelected?.let {
                 Icon(
                     modifier = Modifier.clickable { onUserOptionsSelected(participant) },
-                    painter = painterResource(id = R.drawable.stream_video_ic_options),
+                    painter = painterResource(
+                        id = io.getstream.video.android.compose.R.drawable.stream_design_ic_more_vertical_fill,
+                    ),
                     tint = VideoTheme.colors.textPrimary,
                     contentDescription = null,
                 )

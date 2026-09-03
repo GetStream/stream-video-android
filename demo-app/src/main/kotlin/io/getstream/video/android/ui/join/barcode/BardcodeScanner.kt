@@ -70,7 +70,7 @@ import io.getstream.video.android.DeeplinkingActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.analytics.FirebaseEvents
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -143,7 +143,7 @@ internal fun BarcodeScanner(navigateBack: () -> Unit = {}) {
                                 id = io.getstream.video.android.ui.common.R.string.stream_video_permissions_title,
                             ),
                         )
-                        StreamButton(
+                        StreamTextButton(
                             modifier = Modifier.align(Alignment.CenterHorizontally),
                             text = "Request permission",
                             onClick = { cameraPermissionState.launchPermissionRequest() },

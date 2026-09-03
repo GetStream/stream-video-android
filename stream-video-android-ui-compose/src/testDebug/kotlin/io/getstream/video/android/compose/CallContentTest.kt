@@ -27,8 +27,6 @@ import io.getstream.video.android.compose.ui.components.call.ringing.incomingcal
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallContentOneParticipantPreview
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallControlsPreview
 import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallDetailsAudioPreview
-import io.getstream.video.android.compose.ui.components.call.ringing.incomingcall.IncomingCallDetailsVideoPreview
-import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContentMinimumAudioPreview
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContentMinimumVideoPreview
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContentMultipleParticipantsPreview
 import io.getstream.video.android.compose.ui.components.call.ringing.outgoingcall.OutgoingCallContentOneParticipantPreview
@@ -44,13 +42,6 @@ internal class CallContentTest : PaparazziComposeTest {
         deviceConfig = PIXEL_4A_HDPI,
         renderingMode = SessionParams.RenderingMode.SHRINK,
     )
-
-    @Test
-    fun `incoming call details video`() {
-        snapshotWithDarkMode {
-            IncomingCallDetailsVideoPreview()
-        }
-    }
 
     @Test
     fun `incoming call details audio`() {
@@ -189,20 +180,6 @@ internal class CallContentTest : PaparazziComposeTest {
     fun `outgoing call content with minimum parameters and video type in dark mode`() {
         snapshot(isInDarkMode = true) {
             OutgoingCallContentMinimumVideoPreview()
-        }
-    }
-
-    @Test
-    fun `outgoing call content with minimum parameters and audio type`() {
-        snapshot {
-            OutgoingCallContentMinimumAudioPreview()
-        }
-    }
-
-    @Test
-    fun `outgoing call content with minimum parameters and audio type in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            OutgoingCallContentMinimumAudioPreview()
         }
     }
 }

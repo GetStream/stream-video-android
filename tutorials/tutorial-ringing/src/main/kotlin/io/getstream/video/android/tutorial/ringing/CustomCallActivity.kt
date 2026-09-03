@@ -27,13 +27,14 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.GenericAction
 import io.getstream.video.android.core.Call
@@ -169,16 +170,14 @@ public fun CustomRejectAction(
     reason: String,
     enabled: Boolean = true,
     onCallAction: (CustomAction) -> Unit,
-    icon: ImageVector? = null,
-    bgColor: Color? = null,
-    iconTint: Color? = null,
+    icon: Painter? = null,
+    style: StreamButtonStyle = StreamButtonStyleDefaults.destructiveSolid,
 ): Unit = GenericAction(
     modifier = modifier,
+    icon = icon ?: rememberVectorPainter(Icons.Default.Call),
     enabled = enabled,
+    style = style,
     onAction = { onCallAction(CustomRejectCall(reason)) },
-    icon = icon ?: Icons.Default.Call,
-    color = bgColor ?: VideoTheme.colors.accentError,
-    iconTint = iconTint ?: VideoTheme.colors.textPrimary,
 )
 
 data class CustomRejectCall(val reason: String) : CustomAction(tag = "custom-reject")

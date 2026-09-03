@@ -69,7 +69,8 @@ import io.getstream.video.android.CallActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.compose.ui.components.call.lobby.buildDefaultLobbyControlActions
@@ -494,8 +495,8 @@ private fun LobbyDescriptionContent(participantCounts: ParticipantCount?, onClic
             )
         }
         Spacer(modifier = Modifier.size(16.dp))
-        StreamButton(
-            style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+        StreamTextButton(
+            style = StreamButtonStyleDefaults.primarySolid,
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("Stream_JoinCallButton"),

@@ -243,6 +243,21 @@ public data class ParticipantVideoConnectionIndicatorContentParams(
 )
 
 /**
+ * Parameters for [VideoComponentFactory.UserAvatar].
+ *
+ * @param userImage The URL of the user image, or null to show the initials of [userName].
+ * @param userName The name whose initials are the fallback, or null for no fallback.
+ * @param modifier The modifier applied to the avatar. The avatar fills the size the modifier gives it.
+ * @param isShowingOnlineIndicator Whether the online indicator is drawn over the avatar.
+ */
+public data class UserAvatarParams(
+    val userImage: String?,
+    val userName: String?,
+    val modifier: Modifier = Modifier,
+    val isShowingOnlineIndicator: Boolean = false,
+)
+
+/**
  * Parameters for [VideoComponentFactory.ParticipantVideoFallbackContent].
  *
  * @param call The call that contains all the participants state and tracks.

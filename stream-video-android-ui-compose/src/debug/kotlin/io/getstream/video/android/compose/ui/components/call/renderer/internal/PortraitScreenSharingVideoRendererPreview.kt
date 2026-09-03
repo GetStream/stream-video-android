@@ -36,15 +36,6 @@ private fun PortraitScreenSharingContentRootPreview() {
     }
 }
 
-@Preview
-@Composable
-private fun PortraitScreenSharingMyContentRootPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        PortraitScreenSharingMyContentPreview()
-    }
-}
-
 @Composable
 internal fun PortraitScreenSharingContentPreview() {
     PortraitScreenSharingVideoRenderer(
@@ -54,6 +45,15 @@ internal fun PortraitScreenSharingContentPreview() {
         dominantSpeaker = previewParticipantsList[1],
         modifier = Modifier.fillMaxSize(),
     )
+}
+
+@Preview
+@Composable
+private fun PortraitScreenSharingMyContentRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        PortraitScreenSharingMyContentPreview()
+    }
 }
 
 @Composable

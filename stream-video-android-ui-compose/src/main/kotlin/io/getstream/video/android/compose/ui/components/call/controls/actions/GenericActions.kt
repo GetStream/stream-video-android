@@ -16,134 +16,94 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.material.ButtonDefaults
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.state.ToggleableState
-import io.getstream.video.android.compose.theme.VideoTheme
+import androidx.compose.ui.graphics.painter.Painter
+import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
-import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
-import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
-import io.getstream.video.android.core.call.state.CallAction
 
+/**
+ * A round icon button used for one-shot call actions such as leaving the call.
+ *
+ * @param modifier The modifier applied to the button.
+ * @param icon The icon of the action.
+ * @param contentDescription The accessibility description of the action, or null when a parent describes it.
+ * @param enabled Whether the action accepts clicks.
+ * @param style The colors of the button. See [StreamButtonStyleDefaults].
+ * @param size The visual size of the button.
+ * @param onAction Called when the action is clicked.
+ */
 @Composable
 public fun GenericAction(
     modifier: Modifier = Modifier,
-    icon: ImageVector,
+    icon: Painter,
+    contentDescription: String? = null,
     enabled: Boolean = true,
-    shape: Shape? = null,
-    color: Color? = null,
-    iconTint: Color? = null,
-    style: StreamFixedSizeButtonStyle? = null,
+    style: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
+    size: StreamButtonSize = StreamButtonSize.Medium,
     onAction: () -> Unit,
 ): Unit = StreamIconButton(
+    onClick = onAction,
+    icon = icon,
+    contentDescription = contentDescription,
     modifier = modifier,
     enabled = enabled,
-    icon = icon,
-    style = style?.let {
-        it.copyFixed(
-            shape = shape ?: it.shape,
-            colors = color?.let {
-                ButtonDefaults.buttonColors(
-                    backgroundColor = color,
-                    disabledBackgroundColor = color.copy(alpha = 0.16f),
-                )
-            }
-                ?: it.colors,
-            iconStyle = it.iconStyle.copy(
-                default = it.iconStyle.default.copy(
-                    color = iconTint ?: it.iconStyle.default.color,
-                ),
-            ),
-        )
-    } ?: VideoTheme.styles.buttonStyles.primaryIconButtonStyle()
-        .let {
-            it.copyFixed(
-                shape = shape ?: it.shape,
-                colors = color?.let {
-                    ButtonDefaults.buttonColors(
-                        backgroundColor = color,
-                        disabledBackgroundColor = color.copy(alpha = 0.16f),
-                    )
-                }
-                    ?: it.colors,
-                iconStyle = it.iconStyle.copy(
-                    default = it.iconStyle.default.copy(
-                        color = iconTint ?: it.iconStyle.default.color,
-                    ),
-                ),
-            )
-        },
-    onClick = {
-        onAction()
-    },
+    style = style,
+    size = size,
 )
 
 /**
- * A call action button represents toggling a microphone.
+ * A round icon button used for call actions with an active and an inactive state, such as the microphone.
  *
- * @param modifier Optional Modifier for this action button.
- * @param isMicrophoneEnabled Represent is camera enabled.
- * @param enabled Whether or not this action button will handle input events.
- * @param onCallAction A [CallAction] event that will be fired.
+ * @param modifier The modifier applied to the button.
+ * @param isActionActive Whether the action is in its active state, which selects the first icon and [onStyle].
+ * @param iconOnOff The icons of the active and the inactive state.
+ * @param contentDescription The accessibility description of the action, or null when a parent describes it.
+ * @param enabled Whether the action accepts clicks.
+ * @param progress Whether a progress indicator replaces the icon while the action is pending.
+ * @param onStyle The colors of the active state. See [StreamButtonStyleDefaults].
+ * @param offStyle The colors of the inactive state. See [StreamButtonStyleDefaults].
+ * @param size The visual size of the button.
+ * @param onAction Called when the action is clicked.
  */
 @Composable
 public fun ToggleAction(
     modifier: Modifier = Modifier,
     isActionActive: Boolean,
-    iconOnOff: Pair<ImageVector, ImageVector>,
+    iconOnOff: Pair<Painter, Painter>,
+    contentDescription: String? = null,
     enabled: Boolean = true,
-    shape: Shape? = null,
-    enabledColor: Color? = null,
-    disabledColor: Color? = null,
-    enabledIconTint: Color? = null,
-    disabledIconTint: Color? = null,
     progress: Boolean = false,
-    onStyle: StreamFixedSizeButtonStyle? = null,
-    offStyle: StreamFixedSizeButtonStyle? = null,
+    onStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
+    offStyle: StreamButtonStyle = StreamButtonStyleDefaults.destructiveSolid,
+    size: StreamButtonSize = StreamButtonSize.Medium,
     onAction: () -> Unit,
-): Unit = StreamIconToggleButton(
+): Unit = StreamButton(
+    onClick = onAction,
     modifier = modifier,
     enabled = enabled,
-    showProgress = progress,
-    toggleState = rememberUpdatedState(newValue = ToggleableState(isActionActive)),
-    onIcon = iconOnOff.first,
-    offIcon = iconOnOff.second,
-    onStyle = onStyle ?: VideoTheme.styles.buttonStyles.primaryIconButtonStyle()
-        .let {
-            it.copyFixed(
-                shape = shape ?: it.shape,
-                colors = enabledColor?.let { ButtonDefaults.buttonColors(backgroundColor = enabledColor) }
-                    ?: it.colors,
-                iconStyle = it.iconStyle.copy(
-                    default = it.iconStyle.default.copy(
-                        color = enabledIconTint ?: it.iconStyle.default.color,
-                    ),
-                ),
-            )
-        },
-    offStyle = offStyle ?: VideoTheme.styles.buttonStyles.alertIconButtonStyle().let {
-        it.copyFixed(
-            shape = shape ?: it.shape,
-            colors = disabledColor?.let {
-                ButtonDefaults.buttonColors(
-                    backgroundColor = disabledColor,
-                    disabledBackgroundColor = disabledColor,
-                )
-            }
-                ?: it.colors,
-            iconStyle = it.iconStyle.copy(
-                default = it.iconStyle.default.copy(
-                    color = disabledIconTint ?: it.iconStyle.default.color,
-                ),
-            ),
+    style = if (isActionActive) onStyle else offStyle,
+    size = size,
+) {
+    if (progress) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(size.iconSize),
+            color = LocalContentColor.current,
+            strokeWidth = StreamTokens.strokeW200,
         )
-    },
-    onClick = {
-        onAction()
-    },
-)
+    } else {
+        Icon(
+            painter = if (isActionActive) iconOnOff.first else iconOnOff.second,
+            contentDescription = contentDescription,
+            modifier = Modifier.size(size.iconSize),
+        )
+    }
+}

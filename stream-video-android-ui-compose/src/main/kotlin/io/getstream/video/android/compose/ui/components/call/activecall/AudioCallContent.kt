@@ -43,7 +43,7 @@ import io.getstream.video.android.compose.theme.AudioOnlyCallDetailsContentParam
 import io.getstream.video.android.compose.theme.AudioOnlyCallHeaderContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
-import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.DefaultPermissionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
@@ -280,15 +280,14 @@ public fun AudioOnlyCallControls(
         ToggleMicrophoneAction(
             modifier = Modifier.testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
             isMicrophoneEnabled = isMicrophoneEnabled,
+            size = StreamButtonSize.Large,
             onCallAction = onCallAction,
-            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(1.5f),
-            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
         )
 
         LeaveCallAction(
             modifier = Modifier.testTag("Stream_HangUpButton"),
             onCallAction = onCallAction,
-            style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
+            size = StreamButtonSize.Large,
         )
     }
 }

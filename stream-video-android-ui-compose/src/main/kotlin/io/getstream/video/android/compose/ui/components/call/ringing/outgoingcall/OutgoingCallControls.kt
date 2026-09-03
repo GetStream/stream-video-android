@@ -23,8 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
@@ -55,20 +54,16 @@ public fun OutgoingCallControls(
             modifier = Modifier
                 .testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
             isMicrophoneEnabled = isMicrophoneEnabled,
+            size = StreamButtonSize.Large,
             onCallAction = onCallAction,
-            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(1.5f),
-            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
         )
 
         if (isVideoCall) {
             ToggleCameraAction(
                 modifier = Modifier
                     .testTag("Stream_CameraToggle_Enabled_$isCameraEnabled"),
-                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
-                    1.5f,
-                ),
-                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
                 isCameraEnabled = isCameraEnabled,
+                size = StreamButtonSize.Large,
                 onCallAction = onCallAction,
             )
         }
@@ -76,7 +71,7 @@ public fun OutgoingCallControls(
         CancelCallAction(
             modifier = Modifier.testTag("Stream_DeclineCallButton"),
             onCallAction = onCallAction,
-            style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
+            size = StreamButtonSize.Large,
         )
     }
 }

@@ -57,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -68,7 +69,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -349,16 +351,16 @@ private fun Body(
                         .padding(bottom = 10.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                 ) {
-                    StreamButton(
+                    StreamTextButton(
                         // Floating button
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(bottom = 10.dp)
                             .testTag("Stream_AudioCallButton"),
                         enabled = users.any { it.isSelected },
-                        icon = Icons.Default.Call,
+                        leadingIcon = rememberVectorPainter(Icons.Default.Call),
                         text = "Audio call",
-                        style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                        style = StreamButtonStyleDefaults.primarySolid,
                         onClick = {
                             onStartCallClick(
                                 StreamCallId("audio_call", UUID.randomUUID().toString()),
@@ -371,16 +373,16 @@ private fun Body(
                         },
                     )
 
-                    StreamButton(
+                    StreamTextButton(
                         // Floating button
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(bottom = 10.dp)
                             .testTag("Stream_VideoCallButton"),
                         enabled = users.any { it.isSelected },
-                        icon = Icons.Default.VideoCall,
+                        leadingIcon = rememberVectorPainter(Icons.Default.VideoCall),
                         text = "Video call",
-                        style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                        style = StreamButtonStyleDefaults.primarySolid,
                         onClick = {
                             onStartCallClick(
                                 StreamCallId("default", UUID.randomUUID().toString()),

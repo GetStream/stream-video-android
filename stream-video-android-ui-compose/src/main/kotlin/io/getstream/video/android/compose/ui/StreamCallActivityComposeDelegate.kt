@@ -27,16 +27,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,13 +45,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.log.taggedLogger
@@ -62,10 +57,10 @@ import io.getstream.video.android.compose.permission.LaunchPermissionRequest
 import io.getstream.video.android.compose.theme.DefaultVideoComponentFactory
 import io.getstream.video.android.compose.theme.VideoComponentFactory
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
-import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
-import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamDialog
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
 import io.getstream.video.android.compose.ui.components.call.ringing.RingingCallContent
@@ -219,7 +214,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                         ) {
                                             Icon(
                                                 tint = VideoTheme.colors.textPrimary,
-                                                imageVector = Icons.Default.SignalWifiBad,
+                                                painter = painterResource(R.drawable.stream_design_ic_exclamation_triangle_fill),
                                                 contentDescription = null,
                                             )
                                             Text(
@@ -605,53 +600,38 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                 .background(VideoTheme.colors.backgroundCoreElevation1),
         ) {
             // Proceed as normal
-            StreamDialogPositiveNegative(
-                content = {
-                    Text(
-                        text = stringResource(
-                            id = R.string.stream_default_call_ui_permissions_rationale_title,
-                        ),
-                        style = TextStyle(
-                            fontSize = 24.sp,
-                            lineHeight = 28.sp,
-                            fontWeight = FontWeight(500),
-                            color = VideoTheme.colors.textPrimary,
-                            textAlign = TextAlign.Center,
-                        ),
-                    )
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text(
-                        text = stringResource(
-                            id = R.string.stream_default_call_ui_permission_rationale,
-                        ),
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            lineHeight = 18.5.sp,
-                            fontWeight = FontWeight(400),
-                            color = VideoTheme.colors.textSecondary,
-                            textAlign = TextAlign.Center,
-                        ),
-                    )
-                },
-                style = StreamDialogStyles.defaultDialogStyle(),
-                positiveButton = Triple(
-                    stringResource(id = R.string.stream_default_call_ui_settings_button),
-                    ButtonStyles.secondaryButtonStyle(StyleSize.S),
-                ) {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", packageName, null)
-                    }
-                    startActivity(intent)
-                },
-                negativeButton = Triple(
-                    stringResource(id = R.string.stream_default_call_ui_not_now_button),
-                    ButtonStyles.tertiaryButtonStyle(StyleSize.S),
-                ) {
-                    // No permissions, leave the call
-                    updateRenderPermissionUi(false)
-                    onCallAction(call, LeaveCall)
-                },
-            )
+            StreamDialog(
+                onDismissRequest = {},
+                title = stringResource(
+                    id = R.string.stream_default_call_ui_permissions_rationale_title,
+                ),
+                message = stringResource(id = R.string.stream_default_call_ui_permission_rationale),
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+            ) {
+                StreamTextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", packageName, null)
+                        }
+                        startActivity(intent)
+                    },
+                    text = stringResource(id = R.string.stream_default_call_ui_settings_button),
+                    size = StreamButtonSize.Large,
+                )
+                StreamTextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        // No permissions, leave the call
+                        updateRenderPermissionUi(false)
+                        onCallAction(call, LeaveCall)
+                    },
+                    text = stringResource(id = R.string.stream_default_call_ui_not_now_button),
+                    style = StreamButtonStyleDefaults.secondaryOutline,
+                    size = StreamButtonSize.Large,
+                )
+            }
         }
     }
 }

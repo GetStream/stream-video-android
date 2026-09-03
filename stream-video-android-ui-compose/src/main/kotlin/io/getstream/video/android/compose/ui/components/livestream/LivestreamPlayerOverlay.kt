@@ -93,7 +93,7 @@ private fun BoxScope.LiveBadge(call: Call) {
         Image(
             modifier = Modifier.size(22.dp),
             painter = painterResource(
-                id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_live,
+                id = io.getstream.video.android.compose.R.drawable.stream_design_ic_livestream_fill,
             ),
             contentDescription = stringResource(
                 id = io.getstream.video.android.ui.common.R.string.stream_video_live,

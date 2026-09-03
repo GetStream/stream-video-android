@@ -35,29 +35,11 @@ import io.getstream.video.android.mock.previewParticipantsList
 
 @Preview
 @Composable
-private fun CallParticipantLocalRootPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        CallParticipantLocalPreview()
-    }
-}
-
-@Preview
-@Composable
 private fun CallParticipantRemoteRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallParticipantRemotePreview()
     }
-}
-
-@Composable
-internal fun CallParticipantLocalPreview() {
-    ParticipantVideo(
-        call = previewCall,
-        participant = previewParticipantsList[0],
-        style = RegularVideoRendererStyle(isFocused = true),
-    )
 }
 
 @Composable

@@ -26,9 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
-import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.ui.common.R
 
@@ -53,12 +52,10 @@ internal fun CallParticipantsInfoActions(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        StreamButton(
-            modifier = Modifier
-                .weight(1f),
-            onClick = { onInviteUser.invoke() },
+        StreamTextButton(
+            modifier = Modifier.weight(1f),
+            onClick = onInviteUser,
             text = stringResource(id = R.string.stream_video_call_participants_info_options_invite),
-            style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
         )
         Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
         ToggleMicrophoneAction(

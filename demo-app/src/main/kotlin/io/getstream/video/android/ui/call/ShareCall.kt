@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CopyAll
@@ -41,16 +40,17 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
@@ -119,30 +119,23 @@ public fun ShareSettingsBox(
                 style = VideoTheme.typography.headingLarge.copy(fontSize = 20.sp),
             )
             Spacer(modifier = Modifier.size(16.dp))
-            StreamButton(
+            StreamTextButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(36.dp),
                 text = "Add others",
-                icon = Icons.Default.PersonAddAlt1,
-                style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                leadingIcon = rememberVectorPainter(Icons.Default.PersonAddAlt1),
+                style = StreamButtonStyleDefaults.primarySolid,
                 onClick = { onShare(call.id) },
             )
             Spacer(modifier = Modifier.size(16.dp))
-            StreamButton(
+            StreamTextButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(36.dp),
                 text = "Call ID: ${call.id}",
-                textOverflow = TextOverflow.Ellipsis,
-                icon = Icons.Default.CopyAll,
-                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle().copy(
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
-                        contentColor = VideoTheme.colors.textPrimary,
-                        disabledBackgroundColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
-                    ),
-                ),
+                leadingIcon = rememberVectorPainter(Icons.Default.CopyAll),
+                style = StreamButtonStyleDefaults.secondarySolid,
                 onClick = {
                     val clipData = ClipData.newPlainText("Call ID", call.id)
                     clipboardManager?.setPrimaryClip(clipData)
@@ -191,30 +184,23 @@ public fun ShareSettingsBoxLandscape(
                     style = VideoTheme.typography.headingLarge.copy(fontSize = 20.sp),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
-                StreamButton(
+                StreamTextButton(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(36.dp),
                     text = "Add others",
-                    icon = Icons.Default.PersonAddAlt1,
-                    style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                    leadingIcon = rememberVectorPainter(Icons.Default.PersonAddAlt1),
+                    style = StreamButtonStyleDefaults.primarySolid,
                     onClick = { onShare(call.id) },
                 )
                 Spacer(modifier = Modifier.size(16.dp))
-                StreamButton(
+                StreamTextButton(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(36.dp),
                     text = "Call ID: ${call.id}",
-                    textOverflow = TextOverflow.Ellipsis,
-                    icon = Icons.Default.CopyAll,
-                    style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle().copy(
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
-                            contentColor = VideoTheme.colors.textPrimary,
-                            disabledBackgroundColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
-                        ),
-                    ),
+                    leadingIcon = rememberVectorPainter(Icons.Default.CopyAll),
+                    style = StreamButtonStyleDefaults.secondarySolid,
                     onClick = {
                         val clipData = ClipData.newPlainText("Call ID", call.id)
                         clipboardManager?.setPrimaryClip(clipData)
