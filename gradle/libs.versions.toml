@@ -49,8 +49,6 @@ tink = "1.9.0"
 turbine = "0.13.0"
 itu = "1.7.3"
 
-# TODO(e2ee): snapshot needed for org.webrtc.EncryptionManager (GetStream/webrtc#110). Pin to a
-# release before merging.
 streamWebRTC = "145.17.0"
 streamNoiseCancellation = "3.0.0"
 streamResult = "1.3.0"
