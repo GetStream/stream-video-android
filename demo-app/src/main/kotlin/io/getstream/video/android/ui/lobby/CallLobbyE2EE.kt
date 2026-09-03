@@ -78,8 +78,8 @@ internal fun deriveE2EEKey(passphrase: String): ByteArray {
 @Composable
 internal fun E2EELobbyButton(
     call: Call,
-    onEnable: suspend (String) -> Unit,
-    onDisable: () -> Unit,
+    onEnable: suspend (String) -> Result<Unit>,
+    onDisable: () -> Result<Unit>,
     modifier: Modifier = Modifier,
 ) {
     val encrypted by call.state.e2eeEnabled.collectAsStateWithLifecycle()
@@ -91,7 +91,7 @@ internal fun E2EELobbyButton(
         modifier = modifier.testTag("Stream_LobbyE2EEButton"),
         onClick = {
             if (encrypted) {
-                onDisable()
+                error = onDisable().exceptionOrNull()?.message
             } else {
                 showDialog = true
             }
@@ -119,9 +119,7 @@ internal fun E2EELobbyButton(
                 // Surfaced rather than swallowed: joining a call the user believes is encrypted
                 // when it is not would be worse than refusing to enable it.
                 scope.launch {
-                    val failure = runCatching {
-                        onEnable(passphrase)
-                    }.exceptionOrNull()
+                    val failure = onEnable(passphrase).exceptionOrNull()
                     error = failure?.message ?: failure?.javaClass?.simpleName
                     showDialog = failure != null
                 }

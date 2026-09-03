@@ -451,12 +451,15 @@ internal class Publisher(
             return false
         }
         return try {
-            manager.encrypt(
+            val result = manager.encrypt(
                 sender,
                 publishOption.codec?.name?.asE2EECodecHint(),
                 publishOption.track_type.toE2EETrackType(),
             )
-            true
+            result.exceptionOrNull()?.let { error ->
+                logger.e(error) { "Failed to attach the encryptor for ${publishOption.track_type}" }
+            }
+            result.isSuccess
         } catch (e: Exception) {
             logger.e(e) { "Failed to attach the encryptor for ${publishOption.track_type}" }
             false

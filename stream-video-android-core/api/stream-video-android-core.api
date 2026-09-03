@@ -9038,7 +9038,7 @@ public final class io/getstream/video/android/core/Call {
 	public static synthetic fun sendReaction$default (Lio/getstream/video/android/core/Call;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun setAudioFilter (Lio/getstream/video/android/core/call/audio/InputAudioFilter;)V
 	public final fun setAudioProcessingEnabled (Z)V
-	public final fun setE2EEManager (Lio/getstream/video/android/core/e2ee/E2EEManager;)V
+	public final fun setE2EEManager-IoAF18A (Lio/getstream/video/android/core/e2ee/E2EEManager;)Ljava/lang/Object;
 	public final fun setIncomingAudioEnabled (ZLjava/util/List;)V
 	public static synthetic fun setIncomingAudioEnabled$default (Lio/getstream/video/android/core/Call;ZLjava/util/List;ILjava/lang/Object;)V
 	public final fun setIncomingVideoEnabled (Ljava/lang/Boolean;Ljava/util/List;)V
@@ -12164,8 +12164,8 @@ public final class io/getstream/video/android/core/e2ee/E2EEKeyState {
 }
 
 public abstract interface class io/getstream/video/android/core/e2ee/E2EEManager {
-	public abstract fun decrypt (Lorg/webrtc/RtpReceiver;Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EETrackType;)V
-	public abstract fun encrypt (Lorg/webrtc/RtpSender;Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EETrackType;)V
+	public abstract fun decrypt-0E7RQCE (Lorg/webrtc/RtpReceiver;Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EETrackType;)Ljava/lang/Object;
+	public abstract fun encrypt-0E7RQCE (Lorg/webrtc/RtpSender;Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EETrackType;)Ljava/lang/Object;
 }
 
 public final class io/getstream/video/android/core/e2ee/E2EESharedKey {
@@ -12230,12 +12230,11 @@ public final class io/getstream/video/android/core/e2ee/E2EEUserKey {
 public final class io/getstream/video/android/core/e2ee/StreamEncryptionManager : io/getstream/video/android/core/e2ee/E2EEManager {
 	public static final field Companion Lio/getstream/video/android/core/e2ee/StreamEncryptionManager$Companion;
 	public synthetic fun <init> (Lorg/webrtc/EncryptionManager;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public static final fun create (Ljava/lang/String;)Lio/getstream/video/android/core/e2ee/StreamEncryptionManager;
-	public static final fun create (Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EEAlgorithm;)Lio/getstream/video/android/core/e2ee/StreamEncryptionManager;
-	public fun decrypt (Lorg/webrtc/RtpReceiver;Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EETrackType;)V
+	public static final fun create-gIAlu-s (Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EEAlgorithm;)Ljava/lang/Object;
+	public fun decrypt-0E7RQCE (Lorg/webrtc/RtpReceiver;Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EETrackType;)Ljava/lang/Object;
 	public final fun dispose ()V
 	public final fun enablePerformanceReporting (Z)V
-	public fun encrypt (Lorg/webrtc/RtpSender;Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EETrackType;)V
+	public fun encrypt-0E7RQCE (Lorg/webrtc/RtpSender;Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EETrackType;)Ljava/lang/Object;
 	public final fun getAlgorithm ()Lio/getstream/video/android/core/e2ee/E2EEAlgorithm;
 	public final fun getUserId ()Ljava/lang/String;
 	public static final fun isSupported ()Z
@@ -12249,9 +12248,8 @@ public final class io/getstream/video/android/core/e2ee/StreamEncryptionManager 
 }
 
 public final class io/getstream/video/android/core/e2ee/StreamEncryptionManager$Companion {
-	public final fun create (Ljava/lang/String;)Lio/getstream/video/android/core/e2ee/StreamEncryptionManager;
-	public final fun create (Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EEAlgorithm;)Lio/getstream/video/android/core/e2ee/StreamEncryptionManager;
-	public static synthetic fun create$default (Lio/getstream/video/android/core/e2ee/StreamEncryptionManager$Companion;Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EEAlgorithm;ILjava/lang/Object;)Lio/getstream/video/android/core/e2ee/StreamEncryptionManager;
+	public final fun create-gIAlu-s (Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EEAlgorithm;)Ljava/lang/Object;
+	public static synthetic fun create-gIAlu-s$default (Lio/getstream/video/android/core/e2ee/StreamEncryptionManager$Companion;Ljava/lang/String;Lio/getstream/video/android/core/e2ee/E2EEAlgorithm;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun isSupported ()Z
 }
 

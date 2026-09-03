@@ -42,7 +42,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -67,9 +66,17 @@ class CallE2EETest {
 
     /** Encrypts nothing; the tests only care about what the SDK asks of a manager. */
     private class NoopE2EEManager : E2EEManager {
-        override fun encrypt(sender: RtpSender, codec: String?, trackType: E2EETrackType?) = Unit
-        override fun decrypt(receiver: RtpReceiver, userId: String, trackType: E2EETrackType?) =
-            Unit
+        override fun encrypt(
+            sender: RtpSender,
+            codec: String?,
+            trackType: E2EETrackType?,
+        ): kotlin.Result<Unit> = kotlin.Result.success(Unit)
+
+        override fun decrypt(
+            receiver: RtpReceiver,
+            userId: String,
+            trackType: E2EETrackType?,
+        ): kotlin.Result<Unit> = kotlin.Result.success(Unit)
     }
 
     @Before
@@ -112,8 +119,9 @@ class CallE2EETest {
     fun `attaching a manager marks the call as encrypted`() {
         assertThat(call.state.e2eeEnabled.value).isFalse()
 
-        call.setE2EEManager(NoopE2EEManager())
+        val result = call.setE2EEManager(NoopE2EEManager())
 
+        assertThat(result.isSuccess).isTrue()
         assertThat(call.state.e2eeEnabled.value).isTrue()
     }
 
@@ -127,16 +135,25 @@ class CallE2EETest {
     }
 
     @Test
+    fun `leaving detaches the app-owned manager`() {
+        call.setE2EEManager(NoopE2EEManager())
+
+        call.leave()
+
+        assertThat(call.e2eeManager).isNull()
+        assertThat(call.state.e2eeEnabled.value).isFalse()
+    }
+
+    @Test
     fun `attaching a manager after join is rejected`() {
         // The publisher and subscriber capture the manager when the session is built, so a manager
         // attached afterwards would silently apply to nothing.
         call.injectSession(mockk<RtcSession>(relaxed = true))
 
-        val failure = assertThrows(IllegalStateException::class.java) {
-            call.setE2EEManager(NoopE2EEManager())
-        }
+        val failure = call.setE2EEManager(NoopE2EEManager())
 
-        assertThat(failure).hasMessageThat().contains("before join()")
+        assertThat(failure.isFailure).isTrue()
+        assertThat(failure.exceptionOrNull()).hasMessageThat().contains("before join()")
         assertThat(call.state.e2eeEnabled.value).isFalse()
     }
 

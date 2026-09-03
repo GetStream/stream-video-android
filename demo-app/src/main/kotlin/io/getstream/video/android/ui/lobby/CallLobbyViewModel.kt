@@ -206,29 +206,34 @@ class CallLobbyViewModel @Inject constructor(
         }
     }
 
-    suspend fun enableE2EE(passphrase: String) {
-        val key = withContext(Dispatchers.Default) { deriveE2EEKey(passphrase) }
+    suspend fun enableE2EE(passphrase: String): Result<Unit> {
+        val key = runCatching {
+            withContext(Dispatchers.Default) { deriveE2EEKey(passphrase) }
+        }.getOrElse { return Result.failure(it) }
         val created = StreamEncryptionManager.create(call.user.id)
-        try {
-            created.setSharedKey(E2EE_KEY_INDEX, key)
-            call.setE2EEManager(created)
-            val previous = e2eeManager
-            e2eeManager = created
-            previous?.dispose()
-        } catch (error: Throwable) {
+            .getOrElse { return Result.failure(it) }
+        created.setSharedKey(E2EE_KEY_INDEX, key)
+        val attached = call.setE2EEManager(created)
+        if (attached.isFailure) {
             created.dispose()
-            throw error
+            return attached
         }
+        val previous = e2eeManager
+        e2eeManager = created
+        previous?.dispose()
+        return Result.success(Unit)
     }
 
-    fun disableE2EE() {
+    fun disableE2EE(): Result<Unit> {
         val current = e2eeManager
-        call.setE2EEManager(null)
+        val detached = call.setE2EEManager(null)
+        if (detached.isFailure) return detached
         try {
             current?.dispose()
         } finally {
             e2eeManager = null
         }
+        return Result.success(Unit)
     }
 
     fun signOut() {

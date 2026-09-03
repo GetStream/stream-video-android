@@ -733,9 +733,17 @@ internal class Subscriber(
         }
 
         pendingDecryptors.remove(trackId)
-        safeCall {
+        val result = runCatching {
             logger.d { "[attachDecryptor] #e2ee; track $trackId of $userId ($trackType)" }
             manager.decrypt(receiver, userId, trackType.toE2EETrackType())
+        }.getOrElse { Result.failure(it) }
+        result.onFailure { error ->
+            logger.e(error) {
+                "[attachDecryptor] #e2ee; failed for track $trackId of $userId ($trackType)"
+            }
+            // Attachment did not succeed, so do not suppress a later retry.
+            decryptedTrackIds.remove(trackId)
+            pendingDecryptors[trackId] = sessionId to trackType
         }
     }
 

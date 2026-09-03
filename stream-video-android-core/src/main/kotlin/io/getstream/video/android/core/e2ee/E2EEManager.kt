@@ -48,8 +48,14 @@ public interface E2EEManager {
      * `av1`), or `null` when the SDK cannot determine it. Not restricted to a fixed set;
      * implementations that do not need a codec hint may ignore it.
      * @param trackType Which kind of track this is, or `null` when it cannot be mapped.
+     * @return Success when the frame encryptor was attached, or a failure that prevents the SDK
+     * from publishing this sender without encryption.
      */
-    public fun encrypt(sender: RtpSender, codec: String?, trackType: E2EETrackType?)
+    public fun encrypt(
+        sender: RtpSender,
+        codec: String?,
+        trackType: E2EETrackType?,
+    ): Result<Unit>
 
     /**
      * Called once per incoming track, when the subscriber learns which participant it belongs to.
@@ -59,6 +65,12 @@ public interface E2EEManager {
      * @param userId The user the track belongs to. Keys are looked up per user, so a wrong value
      * here surfaces as undecryptable media rather than as an error.
      * @param trackType Which kind of track this is, or `null` when it cannot be mapped.
+     * @return Success when the frame decryptor was attached, or a failure that leaves the track
+     * available for a later attachment attempt.
      */
-    public fun decrypt(receiver: RtpReceiver, userId: String, trackType: E2EETrackType?)
+    public fun decrypt(
+        receiver: RtpReceiver,
+        userId: String,
+        trackType: E2EETrackType?,
+    ): Result<Unit>
 }

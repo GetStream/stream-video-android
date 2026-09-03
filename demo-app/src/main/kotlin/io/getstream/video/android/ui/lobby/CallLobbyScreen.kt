@@ -183,8 +183,8 @@ private fun CallLobbyHeader(
 private fun CallLobbyHeaderContent(
     user: State<User?>,
     call: Call,
-    onEnableE2EE: suspend (String) -> Unit,
-    onDisableE2EE: () -> Unit,
+    onEnableE2EE: suspend (String) -> Result<Unit>,
+    onDisableE2EE: () -> Result<Unit>,
     onBack: () -> Unit,
 ) {
     Row(
@@ -559,8 +559,8 @@ private fun CallLobbyHeaderPreview() {
                 mutableStateOf(previewUsers[0])
             },
             call = previewCall,
-            onEnableE2EE = {},
-            onDisableE2EE = {},
+            onEnableE2EE = { Result.success(Unit) },
+            onDisableE2EE = { Result.success(Unit) },
         ) {
         }
     }

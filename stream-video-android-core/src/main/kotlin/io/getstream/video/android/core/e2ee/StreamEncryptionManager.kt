@@ -31,8 +31,7 @@ import org.webrtc.RtpSender
  * Typical use, matching the JavaScript and iOS SDKs:
  *
  * ```
- * if (StreamEncryptionManager.isSupported()) {
- *     val e2ee = StreamEncryptionManager.create(myUserId)
+ * StreamEncryptionManager.create(myUserId).onSuccess { e2ee ->
  *     e2ee.setSharedKey(keyIndex = 0, key = myKeyBytes)
  *     call.setE2EEManager(e2ee)
  *     call.join()
@@ -76,22 +75,26 @@ public class StreamEncryptionManager private constructor(
          *
          * @param algorithm The AES-GCM variant to use. Every participant must agree on it, and on
          * a matching key length, or frames will not decode.
-         * @throws IllegalStateException if [isSupported] is false, or if the native manager could
-         * not be allocated.
+         * @return The manager, or a failure when this WebRTC build does not support encryption or
+         * native manager allocation fails.
          */
         @JvmStatic
-        @JvmOverloads
         public fun create(
             userId: String,
             algorithm: E2EEAlgorithm = E2EEAlgorithm.AES_128_GCM,
-        ): StreamEncryptionManager {
-            check(isSupported()) {
-                "End-to-end encryption is not available in this WebRTC build. " +
-                    "Guard calls to create() with StreamEncryptionManager.isSupported()."
+        ): Result<StreamEncryptionManager> {
+            if (!isSupported()) {
+                return Result.failure(
+                    IllegalStateException(
+                        "End-to-end encryption is not available in this WebRTC build.",
+                    ),
+                )
             }
-            return StreamEncryptionManager(
-                EncryptionManager.create(userId, algorithm.toNativeAlgorithm()),
-            )
+            return runCatching {
+                StreamEncryptionManager(
+                    EncryptionManager.create(userId, algorithm.toNativeAlgorithm()),
+                )
+            }
         }
     }
 
@@ -103,21 +106,39 @@ public class StreamEncryptionManager private constructor(
     /** The AES-GCM variant this manager encrypts with. */
     public val algorithm: E2EEAlgorithm get() = native.algorithm().toE2EEAlgorithm()
 
-    override fun encrypt(sender: RtpSender, codec: String?, trackType: E2EETrackType?) {
-        check(!native.isDisposed) { "Cannot attach an encryptor: manager is disposed." }
-        try {
+    override fun encrypt(
+        sender: RtpSender,
+        codec: String?,
+        trackType: E2EETrackType?,
+    ): Result<Unit> {
+        if (native.isDisposed) {
+            return Result.failure(
+                IllegalStateException("Cannot attach an encryptor: manager is disposed."),
+            )
+        }
+        return runCatching {
             logger.d { "[encrypt] trackType: $trackType, codec: $codec" }
             native.encrypt(sender, codec, trackType?.toNativeTrackType())
-        } catch (error: Throwable) {
+        }.onFailure { error ->
             logger.e(error) { "[encrypt] failed" }
-            throw error
         }
     }
 
-    override fun decrypt(receiver: RtpReceiver, userId: String, trackType: E2EETrackType?) {
-        ifActive("decrypt") {
+    override fun decrypt(
+        receiver: RtpReceiver,
+        userId: String,
+        trackType: E2EETrackType?,
+    ): Result<Unit> {
+        if (native.isDisposed) {
+            return Result.failure(
+                IllegalStateException("Cannot attach a decryptor: manager is disposed."),
+            )
+        }
+        return runCatching {
             logger.d { "[decrypt] userId: $userId, trackType: $trackType" }
             native.decrypt(receiver, userId, trackType?.toNativeTrackType())
+        }.onFailure { error ->
+            logger.e(error) { "[decrypt] failed" }
         }
     }
 
@@ -194,9 +215,9 @@ public class StreamEncryptionManager private constructor(
     }
 
     /**
-     * Releases the native manager and wipes its keys. Subsequent key and decrypt operations are
-     * ignored; attempting to attach an encryptor fails so the publisher cannot cache and negotiate
-     * a sender without encryption. Dispose only once you are done with every call that uses it.
+     * Releases the native manager and wipes its keys. Subsequent key operations are ignored;
+     * attempting to attach an encryptor or decryptor returns a failure so the SDK cannot treat an
+     * unprotected track as configured. Dispose only once you are done with every call that uses it.
      */
     public fun dispose() {
         if (native.isDisposed) return
@@ -206,9 +227,8 @@ public class StreamEncryptionManager private constructor(
     }
 
     /**
-     * Native calls after [dispose] would reach freed memory. Non-publisher operations are
-     * best-effort, so they are ignored or logged here; [encrypt] deliberately propagates failure
-     * so the publisher refuses to negotiate an unprotected sender.
+     * Native calls after [dispose] would reach freed memory. Key and observer operations are
+     * best-effort, so they are ignored or logged here; track attachment uses explicit results.
      */
     private inline fun ifActive(operation: String, block: () -> Unit) {
         if (native.isDisposed) {

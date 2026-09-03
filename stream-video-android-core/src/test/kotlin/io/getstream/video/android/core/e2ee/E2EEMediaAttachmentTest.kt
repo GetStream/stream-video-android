@@ -63,17 +63,38 @@ import stream.video.sfu.models.VideoDimension
 class E2EEMediaAttachmentTest {
 
     /** Records what the SDK asked for, and can be made to fail on demand. */
-    private class RecordingE2EEManager(private val failOnEncrypt: Boolean = false) : E2EEManager {
+    private class RecordingE2EEManager(
+        private val failOnEncrypt: Boolean = false,
+        private var decryptFailuresRemaining: Int = 0,
+    ) : E2EEManager {
         val encrypted = mutableListOf<Triple<RtpSender, String?, E2EETrackType?>>()
         val decrypted = mutableListOf<Triple<RtpReceiver, String, E2EETrackType?>>()
+        var decryptAttempts = 0
 
-        override fun encrypt(sender: RtpSender, codec: String?, trackType: E2EETrackType?) {
-            if (failOnEncrypt) throw IllegalStateException("no key material")
+        override fun encrypt(
+            sender: RtpSender,
+            codec: String?,
+            trackType: E2EETrackType?,
+        ): Result<Unit> {
+            if (failOnEncrypt) {
+                return Result.failure(IllegalStateException("no key material"))
+            }
             encrypted += Triple(sender, codec, trackType)
+            return Result.success(Unit)
         }
 
-        override fun decrypt(receiver: RtpReceiver, userId: String, trackType: E2EETrackType?) {
+        override fun decrypt(
+            receiver: RtpReceiver,
+            userId: String,
+            trackType: E2EETrackType?,
+        ): Result<Unit> {
+            decryptAttempts++
+            if (decryptFailuresRemaining > 0) {
+                decryptFailuresRemaining--
+                return Result.failure(IllegalStateException("decryptor unavailable"))
+            }
             decrypted += Triple(receiver, userId, trackType)
+            return Result.success(Unit)
         }
     }
 
@@ -329,6 +350,26 @@ class E2EEMediaAttachmentTest {
         subscriber.onNewStream(audioStreamFor("their-prefix", "remote-audio"))
         subscriber.onNewStream(audioStreamFor("their-prefix", "remote-audio"))
 
+        assertEquals(1, manager.decrypted.size)
+    }
+
+    @Test
+    fun `subscriber retries a track when decryptor attachment fails`() = runTest {
+        val manager = RecordingE2EEManager(decryptFailuresRemaining = 1)
+        stubReceiverFor("remote-audio")
+        val subscriber = subscriberWith(manager) { "alice" }
+
+        subscriber.setTrackLookupPrefixes(mapOf("their-prefix" to "their-session"))
+        subscriber.onNewStream(audioStreamFor("their-prefix", "remote-audio"))
+
+        assertEquals(1, manager.decryptAttempts)
+        assertEquals(0, manager.decrypted.size)
+
+        // A participant update flushes pending decryptors. The failed track must not have been
+        // marked as successfully handled.
+        subscriber.setTrackLookupPrefixes(mapOf("their-prefix" to "their-session"))
+
+        assertEquals(2, manager.decryptAttempts)
         assertEquals(1, manager.decrypted.size)
     }
 

@@ -601,8 +601,7 @@ public class Call(
      * [E2EEManager] to keep the SDK out of your encryption entirely:
      *
      * ```
-     * if (StreamEncryptionManager.isSupported()) {
-     *     val e2ee = StreamEncryptionManager.create(myUserId)
+     * StreamEncryptionManager.create(myUserId).onSuccess { e2ee ->
      *     e2ee.setSharedKey(keyIndex = 0, key = myKeyBytes)
      *     call.setE2EEManager(e2ee)
      *     call.join()
@@ -621,17 +620,33 @@ public class Call(
      * rejects those requests.
      *
      * @param manager The manager to use, or `null` to join unencrypted.
-     * @throws IllegalStateException if the call has already been joined.
+     * @return Success when the manager was updated, or a failure if the call has already joined.
      */
-    public fun setE2EEManager(manager: E2EEManager?) {
-        check(session.value == null) {
-            "setE2EEManager must be called before join(). The publisher and subscriber capture " +
-                "the manager when the session is created, and the coordinator validates the " +
-                "call's encryption mode against the join request."
+    public fun setE2EEManager(manager: E2EEManager?): kotlin.Result<Unit> {
+        if (session.value != null) {
+            return kotlin.Result.failure(
+                IllegalStateException(
+                    "setE2EEManager must be called before join(). The publisher and subscriber " +
+                        "capture the manager when the session is created, and the coordinator " +
+                        "validates the call's encryption mode against the join request.",
+                ),
+            )
         }
         _e2eeManager = manager
         state.setE2eeEnabled(manager != null)
         logger.i { "[setE2EEManager] manager: ${manager?.javaClass?.simpleName ?: "none"}" }
+        return kotlin.Result.success(Unit)
+    }
+
+    /**
+     * Drops only this call's reference to the app-owned manager. The active RTC session captured
+     * its own reference when it was created, so terminal teardown can finish safely. The app
+     * remains responsible for disposing the manager once it no longer uses it.
+     */
+    private fun detachE2EEManager() {
+        _e2eeManager = null
+        state.setE2eeEnabled(false)
+        logger.i { "[detachE2EEManager] detached app-owned manager" }
     }
 
     // endregion
@@ -659,9 +674,15 @@ public class Call(
     // endregion
 
     @InternalStreamVideoApi
-    fun leave(reason: CallLeaveReason) = lifecycle.leave(reason)
+    fun leave(reason: CallLeaveReason) {
+        detachE2EEManager()
+        lifecycle.leave(reason)
+    }
 
-    fun leave(reason: String = "user") = lifecycle.leave(reason)
+    fun leave(reason: String = "user") {
+        detachE2EEManager()
+        lifecycle.leave(reason)
+    }
 
     /** ends the call for yourself as well as other users */
     suspend fun end(): Result<Unit> = lifecycle.end()
