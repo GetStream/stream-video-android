@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.ClosedCaptionOff
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
-import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhoneInTalk
@@ -60,12 +59,6 @@ import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.base.SubMenuItem
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-
-/** Roughly what the SFU offers for the standard voice profile. */
-const val VOICE_AUDIO_BITRATE_BPS: Int = 64_000
-
-/** Roughly what the SFU offers for the music profile. */
-const val MUSIC_AUDIO_BITRATE_BPS: Int = 128_000
 
 /**
  * Defines the default Stream menu for the demo app.
@@ -105,12 +98,6 @@ fun defaultStreamMenu(
     onToggleAudioUsage: () -> Unit = {},
     selectedRecordingTypes: Set<RecordingType> = emptySet(),
     onSelectRecordingType: (RecordingType) -> Unit = {},
-    isHardwareNoiseSuppressorEnabled: Boolean = false,
-    onToggleHardwareNoiseSuppressor: (Boolean) -> Unit = {},
-    isSoftwareAudioProcessingEnabled: Boolean = false,
-    onToggleSoftwareAudioProcessing: (Boolean) -> Unit = {},
-    audioMaxBitrateBps: Int? = null,
-    onToggleAudioMaxBitrate: () -> Unit = {},
     isCommunicationAudioModeEnabled: Boolean = true,
     onToggleCommunicationAudioMode: (Boolean) -> Unit = {},
     isMusicAudioProfile: Boolean = false,
@@ -194,12 +181,6 @@ fun defaultStreamMenu(
                     onToggleAudioUsage,
                     selectedRecordingTypes,
                     onSelectRecordingType,
-                    isHardwareNoiseSuppressorEnabled,
-                    onToggleHardwareNoiseSuppressor,
-                    isSoftwareAudioProcessingEnabled,
-                    onToggleSoftwareAudioProcessing,
-                    audioMaxBitrateBps,
-                    onToggleAudioMaxBitrate,
                     isCommunicationAudioModeEnabled,
                     onToggleCommunicationAudioMode,
                     isMusicAudioProfile,
@@ -387,20 +368,14 @@ fun debugSubmenu(
     onToggleAudioUsage: () -> Unit,
     selectedRecordingTypes: Set<RecordingType>,
     onSelectRecordingType: (RecordingType) -> Unit,
-    isHardwareNoiseSuppressorEnabled: Boolean = false,
-    onToggleHardwareNoiseSuppressor: (Boolean) -> Unit = {},
-    isSoftwareAudioProcessingEnabled: Boolean = false,
-    onToggleSoftwareAudioProcessing: (Boolean) -> Unit = {},
-    audioMaxBitrateBps: Int? = null,
-    onToggleAudioMaxBitrate: () -> Unit = {},
     isCommunicationAudioModeEnabled: Boolean = true,
     onToggleCommunicationAudioMode: (Boolean) -> Unit = {},
     isMusicAudioProfile: Boolean = false,
     onToggleAudioProfile: () -> Unit = {},
 ) = listOf(
-    // The one-call switch, then the individual stages it moves — kept so a stage can still be
-    // isolated when something sounds wrong. "Audio mode" is not one of them: it is the lever below
-    // all of these, and it costs echo cancellation and Bluetooth capture.
+    // The whole audio profile in one tap. "Audio mode" below is not part of it: it is the lever
+    // underneath every stage the profile reaches, and it costs echo cancellation and Bluetooth
+    // capture, so it stays a deliberate, separate choice.
     ActionMenuItem(
         title = if (isMusicAudioProfile) {
             "Audio profile: MUSIC (tap for voice)"
@@ -410,35 +385,6 @@ fun debugSubmenu(
         icon = Icons.Default.MusicNote,
         highlight = isMusicAudioProfile,
         action = onToggleAudioProfile,
-    ),
-    ActionMenuItem(
-        title = when (audioMaxBitrateBps) {
-            null -> "Audio bitrate: SFU default (tap for 128k)"
-            else -> "Audio bitrate: ${audioMaxBitrateBps / 1000}k"
-        },
-        icon = Icons.Default.GraphicEq,
-        highlight = audioMaxBitrateBps != null && audioMaxBitrateBps >= MUSIC_AUDIO_BITRATE_BPS,
-        action = onToggleAudioMaxBitrate,
-    ),
-    ActionMenuItem(
-        title = if (isHardwareNoiseSuppressorEnabled) {
-            "Hardware noise suppressor: ON"
-        } else {
-            "Hardware noise suppressor: OFF"
-        },
-        icon = Icons.Default.SpatialAudioOff,
-        highlight = isHardwareNoiseSuppressorEnabled,
-        action = { onToggleHardwareNoiseSuppressor(!isHardwareNoiseSuppressorEnabled) },
-    ),
-    ActionMenuItem(
-        title = if (isSoftwareAudioProcessingEnabled) {
-            "Software audio processing: ON"
-        } else {
-            "Software audio processing: OFF"
-        },
-        icon = Icons.Default.Audiotrack,
-        highlight = isSoftwareAudioProcessingEnabled,
-        action = { onToggleSoftwareAudioProcessing(!isSoftwareAudioProcessingEnabled) },
     ),
     ActionMenuItem(
         title = if (isCommunicationAudioModeEnabled) {

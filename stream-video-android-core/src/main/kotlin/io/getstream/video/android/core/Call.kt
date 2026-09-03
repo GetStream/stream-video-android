@@ -934,8 +934,8 @@ public class Call(
     /**
      * Applies a platform noise-suppressor change for this call.
      *
-     * Internal bridge for [MicrophoneManager.setHardwareNoiseSuppressorEnabled], which is the
-     * public entry point; the media component is not reachable from there.
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile], which is the public
+     * entry point; the media component is not reachable from there.
      */
     internal fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean =
         media.setHardwareNoiseSuppressorEnabled(enabled)
@@ -943,7 +943,7 @@ public class Call(
     /**
      * Rebuilds the audio source and track so audio-source constraints take effect mid-call.
      *
-     * Internal bridge for [MicrophoneManager.setSoftwareAudioProcessingEnabled]. Before a session
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile]. Before a session
      * exists the source is built lazily from the current constraints anyway, so there is nothing
      * to rebuild and the change already holds.
      */
@@ -953,7 +953,7 @@ public class Call(
     /**
      * Applies a maximum audio bitrate to the live publisher.
      *
-     * Internal bridge for [MicrophoneManager.setAudioMaxBitrate].
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile].
      */
     internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean =
         session.value?.setAudioMaxBitrate(maxBitrateBps) ?: false
@@ -967,7 +967,7 @@ public class Call(
     /**
      * Whether a noise-cancellation processor is wired into this call and can be turned on or off.
      *
-     * Internal bridge for [MicrophoneManager.applyAudioProfile], which reports a stage it could not
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile], which reports a stage it could not
      * reach — and an absent processor is not a stage that failed.
      */
     internal fun isAudioProcessingReachable(): Boolean = media.isAudioProcessingReachable()

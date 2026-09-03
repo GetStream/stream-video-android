@@ -8845,18 +8845,18 @@ public abstract interface class io/getstream/android/video/generated/models/WSCl
 }
 
 public final class io/getstream/video/android/core/AudioProfileResult {
-	public fun <init> (Lstream/video/sfu/models/AudioBitrateProfile;IZZZZ)V
+	public fun <init> (Lstream/video/sfu/models/AudioBitrateProfile;Ljava/lang/Integer;ZZZZ)V
 	public final fun component1 ()Lstream/video/sfu/models/AudioBitrateProfile;
-	public final fun component2 ()I
+	public final fun component2 ()Ljava/lang/Integer;
 	public final fun component3 ()Z
 	public final fun component4 ()Z
 	public final fun component5 ()Z
 	public final fun component6 ()Z
-	public final fun copy (Lstream/video/sfu/models/AudioBitrateProfile;IZZZZ)Lio/getstream/video/android/core/AudioProfileResult;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/AudioProfileResult;Lstream/video/sfu/models/AudioBitrateProfile;IZZZZILjava/lang/Object;)Lio/getstream/video/android/core/AudioProfileResult;
+	public final fun copy (Lstream/video/sfu/models/AudioBitrateProfile;Ljava/lang/Integer;ZZZZ)Lio/getstream/video/android/core/AudioProfileResult;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/AudioProfileResult;Lstream/video/sfu/models/AudioBitrateProfile;Ljava/lang/Integer;ZZZZILjava/lang/Object;)Lio/getstream/video/android/core/AudioProfileResult;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAudioMaxBitrateApplied ()Z
-	public final fun getAudioMaxBitrateBps ()I
+	public final fun getAudioMaxBitrateBps ()Ljava/lang/Integer;
 	public final fun getComplete ()Z
 	public final fun getNoiseCancellationApplied ()Z
 	public final fun getPlatformNoiseSuppressorApplied ()Z
@@ -9424,24 +9424,19 @@ public final class io/getstream/video/android/core/MemberState {
 
 public final class io/getstream/video/android/core/MicrophoneManager {
 	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;ILkotlin/jvm/functions/Function0;)V
-	public final fun appliedAudioMaxBitrate ()Ljava/lang/Integer;
-	public final fun applyAudioProfile (Lstream/video/sfu/models/AudioBitrateProfile;)Lio/getstream/video/android/core/AudioProfileResult;
 	public final fun canHandleDeviceSwitch ()Z
 	public final fun cleanup ()V
 	public final fun clearUsbDeviceSelection ()V
 	public final fun disable (Z)V
 	public static synthetic fun disable$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
 	public final fun getAudioBitrateProfile ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getAudioMaxBitrateBps ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getAudioUsage ()I
 	public final fun getAudioUsageProvider ()Lkotlin/jvm/functions/Function0;
 	public final fun getCommunicationAudioModeEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getHardwareNoiseSuppressorEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
 	public final fun getSelectedDevice ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSelectedUsbDevice ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getSoftwareAudioProcessingEnabled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStatus ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getUsbInputDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun isEnabled ()Lkotlinx/coroutines/flow/StateFlow;
@@ -9454,12 +9449,9 @@ public final class io/getstream/video/android/core/MicrophoneManager {
 	public final fun select (Lio/getstream/video/android/core/audio/StreamAudioDevice;)V
 	public final fun selectUsbDevice (Lio/getstream/video/android/core/audio/UsbAudioInputDevice;)Z
 	public final fun setAudioBitrateProfile-gIAlu-s (Lstream/video/sfu/models/AudioBitrateProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun setAudioMaxBitrate (I)Z
 	public final fun setCommunicationAudioModeEnabled (Z)Z
 	public final fun setEnabled (ZZ)V
 	public static synthetic fun setEnabled$default (Lio/getstream/video/android/core/MicrophoneManager;ZZILjava/lang/Object;)V
-	public final fun setHardwareNoiseSuppressorEnabled (Z)Z
-	public final fun setSoftwareAudioProcessingEnabled (Z)Z
 	public final fun setupUsbDeviceDetection ()V
 }
 

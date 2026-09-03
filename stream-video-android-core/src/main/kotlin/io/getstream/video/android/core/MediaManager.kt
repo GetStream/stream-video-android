@@ -612,59 +612,29 @@ class MicrophoneManager(
     val audioBitrateProfile: StateFlow<AudioBitrateProfile> = _audioBitrateProfile
 
     /**
-     * True once [setHardwareNoiseSuppressorEnabled] has been called, after which the reported
-     * state stops following the audio bitrate profile's default.
-     */
-    private var hardwareNoiseSuppressorOverridden = false
-
-    private val _hardwareNoiseSuppressorEnabled = MutableStateFlow(
-        defaultHardwareAudioEffectsEnabled(_audioBitrateProfile.value),
-    )
-
-    /**
-     * The platform (hardware) noise suppressor state this call has requested.
+     * The platform (hardware) noise suppressor state this call has asked the device for.
      *
-     * Starts at the default the audio device module is built with for the current
-     * [audioBitrateProfile] — on, except under MUSIC_HIGH_QUALITY or below Android Q — and
-     * follows that default until [setHardwareNoiseSuppressorEnabled] is called.
-     *
-     * This is the *requested* state. Whether it reached the platform is the return value of
-     * [setHardwareNoiseSuppressorEnabled]: on devices with no platform noise suppressor the
-     * request is refused and never takes effect.
+     * Derived from [audioBitrateProfile] alone — on, except under MUSIC_HIGH_QUALITY or below
+     * Android Q. There is no per-stage setter: the profile decides every stage, so that this
+     * state and [audioBitrateProfile] cannot disagree about what the call is doing.
      */
-    val hardwareNoiseSuppressorEnabled: StateFlow<Boolean> = _hardwareNoiseSuppressorEnabled
-
-    /**
-     * True once [setSoftwareAudioProcessingEnabled] has been called, after which the reported
-     * state stops following the audio bitrate profile's default.
-     */
-    private var softwareAudioProcessingOverridden = false
-
-    private val _softwareAudioProcessingEnabled = MutableStateFlow(
-        defaultSoftwareAudioProcessingEnabled(_audioBitrateProfile.value),
-    )
+    private var hardwareNoiseSuppressorEnabled =
+        defaultHardwareAudioEffectsEnabled(_audioBitrateProfile.value)
 
     /**
      * Whether WebRTC's own software audio processing — echo cancellation, noise suppression,
      * automatic gain control and the high-pass filter — is applied to captured audio.
      *
      * A separate stage from [hardwareNoiseSuppressorEnabled]: those effects run in the audio
-     * device module, these run in WebRTC's audio processing module. Follows the
-     * [audioBitrateProfile] default until [setSoftwareAudioProcessingEnabled] is called.
+     * device module, these run in WebRTC's audio processing module. Also derived from
+     * [audioBitrateProfile] alone.
      */
-    val softwareAudioProcessingEnabled: StateFlow<Boolean> = _softwareAudioProcessingEnabled
+    private var softwareAudioProcessingEnabled =
+        defaultSoftwareAudioProcessingEnabled(_audioBitrateProfile.value)
 
     /** The value audio sources are built with; see [softwareAudioProcessingEnabled]. */
     internal val effectiveSoftwareAudioProcessingEnabled: Boolean
-        get() = _softwareAudioProcessingEnabled.value
-
-    private val _audioMaxBitrateBps = MutableStateFlow<Int?>(null)
-
-    /**
-     * The maximum audio bitrate this call has asked for, or null while the value the SFU picked
-     * for the current [audioBitrateProfile] stands.
-     */
-    val audioMaxBitrateBps: StateFlow<Int?> = _audioMaxBitrateBps
+        get() = softwareAudioProcessingEnabled
 
     private val _communicationAudioModeEnabled = MutableStateFlow(true)
 
@@ -672,10 +642,9 @@ class MicrophoneManager(
      * Whether the device is being asked to stay in `AudioManager.MODE_IN_COMMUNICATION`, which is
      * where a call puts it by default, rather than `AudioManager.MODE_NORMAL`.
      *
-     * A stage of its own, below [hardwareNoiseSuppressorEnabled] and
-     * [softwareAudioProcessingEnabled]: on some devices the audio mode, not the requested capture
-     * source, is what selects the vendor's VoIP capture chain. Follows the default until
-     * [setCommunicationAudioModeEnabled] is called.
+     * A stage of its own, below every stage the audio bitrate profile reaches: on some devices the
+     * audio mode, not the requested capture source, is what selects the vendor's VoIP capture
+     * chain. Follows the default until [setCommunicationAudioModeEnabled] is called.
      */
     val communicationAudioModeEnabled: StateFlow<Boolean> = _communicationAudioModeEnabled
 
@@ -944,19 +913,44 @@ class MicrophoneManager(
     // ==================== End USB Audio Input Device Support ====================
 
     /**
-     * Set the audio bitrate profile.
-     * This can only be set before joining the call. Once the call is joined,
-     * changes to the audio bitrate profile will be ignored — use [applyAudioProfile] to switch
-     * profiles on a running call.
+     * Sets the audio bitrate profile, before joining or on a running call.
      *
-     * @param profile The audio bitrate profile to use
-     * @return true if the profile was successfully set, false if:
-     *   - The call is already joined and the change was ignored
-     *   - HiFi audio is not enabled in dashboard settings when trying to use MUSIC_HIGH_QUALITY
+     * Before joining, the profile decides how the whole audio pipeline is built and what the SFU
+     * is asked to negotiate. After joining, the pipeline and the negotiated bitrate are already
+     * fixed, so the profile is applied to the stages that can still be reached: the
+     * noise-cancellation processor, the platform noise suppressor, WebRTC's software audio
+     * processing and the publisher's maximum audio bitrate. That is what lets a broadcaster who
+     * starts playing music switch to MUSIC_HIGH_QUALITY without rejoining.
+     *
+     * A mid-call switch is therefore not identical to joining under the same profile. Hardware
+     * echo cancellation and the capture audio source are fixed when the pipeline is built, and the
+     * Opus bitrate and channel count in the SDP come from the server at join — the SFU is not
+     * asked again. It is everything that is left once the call is running.
+     *
+     * **Expect a brief gap in captured audio** on a mid-call switch that changes the software
+     * audio processing stage: those constraints are fixed when the audio source is created, so the
+     * source and track are rebuilt and the live sender moved onto the new one. There is no
+     * renegotiation and the call is not interrupted otherwise.
+     *
+     * **Echo cancellation goes off with the rest under MUSIC_HIGH_QUALITY**, exactly as it does
+     * when joining under that profile. With speakers that sends echo to everyone else, so treat
+     * music as a headphones setting.
+     *
+     * [setCommunicationAudioModeEnabled] is deliberately not part of any profile: it costs echo
+     * cancellation, communication routing and Bluetooth capture outright, which is well past what
+     * asking for a music profile should imply.
+     *
+     * @param profile The audio bitrate profile to use.
+     * @return the profile and, for a mid-call switch, what each stage did — see
+     * [AudioProfileResult]. Failure when HiFi audio is not enabled in the dashboard settings, or
+     * when the call settings could not be fetched to find out.
      */
-    suspend fun setAudioBitrateProfile(profile: AudioBitrateProfile): Result<Unit> {
+    suspend fun setAudioBitrateProfile(
+        profile: AudioBitrateProfile,
+    ): Result<AudioProfileResult> {
         val connectionState = mediaManager.call.state.connection.value
-        val isJoined = connectionState is RealtimeConnection.Joined || connectionState is RealtimeConnection.Connected
+        val isJoined = connectionState is RealtimeConnection.Joined ||
+            connectionState is RealtimeConnection.Connected
 
         // get the call settings if they are not present
         if (mediaManager.call.state.settings.value == null) {
@@ -969,7 +963,8 @@ class MicrophoneManager(
             }
         }
 
-        // Check if HiFi audio is enabled in dashboard
+        // Check if HiFi audio is enabled in dashboard. This gates a mid-call switch too: the
+        // profiles mean the same thing whenever they are set, so they answer to the same setting.
         val hifiAudioEnabled = mediaManager.call.state.settings.value?.audio?.hifiAudioEnabled ?: false
         if (!hifiAudioEnabled) {
             logger.w {
@@ -981,205 +976,102 @@ class MicrophoneManager(
             )
         }
 
-        if (isJoined) {
-            logger.w {
-                "[setAudioBitrateProfile] called after call is joined. " +
-                    "Audio bitrate profile can only be set before joining the call. " +
-                    "Ignoring the change."
-            }
-            return Result.failure(
-                IllegalStateException(
-                    "Cannot call setAudioBitrateProfile after call has been joined",
+        logger.i { "[setAudioBitrateProfile] Setting audio bitrate profile to: $profile" }
+        _audioBitrateProfile.value = profile
+        // The profile decides how the audio device module and the audio sources are built, so
+        // these have to follow it. Nothing else can move them.
+        hardwareNoiseSuppressorEnabled = defaultHardwareAudioEffectsEnabled(profile)
+        // Whether the source constraints actually change decides whether the pipeline has to be
+        // rebuilt below, so it has to be read before the new value lands.
+        val softwareAudioProcessingChanged =
+            softwareAudioProcessingEnabled != defaultSoftwareAudioProcessingEnabled(profile)
+        softwareAudioProcessingEnabled = defaultSoftwareAudioProcessingEnabled(profile)
+
+        if (!isJoined) {
+            // Nothing is capturing or publishing yet, so there is no stage to move: the pipeline
+            // is built from the profile when the call joins, and the SFU picks the bitrate.
+            return Result.success(
+                AudioProfileResult(
+                    profile = profile,
+                    audioMaxBitrateBps = null,
+                    noiseCancellationApplied = true,
+                    platformNoiseSuppressorApplied = true,
+                    softwareAudioProcessingApplied = true,
+                    audioMaxBitrateApplied = true,
                 ),
             )
         }
 
-        logger.i { "[setAudioBitrateProfile] Setting audio bitrate profile to: $profile" }
-        _audioBitrateProfile.value = profile
-        // The profile decides how the audio device module is built, so the reported
-        // noise-suppressor state has to follow it — until a caller overrides it explicitly.
-        if (!hardwareNoiseSuppressorOverridden) {
-            _hardwareNoiseSuppressorEnabled.value = defaultHardwareAudioEffectsEnabled(profile)
-        }
-        if (!softwareAudioProcessingOverridden) {
-            _softwareAudioProcessingEnabled.value = defaultSoftwareAudioProcessingEnabled(profile)
-        }
-        return Result.success(Unit)
+        return Result.success(
+            applyProfileToRunningCall(profile, softwareAudioProcessingChanged),
+        )
     }
 
     /**
-     * Moves every audio stage that is still reachable mid-call to [profile], in one call.
+     * Moves each stage of the running pipeline onto [profile], reporting what reached the device.
      *
-     * This is the mid-call counterpart to [setAudioBitrateProfile]: same profiles, but applied to
-     * the running call instead of negotiated before joining. A broadcaster who starts playing
-     * music makes one call and the noise-cancellation processor, the platform noise suppressor,
-     * WebRTC's software audio processing and the publisher's audio bitrate all move together.
-     *
-     * Four stages, four ways to fail, so the result reports each one; see [AudioProfileResult].
-     * Nothing here needs HiFi audio enabled on the dashboard — every stage is client-side.
-     *
-     * **What a mid-call switch cannot reach.** Hardware echo cancellation and the capture audio
-     * source are fixed when the audio pipeline is built, and the Opus bitrate and channel count in
-     * the SDP come from the server at join. So this is not equivalent to joining under
-     * MUSIC_HIGH_QUALITY — it is everything that is left.
-     *
-     * **What it deliberately leaves alone.** [setCommunicationAudioModeEnabled] is reachable but
-     * not part of any profile: it costs echo cancellation, communication routing and Bluetooth
-     * capture outright, which is far past what asking for a music profile should imply. On a
-     * device whose vendor chain is still gating the audio after this call, that is the next lever
-     * — reached for deliberately, not folded in.
-     *
-     * **Expect a brief gap in captured audio** when the software audio processing stage changes:
-     * those constraints are fixed at source creation, so the source and track are rebuilt.
-     *
-     * Applying a profile clears any per-stage override made with
-     * [setHardwareNoiseSuppressorEnabled] or [setSoftwareAudioProcessingEnabled] — the profile is
-     * the newer instruction, and a stale override would silently pin a stage to the old profile.
+     * The four stages fail independently and for unrelated reasons, so each is applied and
+     * reported on its own rather than short-circuiting on the first refusal — a caller needs to
+     * know *which* stage is still processing its audio the old way.
      */
-    fun applyAudioProfile(profile: AudioBitrateProfile): AudioProfileResult {
-        logger.i { "[applyAudioProfile] applying $profile to the running call" }
+    private fun applyProfileToRunningCall(
+        profile: AudioBitrateProfile,
+        softwareAudioProcessingChanged: Boolean,
+    ): AudioProfileResult {
         val call = mediaManager.call
-
-        _audioBitrateProfile.value = profile
-        // The profile is now the instruction for every stage, so earlier single-stage choices
-        // stop winning — including against a later setAudioBitrateProfile.
-        hardwareNoiseSuppressorOverridden = false
-        softwareAudioProcessingOverridden = false
-
         val isMusic = profile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
 
-        // The noise-cancellation processor is the stage nothing else on this class touches, and on
-        // the calls that shipped one it is the dominant suppressor: leaving it running makes every
-        // other change inaudible.
+        // The noise-cancellation processor is the stage no other control on this class reaches,
+        // and where one is configured it is the dominant suppressor: leaving it running makes
+        // every other change inaudible.
         val noiseCancellationWanted = !isMusic
         val noiseCancellationReachable = call.isAudioProcessingReachable()
         call.setAudioProcessingEnabled(noiseCancellationWanted)
         val noiseCancellationApplied = !noiseCancellationReachable ||
             call.isAudioProcessingEnabled() == noiseCancellationWanted
 
-        val platformNoiseSuppressorApplied = applyHardwareNoiseSuppressor(
-            defaultHardwareAudioEffectsEnabled(profile),
-        )
-        val softwareAudioProcessingApplied = applySoftwareAudioProcessing(
-            defaultSoftwareAudioProcessingEnabled(profile),
-        )
+        val platformNoiseSuppressorApplied =
+            call.setHardwareNoiseSuppressorEnabled(hardwareNoiseSuppressorEnabled)
+        if (!platformNoiseSuppressorApplied) {
+            logger.w {
+                "[setAudioBitrateProfile] the platform did not take the noise suppressor " +
+                    "request; it will be retried when capture restarts"
+            }
+        }
+
+        // Fixed when the audio source is created, so this rebuilds the source and track and moves
+        // the live sender across. Skipped when the value already holds — rebuilding drops audio.
+        val softwareAudioProcessingApplied =
+            if (!softwareAudioProcessingChanged) {
+                true
+            } else {
+                call.rebuildAudioCapturePipeline().also { applied ->
+                    if (!applied) {
+                        logger.w {
+                            "[setAudioBitrateProfile] the audio pipeline was not rebuilt; the " +
+                                "next source built will use the new constraints"
+                        }
+                    }
+                }
+            }
 
         val maxBitrateBps = targetAudioMaxBitrateBps(profile, call.negotiatedAudioBitrate())
-        val audioMaxBitrateApplied = setAudioMaxBitrate(maxBitrateBps)
+        val audioMaxBitrateApplied = call.setAudioMaxBitrate(maxBitrateBps)
+        if (!audioMaxBitrateApplied) {
+            logger.w {
+                "[setAudioBitrateProfile] requested $maxBitrateBps bps but no live audio " +
+                    "sender took it"
+            }
+        }
 
         return AudioProfileResult(
             profile = profile,
-            audioMaxBitrateBps = maxBitrateBps,
+            audioMaxBitrateBps = maxBitrateBps.takeIf { audioMaxBitrateApplied },
             noiseCancellationApplied = noiseCancellationApplied,
             platformNoiseSuppressorApplied = platformNoiseSuppressorApplied,
             softwareAudioProcessingApplied = softwareAudioProcessingApplied,
             audioMaxBitrateApplied = audioMaxBitrateApplied,
-        ).also { logger.i { "[applyAudioProfile] $it" } }
-    }
-
-    /**
-     * Sets the maximum audio bitrate on the live publisher, while the call is running.
-     *
-     * The audio bitrate is carried on the sender's encoding, not in the SDP, so this takes effect
-     * on the running encoder with no renegotiation and no interruption. Raising it is what makes
-     * music sound like music once the processing stages are out of the way; on its own, with
-     * processing still running, it changes nothing audible.
-     *
-     * @param maxBitrateBps for reference, the SFU's own values are around 64000 for the standard
-     * voice profile and 128000 for music.
-     * @return true when a live audio sender accepted it. False means nothing is publishing audio
-     * yet; [audioMaxBitrateBps] reports the requested value either way.
-     */
-    fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean {
-        _audioMaxBitrateBps.value = maxBitrateBps
-        val applied = mediaManager.call.setAudioMaxBitrate(maxBitrateBps)
-        if (!applied) {
-            logger.w {
-                "[setAudioMaxBitrate] requested $maxBitrateBps but no live audio sender took it"
-            }
-        }
-        return applied
-    }
-
-    /** The maximum bitrate actually set on the live audio sender, or null when not publishing. */
-    fun appliedAudioMaxBitrate(): Int? = mediaManager.call.audioMaxBitrate()
-
-    /**
-     * Enables or disables WebRTC's software audio processing while the call is running.
-     *
-     * Echo cancellation, noise suppression, automatic gain control and the high-pass filter are
-     * all tuned for speech; automatic gain control in particular audibly pumps sustained music.
-     * Unlike [setAudioBitrateProfile] this can be called at any time.
-     *
-     * These constraints are fixed when the audio source is created, so applying a change means
-     * building a new source and track and swapping them onto the live sender. **Expect a brief
-     * gap in captured audio.** Nothing else changes: the platform effects, the noise-cancellation
-     * processor and the bitrate are untouched — use [applyAudioProfile] to move all of them.
-     *
-     * @return true when the change was applied. False means the audio pipeline could not be
-     * rebuilt — the previous source stays live and [softwareAudioProcessingEnabled] keeps
-     * reporting the requested value, which the next source picks up.
-     */
-    fun setSoftwareAudioProcessingEnabled(enabled: Boolean): Boolean {
-        softwareAudioProcessingOverridden = true
-        return applySoftwareAudioProcessing(enabled)
-    }
-
-    /**
-     * The change itself, without claiming it as an explicit per-stage choice.
-     *
-     * [applyAudioProfile] sets this stage *from* the profile, so it must not mark it overridden —
-     * that is what a caller reaching for the single stage means, and it stops the profile moving
-     * it afterwards.
-     */
-    private fun applySoftwareAudioProcessing(enabled: Boolean): Boolean {
-        if (_softwareAudioProcessingEnabled.value == enabled) {
-            return true
-        }
-        _softwareAudioProcessingEnabled.value = enabled
-        val applied = mediaManager.call.rebuildAudioCapturePipeline()
-        if (!applied) {
-            logger.w {
-                "[setSoftwareAudioProcessingEnabled] requested $enabled but the audio pipeline " +
-                    "was not rebuilt; the next source built will use it"
-            }
-        }
-        return applied
-    }
-
-    /**
-     * Enables or disables the platform (hardware) noise suppressor while the call is running.
-     *
-     * The platform noise suppressor is aggressive on anything that is not speech, so music played
-     * into the microphone can be suppressed almost entirely. Unlike [setAudioBitrateProfile] this
-     * can be called at any time — the effect is attached to the live recording session — and it
-     * changes nothing else about the audio: the software audio processing, the noise-cancellation
-     * processor and the bitrate are all unaffected. Use [applyAudioProfile] to move all of them.
-     *
-     * The request is remembered and re-applied whenever audio capture restarts, so it survives a
-     * reconnect.
-     *
-     * @return true when the running capture session accepted the change. False means nothing
-     * changed: audio is not being captured yet, or this device has no platform noise suppressor
-     * (or ignores requests to change it). [hardwareNoiseSuppressorEnabled] reports the requested
-     * state either way.
-     */
-    fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean {
-        hardwareNoiseSuppressorOverridden = true
-        return applyHardwareNoiseSuppressor(enabled)
-    }
-
-    /** See [applySoftwareAudioProcessing] for why this is separate from the public setter. */
-    private fun applyHardwareNoiseSuppressor(enabled: Boolean): Boolean {
-        _hardwareNoiseSuppressorEnabled.value = enabled
-        val applied = mediaManager.call.setHardwareNoiseSuppressorEnabled(enabled)
-        if (!applied) {
-            logger.w {
-                "[setHardwareNoiseSuppressorEnabled] requested $enabled but the platform did " +
-                    "not apply it; it will be retried when capture restarts"
-            }
-        }
-        return applied
+        ).also { logger.i { "[setAudioBitrateProfile] $it" } }
     }
 
     /**
@@ -1189,13 +1081,13 @@ class MicrophoneManager(
      * Where the other controls turn off a processing stage, this one decides which capture chain
      * the platform builds in the first place. Some vendors — Samsung in particular — key their
      * VoIP processing off the audio mode rather than the requested capture source, and that
-     * processing sits below the `AudioEffect` API, so it survives
-     * [setHardwareNoiseSuppressorEnabled] and [setSoftwareAudioProcessingEnabled] alike. Leaving
-     * communication mode is the only lever that reaches it.
+     * processing sits below the `AudioEffect` API, so it survives every stage
+     * [setAudioBitrateProfile] reaches. Leaving communication mode is the only lever that reaches
+     * it.
      *
      * **Costs echo cancellation and communication routing.** Bluetooth loses capture altogether:
-     * SCO only runs in communication mode. Prefer the narrower controls first and reach for this
-     * one when the platform is still gating audio after them.
+     * SCO only runs in communication mode. Try the audio bitrate profile first and reach for this
+     * one when the platform is still gating audio after it.
      *
      * The request is re-applied on every route change, because the routing layer sets the mode
      * itself whenever it activates a device.
