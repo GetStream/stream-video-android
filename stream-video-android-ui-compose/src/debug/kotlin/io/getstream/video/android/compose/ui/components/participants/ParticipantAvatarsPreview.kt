@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewMemberListState
+import io.getstream.video.android.mock.previewTwoMembers
 
 @Preview
 @Composable
@@ -35,4 +36,20 @@ private fun ParticipantAvatarsRootPreview() {
 @Composable
 internal fun ParticipantAvatarsPreview() {
     ParticipantAvatars(members = previewMemberListState)
+}
+
+@Composable
+internal fun ParticipantAvatarsOneMemberPreview() {
+    ParticipantAvatars(members = previewMemberListState.take(1))
+}
+
+@Composable
+internal fun ParticipantAvatarsTwoMembersPreview() {
+    ParticipantAvatars(members = previewTwoMembers)
+}
+
+@Suppress("DEPRECATION")
+@Composable
+internal fun ParticipantAvatarsDeprecatedOverloadPreview() {
+    ParticipantAvatars(participants = previewMemberListState)
 }

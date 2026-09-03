@@ -14,34 +14,27 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.base
+package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 
 @Preview
 @Composable
-private fun StreamScrimRootPreview() {
+private fun ScreenShareToggleActionRootPreview() {
     VideoTheme {
-        StreamScrimPreview()
+        ScreenShareToggleActionPreview()
     }
 }
 
-/**
- * The scrim over a menu, to show how much it dims the content behind it.
- */
 @Composable
-internal fun StreamScrimPreview() {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.padding(StreamTokens.spacingMd)) {
-            StreamListItemsPreview()
+internal fun ScreenShareToggleActionPreview() {
+    Row {
+        ScreenShareToggleAction(active = false) {
         }
-        StreamScrim(onClick = {})
+        ScreenShareToggleAction(active = true) {
+        }
     }
 }
