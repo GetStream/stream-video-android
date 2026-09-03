@@ -55,7 +55,7 @@ import io.getstream.video.android.compose.theme.design.StreamTokens
  *
  * @param value The current text and selection.
  * @param onValueChange Called with the new value when the user edits the text.
- * @param modifier The modifier applied to the whole input, field and error message included.
+ * @param modifier The modifier applied to the text field node, which also holds the error message.
  * @param enabled Whether the field accepts input. Disabled fields use the disabled text color.
  * @param readOnly Whether the text can be selected but not edited.
  * @param placeholder The hint shown while [value] is empty, or null for none.
@@ -96,28 +96,25 @@ public fun StreamTextField(
     }
     val textColor = if (enabled) colors.inputTextDefault else colors.inputTextDisabled
     val iconColor = if (focused) colors.inputTextIconActive else colors.inputTextIcon
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(StreamTokens.spacingXs),
-    ) {
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics { errorText?.let { error(it) } },
-            enabled = enabled,
-            readOnly = readOnly,
-            textStyle = VideoTheme.typography.bodyDefault.copy(color = textColor),
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            singleLine = maxLines == 1 && minLines == 1,
-            maxLines = maxOf(minLines, maxLines),
-            minLines = minLines,
-            visualTransformation = visualTransformation,
-            interactionSource = interactionSource,
-            cursorBrush = SolidColor(colors.accentPrimary),
-        ) { innerTextField ->
+    // The text field is the root node so that a test tag or a weight passed in [modifier] lands
+    // on the editable node; the error message is part of the decoration below the field.
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.semantics { errorText?.let { error(it) } },
+        enabled = enabled,
+        readOnly = readOnly,
+        textStyle = VideoTheme.typography.bodyDefault.copy(color = textColor),
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        singleLine = maxLines == 1 && minLines == 1,
+        maxLines = maxOf(minLines, maxLines),
+        minLines = minLines,
+        visualTransformation = visualTransformation,
+        interactionSource = interactionSource,
+        cursorBrush = SolidColor(colors.accentPrimary),
+    ) { innerTextField ->
+        Column(verticalArrangement = Arrangement.spacedBy(StreamTokens.spacingXs)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -148,8 +145,8 @@ public fun StreamTextField(
                 }
                 trailingIcon?.let { FieldIcon(icon = it, tint = iconColor) }
             }
+            errorText?.let { ErrorMessage(text = it) }
         }
-        errorText?.let { ErrorMessage(text = it) }
     }
 }
 
