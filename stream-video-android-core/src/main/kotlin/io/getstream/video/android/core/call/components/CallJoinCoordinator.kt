@@ -327,7 +327,15 @@ internal class CallJoinCoordinator(
             logger.d { "[joinAndRing] Joined #ringing; #track; ring: $members" }
             apiClient.ring(RingCallRequest(isVideoEnabled(), members)).map {
                 logger.d { "[joinAndRing] Ringed #ringing; #track; ring: $members" }
-                callRegistry.markRinging()
+                // registerOutgoingRing registers the ringing call AND starts the outgoing call
+                // foreground service, like the create-with-ring path does. markRinging alone
+                // never started the service here, so the caller had no outgoing notification
+                // (setActiveCall logs "Outgoing call service should already be running").
+                callRegistry.registerOutgoingRing()
+                // An event that arrived before the ring completed (e.g. call.session_started)
+                // computed the ringing state without the ringing call registered. Recompute so
+                // the state cannot stay Idle when no further coordinator event arrives.
+                state.updateRingingState()
                 rtcSession
             }.onError {
                 logger.e { "[joinAndRing] Ring failed #ringing; #track; error: $it" }
@@ -343,10 +351,8 @@ internal class CallJoinCoordinator(
     }
 
     fun isPermanentError(error: Any): Boolean {
-        if (error is Error.ThrowableError) {
-            if (error.message.contains("Unable to resolve host")) {
-                return false
-            }
+        if (error is Error.ThrowableError && error.message.contains("Unable to resolve host")) {
+            return false
         }
         return true
     }
@@ -497,17 +503,17 @@ internal class CallJoinCoordinator(
                     }
                 }
 
-                if (sfuConnectionResult.cause != SfuConnectFailureCause.TerminalSocketFailure) {
-                    if (!didReconnectSucceed()) {
-                        logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
-                        sendJoinErrorAnalytics(sfuConnectionResult)
-                        discardFailedSession(localSession)
-                        return Failure(
-                            Error.GenericError(
-                                sfuConnectionResult.error.message ?: "SFU connection failed",
-                            ),
-                        )
-                    }
+                // A terminal failure already returned above, so only recoverable causes
+                // reach this point and the recovery outcome is the only condition left.
+                if (!didReconnectSucceed()) {
+                    logger.e { "[_join] Could not recover. Error : $sfuConnectionResult" }
+                    sendJoinErrorAnalytics(sfuConnectionResult)
+                    discardFailedSession(localSession)
+                    return Failure(
+                        Error.GenericError(
+                            sfuConnectionResult.error.message ?: "SFU connection failed",
+                        ),
+                    )
                 }
             }
         }

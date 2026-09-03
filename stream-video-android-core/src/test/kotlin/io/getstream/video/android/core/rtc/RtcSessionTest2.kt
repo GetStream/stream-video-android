@@ -24,6 +24,7 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
@@ -70,6 +71,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.PeerType
@@ -862,6 +864,153 @@ class RtcSessionTest2 {
             every { isReconnected } returns false
             every { this@mockk.publishOptions } returns publishOptions
         }
+    }
+
+    @Test
+    fun `iceHealthTransition recovers a reconnecting call when no ICE side is bad`() {
+        // The subscriber has nothing to negotiate after a reconnect and stays NEW; that must
+        // not block the recovery (it deadlocked the connection state as Reconnecting forever).
+        assertEquals(
+            RealtimeConnection.Connected,
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.NEW,
+            ),
+        )
+        // No peer connections at all: the connected socket is the only transport signal.
+        assertEquals(
+            RealtimeConnection.Connected,
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = null,
+                subscriberIce = null,
+            ),
+        )
+    }
+
+    @Test
+    fun `iceHealthTransition does not recover while an ICE side is bad or the socket is down`() {
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.DISCONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.NEW,
+            ),
+        )
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.DISCONNECTED,
+            ),
+        )
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = false,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.CONNECTED,
+            ),
+        )
+        // A closed peer connection never emits another ICE event, so it must block recovery.
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.CLOSED,
+            ),
+        )
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CLOSED,
+                subscriberIce = null,
+            ),
+        )
+    }
+
+    @Test
+    fun `iceHealthTransition degrades a connected call when an ICE side goes bad`() {
+        assertEquals(
+            RealtimeConnection.Reconnecting,
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Connected,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.FAILED,
+                subscriberIce = PeerConnection.IceConnectionState.NEW,
+            ),
+        )
+        assertEquals(
+            RealtimeConnection.Reconnecting,
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Connected,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.FAILED,
+            ),
+        )
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Connected,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.NEW,
+            ),
+        )
+        // CLOSED does not degrade: peer connections close during legitimate teardowns and
+        // the closing flow owns the connection state there.
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Connected,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.CLOSED,
+            ),
+        )
+    }
+
+    @Test
+    fun `evaluateIceHealth applies the transition to the connection state`() = runTest(
+        testDispatcher,
+    ) {
+        every { mockCallState.connection } returns
+            MutableStateFlow<RealtimeConnection>(RealtimeConnection.Connected)
+        val internalConnection = mockk<MutableStateFlow<RealtimeConnection>>(relaxed = true)
+        every { mockCallState._connection } returns internalConnection
+
+        val rtcSession = RtcSession(
+            client = mockStreamVideo,
+            powerManager = mockPowerManager,
+            call = mockCall,
+            sessionManager = CallSessionManager(),
+            sessionId = "test-session-id",
+            apiKey = "test-api-key",
+            lifecycle = mockLifecycle,
+            sfuUrl = "https://test-sfu.stream.com",
+            sfuWsUrl = "wss://test-sfu.stream.com",
+            sfuToken = "fake-sfu-token",
+            sfuName = "test-sfu-edge",
+            clientImpl = mockVideoClient,
+            coroutineScope = testScope,
+            remoteIceServers = emptyList(),
+            sfuConnectionModuleProvider = { mockk(relaxed = true) },
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+        )
+        every { rtcSession.subscriber.value!!.iceState } returns
+            MutableStateFlow<PeerConnection.IceConnectionState?>(
+                PeerConnection.IceConnectionState.FAILED,
+            )
+
+        rtcSession.evaluateIceHealth()
+
+        verify { internalConnection.value = RealtimeConnection.Reconnecting }
     }
 
     private fun createRtcSessionSpyWithMockSocket(): Pair<RtcSession, Publisher> {
