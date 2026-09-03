@@ -34,9 +34,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.theme.UserAvatarParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.ui.common.R
 
@@ -100,11 +100,13 @@ internal fun InviteUserItem(
         val userName by user.userNameOrId.collectAsStateWithLifecycle()
         val userImage by user.image.collectAsStateWithLifecycle()
 
-        UserAvatar(
-            modifier = Modifier.size(StreamTokens.size48),
-            userImage = userImage,
-            userName = userName,
-            isShowingOnlineIndicator = true,
+        VideoTheme.componentFactory.UserAvatar(
+            UserAvatarParams(
+                userImage = userImage,
+                userName = userName,
+                modifier = Modifier.size(StreamTokens.size48),
+                isShowingOnlineIndicator = true,
+            ),
         )
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -121,7 +123,9 @@ internal fun InviteUserItem(
         if (isSelected) {
             Image(
                 modifier = Modifier.size(24.dp),
-                painter = painterResource(id = R.drawable.stream_video_ic_selected),
+                painter = painterResource(
+                    id = io.getstream.video.android.compose.R.drawable.stream_design_ic_checkmark,
+                ),
                 contentDescription = null,
             )
         }

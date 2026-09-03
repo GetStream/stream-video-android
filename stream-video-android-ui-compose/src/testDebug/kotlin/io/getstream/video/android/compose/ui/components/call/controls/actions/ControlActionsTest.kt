@@ -39,13 +39,6 @@ internal class ControlActionsTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `cancel call action`() {
-        snapshotWithDarkModeRow {
-            CancelCallActionPreview()
-        }
-    }
-
-    @Test
     fun `chat action`() {
         snapshotWithDarkModeRow {
             ChatActionPreview()
@@ -77,6 +70,20 @@ internal class ControlActionsTest : PaparazziComposeTest {
     fun `leave call action`() {
         snapshotWithDarkModeRow {
             LeaveCallActionPreview()
+        }
+    }
+
+    @Test
+    fun `screen share toggle action`() {
+        snapshotWithDarkModeRow {
+            ScreenShareToggleActionPreview()
+        }
+    }
+
+    @Test
+    fun `toggle action in progress`() {
+        snapshotWithDarkMode {
+            ToggleActionInProgressPreview()
         }
     }
 

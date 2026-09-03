@@ -19,8 +19,6 @@ package io.getstream.video.android.compose.ui.components.audio
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,11 +27,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallLeaveReason
@@ -59,12 +59,12 @@ public fun AudioControlActions(
         call.microphone.isEnabled.collectAsStateWithLifecycle()
     }
     val activity = LocalContext.current as? ComponentActivity
-    StreamButton(
+    StreamTextButton(
         text = stringResource(
             id = io.getstream.video.android.ui.common.R.string.stream_video_audio_leave,
         ),
-        icon = Icons.Default.ExitToApp,
-        style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+        leadingIcon = painterResource(R.drawable.stream_design_ic_leave),
+        style = StreamButtonStyleDefaults.secondarySolid,
         onClick = {
             onLeaveRoom?.invoke() ?: let {
                 call.leave(

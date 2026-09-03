@@ -22,14 +22,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.ui.common.R
 
@@ -71,8 +72,13 @@ internal fun CallParticipantListAppBar(
 
         StreamIconButton(
             onClick = onBackPressed,
-            icon = Icons.Default.Close,
-            style = VideoTheme.styles.buttonStyles.onlyIconIconButtonStyle(),
+            icon = painterResource(
+                io.getstream.video.android.compose.R.drawable.stream_design_ic_xmark,
+            ),
+            contentDescription = stringResource(
+                R.string.stream_video_back_button_content_description,
+            ),
+            style = StreamButtonStyleDefaults.secondaryGhost,
         )
     }
 }

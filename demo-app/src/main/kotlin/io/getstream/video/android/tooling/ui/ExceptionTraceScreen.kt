@@ -48,7 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.tooling.extensions.toast
 
 @Composable
@@ -62,8 +63,8 @@ internal fun ExceptionTraceScreen(packageName: String, message: String) {
             .padding(16.dp),
     ) {
         val context: Context = LocalContext.current
-        StreamButton(
-            style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+        StreamTextButton(
+            style = StreamButtonStyleDefaults.primarySolid,
             text = stringResource(id = R.string.stream_video_tooling_restart_app),
             onClick = {
                 val mainActivity = Class.forName(packageName)

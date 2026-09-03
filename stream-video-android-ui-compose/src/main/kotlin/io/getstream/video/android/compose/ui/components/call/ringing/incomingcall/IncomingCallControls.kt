@@ -23,8 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DeclineCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
@@ -55,18 +54,15 @@ public fun IncomingCallControls(
         DeclineCallAction(
             modifier = Modifier.testTag("Stream_DeclineCallButton"),
             onCallAction = onCallAction,
-            style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
+            size = StreamButtonSize.Large,
 
         )
 
         if (isMicrophoneEnabled != null) {
             ToggleMicrophoneAction(
                 modifier = Modifier.testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
-                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
-                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
-                    1.5f,
-                ),
                 isMicrophoneEnabled = isMicrophoneEnabled,
+                size = StreamButtonSize.Large,
                 onCallAction = onCallAction,
             )
         }
@@ -74,11 +70,8 @@ public fun IncomingCallControls(
         if (isVideoCall) {
             ToggleCameraAction(
                 modifier = Modifier.testTag("Stream_CameraToggle_Enabled_$isCameraEnabled"),
-                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(1.5f),
-                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
-                    1.5f,
-                ),
                 isCameraEnabled = isCameraEnabled,
+                size = StreamButtonSize.Large,
                 onCallAction = onCallAction,
             )
         }
@@ -86,7 +79,7 @@ public fun IncomingCallControls(
         AcceptCallAction(
             modifier = Modifier.testTag("Stream_AcceptCallButton"),
             onCallAction = onCallAction,
-            style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(1.5f),
+            size = StreamButtonSize.Large,
         )
     }
 }

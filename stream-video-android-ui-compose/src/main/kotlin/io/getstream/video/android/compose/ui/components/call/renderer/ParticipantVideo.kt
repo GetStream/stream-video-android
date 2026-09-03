@@ -40,9 +40,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -442,7 +439,9 @@ public fun BoxScope.ParticipantLabel(
                         modifier = Modifier
                             .padding(horizontal = 4.dp)
                             .size(StreamTokens.size16),
-                        imageVector = Icons.Filled.PushPin,
+                        painter = painterResource(
+                            io.getstream.video.android.compose.R.drawable.stream_design_ic_pin_fill,
+                        ),
                         contentDescription = "Pin",
                         tint = VideoTheme.colors.textOnAccent,
                     )
@@ -456,7 +455,9 @@ public fun BoxScope.ParticipantLabel(
                         modifier = Modifier
                             .padding(horizontal = 4.dp)
                             .size(StreamTokens.size16),
-                        imageVector = Icons.Filled.SignalWifiBad,
+                        painter = painterResource(
+                            io.getstream.video.android.compose.R.drawable.stream_design_ic_exclamation_triangle_fill,
+                        ),
                         contentDescription = "Pause",
                         tint = VideoTheme.colors.textOnAccent,
                     )

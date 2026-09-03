@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -58,22 +59,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -93,12 +91,12 @@ import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButton
-import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
-import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamDialog
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
-import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
-import io.getstream.video.android.compose.ui.components.base.styling.IconStyles
-import io.getstream.video.android.compose.ui.components.base.styling.StreamDialogStyles
 import io.getstream.video.android.model.User
 import io.getstream.video.android.models.builtInUsers
 import io.getstream.video.android.tooling.extensions.toPx
@@ -386,47 +384,53 @@ private fun LoginButtons(
 
                     when (availableLogins[index]) {
                         "built-in" -> {
-                            StreamButton(
+                            StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_BuiltInUserSignIn"),
-                                icon = Icons.Outlined.Adb,
+                                leadingIcon = rememberVectorPainter(Icons.Outlined.Adb),
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.builtin_user_sign_in),
-                                style = ButtonStyles.secondaryButtonStyle(),
+                                style = StreamButtonStyleDefaults.primarySolid,
                                 onClick = showBuiltInUserDialog,
                             )
                         }
 
                         "google" -> {
                             StreamButton(
-                                icon = ImageVector.vectorResource(R.drawable.google_button_logo),
+                                onClick = {
+                                    login(false, LoginEvent.GoogleSignIn())
+                                },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_GoogleSignIn"),
                                 enabled = !isLoading,
-                                text = stringResource(id = R.string.sign_in_google),
-                                style = ButtonStyles.primaryButtonStyle()
-                                    .copy(
-                                        iconStyle = IconStyles.customColorIconStyle(
-                                            color = Color.Unspecified,
-                                        ),
-                                    ),
-                                onClick = {
-                                    login(false, LoginEvent.GoogleSignIn())
-                                },
-                            )
+                                style = StreamButtonStyleDefaults.secondarySolid,
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Image(
+                                        painter = painterResource(R.drawable.google_button_logo),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp),
+                                    )
+                                    Text(text = stringResource(id = R.string.sign_in_google))
+                                }
+                            }
                         }
 
                         "email" -> {
-                            StreamButton(
+                            StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_EmailSignIn"),
-                                icon = Icons.Default.Email,
+                                leadingIcon = rememberVectorPainter(Icons.Default.Email),
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.sign_in_email),
-                                style = ButtonStyles.primaryButtonStyle(),
+                                style = StreamButtonStyleDefaults.secondarySolid,
                                 onClick = {
                                     showEmailLoginDialog.invoke()
                                 },
@@ -434,14 +438,14 @@ private fun LoginButtons(
                         }
 
                         "anonymous" -> {
-                            StreamButton(
+                            StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_RandomUserSignIn"),
-                                icon = Icons.Outlined.GroupAdd,
+                                leadingIcon = rememberVectorPainter(Icons.Outlined.GroupAdd),
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.random_user_sign_in),
-                                style = ButtonStyles.tertiaryButtonStyle(),
+                                style = StreamButtonStyleDefaults.secondaryGhost,
                                 onClick = {
                                     login(true, null)
                                 },
@@ -449,14 +453,14 @@ private fun LoginButtons(
                         }
 
                         "guest_user" -> {
-                            StreamButton(
+                            StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_GuestSignIn"),
-                                icon = Icons.Outlined.Person,
+                                leadingIcon = rememberVectorPainter(Icons.Outlined.Person),
                                 enabled = !isLoading,
                                 text = stringResource(id = R.string.guest_user_sign_in),
-                                style = ButtonStyles.secondaryButtonStyle(),
+                                style = StreamButtonStyleDefaults.primarySolid,
                                 onClick = {
                                     login(false, LoginEvent.SignInAsGuest)
                                 },
@@ -469,13 +473,13 @@ private fun LoginButtons(
         }
 
         if (BuildConfig.BUILD_TYPE == "benchmark") {
-            StreamButton(
+            StreamTextButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 55.dp)
                     .testTag("authenticate"),
                 text = "Login for Benchmark",
-                style = ButtonStyles.secondaryButtonStyle(),
+                style = StreamButtonStyleDefaults.primarySolid,
                 onClick = {
                     login(null, LoginEvent.SignInSuccess("benchmark.test@getstream.io"))
                 },
@@ -537,28 +541,28 @@ private fun EmailLoginDialog(
 ) {
     var email by remember { mutableStateOf(TextFieldValue("")) }
 
-    StreamDialogPositiveNegative(
-        style = StreamDialogStyles.defaultDialogStyle(),
-        onDismiss = { onDismissRequest.invoke() },
-        icon = Icons.Default.Email,
+    StreamDialog(
+        onDismissRequest = onDismissRequest,
+        icon = rememberVectorPainter(Icons.Default.Email),
         title = stringResource(R.string.enter_your_email_address),
-        content = {
-            StreamTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                value = email,
-                onValueChange = { email = it },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Email,
-                ),
-            )
-        },
-        positiveButton = Triple("Login", ButtonStyles.secondaryButtonStyle()) {
-            val userId = UserHelper.getUserIdFromEmail(email.text)
-            login(true, LoginEvent.SignInSuccess(userId))
-        },
-    )
+    ) {
+        StreamTextField(
+            value = email,
+            onValueChange = { email = it },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Email,
+            ),
+        )
+        StreamTextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                val userId = UserHelper.getUserIdFromEmail(email.text)
+                login(true, LoginEvent.SignInSuccess(userId))
+            },
+            text = "Login",
+            size = StreamButtonSize.Large,
+        )
+    }
 }
 
 @Composable
@@ -567,53 +571,57 @@ private fun BuiltInUsersLoginDialog(
     login: (Boolean?, LoginEvent?) -> Unit = { _, _ -> },
 ) {
     val users = User.builtInUsers()
-    StreamDialogPositiveNegative(
-        style = StreamDialogStyles.defaultDialogStyle(),
-        onDismiss = onDismissRequest,
-        icon = Icons.Default.Email,
+    StreamDialog(
+        onDismissRequest = onDismissRequest,
+        icon = rememberVectorPainter(Icons.Default.Email),
         title = stringResource(R.string.select_user),
-        content = {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-            ) {
-                items(users) { user ->
-                    Row(
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 320.dp),
+        ) {
+            items(users) { user ->
+                Row(
+                    modifier = Modifier
+                        .height(64.dp)
+                        .fillMaxWidth()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(bounded = true),
+                            onClick = {
+                                login(true, LoginEvent.SignIn(user))
+                                onDismissRequest()
+                            },
+                        ),
+                ) {
+                    Spacer(modifier = Modifier.width(16.dp))
+                    UserAvatar(
                         modifier = Modifier
-                            .height(64.dp)
-                            .fillMaxWidth()
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = ripple(bounded = true),
-                                onClick = {
-                                    login(true, LoginEvent.SignIn(user))
-                                    onDismissRequest()
-                                },
-                            ),
-                    ) {
-                        Spacer(modifier = Modifier.width(16.dp))
-                        UserAvatar(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .align(Alignment.CenterVertically),
-                            userImage = user.image,
-                            userName = user.userNameOrId,
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            modifier = Modifier.align(Alignment.CenterVertically),
-                            text = user.name.orEmpty(),
-                            color = VideoTheme.colors.textPrimary,
-                            style = VideoTheme.typography.bodyDefault,
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                    }
+                            .size(40.dp)
+                            .align(Alignment.CenterVertically),
+                        userImage = user.image,
+                        userName = user.userNameOrId,
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        text = user.name.orEmpty(),
+                        color = VideoTheme.colors.textPrimary,
+                        style = VideoTheme.typography.bodyDefault,
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
                 }
             }
-        },
-        negativeButton = Triple("Cancel", ButtonStyles.secondaryButtonStyle(), onDismissRequest),
-    )
+        }
+        StreamTextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onDismissRequest,
+            text = "Cancel",
+            style = StreamButtonStyleDefaults.secondaryOutline,
+            size = StreamButtonSize.Large,
+        )
+    }
 }
 
 @Composable
@@ -632,14 +640,12 @@ fun SelectableDialog(
             color = Color.White,
         )
         if (items.size > 1) {
-            StreamIconToggleButton(
-                toggleState = rememberUpdatedState(newValue = ToggleableState(showDialog)),
+            StreamIconButton(
                 onClick = { showDialog = !showDialog },
-                onIcon = Icons.Default.Settings,
-                offIcon = Icons.Default.Settings,
-                onStyle = ButtonStyles.secondaryIconButtonStyle(),
-                offStyle = ButtonStyles.primaryIconButtonStyle(),
+                icon = rememberVectorPainter(Icons.Default.Settings),
+                contentDescription = null,
                 modifier = Modifier.padding(16.dp),
+                style = if (showDialog) StreamButtonStyleDefaults.primarySolid else StreamButtonStyleDefaults.secondarySolid,
             )
             if (showDialog) {
                 Popup(
@@ -660,14 +666,14 @@ fun SelectableDialog(
                             .width(180.dp),
                     ) {
                         items.forEach { item ->
-                            StreamButton(
+                            StreamTextButton(
                                 text = item.displayName,
                                 onClick = {
                                     onItemSelected(item)
                                     selectedText = item.displayName
                                     showDialog = !showDialog
                                 },
-                                style = ButtonStyles.tertiaryButtonStyle(),
+                                style = StreamButtonStyleDefaults.secondaryGhost,
                                 modifier = Modifier
                                     .padding(horizontal = 8.dp)
                                     .fillMaxWidth(),

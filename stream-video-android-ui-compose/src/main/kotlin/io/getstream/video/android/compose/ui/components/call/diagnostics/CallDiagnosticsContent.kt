@@ -30,16 +30,16 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.stats.model.RtcAudioSourceStats
 import io.getstream.video.android.core.call.stats.model.RtcCodecStats
@@ -73,7 +73,10 @@ public fun CallDiagnosticsContent(
         if (configuration.orientation == ORIENTATION_PORTRAIT) {
             Column {
                 IconButton(onClick = onCloseClick) {
-                    Icon(Icons.Filled.Close, contentDescription = null)
+                    Icon(
+                        painterResource(R.drawable.stream_design_ic_xmark),
+                        contentDescription = null,
+                    )
                 }
                 LazyColumn {
                     call.state.participants.value.forEach {
@@ -104,7 +107,10 @@ public fun CallDiagnosticsContent(
         } else {
             Row {
                 IconButton(onClick = onCloseClick) {
-                    Icon(Icons.Filled.Close, contentDescription = null)
+                    Icon(
+                        painterResource(R.drawable.stream_design_ic_xmark),
+                        contentDescription = null,
+                    )
                 }
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     PublisherDiagnosticsContent(

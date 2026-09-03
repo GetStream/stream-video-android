@@ -16,42 +16,49 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ClosedCaption
-import androidx.compose.material.icons.filled.ClosedCaptionOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.call.state.CallAction
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.core.call.state.ClosedCaptionsAction
 
 /**
- * A call action button represents displaying the call captions.
+ * Turns closed captions on and off.
  *
- * @param modifier Optional Modifier for this action button.
- * @param enabled Whether or not this action button will handle input events.
- * @param onCallAction A [CallAction] event that will be fired.
+ * @param modifier The modifier applied to the button.
+ * @param active Whether the action is in its active state.
+ * @param enabled Whether the action accepts clicks.
+ * @param onStyle The colors of the active state. See [StreamButtonStyleDefaults].
+ * @param offStyle The colors of the inactive state. See [StreamButtonStyleDefaults].
+ * @param size The visual size of the button.
+ * @param onCallAction Called with [ClosedCaptionsAction] when the action is clicked.
  */
 @Composable
 public fun ClosedCaptionsToggleAction(
     modifier: Modifier = Modifier,
     active: Boolean,
     enabled: Boolean = true,
-    shape: Shape? = null,
-    enabledColor: Color? = null,
-    disabledColor: Color? = null,
+    onStyle: StreamButtonStyle = StreamButtonStyleDefaults.primarySolid,
+    offStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
+    size: StreamButtonSize = StreamButtonSize.Medium,
     onCallAction: (ClosedCaptionsAction) -> Unit,
 ): Unit = ToggleAction(
-    isActionActive = active,
-    iconOnOff =
-    Pair(Icons.Default.ClosedCaption, Icons.Default.ClosedCaptionOff),
     modifier = modifier,
-    enabled = enabled, shape = shape,
-    enabledColor = enabledColor, disabledColor = disabledColor,
-    offStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
-    onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-) {
-    onCallAction(ClosedCaptionsAction(!active))
-}
+    isActionActive = active,
+    iconOnOff = Pair(
+        painterResource(R.drawable.stream_design_ic_caption_fill),
+        painterResource(R.drawable.stream_design_ic_caption_fill),
+    ),
+    contentDescription = stringResource(
+        io.getstream.video.android.ui.common.R.string.stream_video_call_controls_toggle_closed_captions,
+    ),
+    enabled = enabled,
+    onStyle = onStyle,
+    offStyle = offStyle,
+    size = size,
+    onAction = { onCallAction(ClosedCaptionsAction(!active)) },
+)

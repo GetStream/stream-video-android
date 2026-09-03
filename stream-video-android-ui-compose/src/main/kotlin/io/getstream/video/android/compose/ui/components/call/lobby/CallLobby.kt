@@ -50,9 +50,9 @@ import io.getstream.video.android.compose.theme.CallLobbyControlsContentParams
 import io.getstream.video.android.compose.theme.CallLobbyOnDisabledContentParams
 import io.getstream.video.android.compose.theme.CallLobbyOnRenderedContentParams
 import io.getstream.video.android.compose.theme.CallLobbyParticipantLabelContentParams
+import io.getstream.video.android.compose.theme.UserAvatarParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.indicator.MicrophoneIndicator
@@ -381,12 +381,14 @@ internal fun OnDisabledContent(user: User) {
             .background(VideoTheme.colors.backgroundCoreSurfaceDefault)
             .testTag("on_disabled_content"),
     ) {
-        UserAvatar(
-            modifier = Modifier
-                .size(100.dp)
-                .align(Alignment.Center),
-            userImage = user.image,
-            userName = user.name.takeUnless { it.isNullOrBlank() } ?: user.id,
+        VideoTheme.componentFactory.UserAvatar(
+            UserAvatarParams(
+                userImage = user.image,
+                userName = user.name.takeUnless { it.isNullOrBlank() } ?: user.id,
+                modifier = Modifier
+                    .size(100.dp)
+                    .align(Alignment.Center),
+            ),
         )
     }
 }

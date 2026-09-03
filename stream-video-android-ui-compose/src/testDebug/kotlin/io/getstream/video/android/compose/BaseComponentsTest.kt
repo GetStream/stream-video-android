@@ -21,15 +21,12 @@ import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.base.BadgesWithButtonsPreview
-import io.getstream.video.android.compose.ui.components.base.ButtonWithIconsPreview
-import io.getstream.video.android.compose.ui.components.base.DifferentSizeButtonsPreview
 import io.getstream.video.android.compose.ui.components.base.GenericContainerPreview
-import io.getstream.video.android.compose.ui.components.base.InputFieldsPreview
-import io.getstream.video.android.compose.ui.components.base.RegularButtonsPreview
-import io.getstream.video.android.compose.ui.components.base.RegularIconButtonsPreview
-import io.getstream.video.android.compose.ui.components.base.ShowProgressIntoIconButtonsPreview
-import io.getstream.video.android.compose.ui.components.base.ToggleButtonsPreview
-import io.getstream.video.android.compose.ui.components.base.ToggleIconButtonsPreview
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSizesPreview
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStylesPreview
+import io.getstream.video.android.compose.ui.components.base.StreamListItemsPreview
+import io.getstream.video.android.compose.ui.components.base.StreamScrimPreview
+import io.getstream.video.android.compose.ui.components.base.StreamTextFieldPreview
 import org.junit.Rule
 import org.junit.Test
 
@@ -42,72 +39,37 @@ internal class BaseComponentsTest : PaparazziComposeTest {
     )
 
     @Test
-    fun `regular icon buttons`() {
+    fun `button styles enabled`() {
         snapshotWithDarkMode {
-            RegularIconButtonsPreview()
+            StreamButtonStylesPreview(enabled = true)
         }
     }
 
     @Test
-    fun `regular buttons`() {
+    fun `button styles disabled`() {
+        snapshotWithDarkMode {
+            StreamButtonStylesPreview(enabled = false)
+        }
+    }
+
+    @Test
+    fun `button sizes`() {
+        snapshotWithDarkMode {
+            StreamButtonSizesPreview()
+        }
+    }
+
+    @Test
+    fun `text fields`() {
         snapshot {
-            RegularButtonsPreview()
+            StreamTextFieldPreview()
         }
     }
 
     @Test
-    fun `regular buttons in dark mode`() {
+    fun `text fields in dark mode`() {
         snapshot(isInDarkMode = true) {
-            RegularButtonsPreview()
-        }
-    }
-
-    @Test
-    fun `button with icons`() {
-        snapshotWithDarkMode {
-            ButtonWithIconsPreview()
-        }
-    }
-
-    @Test
-    fun `different size buttons`() {
-        snapshotWithDarkMode {
-            DifferentSizeButtonsPreview()
-        }
-    }
-
-    @Test
-    fun `toggle icon buttons`() {
-        snapshotWithDarkMode {
-            ToggleIconButtonsPreview()
-        }
-    }
-
-    @Test
-    fun `toggle buttons`() {
-        snapshotWithDarkMode {
-            ToggleButtonsPreview()
-        }
-    }
-
-    @Test
-    fun `show progress into icon buttons`() {
-        snapshotWithDarkMode {
-            ShowProgressIntoIconButtonsPreview()
-        }
-    }
-
-    @Test
-    fun `input fields`() {
-        snapshot {
-            InputFieldsPreview()
-        }
-    }
-
-    @Test
-    fun `input fields in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            InputFieldsPreview()
+            StreamTextFieldPreview()
         }
     }
 
@@ -122,6 +84,20 @@ internal class BaseComponentsTest : PaparazziComposeTest {
     fun `badges with buttons`() {
         snapshotWithDarkMode {
             BadgesWithButtonsPreview()
+        }
+    }
+
+    @Test
+    fun `list items`() {
+        snapshotWithDarkMode {
+            StreamListItemsPreview()
+        }
+    }
+
+    @Test
+    fun `scrim`() {
+        snapshotWithDarkMode {
+            StreamScrimPreview()
         }
     }
 }

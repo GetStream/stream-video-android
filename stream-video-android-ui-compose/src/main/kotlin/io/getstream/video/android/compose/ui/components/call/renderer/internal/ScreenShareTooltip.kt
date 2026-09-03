@@ -63,7 +63,9 @@ internal fun ScreenShareTooltip(
                 start = StreamTokens.spacingXxs,
                 end = StreamTokens.spacingXxs,
             ),
-            painter = painterResource(id = R.drawable.stream_video_ic_screensharing),
+            painter = painterResource(
+                id = io.getstream.video.android.compose.R.drawable.stream_design_ic_present_mobile_fill,
+            ),
             tint = VideoTheme.colors.textOnAccent,
             contentDescription = "Presenting",
         )

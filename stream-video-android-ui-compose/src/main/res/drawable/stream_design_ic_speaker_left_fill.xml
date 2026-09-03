@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
+
+    Licensed under the Stream License;
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+      https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M4.38 16.88H10.13C10.46 16.88 10.78 16.74 11.01 16.51 11.25 16.27 11.38 15.96 11.38 15.63L11.38 4.37C11.38 4.04 11.25 3.72 11.01 3.49 10.78 3.25 10.46 3.12 10.13 3.12L4.38 3.12C4.05 3.12 3.73 3.25 3.49 3.49 3.26 3.72 3.13 4.04 3.13 4.37L3.13 15.63C3.13 15.96 3.26 16.27 3.49 16.51 3.73 16.74 4.05 16.88 4.38 16.88Z"/>
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M12.63 4.37L12.63 8.12C12.63 8.45 12.76 8.77 12.99 9.01 13.23 9.24 13.55 9.37 13.88 9.37H15.63C15.96 9.37 16.28 9.24 16.51 9.01 16.75 8.77 16.88 8.45 16.88 8.12L16.88 4.37C16.88 4.04 16.75 3.72 16.51 3.49 16.28 3.25 15.96 3.12 15.63 3.12L13.88 3.12C13.55 3.12 13.23 3.25 12.99 3.49 12.76 3.72 12.63 4.04 12.63 4.37Z"/>
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M12.63 11.88V15.63C12.63 15.96 12.76 16.28 12.99 16.51 13.23 16.75 13.55 16.88 13.88 16.88L15.63 16.88C15.96 16.88 16.28 16.75 16.51 16.51 16.75 16.28 16.88 15.96 16.88 15.63V11.88C16.88 11.55 16.75 11.23 16.51 10.99 16.28 10.76 15.96 10.63 15.63 10.63H13.88C13.55 10.63 13.23 10.76 12.99 10.99 12.76 11.23 12.63 11.55 12.63 11.88Z"/>
+</vector>

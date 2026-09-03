@@ -57,12 +57,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
@@ -73,7 +73,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -95,9 +94,11 @@ import io.getstream.video.android.R
 import io.getstream.video.android.app
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
-import io.getstream.video.android.compose.ui.components.base.StreamButton
-import io.getstream.video.android.compose.ui.components.base.StreamDialogPositiveNegative
-import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamDialog
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextField
 import io.getstream.video.android.defaultCallId
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -285,7 +286,10 @@ private fun CallJoinHeader(
             var popupPosition by remember { mutableStateOf(IntOffset(0, 0)) }
             var buttonSize by remember { mutableStateOf(IntSize(0, 0)) }
 
-            StreamIconToggleButton(
+            StreamIconButton(
+                onClick = { showMenu = !showMenu },
+                icon = rememberVectorPainter(Icons.Default.Settings),
+                contentDescription = null,
                 modifier = Modifier
                     .onGloballyPositioned { coordinates ->
                         val buttonBounds = coordinates.boundsInParent()
@@ -296,17 +300,8 @@ private fun CallJoinHeader(
                         buttonSize = coordinates.size
                     }
                     .testTag("Stream_SettingsIcon"),
-                toggleState = rememberUpdatedState(newValue = ToggleableState(showMenu)),
-                onIcon = Icons.Default.Settings,
-                onStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-                offStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
-            ) {
-                showMenu = when (it) {
-                    ToggleableState.On -> false
-                    ToggleableState.Off -> true
-                    ToggleableState.Indeterminate -> false
-                }
-            }
+                style = if (showMenu) StreamButtonStyleDefaults.primarySolid else StreamButtonStyleDefaults.secondarySolid,
+            )
 
             if (showMenu) {
                 Popup(
@@ -325,13 +320,13 @@ private fun CallJoinHeader(
                             .padding(16.dp),
                     ) {
                         if (showDirectCall) {
-                            StreamButton(
+                            StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_DirectCallButton"),
                                 text = stringResource(id = R.string.direct_call),
-                                icon = Icons.Default.Call,
-                                style = VideoTheme.styles.buttonStyles.primaryButtonStyle(),
+                                leadingIcon = rememberVectorPainter(Icons.Default.Call),
+                                style = StreamButtonStyleDefaults.secondarySolid,
                                 onClick = {
                                     showMenu = false
                                     onDirectCallClick.invoke()
@@ -340,12 +335,12 @@ private fun CallJoinHeader(
                         }
                         Spacer(modifier = Modifier.width(5.dp))
                         if (!isProduction) {
-                            StreamButton(
+                            StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_CallSettingsButton"),
-                                icon = Icons.Default.Settings,
-                                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                                leadingIcon = rememberVectorPainter(Icons.Default.Settings),
+                                style = StreamButtonStyleDefaults.secondaryGhost,
                                 text = stringResource(id = R.string.call_settings),
                                 onClick = {
                                     showMenu = false
@@ -353,12 +348,14 @@ private fun CallJoinHeader(
                                 },
                             )
                             Spacer(modifier = Modifier.width(5.dp))
-                            StreamButton(
+                            StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_ExportLogsButton"),
-                                icon = Icons.AutoMirrored.Default.DriveFileMove,
-                                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                                leadingIcon = rememberVectorPainter(
+                                    Icons.AutoMirrored.Default.DriveFileMove,
+                                ),
+                                style = StreamButtonStyleDefaults.secondaryGhost,
                                 text = stringResource(id = R.string.logs),
                                 onClick = {
                                     showMenu = false
@@ -366,12 +363,14 @@ private fun CallJoinHeader(
                                 },
                             )
                             Spacer(modifier = Modifier.width(5.dp))
-                            StreamButton(
+                            StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_SignOutButton"),
-                                icon = Icons.AutoMirrored.Filled.Logout,
-                                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+                                leadingIcon = rememberVectorPainter(
+                                    Icons.AutoMirrored.Filled.Logout,
+                                ),
+                                style = StreamButtonStyleDefaults.secondaryGhost,
                                 text = stringResource(id = R.string.sign_out),
                                 onClick = {
                                     showMenu = false
@@ -463,22 +462,22 @@ private fun CallActualContentPortrait(
             onJoinCall(it)
         }
         Spacer(modifier = Modifier.height(8.dp))
-        StreamButton(
+        StreamTextButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("Stream_StartNewCallButton"),
             text = stringResource(id = R.string.start_a_new_call),
-            icon = Icons.Default.VideoCall,
+            leadingIcon = rememberVectorPainter(Icons.Default.VideoCall),
             onClick = { onNewCall() },
         )
         Spacer(modifier = Modifier.height(8.dp))
-        StreamButton(
-            style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+        StreamTextButton(
+            style = StreamButtonStyleDefaults.secondaryGhost,
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("Stream_ScanQrCodeButton"),
             text = stringResource(id = R.string.scan_qr_code),
-            icon = Icons.Default.QrCodeScanner,
+            leadingIcon = rememberVectorPainter(Icons.Default.QrCodeScanner),
             onClick = { gotoQR() },
         )
     }
@@ -518,22 +517,22 @@ private fun CallActualContentLandscape(
                 onJoinCall(it)
             }
             Spacer(modifier = Modifier.height(8.dp))
-            StreamButton(
+            StreamTextButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("Stream_StartNewCallButton"),
                 text = stringResource(id = R.string.start_a_new_call),
-                icon = Icons.Default.VideoCall,
+                leadingIcon = rememberVectorPainter(Icons.Default.VideoCall),
                 onClick = { onNewCall() },
             )
             Spacer(modifier = Modifier.height(8.dp))
-            StreamButton(
-                style = VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
+            StreamTextButton(
+                style = StreamButtonStyleDefaults.secondaryGhost,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("Stream_ScanQrCodeButton"),
                 text = stringResource(id = R.string.scan_qr_code),
-                icon = Icons.Default.QrCodeScanner,
+                leadingIcon = rememberVectorPainter(Icons.Default.QrCodeScanner),
                 onClick = { gotoQR() },
             )
         }
@@ -621,7 +620,6 @@ private fun JoinCallForm(
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
             ),
-            style = VideoTheme.styles.textFieldStyles.defaultTextField(),
             value = callId,
             placeholder = stringResource(id = R.string.join_call_call_id_hint),
             keyboardActions = KeyboardActions(
@@ -631,9 +629,9 @@ private fun JoinCallForm(
             ),
         )
 
-        StreamButton(
-            icon = Icons.AutoMirrored.Filled.Login,
-            style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+        StreamTextButton(
+            leadingIcon = rememberVectorPainter(Icons.AutoMirrored.Filled.Login),
+            style = StreamButtonStyleDefaults.primarySolid,
             modifier = Modifier
                 .padding(start = 16.dp)
                 .fillMaxHeight()
@@ -651,23 +649,25 @@ private fun SignOutDialog(
     onConfirmation: () -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    StreamDialogPositiveNegative(
-        style = VideoTheme.styles.dialogStyles.defaultDialogStyle(),
-        positiveButton = Triple(
-            stringResource(id = R.string.sign_out),
-            VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
-        ) {
-            onConfirmation()
-        },
-        negativeButton = Triple(
-            stringResource(R.string.cancel),
-            VideoTheme.styles.buttonStyles.tertiaryButtonStyle(),
-        ) {
-            onDismissRequest()
-        },
+    StreamDialog(
+        onDismissRequest = onDismissRequest,
         title = stringResource(id = R.string.sign_out),
-        contentText = stringResource(R.string.are_you_sure_sign_out),
-    )
+        message = stringResource(R.string.are_you_sure_sign_out),
+    ) {
+        StreamTextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onConfirmation,
+            text = stringResource(id = R.string.sign_out),
+            size = StreamButtonSize.Large,
+        )
+        StreamTextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onDismissRequest,
+            text = stringResource(R.string.cancel),
+            style = StreamButtonStyleDefaults.secondaryOutline,
+            size = StreamButtonSize.Large,
+        )
+    }
 }
 
 class BelowElementPositionProvider(
