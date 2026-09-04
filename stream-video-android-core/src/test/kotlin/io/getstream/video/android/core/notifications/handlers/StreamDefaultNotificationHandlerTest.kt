@@ -18,7 +18,9 @@ package io.getstream.video.android.core.notifications.handlers
 
 import android.app.Application
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -33,6 +35,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
+import io.getstream.video.android.core.notifications.IncomingCallNotificationPreparer
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
@@ -59,6 +62,7 @@ import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -124,6 +128,7 @@ class StreamDefaultNotificationHandlerTest {
         val mockCallConfigRegistry = mockk<CallServiceConfigRegistry>(relaxed = true)
         val mockCallServiceConfig = mockk<CallServiceConfig>(relaxed = true)
         every { StreamVideo.instance() } returns mockStreamVideo
+        every { mockStreamVideo.context } returns mockApplication
         every { mockStreamVideo.state } returns mockState
         serviceLauncher = mockk(relaxed = true)
         every { mockState.serviceLauncher } returns serviceLauncher
@@ -186,6 +191,9 @@ class StreamDefaultNotificationHandlerTest {
         every { mockApplication.getString(any()) } returns "Test String"
         every { mockApplication.getString(any(), any()) } returns "Test String with param"
         every { mockApplication.applicationInfo } returns mockk(relaxed = true)
+        every {
+            mockApplication.getSystemService(Context.NOTIFICATION_SERVICE)
+        } returns mockk<NotificationManager>(relaxed = true)
 
         // Mock call state
         every { mockCall.cid } returns "default:test-call-123"
@@ -377,6 +385,53 @@ class StreamDefaultNotificationHandlerTest {
     }
 
     @Test
+    fun `onRingingCall prepares notification only when notification owns ringtone`() {
+        val ownerProvider = slot<(IncomingRingtoneOwner) -> Notification?>()
+        val preparedNotification = mockk<Notification>(relaxed = true)
+        every { callBusyHandler.isBusyWithAnotherCall(testCallId.cid) } returns false
+        every {
+            serviceLauncher.showIncomingCall(any(), any(), any(), any(), any(), capture(ownerProvider))
+        } returns Unit
+        every { mockIntentResolver.searchIncomingCallPendingIntent(any(), any()) } returns mockPendingIntent
+        every { mockIntentResolver.searchAcceptCallPendingIntent(any(), any()) } returns mockPendingIntent
+        every { mockIntentResolver.searchRejectCallPendingIntent(any(), any()) } returns mockPendingIntent
+        every {
+            mockInitialInterceptor.onBuildIncomingCallNotification(
+                any(), any(), any(), any(), any(), any(), any(),
+            )
+        } returns mockk(relaxed = true)
+        mockkConstructor(IncomingCallNotificationPreparer::class)
+        every {
+            anyConstructed<IncomingCallNotificationPreparer>().prepare(
+                any(),
+                IncomingRingtoneOwner.Notification,
+                any(),
+            )
+        } returns preparedNotification
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockApplication,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+        )
+
+        testHandler.onRingingCall(testCallId, "Caller", payload)
+        val result = ownerProvider.captured(IncomingRingtoneOwner.Notification)
+
+        assertEquals(preparedNotification, result)
+        verify {
+            anyConstructed<IncomingCallNotificationPreparer>().prepare(
+                any(),
+                IncomingRingtoneOwner.Notification,
+                any(),
+            )
+        }
+    }
+
+    @Test
     fun `onMissedCall creates and shows missed call notification`() {
         // Given
         val callDisplayName = "Jane Smith"
@@ -431,6 +486,11 @@ class StreamDefaultNotificationHandlerTest {
         }
 
         // Verify notification manager is called to show notification
+        verify {
+            mockNotificationManager.cancel(
+                testCallId.getNotificationId(NotificationType.Incoming),
+            )
+        }
         verify { mockNotificationManager.notify(notificationId, any()) }
     }
 
