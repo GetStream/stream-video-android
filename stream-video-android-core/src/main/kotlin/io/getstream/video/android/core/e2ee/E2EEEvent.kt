@@ -52,15 +52,34 @@ public data class E2EEEvent(
  * WebRTC build than this SDK was compiled against.
  */
 public enum class E2EEEventType {
+    /** A remote frame could not be decrypted, usually because its key is missing or incorrect. */
     DECRYPTION_FAILED,
+
+    /** A remote track successfully decrypted again after reporting [DECRYPTION_FAILED]. */
     DECRYPTION_RESUMED,
+
+    /** Consecutive decryption failures crossed the native tolerance and the track stopped rendering. */
     DECRYPTION_STALLED,
+
+    /** An outgoing frame could not be encrypted and was not sent. */
     ENCRYPTION_FAILED,
+
+    /** A key required to encrypt local media or decrypt remote media is not available. */
     MISSING_KEY,
+
+    /** A remote frame had no E2EE trailer and was passed to the decoder as cleartext. */
     UNENCRYPTED_FRAME,
+
+    /** A remote frame used an unsupported E2EE format version and was dropped. */
     UNSUPPORTED_VERSION,
+
+    /** A key inventory requested through [StreamEncryptionManager.requestKeyState]. */
     KEY_STATE,
+
+    /** Periodic encryption timings enabled through [StreamEncryptionManager.enablePerformanceReporting]. */
     PERF_REPORT,
+
+    /** An event type added by a native WebRTC version newer than this SDK understands. */
     UNKNOWN,
 }
 

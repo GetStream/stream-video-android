@@ -26,6 +26,7 @@ import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.e2ee.E2EEEventType
 import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
@@ -212,6 +213,24 @@ class CallLobbyViewModel @Inject constructor(
         }.getOrElse { return Result.failure(it) }
         val created = StreamEncryptionManager.create(call.user.id)
             .getOrElse { return Result.failure(it) }
+        created.setEventListener { event ->
+            val message = "Native E2EE event: $event"
+            when (event.type) {
+                E2EEEventType.DECRYPTION_RESUMED -> Log.i("CallLobbyViewModel", message)
+                E2EEEventType.KEY_STATE,
+                E2EEEventType.PERF_REPORT,
+                -> Log.d("CallLobbyViewModel", message)
+                E2EEEventType.DECRYPTION_FAILED,
+                E2EEEventType.DECRYPTION_STALLED,
+                E2EEEventType.ENCRYPTION_FAILED,
+                E2EEEventType.MISSING_KEY,
+                E2EEEventType.UNENCRYPTED_FRAME,
+                E2EEEventType.UNSUPPORTED_VERSION,
+                E2EEEventType.UNKNOWN,
+                -> Log.w("CallLobbyViewModel", message)
+            }
+        }
+        created.enablePerformanceReporting(true)
         created.setSharedKey(E2EE_KEY_INDEX, key)
         val attached = call.setE2EEManager(created)
         if (attached.isFailure) {

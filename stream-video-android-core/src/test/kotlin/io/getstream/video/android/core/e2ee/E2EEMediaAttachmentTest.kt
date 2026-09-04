@@ -354,6 +354,23 @@ class E2EEMediaAttachmentTest {
     }
 
     @Test
+    fun `subscriber attaches a new decryptor when a removed track is re-added`() = runTest {
+        val manager = RecordingE2EEManager()
+        val firstReceiver = stubReceiverFor("remote-audio")
+        val subscriber = subscriberWith(manager) { "alice" }
+        val firstStream = audioStreamFor("their-prefix", "remote-audio")
+
+        subscriber.setTrackLookupPrefixes(mapOf("their-prefix" to "their-session"))
+        subscriber.onNewStream(firstStream)
+        subscriber.onRemoveStream(firstStream)
+
+        val secondReceiver = stubReceiverFor("remote-audio")
+        subscriber.onNewStream(audioStreamFor("their-prefix", "remote-audio"))
+
+        assertEquals(listOf(firstReceiver, secondReceiver), manager.decrypted.map { it.first })
+    }
+
+    @Test
     fun `subscriber retries a track when decryptor attachment fails`() = runTest {
         val manager = RecordingE2EEManager(decryptFailuresRemaining = 1)
         stubReceiverFor("remote-audio")

@@ -637,6 +637,7 @@ internal class Subscriber(
         // Process audio tracks
         stream.audioTracks.forEach { track ->
             val trackId = track.id()
+            removeDecryptorTracking(trackId)
             val sessionId = trackIdToParticipant[trackId]
             val trackType = trackIdToTrackType[trackId]
 
@@ -664,6 +665,7 @@ internal class Subscriber(
         // Process video tracks
         stream.videoTracks.forEach { track ->
             val trackId = track.id()
+            removeDecryptorTracking(trackId)
             val sessionId = trackIdToParticipant[trackId]
             val trackType = trackIdToTrackType[trackId]
 
@@ -709,6 +711,9 @@ internal class Subscriber(
      */
     private fun attachDecryptor(trackId: String, sessionId: String, trackType: TrackType) {
         val manager = e2eeManager ?: return
+        // A track may be delivered more than once. Installing another native decryptor on the
+        // same active receiver is not guaranteed to be idempotent, so claim the track atomically.
+        // Removal and failed attachment clear this claim, allowing a replacement receiver or retry.
         if (!decryptedTrackIds.add(trackId)) return
 
         val userId = userIdForSession(sessionId)
@@ -758,6 +763,11 @@ internal class Subscriber(
 
     private fun receiverForTrack(trackId: String) = safeCallWithDefault(null) {
         connection.transceivers?.firstOrNull { it.receiver?.track()?.id() == trackId }?.receiver
+    }
+
+    private fun removeDecryptorTracking(trackId: String) {
+        pendingDecryptors.remove(trackId)
+        decryptedTrackIds.remove(trackId)
     }
 
     // endregion
