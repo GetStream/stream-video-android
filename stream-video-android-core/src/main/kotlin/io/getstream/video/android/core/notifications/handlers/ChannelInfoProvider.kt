@@ -25,6 +25,10 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.video.android.core.utils.safeCall
 
+internal fun shouldNotificationOwnIncomingRingtone(
+    notificationRingtoneEnabled: Boolean,
+): Boolean = notificationRingtoneEnabled
+
 /**
  * Provides a way to create a custom channel for the notification.
  *

@@ -19,10 +19,16 @@ package io.getstream.video.android.core.notifications.handlers
 import android.app.Notification
 import io.getstream.video.android.core.RingingState
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class IncomingCallNotificationAlertTest {
+
+    @Test
+    fun `disabled configuration keeps legacy ringtone ownership`() {
+        assertFalse(shouldNotificationOwnIncomingRingtone(false))
+    }
 
     @Test
     fun `ringing notification loops and can alert again`() {

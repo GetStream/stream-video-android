@@ -111,21 +111,25 @@ public open class DefaultNotificationHandler(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        val streamVideo = StreamVideo.instance()
+        val streamVideo = StreamVideo.instance() as StreamVideoClient
+        val notificationPreparer = IncomingCallNotificationPreparer(streamVideo)
         streamVideo.state.serviceLauncher.showIncomingCall(
             callId,
             callDisplayName,
             streamVideo.state.callConfigRegistry.get(callId.type),
             isVideo = isVideoCall(callId, payload),
             payload = payload,
-            notificationProvider = {
+            notificationProvider = { owner ->
+                val ringingState = RingingState.Incoming()
                 getRingingCallNotification(
-                    RingingState.Incoming(),
+                    ringingState,
                     callId,
                     callDisplayName,
                     shouldHaveContentIntent = true,
                     payload,
-                )
+                )?.let { notification ->
+                    notificationPreparer.prepare(notification, owner, ringingState)
+                }
             },
         )
     }
