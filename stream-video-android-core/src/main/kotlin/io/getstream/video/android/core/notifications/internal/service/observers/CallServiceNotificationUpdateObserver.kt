@@ -50,6 +50,7 @@ internal class CallServiceNotificationUpdateObserver(
 ) {
 
     private val logger by taggedLogger("NotificationUpdateObserver")
+
     private suspend fun delayIncomingRingingNotificationUpdate() {
         val delayMillis = streamVideo.streamNotificationManager
             .notificationConfig
