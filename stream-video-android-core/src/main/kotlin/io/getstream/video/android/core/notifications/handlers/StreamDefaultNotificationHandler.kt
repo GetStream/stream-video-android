@@ -25,6 +25,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
 import android.os.Build
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
@@ -47,6 +48,7 @@ import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
+import io.getstream.video.android.core.notifications.IncomingCallNotificationPreparer
 import io.getstream.video.android.core.notifications.IncomingNotificationAction
 import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
@@ -59,6 +61,7 @@ import io.getstream.video.android.core.notifications.extractor.DefaultNotificati
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.style.StyleProvider
 import io.getstream.video.android.core.utils.BackgroundRestrictions
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
@@ -166,7 +169,8 @@ constructor(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        val streamVideo = StreamVideo.instance()
+        val streamVideo = StreamVideo.instance() as StreamVideoClient
+        val notificationPreparer = IncomingCallNotificationPreparer(streamVideo)
         if (shouldShowIncomingCallNotification(
                 (streamVideo as StreamVideoClient).callBusyHandler,
                 callId.cid,
@@ -181,13 +185,18 @@ constructor(
                     streamVideo.state.callConfigRegistry.get(callId.type),
                     isVideo = isVideoCall(callId, payload),
                     payload = payload,
-                    notification = getRingingCallNotification(
-                        RingingState.Incoming(),
-                        callId,
-                        callDisplayName,
-                        shouldHaveContentIntent = true,
-                        payload,
-                    ),
+                    notificationProvider = { owner ->
+                        val ringingState = RingingState.Incoming()
+                        getRingingCallNotification(
+                            ringingState,
+                            callId,
+                            callDisplayName,
+                            shouldHaveContentIntent = true,
+                            payload,
+                        )?.let { notification ->
+                            notificationPreparer.prepare(notification, owner, ringingState)
+                        }
+                    },
                 )
             }
         }
@@ -469,7 +478,7 @@ constructor(
             else -> notificationChannels.incomingCallChannel
         }
 
-        return ensureChannelAndBuildNotification(notificationChannel) {
+        return ensureIncomingCallChannelAndBuildNotification(notificationChannel) {
             priority = if (hideRingingNotificationInForeground) {
                 NotificationCompat.PRIORITY_LOW
             } else {
@@ -1234,6 +1243,31 @@ constructor(
         return NotificationCompat.Builder(application, channelInfo.id).let(builder).build()
     }
 
+    private inline fun ensureIncomingCallChannelAndBuildNotification(
+        channelInfo: StreamNotificationChannelInfo,
+        builder: NotificationCompat.Builder.() -> NotificationCompat.Builder,
+    ): Notification {
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+        if (isAndroid17OrHigher() && streamVideo != null) {
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+            val vibrationPattern = streamVideo.vibrationConfig
+                .takeIf { it.enabled }
+                ?.vibratePattern
+            channelInfo.createRingingChannel(
+                manager = notificationManager,
+                soundUri = streamVideo.sounds.ringingConfig.incomingCallSoundUri,
+                audioAttributes = audioAttributes,
+                vibrationPattern = vibrationPattern,
+            )
+        } else {
+            channelInfo.create(notificationManager)
+        }
+        return NotificationCompat.Builder(application, channelInfo.id).let(builder).build()
+    }
+
     @OptIn(ExperimentalStreamVideoApi::class)
     internal fun mediaSession(callId: StreamCallId) = mediaSessionController.provideMediaSession(
         application,
@@ -1254,4 +1288,22 @@ constructor(
         val call = StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
         return call?.isVideoEnabled() == true
     }
+}
+
+/**
+ * Updates how an incoming-call notification alerts the user.
+ *
+ * While the call is unanswered, the notification keeps ringing. After the user accepts the call,
+ * ringing is stopped and later notification updates are prevented from starting the sound again.
+ * Any unrelated notification flags are kept unchanged.
+ */
+internal fun incomingCallNotificationFlags(
+    currentFlags: Int,
+    ringingState: RingingState.Incoming,
+): Int = if (ringingState.acceptedByMe) {
+    val withoutInsistent = currentFlags and Notification.FLAG_INSISTENT.inv()
+    withoutInsistent or Notification.FLAG_ONLY_ALERT_ONCE
+} else {
+    val withoutOnlyAlertOnce = currentFlags and Notification.FLAG_ONLY_ALERT_ONCE.inv()
+    withoutOnlyAlertOnce or Notification.FLAG_INSISTENT
 }

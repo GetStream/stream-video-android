@@ -16,12 +16,19 @@
 
 package io.getstream.video.android.core.utils
 
-import android.os.Build
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
-// Polyfills for Build.VERSION_CODES values not yet available at the current compileSdk.
-// TODO: delete each once compileSdk covers it, replacing usages with the real constant.
-internal const val BUILD_VERSION_CODES_BAKLAVA = 36 // Build.VERSION_CODES.BAKLAVA — needs compileSdk 36
-internal const val BUILD_VERSION_CODES_CINNAMON_BUN = 37 // Build.VERSION_CODES.CINNAMON_BUN — needs compileSdk 37
+class AndroidVersionCodesTest {
 
-internal fun isAndroid17OrHigher(sdkInt: Int = Build.VERSION.SDK_INT): Boolean =
-    sdkInt >= BUILD_VERSION_CODES_CINNAMON_BUN
+    @Test
+    fun `SDK below Android 17 is not Android 17 or higher`() {
+        assertFalse(isAndroid17OrHigher(BUILD_VERSION_CODES_CINNAMON_BUN - 1))
+    }
+
+    @Test
+    fun `Android 17 SDK is Android 17 or higher`() {
+        assertTrue(isAndroid17OrHigher(BUILD_VERSION_CODES_CINNAMON_BUN))
+    }
+}
