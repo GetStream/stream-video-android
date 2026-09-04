@@ -19007,3 +19007,4 @@ public final class stream/video/sfu/signal/VideoMuteChanged : com/squareup/wire/
 
 public final class stream/video/sfu/signal/VideoMuteChanged$Companion {
 }
+
