@@ -21,12 +21,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.app.NotificationManagerCompat
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 
 internal class DismissNotificationActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        NotificationManagerCompat.from(this)
-            .cancel(intent.getIntExtra(KEY_NOTIFICATION_ID, 0))
+        // On Android 17 the full-screen trampoline must not cancel the notification that owns
+        // the incoming ringtone. Accept/reject handling remains responsible for dismissing it.
+        if (!isAndroid17OrHigher()) {
+            NotificationManagerCompat.from(this)
+                .cancel(intent.getIntExtra(KEY_NOTIFICATION_ID, 0))
+        }
         finish()
     }
 
