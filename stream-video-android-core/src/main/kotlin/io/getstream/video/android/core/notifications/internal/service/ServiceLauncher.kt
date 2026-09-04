@@ -47,6 +47,7 @@ import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.
 import io.getstream.video.android.core.notifications.internal.service.incomingcallcoordinator.Android17IncomingCallCoordinator
 import io.getstream.video.android.core.notifications.internal.service.incomingcallcoordinator.IncomingCallCoordinator
 import io.getstream.video.android.core.notifications.internal.service.incomingcallcoordinator.PreAndroid17IncomingCallCoordinator
+import io.getstream.video.android.core.notifications.internal.service.models.ServiceRoute
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomPermissions
@@ -120,6 +121,7 @@ internal class ServiceLauncher(val context: Context, val client: StreamVideoClie
                 callServiceConfiguration = callConfig,
             ),
         )
+
         ContextCompat.startForegroundService(context, serviceIntent)
     }
 
@@ -138,7 +140,7 @@ internal class ServiceLauncher(val context: Context, val client: StreamVideoClie
                 callServiceConfiguration = callConfig,
             ),
         )
-
+        call.state.updateServiceRoute(ServiceRoute.LEGACY_CALL_SERVICE)
         ContextCompat.startForegroundService(context, serviceIntent)
 
         /**

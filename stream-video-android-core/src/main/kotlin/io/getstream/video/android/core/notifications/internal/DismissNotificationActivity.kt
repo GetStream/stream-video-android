@@ -19,10 +19,9 @@ package io.getstream.video.android.core.notifications.internal
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.core.app.NotificationManagerCompat
-import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 
 internal class DismissNotificationActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,7 +29,7 @@ internal class DismissNotificationActivity : Activity() {
         /**
          * Removing this line is needed else ringing notification will get muted
          */
-        if (Build.VERSION.SDK_INT < BUILD_VERSION_CODES_CINNAMON_BUN) {
+        if (!isAndroid17OrHigher()) {
             NotificationManagerCompat.from(this)
                 .cancel(intent.getIntExtra(KEY_NOTIFICATION_ID, 0))
         }

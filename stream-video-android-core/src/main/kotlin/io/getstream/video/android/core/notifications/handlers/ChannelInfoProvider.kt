@@ -25,14 +25,14 @@ import androidx.annotation.StringRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.video.android.core.R
-import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.core.utils.safeCall
 
 @StringRes
 internal fun defaultIncomingCallChannelIdRes(
     sdkInt: Int = Build.VERSION.SDK_INT,
 ): Int =
-    if (sdkInt >= BUILD_VERSION_CODES_CINNAMON_BUN) {
+    if (isAndroid17OrHigher(sdkInt)) {
         R.string.stream_video_incoming_call_ringing_notification_channel_id
     } else {
         R.string.stream_video_incoming_call_notification_channel_id
@@ -42,7 +42,7 @@ internal fun defaultIncomingCallChannelIdRes(
 internal fun defaultIncomingCallLowImportanceChannelIdRes(
     sdkInt: Int = Build.VERSION.SDK_INT,
 ): Int =
-    if (sdkInt >= BUILD_VERSION_CODES_CINNAMON_BUN) {
+    if (isAndroid17OrHigher(sdkInt)) {
         R.string.stream_video_incoming_call_ringing_low_priority_notification_channel_id
     } else {
         R.string.stream_video_incoming_call_low_priority_notification_channel_id
@@ -53,7 +53,7 @@ internal fun shouldNotificationOwnIncomingRingtone(
     telecomFirstEnabled: Boolean = false,
     sdkInt: Int = Build.VERSION.SDK_INT,
 ): Boolean =
-    sdkInt >= BUILD_VERSION_CODES_CINNAMON_BUN ||
+    isAndroid17OrHigher(sdkInt) ||
         telecomFirstEnabled ||
         notificationRingtoneEnabled
 

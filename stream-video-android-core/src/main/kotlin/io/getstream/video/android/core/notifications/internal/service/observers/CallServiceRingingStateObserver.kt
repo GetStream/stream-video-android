@@ -37,10 +37,6 @@ internal class CallServiceRingingStateObserver(
 ) {
     private val logger by taggedLogger("RingingStateObserver")
 
-    private companion object {
-        const val TELECOM_REGISTRATION_TIMEOUT_MS = 5_000L
-    }
-
     /**
      * Starts observing ringing state changes.
      */

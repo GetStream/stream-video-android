@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import android.app.Notification
 import android.content.Context
-import android.os.Build
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.log.AndroidStreamLogger
@@ -49,7 +48,7 @@ import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
 import io.getstream.video.android.core.sounds.disableVibrationConfig
 import io.getstream.video.android.core.sounds.toSounds
 import io.getstream.video.android.core.user.StreamUserRepositoryImpl
-import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -178,8 +177,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private var wssUrl: String? = null
     internal var debugUseNotificationRingtoneForIncomingCalls: Boolean = true
         private set
-    internal var debugUseTelecomFirstForIncomingCalls: Boolean =
-        Build.VERSION.SDK_INT >= BUILD_VERSION_CODES_CINNAMON_BUN
+    internal var debugUseTelecomFirstForIncomingCalls: Boolean = isAndroid17OrHigher()
         private set
     private var incomingCallNotificationUpdateComparator: NotificationUpdateComparator =
         DefaultNotificationUpdateComparator

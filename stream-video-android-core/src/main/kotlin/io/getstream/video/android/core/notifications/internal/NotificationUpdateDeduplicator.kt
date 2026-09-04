@@ -17,12 +17,11 @@
 package io.getstream.video.android.core.notifications.internal
 
 import android.app.Notification
-import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationUpdateComparator
-import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 
 internal class NotificationUpdateDeduplicator(
     private val comparator: NotificationUpdateComparator,
@@ -58,7 +57,4 @@ internal class NotificationUpdateDeduplicator(
             false
         }
     }
-
-    private fun isAndroid17OrHigher(): Boolean =
-        Build.VERSION.SDK_INT >= BUILD_VERSION_CODES_CINNAMON_BUN
 }

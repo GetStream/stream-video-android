@@ -16,7 +16,12 @@
 
 package io.getstream.video.android.core.utils
 
+import android.os.Build
+
 // Polyfills for Build.VERSION_CODES values not yet available at the current compileSdk.
 // TODO: delete each once compileSdk covers it, replacing usages with the real constant.
 internal const val BUILD_VERSION_CODES_BAKLAVA = 36 // Build.VERSION_CODES.BAKLAVA — needs compileSdk 36
 internal const val BUILD_VERSION_CODES_CINNAMON_BUN = 35 // Build.VERSION_CODES.CINNAMON_BUN — needs compileSdk 37 TODO Revert it back to 37
+
+internal fun isAndroid17OrHigher(sdkInt: Int = Build.VERSION.SDK_INT): Boolean =
+    sdkInt >= BUILD_VERSION_CODES_CINNAMON_BUN
