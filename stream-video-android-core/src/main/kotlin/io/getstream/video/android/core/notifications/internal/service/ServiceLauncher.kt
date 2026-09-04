@@ -40,6 +40,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.internal.Throttler
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
@@ -84,7 +85,7 @@ internal class ServiceLauncher(
         callServiceConfiguration: CallServiceConfig,
         isVideo: Boolean,
         payload: Map<String, Any?>,
-        notification: Notification?,
+        notificationProvider: (IncomingRingtoneOwner) -> Notification?,
     ) {
         incomingCallCoordinator.showIncomingCall(
             IncomingCallRequest(
@@ -93,7 +94,7 @@ internal class ServiceLauncher(
                 callServiceConfiguration = callServiceConfiguration,
                 isVideo = isVideo,
                 payload = payload,
-                notification = notification,
+                notificationProvider = notificationProvider,
             ),
         )
     }
