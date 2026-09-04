@@ -86,7 +86,7 @@ class ClientState(private val client: StreamVideo) {
     public val activeCall: StateFlow<Call?> = _activeCall
 
     public val callConfigRegistry = (client as StreamVideoClient).callServiceConfigRegistry
-    private val serviceLauncher = ServiceLauncher(client.context)
+    internal val serviceLauncher = ServiceLauncher(client.context, streamVideoClient)
 
     internal val clientEventReporter = (client as StreamVideoClient).analytics.clientEventReporter
 
@@ -293,13 +293,11 @@ class ClientState(private val client: StreamVideo) {
             CallService.TRIGGER_ONGOING_CALL -> serviceLauncher.showOnGoingCall(
                 call,
                 trigger,
-                streamVideoClient,
             )
 
             CallService.TRIGGER_OUTGOING_CALL -> serviceLauncher.showOutgoingCall(
                 call,
                 trigger,
-                streamVideoClient,
             )
 
             else -> {}
@@ -312,10 +310,7 @@ class ClientState(private val client: StreamVideo) {
     internal fun maybeStopForegroundService(call: Call) {
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
         if (callConfig.runCallServiceInForeground) {
-            val context = streamVideoClient.context
-
             logger.d { "Building stop intent for call_id: ${call.cid}" }
-            val serviceLauncher = ServiceLauncher(context)
             serviceLauncher.stopService(call)
         }
     }
