@@ -62,6 +62,17 @@ internal class IncomingCallPresenter(private val client: StreamVideo, private va
         return result
     }
 
+    fun showIncomingCallNotification(
+        context: Context,
+        callId: StreamCallId,
+        notification: Notification?,
+    ): ShowIncomingCallResult = showNotification(
+        context = context,
+        notification = notification,
+        callId = callId,
+        error = null,
+    )
+
     // ----------------------------------
     // Decision branches
     // ----------------------------------
