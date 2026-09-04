@@ -129,6 +129,7 @@ class CallServiceNotificationUpdateObserverTest {
 
         streamVideo = mockk {
             every { state } returns streamState
+            every { debugUseNotificationRingtoneForIncomingCalls } returns false
             coEvery { onCallNotificationUpdate(call) } returns notification
             every { this@mockk.streamNotificationManager } returns streamNotificationManager
         }

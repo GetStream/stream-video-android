@@ -22,6 +22,7 @@ import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.model.StreamCallId
 
 class DefaultNotificationDispatcher private constructor(
@@ -43,8 +44,27 @@ class DefaultNotificationDispatcher private constructor(
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun notify(streamCallId: StreamCallId, id: Int, notification: Notification) {
         logger.d { "[notify] callId: ${streamCallId.id}, notificationId: $id" }
-        streamVideoProvider()?.call(streamCallId.type, streamCallId.id)
-            ?.state?.updateNotification(id, notification)
+        val streamVideo = streamVideoProvider()
+        val streamVideoClient = streamVideo as? StreamVideoClient
+        val call = streamVideo?.call(streamCallId.type, streamCallId.id)
+        if (streamVideoClient != null && call != null) {
+            val callState = call.state
+            val ringingState = callState.ringingState.value
+            if (streamVideoClient.streamNotificationManager.notificationUpdateDeduplicator.isDuplicate(
+                    call = call,
+                    ringingState = ringingState,
+                    existingNotificationId = callState.notificationIdFlow.value,
+                    existingNotification = callState.atomicNotification.get(),
+                    updatedNotificationId = id,
+                    updatedNotification = notification,
+                )
+            ) {
+                logger.d { "[notify] Skipping equivalent incoming-call notification update" }
+                return
+            }
+        }
+
+        call?.state?.updateNotification(id, notification)
 
         notificationManager.notify(id, notification)
     }
