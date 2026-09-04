@@ -14,21 +14,10 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.service.incomingcallcoordinator
+package io.getstream.video.android.core.notifications.internal.service.models
 
-import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
-import io.getstream.video.android.core.notifications.internal.service.IncomingCallRequest
-import io.getstream.video.android.model.StreamCallId
-
-internal interface IncomingCallCoordinator {
-
-    fun showIncomingCall(request: IncomingCallRequest)
-
-    fun dismissIncomingCall(
-        callId: StreamCallId,
-        config: CallServiceConfig,
-    )
-
-    fun finishIncomingCall(call: Call)
+internal enum class ServiceRoute {
+    UNDECIDED,
+    LEGACY_CALL_SERVICE,
+    TELECOM,
 }

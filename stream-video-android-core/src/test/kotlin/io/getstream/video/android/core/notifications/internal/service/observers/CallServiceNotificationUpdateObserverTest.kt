@@ -164,7 +164,7 @@ class CallServiceNotificationUpdateObserverTest {
 
     @Test
     fun `incoming ringing state starts incoming foreground notification`() = runTest {
-        observer.observe(context)
+        observer.observe()
 
         ringingStateFlow.value = RingingState.Incoming()
         advanceUntilIdle()
@@ -265,7 +265,7 @@ class CallServiceNotificationUpdateObserverTest {
 
     @Test
     fun `outgoing ringing state starts outgoing foreground notification`() = runTest {
-        observer.observe(context)
+        observer.observe()
         advanceUntilIdle()
 
         ringingStateFlow.value = RingingState.Outgoing()
@@ -289,7 +289,7 @@ class CallServiceNotificationUpdateObserverTest {
         every { streamVideo.getStreamNotificationDispatcher() } returns notificationDispatcher
         coEvery { streamVideo.onCallNotificationUpdate(call) } returns mockNotification
 
-        observer.observe(context)
+        observer.observe()
 
         advanceUntilIdle()
 
@@ -313,7 +313,7 @@ class CallServiceNotificationUpdateObserverTest {
     fun `no notification generated does not start foreground service`() = runTest {
         coEvery { streamVideo.onCallNotificationUpdate(call) } returns null
 
-        observer.observe(context)
+        observer.observe()
         advanceUntilIdle()
 
         ringingStateFlow.value = RingingState.Incoming()
