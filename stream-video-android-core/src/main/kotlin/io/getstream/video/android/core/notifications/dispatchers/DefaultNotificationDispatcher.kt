@@ -21,7 +21,9 @@ import android.app.Notification
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.model.StreamCallId
 
 class DefaultNotificationDispatcher(
@@ -33,9 +35,33 @@ class DefaultNotificationDispatcher(
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun notify(streamCallId: StreamCallId, id: Int, notification: Notification) {
         logger.d { "[notify] callId: ${streamCallId.id}, notificationId: $id" }
-        StreamVideo.instanceOrNull()?.call(streamCallId.type, streamCallId.id)
-            ?.state?.updateNotification(id, notification)
-
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+        val call = streamVideo?.call(streamCallId.type, streamCallId.id)
+        if (shouldSkipNotification(streamVideo, call, id, notification)) return
+        call?.state?.updateNotification(id, notification)
         notificationManager.notify(id, notification)
+    }
+
+    private fun shouldSkipNotification(
+        streamVideo: StreamVideoClient?,
+        call: Call?,
+        notificationId: Int,
+        notification: Notification,
+    ): Boolean {
+        if (streamVideo == null || call == null) return false
+        val callState = call.state
+        val isDuplicate =
+            streamVideo.streamNotificationManager.notificationUpdateDeduplicator.isDuplicate(
+                call = call,
+                ringingState = callState.ringingState.value,
+                existingNotificationId = callState.notificationIdFlow.value,
+                existingNotification = callState.atomicNotification.get(),
+                updatedNotificationId = notificationId,
+                updatedNotification = notification,
+            )
+        if (isDuplicate) {
+            logger.d { "[notify] Skipping equivalent incoming-call notification update" }
+        }
+        return isDuplicate
     }
 }
