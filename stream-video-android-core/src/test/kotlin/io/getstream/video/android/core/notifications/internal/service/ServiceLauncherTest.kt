@@ -158,7 +158,7 @@ class ServiceLauncherTest {
             callServiceConfiguration = callServiceConfig,
             isVideo = true,
             payload = emptyMap(),
-            notification = notification,
+            notificationProvider = { notification },
         )
         testScheduler.advanceUntilIdle()
 
@@ -175,7 +175,7 @@ class ServiceLauncherTest {
             callServiceConfig,
             isVideo = false,
             payload = emptyMap(),
-            notification = notification,
+            notificationProvider = { notification },
         )
 
         coVerify(exactly = 0) { jetpackTelecomRepository.registerCall(any(), any(), any(), any()) }

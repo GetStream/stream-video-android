@@ -51,6 +51,7 @@ import io.getstream.video.android.core.notifications.dispatchers.NotificationDis
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -111,20 +112,26 @@ public open class DefaultNotificationHandler(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
-        val streamVideo = StreamVideo.instance()
+        val streamVideo = StreamVideo.instance() as StreamVideoClient
+        val notificationPreparer = IncomingCallNotificationPreparer(streamVideo)
         streamVideo.state.serviceLauncher.showIncomingCall(
             callId,
             callDisplayName,
             streamVideo.state.callConfigRegistry.get(callId.type),
             isVideo = isVideoCall(callId, payload),
             payload = payload,
-            notification = getRingingCallNotification(
-                RingingState.Incoming(),
-                callId,
-                callDisplayName,
-                shouldHaveContentIntent = true,
-                payload,
-            ),
+            notificationProvider = { owner ->
+                val ringingState = RingingState.Incoming()
+                getRingingCallNotification(
+                    ringingState,
+                    callId,
+                    callDisplayName,
+                    shouldHaveContentIntent = true,
+                    payload,
+                )?.let { notification ->
+                    notificationPreparer.prepare(notification, owner, ringingState)
+                }
+            },
         )
     }
 
@@ -406,6 +413,21 @@ public open class DefaultNotificationHandler(
                     }
                     this.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                     this.setShowBadge(true)
+                    val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+                    if (isAndroid17OrHigher() && streamVideo != null) {
+                        val audioAttributes = android.media.AudioAttributes.Builder()
+                            .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build()
+                        setSound(
+                            streamVideo.sounds.ringingConfig.incomingCallSoundUri,
+                            audioAttributes,
+                        )
+                        streamVideo.vibrationConfig
+                            .takeIf { it.enabled }
+                            ?.vibratePattern
+                            ?.let { vibrationPattern = it }
+                    }
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     this.setAllowBubbles(true)
