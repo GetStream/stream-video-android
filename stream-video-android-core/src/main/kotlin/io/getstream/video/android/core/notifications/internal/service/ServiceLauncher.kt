@@ -41,7 +41,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.Throttler
@@ -57,25 +56,26 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-internal class ServiceLauncher(val context: Context) {
+internal class ServiceLauncher(
+    val context: Context,
+    private val client: StreamVideoClient,
+) {
 
     private val logger by taggedLogger("ServiceTriggers")
     private val serviceIntentBuilder = ServiceIntentBuilder()
     private val incomingCallPresenter = IncomingCallPresenter(serviceIntentBuilder)
     private val telecomHelper = TelecomHelper()
     private val telecomPermissions = TelecomPermissions()
-    private val jetpackTelecomRepositoryProvider = JetpackTelecomRepositoryProvider(context)
+    private val jetpackTelecomRepositoryProvider = JetpackTelecomRepositoryProvider(client)
     private val throttler = Throttler()
 
     @SuppressLint("MissingPermission", "NewApi")
     fun showIncomingCall(
-        context: Context,
         callId: StreamCallId,
         callDisplayName: String?,
         callServiceConfiguration: CallServiceConfig,
         isVideo: Boolean,
         payload: Map<String, Any?>,
-        streamVideo: StreamVideo,
         notification: Notification?,
     ) {
         val result = incomingCallPresenter.showIncomingCall(
@@ -90,15 +90,15 @@ internal class ServiceLauncher(val context: Context) {
             if (telecomHelper.canUseJetpackTelecom()) {
                 when (result) {
                     ShowIncomingCallResult.FG_SERVICE -> {
-                        updateIncomingCallNotification(notification, streamVideo, callId)
+                        updateIncomingCallNotification(notification, callId)
 
                         val jetpackTelecomRepository = jetpackTelecomRepositoryProvider.get(callId)
 
-                        val appSchema = (streamVideo as StreamVideoClient).telecomConfig?.schema
+                        val appSchema = client.telecomConfig?.schema
                         val addressUri = "$appSchema:${callId.id}".toUri()
                         val formattedCallDisplayName = callDisplayName?.takeIf { it.isNotBlank() } ?: DEFAULT_CALL_TEXT
 
-                        val call = streamVideo.call(callId.type, callId.id)
+                        val call = client.call(callId.type, callId.id)
 
                         call.state.jetpackTelecomRepository = (jetpackTelecomRepository)
 
@@ -117,14 +117,12 @@ internal class ServiceLauncher(val context: Context) {
         }
     }
 
-    fun showOnGoingCall(call: Call, trigger: String, streamVideo: StreamVideo) {
-        val client = streamVideo as StreamVideoClient
+    fun showOnGoingCall(call: Call, trigger: String) {
         val callConfig = client.callServiceConfigRegistry.get(call.type)
         if (!callConfig.runCallServiceInForeground) {
             return
         }
         val callId = StreamCallId.fromCallCid(call.cid)
-        val context = client.context
         val serviceIntent = ServiceIntentBuilder().buildStartIntent(
             context,
             StartServiceParam(
@@ -137,8 +135,8 @@ internal class ServiceLauncher(val context: Context) {
     }
 
     @SuppressLint("NewApi")
-    fun showOutgoingCall(call: Call, trigger: String, streamVideo: StreamVideo) {
-        val callConfig = (streamVideo as StreamVideoClient).callServiceConfigRegistry.get(call.type)
+    fun showOutgoingCall(call: Call, trigger: String) {
+        val callConfig = client.callServiceConfigRegistry.get(call.type)
         if (!callConfig.runCallServiceInForeground) {
             return
         }
@@ -165,7 +163,7 @@ internal class ServiceLauncher(val context: Context) {
             if (telecomHelper.canUseJetpackTelecom()) {
                 val jetpackTelecomRepository = jetpackTelecomRepositoryProvider.get(callId)
 
-                val appSchema = streamVideo.telecomConfig?.schema
+                val appSchema = client.telecomConfig?.schema
                 val addressUri = "$appSchema:${callId.id}".toUri()
                 val formattedCallDisplayName =
                     callDisplayName?.takeIf { it.isNotBlank() } ?: DEFAULT_CALL_TEXT
@@ -199,18 +197,16 @@ internal class ServiceLauncher(val context: Context) {
      */
     private fun updateIncomingCallNotification(
         notification: Notification?,
-        streamVideo: StreamVideo,
         callId: StreamCallId,
     ) {
         notification?.let {
             val notificationId = callId.getNotificationId(NotificationType.Incoming)
-            streamVideo.call(callId.type, callId.id)
+            client.call(callId.type, callId.id)
                 .state.updateNotification(notificationId, notification)
         }
     }
 
     fun removeIncomingCall(
-        context: Context,
         callId: StreamCallId,
         config: CallServiceConfig = DefaultCallConfigurations.default,
     ) {
@@ -249,25 +245,18 @@ internal class ServiceLauncher(val context: Context) {
 
     private fun stopCallServiceInternal(call: Call) {
         logger.d { "[stopCallServiceInternal]" }
-        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
-        streamVideo?.let { streamVideoClient ->
-            val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
-            if (callConfig.runCallServiceInForeground) {
-                val context = streamVideoClient.context
-
-                val serviceIntent = serviceIntentBuilder.buildStopIntent(
-                    context,
-                    StopServiceParam(call, callConfig),
-                )
-                serviceIntent?.let {
-                    logger.d {
-                        "Building stop intent, class: ${serviceIntent.component?.className} for call_id: ${call.cid}"
-                    }
-                    serviceIntent.extras?.let {
-                        logBundle(it)
-                    }
-                    context.startService(serviceIntent)
+        val callConfig = client.callServiceConfigRegistry.get(call.type)
+        if (callConfig.runCallServiceInForeground) {
+            val serviceIntent = serviceIntentBuilder.buildStopIntent(
+                context,
+                StopServiceParam(call, callConfig),
+            )
+            serviceIntent?.let {
+                logger.d {
+                    "Building stop intent, class: ${serviceIntent.component?.className} for call_id: ${call.cid}"
                 }
+                serviceIntent.extras?.let { logBundle(it) }
+                context.startService(serviceIntent)
             }
         }
     }
