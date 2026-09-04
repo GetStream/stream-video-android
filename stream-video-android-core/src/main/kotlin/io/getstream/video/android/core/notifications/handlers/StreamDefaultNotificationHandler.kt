@@ -57,7 +57,6 @@ import io.getstream.video.android.core.notifications.dispatchers.DefaultNotifica
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
-import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.notifications.style.StyleProvider
 import io.getstream.video.android.core.utils.BackgroundRestrictions
 import io.getstream.video.android.core.utils.isAppInForeground
@@ -149,7 +148,6 @@ constructor(
     NotificationPermissionHandler by notificationPermissionHandler {
 
     private val logger by taggedLogger("Video:StreamNotificationHandler")
-    private val serviceLauncher = ServiceLauncher(application)
     private val styleProvider = StyleProvider(application)
     private val batteryRestrictions = BackgroundRestrictions(application)
 
@@ -177,14 +175,12 @@ constructor(
             val canRunService =
                 streamVideo.callServiceConfigRegistry.get(callId.type).runCallServiceInForeground
             if (canRunService) {
-                serviceLauncher.showIncomingCall(
-                    application,
+                streamVideo.state.serviceLauncher.showIncomingCall(
                     callId,
                     callDisplayName,
                     streamVideo.state.callConfigRegistry.get(callId.type),
                     isVideo = isVideoCall(callId, payload),
                     payload = payload,
-                    streamVideo,
                     notification = getRingingCallNotification(
                         RingingState.Incoming(),
                         callId,
