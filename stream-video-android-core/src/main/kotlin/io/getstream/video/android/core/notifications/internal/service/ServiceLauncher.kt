@@ -168,6 +168,21 @@ internal class ServiceLauncher(private val client: StreamVideoClient) {
         }
     }
 
+    /**
+     * Because we need to retrieve the notification
+     * in [io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessIncomingTelecomConnection]
+     */
+    private fun updateIncomingCallNotification(
+        notification: Notification?,
+        callId: StreamCallId,
+    ) {
+        notification?.let {
+            val notificationId = callId.getNotificationId(NotificationType.Incoming)
+            client.call(callId.type, callId.id)
+                .state.updateNotification(notificationId, notification)
+        }
+    }
+
     fun removeIncomingCall(
         callId: StreamCallId,
         config: CallServiceConfig = DefaultCallConfigurations.default,
