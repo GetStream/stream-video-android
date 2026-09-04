@@ -608,7 +608,16 @@ class MicrophoneManager(
             AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
         )
 
-    /** The current audio bitrate profile */
+    /**
+     * The audio bitrate profile currently in force — observe this to drive a music/voice toggle.
+     *
+     * Only moves when the profile actually took. Set before joining it always does, since the
+     * pipeline is then built from it. Set on a running call it moves only if every reachable stage
+     * accepted the change; if one did not, this keeps reporting the previous profile, so a toggle
+     * bound to it snaps back rather than claiming a switch the audio did not make.
+     *
+     * Which stage refused is on the [AudioProfileResult] returned by [setAudioBitrateProfile].
+     */
     val audioBitrateProfile: StateFlow<AudioBitrateProfile> = _audioBitrateProfile
 
     /**
@@ -977,7 +986,6 @@ class MicrophoneManager(
         }
 
         logger.i { "[setAudioBitrateProfile] Setting audio bitrate profile to: $profile" }
-        _audioBitrateProfile.value = profile
         // The profile decides how the audio device module and the audio sources are built, so
         // these have to follow it. Nothing else can move them.
         hardwareNoiseSuppressorEnabled = defaultHardwareAudioEffectsEnabled(profile)
@@ -989,7 +997,9 @@ class MicrophoneManager(
 
         if (!isJoined) {
             // Nothing is capturing or publishing yet, so there is no stage to move: the pipeline
-            // is built from the profile when the call joins, and the SFU picks the bitrate.
+            // is built from the profile when the call joins, and the SFU picks the bitrate. The
+            // profile is in force by construction, so it is published unconditionally here.
+            _audioBitrateProfile.value = profile
             return Result.success(
                 AudioProfileResult(
                     profile = profile,
@@ -1002,9 +1012,21 @@ class MicrophoneManager(
             )
         }
 
-        return Result.success(
-            applyProfileToRunningCall(profile, softwareAudioProcessingChanged),
-        )
+        val result = applyProfileToRunningCall(profile, softwareAudioProcessingChanged)
+        if (result.complete) {
+            _audioBitrateProfile.value = profile
+        } else {
+            // Every reachable stage did not move, so the audio is not what this profile means.
+            // Publishing it anyway is the failure the flow exists to catch: a toggle stuck on
+            // MUSIC while a suppressor is still eating the music looks exactly like success.
+            // Leaving the flow where it was makes a UI toggle snap back, which is the truth and
+            // lets the caller retry — the stages that did move are reported on [result], and the
+            // private stage state still follows the request, so a later source rebuild picks it up.
+            logger.w {
+                "[setAudioBitrateProfile] $profile only partly applied, not publishing it: $result"
+            }
+        }
+        return Result.success(result)
     }
 
     /**
@@ -1030,8 +1052,12 @@ class MicrophoneManager(
         val noiseCancellationApplied = !noiseCancellationReachable ||
             call.isAudioProcessingEnabled() == noiseCancellationWanted
 
+        // A device with no platform noise suppressor has nothing suppressing, so the profile is
+        // satisfied — the same rule as an absent noise-cancellation processor. The setter cannot
+        // tell the two apart: it returns false for "unsupported" and "refused" alike.
         val platformNoiseSuppressorApplied =
-            call.setHardwareNoiseSuppressorEnabled(hardwareNoiseSuppressorEnabled)
+            call.setHardwareNoiseSuppressorEnabled(hardwareNoiseSuppressorEnabled) ||
+                !call.isHardwareNoiseSuppressorSupported()
         if (!platformNoiseSuppressorApplied) {
             logger.w {
                 "[setAudioBitrateProfile] the platform did not take the noise suppressor " +

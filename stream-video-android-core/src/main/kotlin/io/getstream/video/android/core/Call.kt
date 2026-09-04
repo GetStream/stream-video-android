@@ -972,6 +972,15 @@ public class Call(
      */
     internal fun isAudioProcessingReachable(): Boolean = media.isAudioProcessingReachable()
 
+    /**
+     * Whether this device has a platform noise suppressor at all.
+     *
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile]: a device with no suppressor
+     * has nothing suppressing, which is not the same as a suppressor that refused.
+     */
+    internal fun isHardwareNoiseSuppressorSupported(): Boolean =
+        media.isHardwareNoiseSuppressorSupported()
+
     fun toggleAudioProcessing(): Boolean {
         // Reads without building a factory: the gate runs before join, and a factory created
         // there would capture the pre-join audio bitrate profile.

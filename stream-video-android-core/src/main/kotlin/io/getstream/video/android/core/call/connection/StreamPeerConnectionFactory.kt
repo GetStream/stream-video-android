@@ -244,6 +244,19 @@ public class StreamPeerConnectionFactory(
     }
 
     /**
+     * Whether this device has a platform noise suppressor at all.
+     *
+     * Separates "there is nothing to switch off" from "it refused", which
+     * [setHardwareNoiseSuppressorEnabled] cannot: it returns false for both. Callers reporting
+     * whether an audio profile took need the difference — on a device with no suppressor there is
+     * nothing suppressing, so the profile is satisfied, and calling that a failed stage would send
+     * every such device chasing a problem it does not have.
+     */
+    internal fun isHardwareNoiseSuppressorSupported(): Boolean = safeCallWithDefault(false) {
+        JavaAudioDeviceModule.isBuiltInNoiseSuppressorSupported()
+    }
+
+    /**
      * Re-applies [desiredHardwareNoiseSuppressorEnabled] to the recording session that has just
      * started. No-op when the caller never expressed a preference, so the builder default stands.
      */

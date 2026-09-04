@@ -382,6 +382,13 @@ internal class CallMediaManager(
         return _peerConnectionFactory?.setHardwareNoiseSuppressorEnabled(enabled) ?: false
     }
 
+    /**
+     * Whether this device has a platform noise suppressor at all. Never builds a factory — the
+     * answer is a device capability, not a property of this call.
+     */
+    fun isHardwareNoiseSuppressorSupported(): Boolean =
+        _peerConnectionFactory?.isHardwareNoiseSuppressorSupported() ?: false
+
     /** Forgets the wanted noise-suppressor state, so nothing is re-applied after the call ends. */
     fun resetDesiredHardwareNoiseSuppressor() {
         desiredHardwareNoiseSuppressorEnabled = null
