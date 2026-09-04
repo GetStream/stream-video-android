@@ -23,6 +23,7 @@ import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.RejectReason
+import io.getstream.video.android.core.notifications.handlers.shouldNotificationOwnIncomingRingtone
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.core.sounds.MutedRingingConfig
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
@@ -33,6 +34,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -72,6 +75,8 @@ class CallServiceRingingStateObserverTest {
     @Before
     fun setup() {
         Dispatchers.setMain(dispatcher)
+        mockkStatic("io.getstream.video.android.core.notifications.handlers.ChannelInfoProviderKt")
+        every { shouldNotificationOwnIncomingRingtone() } returns false
 
         callState = mockk {
             every { this@mockk.ringingState } returns ringingStateFlow
@@ -145,6 +150,20 @@ class CallServiceRingingStateObserverTest {
         advanceUntilIdle()
         advanceTimeBy(100L)
         verify { soundPlayer.stopCallSound() }
+    }
+
+    @Test
+    fun `notification owned incoming ringing does not use legacy sound or vibration`() = runTest {
+        every { shouldNotificationOwnIncomingRingtone() } returns true
+        observer.observe { }
+        advanceUntilIdle()
+        clearMocks(soundPlayer, answers = false)
+
+        ringingStateFlow.value = RingingState.Incoming(acceptedByMe = false)
+        advanceUntilIdle()
+
+        verify(exactly = 0) { soundPlayer.playCallSound(any(), any()) }
+        verify(exactly = 0) { soundPlayer.vibrate(any()) }
     }
 
     @Test
@@ -266,5 +285,8 @@ class CallServiceRingingStateObserverTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        unmockkStatic(
+            "io.getstream.video.android.core.notifications.handlers.ChannelInfoProviderKt",
+        )
     }
 }

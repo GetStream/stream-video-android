@@ -135,6 +135,21 @@ class TelecomPermissionsTest {
     }
 
     @Test
+    fun `canUseTelecom without call service config returns true when all platform conditions pass`() {
+        val client = mockk<StreamVideoClient> {
+            every { telecomConfig } returns mockk()
+        }
+        every { StreamVideo.instanceOrNull() } returns client
+        every { packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY) } returns true
+        every { telecomManager.defaultDialerPackage } returns "com.android.dialer"
+        every {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.MANAGE_OWN_CALLS)
+        } returns PackageManager.PERMISSION_GRANTED
+
+        assertTrue(telecomPermissions.canUseTelecom(context))
+    }
+
+    @Test
     fun `canUseTelecom returns false when telecom disabled in config`() {
         val result = telecomPermissions.canUseTelecom(
             callServiceConfig.copy(enableTelecom = false),
