@@ -70,8 +70,11 @@ class TelecomPermissions {
     private fun optedForTelecom() = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.telecomConfig != null
 
     fun canUseTelecom(callServiceConfig: CallServiceConfig, context: Context): Boolean {
-        return callServiceConfig.enableTelecom && optedForTelecom() && supportsTelecom(context) && hasPermissions(context)
+        return callServiceConfig.enableTelecom && canUseTelecom(context)
     }
+
+    internal fun canUseTelecom(context: Context): Boolean =
+        optedForTelecom() && supportsTelecom(context) && hasPermissions(context)
 
     fun supportsTelecom(context: Context): Boolean {
         val pm = context.packageManager

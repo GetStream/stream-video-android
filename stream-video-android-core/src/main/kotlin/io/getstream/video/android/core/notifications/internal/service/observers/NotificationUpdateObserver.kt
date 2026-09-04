@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.service.incomingcallcoordinator
+package io.getstream.video.android.core.notifications.internal.service.observers
 
-import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
-import io.getstream.video.android.core.notifications.internal.service.IncomingCallRequest
+import android.app.Notification
+import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.model.StreamCallId
 
-internal interface IncomingCallCoordinator {
-
-    fun showIncomingCall(request: IncomingCallRequest)
-
-    fun dismissIncomingCall(
-        callId: StreamCallId,
-        config: CallServiceConfig,
-    )
-
-    fun finishIncomingCall(call: Call)
+internal interface NotificationUpdateObserver {
+    fun observe()
+    suspend fun updateNotification()
+    fun showNotificationForState(ringingState: RingingState, notification: Notification)
+    fun showActiveCallNotification(callId: StreamCallId, notification: Notification)
+    fun showOutgoingCallNotification(callId: StreamCallId, notification: Notification)
+    fun showIncomingCallNotification(callId: StreamCallId, notification: Notification)
 }

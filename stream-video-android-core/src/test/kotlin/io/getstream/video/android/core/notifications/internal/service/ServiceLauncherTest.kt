@@ -30,6 +30,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomPermissions
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.coVerify
 import io.mockk.every
@@ -91,6 +92,7 @@ class ServiceLauncherTest {
         jetpackTelecomRepository = mockk(relaxed = true)
 
         mockkStatic(ContextCompat::class)
+        mockkStatic("io.getstream.video.android.core.utils.AndroidVersionCodesKt")
         mockkObject(StreamVideo)
         mockkConstructor(JetpackTelecomRepository::class)
         mockkConstructor(JetpackTelecomRepositoryProvider::class)
@@ -122,6 +124,7 @@ class ServiceLauncherTest {
         every { StreamVideo.instanceOrNull() } returns streamVideo
         every { StreamVideo.instance() } returns streamVideo
         every { jetpackTelecomRepositoryProvider.get(any()) } returns jetpackTelecomRepository
+        every { isAndroid17OrHigher() } returns false
 
         serviceLauncher = ServiceLauncher(context, streamVideo)
     }
@@ -135,6 +138,37 @@ class ServiceLauncherTest {
     // region showIncomingCall()
 
     @Test
+    fun `showIncomingCall registers Telecom first on Android 17`() = runTest {
+        val call = mockk<Call>(relaxed = true)
+        every { isAndroid17OrHigher() } returns true
+        every { anyConstructed<TelecomPermissions>().canUseTelecom(context) } returns true
+        every { streamVideo.call(any(), any()) } returns call
+        every { call.scope } returns TestScope(StandardTestDispatcher(testScheduler))
+        every { call.state.jetpackTelecomRepository } returns null
+
+        serviceLauncher.showIncomingCall(
+            callId = callId,
+            callDisplayName = "Test Caller",
+            callServiceConfiguration = callServiceConfig,
+            isVideo = true,
+            payload = emptyMap(),
+            notificationProvider = { notification },
+        )
+        testScheduler.advanceUntilIdle()
+
+        coVerify {
+            jetpackTelecomRepository.registerCall(
+                any(),
+                any(),
+                true,
+                true,
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
     fun `showIncomingCall starts telecom registration when all conditions pass`() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
         val testScope = TestScope(testDispatcher)
@@ -142,6 +176,7 @@ class ServiceLauncherTest {
         val call = mockk<Call>(relaxed = true)
         every { streamVideo.call(any(), any()) } returns call
         every { call.state } returns mockk(relaxed = true)
+        every { call.state.jetpackTelecomRepository } returns null
         every { call.scope } returns testScope
 
         mockkStatic(ContextCompat::class)

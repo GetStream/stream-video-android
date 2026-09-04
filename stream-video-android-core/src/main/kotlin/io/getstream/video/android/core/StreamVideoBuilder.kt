@@ -48,6 +48,7 @@ import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
 import io.getstream.video.android.core.sounds.disableVibrationConfig
 import io.getstream.video.android.core.sounds.toSounds
 import io.getstream.video.android.core.user.StreamUserRepositoryImpl
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserToken
@@ -318,7 +319,11 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             enableStatsCollection = enableStatsReporting,
             vibrationConfig = vibrationConfig,
             enableStereoForSubscriber = enableStereoForSubscriber,
-            telecomConfig = telecomConfig,
+            telecomConfig = telecomConfig ?: if (isAndroid17OrHigher()) {
+                TelecomConfig(context.packageName)
+            } else {
+                null
+            },
             tokenRepository = tokenRepository,
             rejectCallWhenBusy = rejectCallWhenBusy,
         )

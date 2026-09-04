@@ -23,8 +23,8 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.RejectReason
+import io.getstream.video.android.core.notifications.handlers.shouldNotificationOwnIncomingRingtone
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
-import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -67,7 +67,7 @@ internal class CallServiceRingingStateObserver(
      */
     private fun handleIncomingState(state: RingingState.Incoming) {
         if (!state.acceptedByMe) {
-            if (isAndroid17OrHigher()) {
+            if (shouldNotificationOwnIncomingRingtone()) {
                 return
             }
 
