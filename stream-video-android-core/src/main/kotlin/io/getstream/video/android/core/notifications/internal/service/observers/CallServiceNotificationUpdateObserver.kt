@@ -26,8 +26,11 @@ import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.permissions.ForegroundServicePermissionManager
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -48,6 +51,16 @@ internal class CallServiceNotificationUpdateObserver(
 ) {
 
     private val logger by taggedLogger("NotificationUpdateObserver")
+    private val incomingRingingNotificationStabilization by lazy {
+        scope.async {
+            val delayMillis = streamVideo.streamNotificationManager
+                .notificationConfig
+                .incomingRingingNotificationUpdateDelayMillis
+            if (delayMillis > 0 && call.state.notificationIdFlow.value != null) {
+                delay(delayMillis)
+            }
+        }
+    }
 
     /**
      * Starts observing notification update triggers.
@@ -100,10 +113,40 @@ internal class CallServiceNotificationUpdateObserver(
         }
 
         if (notification != null) {
+            if (shouldSkipIncomingRingingNotificationUpdate(ringingState, notification)) {
+                logger.d { "[updateNotification] Skipping equivalent incoming-call update" }
+                return
+            }
+            if (shouldStabilizeIncomingRingingNotification(ringingState)) {
+                incomingRingingNotificationStabilization.await()
+            }
             showNotificationForState(context, ringingState, notification)
         } else {
             logger.w { "[updateNotification] No notification generated" }
         }
+    }
+
+    private fun shouldStabilizeIncomingRingingNotification(ringingState: RingingState): Boolean =
+        ringingState is RingingState.Incoming &&
+            !ringingState.acceptedByMe &&
+            isAndroid17OrHigher()
+
+    private fun shouldSkipIncomingRingingNotificationUpdate(
+        ringingState: RingingState,
+        updatedNotification: Notification,
+    ): Boolean {
+        if (!shouldStabilizeIncomingRingingNotification(ringingState)) return false
+        val callId = StreamCallId(call.type, call.id)
+        val updatedNotificationId = call.state.notificationIdFlow.value
+            ?: callId.getNotificationId(NotificationType.Incoming)
+        return streamVideo.streamNotificationManager.notificationUpdateDeduplicator.isDuplicate(
+            call = call,
+            ringingState = ringingState,
+            existingNotificationId = call.state.notificationIdFlow.value,
+            existingNotification = call.state.atomicNotification.get(),
+            updatedNotificationId = updatedNotificationId,
+            updatedNotification = updatedNotification,
+        )
     }
 
     /**

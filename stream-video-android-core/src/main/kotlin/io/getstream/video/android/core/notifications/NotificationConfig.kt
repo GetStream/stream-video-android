@@ -52,4 +52,10 @@ public data class NotificationConfig(
      */
     @ExperimentalStreamVideoApi
     val notificationUpdateTriggers: (Call) -> Flow<*>? = { _ -> null },
+    /**
+     * Delay before replacing an unaccepted incoming-call notification whose channel owns ringing.
+     * Android may stop an insistent alert when that notification is immediately replaced.
+     * Set this to `0` to disable the delay.
+     */
+    val incomingRingingNotificationUpdateDelayMillis: Long = 1_300L,
 )

@@ -27,7 +27,9 @@ import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.notifications.DefaultNotificationUpdateComparator
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.core.notifications.NotificationUpdateComparator
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
@@ -172,6 +174,15 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
     private var apiUrl: String? = null
     private var wssUrl: String? = null
+    private var incomingCallNotificationUpdateComparator: NotificationUpdateComparator =
+        DefaultNotificationUpdateComparator
+
+    /** Sets the semantic comparison used to suppress duplicate incoming-call updates. */
+    internal fun incomingCallNotificationUpdateComparator(
+        comparator: NotificationUpdateComparator,
+    ): StreamVideoBuilder = apply {
+        incomingCallNotificationUpdateComparator = comparator
+    }
 
     /**
      * Set the API URL to be used for the video client.
@@ -270,6 +281,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             context = context,
             scope = scope,
             notificationConfig = notificationConfig,
+            incomingCallNotificationUpdateComparator = incomingCallNotificationUpdateComparator,
             api = coordinatorConnectionModule.api,
             deviceTokenStorage = deviceTokenStorage,
         )

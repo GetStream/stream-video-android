@@ -364,7 +364,7 @@ constructor(
                     callDisplayName,
                     shouldHaveContentIntent,
                     payload,
-                )
+                ).configureIncomingCallAlert(ringingState)
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
                 null
@@ -401,6 +401,7 @@ constructor(
         callDisplayName: String?,
         payload: Map<String, Any?>,
         shouldHaveContentIntent: Boolean,
+        existingChannelId: String? = null,
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification? {
         logger.d {
@@ -428,8 +429,9 @@ constructor(
                     callDisplayName,
                     payload,
                     shouldHaveContentIntent,
+                    existingChannelId,
                     intercept,
-                )
+                ).configureIncomingCallAlert(ringingState)
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
                 null
@@ -467,15 +469,21 @@ constructor(
         callerName: String?,
         payload: Map<String, Any?>,
         shouldHaveContentIntent: Boolean,
+        existingChannelId: String? = null,
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification {
         logger.d {
             "[getIncomingCallNotificationInternal] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
-        val notificationChannel = when {
-            isAppInForeground() && hideRingingNotificationInForeground ->
+        val notificationChannel = when (existingChannelId) {
+            notificationChannels.incomingCallChannel.id -> notificationChannels.incomingCallChannel
+            notificationChannels.incomingCallLowImportanceChannel.id ->
                 notificationChannels.incomingCallLowImportanceChannel
-            else -> notificationChannels.incomingCallChannel
+            else -> when {
+                isAppInForeground() && hideRingingNotificationInForeground ->
+                    notificationChannels.incomingCallLowImportanceChannel
+                else -> notificationChannels.incomingCallChannel
+            }
         }
 
         return ensureIncomingCallChannelAndBuildNotification(notificationChannel) {
@@ -934,6 +942,8 @@ constructor(
             callId = callId,
             callDisplayName = callDisplayName,
             shouldHaveContentIntent = true,
+            existingChannelId = (call.state.atomicNotification.get() as? Notification)
+                ?.let(NotificationCompat::getChannelId),
             intercept = {
                 val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
                     callId,
@@ -1306,4 +1316,12 @@ internal fun incomingCallNotificationFlags(
 } else {
     val withoutOnlyAlertOnce = currentFlags and Notification.FLAG_ONLY_ALERT_ONCE.inv()
     withoutOnlyAlertOnce or Notification.FLAG_INSISTENT
+}
+
+private fun Notification?.configureIncomingCallAlert(
+    ringingState: RingingState.Incoming,
+): Notification? = this?.apply {
+    if (isAndroid17OrHigher()) {
+        flags = incomingCallNotificationFlags(flags, ringingState)
+    }
 }
