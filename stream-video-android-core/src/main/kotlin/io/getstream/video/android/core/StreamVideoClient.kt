@@ -263,11 +263,11 @@ internal class StreamVideoClient internal constructor(
         val runCallServiceInForeground = callConfig.runCallServiceInForeground
         if (runCallServiceInForeground) {
             safeCall {
-                val serviceIntent = ServiceIntentBuilder().buildStopIntent(
+                // buildStopIntent returns null when the service is not running.
+                ServiceIntentBuilder().buildStopIntent(
                     context = context,
                     StopServiceParam(callServiceConfiguration = callConfig),
-                )
-                serviceIntent.let {
+                )?.let { serviceIntent ->
                     context.stopService(serviceIntent)
                 }
             }

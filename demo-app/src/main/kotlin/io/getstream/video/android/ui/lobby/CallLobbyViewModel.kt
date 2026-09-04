@@ -26,7 +26,6 @@ import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.utils.isAutoOn
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
@@ -142,9 +141,6 @@ class CallLobbyViewModel @Inject constructor(
 
             // enable/disable camera capture (no preview would be visible otherwise)
             call.camera.setEnabled(isCameraEnabled)
-
-            val isNoiseCancellationEnabled = settings?.audio?.noiseCancellation?.isAutoOn ?: false
-            call.setAudioProcessingEnabled(isNoiseCancellationEnabled)
         }
     }
 

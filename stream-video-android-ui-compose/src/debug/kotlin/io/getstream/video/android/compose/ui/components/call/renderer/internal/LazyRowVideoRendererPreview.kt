@@ -22,17 +22,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.mock.previewParticipantsList
 
 @Preview
 @Composable
-private fun ParticipantsRowPreview() {
+private fun ParticipantsRowRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        LazyRowVideoRenderer(
-            call = previewCall,
-            participants = previewParticipantsList,
-            dominantSpeaker = previewParticipantsList[0],
-        )
+        ParticipantsRowPreview()
     }
+}
+
+@Composable
+internal fun ParticipantsRowPreview() {
+    LazyRowVideoRenderer(
+        call = previewCall,
+        participants = previewParticipantsList,
+        dominantSpeaker = previewParticipant,
+    )
 }

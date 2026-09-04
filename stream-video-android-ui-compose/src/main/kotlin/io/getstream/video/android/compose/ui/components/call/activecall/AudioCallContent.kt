@@ -39,6 +39,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.getDefaultPermissionList
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
+import io.getstream.video.android.compose.theme.AudioOnlyCallControlsContentParams
+import io.getstream.video.android.compose.theme.AudioOnlyCallDetailsContentParams
+import io.getstream.video.android.compose.theme.AudioOnlyCallHeaderContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.fillCircle
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.DefaultPermissionHandler
@@ -144,10 +147,13 @@ public fun AudioCallContent(
  * @param isMicrophoneEnabled Weather or not the microphone icon will show the mic as enabled or not.
  * @param permissions Android permissions that should be requested.
  * @param isShowingHeader If true, header content is shown.
- * @param headerContent Content that overrides the header.
+ * @param headerContent Content that overrides the header. When `null`,
+ * [io.getstream.video.android.compose.theme.VideoComponentFactory.AudioOnlyCallHeaderContent] is used.
  * @param durationPlaceholder Content (text) shown while the duration is not available.
- * @param detailsContent Content that overrides the details (the middle part of the screen).
- * @param controlsContent Content that allows users to trigger call actions. See [CallAction].
+ * @param detailsContent Content that overrides the details (the middle part of the screen). When `null`,
+ * [io.getstream.video.android.compose.theme.VideoComponentFactory.AudioOnlyCallDetailsContent] is used.
+ * @param controlsContent Content that allows users to trigger call actions. See [CallAction]. When `null`,
+ * [io.getstream.video.android.compose.theme.VideoComponentFactory.AudioOnlyCallControlsContent] is used.
  * @param onCallAction Handler used when the user triggers a [CallAction].
  * @param onBackPressed Handler used when the user taps on the back button.
  */
@@ -192,24 +198,34 @@ public fun AudioOnlyCallContent(
                 .align(Alignment.Center),
             verticalArrangement = Arrangement.Center,
         ) {
-            if (isShowingHeader) headerContent?.invoke(this)
+            if (isShowingHeader) {
+                headerContent?.invoke(this) ?: with(VideoTheme.componentFactory) {
+                    AudioOnlyCallHeaderContent(
+                        params = AudioOnlyCallHeaderContentParams(call = call),
+                    )
+                }
+            }
 
             detailsContent?.invoke(this, remoteParticipants, VideoTheme.dimens.spacingM)
-                ?: AudioOnlyCallDetails(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                    participants = remoteParticipants,
-                    duration = durationText,
-                )
+                ?: with(VideoTheme.componentFactory) {
+                    AudioOnlyCallDetailsContent(
+                        params = AudioOnlyCallDetailsContentParams(
+                            remoteParticipants = remoteParticipants,
+                            topPadding = VideoTheme.dimens.spacingM,
+                            duration = durationText,
+                        ),
+                    )
+                }
         }
 
-        controlsContent?.invoke(this) ?: AudioOnlyCallControls(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = VideoTheme.dimens.genericXxl),
-            isMicrophoneEnabled = isMicrophoneEnabled,
-            onCallAction = onCallAction,
-        )
+        controlsContent?.invoke(this) ?: with(VideoTheme.componentFactory) {
+            AudioOnlyCallControlsContent(
+                params = AudioOnlyCallControlsContentParams(
+                    isMicrophoneEnabled = isMicrophoneEnabled,
+                    onCallAction = onCallAction,
+                ),
+            )
+        }
     }
 }
 

@@ -50,12 +50,7 @@ public fun ParticipantsRegularGrid(
         participant: ParticipantState,
         style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        ParticipantVideo(
-            modifier = videoModifier,
-            call = videoCall,
-            participant = videoParticipant,
-            style = videoStyle,
-        )
+        DefaultParticipantVideoRenderer(videoModifier, videoCall, videoParticipant, videoStyle)
     },
     floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
 ) {

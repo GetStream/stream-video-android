@@ -24,10 +24,12 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
+import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
@@ -69,6 +71,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.PeerType
@@ -76,6 +79,8 @@ import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.WebsocketReconnectStrategy
+import stream.video.sfu.signal.StartNoiseCancellationRequest
+import stream.video.sfu.signal.StopNoiseCancellationRequest
 import java.io.InterruptedIOException
 
 class RtcSessionTest2 {
@@ -772,6 +777,60 @@ class RtcSessionTest2 {
         verify(exactly = 0) { rtcSession["createPublisher"](any<List<PublishOption>>()) }
     }
 
+    @Test
+    fun `createAndPublishAudioTrack does not crash when publishStream returns null`() = runTest(
+        testDispatcher,
+    ) {
+        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+        val (rtcSession, publisherMock) = createRtcSessionSpyWithMockSocket()
+        rtcSession.publisher.value = publisherMock
+        coEvery {
+            publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
+        } returns null
+
+        rtcSession.createAndPublishAudioTrack()
+
+        coVerify { publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO) }
+        // Unmuting before a failed publish would tell the SFU we are live with no track.
+        verify(exactly = 0) {
+            rtcSession["setMuteState"](true, TrackType.TRACK_TYPE_AUDIO)
+        }
+    }
+
+    @Test
+    fun `createAndPublishAudioTrack unmutes only after publishStream returns a track`() = runTest(
+        testDispatcher,
+    ) {
+        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+        val (rtcSession, publisherMock) = createRtcSessionSpyWithMockSocket()
+        rtcSession.publisher.value = publisherMock
+        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+        coEvery {
+            publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
+        } returns audioTrack
+
+        rtcSession.createAndPublishAudioTrack()
+
+        verify(exactly = 1) {
+            rtcSession["setMuteState"](true, TrackType.TRACK_TYPE_AUDIO)
+        }
+    }
+
+    @Test
+    fun `createAndPublishAudioTrack does not crash when publisher is missing`() = runTest(
+        testDispatcher,
+    ) {
+        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+        val (rtcSession, _) = createRtcSessionSpyWithMockSocket()
+        rtcSession.publisher.value = null
+
+        rtcSession.createAndPublishAudioTrack()
+
+        verify(exactly = 0) {
+            rtcSession["setMuteState"](true, TrackType.TRACK_TYPE_AUDIO)
+        }
+    }
+
     private fun <T> RtcSession.fieldValue(name: String): T? {
         val field = RtcSession::class.java.getDeclaredField(name)
         field.isAccessible = true
@@ -804,6 +863,153 @@ class RtcSessionTest2 {
             every { isReconnected } returns false
             every { this@mockk.publishOptions } returns publishOptions
         }
+    }
+
+    @Test
+    fun `iceHealthTransition recovers a reconnecting call when no ICE side is bad`() {
+        // The subscriber has nothing to negotiate after a reconnect and stays NEW; that must
+        // not block the recovery (it deadlocked the connection state as Reconnecting forever).
+        assertEquals(
+            RealtimeConnection.Connected,
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.NEW,
+            ),
+        )
+        // No peer connections at all: the connected socket is the only transport signal.
+        assertEquals(
+            RealtimeConnection.Connected,
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = null,
+                subscriberIce = null,
+            ),
+        )
+    }
+
+    @Test
+    fun `iceHealthTransition does not recover while an ICE side is bad or the socket is down`() {
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.DISCONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.NEW,
+            ),
+        )
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.DISCONNECTED,
+            ),
+        )
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = false,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.CONNECTED,
+            ),
+        )
+        // A closed peer connection never emits another ICE event, so it must block recovery.
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.CLOSED,
+            ),
+        )
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Reconnecting,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CLOSED,
+                subscriberIce = null,
+            ),
+        )
+    }
+
+    @Test
+    fun `iceHealthTransition degrades a connected call when an ICE side goes bad`() {
+        assertEquals(
+            RealtimeConnection.Reconnecting,
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Connected,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.FAILED,
+                subscriberIce = PeerConnection.IceConnectionState.NEW,
+            ),
+        )
+        assertEquals(
+            RealtimeConnection.Reconnecting,
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Connected,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.FAILED,
+            ),
+        )
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Connected,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.NEW,
+            ),
+        )
+        // CLOSED does not degrade: peer connections close during legitimate teardowns and
+        // the closing flow owns the connection state there.
+        assertNull(
+            RtcSession.iceHealthTransition(
+                connection = RealtimeConnection.Connected,
+                sfuSocketConnected = true,
+                publisherIce = PeerConnection.IceConnectionState.CONNECTED,
+                subscriberIce = PeerConnection.IceConnectionState.CLOSED,
+            ),
+        )
+    }
+
+    @Test
+    fun `evaluateIceHealth applies the transition to the connection state`() = runTest(
+        testDispatcher,
+    ) {
+        every { mockCallState.connection } returns
+            MutableStateFlow<RealtimeConnection>(RealtimeConnection.Connected)
+        val internalConnection = mockk<MutableStateFlow<RealtimeConnection>>(relaxed = true)
+        every { mockCallState._connection } returns internalConnection
+
+        val rtcSession = RtcSession(
+            client = mockStreamVideo,
+            powerManager = mockPowerManager,
+            call = mockCall,
+            sessionManager = CallSessionManager(),
+            sessionId = "test-session-id",
+            apiKey = "test-api-key",
+            lifecycle = mockLifecycle,
+            sfuUrl = "https://test-sfu.stream.com",
+            sfuWsUrl = "wss://test-sfu.stream.com",
+            sfuToken = "fake-sfu-token",
+            sfuName = "test-sfu-edge",
+            clientImpl = mockVideoClient,
+            coroutineScope = testScope,
+            remoteIceServers = emptyList(),
+            sfuConnectionModuleProvider = { mockk(relaxed = true) },
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+        )
+        every { rtcSession.subscriber.value!!.iceState } returns
+            MutableStateFlow<PeerConnection.IceConnectionState?>(
+                PeerConnection.IceConnectionState.FAILED,
+            )
+
+        rtcSession.evaluateIceHealth()
+
+        verify { internalConnection.value = RealtimeConnection.Reconnecting }
     }
 
     private fun createRtcSessionSpyWithMockSocket(): Pair<RtcSession, Publisher> {
@@ -850,5 +1056,67 @@ class RtcSessionTest2 {
         val publisherMock = mockk<Publisher>(relaxed = true)
         every { rtcSession["createPublisher"](any<List<PublishOption>>()) } returns publisherMock
         return rtcSession to publisherMock
+    }
+
+    @Test
+    fun `startNoiseCancellation sends the request to the SFU with the session id`() = runTest {
+        // Given
+        val signalService = mockk<SignalServerService>(relaxed = true)
+        val (rtcSession, _) = noiseCancellationSession(signalService)
+
+        // When
+        rtcSession.startNoiseCancellation()
+
+        // Then
+        coVerify(exactly = 1) {
+            signalService.startNoiseCancellation(
+                StartNoiseCancellationRequest(session_id = "session-id"),
+            )
+        }
+    }
+
+    @Test
+    fun `stopNoiseCancellation sends the request to the SFU with the session id`() = runTest {
+        // Given
+        val signalService = mockk<SignalServerService>(relaxed = true)
+        val (rtcSession, _) = noiseCancellationSession(signalService)
+
+        // When
+        rtcSession.stopNoiseCancellation()
+
+        // Then
+        coVerify(exactly = 1) {
+            signalService.stopNoiseCancellation(
+                StopNoiseCancellationRequest(session_id = "session-id"),
+            )
+        }
+    }
+
+    private fun noiseCancellationSession(
+        signalService: SignalServerService,
+    ): Pair<RtcSession, SfuConnectionModule> {
+        val mockModule = mockk<SfuConnectionModule>(relaxed = true) {
+            every { api } returns signalService
+        }
+        val rtcSession = RtcSession(
+            client = mockStreamVideo,
+            powerManager = mockPowerManager,
+            call = mockCall,
+            sessionManager = CallSessionManager(),
+            sessionId = "session-id",
+            apiKey = "api-key",
+            lifecycle = mockLifecycle,
+            sfuUrl = "https://test-sfu.stream.com",
+            sfuWsUrl = "wss://test-sfu.stream.com",
+            sfuToken = "fake-sfu-token",
+            sfuName = "test-sfu-edge",
+            clientImpl = mockVideoClient,
+            coroutineScope = testScope,
+            rtcSessionScope = testScope,
+            remoteIceServers = emptyList(),
+            sfuConnectionModuleProvider = { mockModule },
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+        )
+        return rtcSession to mockModule
     }
 }

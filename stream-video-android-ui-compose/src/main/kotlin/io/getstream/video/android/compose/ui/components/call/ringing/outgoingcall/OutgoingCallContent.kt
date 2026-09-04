@@ -21,16 +21,17 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.theme.OutgoingCallControlsContentParams
+import io.getstream.video.android.compose.theme.OutgoingCallDetailsContentParams
+import io.getstream.video.android.compose.theme.OutgoingCallHeaderContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.core.Call
@@ -138,7 +139,11 @@ public fun OutgoingCallContent(
     ) {
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
             if (isShowingHeader) {
-                headerContent?.invoke(this)
+                headerContent?.invoke(this) ?: with(VideoTheme.componentFactory) {
+                    OutgoingCallHeaderContent(
+                        params = OutgoingCallHeaderContentParams(call = call),
+                    )
+                }
             }
 
             val topPadding = if (participants.size == 1 || isVideoType) {
@@ -147,22 +152,27 @@ public fun OutgoingCallContent(
                 VideoTheme.dimens.spacingM
             }
 
-            detailsContent?.invoke(this, participants, topPadding) ?: OutgoingCallDetails(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally),
-                participants = participants,
-                isVideoType = isVideoType,
-            )
+            detailsContent?.invoke(this, participants, topPadding)
+                ?: with(VideoTheme.componentFactory) {
+                    OutgoingCallDetailsContent(
+                        params = OutgoingCallDetailsContentParams(
+                            participants = participants,
+                            topPadding = topPadding,
+                            isVideoType = isVideoType,
+                        ),
+                    )
+                }
         }
 
-        controlsContent?.invoke(this) ?: OutgoingCallControls(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = VideoTheme.dimens.genericXxl),
-            isVideoCall = isVideoType,
-            isCameraEnabled = isCameraEnabled,
-            isMicrophoneEnabled = isMicrophoneEnabled,
-            onCallAction = onCallAction,
-        )
+        controlsContent?.invoke(this) ?: with(VideoTheme.componentFactory) {
+            OutgoingCallControlsContent(
+                params = OutgoingCallControlsContentParams(
+                    isCameraEnabled = isCameraEnabled,
+                    isMicrophoneEnabled = isMicrophoneEnabled,
+                    isVideoCall = isVideoType,
+                    onCallAction = onCallAction,
+                ),
+            )
+        }
     }
 }

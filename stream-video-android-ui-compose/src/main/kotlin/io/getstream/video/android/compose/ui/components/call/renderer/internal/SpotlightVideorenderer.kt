@@ -41,7 +41,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
+import io.getstream.video.android.compose.ui.components.call.renderer.DefaultParticipantVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.SpotlightVideoRendererStyle
 import io.getstream.video.android.compose.ui.components.call.renderer.VideoRendererStyle
 import io.getstream.video.android.core.Call
@@ -65,12 +65,7 @@ internal fun SpotlightVideoRenderer(
         participant: ParticipantState,
         style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        ParticipantVideo(
-            modifier = videoModifier,
-            call = videoCall,
-            participant = videoParticipant,
-            style = videoStyle,
-        )
+        DefaultParticipantVideoRenderer(videoModifier, videoCall, videoParticipant, videoStyle)
     },
 ) {
     if (participants.size == 1) {

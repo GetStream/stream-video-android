@@ -20,6 +20,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -28,173 +29,122 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewCall
-import io.getstream.video.android.mock.previewParticipantsList
+import io.getstream.video.android.mock.previewGridCall
 
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun LandscapeParticipantsPreview1() {
+private fun LandscapeParticipantsRootPreview1() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            LandscapeVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(1),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        LandscapeParticipantsPreview1()
     }
 }
 
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun LandscapeParticipantsPreview2() {
+private fun LandscapeParticipantsRootPreview2() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            LandscapeVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(2),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        LandscapeParticipantsPreview2()
     }
 }
 
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun LandscapeParticipantsPreview3() {
+private fun LandscapeParticipantsRootPreview3() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            LandscapeVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(3),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        LandscapeParticipantsPreview3()
     }
 }
 
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun LandscapeParticipantsPreview4() {
+private fun LandscapeParticipantsRootPreview4() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            LandscapeVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(4),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        LandscapeParticipantsPreview4()
     }
 }
 
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun LandscapeParticipantsPreview5() {
+private fun LandscapeParticipantsRootPreview5() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            LandscapeVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(5),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        LandscapeParticipantsPreview5()
     }
 }
 
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun LandscapeParticipantsPreview6() {
+private fun LandscapeParticipantsRootPreview6() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
-
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            LandscapeVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(6),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+        LandscapeParticipantsPreview6()
     }
 }
 
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun LandscapeParticipantsPreview7() {
+private fun LandscapeParticipantsRootPreview7() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val configuration = LocalConfiguration.current
-        val screenWidth = configuration.screenWidthDp
-        val screenHeight = configuration.screenHeightDp
-        val participants = previewParticipantsList
+        LandscapeParticipantsPreview7()
+    }
+}
 
-        Box(
-            modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
-        ) {
-            LandscapeVideoRenderer(
-                call = previewCall,
-                dominantSpeaker = participants[0],
-                callParticipants = participants.take(7),
-                modifier = Modifier.fillMaxSize(),
-                parentSize = IntSize(screenWidth, screenHeight),
-            )
-        }
+@Composable
+internal fun LandscapeParticipantsPreview1() {
+    LandscapeParticipants(participantCount = 1)
+}
+
+@Composable
+internal fun LandscapeParticipantsPreview2() {
+    LandscapeParticipants(participantCount = 2)
+}
+
+@Composable
+internal fun LandscapeParticipantsPreview3() {
+    LandscapeParticipants(participantCount = 3)
+}
+
+@Composable
+internal fun LandscapeParticipantsPreview4() {
+    LandscapeParticipants(participantCount = 4)
+}
+
+@Composable
+internal fun LandscapeParticipantsPreview5() {
+    LandscapeParticipants(participantCount = 5)
+}
+
+@Composable
+internal fun LandscapeParticipantsPreview6() {
+    LandscapeParticipants(participantCount = 6)
+}
+
+@Composable
+internal fun LandscapeParticipantsPreview7() {
+    LandscapeParticipants(participantCount = 7)
+}
+
+@Composable
+private fun LandscapeParticipants(participantCount: Int) {
+    val gridCall = remember(participantCount) { previewGridCall(participantCount) }
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+    val screenHeight = configuration.screenHeightDp
+
+    Box(
+        modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+    ) {
+        LandscapeVideoRenderer(
+            call = gridCall.call,
+            dominantSpeaker = gridCall.participants[0],
+            callParticipants = gridCall.participants,
+            modifier = Modifier.fillMaxSize(),
+            parentSize = IntSize(screenWidth, screenHeight),
+        )
     }
 }
