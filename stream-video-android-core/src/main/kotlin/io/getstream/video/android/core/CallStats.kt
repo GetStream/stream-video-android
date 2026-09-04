@@ -69,6 +69,57 @@ public class PeerConnectionStats(scope: CoroutineScope) {
 
     internal val _videoCodec: MutableStateFlow<String> = MutableStateFlow("")
     val videoCodec: StateFlow<String> = _videoCodec
+
+    internal val _audioBitrateKbps: MutableStateFlow<Float> = MutableStateFlow(0F)
+
+    /**
+     * Audio bitrate actually sent or received, measured from the RTP byte counters between two
+     * stats polls.
+     *
+     * Distinct from [bitrateKbps], which reports the connection's *available* bandwidth estimate
+     * rather than anything that was transmitted. This one moves when the encoder does.
+     */
+    val audioBitrateKbps: StateFlow<Float> = _audioBitrateKbps
+
+    internal val _audioCodec: MutableStateFlow<String> = MutableStateFlow("")
+    val audioCodec: StateFlow<String> = _audioCodec
+
+    internal val _audioTargetBitrateKbps: MutableStateFlow<Float> = MutableStateFlow(0F)
+
+    /**
+     * The bitrate the audio encoder is aiming for, as reported by `outbound-rtp`.
+     *
+     * The requested value, where [audioBitrateKbps] is what actually went out. Comparing the two
+     * is how you tell "we asked for more" from "we are sending more".
+     */
+    val audioTargetBitrateKbps: StateFlow<Float> = _audioTargetBitrateKbps
+
+    /** Byte counter and its timestamp from the previous poll, to derive a rate. */
+    internal var lastAudioBytes: Long? = null
+    internal var lastAudioTimestampUs: Double? = null
+
+    /**
+     * Derives the audio bitrate from the change in [bytes] since the previous poll.
+     *
+     * The first sample only seeds the baseline — a rate needs two points. A counter that went
+     * backwards means the stream was replaced, so the baseline is reset rather than reported as a
+     * negative rate.
+     */
+    internal fun updateAudioBitrate(bytes: Long?, timestampUs: Double) {
+        if (bytes == null) return
+        val previousBytes = lastAudioBytes
+        val previousTimestampUs = lastAudioTimestampUs
+        lastAudioBytes = bytes
+        lastAudioTimestampUs = timestampUs
+
+        if (previousBytes == null || previousTimestampUs == null) return
+        val elapsedUs = timestampUs - previousTimestampUs
+        val deltaBytes = bytes - previousBytes
+        if (elapsedUs <= 0 || deltaBytes < 0) return
+
+        val bitsPerSecond = deltaBytes * 8.0 * 1_000_000.0 / elapsedUs
+        _audioBitrateKbps.value = (bitsPerSecond / 1000).toFloat()
+    }
 }
 
 public data class LocalStats(
@@ -193,6 +244,39 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
                     subscriber._resolution.value = "$width x $height @ $fps fps"
                 }
             }
+            // Audio send/receive rate, derived from the RTP byte counters. Nothing else reports
+            // what the audio encoder is actually doing — the candidate-pair numbers below are a
+            // bandwidth estimate, not a transmitted rate.
+            statGroups["outbound-rtp:audio"]?.firstOrNull()?.let {
+                publisher.updateAudioBitrate(
+                    bytes = it.members["bytesSent"] as? Long,
+                    timestampUs = it.timestampUs,
+                )
+                (it.members["targetBitrate"] as? Double)?.let { target ->
+                    publisher._audioTargetBitrateKbps.value = (target / 1000).toFloat()
+                }
+            }
+            statGroups["inbound-rtp:audio"]?.firstOrNull()?.let {
+                subscriber.updateAudioBitrate(
+                    bytes = it.members["bytesReceived"] as? Long,
+                    timestampUs = it.timestampUs,
+                )
+            }
+            statGroups["codec:audio"]?.firstOrNull()?.let {
+                val mimeType = it.members["mimeType"] as? String
+                val clockRate = it.members["clockRate"] as? Long
+                val channels = it.members["channels"] as? Long
+                val fmtp = it.members["sdpFmtpLine"] as? String
+                val codec = listOfNotNull(
+                    mimeType,
+                    clockRate?.let { rate -> "$rate Hz" },
+                    channels?.let { count -> if (count > 1) "stereo" else "mono" },
+                    fmtp,
+                ).joinToString(" ")
+                publisher._audioCodec.value = codec
+                subscriber._audioCodec.value = codec
+            }
+
             statGroups["candidate-pair"]?.firstOrNull()?.let {
                 val latency = it.members["currentRoundTripTime"] as? Double
                 val outgoingBitrate = it.members["availableOutgoingBitrate"] as? Double

@@ -58,6 +58,7 @@ import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
 import stream.video.sfu.event.VideoLayerSetting
 import stream.video.sfu.event.VideoSender
+import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.ErrorCode
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackInfo
@@ -341,6 +342,93 @@ internal class Publisher(
         logger.d {
             "[trackPublishing] Track: ${senderTrack?.enabled()}:${senderTrack?.state()}:${senderTrack?.id()}"
         }
+    }
+
+    /**
+     * Swaps the track on the live audio sender, without renegotiating.
+     *
+     * Passes `takeOwnership = false` deliberately. [MediaManagerImpl] owns the audio track and is
+     * what disposes it, so the sender must not dispose it too: [RtpSender.setTrack] disposes the
+     * track it currently holds only when it owns it, and leaving ownership with the media manager
+     * keeps disposal in exactly one place. The replaced track therefore stays valid until the
+     * caller disposes it.
+     *
+     * @return true when a live audio sender was found and accepted the track.
+     */
+    internal fun replaceAudioTrack(newTrack: MediaStreamTrack): Boolean {
+        val senders = safeCallWithDefault(emptyList()) {
+            transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO).mapNotNull { it.sender }
+        }
+        if (senders.isEmpty()) {
+            logger.d { "[replaceAudioTrack] no audio sender to replace the track on" }
+            return false
+        }
+        return senders.any { sender ->
+            safeCallWithDefault(false) { sender.setTrack(newTrack, false) }.also { replaced ->
+                logger.d { "[replaceAudioTrack] replaced: $replaced, track: ${newTrack.id()}" }
+            }
+        }
+    }
+
+    /**
+     * Sets the maximum bitrate on the live audio sender.
+     *
+     * Applied through the sender's [RtpParameters], the same way the video layers and the
+     * degradation preference are — so it takes effect on the running encoder with no renegotiation.
+     * The audio bitrate is not carried in the SDP on our side; it rides entirely on the encoding.
+     *
+     * @return true when a live audio sender accepted the new parameters.
+     */
+    internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean {
+        val senders = safeCallWithDefault(emptyList()) {
+            transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO).mapNotNull { it.sender }
+        }
+        if (senders.isEmpty()) {
+            logger.d { "[setAudioMaxBitrate] no audio sender to apply $maxBitrateBps to" }
+            return false
+        }
+        return senders.any { sender ->
+            safeCallWithDefault(false) {
+                val params = sender.parameters ?: return@safeCallWithDefault false
+                if (params.encodings.isEmpty()) return@safeCallWithDefault false
+                params.encodings.forEach { it.maxBitrateBps = maxBitrateBps }
+                sender.parameters = params
+                logger.d { "[setAudioMaxBitrate] applied maxBitrateBps: $maxBitrateBps" }
+                true
+            }
+        }
+    }
+
+    /**
+     * The bitrate the SFU offers for [profile], or null when it named none.
+     *
+     * The server sends one per profile in `PublishOption.audio_bitrate_profiles`, so a mid-call
+     * switch does not have to invent a number for the profile it is moving to — this is the same
+     * value a freshly created audio transceiver would be given for that profile.
+     */
+    internal fun audioBitrateFor(profile: AudioBitrateProfile): Int? = safeCallWithDefault(null) {
+        publishOptions.firstOrNull { it.track_type == TrackType.TRACK_TYPE_AUDIO }
+            ?.audio_bitrate_profiles
+            ?.firstOrNull { it.profile == profile }
+            ?.bitrate
+            ?.takeIf { it > 0 }
+    }
+
+    /**
+     * The audio bitrate the SFU negotiated for this publisher, or null when it publishes no audio.
+     *
+     * This is what the server asked for at join, for the audio bitrate profile the call joined
+     * with — the value to restore when a mid-call switch to music is undone.
+     */
+    internal fun negotiatedAudioBitrate(): Int? = safeCallWithDefault(null) {
+        publishOptions.firstOrNull { it.track_type == TrackType.TRACK_TYPE_AUDIO }?.bitrate
+    }
+
+    /** The maximum bitrate currently set on the live audio sender, or null when unknown. */
+    internal fun audioMaxBitrate(): Int? = safeCallWithDefault(null) {
+        transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO)
+            .mapNotNull { it.sender?.parameters?.encodings?.firstOrNull()?.maxBitrateBps }
+            .firstOrNull()
     }
 
     @VisibleForTesting

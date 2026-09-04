@@ -566,6 +566,53 @@ public class RtcSession internal constructor(
     }
 
     /**
+     * Moves publishing onto a freshly built audio track, so audio-source constraints that are
+     * fixed at source creation can be changed without rejoining.
+     *
+     * No renegotiation: replacing a sender's track does not change the SDP. When nothing is
+     * published yet the new pair simply becomes current.
+     *
+     * @return true when the pipeline was rebuilt.
+     */
+    internal fun rebuildAudioCapturePipeline(): Boolean =
+        call.mediaManager.replaceAudioSourceAndTrack { newTrack ->
+            val publisher = publisher.value
+                // Nothing published yet, so there is no sender to move and the new pair stands.
+                ?: return@replaceAudioSourceAndTrack true
+
+            publisher.replaceAudioTrack(newTrack).also { replaced ->
+                if (replaced) {
+                    // The local participant's track has to point at what is actually being sent.
+                    setLocalTrack(
+                        TrackType.TRACK_TYPE_AUDIO,
+                        AudioTrack(
+                            streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
+                            audio = newTrack,
+                        ),
+                    )
+                }
+            }
+        }
+
+    /**
+     * Applies a maximum audio bitrate to the live publisher, with no renegotiation.
+     *
+     * @return true when a live audio sender accepted it.
+     */
+    internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean =
+        publisher.value?.setAudioMaxBitrate(maxBitrateBps) ?: false
+
+    /** The maximum bitrate on the live audio sender, or null when nothing is publishing audio. */
+    internal fun audioMaxBitrate(): Int? = publisher.value?.audioMaxBitrate()
+
+    /** The audio bitrate the SFU negotiated at join, or null when nothing publishes audio. */
+    internal fun negotiatedAudioBitrate(): Int? = publisher.value?.negotiatedAudioBitrate()
+
+    /** The bitrate the SFU offers for [profile], or null when it named none. */
+    internal fun audioBitrateFor(profile: stream.video.sfu.models.AudioBitrateProfile): Int? =
+        publisher.value?.audioBitrateFor(profile)
+
+    /**
      * Connection and WebRTC.
      */
 

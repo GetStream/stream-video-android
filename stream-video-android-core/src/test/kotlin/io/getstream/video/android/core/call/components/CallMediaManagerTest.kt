@@ -271,4 +271,28 @@ class CallMediaManagerTest {
 
         verify { processor.isEnabled = true }
     }
+
+    @Test
+    fun `setting the hardware noise suppressor applies it to the existing factory`() {
+        val factory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+        every { factory.setHardwareNoiseSuppressorEnabled(false) } returns true
+        val manager = manager()
+        manager.peerConnectionFactory = factory
+
+        assertThat(manager.setHardwareNoiseSuppressorEnabled(false)).isTrue()
+
+        verify { factory.setHardwareNoiseSuppressorEnabled(false) }
+    }
+
+    @Test
+    fun `setting the hardware noise suppressor does not build a factory for a call without one`() {
+        val manager = manager()
+
+        // Recorded for whichever factory is built later. Building one here would capture the
+        // pre-join audio bitrate profile, which is what ensureFactoryMatchesAudioProfile exists
+        // to prevent.
+        assertThat(manager.setHardwareNoiseSuppressorEnabled(false)).isFalse()
+
+        manager.recreatePeerConnectionFactory()
+    }
 }

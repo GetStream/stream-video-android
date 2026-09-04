@@ -945,6 +945,60 @@ public class Call(
         notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
     }
 
+    /**
+     * Applies a platform noise-suppressor change for this call.
+     *
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile], which is the public
+     * entry point; the media component is not reachable from there.
+     */
+    internal fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean =
+        media.setHardwareNoiseSuppressorEnabled(enabled)
+
+    /**
+     * Rebuilds the audio source and track so audio-source constraints take effect mid-call.
+     *
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile]. Before a session
+     * exists the source is built lazily from the current constraints anyway, so there is nothing
+     * to rebuild and the change already holds.
+     */
+    internal fun rebuildAudioCapturePipeline(): Boolean =
+        session.value?.rebuildAudioCapturePipeline() ?: true
+
+    /**
+     * Applies a maximum audio bitrate to the live publisher.
+     *
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile].
+     */
+    internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean =
+        session.value?.setAudioMaxBitrate(maxBitrateBps) ?: false
+
+    /** The maximum bitrate on the live audio sender, or null when nothing is publishing audio. */
+    internal fun audioMaxBitrate(): Int? = session.value?.audioMaxBitrate()
+
+    /** The audio bitrate the SFU negotiated at join, or null when nothing publishes audio. */
+    internal fun negotiatedAudioBitrate(): Int? = session.value?.negotiatedAudioBitrate()
+
+    /** The bitrate the SFU offers for [profile], or null when it named none. */
+    internal fun audioBitrateFor(profile: stream.video.sfu.models.AudioBitrateProfile): Int? =
+        session.value?.audioBitrateFor(profile)
+
+    /**
+     * Whether a noise-cancellation processor is wired into this call and can be turned on or off.
+     *
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile], which reports a stage it could not
+     * reach — and an absent processor is not a stage that failed.
+     */
+    internal fun isAudioProcessingReachable(): Boolean = media.isAudioProcessingReachable()
+
+    /**
+     * Whether this device has a platform noise suppressor at all.
+     *
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile]: a device with no suppressor
+     * has nothing suppressing, which is not the same as a suppressor that refused.
+     */
+    internal fun isHardwareNoiseSuppressorSupported(): Boolean =
+        media.isHardwareNoiseSuppressorSupported()
+
     fun toggleAudioProcessing(): Boolean {
         // Reads without building a factory: the gate runs before join, and a factory created
         // there would capture the pre-join audio bitrate profile.

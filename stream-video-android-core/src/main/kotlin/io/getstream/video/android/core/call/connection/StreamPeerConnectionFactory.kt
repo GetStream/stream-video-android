@@ -21,6 +21,7 @@ import android.media.AudioAttributes
 import android.media.AudioDeviceInfo
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.annotation.VisibleForTesting
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.api.SignalServerService
@@ -34,6 +35,7 @@ import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
+import io.getstream.video.android.core.utils.defaultHardwareAudioEffectsEnabled
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
@@ -212,6 +214,63 @@ public class StreamPeerConnectionFactory(
 
     private var adm: JavaAudioDeviceModule? = null
 
+    /**
+     * Platform noise-suppressor state this call asked for at runtime, or null while it has never
+     * been changed and the builder default stands.
+     *
+     * Held here because the effect itself does not survive a capture restart: the audio device
+     * module attaches it to the current recording session and drops it when recording stops, then
+     * rebuilds it from the *builder* flag on the next start. Without re-applying, a caller's
+     * choice would silently revert on the next reconnect or route change.
+     */
+    @Volatile
+    private var desiredHardwareNoiseSuppressorEnabled: Boolean? = null
+
+    /**
+     * Enables or disables the platform noise suppressor on the live recording session.
+     *
+     * Unlike the builder flag this takes effect immediately, but only while audio is being
+     * captured — the effect exists for the lifetime of a recording session. Returns false when
+     * nothing was changed: no module built yet, no active capture, or a device whose platform
+     * noise suppressor is unsupported or ignores the request.
+     *
+     * The request is remembered either way and re-applied whenever capture restarts.
+     */
+    internal fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean {
+        desiredHardwareNoiseSuppressorEnabled = enabled
+        return safeCallWithDefault(false) {
+            adm?.setNoiseSuppressorEnabled(enabled) ?: false
+        }
+    }
+
+    /**
+     * Whether this device has a platform noise suppressor at all.
+     *
+     * Separates "there is nothing to switch off" from "it refused", which
+     * [setHardwareNoiseSuppressorEnabled] cannot: it returns false for both. Callers reporting
+     * whether an audio profile took need the difference — on a device with no suppressor there is
+     * nothing suppressing, so the profile is satisfied, and calling that a failed stage would send
+     * every such device chasing a problem it does not have.
+     */
+    internal fun isHardwareNoiseSuppressorSupported(): Boolean = safeCallWithDefault(false) {
+        JavaAudioDeviceModule.isBuiltInNoiseSuppressorSupported()
+    }
+
+    /**
+     * Re-applies [desiredHardwareNoiseSuppressorEnabled] to the recording session that has just
+     * started. No-op when the caller never expressed a preference, so the builder default stands.
+     */
+    @VisibleForTesting
+    internal fun reapplyHardwareNoiseSuppressor() {
+        val desired = desiredHardwareNoiseSuppressorEnabled ?: return
+        val applied = safeCallWithDefault(false) {
+            adm?.setNoiseSuppressorEnabled(desired) ?: false
+        }
+        audioLogger.d {
+            "[reapplyHardwareNoiseSuppressor] desired: $desired, applied: $applied"
+        }
+    }
+
     @Volatile
     private var pendingPreferredInputDevice: AudioDeviceInfo? = null
 
@@ -289,18 +348,10 @@ public class StreamPeerConnectionFactory(
         // Capture the audio bitrate profile when initializing the audio device module
         audioBitrateProfile = audioBitrateProfileProvider?.invoke()
 
-        val isMusicHighQuality = audioBitrateProfile ==
-            stream.video.sfu.models.AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
-        val useHardwareAcousticEchoCanceler = if (isMusicHighQuality) {
-            false
-        } else {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-        }
-        val useHardwareNoiseSuppressor = if (isMusicHighQuality) {
-            false
-        } else {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-        }
+        val useHardwareAcousticEchoCanceler =
+            defaultHardwareAudioEffectsEnabled(audioBitrateProfile)
+        val useHardwareNoiseSuppressor =
+            defaultHardwareAudioEffectsEnabled(audioBitrateProfile)
 
         adm = JavaAudioDeviceModule
             .builder(context)
@@ -352,6 +403,9 @@ public class StreamPeerConnectionFactory(
                 JavaAudioDeviceModule.AudioRecordStateCallback {
                 override fun onWebRtcAudioRecordStart() {
                     audioLogger.d { "[onWebRtcAudioRecordStart] no args" }
+                    // The platform effects are rebuilt from the builder flags for every recording
+                    // session, so a runtime override has to be re-applied here or it is lost.
+                    reapplyHardwareNoiseSuppressor()
                 }
 
                 override fun onWebRtcAudioRecordStop() {

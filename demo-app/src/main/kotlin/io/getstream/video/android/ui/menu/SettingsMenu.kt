@@ -74,6 +74,7 @@ import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateManager
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
+import stream.video.sfu.models.AudioBitrateProfile
 import java.nio.ByteBuffer
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -112,6 +113,64 @@ internal fun SettingsMenu(
             AudioUsageVoiceCommunicationUiState -> AudioAttributes.USAGE_MEDIA
         }
         call.speaker.setAudioUsage(newAudioUsage)
+    }
+
+    val isCommunicationAudioModeEnabled by call.microphone.communicationAudioModeEnabled
+        .collectAsStateWithLifecycle()
+
+    val onToggleCommunicationAudioMode: (Boolean) -> Unit = { enabled ->
+        val applied = call.microphone.setCommunicationAudioModeEnabled(enabled)
+        if (!applied) {
+            Toast.makeText(
+                context,
+                "Audio mode not applied — this call does not manage audio routing",
+                Toast.LENGTH_LONG,
+            ).show()
+        }
+    }
+
+    val audioBitrateProfile by call.microphone.audioBitrateProfile.collectAsStateWithLifecycle()
+    val isMusicAudioProfile =
+        audioBitrateProfile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+
+    val onToggleAudioProfile: () -> Unit = {
+        val next = if (isMusicAudioProfile) {
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED
+        } else {
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+        }
+        scope.launch {
+            call.microphone.setAudioBitrateProfile(next)
+                .onSuccess { result ->
+                    // Name the stages that did not move — a partial switch sounds like a failed
+                    // one, and with no per-stage controls left this is the only way to tell.
+                    val missed = buildList {
+                        if (!result.noiseCancellationApplied) add("noise cancellation")
+                        if (!result.platformNoiseSuppressorApplied) add("hardware NS")
+                        if (!result.softwareAudioProcessingApplied) add("software APM")
+                        if (!result.audioMaxBitrateApplied) add("bitrate")
+                    }
+                    Toast.makeText(
+                        context,
+                        if (missed.isEmpty()) {
+                            val bitrate = result.audioMaxBitrateBps
+                                ?.let { " at ${it / 1000}k" }
+                                .orEmpty()
+                            "Audio profile: $next$bitrate"
+                        } else {
+                            "Audio profile: $next — not applied: ${missed.joinToString()}"
+                        },
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+                .onFailure {
+                    Toast.makeText(
+                        context,
+                        "Audio profile not set: ${it.message}",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+        }
     }
 
     val onToggleAudioFilterClick: () -> Unit = {
@@ -360,6 +419,10 @@ internal fun SettingsMenu(
                 onToggleAudioUsage = onToggleAudioUsage,
                 selectedRecordingTypes = enabledRecordingTypes,
                 onSelectRecordingType = onSelectRecordingType,
+                isCommunicationAudioModeEnabled = isCommunicationAudioModeEnabled,
+                onToggleCommunicationAudioMode = onToggleCommunicationAudioMode,
+                isMusicAudioProfile = isMusicAudioProfile,
+                onToggleAudioProfile = onToggleAudioProfile,
             ),
         )
     }

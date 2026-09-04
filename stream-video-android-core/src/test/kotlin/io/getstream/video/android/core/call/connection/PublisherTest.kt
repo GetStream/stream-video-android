@@ -44,6 +44,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.webrtc.AudioTrack
@@ -840,6 +841,35 @@ class PublisherTest {
         coVerify { mockVideoTrack.setEnabled(true) }
         // Ensure no transceiver was added if transceiver exists for publish option
         coVerify(exactly = 0) { publisher.addTransceiver(any(), any(), any(), videoPublishOption) }
+    }
+
+    @Test
+    fun `replaceAudioTrack moves the audio sender over without taking ownership`() = runTest {
+        val mockSender = mockk<RtpSender>(relaxed = true)
+        every { mockSender.setTrack(any(), any()) } returns true
+        val mockTransceiver = mockk<RtpTransceiver>(relaxed = true) {
+            every { sender } returns mockSender
+        }
+        every {
+            mockTransceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO)
+        } returns listOf(mockTransceiver)
+        val newTrack = mockk<MediaStreamTrack>(relaxed = true)
+
+        assertTrue(publisher.replaceAudioTrack(newTrack))
+
+        // takeOwnership must be false: MediaManagerImpl owns and disposes the audio track, and a
+        // sender that also owned it would dispose the replaced track behind our back.
+        coVerify { mockSender.setTrack(newTrack, false) }
+        coVerify(exactly = 0) { mockSender.setTrack(any(), true) }
+    }
+
+    @Test
+    fun `replaceAudioTrack reports false when no audio is being published`() = runTest {
+        every {
+            mockTransceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO)
+        } returns emptyList()
+
+        assertFalse(publisher.replaceAudioTrack(mockk(relaxed = true)))
     }
     //endregion
 

@@ -379,27 +379,6 @@ class MicrophoneManagerTest {
     }
 
     @Test
-    fun `setAudioBitrateProfile should fail if call already joined`() = runTest {
-        val mediaManager = mockMediaManager(
-            connection = MutableStateFlow(
-                RealtimeConnection.Joined(mockk<RtcSession>(relaxed = true)),
-            ),
-            settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = true)),
-        )
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
-
-        val result = microphoneManager.setAudioBitrateProfile(
-            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY,
-        )
-
-        assertTrue(result.isFailure)
-        assertEquals(
-            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
-            microphoneManager.audioBitrateProfile.value,
-        )
-    }
-
-    @Test
     fun `setAudioBitrateProfile should fail if hifi disabled`() = runTest {
         val mediaManager = mockMediaManager(
             connection = MutableStateFlow(RealtimeConnection.PreJoin),
@@ -416,6 +395,343 @@ class MicrophoneManagerTest {
             AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
             microphoneManager.audioBitrateProfile.value,
         )
+    }
+
+    @Test
+    fun `setAudioBitrateProfile should fail if hifi disabled after joining too`() = runTest {
+        val call = mockAudioStagesCall()
+        val mediaManager = mockMediaManager(
+            connection = MutableStateFlow(joined()),
+            settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = false)),
+            call = call,
+        )
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+
+        // The profiles mean the same thing whenever they are set, so they answer to the same
+        // dashboard setting; joining is not a way around it.
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        )
+
+        assertTrue(result.isFailure)
+        verify(exactly = 0) { call.setAudioProcessingEnabled(any()) }
+        verify(exactly = 0) { call.rebuildAudioCapturePipeline() }
+        verify(exactly = 0) { call.setAudioMaxBitrate(any()) }
+    }
+
+    @Test
+    fun `setAudioBitrateProfile before joining moves no stage`() = runTest {
+        val call = mockAudioStagesCall()
+        val mediaManager = mockMediaManager(
+            connection = MutableStateFlow(RealtimeConnection.PreJoin),
+            settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = true)),
+            call = call,
+        )
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+
+        // Nothing is capturing or publishing, so there is nothing to move: the pipeline is built
+        // from the profile at join and the SFU picks the bitrate.
+        assertEquals(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            microphoneManager.audioBitrateProfile.value,
+        )
+        assertTrue(result.complete)
+        assertNull(result.audioMaxBitrateBps)
+        verify(exactly = 0) { call.rebuildAudioCapturePipeline() }
+        verify(exactly = 0) { call.setAudioMaxBitrate(any()) }
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `setAudioBitrateProfile moves every reachable stage after joining`() = runTest {
+        val call = mockAudioStagesCall(negotiatedAudioBitrate = 64_000)
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        // The whole point of the change: before, this returned a failure once joined.
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+
+        assertTrue(result.complete)
+        assertEquals(128_000, result.audioMaxBitrateBps)
+        // The noise-cancellation processor is the stage no other control on the class reaches.
+        verify { call.setAudioProcessingEnabled(false) }
+        verify { call.setHardwareNoiseSuppressorEnabled(false) }
+        verify { call.rebuildAudioCapturePipeline() }
+        verify { call.setAudioMaxBitrate(128_000) }
+    }
+
+    @Test
+    fun `setAudioBitrateProfile restores the negotiated bitrate when leaving music`() = runTest {
+        val call = mockAudioStagesCall(negotiatedAudioBitrate = 96_000)
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        )
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+        ).getOrThrow()
+
+        // What the SFU asked for at join, not a guess at what a voice profile is worth.
+        assertEquals(96_000, result.audioMaxBitrateBps)
+        verify { call.setAudioMaxBitrate(96_000) }
+    }
+
+    @Test
+    fun `setAudioBitrateProfile falls back to the voice bitrate with no negotiated value`() =
+        runTest {
+            val call = mockAudioStagesCall(negotiatedAudioBitrate = null)
+            val microphoneManager = joinedMicrophoneManager(call)
+
+            val result = microphoneManager.setAudioBitrateProfile(
+                AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY,
+            ).getOrThrow()
+
+            assertEquals(64_000, result.audioMaxBitrateBps)
+        }
+
+    @Test
+    fun `setAudioBitrateProfile does not rebuild the pipeline when nothing changes`() = runTest {
+        val call = mockAudioStagesCall()
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        // Already the default profile's value — rebuilding would drop audio for no reason.
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_HIGH_QUALITY,
+        ).getOrThrow()
+
+        assertTrue(result.softwareAudioProcessingApplied)
+        verify(exactly = 0) { call.rebuildAudioCapturePipeline() }
+    }
+
+    @Test
+    fun `setAudioBitrateProfile counts an absent noise cancellation processor as applied`() =
+        runTest {
+            val call = mockAudioStagesCall(audioProcessingReachable = false)
+            // Nothing is attached, so nothing is processing: the profile is satisfied. Reporting a
+            // failed stage would send every customer without a processor chasing a non-problem.
+            every { call.isAudioProcessingEnabled() } returns false
+            val microphoneManager = joinedMicrophoneManager(call)
+
+            val result = microphoneManager.setAudioBitrateProfile(
+                AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+            ).getOrThrow()
+
+            assertTrue(result.noiseCancellationApplied)
+            assertTrue(result.complete)
+        }
+
+    @Test
+    fun `setAudioBitrateProfile reports a noise cancellation processor that refused`() = runTest {
+        val call = mockAudioStagesCall(audioProcessingReachable = true)
+        // Attached but not allowed on this call — setAudioProcessingEnabled(true) is refused.
+        every { call.isAudioProcessingEnabled() } returns false
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+        ).getOrThrow()
+
+        assertFalse(result.noiseCancellationApplied)
+        assertFalse(result.complete)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `setAudioBitrateProfile reports each stage that did not move`() = runTest {
+        val call = mockAudioStagesCall()
+        every { call.setHardwareNoiseSuppressorEnabled(any()) } returns false
+        every { call.rebuildAudioCapturePipeline() } returns false
+        every { call.setAudioMaxBitrate(any()) } returns false
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+
+        assertTrue(result.noiseCancellationApplied)
+        assertFalse(result.platformNoiseSuppressorApplied)
+        assertFalse(result.softwareAudioProcessingApplied)
+        assertFalse(result.audioMaxBitrateApplied)
+        assertFalse(result.complete)
+        // No ceiling reached a sender, so the negotiated bitrate is what stands.
+        assertNull(result.audioMaxBitrateBps)
+    }
+
+    @Test
+    fun `communication audio mode should be on by default`() {
+        val microphoneManager =
+            MicrophoneManager(mockMediaManager(), audioUsage, audioUsageProvider)
+
+        assertTrue(microphoneManager.communicationAudioModeEnabled.value)
+    }
+
+    @Test
+    fun `setCommunicationAudioModeEnabled should report the requested state when refused`() {
+        val microphoneManager =
+            MicrophoneManager(mockMediaManager(), audioUsage, audioUsageProvider)
+
+        // No audio handler: this call does not manage routing, so the mode is left alone.
+        assertFalse(microphoneManager.setCommunicationAudioModeEnabled(false))
+        // Still reported, so the next handler to start picks the choice up.
+        assertFalse(microphoneManager.communicationAudioModeEnabled.value)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `a refused switch puts the profile-derived state back`() = runTest {
+        val call = mockAudioStagesCall()
+        every { call.setAudioMaxBitrate(any()) } returns false
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        )
+
+        // The suppressor is asked for music (off), then put back to the voice value — otherwise
+        // the value it remembers resurrects music when capture restarts, on a call whose profile
+        // flow says voice.
+        verifyOrder {
+            call.setHardwareNoiseSuppressorEnabled(false)
+            call.setHardwareNoiseSuppressorEnabled(true)
+        }
+        // And the noise-cancellation processor goes back on with it.
+        verifyOrder {
+            call.setAudioProcessingEnabled(false)
+            call.setAudioProcessingEnabled(true)
+        }
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `a refused switch does not swap the live track back`() = runTest {
+        val call = mockAudioStagesCall()
+        every { call.setAudioMaxBitrate(any()) } returns false
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        )
+
+        // Rebuilding back would be a second RtpSender.setTrack swap on a live connection: another
+        // gap in captured audio, and the publisher's disposed-track path. Once, going in, only.
+        verify(exactly = 1) { call.rebuildAudioCapturePipeline() }
+    }
+
+    @Test
+    fun `the switch uses the bitrate the SFU offers for the profile`() = runTest {
+        val call = mockAudioStagesCall(negotiatedAudioBitrate = 64_000)
+        // The server names a bitrate per profile; there is no need to guess at one.
+        every {
+            call.audioBitrateFor(AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY)
+        } returns 160_000
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+
+        assertEquals(160_000, result.audioMaxBitrateBps)
+        verify { call.setAudioMaxBitrate(160_000) }
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `the profile flow does not move when a stage refused`() = runTest {
+        val call = mockAudioStagesCall()
+        every { call.setAudioMaxBitrate(any()) } returns false
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+
+        assertFalse(result.complete)
+        // A toggle bound to this flow snaps back, rather than claiming a switch the audio did not
+        // make — reporting MUSIC here is exactly the "looks like it worked" failure to avoid.
+        assertEquals(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+            microphoneManager.audioBitrateProfile.value,
+        )
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `the profile flow moves when every reachable stage took the change`() = runTest {
+        val call = mockAudioStagesCall()
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+
+        assertTrue(result.complete)
+        assertEquals(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            microphoneManager.audioBitrateProfile.value,
+        )
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `a device with no platform noise suppressor is not a refused stage`() = runTest {
+        val call = mockAudioStagesCall(hardwareNoiseSuppressorSupported = false)
+        // The setter returns false on such a device, exactly as it does when a suppressor refuses.
+        every { call.setHardwareNoiseSuppressorEnabled(any()) } returns false
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+
+        // Nothing is suppressing, so the profile is satisfied and the switch is not held back.
+        assertTrue(result.platformNoiseSuppressorApplied)
+        assertTrue(result.complete)
+        assertEquals(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            microphoneManager.audioBitrateProfile.value,
+        )
+    }
+
+    private fun joined() = RealtimeConnection.Joined(mockk<RtcSession>(relaxed = true))
+
+    /** A joined call with HiFi enabled — where a mid-call profile switch actually does something. */
+    private fun joinedMicrophoneManager(call: Call): MicrophoneManager = MicrophoneManager(
+        mockMediaManager(
+            connection = MutableStateFlow(joined()),
+            settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = true)),
+            call = call,
+        ),
+        audioUsage,
+        audioUsageProvider,
+    )
+
+    /** A [Call] with every audio stage present and accepting changes. */
+    private fun mockAudioStagesCall(
+        audioProcessingReachable: Boolean = true,
+        negotiatedAudioBitrate: Int? = 64_000,
+        hardwareNoiseSuppressorSupported: Boolean = true,
+    ): Call {
+        // Mirrors what was asked for, so a stage that accepts the change reports applied.
+        var audioProcessingEnabled = false
+        return mockk<Call>(relaxed = true) {
+            every { isAudioProcessingReachable() } returns audioProcessingReachable
+            every { isHardwareNoiseSuppressorSupported() } returns hardwareNoiseSuppressorSupported
+            every { setAudioProcessingEnabled(any()) } answers {
+                audioProcessingEnabled = firstArg()
+            }
+            every { isAudioProcessingEnabled() } answers { audioProcessingEnabled }
+            every { setHardwareNoiseSuppressorEnabled(any()) } returns true
+            every { rebuildAudioCapturePipeline() } returns true
+            every { setAudioMaxBitrate(any()) } returns true
+            every { negotiatedAudioBitrate() } returns negotiatedAudioBitrate
+            every { audioBitrateFor(any()) } returns null
+        }
     }
 
     private fun microphoneManagerWithImmediateSetup(
