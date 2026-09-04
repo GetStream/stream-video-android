@@ -56,9 +56,9 @@ public data class NotificationConfig(
      * Delay in milliseconds before updating an unaccepted incoming-call notification while that
      * notification owns the ringtone.
      * On Android 17 and above: The incoming notification will own the ringing and updating a
-     * ringing notification before 1.1 second will mute its sound
+     * ringing notification before 1.5 second will mute its sound
      *
      * Set this to `0` to disable the delay.
      */
-    val incomingRingingNotificationUpdateDelayMillis: Long = 1_100L,
+    val incomingRingingNotificationUpdateDelayMillis: Long = 1_500L,
 )
