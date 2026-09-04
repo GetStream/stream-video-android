@@ -18,6 +18,8 @@ package io.getstream.video.android.core.notifications.handlers
 
 import android.app.NotificationManager
 import android.content.Context
+import android.media.AudioAttributes
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
@@ -83,6 +85,23 @@ internal fun StreamNotificationChannelInfo.create(manager: NotificationManagerCo
         )
             .setName(name)
             .setDescription(description)
+            .build(),
+    )
+}
+
+/** Creates an incoming-call channel whose sound and vibration are owned by the system. */
+internal fun StreamNotificationChannelInfo.createRingingChannel(
+    manager: NotificationManagerCompat,
+    soundUri: Uri?,
+    audioAttributes: AudioAttributes,
+    vibrationPattern: LongArray?,
+) = safeCall {
+    manager.createNotificationChannel(
+        NotificationChannelCompat.Builder(id, importance)
+            .setName(name)
+            .setDescription(description)
+            .setSound(soundUri, audioAttributes)
+            .setVibrationPattern(vibrationPattern)
             .build(),
     )
 }
