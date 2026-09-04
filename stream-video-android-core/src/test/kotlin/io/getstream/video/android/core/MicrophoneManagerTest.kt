@@ -584,6 +584,64 @@ class MicrophoneManagerTest {
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `a refused switch puts the profile-derived state back`() = runTest {
+        val call = mockAudioStagesCall()
+        every { call.setAudioMaxBitrate(any()) } returns false
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        )
+
+        // The suppressor is asked for music (off), then put back to the voice value — otherwise
+        // the value it remembers resurrects music when capture restarts, on a call whose profile
+        // flow says voice.
+        verifyOrder {
+            call.setHardwareNoiseSuppressorEnabled(false)
+            call.setHardwareNoiseSuppressorEnabled(true)
+        }
+        // And the noise-cancellation processor goes back on with it.
+        verifyOrder {
+            call.setAudioProcessingEnabled(false)
+            call.setAudioProcessingEnabled(true)
+        }
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `a refused switch does not swap the live track back`() = runTest {
+        val call = mockAudioStagesCall()
+        every { call.setAudioMaxBitrate(any()) } returns false
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        )
+
+        // Rebuilding back would be a second RtpSender.setTrack swap on a live connection: another
+        // gap in captured audio, and the publisher's disposed-track path. Once, going in, only.
+        verify(exactly = 1) { call.rebuildAudioCapturePipeline() }
+    }
+
+    @Test
+    fun `the switch uses the bitrate the SFU offers for the profile`() = runTest {
+        val call = mockAudioStagesCall(negotiatedAudioBitrate = 64_000)
+        // The server names a bitrate per profile; there is no need to guess at one.
+        every {
+            call.audioBitrateFor(AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY)
+        } returns 160_000
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+
+        assertEquals(160_000, result.audioMaxBitrateBps)
+        verify { call.setAudioMaxBitrate(160_000) }
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
     fun `the profile flow does not move when a stage refused`() = runTest {
         val call = mockAudioStagesCall()
         every { call.setAudioMaxBitrate(any()) } returns false
@@ -672,6 +730,7 @@ class MicrophoneManagerTest {
             every { rebuildAudioCapturePipeline() } returns true
             every { setAudioMaxBitrate(any()) } returns true
             every { negotiatedAudioBitrate() } returns negotiatedAudioBitrate
+            every { audioBitrateFor(any()) } returns null
         }
     }
 

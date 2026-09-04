@@ -594,6 +594,10 @@ public class RtcSession internal constructor(
     /** The audio bitrate the SFU negotiated at join, or null when nothing publishes audio. */
     internal fun negotiatedAudioBitrate(): Int? = publisher.value?.negotiatedAudioBitrate()
 
+    /** The bitrate the SFU offers for [profile], or null when it named none. */
+    internal fun audioBitrateFor(profile: stream.video.sfu.models.AudioBitrateProfile): Int? =
+        publisher.value?.audioBitrateFor(profile)
+
     /**
      * Connection and WebRTC.
      */

@@ -227,18 +227,24 @@ internal const val MUSIC_MAX_AUDIO_BITRATE_BPS: Int = 128_000
 /**
  * The maximum audio bitrate to put on the publisher for [profile].
  *
- * The SFU picks the audio bitrate from the publish options it negotiated at join, and mid-call it
- * is not asked again — so switching to music has to raise the encoder's own ceiling. Going back the
- * other way restores exactly what was negotiated, [negotiatedBitrateBps], rather than a guess at it.
+ * The SFU is not asked again mid-call, so switching profiles has to move the encoder's own ceiling.
+ * It does not have to guess at the number, though: the server sends one bitrate per profile in
+ * `PublishOption.audio_bitrate_profiles`, and [serverBitrateBps] is the one for [profile] — the
+ * same value a freshly created audio transceiver would be given. Only when the server named none
+ * does this fall back to what was negotiated at join, and then to a constant.
  */
 @JvmSynthetic
 internal fun targetAudioMaxBitrateBps(
     profile: AudioBitrateProfile,
+    serverBitrateBps: Int?,
     negotiatedBitrateBps: Int?,
-): Int = if (profile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY) {
-    maxOf(MUSIC_MAX_AUDIO_BITRATE_BPS, negotiatedBitrateBps ?: 0)
-} else {
-    negotiatedBitrateBps?.takeIf { it > 0 } ?: VOICE_MAX_AUDIO_BITRATE_BPS
+): Int {
+    serverBitrateBps?.takeIf { it > 0 }?.let { return it }
+    return if (profile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY) {
+        maxOf(MUSIC_MAX_AUDIO_BITRATE_BPS, negotiatedBitrateBps ?: 0)
+    } else {
+        negotiatedBitrateBps?.takeIf { it > 0 } ?: VOICE_MAX_AUDIO_BITRATE_BPS
+    }
 }
 
 @JvmSynthetic

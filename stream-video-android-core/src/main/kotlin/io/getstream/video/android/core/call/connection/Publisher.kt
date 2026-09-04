@@ -58,6 +58,7 @@ import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
 import stream.video.sfu.event.VideoLayerSetting
 import stream.video.sfu.event.VideoSender
+import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.ErrorCode
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackInfo
@@ -396,6 +397,21 @@ internal class Publisher(
                 true
             }
         }
+    }
+
+    /**
+     * The bitrate the SFU offers for [profile], or null when it named none.
+     *
+     * The server sends one per profile in `PublishOption.audio_bitrate_profiles`, so a mid-call
+     * switch does not have to invent a number for the profile it is moving to — this is the same
+     * value a freshly created audio transceiver would be given for that profile.
+     */
+    internal fun audioBitrateFor(profile: AudioBitrateProfile): Int? = safeCallWithDefault(null) {
+        publishOptions.firstOrNull { it.track_type == TrackType.TRACK_TYPE_AUDIO }
+            ?.audio_bitrate_profiles
+            ?.firstOrNull { it.profile == profile }
+            ?.bitrate
+            ?.takeIf { it > 0 }
     }
 
     /**

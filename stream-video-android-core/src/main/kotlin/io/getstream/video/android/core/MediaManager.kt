@@ -986,8 +986,10 @@ class MicrophoneManager(
         }
 
         logger.i { "[setAudioBitrateProfile] Setting audio bitrate profile to: $profile" }
+        val previousProfile = _audioBitrateProfile.value
         // The profile decides how the audio device module and the audio sources are built, so
-        // these have to follow it. Nothing else can move them.
+        // these have to follow it — the pipeline rebuild below reads them. A switch that does not
+        // complete puts them back; see [revertProfileDerivedState].
         hardwareNoiseSuppressorEnabled = defaultHardwareAudioEffectsEnabled(profile)
         // Whether the source constraints actually change decides whether the pipeline has to be
         // rebuilt below, so it has to be read before the new value lands.
@@ -1016,17 +1018,43 @@ class MicrophoneManager(
         if (result.complete) {
             _audioBitrateProfile.value = profile
         } else {
-            // Every reachable stage did not move, so the audio is not what this profile means.
-            // Publishing it anyway is the failure the flow exists to catch: a toggle stuck on
-            // MUSIC while a suppressor is still eating the music looks exactly like success.
-            // Leaving the flow where it was makes a UI toggle snap back, which is the truth and
-            // lets the caller retry — the stages that did move are reported on [result], and the
-            // private stage state still follows the request, so a later source rebuild picks it up.
+            // Not every reachable stage moved, so the audio is not what this profile means and the
+            // profile is not published: a toggle stuck on MUSIC while a suppressor still eats the
+            // music looks exactly like success. Leaving the flow where it was makes it snap back,
+            // which is the truth, and lets the caller retry.
             logger.w {
                 "[setAudioBitrateProfile] $profile only partly applied, not publishing it: $result"
             }
+            revertProfileDerivedState(previousProfile)
         }
         return Result.success(result)
+    }
+
+    /**
+     * Puts the state derived from the audio bitrate profile back to [previousProfile] after a
+     * switch that did not complete, so nothing disagrees with [audioBitrateProfile] about which
+     * profile this call is on.
+     *
+     * This restores *state*, not the live pipeline. The stages that did move stay where they are
+     * until the next source rebuild picks the restored values up, deliberately: undoing the
+     * software audio processing stage means a second `RtpSender.setTrack` swap on a live
+     * connection, which costs another gap in captured audio and re-enters the disposed-track path
+     * in the publisher. Trading a partial switch for a possible force-rejoin is a bad bargain.
+     *
+     * The two stages that cost nothing to put back — the platform noise suppressor and the
+     * noise-cancellation processor — are re-requested, because the values they remember are
+     * re-applied when capture restarts and would otherwise resurrect the profile this call just
+     * decided it is not on.
+     */
+    private fun revertProfileDerivedState(previousProfile: AudioBitrateProfile) {
+        hardwareNoiseSuppressorEnabled = defaultHardwareAudioEffectsEnabled(previousProfile)
+        softwareAudioProcessingEnabled = defaultSoftwareAudioProcessingEnabled(previousProfile)
+
+        val call = mediaManager.call
+        call.setHardwareNoiseSuppressorEnabled(hardwareNoiseSuppressorEnabled)
+        call.setAudioProcessingEnabled(
+            previousProfile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        )
     }
 
     /**
@@ -1081,7 +1109,11 @@ class MicrophoneManager(
                 }
             }
 
-        val maxBitrateBps = targetAudioMaxBitrateBps(profile, call.negotiatedAudioBitrate())
+        val maxBitrateBps = targetAudioMaxBitrateBps(
+            profile,
+            serverBitrateBps = call.audioBitrateFor(profile),
+            negotiatedBitrateBps = call.negotiatedAudioBitrate(),
+        )
         val audioMaxBitrateApplied = call.setAudioMaxBitrate(maxBitrateBps)
         if (!audioMaxBitrateApplied) {
             logger.w {

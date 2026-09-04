@@ -964,6 +964,10 @@ public class Call(
     /** The audio bitrate the SFU negotiated at join, or null when nothing publishes audio. */
     internal fun negotiatedAudioBitrate(): Int? = session.value?.negotiatedAudioBitrate()
 
+    /** The bitrate the SFU offers for [profile], or null when it named none. */
+    internal fun audioBitrateFor(profile: stream.video.sfu.models.AudioBitrateProfile): Int? =
+        session.value?.audioBitrateFor(profile)
+
     /**
      * Whether a noise-cancellation processor is wired into this call and can be turned on or off.
      *
