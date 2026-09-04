@@ -17,12 +17,12 @@
 package io.getstream.video.android.core.notifications.internal.telecom
 
 import android.os.Build
-import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 
-internal class TelecomHelper {
+internal class TelecomHelper(val client: StreamVideoClient) {
 
     fun canUseJetpackTelecom(): Boolean {
-        val integrationTypeIsJetpack = (StreamVideo.instanceOrNull())?.state?.getTelecomIntegrationType() == TelecomIntegrationType.JETPACK_TELECOM
+        val integrationTypeIsJetpack = client.state.getTelecomIntegrationType() == TelecomIntegrationType.JETPACK_TELECOM
         return integrationTypeIsJetpack && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
     }
 }
