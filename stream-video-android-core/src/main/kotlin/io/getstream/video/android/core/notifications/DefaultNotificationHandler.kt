@@ -329,8 +329,9 @@ public open class DefaultNotificationHandler(
         callDisplayName: String,
     ): Notification? = null
 
-    protected val notificationDispatcher: NotificationDispatcher =
-        DefaultNotificationDispatcher(notificationManager)
+    protected val notificationDispatcher: NotificationDispatcher by lazy {
+        DefaultNotificationDispatcher(notificationManager, StreamVideo.instance())
+    }
 
     override fun getStreamNotificationDispatcher(): NotificationDispatcher {
         return notificationDispatcher

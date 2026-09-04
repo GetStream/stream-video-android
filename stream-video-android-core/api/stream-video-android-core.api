@@ -14014,6 +14014,7 @@ public abstract interface class io/getstream/video/android/core/notifications/St
 
 public final class io/getstream/video/android/core/notifications/dispatchers/DefaultNotificationDispatcher : io/getstream/video/android/core/notifications/dispatchers/NotificationDispatcher {
 	public fun <init> (Landroidx/core/app/NotificationManagerCompat;)V
+	public fun <init> (Landroidx/core/app/NotificationManagerCompat;Lio/getstream/video/android/core/StreamVideo;)V
 	public final fun getNotificationManager ()Landroidx/core/app/NotificationManagerCompat;
 	public fun notify (Lio/getstream/video/android/model/StreamCallId;ILandroid/app/Notification;)V
 }
