@@ -197,6 +197,7 @@ internal class StreamVideoClient internal constructor(
     internal val telecomConfig: TelecomConfig? = null,
     internal val rejectCallWhenBusy: Boolean = false,
     internal val debugUseNotificationRingtoneForIncomingCalls: Boolean = false,
+    internal val debugUseTelecomFirstForIncomingCalls: Boolean = false,
     internal val analytics: AnalyticsModule = AnalyticsModule.getDefault(
         coordinatorConnectionModule.api,
         scope,

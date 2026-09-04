@@ -29,6 +29,7 @@ import io.getstream.video.android.core.notifications.internal.service.ServiceInt
 import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomIntegrationType
 import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.delay
@@ -309,7 +310,7 @@ class ClientState(private val client: StreamVideo) {
      */
     internal fun maybeStopForegroundService(call: Call) {
         val callConfig = streamVideoClient.callServiceConfigRegistry.get(call.type)
-        if (callConfig.runCallServiceInForeground) {
+        if (callConfig.runCallServiceInForeground || isAndroid17OrHigher()) {
             logger.d { "Building stop intent for call_id: ${call.cid}" }
             serviceLauncher.stopService(call)
         }

@@ -38,6 +38,7 @@ import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.R
@@ -89,7 +90,7 @@ constructor(
     private val notificationChannels: StreamNotificationChannels = StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_notification_channel_id,
+            defaultIncomingCallChannelIdRes(),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
@@ -170,7 +171,6 @@ constructor(
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instance() as StreamVideoClient
-        val notificationPreparer = IncomingCallNotificationPreparer(streamVideo)
         if (shouldShowIncomingCallNotification(
                 (streamVideo as StreamVideoClient).callBusyHandler,
                 callId.cid,
@@ -194,7 +194,12 @@ constructor(
                             shouldHaveContentIntent = true,
                             payload,
                         )?.let { notification ->
-                            notificationPreparer.prepare(notification, owner, ringingState)
+                            if (owner == IncomingRingtoneOwner.Notification) {
+                                IncomingCallNotificationPreparer(streamVideo)
+                                    .prepare(notification, owner, ringingState)
+                            } else {
+                                notification
+                            }
                         }
                     },
                 )
@@ -232,6 +237,7 @@ constructor(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
+        notificationManager.cancel(callId.getNotificationId(NotificationType.Incoming))
         val notificationId = callId.getNotificationId(NotificationType.Missed)
         getMissedCallNotification(
             callId,

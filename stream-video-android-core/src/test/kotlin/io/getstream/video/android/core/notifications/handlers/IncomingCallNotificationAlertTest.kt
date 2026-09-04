@@ -21,6 +21,7 @@ import io.getstream.video.android.core.RingingState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class IncomingCallNotificationAlertTest {
@@ -28,6 +29,27 @@ class IncomingCallNotificationAlertTest {
     @Test
     fun `disabled configuration keeps legacy ringtone ownership`() {
         assertFalse(shouldNotificationOwnIncomingRingtone(false))
+    }
+
+    @Test
+    fun `Android 17 uses notification ringtone ownership by default`() {
+        assertTrue(
+            shouldNotificationOwnIncomingRingtone(
+                notificationRingtoneEnabled = false,
+                sdkInt = 37,
+            ),
+        )
+    }
+
+    @Test
+    fun `Telecom first testing uses notification ringtone ownership before Android 17`() {
+        assertTrue(
+            shouldNotificationOwnIncomingRingtone(
+                notificationRingtoneEnabled = false,
+                telecomFirstEnabled = true,
+                sdkInt = 35,
+            ),
+        )
     }
 
     @Test

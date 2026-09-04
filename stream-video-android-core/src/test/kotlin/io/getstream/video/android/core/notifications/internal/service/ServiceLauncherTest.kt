@@ -136,6 +136,37 @@ class ServiceLauncherTest {
     // region showIncomingCall()
 
     @Test
+    fun `showIncomingCall registers Telecom first when configured`() = runTest {
+        val call = mockk<Call>(relaxed = true)
+        every { streamVideo.debugUseTelecomFirstForIncomingCalls } returns true
+        every { anyConstructed<TelecomPermissions>().canUseTelecom(context) } returns true
+        every { streamVideo.call(any(), any()) } returns call
+        every { call.scope } returns TestScope(StandardTestDispatcher(testScheduler))
+        every { call.state.jetpackTelecomRepository } returns null
+
+        serviceLauncher.showIncomingCall(
+            callId = callId,
+            callDisplayName = "Test Caller",
+            callServiceConfiguration = callServiceConfig,
+            isVideo = true,
+            payload = emptyMap(),
+            notificationProvider = { notification },
+        )
+        testScheduler.advanceUntilIdle()
+
+        coVerify {
+            jetpackTelecomRepository.registerCall(
+                any(),
+                any(),
+                true,
+                true,
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
     fun `showIncomingCall starts telecom registration when all conditions pass`() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
         val testScope = TestScope(testDispatcher)
@@ -143,6 +174,7 @@ class ServiceLauncherTest {
         val call = mockk<Call>(relaxed = true)
         every { streamVideo.call(any(), any()) } returns call
         every { call.state } returns mockk(relaxed = true)
+        every { call.state.jetpackTelecomRepository } returns null
         every { call.scope } returns testScope
 
         mockkStatic(ContextCompat::class)

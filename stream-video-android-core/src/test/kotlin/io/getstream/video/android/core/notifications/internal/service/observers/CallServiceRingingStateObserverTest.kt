@@ -117,6 +117,7 @@ class CallServiceRingingStateObserverTest {
             every { this@mockk.vibrationConfig } returns vibrationConfig
             every { this@mockk.sounds } returns sounds
             every { debugUseNotificationRingtoneForIncomingCalls } returns false
+            every { debugUseTelecomFirstForIncomingCalls } returns false
         }
 
         observer = CallServiceRingingStateObserver(

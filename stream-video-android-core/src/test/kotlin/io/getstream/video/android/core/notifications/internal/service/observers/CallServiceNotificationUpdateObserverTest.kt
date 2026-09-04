@@ -127,11 +127,14 @@ class CallServiceNotificationUpdateObserverTest {
                 this@CallServiceNotificationUpdateObserverTest.notificationUpdateDeduplicator
         }
 
-        streamVideo = mockk {
-            every { state } returns streamState
-            every { debugUseNotificationRingtoneForIncomingCalls } returns false
-            coEvery { onCallNotificationUpdate(call) } returns notification
-            every { this@mockk.streamNotificationManager } returns streamNotificationManager
+        streamVideo = mockk(relaxed = true)
+        every { streamVideo.state } returns streamState
+        every { streamVideo.context } returns context
+        coEvery { streamVideo.onCallNotificationUpdate(call) } returns notification
+        every { streamVideo.streamNotificationManager } returns mockk {
+            every { notificationConfig } returns mockk {
+                every { notificationUpdateTriggers(call) } returns null
+            }
         }
 
         permissionManager = mockk {
@@ -165,7 +168,7 @@ class CallServiceNotificationUpdateObserverTest {
 
     @Test
     fun `incoming ringing state starts incoming foreground notification`() = runTest {
-        observer.observe(context)
+        observer.observe()
 
         ringingStateFlow.value = RingingState.Incoming()
         advanceUntilIdle()
@@ -266,7 +269,7 @@ class CallServiceNotificationUpdateObserverTest {
 
     @Test
     fun `outgoing ringing state starts outgoing foreground notification`() = runTest {
-        observer.observe(context)
+        observer.observe()
         advanceUntilIdle()
 
         ringingStateFlow.value = RingingState.Outgoing()
@@ -290,7 +293,7 @@ class CallServiceNotificationUpdateObserverTest {
         every { streamVideo.getStreamNotificationDispatcher() } returns notificationDispatcher
         coEvery { streamVideo.onCallNotificationUpdate(call) } returns mockNotification
 
-        observer.observe(context)
+        observer.observe()
 
         advanceUntilIdle()
 
@@ -314,7 +317,7 @@ class CallServiceNotificationUpdateObserverTest {
     fun `no notification generated does not start foreground service`() = runTest {
         coEvery { streamVideo.onCallNotificationUpdate(call) } returns null
 
-        observer.observe(context)
+        observer.observe()
         advanceUntilIdle()
 
         ringingStateFlow.value = RingingState.Incoming()

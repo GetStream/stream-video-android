@@ -123,11 +123,17 @@ class StreamDefaultNotificationHandlerTest {
         val mockState = mockk<ClientState>(relaxed = true)
         val mockCallConfigRegistry = mockk<CallServiceConfigRegistry>(relaxed = true)
         val mockCallServiceConfig = mockk<CallServiceConfig>(relaxed = true)
+        val mockServiceLauncher = mockk<ServiceLauncher>(relaxed = true)
 
         every { StreamVideo.instance() } returns mockStreamVideo
         every { mockStreamVideo.state } returns mockState
-        serviceLauncher = mockk(relaxed = true)
-        every { mockState.serviceLauncher } returns serviceLauncher
+        every { mockState.serviceLauncher } returns mockServiceLauncher
+        every {
+            mockServiceLauncher.showIncomingCall(any(), any(), any(), any(), any(), any())
+        } answers {
+            arg<(IncomingRingtoneOwner) -> Notification?>(5)(IncomingRingtoneOwner.Legacy)
+            Unit
+        }
         every { mockState.callConfigRegistry } returns mockCallConfigRegistry
         every { mockStreamVideo.callServiceConfigRegistry } returns mockCallConfigRegistry
         every { mockCallConfigRegistry.get(any()) } returns mockCallServiceConfig
