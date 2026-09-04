@@ -46,6 +46,7 @@ import io.getstream.video.android.core.notifications.internal.service.observers.
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceNotificationUpdateObserver
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceRingingStateObserver
 import io.getstream.video.android.core.notifications.internal.service.permissions.ForegroundServicePermissionManager
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
 import io.getstream.video.android.model.StreamCallId
@@ -537,7 +538,11 @@ internal open class CallService : Service() {
     }
 
     private fun observeCall(call: Call, streamVideo: StreamVideoClient) {
-        if (call.state.serviceRoute.value == ServiceRoute.LEGACY_CALL_SERVICE) {
+        val shouldUseCallServiceObservers =
+            !isAndroid17OrHigher() ||
+                call.state.serviceRoute.value == ServiceRoute.LEGACY_CALL_SERVICE
+
+        if (shouldUseCallServiceObservers) {
             CallServiceRingingStateObserver(
                 call,
                 serviceStateController.soundPlayer,
