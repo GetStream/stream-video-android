@@ -479,6 +479,13 @@ constructor(
         logger.d {
             "[getIncomingCallNotificationInternal] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
+        // TODO: Unaccepted incoming-call updates must preserve the original ringing channel ID.
+        // While the screen is locked, the initial notification is posted on incomingCallChannel.
+        // Its full-screen intent brings the app to the foreground, so a subsequent notification
+        // update can incorrectly select incomingCallLowImportanceChannel below. Updating the same
+        // notification on a different channel may stops the sound and vibration owned by the original
+        // ringing channel. Keep using the initially posted channel until the call is accepted,
+        // rejected, or ended.
         val notificationChannel = when {
             isAppInForeground() && hideRingingNotificationInForeground ->
                 notificationChannels.incomingCallLowImportanceChannel
