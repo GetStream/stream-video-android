@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.notifications.internal.service
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.telecom.CallsManager
@@ -25,20 +24,30 @@ import io.getstream.video.android.core.notifications.internal.telecom.IncomingCa
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.model.StreamCallId
 
-internal class JetpackTelecomRepositoryProvider(private val context: Context) {
+internal class JetpackTelecomRepositoryProvider(private val streamVideo: StreamVideo) {
+
+    private val context = streamVideo.context.applicationContext ?: streamVideo.context
+    private val registrationLock = Any()
+    private lateinit var callsManager: CallsManager
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun get(callId: StreamCallId): JetpackTelecomRepository {
-        val callsManager = CallsManager(context).apply {
-            registerAppWithTelecom(
-                capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING and
-                    CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
-            )
-        }
-
-        val streamVideo = StreamVideo.instance()
+        val callsManager = getOrRegisterCallsManager()
         val incomingCallTelecomAction =
             IncomingCallTelecomAction(streamVideo)
         return JetpackTelecomRepository(callsManager, callId, incomingCallTelecomAction)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getOrRegisterCallsManager(): CallsManager = synchronized(registrationLock) {
+        if (!::callsManager.isInitialized) {
+            callsManager = CallsManager(context).also { manager ->
+                manager.registerAppWithTelecom(
+                    capabilities = CallsManager.CAPABILITY_SUPPORTS_CALL_STREAMING or
+                        CallsManager.CAPABILITY_SUPPORTS_VIDEO_CALLING,
+                )
+            }
+        }
+        callsManager
     }
 }
