@@ -77,27 +77,31 @@ internal open class CallServiceNotificationUpdateObserver(
             val updateTriggers = getUpdateTriggers()
 
             updateTriggers.collectLatest { _ ->
-                deferIncomingRingingNotificationUpdateIfRequired()
                 updateNotification()
             }
         }
     }
 
-    private suspend fun deferIncomingRingingNotificationUpdateIfRequired() {
-        val ringingState = call.state.ringingState.value
+    private suspend fun deferIncomingRingingNotificationUpdateIfRequired(
+        ringingState: RingingState,
+    ) {
+        if (shouldStabilizeIncomingRingingNotification(ringingState)) {
+            incomingRingingNotificationStabilization.await()
+        }
+    }
+
+    private fun shouldStabilizeIncomingRingingNotification(
+        ringingState: RingingState,
+    ): Boolean {
         val notificationOwnsRingtone = shouldNotificationOwnIncomingRingtone(
             notificationRingtoneEnabled =
             streamVideo.debugUseNotificationRingtoneForIncomingCalls,
             telecomFirstEnabled = streamVideo.debugUseTelecomFirstForIncomingCalls,
         )
 
-        if (
-            ringingState is RingingState.Incoming &&
+        return ringingState is RingingState.Incoming &&
             !ringingState.acceptedByMe &&
             notificationOwnsRingtone
-        ) {
-            incomingRingingNotificationStabilization.await()
-        }
     }
 
     /**
@@ -135,10 +139,37 @@ internal open class CallServiceNotificationUpdateObserver(
         }
 
         if (notification != null) {
+            if (shouldSkipIncomingRingingNotificationUpdate(ringingState, notification)) {
+                logger.d {
+                    "[updateNotification] Skipping equivalent incoming-call notification update"
+                }
+                return
+            }
+            deferIncomingRingingNotificationUpdateIfRequired(ringingState)
             showNotificationForState(ringingState, notification)
         } else {
             logger.w { "[updateNotification] No notification generated" }
         }
+    }
+
+    private fun shouldSkipIncomingRingingNotificationUpdate(
+        ringingState: RingingState,
+        updatedNotification: Notification,
+    ): Boolean {
+        if (!shouldStabilizeIncomingRingingNotification(ringingState)) return false
+
+        val callId = StreamCallId(call.type, call.id)
+        val updatedNotificationId = call.state.notificationIdFlow.value
+            ?: callId.getNotificationId(NotificationType.Incoming)
+
+        return streamVideo.streamNotificationManager.notificationUpdateDeduplicator.isDuplicate(
+            call = call,
+            ringingState = ringingState,
+            existingNotificationId = call.state.notificationIdFlow.value,
+            existingNotification = call.state.atomicNotification.get(),
+            updatedNotificationId = updatedNotificationId,
+            updatedNotification = updatedNotification,
+        )
     }
 
     /**

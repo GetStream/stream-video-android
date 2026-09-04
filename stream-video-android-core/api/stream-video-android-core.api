@@ -9804,6 +9804,7 @@ public final class io/getstream/video/android/core/StreamVideoBuilder {
 	public final fun build ()Lio/getstream/video/android/core/StreamVideo;
 	public final fun debugUseNotificationRingtoneForIncomingCalls (Z)Lio/getstream/video/android/core/StreamVideoBuilder;
 	public final fun debugUseTelecomFirstForIncomingCalls (Z)Lio/getstream/video/android/core/StreamVideoBuilder;
+	public final fun incomingCallNotificationUpdateComparator (Lio/getstream/video/android/core/notifications/NotificationUpdateComparator;)Lio/getstream/video/android/core/StreamVideoBuilder;
 }
 
 public abstract interface class io/getstream/video/android/core/StreamVideoConfig {
@@ -13710,6 +13711,10 @@ public final class io/getstream/video/android/core/notifications/NotificationTyp
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class io/getstream/video/android/core/notifications/NotificationUpdateComparator {
+	public abstract fun areEquivalent (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/RingingState;Landroid/app/Notification;Landroid/app/Notification;)Z
 }
 
 public abstract interface class io/getstream/video/android/core/notifications/StreamIntentResolver : io/getstream/video/android/core/notifications/StreamIntentResolverWithPayload {

@@ -408,6 +408,7 @@ constructor(
         callDisplayName: String?,
         payload: Map<String, Any?>,
         shouldHaveContentIntent: Boolean,
+        existingChannelId: String? = null,
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification? {
         logger.d {
@@ -435,6 +436,7 @@ constructor(
                     callDisplayName,
                     payload,
                     shouldHaveContentIntent,
+                    existingChannelId,
                     intercept,
                 ).configureIncomingCallAlert(ringingState)
             } else {
@@ -474,22 +476,25 @@ constructor(
         callerName: String?,
         payload: Map<String, Any?>,
         shouldHaveContentIntent: Boolean,
+        existingChannelId: String? = null,
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification {
         logger.d {
             "[getIncomingCallNotificationInternal] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
-        // TODO: Unaccepted incoming-call updates must preserve the original ringing channel ID.
-        // While the screen is locked, the initial notification is posted on incomingCallChannel.
-        // Its full-screen intent brings the app to the foreground, so a subsequent notification
-        // update can incorrectly select incomingCallLowImportanceChannel below. Updating the same
-        // notification on a different channel may stops the sound and vibration owned by the original
-        // ringing channel. Keep using the initially posted channel until the call is accepted,
-        // rejected, or ended.
-        val notificationChannel = when {
-            isAppInForeground() && hideRingingNotificationInForeground ->
+        // A full-screen intent can move the app to the foreground after the initial notification
+        // is posted. Preserve that notification's channel during incoming-call updates instead of
+        // switching it to the foreground-only channel and interrupting notification-owned ringing.
+        val notificationChannel = when (existingChannelId) {
+            notificationChannels.incomingCallChannel.id ->
+                notificationChannels.incomingCallChannel
+            notificationChannels.incomingCallLowImportanceChannel.id ->
                 notificationChannels.incomingCallLowImportanceChannel
-            else -> notificationChannels.incomingCallChannel
+            else -> when {
+                isAppInForeground() && hideRingingNotificationInForeground ->
+                    notificationChannels.incomingCallLowImportanceChannel
+                else -> notificationChannels.incomingCallChannel
+            }
         }
 
         return ensureIncomingCallChannelAndBuildNotification(notificationChannel) {
@@ -542,17 +547,18 @@ constructor(
             callerName,
             payload,
             shouldHaveContentIntent,
-        ) {
-            initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
-                this,
-                fullScreenPendingIntent,
-                acceptCallPendingIntent,
-                rejectCallPendingIntent,
-                callerName,
-                shouldHaveContentIntent,
-                payload,
-            )
-        }
+            intercept = {
+                initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
+                    this,
+                    fullScreenPendingIntent,
+                    acceptCallPendingIntent,
+                    rejectCallPendingIntent,
+                    callerName,
+                    shouldHaveContentIntent,
+                    payload,
+                )
+            },
+        )
     }
 
     @Deprecated(
@@ -943,11 +949,15 @@ constructor(
         }
         val callId = StreamCallId.fromCallCid(call.cid)
         val payload = emptyMap<String, Any?>()
+        val existingChannelId = call.state.atomicNotification.get()?.let {
+            NotificationCompat.getChannelId(it)
+        }
         return getRingingCallNotificationInternal(
             ringingState = call.state.ringingState.value,
             callId = callId,
             callDisplayName = callDisplayName,
             shouldHaveContentIntent = true,
+            existingChannelId = existingChannelId,
             intercept = {
                 val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
                     callId,

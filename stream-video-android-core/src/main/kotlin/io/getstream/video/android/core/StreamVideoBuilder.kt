@@ -28,7 +28,9 @@ import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
+import io.getstream.video.android.core.notifications.DefaultNotificationUpdateComparator
 import io.getstream.video.android.core.notifications.NotificationConfig
+import io.getstream.video.android.core.notifications.NotificationUpdateComparator
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
@@ -179,6 +181,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     internal var debugUseTelecomFirstForIncomingCalls: Boolean =
         Build.VERSION.SDK_INT >= BUILD_VERSION_CODES_CINNAMON_BUN
         private set
+    private var incomingCallNotificationUpdateComparator: NotificationUpdateComparator =
+        DefaultNotificationUpdateComparator
 
     /**
      * Selects the incoming-call ringtone player.
@@ -204,6 +208,17 @@ public class StreamVideoBuilder @JvmOverloads constructor(
      */
     public fun debugUseTelecomFirstForIncomingCalls(enabled: Boolean): StreamVideoBuilder = apply {
         debugUseTelecomFirstForIncomingCalls = enabled
+    }
+
+    /**
+     * Sets the comparison used on Android 17 and above to suppress equivalent unaccepted
+     * incoming-call notification updates. Return `true` from
+     * [NotificationUpdateComparator.areEquivalent] to skip publishing the proposed update.
+     */
+    public fun incomingCallNotificationUpdateComparator(
+        comparator: NotificationUpdateComparator,
+    ): StreamVideoBuilder = apply {
+        incomingCallNotificationUpdateComparator = comparator
     }
 
     /**
@@ -303,6 +318,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             context = context,
             scope = scope,
             notificationConfig = notificationConfig,
+            incomingCallNotificationUpdateComparator = incomingCallNotificationUpdateComparator,
             api = coordinatorConnectionModule.api,
             deviceTokenStorage = deviceTokenStorage,
         )

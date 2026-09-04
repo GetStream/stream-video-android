@@ -23,6 +23,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.model.StreamCallId
 
 class DefaultNotificationDispatcher(
@@ -33,9 +34,9 @@ class DefaultNotificationDispatcher(
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun notify(streamCallId: StreamCallId, id: Int, notification: Notification) {
-        val callState = StreamVideo.instanceOrNull()
-            ?.call(streamCallId.type, streamCallId.id)
-            ?.state
+        val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
+        val call = streamVideo?.call(streamCallId.type, streamCallId.id)
+        val callState = call?.state
         val previousNotification = callState?.atomicNotification?.get()
         val previousSnapshot = previousNotification?.toDebugSnapshot()
         val incomingSnapshot = notification.toDebugSnapshot()
@@ -45,6 +46,26 @@ class DefaultNotificationDispatcher(
                 "isUpdate=${previousNotification != null}, " +
                 "alertConfigurationChanged=${previousSnapshot != null && previousSnapshot != incomingSnapshot}, " +
                 "previous=$previousSnapshot, incoming=$incomingSnapshot"
+        }
+
+        val ringingState = callState?.ringingState?.value
+        if (
+            call != null &&
+            ringingState != null &&
+            streamVideo.streamNotificationManager.notificationUpdateDeduplicator.isDuplicate( // TODO Rahul, probably remove this before merging
+                call = call,
+                ringingState = ringingState,
+                existingNotificationId = callState.notificationIdFlow.value,
+                existingNotification = previousNotification,
+                updatedNotificationId = id,
+                updatedNotification = notification,
+            )
+        ) {
+            logger.d {
+                "[notify] Skipping equivalent incoming-call notification update: " +
+                    "callId=${streamCallId.id}, notificationId=$id"
+            }
+            return
         }
 
         callState?.updateNotification(id, notification)

@@ -689,6 +689,75 @@ class StreamDefaultNotificationHandlerTest {
     }
 
     @Test
+    fun `updateIncomingCallNotification preserves the previously posted incoming channel`() = runTest {
+        // Given
+        val previousChannelId = "incoming-low"
+        val previousNotification = mockk<Notification>(relaxed = true)
+        every { previousNotification.channelId } returns previousChannelId
+        mockkStatic(NotificationCompat::class)
+        every { NotificationCompat.getChannelId(previousNotification) } returns previousChannelId
+        every { mockCallState.atomicNotification } returns
+            java.util.concurrent.atomic.AtomicReference(previousNotification)
+
+        every {
+            mockIntentResolver.searchIncomingCallPendingIntent(any(), payload = any())
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchAcceptCallPendingIntent(any(), payload = any())
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchRejectCallPendingIntent(any(), payload = any())
+        } returns mockPendingIntent
+
+        val channels = StreamNotificationChannels(
+            incomingCallChannel = StreamNotificationChannelInfo(
+                id = "incoming-high",
+                name = "Incoming high",
+                description = "Incoming high",
+            ),
+            incomingCallLowImportanceChannel = StreamNotificationChannelInfo(
+                id = previousChannelId,
+                name = "Incoming low",
+                description = "Incoming low",
+            ),
+            ongoingCallChannel = StreamNotificationChannelInfo("ongoing", "Ongoing", "Ongoing"),
+            outgoingCallChannel = StreamNotificationChannelInfo("outgoing", "Outgoing", "Outgoing"),
+            missedCallChannel = StreamNotificationChannelInfo("missed", "Missed", "Missed"),
+            missedCallLowImportanceChannel = StreamNotificationChannelInfo(
+                "missed-low",
+                "Missed low",
+                "Missed low",
+            ),
+        )
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockApplication,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+            notificationChannels = channels,
+            permissionChecker = { _, _ -> PackageManager.PERMISSION_GRANTED },
+        )
+
+        // When
+        testHandler.updateIncomingCallNotification(mockCall, "Caller")
+
+        // Then
+        verify {
+            mockNotificationManager.createNotificationChannel(
+                match<NotificationChannelCompat> { it.id == previousChannelId },
+            )
+        }
+        verify(exactly = 0) {
+            mockNotificationManager.createNotificationChannel(
+                match<NotificationChannelCompat> { it.id == "incoming-high" },
+            )
+        }
+    }
+
+    @Test
     fun `updateOngoingCallNotification calls interceptor with correct parameters`() = runTest {
         // Given
         val callDisplayName = "Ivy Chen"
