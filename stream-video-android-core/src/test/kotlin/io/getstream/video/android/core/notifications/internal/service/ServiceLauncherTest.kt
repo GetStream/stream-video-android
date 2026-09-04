@@ -123,7 +123,7 @@ class ServiceLauncherTest {
         every { StreamVideo.instance() } returns streamVideo
         every { jetpackTelecomRepositoryProvider.get(any()) } returns jetpackTelecomRepository
 
-        serviceLauncher = ServiceLauncher(context)
+        serviceLauncher = ServiceLauncher(context, streamVideo)
     }
 
     @After
@@ -153,13 +153,11 @@ class ServiceLauncherTest {
         } returns mockk()
 
         serviceLauncher.showIncomingCall(
-            context = context,
             callId = callId,
             callDisplayName = "Test Caller",
             callServiceConfiguration = callServiceConfig,
             isVideo = true,
             payload = emptyMap(),
-            streamVideo = streamVideo,
             notification = notification,
         )
         testScheduler.advanceUntilIdle()
@@ -172,13 +170,11 @@ class ServiceLauncherTest {
         every { anyConstructed<TelecomPermissions>().canUseTelecom(any(), any()) } returns false
 
         serviceLauncher.showIncomingCall(
-            context,
             callId,
             "Test Caller",
             callServiceConfig,
             isVideo = false,
             payload = emptyMap(),
-            streamVideo = streamVideo,
             notification = notification,
         )
 
@@ -204,7 +200,7 @@ class ServiceLauncherTest {
         every { call.cid } returns "default:cid-123"
         every { call.isVideoEnabled() } returns true
 
-        serviceLauncher.showOutgoingCall(call, "outgoing_call", streamVideo)
+        serviceLauncher.showOutgoingCall(call, "outgoing_call")
 
         verify { ContextCompat.startForegroundService(context, any<Intent>()) }
 
@@ -229,7 +225,7 @@ class ServiceLauncherTest {
         every { call.isVideoEnabled() } returns true
         every { anyConstructed<TelecomPermissions>().canUseTelecom(any(), any()) } returns false
 
-        serviceLauncher.showOutgoingCall(call, "outgoing_call", streamVideo)
+        serviceLauncher.showOutgoingCall(call, "outgoing_call")
 
         coVerify(exactly = 0) { jetpackTelecomRepository.registerCall(any(), any(), any(), any()) }
     }
