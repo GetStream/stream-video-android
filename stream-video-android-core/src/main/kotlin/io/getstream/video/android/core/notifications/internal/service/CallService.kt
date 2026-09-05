@@ -538,7 +538,7 @@ internal open class CallService : Service() {
 
     private fun observeCall(call: Call, streamVideo: StreamVideoClient) {
         val shouldUseCallServiceObservers = !isAndroid17OrHigher() ||
-            call.state.serviceRoute.value == ServiceRoute.LEGACY_CALL_SERVICE
+            call.state.serviceRoute.value != ServiceRoute.TELECOM
         if (!shouldUseCallServiceObservers) return
 
         CallServiceRingingStateObserver(

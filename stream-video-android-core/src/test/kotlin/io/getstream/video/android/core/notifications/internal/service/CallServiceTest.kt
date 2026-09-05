@@ -268,6 +268,27 @@ class CallServiceTest {
         }
     }
 
+    @Test
+    fun `Android 17 undecided route installs CallService observers`() {
+        mockkStatic("io.getstream.video.android.core.utils.AndroidVersionCodesKt")
+        every { isAndroid17OrHigher() } returns true
+        mockkConstructor(CallServiceRingingStateObserver::class)
+        mockkConstructor(CallServiceEventObserver::class)
+        every { anyConstructed<CallServiceRingingStateObserver>().observe(any()) } just runs
+        every { anyConstructed<CallServiceEventObserver>().observe(any(), any()) } just runs
+        val call = mockCall(ServiceRoute.UNDECIDED)
+        every { mockStreamVideoClient.enableCallNotificationUpdates } returns false
+
+        callService.observeCallForTest(call, mockStreamVideoClient)
+
+        verify(exactly = 1) {
+            anyConstructed<CallServiceRingingStateObserver>().observe(any())
+        }
+        verify(exactly = 1) {
+            anyConstructed<CallServiceEventObserver>().observe(any(), any())
+        }
+    }
+
     private fun mockCall(route: ServiceRoute): Call {
         val callState = mockk<CallState>(relaxed = true) {
             every { serviceRoute } returns MutableStateFlow(route)
