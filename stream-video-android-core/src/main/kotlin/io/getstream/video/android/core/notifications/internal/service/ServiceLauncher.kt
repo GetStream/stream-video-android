@@ -115,6 +115,9 @@ internal class ServiceLauncher(private val client: StreamVideoClient) {
         if (!callConfig.runCallServiceInForeground) {
             return
         }
+        if (call.state.serviceRoute.value == ServiceRoute.UNDECIDED) {
+            call.state.updateServiceRoute(ServiceRoute.LEGACY_CALL_SERVICE)
+        }
         val callId = StreamCallId.fromCallCid(call.cid)
         val serviceIntent = ServiceIntentBuilder().buildStartIntent(
             context,
