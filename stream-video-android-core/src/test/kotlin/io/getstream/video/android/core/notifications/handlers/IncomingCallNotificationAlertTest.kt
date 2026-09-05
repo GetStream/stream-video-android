@@ -17,12 +17,50 @@
 package io.getstream.video.android.core.notifications.handlers
 
 import android.app.Notification
+import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
+import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class IncomingCallNotificationAlertTest {
+
+    @Test
+    fun `low importance incoming call channel uses legacy ID before Android 17`() {
+        assertEquals(
+            R.string.stream_video_incoming_call_low_priority_notification_channel_id,
+            defaultIncomingCallLowImportanceChannelIdRes(BUILD_VERSION_CODES_CINNAMON_BUN - 1),
+        )
+    }
+
+    @Test
+    fun `low importance incoming call channel uses ringing ID on Android 17`() {
+        assertEquals(
+            R.string.stream_video_incoming_call_ringing_low_priority_notification_channel_id,
+            defaultIncomingCallLowImportanceChannelIdRes(BUILD_VERSION_CODES_CINNAMON_BUN),
+        )
+    }
+
+    @Test
+    fun `before Android 17 keeps legacy ringtone ownership`() {
+        assertFalse(
+            shouldNotificationOwnIncomingRingtone(
+                sdkInt = BUILD_VERSION_CODES_CINNAMON_BUN - 1,
+            ),
+        )
+    }
+
+    @Test
+    fun `Android 17 uses notification ringtone ownership by default`() {
+        assertTrue(
+            shouldNotificationOwnIncomingRingtone(
+                sdkInt = BUILD_VERSION_CODES_CINNAMON_BUN,
+            ),
+        )
+    }
 
     @Test
     fun `ringing notification loops and can alert again`() {

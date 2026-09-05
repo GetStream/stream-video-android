@@ -62,6 +62,17 @@ internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIn
         return result
     }
 
+    fun showIncomingCallNotification(
+        context: Context,
+        callId: StreamCallId,
+        notification: Notification?,
+    ): ShowIncomingCallResult = showNotification(
+        context = context,
+        notification = notification,
+        callId = callId,
+        error = null,
+    )
+
     // ----------------------------------
     // Decision branches
     // ----------------------------------

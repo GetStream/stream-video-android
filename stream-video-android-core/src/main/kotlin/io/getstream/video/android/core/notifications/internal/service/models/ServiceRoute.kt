@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+package io.getstream.video.android.core.notifications.internal.service.models
 
-/** Identifies which component owns incoming-call ringing. */
-internal sealed interface IncomingRingtoneOwner {
+/** Identifies the route selected by the SDK to manage a call. */
+internal enum class ServiceRoute {
 
-    /** The incoming-call notification produces the ringtone and vibration. */
-    data object Notification : IncomingRingtoneOwner
+    /** A route has not been selected yet. */
+    UNDECIDED,
 
-    /** The SDK sound and vibration player produces the ringtone and vibration. */
-    data object Legacy : IncomingRingtoneOwner
+    /** The call is managed through CallService. */
+    LEGACY_CALL_SERVICE,
+
+    /** The call is managed through Telecom. */
+    TELECOM,
 }

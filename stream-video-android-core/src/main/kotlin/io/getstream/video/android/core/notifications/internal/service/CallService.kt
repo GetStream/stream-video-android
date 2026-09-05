@@ -40,10 +40,12 @@ import io.getstream.video.android.core.notifications.internal.service.controller
 import io.getstream.video.android.core.notifications.internal.service.managers.CallServiceLifecycleManager
 import io.getstream.video.android.core.notifications.internal.service.managers.CallServiceNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.models.CallIntentParams
+import io.getstream.video.android.core.notifications.internal.service.models.ServiceRoute
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceEventObserver
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceNotificationUpdateObserver
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceRingingStateObserver
 import io.getstream.video.android.core.notifications.internal.service.permissions.ForegroundServicePermissionManager
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.startForegroundWithServiceType
 import io.getstream.video.android.model.StreamCallId
@@ -535,6 +537,10 @@ internal open class CallService : Service() {
     }
 
     private fun observeCall(call: Call, streamVideo: StreamVideoClient) {
+        val shouldUseCallServiceObservers = !isAndroid17OrHigher() ||
+            call.state.serviceRoute.value != ServiceRoute.TELECOM
+        if (!shouldUseCallServiceObservers) return
+
         CallServiceRingingStateObserver(
             call,
             serviceStateController.soundPlayer,
@@ -570,7 +576,7 @@ internal open class CallService : Service() {
                     foregroundServiceType,
                 )
             }
-                .observe(baseContext)
+                .observe()
         }
     }
 

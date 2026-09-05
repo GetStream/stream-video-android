@@ -218,6 +218,35 @@ class IncomingCallPresenterTest {
         assertEquals(ShowIncomingCallResult.ERROR, result)
     }
 
+    @Test
+    fun `showIncomingCallNotification dispatches incoming notification when permitted`() {
+        mockNotificationPermission(granted = true)
+        val dispatcher = mockk<DefaultNotificationDispatcher>(relaxed = true)
+        every { streamVideoClient.getStreamNotificationDispatcher() } returns dispatcher
+
+        val result = presenter.showIncomingCallNotification(context, callId, notification)
+
+        assertEquals(ShowIncomingCallResult.ONLY_NOTIFICATION, result)
+        verify {
+            dispatcher.notify(
+                callId,
+                callId.getNotificationId(
+                    io.getstream.video.android.core.notifications.NotificationType.Incoming,
+                ),
+                notification,
+            )
+        }
+    }
+
+    @Test
+    fun `showIncomingCallNotification returns error when notification is absent`() {
+        mockNotificationPermission(granted = true)
+
+        val result = presenter.showIncomingCallNotification(context, callId, null)
+
+        assertEquals(ShowIncomingCallResult.ERROR, result)
+    }
+
     // ---------- helpers ----------
 
     private fun mockNoActiveCall() {

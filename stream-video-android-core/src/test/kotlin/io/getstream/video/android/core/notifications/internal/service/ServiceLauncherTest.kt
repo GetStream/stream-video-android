@@ -25,11 +25,14 @@ import android.os.Build
 import android.telecom.TelecomManager
 import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
+import io.getstream.video.android.core.notifications.internal.service.models.ServiceRoute
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomPermissions
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.coVerify
 import io.mockk.every
@@ -40,6 +43,7 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
@@ -91,6 +95,7 @@ class ServiceLauncherTest {
         jetpackTelecomRepository = mockk(relaxed = true)
 
         mockkStatic(ContextCompat::class)
+        mockkStatic("io.getstream.video.android.core.utils.AndroidVersionCodesKt")
         mockkObject(StreamVideo)
         mockkConstructor(JetpackTelecomRepository::class)
         mockkConstructor(JetpackTelecomRepositoryProvider::class)
@@ -122,6 +127,7 @@ class ServiceLauncherTest {
         every { StreamVideo.instanceOrNull() } returns streamVideo
         every { StreamVideo.instance() } returns streamVideo
         every { jetpackTelecomRepositoryProvider.get(any()) } returns jetpackTelecomRepository
+        every { isAndroid17OrHigher() } returns false
 
         serviceLauncher = ServiceLauncher(context, streamVideo)
     }
@@ -135,6 +141,37 @@ class ServiceLauncherTest {
     // region showIncomingCall()
 
     @Test
+    fun `showIncomingCall registers Telecom first on Android 17`() = runTest {
+        val call = mockk<Call>(relaxed = true)
+        every { isAndroid17OrHigher() } returns true
+        every { anyConstructed<TelecomPermissions>().canUseTelecom(context) } returns true
+        every { streamVideo.call(any(), any()) } returns call
+        every { call.scope } returns TestScope(StandardTestDispatcher(testScheduler))
+        every { call.state.jetpackTelecomRepository } returns null
+
+        serviceLauncher.showIncomingCall(
+            callId = callId,
+            callDisplayName = "Test Caller",
+            callServiceConfiguration = callServiceConfig,
+            isVideo = true,
+            payload = emptyMap(),
+            notificationProvider = { notification },
+        )
+        testScheduler.advanceUntilIdle()
+
+        coVerify {
+            jetpackTelecomRepository.registerCall(
+                any(),
+                any(),
+                true,
+                true,
+                any(),
+                any(),
+            )
+        }
+    }
+
+    @Test
     fun `showIncomingCall starts telecom registration when all conditions pass`() = runTest {
         val testDispatcher = StandardTestDispatcher(testScheduler)
         val testScope = TestScope(testDispatcher)
@@ -142,6 +179,7 @@ class ServiceLauncherTest {
         val call = mockk<Call>(relaxed = true)
         every { streamVideo.call(any(), any()) } returns call
         every { call.state } returns mockk(relaxed = true)
+        every { call.state.jetpackTelecomRepository } returns null
         every { call.scope } returns testScope
 
         mockkStatic(ContextCompat::class)
@@ -180,6 +218,57 @@ class ServiceLauncherTest {
 
         coVerify(exactly = 0) { jetpackTelecomRepository.registerCall(any(), any(), any(), any()) }
     }
+
+    // endregion
+
+    // region showOnGoingCall()
+
+    @Test
+    fun `showOnGoingCall selects legacy route when route is undecided`() {
+        val (call, callState) = ongoingCall(ServiceRoute.UNDECIDED)
+
+        serviceLauncher.showOnGoingCall(call, "ongoing_call")
+
+        verify(exactly = 1) {
+            callState.updateServiceRoute(ServiceRoute.LEGACY_CALL_SERVICE)
+        }
+        verify(exactly = 1) { ContextCompat.startForegroundService(context, any<Intent>()) }
+    }
+
+    @Test
+    fun `showOnGoingCall preserves Telecom route`() {
+        val (call, callState) = ongoingCall(ServiceRoute.TELECOM)
+
+        serviceLauncher.showOnGoingCall(call, "ongoing_call")
+
+        verify(exactly = 0) { callState.updateServiceRoute(any()) }
+        verify(exactly = 1) { ContextCompat.startForegroundService(context, any<Intent>()) }
+    }
+
+    @Test
+    fun `showOnGoingCall preserves legacy route`() {
+        val (call, callState) = ongoingCall(ServiceRoute.LEGACY_CALL_SERVICE)
+
+        serviceLauncher.showOnGoingCall(call, "ongoing_call")
+
+        verify(exactly = 0) { callState.updateServiceRoute(any()) }
+        verify(exactly = 1) { ContextCompat.startForegroundService(context, any<Intent>()) }
+    }
+
+    @Test
+    fun `showOnGoingCall does not select route when foreground service is disabled`() {
+        val (call, callState) = ongoingCall(
+            route = ServiceRoute.UNDECIDED,
+            runCallServiceInForeground = false,
+        )
+
+        serviceLauncher.showOnGoingCall(call, "ongoing_call")
+
+        verify(exactly = 0) { callState.updateServiceRoute(any()) }
+        verify(exactly = 0) { ContextCompat.startForegroundService(context, any<Intent>()) }
+    }
+
+    // endregion
 
     //
 //    // endregion
@@ -231,4 +320,22 @@ class ServiceLauncherTest {
     }
 
     // endregion
+
+    private fun ongoingCall(
+        route: ServiceRoute,
+        runCallServiceInForeground: Boolean = true,
+    ): Pair<Call, CallState> {
+        val callState = mockk<CallState>(relaxed = true) {
+            every { serviceRoute } returns MutableStateFlow(route)
+        }
+        val call = mockk<Call>(relaxed = true) {
+            every { type } returns "default"
+            every { cid } returns "default:cid-123"
+            every { state } returns callState
+        }
+        every { streamVideo.callServiceConfigRegistry.get("default") } returns CallServiceConfig(
+            runCallServiceInForeground = runCallServiceInForeground,
+        )
+        return call to callState
+    }
 }

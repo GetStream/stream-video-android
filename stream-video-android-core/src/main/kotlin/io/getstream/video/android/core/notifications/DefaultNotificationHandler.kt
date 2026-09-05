@@ -40,6 +40,7 @@ import io.getstream.android.push.permissions.DefaultNotificationPermissionHandle
 import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
@@ -48,10 +49,12 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
+import io.getstream.video.android.core.notifications.handlers.defaultIncomingCallChannelIdRes
+import io.getstream.video.android.core.notifications.handlers.incomingCallNotificationFlags
+import io.getstream.video.android.core.notifications.handlers.shouldNotificationOwnIncomingRingtone
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
-import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -113,7 +116,6 @@ public open class DefaultNotificationHandler(
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instance() as StreamVideoClient
-        val notificationPreparer = IncomingCallNotificationPreparer(streamVideo)
         streamVideo.state.serviceLauncher.showIncomingCall(
             callId,
             callDisplayName,
@@ -129,7 +131,12 @@ public open class DefaultNotificationHandler(
                     shouldHaveContentIntent = true,
                     payload,
                 )?.let { notification ->
-                    notificationPreparer.prepare(notification, owner, ringingState)
+                    if (owner == IncomingRingtoneOwner.Notification) {
+                        IncomingCallNotificationPreparer(streamVideo)
+                            .prepare(notification, owner, ringingState)
+                    } else {
+                        notification
+                    }
                 }
             },
         )
@@ -141,6 +148,7 @@ public open class DefaultNotificationHandler(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
+        notificationManager.cancel(callId.getNotificationId(NotificationType.Incoming))
         val notificationId = callId.hashCode()
         val notification = getMissedCallNotification(callId, callDisplayName, payload)
         if (notification != null && ActivityCompat.checkSelfPermission(
@@ -182,7 +190,11 @@ public open class DefaultNotificationHandler(
                     callDisplayName,
                     shouldHaveContentIntent,
                     payload,
-                )
+                ).apply {
+                    if (shouldNotificationOwnIncomingRingtone()) {
+                        flags = incomingCallNotificationFlags(flags, ringingState)
+                    }
+                }
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
                 null
@@ -356,7 +368,7 @@ public open class DefaultNotificationHandler(
         val showAsHighPriority = !hideRingingNotificationInForeground || !isInForeground()
         val channelId = application.getString(
             if (showAsHighPriority) {
-                R.string.stream_video_incoming_call_notification_channel_id
+                defaultIncomingCallChannelIdRes()
             } else {
                 R.string.stream_video_incoming_call_low_priority_notification_channel_id
             },
@@ -413,20 +425,23 @@ public open class DefaultNotificationHandler(
                     }
                     this.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                     this.setShowBadge(true)
-                    val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
-                    if (isAndroid17OrHigher() && streamVideo != null) {
-                        val audioAttributes = android.media.AudioAttributes.Builder()
-                            .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
-                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build()
-                        setSound(
-                            streamVideo.sounds.ringingConfig.incomingCallSoundUri,
-                            audioAttributes,
-                        )
-                        streamVideo.vibrationConfig
-                            .takeIf { it.enabled }
-                            ?.vibratePattern
-                            ?.let { vibrationPattern = it }
+                    streamVideoClient()?.let { client ->
+                        if (shouldNotificationOwnIncomingRingtone()) {
+                            val audioAttributes = android.media.AudioAttributes.Builder()
+                                .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                                .setContentType(
+                                    android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION,
+                                )
+                                .build()
+                            setSound(
+                                client.sounds.ringingConfig.incomingCallSoundUri,
+                                audioAttributes,
+                            )
+                            client.vibrationConfig
+                                .takeIf { it.enabled }
+                                ?.vibratePattern
+                                ?.let { vibrationPattern = it }
+                        }
                     }
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -901,6 +916,9 @@ public open class DefaultNotificationHandler(
     open fun getChannelId(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_id,
     )
+
+    private fun streamVideoClient(): StreamVideoClient? =
+        StreamVideo.instanceOrNull() as? StreamVideoClient
 
     open fun getChannelName(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_title,
