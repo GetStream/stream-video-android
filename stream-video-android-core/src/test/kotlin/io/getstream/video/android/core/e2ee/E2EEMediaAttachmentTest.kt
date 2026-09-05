@@ -24,6 +24,7 @@ import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.call.connection.transceivers.TransceiverCache
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -40,7 +41,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.robolectric.shadows.ShadowTrace.setEnabled
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
@@ -116,6 +116,15 @@ class E2EEMediaAttachmentTest {
     private val testScope = TestScope(UnconfinedTestDispatcher())
     private val transceiverCache = spyk(TransceiverCache())
 
+    // Real tracers rather than mocks: the assertions below are about what reaches the trace buffer,
+    // since that buffer is what ships to the SFU with call stats.
+    private val publisherTracer = Tracer("publisher")
+    private val subscriberTracer = Tracer("subscriber")
+
+    /** The payload of the single trace carrying [key], failing if there is not exactly one. */
+    private fun Tracer.singleTrace(key: PeerConnectionTraceKey): Any? =
+        take().snapshot.single { it.tag == key.value }.data
+
     private val videoPublishOption = PublishOption(
         id = 1,
         track_type = TrackType.TRACK_TYPE_VIDEO,
@@ -153,7 +162,7 @@ class E2EEMediaAttachmentTest {
             rejoin = {},
             fastReconnect = {},
             transceiverCache = transceiverCache,
-            tracer = mockk(relaxed = true),
+            tracer = publisherTracer,
             e2eeManager = manager,
         ),
     ) {
@@ -229,6 +238,25 @@ class E2EEMediaAttachmentTest {
     }
 
     @Test
+    fun `publisher traces why a track was not published`() = runTest {
+        stubAddTransceiver(mockk<RtpSender>(relaxed = true))
+
+        publisherWith(RecordingE2EEManager(failOnEncrypt = true)).addTransceiver(
+            streamIdList = listOf("stream-id"),
+            captureFormat = null,
+            track = mockk<MediaStreamTrack>(relaxed = true),
+            publishOption = videoPublishOption,
+        )
+
+        // The transceiver is dropped before it reaches the SFU, so this trace is the only record
+        // that the track was deliberately withheld rather than never attempted.
+        assertEquals(
+            "track=TRACK_TYPE_VIDEO codec=VP8 reason=no key material",
+            publisherTracer.singleTrace(PeerConnectionTraceKey.E2EE_ENCRYPTOR_FAILED),
+        )
+    }
+
+    @Test
     fun `publisher publishes normally when no manager is attached`() = runTest {
         stubAddTransceiver(mockk<RtpSender>(relaxed = true))
 
@@ -269,7 +297,7 @@ class E2EEMediaAttachmentTest {
             sessionId = "my-session",
             sfuClient = mockSignalServer,
             coroutineScope = testScope,
-            tracer = Tracer("subscriber").also { setEnabled(false) },
+            tracer = subscriberTracer,
             rejoin = {},
             fastReconnect = {},
             onIceCandidateRequest = null,
@@ -388,6 +416,23 @@ class E2EEMediaAttachmentTest {
 
         assertEquals(2, manager.decryptAttempts)
         assertEquals(1, manager.decrypted.size)
+    }
+
+    @Test
+    fun `subscriber traces a track it could not decrypt`() = runTest {
+        stubReceiverFor("remote-audio")
+        val subscriber = subscriberWith(RecordingE2EEManager(decryptFailuresRemaining = 1)) {
+            "alice"
+        }
+
+        subscriber.setTrackLookupPrefixes(mapOf("their-prefix" to "their-session"))
+        subscriber.onNewStream(audioStreamFor("their-prefix", "remote-audio"))
+
+        // A track with no decryptor renders nothing, and the retry can keep failing quietly.
+        assertEquals(
+            "track=TRACK_TYPE_AUDIO user=alice reason=decryptor unavailable",
+            subscriberTracer.singleTrace(PeerConnectionTraceKey.E2EE_DECRYPTOR_FAILED),
+        )
     }
 
     // endregion

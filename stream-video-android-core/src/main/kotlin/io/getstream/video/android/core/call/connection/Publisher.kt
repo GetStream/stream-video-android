@@ -36,6 +36,7 @@ import io.getstream.video.android.core.e2ee.E2EEManager
 import io.getstream.video.android.core.e2ee.toE2EETrackType
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.trySetEnabled
 import io.getstream.video.android.core.utils.SdpSession
@@ -448,6 +449,7 @@ internal class Publisher(
         val sender = transceiver.sender
         if (sender == null) {
             logger.e { "No sender on the ${publishOption.track_type} transceiver to encrypt." }
+            traceEncryptorFailure(publishOption, "no sender on transceiver")
             return false
         }
         return try {
@@ -458,12 +460,25 @@ internal class Publisher(
             )
             result.exceptionOrNull()?.let { error ->
                 logger.e(error) { "Failed to attach the encryptor for ${publishOption.track_type}" }
+                traceEncryptorFailure(publishOption, error.message ?: error.javaClass.simpleName)
             }
             result.isSuccess
         } catch (e: Exception) {
             logger.e(e) { "Failed to attach the encryptor for ${publishOption.track_type}" }
+            traceEncryptorFailure(publishOption, e.message ?: e.javaClass.simpleName)
             false
         }
+    }
+
+    /**
+     * Reports a track this call will not publish. The app sees only a missing track otherwise,
+     * because the transceiver is dropped before it is ever announced to the SFU.
+     */
+    private fun traceEncryptorFailure(publishOption: PublishOption, reason: String) {
+        tracer.trace(
+            PeerConnectionTraceKey.E2EE_ENCRYPTOR_FAILED.value,
+            "track=${publishOption.track_type} codec=${publishOption.codec?.name} reason=$reason",
+        )
     }
 
     /**

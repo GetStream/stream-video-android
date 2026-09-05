@@ -90,6 +90,7 @@ import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -637,7 +638,13 @@ public class Call(
      * @return Success when the manager was updated, or a failure if the call has already joined.
      */
     public fun setE2EEManager(manager: E2EEManager?): kotlin.Result<Unit> {
-        if (session.value != null) {
+        session.value?.let { activeSession ->
+            // Too late to encrypt this call, and the app may not check the result. Record it, since
+            // the SFU otherwise just sees a call that stayed unencrypted for no stated reason.
+            activeSession.sfuTracer.trace(
+                PeerConnectionTraceKey.E2EE_SET_MANAGER.value,
+                "rejected: call already joined",
+            )
             return kotlin.Result.failure(
                 IllegalStateException(
                     "setE2EEManager must be called before join(). The publisher and subscriber " +

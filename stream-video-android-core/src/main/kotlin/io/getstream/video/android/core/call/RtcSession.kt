@@ -59,6 +59,11 @@ import io.getstream.video.android.core.call.utils.SessionFatalException
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.e2ee.E2EEEvent
+import io.getstream.video.android.core.e2ee.E2EEEventListener
+import io.getstream.video.android.core.e2ee.E2EEEventType
+import io.getstream.video.android.core.e2ee.E2EETraceThrottle
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishOptionsEvent
@@ -612,6 +617,87 @@ public class RtcSession internal constructor(
      */
     internal fun isSDKInitialized() = StreamVideo.isInstalled
 
+    // region End-to-end encryption tracing
+
+    private val e2eeTraceThrottle = E2EETraceThrottle(E2EE_TRACE_THROTTLE_MS)
+
+    private val e2eeTraceListener = E2EEEventListener { event -> traceE2EEEvent(event) }
+
+    /**
+     * The manager this session registered on. Held separately because [Call.leave] drops the call's
+     * reference before [cleanup] runs, so `call.e2eeManager` is already null by then.
+     */
+    @Volatile
+    private var tracedE2EEManager: StreamEncryptionManager? = null
+
+    /**
+     * Records whether the app attached an encryption manager to this call, and starts tracing the
+     * errors native reports for it.
+     *
+     * [Call.setE2EEManager] has to run before [join], so no session and therefore no tracer exists
+     * at the moment the app calls it. Session creation is the first point where that choice can
+     * reach the stats pipeline, and it is also the point that decides it: the publisher and the
+     * subscriber capture the manager as they are built, just below.
+     */
+    private fun traceE2EEConfiguration() {
+        val manager = call.e2eeManager
+        if (manager == null) {
+            sfuTracer.trace(PeerConnectionTraceKey.E2EE_SET_MANAGER.value, "none")
+            return
+        }
+
+        val algorithm = (manager as? StreamEncryptionManager)?.let {
+            // Reads native state, which an app-owned manager may already have disposed.
+            safeCallWithDefault(null) { it.algorithm.name }
+        }
+        sfuTracer.trace(
+            PeerConnectionTraceKey.E2EE_SET_MANAGER.value,
+            buildString {
+                append("manager=${manager.javaClass.simpleName}")
+                algorithm?.let { append(" algorithm=$it") }
+            },
+        )
+
+        // Native errors only reach the SDK through the default manager's observer. A custom
+        // E2EEManager reports nothing, so only its attach failures get traced.
+        if (manager is StreamEncryptionManager) {
+            tracedE2EEManager = manager
+            manager.setInternalEventListener(e2eeTraceListener)
+        }
+    }
+
+    /**
+     * Traces an encryption event reported by native, alongside any listener the app registered.
+     *
+     * Throttled per event kind and track: failures such as [E2EEEventType.DECRYPTION_FAILED] can
+     * arrive per frame, while the trace buffer only drains on the stats interval. The count of
+     * suppressed repeats rides along on the next trace, so a storm stays visible without filling
+     * the buffer.
+     */
+    private fun traceE2EEEvent(event: E2EEEvent) {
+        if (event.type !in tracedE2eeEvents) return
+        val suppressed = e2eeTraceThrottle.admit(event) ?: return
+
+        val detail = buildString {
+            append(event.type.name)
+            if (event.type == E2EEEventType.UNKNOWN) append(" native=${event.name}")
+            event.userId?.let { append(" user=$it") }
+            event.trackType?.let { append(" track=$it") }
+            event.keyIndex?.let { append(" keyIndex=$it") }
+            event.version?.let { append(" version=$it") }
+            event.reason?.let { append(" reason=$it") }
+            if (suppressed > 0) append(" repeated=$suppressed")
+        }
+        sfuTracer.trace(PeerConnectionTraceKey.E2EE_NATIVE_ERROR.value, detail)
+        if (event.type == E2EEEventType.DECRYPTION_RESUMED) {
+            logger.i { "[traceE2EEEvent] #e2ee; $detail" }
+        } else {
+            logger.w { "[traceE2EEEvent] #e2ee; $detail" }
+        }
+    }
+
+    // endregion
+
     init {
         if (!isSDKInitialized()) {
             throw IllegalArgumentException(
@@ -619,6 +705,8 @@ public class RtcSession internal constructor(
             )
         }
         logger.i { "<init> #sfu; #track; no args" }
+
+        traceE2EEConfiguration()
 
         // step 1 setup the peer connections
         // publisher = createPublisher()
@@ -1247,6 +1335,11 @@ public class RtcSession internal constructor(
 
     fun cleanup() = atomicCleanup {
         logger.i { "[cleanup] #sfu; #track; no args" }
+
+        // The manager outlives this session, so stop tracing into a tracer that is going away.
+        tracedE2EEManager?.clearInternalEventListener(e2eeTraceListener)
+        tracedE2EEManager = null
+        e2eeTraceThrottle.clear()
 
         coroutineScope.launch {
             serialProcessor.submit("cleanupSfuConnections") {
@@ -2202,6 +2295,25 @@ public class RtcSession internal constructor(
         private val badIceStates = setOf(
             PeerConnection.IceConnectionState.DISCONNECTED,
             PeerConnection.IceConnectionState.FAILED,
+        )
+
+        /** Shortest gap between two traces of the same encryption event for the same track. */
+        private const val E2EE_TRACE_THROTTLE_MS = 2_000L
+
+        /**
+         * The encryption events worth shipping to call stats: every failure mode, plus the recovery
+         * that closes one out. [E2EEEventType.KEY_STATE] and [E2EEEventType.PERF_REPORT] are
+         * diagnostics the app opts into, and carry no error signal, so they stay out.
+         */
+        private val tracedE2eeEvents = setOf(
+            E2EEEventType.DECRYPTION_FAILED,
+            E2EEEventType.DECRYPTION_RESUMED,
+            E2EEEventType.DECRYPTION_STALLED,
+            E2EEEventType.ENCRYPTION_FAILED,
+            E2EEEventType.MISSING_KEY,
+            E2EEEventType.UNENCRYPTED_FRAME,
+            E2EEEventType.UNSUPPORTED_VERSION,
+            E2EEEventType.UNKNOWN,
         )
 
         /**
