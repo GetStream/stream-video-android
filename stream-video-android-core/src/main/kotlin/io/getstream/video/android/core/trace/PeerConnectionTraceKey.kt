@@ -46,9 +46,6 @@ internal enum class PeerConnectionTraceKey(val value: String) {
     SFU_ERROR("error"),
     CALL_ENDED("callEnded"),
     E2EE_SET_MANAGER("e2eeSetManager"),
-    E2EE_NATIVE_ERROR("e2eeError"),
-    E2EE_ENCRYPTOR_FAILED("e2eeEncryptorFailed"),
-    E2EE_DECRYPTOR_FAILED("e2eeDecryptorFailed"),
     ;
 
     /** Log / serialise using the original string value. */

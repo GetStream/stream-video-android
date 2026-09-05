@@ -22,7 +22,6 @@ import io.getstream.video.android.core.utils.safeCall
 import org.webrtc.EncryptionManager
 import org.webrtc.RtpReceiver
 import org.webrtc.RtpSender
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * The SDK's default [E2EEManager], backed by WebRTC's framed AES-GCM encryption. Frames are
@@ -107,53 +106,6 @@ public class StreamEncryptionManager private constructor(
     /** The AES-GCM variant this manager encrypts with. */
     public val algorithm: E2EEAlgorithm get() = native.algorithm().toE2EEAlgorithm()
 
-    private val appListener = AtomicReference<E2EEEventListener?>(null)
-    private val internalListener = AtomicReference<E2EEEventListener?>(null)
-
-    init {
-        // Native offers a single observer slot, but both the app and the SDK need these events:
-        // the app to surface key problems in its UI, the SDK to trace them into call stats. Claim
-        // the slot once here and fan out, so neither side can unregister the other.
-        ifActive("installObserver") {
-            native.setObserver(
-                EncryptionManager.Observer { event ->
-                    val mapped = event.toE2EEEvent()
-                    dispatch(internalListener.get(), mapped, "sdk")
-                    dispatch(appListener.get(), mapped, "app")
-                },
-            )
-        }
-    }
-
-    /**
-     * Delivers [event] without letting one listener's failure starve the other, since both run on
-     * the WebRTC thread that produced the event.
-     */
-    private fun dispatch(target: E2EEEventListener?, event: E2EEEvent, label: String) {
-        if (target == null) return
-        try {
-            target.onEvent(event)
-        } catch (e: Throwable) {
-            logger.e(e) { "[dispatch] $label listener threw for ${event.type}" }
-        }
-    }
-
-    /**
-     * Lets the SDK observe encryption events alongside the app's own listener, for tracing into
-     * call stats. Pass `null` to stop. Not part of the public surface: apps use [setEventListener].
-     */
-    internal fun setInternalEventListener(listener: E2EEEventListener?) {
-        internalListener.set(listener)
-    }
-
-    /**
-     * Clears [listener] only if it is still the registered one. Managers outlive sessions, so a
-     * finished session must not unregister the listener a newer session already installed.
-     */
-    internal fun clearInternalEventListener(listener: E2EEEventListener) {
-        internalListener.compareAndSet(listener, null)
-    }
-
     override fun encrypt(
         sender: RtpSender,
         codec: String?,
@@ -237,11 +189,13 @@ public class StreamEncryptionManager private constructor(
      * dispatcher before touching UI state.
      */
     public fun setEventListener(listener: E2EEEventListener?) {
-        if (native.isDisposed) {
-            logger.w { "[setEventListener] ignored, manager is disposed" }
-            return
+        ifActive("setEventListener") {
+            native.setObserver(
+                listener?.let { target ->
+                    EncryptionManager.Observer { event -> target.onEvent(event.toE2EEEvent()) }
+                },
+            )
         }
-        appListener.set(listener)
     }
 
     /**
@@ -268,10 +222,6 @@ public class StreamEncryptionManager private constructor(
     public fun dispose() {
         if (native.isDisposed) return
         val disposedUserId = userId
-        // Drop both listeners first: nothing should be delivered from a manager being torn down,
-        // and holding them would outlive the native state they describe.
-        appListener.set(null)
-        internalListener.set(null)
         safeCall { native.dispose() }
         logger.d { "[dispose] released native manager for $disposedUserId" }
     }

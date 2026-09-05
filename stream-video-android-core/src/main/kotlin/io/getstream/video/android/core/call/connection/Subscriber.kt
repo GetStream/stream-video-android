@@ -746,12 +746,6 @@ internal class Subscriber(
             logger.e(error) {
                 "[attachDecryptor] #e2ee; failed for track $trackId of $userId ($trackType)"
             }
-            // A track that never gets a decryptor renders nothing, and the retry below can keep
-            // failing silently, so record the attempt rather than leaving only a local log.
-            tracer().trace(
-                PeerConnectionTraceKey.E2EE_DECRYPTOR_FAILED.value,
-                "track=$trackType user=$userId reason=${error.message ?: error.javaClass.simpleName}",
-            )
             // Attachment did not succeed, so do not suppress a later retry.
             decryptedTrackIds.remove(trackId)
             pendingDecryptors[trackId] = sessionId to trackType
