@@ -16,7 +16,12 @@
 
 package io.getstream.video.android.core
 
+/** Identifies which component owns incoming-call ringing. */
 internal sealed interface IncomingRingtoneOwner {
+
+    /** The incoming-call notification produces the ringtone and vibration. */
     data object Notification : IncomingRingtoneOwner
+
+    /** The SDK sound and vibration player produces the ringtone and vibration. */
     data object Legacy : IncomingRingtoneOwner
 }
