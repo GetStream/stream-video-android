@@ -42,7 +42,12 @@ import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
-/** Coordinates the existing incoming-call service and optional Telecom registration path. */
+/**
+ * Coordinates the CallService-first incoming-call flow.
+ *
+ * Starts CallService before optional Telecom registration and uses the ringtone
+ * owner selected for the flow.
+ */
 internal class PreAndroid17IncomingCallCoordinator(
     private val context: Context,
     private val client: StreamVideoClient,

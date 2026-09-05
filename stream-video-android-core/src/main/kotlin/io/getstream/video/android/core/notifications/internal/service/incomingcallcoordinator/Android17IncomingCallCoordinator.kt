@@ -49,7 +49,12 @@ import io.getstream.video.android.core.notifications.internal.telecom.jetpack.Je
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
-/** Coordinates the Android 17 incoming-call path without starting CallService. */
+/**
+ * Coordinates the Telecom-first incoming-call flow on Android 17 and newer.
+ *
+ * Registers the call with Telecom before posting a notification-owned ringing
+ * notification. Falls back to the CallService-first flow when Telecom cannot be used.
+ */
 internal class Android17IncomingCallCoordinator(
     private val context: Context,
     private val client: StreamVideoClient,

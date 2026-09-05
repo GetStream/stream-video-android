@@ -21,6 +21,12 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.IncomingCallRequest
 import io.getstream.video.android.model.StreamCallId
 
+/**
+ * Coordinates registration, presentation, and cleanup of incoming calls.
+ *
+ * Implementations select the service route and ringtone owner before starting
+ * the corresponding incoming-call flow.
+ */
 internal interface IncomingCallCoordinator {
 
     fun showIncomingCall(request: IncomingCallRequest)
