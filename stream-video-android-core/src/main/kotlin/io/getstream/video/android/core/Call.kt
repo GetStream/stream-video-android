@@ -76,6 +76,8 @@ import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
+import io.getstream.video.android.core.e2ee.E2EEManager
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -88,6 +90,7 @@ import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -294,6 +297,7 @@ public class Call(
         callRegistry = callRegistry,
         callAnalytics = callAnalytics,
         sessionManager = sessionManager,
+        e2eeRequested = { e2eeManager != null },
     )
 
     /**
@@ -591,6 +595,83 @@ public class Call(
         callJoinInterceptor,
     )
 
+    // region End-to-end encryption
+
+    @Volatile
+    private var _e2eeManager: E2EEManager? = null
+
+    /** Read by [RtcSession] when it builds the publisher and the subscriber. */
+    internal val e2eeManager: E2EEManager? get() = _e2eeManager
+
+    /**
+     * Attaches an end-to-end encryption manager, so that media published from and received by this
+     * call is encrypted before it reaches Stream's infrastructure.
+     *
+     * Must be called before [join]. The publisher and subscriber capture the manager when they are
+     * built, and the join request tells the coordinator whether this call is encrypted — a
+     * mismatch there is rejected server side. The manager survives rejoins and migrations, so it
+     * only needs to be set once.
+     *
+     * Pass [StreamEncryptionManager] for Stream's default AES-GCM implementation, or your own
+     * [E2EEManager] to keep the SDK out of your encryption entirely:
+     *
+     * ```
+     * StreamEncryptionManager.create(myUserId).onSuccess { e2ee ->
+     *     e2ee.setSharedKey(keyIndex = 0, key = myKeyBytes)
+     *     call.setE2EEManager(e2ee)
+     *     call.join()
+     * }
+     * ```
+     *
+     * Keys stay on the manager, deliberately: keep your reference to it to add, remove and rotate
+     * keys, during the call as well as before it. Generating and distributing key material has to
+     * stay outside Stream's infrastructure, so the SDK never holds or transports it.
+     *
+     * You own the manager's lifecycle too — the SDK does not dispose it, since the same instance is
+     * normally reused across rejoins and often across calls.
+     *
+     * Note that an encrypted call cannot be recorded, transcribed, closed-captioned, thumbnailed
+     * or broadcast over HLS: none of that content is readable by Stream, so the coordinator
+     * rejects those requests.
+     *
+     * @param manager The manager to use, or `null` to join unencrypted.
+     * @return Success when the manager was updated, or a failure if the call has already joined.
+     */
+    public fun setE2EEManager(manager: E2EEManager?): kotlin.Result<Unit> {
+        session.value?.let { activeSession ->
+            // Too late to encrypt this call, and the app may not check the result. Record it, since
+            // the SFU otherwise just sees a call that stayed unencrypted for no stated reason.
+            activeSession.sfuTracer.trace(
+                PeerConnectionTraceKey.E2EE_SET_MANAGER.value,
+                "rejected: call already joined",
+            )
+            return kotlin.Result.failure(
+                IllegalStateException(
+                    "setE2EEManager must be called before join(). The publisher and subscriber " +
+                        "capture the manager when the session is created, and the coordinator " +
+                        "validates the call's encryption mode against the join request.",
+                ),
+            )
+        }
+        _e2eeManager = manager
+        state.setE2eeEnabled(manager != null)
+        logger.i { "[setE2EEManager] manager: ${manager?.javaClass?.simpleName ?: "none"}" }
+        return kotlin.Result.success(Unit)
+    }
+
+    /**
+     * Drops only this call's reference to the app-owned manager. The active RTC session captured
+     * its own reference when it was created, so terminal teardown can finish safely. The app
+     * remains responsible for disposing the manager once it no longer uses it.
+     */
+    private fun detachE2EEManager() {
+        _e2eeManager = null
+        state.setE2eeEnabled(false)
+        logger.i { "[detachE2EEManager] detached app-owned manager" }
+    }
+
+    // endregion
+
     internal suspend fun collectStats(): CallStatsReport = statsReporter.collectStats()
 
     // region Reconnection — unified loop
@@ -614,9 +695,15 @@ public class Call(
     // endregion
 
     @InternalStreamVideoApi
-    fun leave(reason: CallLeaveReason) = lifecycle.leave(reason)
+    fun leave(reason: CallLeaveReason) {
+        detachE2EEManager()
+        lifecycle.leave(reason)
+    }
 
-    fun leave(reason: String = "user") = lifecycle.leave(reason)
+    fun leave(reason: String = "user") {
+        detachE2EEManager()
+        lifecycle.leave(reason)
+    }
 
     /** ends the call for yourself as well as other users */
     suspend fun end(): Result<Unit> = lifecycle.end()
@@ -852,9 +939,17 @@ public class Call(
         notify,
         hintHighScaleLivestreamPublisher,
         joinAnalyticsModel,
-    )
+        e2ee = e2eeManager != null,
+    ).also {
+        logger.i {
+            "[joinRequest] e2ee=${e2eeManager != null} " +
+                "encryptionMode=${state.settings.value?.encryption?.mode}"
+        }
+    }
 
-    fun cleanup() = lifecycle.cleanup()
+    fun cleanup() {
+        lifecycle.cleanup()
+    }
 
     suspend fun ring(): Result<GetCallResponse> = apiClient.ring()
 

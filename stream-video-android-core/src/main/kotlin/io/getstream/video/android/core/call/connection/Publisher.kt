@@ -32,6 +32,8 @@ import io.getstream.video.android.core.call.connection.utils.stringify
 import io.getstream.video.android.core.call.connection.utils.toRtcDegradationPreference
 import io.getstream.video.android.core.call.connection.utils.toVideoDimension
 import io.getstream.video.android.core.call.connection.utils.toVideoLayers
+import io.getstream.video.android.core.e2ee.E2EEManager
+import io.getstream.video.android.core.e2ee.toE2EETrackType
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.trace.Tracer
@@ -86,6 +88,8 @@ internal class Publisher(
     private val tracer: Tracer,
     private val restartIceJobDelegate: RestartIceJobDelegate =
         RestartIceJobDelegate(coroutineScope),
+    /** Set when the call is end-to-end encrypted; installs an encryptor per outgoing track. */
+    private val e2eeManager: E2EEManager? = null,
 ) : StreamPeerConnection(
     type,
     mediaConstraints,
@@ -412,6 +416,16 @@ internal class Publisher(
                 ),
             )
             applyDegradationPreference(transceiver, publishOption)
+            if (!attachEncryptor(transceiver, publishOption)) {
+                // Caching this transceiver would publish plaintext on a call the app believes is
+                // encrypted, so drop it instead. Stop only — the PeerConnection owns the native
+                // transceiver and disposing here is a use-after-free on network_thread.
+                logger.e {
+                    "Refusing to publish ${publishOption.track_type}: the encryptor could not be attached."
+                }
+                safeCall { transceiver.stop() }
+                return
+            }
             logger.d {
                 "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encodings: ${transceiver.sender?.parameters?.encodings?.joinToString { it.stringify() }})"
             }
@@ -420,6 +434,48 @@ internal class Publisher(
             logger.e(e) { "Failed to add transceiver for ${publishOption.track_type}" }
         }
     }
+
+    /**
+     * Installs the frame encryptor on a freshly added transceiver. Returns false only when the
+     * call is encrypted and the encryptor could not be attached, which the caller must treat as a
+     * publish failure rather than falling through to sending in the clear.
+     */
+    private fun attachEncryptor(
+        transceiver: RtpTransceiver,
+        publishOption: PublishOption,
+    ): Boolean {
+        val manager = e2eeManager ?: return true
+        val sender = transceiver.sender
+        if (sender == null) {
+            logger.e { "No sender on the ${publishOption.track_type} transceiver to encrypt." }
+            return false
+        }
+        return try {
+            val result = manager.encrypt(
+                sender,
+                publishOption.codec?.name?.asE2EECodecHint(),
+                publishOption.track_type.toE2EETrackType(),
+            )
+            result.exceptionOrNull()?.let { error ->
+                logger.e(error) { "Failed to attach the encryptor for ${publishOption.track_type}" }
+            }
+            result.isSuccess
+        } catch (e: Exception) {
+            logger.e(e) { "Failed to attach the encryptor for ${publishOption.track_type}" }
+            false
+        }
+    }
+
+    /**
+     * Normalises a negotiated codec name into the bare lowercase form the encryption layer expects
+     * ("vp9", not "video/VP9"). Publish options carry either spelling.
+     *
+     * Deliberately not filtered against a known-codec list: the encryption layer takes this string
+     * as-is and decides for itself, so a list here would silently drop the hint for anything added
+     * to the codec set later.
+     */
+    private fun String.asE2EECodecHint(): String? =
+        lowercase().substringAfterLast('/').trim().takeIf { it.isNotEmpty() }
 
     fun syncPublishOptions(captureFormat: CaptureFormat?, publishOptions: List<PublishOption>) {
         // enable publishing with new options

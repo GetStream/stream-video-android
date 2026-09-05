@@ -27,6 +27,8 @@ import io.getstream.video.android.core.call.connection.stats.ComputedStats
 import io.getstream.video.android.core.call.connection.utils.safeApiCall
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
+import io.getstream.video.android.core.e2ee.E2EEManager
+import io.getstream.video.android.core.e2ee.toE2EETrackType
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.IceCandidate
@@ -77,6 +79,10 @@ internal class Subscriber(
         RestartIceJobDelegate(coroutineScope),
     onIceCandidateRequest: ((IceCandidate, StreamPeerType) -> Unit)?,
     private val sfuConnectionModule: SfuConnectionModule,
+    /** Set when the call is end-to-end encrypted; installs a decryptor per incoming track. */
+    private val e2eeManager: E2EEManager? = null,
+    /** Resolves the user a session belongs to. Keys are per user, so this must be exact. */
+    private val userIdForSession: (String) -> String? = { null },
 ) : StreamPeerConnection(
     type = StreamPeerType.SUBSCRIBER,
     mediaConstraints = MediaConstraints(),
@@ -247,6 +253,8 @@ internal class Subscriber(
         tracks.clear()
         trackDimensions.clear()
         subscriptions.clear()
+        pendingDecryptors.clear()
+        decryptedTrackIds.clear()
     }
 
     /**
@@ -472,6 +480,9 @@ internal class Subscriber(
     fun participantLeft(participant: Participant) {
         tracks.remove(participant.session_id)
         trackDimensions.keys.removeAll { it.sessionId == participant.session_id }
+        // Otherwise a track that never resolved a user would be retried on every participant
+        // update for the rest of the call.
+        pendingDecryptors.entries.removeAll { it.value.first == participant.session_id }
     }
 
     private fun VideoDimension.isUnknown() =
@@ -530,6 +541,9 @@ internal class Subscriber(
                 pendingStreams.clear()
             }
         }
+        // This runs off the participant list, so it is also the point where a session that had no
+        // known user when its track arrived becomes resolvable.
+        flushPendingDecryptors()
     }
 
     private val streamsFlow =
@@ -591,6 +605,7 @@ internal class Subscriber(
             trackIdToParticipant[track.id()] = sessionId
             trackIdToTrackType[track.id()] = trackType
             traceTrack(trackType, track.id(), listOf(mediaStream.id))
+            attachDecryptor(track.id(), sessionId, trackType)
             setTrack(sessionId, trackType, audioTrack)
             streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, audioTrack))
         }
@@ -605,6 +620,7 @@ internal class Subscriber(
             trackIdToParticipant[track.id()] = sessionId
             trackIdToTrackType[track.id()] = trackType
             traceTrack(trackType, track.id(), listOf(mediaStream.id))
+            attachDecryptor(track.id(), sessionId, trackType)
             setTrack(sessionId, trackType, videoTrack)
             streamsFlow.tryEmit(ReceivedMediaStream(sessionId, trackType, videoTrack))
         }
@@ -621,6 +637,7 @@ internal class Subscriber(
         // Process audio tracks
         stream.audioTracks.forEach { track ->
             val trackId = track.id()
+            removeDecryptorTracking(trackId)
             val sessionId = trackIdToParticipant[trackId]
             val trackType = trackIdToTrackType[trackId]
 
@@ -648,6 +665,7 @@ internal class Subscriber(
         // Process video tracks
         stream.videoTracks.forEach { track ->
             val trackId = track.id()
+            removeDecryptorTracking(trackId)
             val sessionId = trackIdToParticipant[trackId]
             val trackType = trackIdToTrackType[trackId]
 
@@ -676,4 +694,81 @@ internal class Subscriber(
     fun trackIdToParticipant(): Map<String, String> = trackIdToParticipant.toMap()
 
     fun isEnabled() = enabled
+
+    // region End-to-end encryption
+
+    /** Tracks whose owning session had no known user yet, keyed by track id. */
+    private val pendingDecryptors = ConcurrentHashMap<String, Pair<String, TrackType>>()
+
+    /** Track ids already handed to the manager, so re-delivered streams don't attach twice. */
+    private val decryptedTrackIds = ConcurrentHashMap.newKeySet<String>()
+
+    /**
+     * Installs a decryptor for an incoming track. Keys are looked up per user, so this needs the
+     * publisher's user id — not their session id. That mapping comes from the participant list,
+     * which can lag the track, so unresolved tracks are parked and retried by
+     * [flushPendingDecryptors] on the next participant update.
+     */
+    private fun attachDecryptor(trackId: String, sessionId: String, trackType: TrackType) {
+        val manager = e2eeManager ?: return
+        // A track may be delivered more than once. Installing another native decryptor on the
+        // same active receiver is not guaranteed to be idempotent, so claim the track atomically.
+        // Removal and failed attachment clear this claim, allowing a replacement receiver or retry.
+        if (!decryptedTrackIds.add(trackId)) return
+
+        val userId = userIdForSession(sessionId)
+        if (userId == null) {
+            logger.d {
+                "[attachDecryptor] #e2ee; no user yet for session $sessionId, parking track $trackId"
+            }
+            // Undo the claim so the flush can pick it up.
+            decryptedTrackIds.remove(trackId)
+            pendingDecryptors[trackId] = sessionId to trackType
+            return
+        }
+
+        val receiver = receiverForTrack(trackId)
+        if (receiver == null) {
+            logger.w {
+                "[attachDecryptor] #e2ee; no receiver for track $trackId, parking until it appears"
+            }
+            decryptedTrackIds.remove(trackId)
+            pendingDecryptors[trackId] = sessionId to trackType
+            return
+        }
+
+        pendingDecryptors.remove(trackId)
+        val result = runCatching {
+            logger.d { "[attachDecryptor] #e2ee; track $trackId of $userId ($trackType)" }
+            manager.decrypt(receiver, userId, trackType.toE2EETrackType())
+        }.getOrElse { Result.failure(it) }
+        result.onFailure { error ->
+            logger.e(error) {
+                "[attachDecryptor] #e2ee; failed for track $trackId of $userId ($trackType)"
+            }
+            // Attachment did not succeed, so do not suppress a later retry.
+            decryptedTrackIds.remove(trackId)
+            pendingDecryptors[trackId] = sessionId to trackType
+        }
+    }
+
+    /** Retries every parked track. Called whenever the participant list changes. */
+    private fun flushPendingDecryptors() {
+        if (e2eeManager == null || pendingDecryptors.isEmpty()) return
+        pendingDecryptors.toMap().forEach { (trackId, pending) ->
+            val (pendingSessionId, trackType) = pending
+            attachDecryptor(trackId, pendingSessionId, trackType)
+        }
+    }
+
+    private fun receiverForTrack(trackId: String) = safeCallWithDefault(null) {
+        connection.transceivers?.firstOrNull { it.receiver?.track()?.id() == trackId }?.receiver
+    }
+
+    private fun removeDecryptorTracking(trackId: String) {
+        pendingDecryptors.remove(trackId)
+        decryptedTrackIds.remove(trackId)
+    }
+
+    // endregion
 }

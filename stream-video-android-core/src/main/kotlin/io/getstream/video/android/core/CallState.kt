@@ -298,6 +298,22 @@ public class CallState(
     private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
     val participantCounts: StateFlow<ParticipantCount?> = _participantCounts
 
+    private val _e2eeEnabled = MutableStateFlow(false)
+
+    /**
+     * Whether media on this call is end-to-end encrypted, which is true once an
+     * [io.getstream.video.android.core.e2ee.E2EEManager] is attached via
+     * [Call.setE2EEManager] or implicitly by setting a key. Use it to show a lock indicator.
+     *
+     * Whether the call *type* permits encryption at all is a separate thing, readable from
+     * `settings.value?.encryption?.mode`.
+     */
+    public val e2eeEnabled: StateFlow<Boolean> = _e2eeEnabled
+
+    internal fun setE2eeEnabled(enabled: Boolean) {
+        _e2eeEnabled.value = enabled
+    }
+
     /** a count of the total number of participants. */
     val totalParticipants = _participantCounts.mapState { it?.total ?: 0 }
 

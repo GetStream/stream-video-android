@@ -59,6 +59,7 @@ import io.getstream.video.android.core.call.utils.SessionFatalException
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishOptionsEvent
@@ -612,6 +613,38 @@ public class RtcSession internal constructor(
      */
     internal fun isSDKInitialized() = StreamVideo.isInstalled
 
+    /**
+     * Records whether the app attached an encryption manager to this call.
+     *
+     * [Call.setE2EEManager] has to run before [join], so no session and therefore no tracer exists
+     * at the moment the app calls it. Session creation is the first point where that choice can
+     * reach the stats pipeline, and it is also the point that acts on it: the publisher and the
+     * subscriber capture the manager as they are built, just below.
+     *
+     * Only the setup is traced, not the encryption events native reports afterwards: those arrive
+     * per frame on every client, which is far more volume than call stats should carry. Apps observe
+     * them through [StreamEncryptionManager.setEventListener] instead.
+     */
+    private fun traceE2EEConfiguration() {
+        val manager = call.e2eeManager
+        if (manager == null) {
+            sfuTracer.trace(PeerConnectionTraceKey.E2EE_SET_MANAGER.value, "none")
+            return
+        }
+
+        val algorithm = (manager as? StreamEncryptionManager)?.let {
+            // Reads native state, which an app-owned manager may already have disposed.
+            safeCallWithDefault(null) { it.algorithm.name }
+        }
+        sfuTracer.trace(
+            PeerConnectionTraceKey.E2EE_SET_MANAGER.value,
+            buildString {
+                append("manager=${manager.javaClass.simpleName}")
+                algorithm?.let { append(" algorithm=$it") }
+            },
+        )
+    }
+
     init {
         if (!isSDKInitialized()) {
             throw IllegalArgumentException(
@@ -619,6 +652,8 @@ public class RtcSession internal constructor(
             )
         }
         logger.i { "<init> #sfu; #track; no args" }
+
+        traceE2EEConfiguration()
 
         // step 1 setup the peer connections
         // publisher = createPublisher()
@@ -1394,6 +1429,8 @@ public class RtcSession internal constructor(
                 // Empty, handled differently
             },
             onIceCandidateRequest = ::sendIceCandidate,
+            e2eeManager = call.e2eeManager,
+            userIdForSession = { call.state.getParticipantBySessionId(it)?.userId?.value },
         )
         return peerConnection
     }
@@ -1488,6 +1525,7 @@ public class RtcSession internal constructor(
                 // Empty on purpose
             },
             isHifiAudioEnabled = call.state.settings.value?.audio?.hifiAudioEnabled ?: false,
+            e2eeManager = call.e2eeManager,
         )
     }
 

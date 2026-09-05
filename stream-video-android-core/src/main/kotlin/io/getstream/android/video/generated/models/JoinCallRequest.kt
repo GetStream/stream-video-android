@@ -45,6 +45,9 @@ data class JoinCallRequest (
     @Json(name = "create")
     val create: kotlin.Boolean? = null,
 
+    @Json(name = "e2ee")
+    val e2ee: kotlin.Boolean? = null,
+
     @Json(name = "hint_high_scale_livestream_publisher")
     val hintHighScaleLivestreamPublisher: kotlin.Boolean? = null,
 
