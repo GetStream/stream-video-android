@@ -35,12 +35,11 @@ import io.getstream.video.android.core.notifications.internal.service.ShowIncomi
 import io.getstream.video.android.core.notifications.internal.service.StartServiceParam
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomPermissions
-import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
-/** Coordinates the existing incoming-call service and optional Telecom registration path. */
+/** Coordinates the legacy incoming-call flow, where CallService owns the ringtone. */
 internal class PreAndroid17IncomingCallCoordinator(
     private val context: Context,
     private val client: StreamVideoClient,
@@ -55,12 +54,7 @@ internal class PreAndroid17IncomingCallCoordinator(
 
     @SuppressLint("MissingPermission", "NewApi")
     override fun showIncomingCall(request: IncomingCallRequest) {
-        val ringtoneOwner = if (isAndroid17OrHigher()) {
-            IncomingRingtoneOwner.Notification
-        } else {
-            IncomingRingtoneOwner.Legacy
-        }
-        val notification = request.notificationProvider(ringtoneOwner)
+        val notification = request.notificationProvider(IncomingRingtoneOwner.Legacy)
         val result = incomingCallPresenter.showIncomingCall(
             context = context,
             callId = request.callId,

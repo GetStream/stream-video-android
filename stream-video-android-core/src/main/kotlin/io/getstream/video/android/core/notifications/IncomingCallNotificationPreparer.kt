@@ -45,9 +45,8 @@ internal class IncomingCallNotificationPreparer(
         nonRingingNotification: Notification,
         ringingState: RingingState.Incoming,
     ): Notification {
-        val channelId = requireNotNull(NotificationCompat.getChannelId(nonRingingNotification)) {
-            "Incoming-call ringing requires a notification channel ID."
-        }
+        val channelId = NotificationCompat.getChannelId(nonRingingNotification)
+            ?: return nonRingingNotification
         return NotificationCompat.Builder(context, nonRingingNotification)
             .setChannelId(channelId)
             .build()
