@@ -1,0 +1,48 @@
+name: App Distribute CI v2
+
+# Temporary workflow to publish the v2 demo app to Firebase App Distribution in the shared
+# stream-android-32afb project. When v2 is released and `develop-v2` becomes `develop`, remove
+# this workflow and update the main `app-distribute.yml` instead.
+
+on:
+  push:
+    branches:
+      - develop-v2
+  workflow_dispatch:
+
+jobs:
+  build_v2_demo_app:
+    permissions:
+      actions: write
+      contents: read
+    name: Build and Distribute V2 Demo App
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: GetStream/android-ci-actions/actions/setup-java@cb46e4f44d105a68738bfd2a1cfd156bb768665b
+      - name: Prepare environment
+        env:
+          ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
+          PASSPHRASE: ${{ secrets.PASSPHRASE }}
+          RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
+          RELEASE_KEYSTORE_PROPERTIES: ${{ secrets.RELEASE_KEYSTORE_PROPERTIES }}
+        run: |
+          echo "${{ env.RELEASE_KEYSTORE }}" > .sign/release.keystore.asc
+          gpg -d --passphrase "${{ env.PASSPHRASE }}" --batch .sign/release.keystore.asc > .sign/release.keystore
+          echo "${{ env.RELEASE_KEYSTORE_PROPERTIES }}" > .sign/keystore.properties.asc
+          gpg -d --passphrase "${{ env.PASSPHRASE }}" --batch .sign/keystore.properties.asc > .sign/keystore.properties
+          echo "${{ env.ENV_PROPERTIES }}" > .env.properties
+      - name: Assemble
+        run: bash ./gradlew :demo-app:assembleDevelopmentRelease --stacktrace
+      - name: Upload APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: demo-app-development-release
+          path: demo-app/build/outputs/apk/development/release/
+      - name: Upload artifact to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@bd494989dd4bec0343f78adee87fe66e48279ad6
+        with:
+          appId: ${{ secrets.FIREBASE_V2_DEMO_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.STREAM_ANDROID_FIREBASE_CREDENTIALS_APP_CONTENT }}
+          groups: stream-testers
+          file: demo-app/build/outputs/apk/development/release/demo-app-development-release.apk
