@@ -29,6 +29,22 @@ import org.junit.Test
 class IncomingCallNotificationAlertTest {
 
     @Test
+    fun `incoming call channel uses legacy ID before Android 17`() {
+        assertEquals(
+            R.string.stream_video_incoming_call_notification_channel_id,
+            defaultIncomingCallChannelIdRes(BUILD_VERSION_CODES_CINNAMON_BUN - 1),
+        )
+    }
+
+    @Test
+    fun `incoming call channel uses ringing ID on Android 17`() {
+        assertEquals(
+            R.string.stream_video_incoming_call_ringing_notification_channel_id,
+            defaultIncomingCallChannelIdRes(BUILD_VERSION_CODES_CINNAMON_BUN),
+        )
+    }
+
+    @Test
     fun `low importance incoming call channel uses legacy ID before Android 17`() {
         assertEquals(
             R.string.stream_video_incoming_call_low_priority_notification_channel_id,

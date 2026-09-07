@@ -132,7 +132,7 @@ constructor(
     notificationChannels: StreamNotificationChannels = StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_notification_channel_id,
+            defaultIncomingCallChannelIdRes(),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
@@ -167,7 +167,7 @@ constructor(
         ),
         incomingCallLowImportanceChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_low_priority_notification_channel_id,
+            defaultIncomingCallLowImportanceChannelIdRes(),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_low_priority_notification_channel_description,
             NotificationManager.IMPORTANCE_DEFAULT,
