@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.webrtc.RTCStats
 import org.webrtc.RTCStatsReport
@@ -224,6 +225,85 @@ class CallStatsTest {
         assertEquals(0F, stats.publisher.audioBitrateKbps.value)
     }
 
+    @Test
+    fun `a seeded byte count with no timestamp behind it does not derive a rate`() {
+        val stats = callStats()
+        // The two halves of the baseline are separate fields, so a half-written one has to be
+        // treated as no baseline rather than divided by.
+        stats.publisher.lastAudioBytes = 8_000
+
+        stats.publisher.updateAudioBitrate(bytes = 16_000, timestampUs = 1_000_000.0)
+
+        assertEquals(0F, stats.publisher.audioBitrateKbps.value)
+    }
+
+    @Test
+    fun `a report carrying no audio at all leaves every audio value alone`() {
+        val stats = callStats()
+
+        stats.updateFromRTCStats(
+            report(stat(type = "candidate-pair", members = mapOf("currentRoundTripTime" to 0.05))),
+            isPublisher = true,
+        )
+
+        assertEquals(0F, stats.publisher.audioBitrateKbps.value)
+        assertEquals(0F, stats.publisher.audioTargetBitrateKbps.value)
+        assertEquals("", stats.publisher.audioCodec.value)
+    }
+
+    @Test
+    fun `byte counters of the wrong type are treated as absent`() {
+        val stats = callStats()
+
+        // WebRTC reports these as BigInteger on some builds; the cast has to fail into "no
+        // sample" rather than seed a baseline that later polls subtract from.
+        stats.updateFromRTCStats(
+            report(
+                stat(
+                    type = "outbound-rtp",
+                    id = "outbound-audio",
+                    members = mapOf("kind" to "audio", "bytesSent" to "16000"),
+                ),
+            ),
+            isPublisher = true,
+        )
+        stats.updateFromRTCStats(
+            report(
+                stat(
+                    type = "inbound-rtp",
+                    id = "inbound-audio",
+                    members = mapOf("kind" to "audio", "bytesReceived" to 1.5),
+                ),
+            ),
+            isPublisher = false,
+        )
+
+        assertNull(stats.publisher.lastAudioBytes)
+        assertNull(stats.subscriber.lastAudioBytes)
+    }
+
+    @Test
+    fun `a target bitrate of the wrong type is skipped`() {
+        val stats = callStats()
+
+        stats.updateFromRTCStats(
+            report(
+                stat(
+                    type = "outbound-rtp",
+                    id = "outbound-audio",
+                    members = mapOf(
+                        "kind" to "audio",
+                        "bytesSent" to 0L,
+                        "targetBitrate" to 128_000,
+                    ),
+                ),
+            ),
+            isPublisher = true,
+        )
+
+        assertEquals(0F, stats.publisher.audioTargetBitrateKbps.value)
+    }
+
     //endregion
 
     //region codec direction
@@ -287,6 +367,86 @@ class CallStatsTest {
             "audio/opus 48000 Hz stereo minptime=10;useinbandfec=1",
             stats.publisher.audioCodec.value,
         )
+    }
+
+    @Test
+    fun `a codecId of the wrong type falls back to the codec the report carries`() {
+        val stats = callStats()
+
+        stats.updateFromRTCStats(
+            report(
+                stat(
+                    type = "outbound-rtp",
+                    id = "outbound-audio",
+                    members = mapOf("kind" to "audio", "bytesSent" to 0L, "codecId" to 7L),
+                ),
+                codec("codec-only"),
+            ),
+            isPublisher = true,
+        )
+
+        assertEquals(
+            "audio/opus 48000 Hz mono minptime=10;useinbandfec=1",
+            stats.publisher.audioCodec.value,
+        )
+    }
+
+    @Test
+    fun `a codecId pointing at nothing reports no codec`() {
+        val stats = callStats()
+
+        // The elvis falls through to codec:audio, and there is none — the alternative is an
+        // exception on a stats poll.
+        stats.updateFromRTCStats(
+            report(outboundAudio(bytesSent = 0, timestampUs = 0, codecId = "missing")),
+            isPublisher = true,
+        )
+
+        assertEquals("", stats.publisher.audioCodec.value)
+    }
+
+    @Test
+    fun `codec members of the wrong type drop out of the description`() {
+        val stats = callStats()
+
+        stats.updateFromRTCStats(
+            report(
+                outboundAudio(bytesSent = 0, timestampUs = 0, codecId = "odd-codec"),
+                stat(
+                    type = "codec",
+                    id = "odd-codec",
+                    members = mapOf(
+                        "mimeType" to 1,
+                        "clockRate" to "48000",
+                        "channels" to "1",
+                        "sdpFmtpLine" to 2,
+                    ),
+                ),
+            ),
+            isPublisher = true,
+        )
+
+        // Every member failed its cast, so the description is empty rather than "null null null".
+        assertEquals("", stats.publisher.audioCodec.value)
+    }
+
+    @Test
+    fun `a codec with no channel count reports without a channel word`() {
+        val stats = callStats()
+
+        stats.updateFromRTCStats(
+            report(
+                outboundAudio(bytesSent = 0, timestampUs = 0, codecId = "no-channels"),
+                stat(
+                    type = "codec",
+                    id = "no-channels",
+                    members = mapOf("mimeType" to "audio/opus", "clockRate" to 48000L),
+                ),
+            ),
+            isPublisher = true,
+        )
+
+        assertEquals("audio/opus 48000 Hz", stats.publisher.audioCodec.value)
     }
 
     @Test

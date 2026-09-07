@@ -44,6 +44,8 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.webrtc.AudioTrack
 import stream.video.sfu.models.AudioBitrateProfile
 
@@ -55,7 +57,13 @@ import stream.video.sfu.models.AudioBitrateProfile
  * Every bridge has a no-publisher branch that has to answer without throwing: the profile can be
  * set on a session that exists but is not publishing audio yet, and a crash there would take the
  * whole switch down rather than reporting one stage as unreachable.
+ *
+ * Runs under Robolectric even though nothing here needs Android: the other tests that touch
+ * [RtcSession] are Robolectric tests, and mixing loaders makes JaCoCo discard this class's
+ * execution data as a bytecode mismatch — the coverage silently disappears in a full-suite run
+ * while every test still passes.
  */
+@RunWith(RobolectricTestRunner::class)
 class RtcSessionAudioProfileTest {
 
     private val testScope = TestScope(StandardTestDispatcher())
