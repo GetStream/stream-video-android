@@ -62,6 +62,7 @@ import io.getstream.video.android.core.utils.defaultHardwareAudioEffectsEnabled
 import io.getstream.video.android.core.utils.defaultSoftwareAudioProcessingEnabled
 import io.getstream.video.android.core.utils.mapState
 import io.getstream.video.android.core.utils.safeCall
+import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.targetAudioMaxBitrateBps
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -1901,9 +1902,13 @@ class MediaManagerImpl(
                 source = newSource,
                 trackId = UUID.randomUUID().toString(),
             )
-            // A fresh track starts enabled; a muted microphone must stay muted across the swap.
-            newTrack.trySetEnabled(microphone.isEnabled.value)
-            // A fresh track starts enabled; a muted microphone must stay muted across the swap.
+            // A fresh track starts enabled, so the state the swap is replacing has to be carried
+            // over. The outgoing track is the truth and `microphone.isEnabled` is not: `enable`
+            // and `disable` only move `_status` when `fromUser` is true, so a lifecycle-driven
+            // pause leaves the flow reading enabled while the track is off, and reading the flow
+            // would unmute a call the app had muted. The flow is the fallback for the first
+            // build, where there is no outgoing track to ask.
+            newTrack.trySetEnabled(previousTrack?.tryEnabled() ?: microphone.isEnabled.value)
 
             if (!swap(newTrack)) {
                 newTrack.dispose()
@@ -1975,3 +1980,9 @@ class MediaManagerImpl(
 }
 
 fun MediaStreamTrack.trySetEnabled(enabled: Boolean) = safeCall { setEnabled(enabled) }
+
+/**
+ * The track's own enabled flag, or null when it cannot answer — a disposed track throws from
+ * native rather than reporting a value.
+ */
+internal fun MediaStreamTrack.tryEnabled(): Boolean? = safeCallWithDefault(null) { enabled() }
