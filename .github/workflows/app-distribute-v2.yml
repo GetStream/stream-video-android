@@ -13,7 +13,6 @@ on:
 jobs:
   build_v2_demo_app:
     permissions:
-      actions: write
       contents: read
     name: Build and Distribute V2 Demo App
     runs-on: ubuntu-24.04
@@ -27,15 +26,23 @@ jobs:
           RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
           RELEASE_KEYSTORE_PROPERTIES: ${{ secrets.RELEASE_KEYSTORE_PROPERTIES }}
         run: |
-          echo "${{ env.RELEASE_KEYSTORE }}" > .sign/release.keystore.asc
-          gpg -d --passphrase "${{ env.PASSPHRASE }}" --batch .sign/release.keystore.asc > .sign/release.keystore
-          echo "${{ env.RELEASE_KEYSTORE_PROPERTIES }}" > .sign/keystore.properties.asc
-          gpg -d --passphrase "${{ env.PASSPHRASE }}" --batch .sign/keystore.properties.asc > .sign/keystore.properties
-          echo "${{ env.ENV_PROPERTIES }}" > .env.properties
+          echo "$RELEASE_KEYSTORE" > .sign/release.keystore.asc
+          gpg -d --batch --pinentry-mode loopback --passphrase-fd 0 \
+            .sign/release.keystore.asc > .sign/release.keystore <<< "$PASSPHRASE"
+          echo "$RELEASE_KEYSTORE_PROPERTIES" > .sign/keystore.properties.asc
+          gpg -d --batch --pinentry-mode loopback --passphrase-fd 0 \
+            .sign/keystore.properties.asc > .sign/keystore.properties <<< "$PASSPHRASE"
+          echo "$ENV_PROPERTIES" > .env.properties
       - name: Assemble
         run: bash ./gradlew :demo-app:assembleDevelopmentRelease --stacktrace
+      - name: Remove signing material
+        if: always()
+        run: |
+          rm -f .sign/release.keystore .sign/release.keystore.asc \
+                .sign/keystore.properties .sign/keystore.properties.asc \
+                .env.properties
       - name: Upload APK
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: demo-app-development-release
           path: demo-app/build/outputs/apk/development/release/
