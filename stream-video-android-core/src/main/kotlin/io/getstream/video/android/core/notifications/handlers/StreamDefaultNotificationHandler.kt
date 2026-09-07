@@ -236,7 +236,6 @@ constructor(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
-        notificationManager.cancel(callId.getNotificationId(NotificationType.Incoming))
         val notificationId = callId.getNotificationId(NotificationType.Missed)
         getMissedCallNotification(
             callId,

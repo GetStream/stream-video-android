@@ -485,12 +485,13 @@ class StreamDefaultNotificationHandlerTest {
             )
         }
 
-        // Verify notification manager is called to show notification
-        verify {
+        // Incoming notification cleanup belongs to its service route.
+        verify(exactly = 0) {
             mockNotificationManager.cancel(
                 testCallId.getNotificationId(NotificationType.Incoming),
             )
         }
+        // Verify notification manager is called to show notification
         verify { mockNotificationManager.notify(notificationId, any()) }
     }
 
