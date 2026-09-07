@@ -60,6 +60,7 @@ import org.webrtc.SessionDescription
 import org.webrtc.VideoTrack
 import stream.video.sfu.event.VideoLayerSetting
 import stream.video.sfu.event.VideoSender
+import stream.video.sfu.models.AudioBitrate
 import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.Codec
 import stream.video.sfu.models.DegradationPreference
@@ -928,6 +929,94 @@ class PublisherTest {
 
         assertFalse(publisher.setAudioMaxBitrate(128_000))
     }
+
+    @Test
+    fun `audioMaxBitrate reads the ceiling off the live sender`() = runTest {
+        publishingAudioThrough(
+            audioSenderWith(
+                buildRtpParams(rid = null, active = true, maxBitrate = 128_000),
+                accepts = true,
+            ),
+        )
+
+        assertEquals(128_000, publisher.audioMaxBitrate())
+    }
+
+    @Test
+    fun `audioMaxBitrate is null when nothing is publishing audio`() = runTest {
+        every {
+            mockTransceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO)
+        } returns emptyList()
+
+        assertNull(publisher.audioMaxBitrate())
+    }
+
+    @Test
+    fun `negotiatedAudioBitrate reports what the SFU asked for at join`() = runTest {
+        // The value to restore when a mid-call switch to music is undone, rather than a guess.
+        assertEquals(128_000, publisher.negotiatedAudioBitrate())
+    }
+
+    @Test
+    fun `negotiatedAudioBitrate is null when the publisher carries no audio option`() = runTest {
+        val videoOnly = buildPublisher(listOf(videoPublishOption))
+
+        assertNull(videoOnly.negotiatedAudioBitrate())
+    }
+
+    @Test
+    fun `audioBitrateFor returns the bitrate the SFU offers for the profile`() = runTest {
+        val withProfiles = buildPublisher(
+            listOf(
+                audioPublishOption.copy(
+                    audio_bitrate_profiles = listOf(
+                        AudioBitrate(
+                            profile = AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+                            bitrate = 64_000,
+                        ),
+                        AudioBitrate(
+                            profile = AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+                            bitrate = 128_000,
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        assertEquals(
+            128_000,
+            withProfiles.audioBitrateFor(
+                AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            ),
+        )
+    }
+
+    @Test
+    fun `audioBitrateFor is null when the server named none for the profile`() = runTest {
+        // A zero is the proto default for a field the server left out, not an offer of no
+        // bitrate — treating it as one would ask the encoder for nothing.
+        val zeroed = buildPublisher(
+            listOf(
+                audioPublishOption.copy(
+                    audio_bitrate_profiles = listOf(
+                        AudioBitrate(
+                            profile = AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+                            bitrate = 0,
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        assertNull(
+            zeroed.audioBitrateFor(AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY),
+        )
+        assertNull(
+            zeroed.audioBitrateFor(
+                AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+            ),
+        )
+    }
     //endregion
 
     // change publish quality region
@@ -1429,6 +1518,26 @@ class PublisherTest {
     //endregion
 
     // region utils
+    /** A publisher carrying [publishOptions], for the accessors that read them. */
+    private fun buildPublisher(publishOptions: List<PublishOption>): Publisher = Publisher(
+        mediaManager = mockMediaManager,
+        peerConnectionFactory = mockPeerConnectionFactory,
+        publishOptions = publishOptions,
+        coroutineScope = testScope,
+        type = StreamPeerType.PUBLISHER,
+        mediaConstraints = MediaConstraints(),
+        onStreamAdded = null,
+        onNegotiationNeeded = { _, _ -> },
+        onIceCandidate = null,
+        maxBitRate = 1_500_000,
+        sfuClient = mockSignalServerService,
+        sessionId = "session-id",
+        rejoin = { rejoinInvocations++ },
+        tracer = mockk(relaxed = true),
+        fastReconnect = {},
+        transceiverCache = mockTransceiverCache,
+    )
+
     private fun buildRtpParams(
         rid: String?,
         active: Boolean,
