@@ -31,4 +31,14 @@ class AndroidVersionCodesTest {
     fun `Android 17 SDK is Android 17 or higher`() {
         assertTrue(isAndroid17OrHigher(BUILD_VERSION_CODES_CINNAMON_BUN))
     }
+
+    @Test
+    fun `SDK below Android 17 is pre Android 17`() {
+        assertTrue(isPreAndroid17(BUILD_VERSION_CODES_CINNAMON_BUN - 1))
+    }
+
+    @Test
+    fun `Android 17 SDK is not pre Android 17`() {
+        assertFalse(isPreAndroid17(BUILD_VERSION_CODES_CINNAMON_BUN))
+    }
 }
