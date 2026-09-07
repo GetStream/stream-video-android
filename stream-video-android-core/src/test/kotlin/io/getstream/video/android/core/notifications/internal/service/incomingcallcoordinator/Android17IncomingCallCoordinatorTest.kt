@@ -125,18 +125,13 @@ class Android17IncomingCallCoordinatorTest {
     }
 
     @Test
-    fun `falls back with notification ringtone when Telecom is unavailable`() {
+    fun `falls back to legacy coordinator when Telecom is unavailable`() {
         every { telecomPermissions.canUseTelecom(context) } returns false
         val request = request()
 
         coordinator.showIncomingCall(request)
 
-        verify {
-            fallbackCoordinator.showIncomingCall(
-                request,
-                IncomingRingtoneOwner.Notification,
-            )
-        }
+        verify { fallbackCoordinator.showIncomingCall(request) }
         coVerify(exactly = 0) { repository.registerCall(any(), any(), any(), any(), any(), any()) }
     }
 
@@ -178,12 +173,7 @@ class Android17IncomingCallCoordinatorTest {
         coordinator.showIncomingCall(request)
         callScope.advanceUntilIdle()
 
-        verify {
-            fallbackCoordinator.showIncomingCall(
-                request,
-                IncomingRingtoneOwner.Notification,
-            )
-        }
+        verify { fallbackCoordinator.showIncomingCall(request) }
     }
 
     private fun request(
