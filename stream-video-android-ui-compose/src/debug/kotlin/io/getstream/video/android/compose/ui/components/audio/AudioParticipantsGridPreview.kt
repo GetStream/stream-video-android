@@ -29,12 +29,17 @@ import io.getstream.video.android.mock.previewParticipantsList
 @Preview
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1440, heightDp = 720)
 @Composable
-private fun AudioParticipantsGridPreview() {
+private fun AudioParticipantsGridRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        AudioParticipantsGrid(
-            modifier = Modifier.fillMaxSize(),
-            participants = previewParticipantsList,
-        )
+        AudioParticipantsGridPreview()
     }
+}
+
+@Composable
+internal fun AudioParticipantsGridPreview() {
+    AudioParticipantsGrid(
+        modifier = Modifier.fillMaxSize(),
+        participants = previewParticipantsList,
+    )
 }

@@ -25,11 +25,14 @@ import io.getstream.video.android.mock.previewMemberListState
 
 @Preview
 @Composable
-private fun ParticipantAvatarsPreview() {
+private fun ParticipantAvatarsRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        ParticipantAvatars(
-            members = previewMemberListState,
-        )
+        ParticipantAvatarsPreview()
     }
+}
+
+@Composable
+internal fun ParticipantAvatarsPreview() {
+    ParticipantAvatars(members = previewMemberListState)
 }

@@ -38,92 +38,102 @@ import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
 
 @Preview
 @Composable
-private fun StreamDialogPreview() {
+private fun StreamDialogRootPreview() {
     VideoTheme {
-        StreamDialogPositiveNegative(
-            icon = Icons.Default.StopCircle,
-            title = "This Call is Being Recorded",
-            // Color is for preview only
-            style = StreamDialogStyles.defaultDialogStyle().copy(
-                backgroundColor = VideoTheme.colors.baseSheetTertiary,
-            ),
-            contentText = "By staying in the call you’re consenting to being recorded.",
-            positiveButton = Triple(
-                "Continue",
-                ButtonStyles.secondaryButtonStyle(StyleSize.S),
-            ) {
-                // Do nothing
-            },
-            negativeButton = Triple(
-                "Leave call",
-                ButtonStyles.tertiaryButtonStyle(StyleSize.S),
-            ) {
-                // Do nothing
-            },
-        )
+        StreamDialogPreview()
     }
+}
+
+@Composable
+internal fun StreamDialogPreview() {
+    StreamDialogPositiveNegative(
+        icon = Icons.Default.StopCircle,
+        title = "This Call is Being Recorded",
+        // Color is for preview only
+        style = StreamDialogStyles.defaultDialogStyle().copy(
+            backgroundColor = VideoTheme.colors.baseSheetTertiary,
+        ),
+        contentText = "By staying in the call you’re consenting to being recorded.",
+        positiveButton = Triple(
+            "Continue",
+            ButtonStyles.secondaryButtonStyle(StyleSize.S),
+        ) {
+            // Do nothing
+        },
+        negativeButton = Triple(
+            "Leave call",
+            ButtonStyles.tertiaryButtonStyle(StyleSize.S),
+        ) {
+            // Do nothing
+        },
+    )
 }
 
 @Preview
 @Composable
-private fun StreamDialogWithInputPreview() {
+private fun StreamDialogWithInputRootPreview() {
     VideoTheme {
-        StreamDialogPositiveNegative(
-            content = {
-                Text(
-                    text = "How is your call Going?",
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        lineHeight = 28.sp,
-                        fontWeight = FontWeight(500),
-                        color = VideoTheme.colors.basePrimary,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = "All feedback is celebrated!",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        lineHeight = 18.5.sp,
-                        fontWeight = FontWeight(400),
-                        color = VideoTheme.colors.baseSecondary,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-                Spacer(modifier = Modifier.size(16.dp))
-                StreamTextField(
-                    value = TextFieldValue(""),
-                    placeholder = "Email address (required)",
-                    onValueChange = {},
-                    style = StreamTextFieldStyles.defaultTextField(StyleSize.S),
-                )
-
-                Spacer(modifier = Modifier.size(16.dp))
-                StreamTextField(
-                    value = TextFieldValue(""),
-                    placeholder = "Message",
-                    onValueChange = {},
-                    minLines = 7,
-                    style = StreamTextFieldStyles.defaultTextField(StyleSize.S),
-                )
-            },
-            // Color is for preview only
-            style = StreamDialogStyles.defaultDialogStyle().copy(
-                backgroundColor = VideoTheme.colors.baseSheetTertiary,
-            ),
-            positiveButton = Triple(
-                "Submit",
-                ButtonStyles.secondaryButtonStyle(StyleSize.S),
-            ) {
-                // Do nothing
-            },
-            negativeButton = Triple(
-                "Not now",
-                ButtonStyles.tertiaryButtonStyle(StyleSize.S),
-            ) {
-                // Do nothing
-            },
-        )
+        StreamDialogWithInputPreview()
     }
+}
+
+@Composable
+internal fun StreamDialogWithInputPreview() {
+    StreamDialogPositiveNegative(
+        content = {
+            Text(
+                text = "How is your call Going?",
+                style = TextStyle(
+                    fontSize = 24.sp,
+                    lineHeight = 28.sp,
+                    fontWeight = FontWeight(500),
+                    color = VideoTheme.colors.basePrimary,
+                    textAlign = TextAlign.Center,
+                ),
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = "All feedback is celebrated!",
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    lineHeight = 18.5.sp,
+                    fontWeight = FontWeight(400),
+                    color = VideoTheme.colors.baseSecondary,
+                    textAlign = TextAlign.Center,
+                ),
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            StreamTextField(
+                value = TextFieldValue(""),
+                placeholder = "Email address (required)",
+                onValueChange = {},
+                style = StreamTextFieldStyles.defaultTextField(StyleSize.S),
+            )
+
+            Spacer(modifier = Modifier.size(16.dp))
+            StreamTextField(
+                value = TextFieldValue(""),
+                placeholder = "Message",
+                onValueChange = {},
+                minLines = 7,
+                style = StreamTextFieldStyles.defaultTextField(StyleSize.S),
+            )
+        },
+        // Color is for preview only
+        style = StreamDialogStyles.defaultDialogStyle().copy(
+            backgroundColor = VideoTheme.colors.baseSheetTertiary,
+        ),
+        positiveButton = Triple(
+            "Submit",
+            ButtonStyles.secondaryButtonStyle(StyleSize.S),
+        ) {
+            // Do nothing
+        },
+        negativeButton = Triple(
+            "Not now",
+            ButtonStyles.tertiaryButtonStyle(StyleSize.S),
+        ) {
+            // Do nothing
+        },
+    )
 }

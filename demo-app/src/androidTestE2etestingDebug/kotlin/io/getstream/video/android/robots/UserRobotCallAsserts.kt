@@ -16,12 +16,15 @@
 
 package io.getstream.video.android.robots
 
+import android.app.Notification
+import android.app.NotificationManager
 import androidx.test.uiautomator.BySelector
 import io.getstream.video.android.pages.CallPage
 import io.getstream.video.android.pages.CallPage.SettingsMenu
 import io.getstream.video.android.pages.RingPage
 import io.getstream.video.android.robots.UserControls.DISABLE
 import io.getstream.video.android.robots.UserControls.ENABLE
+import io.getstream.video.android.uiautomator.appContext
 import io.getstream.video.android.uiautomator.defaultTimeout
 import io.getstream.video.android.uiautomator.device
 import io.getstream.video.android.uiautomator.findObject
@@ -29,6 +32,7 @@ import io.getstream.video.android.uiautomator.findObjects
 import io.getstream.video.android.uiautomator.isDisplayed
 import io.getstream.video.android.uiautomator.retryOnStaleObjectException
 import io.getstream.video.android.uiautomator.seconds
+import io.getstream.video.android.uiautomator.waitDisplayed
 import io.getstream.video.android.uiautomator.waitForCount
 import io.getstream.video.android.uiautomator.waitForText
 import io.getstream.video.android.uiautomator.waitToAppear
@@ -70,15 +74,23 @@ fun UserRobot.assertThatCallIsEnded(): UserRobot {
 }
 
 fun UserRobot.assertUserMicrophone(isEnabled: Boolean, videoCall: Boolean = true): UserRobot {
+    // The participant view icon updates slightly after the control toggle, so both
+    // checks poll instead of asserting the icon at the instant the toggle appears.
     if (isEnabled) {
-        assertTrue(CallPage.microphoneEnabledToggle.waitToAppear().isDisplayed())
+        assertTrue("Microphone enabled toggle", CallPage.microphoneEnabledToggle.waitDisplayed())
         if (videoCall) {
-            assertTrue(CallPage.ParticipantView.microphoneEnabledIcon.isDisplayed())
+            assertTrue(
+                "Participant microphone enabled icon",
+                CallPage.ParticipantView.microphoneEnabledIcon.waitDisplayed(),
+            )
         }
     } else {
-        assertTrue(CallPage.microphoneDisabledToggle.waitToAppear().isDisplayed())
+        assertTrue("Microphone disabled toggle", CallPage.microphoneDisabledToggle.waitDisplayed())
         if (videoCall) {
-            assertTrue(CallPage.ParticipantView.microphoneDisabledIcon.isDisplayed())
+            assertTrue(
+                "Participant microphone disabled icon",
+                CallPage.ParticipantView.microphoneDisabledIcon.waitDisplayed(),
+            )
         }
     }
     return this
@@ -145,12 +157,10 @@ fun UserRobot.assertParticipantsCountOnCall(
 ): UserRobot {
     val user = 1
     val participants = (user + count).toString()
-    val actualCount = device.retryOnStaleObjectException {
-        CallPage.participantsCountBadge
-            .waitToAppear()
-            .waitForText(expectedText = participants, timeOutMillis = timeOutMillis)
-            .text
-    }
+    val actualCount = CallPage.participantsCountBadge.waitForText(
+        expectedText = participants,
+        timeOutMillis = timeOutMillis,
+    )
     assertEquals(participants, actualCount)
     return this
 }
@@ -199,8 +209,19 @@ fun UserRobot.assertRecordingView(isDisplayed: Boolean): UserRobot {
     if (isDisplayed) {
         // The backend composite recorder can take 20-30s to actually start and emit
         // call.recording_started, so the icon needs a longer window than the 5s default.
-        assertTrue(CallPage.recordingIcon.waitToAppear(timeOutMillis = 30.seconds).isDisplayed())
-        assertEquals(label, CallPage.callInfoView.findObject().text)
+        // waitDisplayed also absorbs stale reads: the node returned by waitToAppear could
+        // go stale before isDisplayed() and leak a StaleObjectException.
+        assertTrue(
+            "Recording icon",
+            CallPage.recordingIcon.waitDisplayed(timeOutMillis = 30.seconds),
+        )
+        // After a network drop the label can briefly read "Reconnecting.." before it settles
+        // back to "Recording", so poll instead of asserting on the first read.
+        val callInfoText = CallPage.callInfoView.waitForText(
+            expectedText = label,
+            timeOutMillis = 15.seconds,
+        )
+        assertEquals(label, callInfoText)
     } else {
         // The buddy records for ~60s, so the icon stays visible until the backend emits
         // call.recording_stopped. waitToDisappear returns as soon as the icon is gone, so
@@ -262,19 +283,22 @@ fun UserRobot.assertIncomingCall(isDisplayed: Boolean): UserRobot {
 fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean): UserRobot {
     if (isDisplayed) {
         // The outgoing ringing screen only renders after the call create/ring network
-        // round-trip completes, which can exceed 10s under CI load.
+        // round-trip completes, which can exceed 20s on the slower CI emulators (API 28).
         assertTrue(
             "Decline call button",
-            RingPage.declineCallButton.waitToAppear(timeOutMillis = 20.seconds).isDisplayed(),
+            RingPage.declineCallButton.waitToAppear(timeOutMillis = 30.seconds).isDisplayed(),
         )
-        assertTrue("Call label", RingPage.outgoingCallLabel.isDisplayed())
-        assertTrue("Avatar", RingPage.callParticipantAvatar.isDisplayed())
-        assertTrue("Microphone", RingPage.microphoneEnabledToggle.isDisplayed())
-        assertEquals(
-            "Camera should be displayed: ${!audioOnly}",
-            !audioOnly,
-            RingPage.cameraEnabledToggle.isDisplayed(),
-        )
+        // The control toggles reflect async call state (the microphone can still show the
+        // muted state right after the screen renders), so poll instead of instant asserts.
+        assertTrue("Call label", RingPage.outgoingCallLabel.waitDisplayed())
+        assertTrue("Avatar", RingPage.callParticipantAvatar.waitDisplayed())
+        assertTrue("Microphone", RingPage.microphoneEnabledToggle.waitDisplayed())
+        if (audioOnly) {
+            assertFalse("Camera enabled toggle", RingPage.cameraEnabledToggle.isDisplayed())
+            assertFalse("Camera disabled toggle", RingPage.cameraDisabledToggle.isDisplayed())
+        } else {
+            assertTrue("Camera", RingPage.cameraEnabledToggle.waitDisplayed())
+        }
     } else {
         assertFalse(
             "Decline call button",
@@ -284,11 +308,37 @@ fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean
     return this
 }
 
+/**
+ * Asserts the presence of the outgoing call notification, which the outgoing call foreground
+ * service posts with the "Calling..." title (on the ongoing calls channel, see
+ * getSimpleOngoingCallNotification). The instrumentation runs inside the app process, so the
+ * check reads NotificationManager.activeNotifications directly instead of matching text in
+ * the notification shade, where the outgoing screen shows the same "Calling..." text.
+ * The service start and stop are asynchronous, so both directions poll.
+ */
+fun UserRobot.assertOutgoingCallNotification(isDisplayed: Boolean): UserRobot {
+    val title = appContext.getString(
+        io.getstream.video.android.core.R.string.stream_video_outgoing_call_notification_title,
+    )
+    val notificationManager = appContext.getSystemService(NotificationManager::class.java)
+    fun displayed() = notificationManager.activeNotifications.any {
+        it.notification.extras.getCharSequence(Notification.EXTRA_TITLE)?.toString() == title
+    }
+    val endTime = System.currentTimeMillis() + defaultTimeout
+    while (displayed() != isDisplayed && System.currentTimeMillis() < endTime) {
+        Thread.sleep(250)
+    }
+    assertEquals("Outgoing call notification displayed", isDisplayed, displayed())
+    return this
+}
+
 fun UserRobot.assertConnectingView(): UserRobot {
     assertEquals("Connecting...", RingPage.callProgressBar.waitToAppear().text)
+    // Connecting covers the same call join round-trip as waitForCallToStart, which can
+    // exceed 10s on a loaded CI emulator, so both use the same 30s window.
     assertFalse(
         "Connecting screen should disappear",
-        RingPage.callProgressBar.waitToDisappear(timeOutMillis = 10000).isDisplayed(),
+        RingPage.callProgressBar.waitToDisappear(timeOutMillis = 30.seconds).isDisplayed(),
     )
     return this
 }

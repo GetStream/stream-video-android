@@ -21,6 +21,7 @@ import io.getstream.video.android.robots.assertAudioCallControls
 import io.getstream.video.android.robots.assertConnectingView
 import io.getstream.video.android.robots.assertIncomingCall
 import io.getstream.video.android.robots.assertOutgoingCall
+import io.getstream.video.android.robots.assertOutgoingCallNotification
 import io.getstream.video.android.robots.assertThatCallIsEnded
 import io.getstream.video.android.robots.assertVideoCallControls
 import io.qameta.allure.kotlin.Allure.step
@@ -80,11 +81,17 @@ class RingingTests : StreamTestCase() {
         step("THEN the outgoing call starts") {
             userRobot.assertOutgoingCall(audioOnly = true, isDisplayed = true)
         }
+        step("AND the outgoing call notification is displayed") {
+            userRobot.assertOutgoingCallNotification(isDisplayed = true)
+        }
         step("WHEN user rejects the outgoing call") {
             userRobot.declineOutgoingCall()
         }
         step("THEN the outgoing call ends") {
             userRobot.assertOutgoingCall(isDisplayed = false)
+        }
+        step("AND the outgoing call notification is dismissed") {
+            userRobot.assertOutgoingCallNotification(isDisplayed = false)
         }
     }
 

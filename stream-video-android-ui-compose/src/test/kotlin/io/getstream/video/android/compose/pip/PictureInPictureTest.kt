@@ -17,13 +17,10 @@
 package io.getstream.video.android.compose.pip
 
 import android.app.Activity
-import android.content.Context
-import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.util.Rational
-import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.ScreenSharingSession
@@ -31,88 +28,70 @@ import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
-import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 public class PictureInPictureTest {
 
-    private lateinit var context: Context
+    private lateinit var activity: Activity
     private lateinit var call: Call
     private lateinit var pipConfig: PictureInPictureConfiguration
 
     @Before
     public fun setup() {
-        context = mockk(relaxed = true)
+        activity = Robolectric.buildActivity(Activity::class.java).create().get()
         call = mockk(relaxed = true)
         pipConfig = PictureInPictureConfiguration(true)
 
-        val packageManager = mockk<PackageManager>()
-        every { context.packageManager } returns packageManager
-        every { packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE) } returns true
-
-        val resources = mockk<android.content.res.Resources>()
-        val configuration = Configuration()
-        configuration.orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        every { resources.configuration } returns configuration
-        every { context.resources } returns resources
-
-        // Mock findActivity()
-        val activity = mockk<Activity>(relaxed = true)
-        mockkStatic("io.getstream.video.android.compose.pip.PictureInPictureKt")
-        every { context.findActivity() } returns activity
+        shadowOf(activity.packageManager)
+            .setSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE, true)
     }
 
     @After
     public fun tearDown() {
-        unmockkStatic(ContextCompat::class)
         clearAllMocks()
     }
 
     // enterPictureInPicture Test
     @Test
     @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
-    public fun `should enter pip mode with correct params`() {
+    public fun `should enter pip mode when O and above`() {
         val screenSharing = mockk<ScreenSharingSession>(relaxed = true)
         every { call.state.screenSharingSession.value } returns screenSharing
-        val activity = context.findActivity()!!
 
-        enterPictureInPicture(context, call, pipConfig)
+        enterPictureInPicture(activity, call, pipConfig)
 
-        verify(exactly = 1) { activity.enterPictureInPictureMode(any()) }
+        assertTrue(activity.isInPictureInPictureMode)
     }
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.N]) // below O
     public fun `should enter pip mode without params when below O`() {
-        every {
-            context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
-        } returns true
-        val activity = context.findActivity()!!
+        enterPictureInPicture(activity, call, pipConfig)
 
-        enterPictureInPicture(context, call, pipConfig)
-
-        verify(exactly = 1) { activity.enterPictureInPictureMode() }
+        assertTrue(activity.isInPictureInPictureMode)
     }
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.O])
     public fun `should not enter pip when feature not supported`() {
-        every {
-            context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
-        } returns false
-        enterPictureInPicture(context, call, pipConfig)
-        val activity = context.findActivity()!!
-        verify(exactly = 0) { activity.enterPictureInPictureMode(any()) }
+        shadowOf(activity.packageManager)
+            .setSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE, false)
+
+        enterPictureInPicture(activity, call, pipConfig)
+
+        assertFalse(activity.isInPictureInPictureMode)
     }
 
     // getAspect test
@@ -125,8 +104,8 @@ public class PictureInPictureTest {
         val screenSharing = mockk<ScreenSharingSession>()
         every { screenSharing.participant } returns localParticipant
 
-        val aspect1 = getAspect(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, null)
-        val aspect2 = getAspect(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, screenSharing)
+        val aspect1 = getAspect(Configuration.ORIENTATION_PORTRAIT, null)
+        val aspect2 = getAspect(Configuration.ORIENTATION_PORTRAIT, screenSharing)
 
         assertEquals(Rational(9, 16), aspect1)
         assertEquals(Rational(9, 16), aspect2)
@@ -134,7 +113,7 @@ public class PictureInPictureTest {
 
     @Test
     public fun `should return 16x9 when landscape`() {
-        val aspect = getAspect(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, null)
+        val aspect = getAspect(Configuration.ORIENTATION_LANDSCAPE, null)
         assertEquals(Rational(16, 9), aspect)
     }
 
@@ -146,7 +125,7 @@ public class PictureInPictureTest {
         val screenSharing = mockk<ScreenSharingSession>()
         every { screenSharing.participant } returns remoteParticipant
 
-        val aspect = getAspect(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, screenSharing)
+        val aspect = getAspect(Configuration.ORIENTATION_PORTRAIT, screenSharing)
         assertEquals(Rational(16, 9), aspect)
     }
 
@@ -154,19 +133,43 @@ public class PictureInPictureTest {
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.S]) // Android 12
-    public fun `should set aspect ratio and auto-enter when SDK S`() {
+    public fun `should enable auto-enter by default when SDK S`() {
         val builder = getPictureInPictureParams(Rational(16, 9), pipConfig)
         val params = builder.build()
 
-        assertNotNull(params)
+        // getAspectRatio() returns float until API 32 and Rational from 33, so calling it
+        // against the current SDK stubs throws NoSuchMethodError on the S runtime.
+        // Only the boolean getters can be asserted here.
+        assertTrue(params.isAutoEnterEnabled)
     }
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
-    public fun `should set title and seamless resize for TIRAMISU`() {
+    public fun `should set aspect ratio and title for TIRAMISU`() {
         val builder = getPictureInPictureParams(Rational(9, 16), pipConfig)
         val params = builder.build()
-        assertNotNull(params)
+
+        assertEquals(Rational(9, 16), params.aspectRatio)
+        assertEquals("Video Player", params.title.toString())
+        // isSeamlessResizeEnabled() defaults to true when never set, so this only guards
+        // a regression to setSeamlessResizeEnabled(false); set-true is not observable.
+        assertTrue(params.isSeamlessResizeEnabled)
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+    public fun `should follow the configured auto-enter for TIRAMISU`() {
+        val enabled = getPictureInPictureParams(
+            Rational(9, 16),
+            PictureInPictureConfiguration(enable = true, autoEnterEnabled = true),
+        ).build()
+        val disabled = getPictureInPictureParams(
+            Rational(9, 16),
+            PictureInPictureConfiguration(enable = true, autoEnterEnabled = false),
+        ).build()
+
+        assertTrue(enabled.isAutoEnterEnabled)
+        assertFalse(disabled.isAutoEnterEnabled)
     }
 
     @Test

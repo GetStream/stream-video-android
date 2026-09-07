@@ -29,40 +29,69 @@ import io.getstream.video.android.ui.common.R
 
 @Preview
 @Composable
-private fun IncomingCallPreview1() {
+private fun IncomingCallContentOneParticipantRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
                 R.drawable.stream_video_call_sample,
         ) {
-            IncomingCallContent(
-                call = previewCall,
-                participants = previewMemberListState.takeLast(1),
-                isVideoType = true,
-                isCameraEnabled = false,
-                onBackPressed = {},
-            ) {}
+            IncomingCallContentOneParticipantPreview()
         }
     }
 }
 
+@Composable
+internal fun IncomingCallContentOneParticipantPreview() {
+    IncomingCallContent(
+        call = previewCall,
+        participants = previewMemberListState.takeLast(1),
+        isCameraEnabled = false,
+        onBackPressed = {},
+    ) {}
+}
+
 @Preview
 @Composable
-private fun IncomingCallPreview2() {
+private fun IncomingCallContentMultipleParticipantsRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CompositionLocalProvider(
             LocalAvatarPreviewPlaceholder provides
                 R.drawable.stream_video_call_sample,
         ) {
-            IncomingCallContent(
-                call = previewCall,
-                participants = previewMemberListState,
-                isVideoType = true,
-                isCameraEnabled = false,
-                onBackPressed = {},
-            ) {}
+            IncomingCallContentMultipleParticipantsPreview()
         }
     }
+}
+
+@Composable
+internal fun IncomingCallContentMultipleParticipantsPreview() {
+    IncomingCallContent(
+        call = previewCall,
+        participants = previewMemberListState,
+        isCameraEnabled = false,
+        onBackPressed = {},
+    ) {}
+}
+
+@Preview
+@Composable
+private fun IncomingCallContentMinimumRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CompositionLocalProvider(
+            LocalAvatarPreviewPlaceholder provides
+                R.drawable.stream_video_call_sample,
+        ) {
+            IncomingCallContentMinimumPreview()
+        }
+    }
+}
+
+@Composable
+internal fun IncomingCallContentMinimumPreview() {
+    IncomingCallContent(
+        call = previewCall,
+    )
 }

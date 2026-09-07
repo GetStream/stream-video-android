@@ -19,11 +19,13 @@ package io.getstream.video.android.rules
 import android.database.sqlite.SQLiteDatabase
 import android.os.Environment
 import androidx.test.platform.app.InstrumentationRegistry
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.uiautomator.allureLogcat
 import io.getstream.video.android.uiautomator.allureScreenrecord
 import io.getstream.video.android.uiautomator.allureScreenshot
 import io.getstream.video.android.uiautomator.allureWindowHierarchy
 import io.getstream.video.android.uiautomator.device
+import io.getstream.video.android.uiautomator.enableInternetConnection
 import io.qameta.allure.kotlin.Allure
 import io.qameta.allure.kotlin.model.Stage
 import io.qameta.allure.kotlin.model.TestResult
@@ -71,7 +73,15 @@ public class RetryRule(private val count: Int) : TestRule {
                 } catch (t: Throwable) {
                     System.err.println("$testName: run #$attempt failed.")
                     caughtThrowable = t
-                    databaseOperations.clearDatabases()
+                    // Every post-failure step is best-effort: an exception escaping this
+                    // catch block replaces the real failure and skips the remaining
+                    // attempts, so none of them may throw.
+                    runCatching { databaseOperations.clearDatabases() }
+                        .onFailure {
+                            System.err.println(
+                                "$testName: clearing databases failed: $it",
+                            )
+                        }
                     val recordingStopped = recordingThread?.let {
                         stopRecordingSafely(
                             testName,
@@ -79,17 +89,34 @@ public class RetryRule(private val count: Int) : TestRule {
                             it,
                         )
                     }
-                    device.allureLogcat(name = "logcat_$attempt")
-                    device.allureScreenshot(name = "screenshot_$attempt")
-                    device.allureWindowHierarchy(name = "hierarchy_$attempt")
-                    if (recordingStopped == true) {
-                        device.allureScreenrecord(
-                            name = "record_$attempt",
-                            file = File(videoFilePath),
+                    runCatching {
+                        device.allureLogcat(name = "logcat_$attempt")
+                        device.allureScreenshot(name = "screenshot_$attempt")
+                        device.allureWindowHierarchy(name = "hierarchy_$attempt")
+                        if (recordingStopped == true) {
+                            device.allureScreenrecord(
+                                name = "record_$attempt",
+                                file = File(videoFilePath),
+                            )
+                        }
+                    }.onFailure {
+                        System.err.println(
+                            "$testName: capturing failure artifacts failed: $it",
                         )
                     }
+                    // The connection is device-global state that outlives the test process,
+                    // so it is restored even after the final attempt: otherwise one
+                    // reconnection test failing all attempts leaves the rest of the batch
+                    // without network.
+                    restoreInternetConnection(testName)
                     if (attempt < count) {
-                        writeFailedAttemptResult(attempt, t, startMillis)
+                        leaveLeftoverCall(testName)
+                        runCatching { writeFailedAttemptResult(attempt, t, startMillis) }
+                            .onFailure {
+                                System.err.println(
+                                    "$testName: writing the attempt result failed: $it",
+                                )
+                            }
                     }
                 } finally {
                     if (recordingThread != null) {
@@ -100,6 +127,32 @@ public class RetryRule(private val count: Int) : TestRule {
 
             throw caughtThrowable ?: IllegalStateException("$testName failed without a captured error")
         }
+    }
+
+    /**
+     * A reconnection test that fails between disabling and enabling the connection leaves
+     * wifi and data off. Best-effort: [io.getstream.video.android.uiautomator.waitForInternetConnection]
+     * throws when the connection does not come back within its window, and that must not
+     * replace the test failure.
+     */
+    private fun restoreInternetConnection(testName: String) {
+        runCatching { device.enableInternetConnection() }
+            .onFailure { System.err.println("$testName: restoring the connection failed: $it") }
+    }
+
+    /**
+     * Best-effort teardown of a call a failed attempt left behind. The instrumentation runs
+     * inside the app process, so the app cannot be force-stopped or its process killed
+     * without killing the test itself: leftover state has to be reset in place, or the next
+     * attempt inherits a call that is still active or ringing and fails the same way.
+     */
+    private fun leaveLeftoverCall(testName: String) {
+        runCatching {
+            StreamVideo.instanceOrNull()?.state?.let { state ->
+                state.ringingCall.value?.leave(reason = "e2e-test-retry")
+                state.activeCall.value?.leave(reason = "e2e-test-retry")
+            }
+        }.onFailure { System.err.println("$testName: leaving the leftover call failed: $it") }
     }
 
     /**

@@ -40,6 +40,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
+import io.getstream.video.android.ui.call.DemoComponentFactory
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
@@ -111,6 +112,8 @@ class CallActivity : ComposeStreamCallActivity() {
     }
 
     private class StreamDemoUiDelegate : StreamCallActivityComposeDelegate() {
+
+        override val componentFactory = DemoComponentFactory
 
         @Composable
         override fun StreamCallActivity.LoadingContent(call: Call) {

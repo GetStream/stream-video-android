@@ -64,6 +64,33 @@ class JoinAnalyticsTest {
     }
 
     @Test
+    fun `onJoinFunctionStart mints a new attempt id on every call`() {
+        joinAnalytics.onJoinFunctionStart()
+        val first = stateHolder.state.value.joinStageAttemptId
+
+        joinAnalytics.onJoinFunctionStart()
+        val second = stateHolder.state.value.joinStageAttemptId
+
+        assertNotNull(first)
+        assertNotNull(second)
+        assertNotEquals(first, second)
+        verify(exactly = 1) {
+            reporter.reportSdkMethodJoinInitiated(
+                callId = "call-1",
+                callType = "default",
+                joinStageAttemptId = first!!,
+            )
+        }
+        verify(exactly = 1) {
+            reporter.reportSdkMethodJoinInitiated(
+                callId = "call-1",
+                callType = "default",
+                joinStageAttemptId = second!!,
+            )
+        }
+    }
+
+    @Test
     fun `onJoinRequestStart reports the coordinator join and moves the stage in progress`() {
         joinAnalytics.onJoinRequestStart(JoinReason.FirstAttempt)
 

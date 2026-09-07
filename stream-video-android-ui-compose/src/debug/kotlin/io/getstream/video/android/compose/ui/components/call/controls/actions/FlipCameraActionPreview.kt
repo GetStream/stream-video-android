@@ -22,9 +22,14 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-private fun FlipActionPreview() {
+private fun FlipActionRootPreview() {
     VideoTheme {
-        FlipCameraAction {
-        }
+        FlipActionPreview()
+    }
+}
+
+@Composable
+internal fun FlipActionPreview() {
+    FlipCameraAction {
     }
 }

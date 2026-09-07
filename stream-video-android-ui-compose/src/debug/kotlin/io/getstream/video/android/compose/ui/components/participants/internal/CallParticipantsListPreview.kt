@@ -25,15 +25,20 @@ import io.getstream.video.android.mock.previewParticipantsList
 
 @Preview
 @Composable
-private fun CallParticipantsListPreview() {
+private fun CallParticipantsListRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallParticipantsList(
-            participants = previewParticipantsList,
-            onUserOptionsSelected = {},
-            isLocalAudioEnabled = false,
-            onInviteUser = {},
-            onMute = {},
-        ) {}
+        CallParticipantsListPreview()
     }
+}
+
+@Composable
+internal fun CallParticipantsListPreview() {
+    CallParticipantsList(
+        participants = previewParticipantsList,
+        onUserOptionsSelected = {},
+        isLocalAudioEnabled = false,
+        onInviteUser = {},
+        onMute = {},
+    ) {}
 }

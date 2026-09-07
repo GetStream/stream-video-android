@@ -26,11 +26,16 @@ import io.getstream.video.android.mock.previewCall
 
 @Preview
 @Composable
-private fun CallContentPreview() {
+private fun CallContentMultipleParticipantsRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallContent(call = previewCall)
+        CallContentMultipleParticipantsPreview()
     }
+}
+
+@Composable
+internal fun CallContentMultipleParticipantsPreview() {
+    CallContent(call = previewCall)
 }
 
 @Preview(
@@ -44,4 +49,26 @@ private fun CallContentPreviewLandscape() {
     VideoTheme {
         CallContent(call = previewCall)
     }
+}
+
+@Preview
+@Composable
+private fun CallContentDeprecatedOverloadRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallContentDeprecatedOverloadPreview()
+    }
+}
+
+/**
+ * Pins the deprecated [CallContent] overload (the one taking `enableInPictureInPicture`), which
+ * must keep rendering exactly like the current overload until it is removed.
+ */
+@Suppress("DEPRECATION")
+@Composable
+internal fun CallContentDeprecatedOverloadPreview() {
+    CallContent(
+        call = previewCall,
+        enableInPictureInPicture = false,
+    )
 }

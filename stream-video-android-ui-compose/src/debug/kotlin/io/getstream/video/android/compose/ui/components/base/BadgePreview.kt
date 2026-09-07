@@ -33,49 +33,54 @@ import io.getstream.video.android.compose.ui.components.base.styling.StreamBadge
 
 @Preview
 @Composable
-private fun ButtonWithBadgePreview() {
+private fun BadgesWithButtonsRootPreview() {
     VideoTheme {
-        Column {
-            StreamBadgeBox(
-                text = "!",
-                style = StreamBadgeStyles.defaultBadgeStyle(),
-            ) {
-                StreamIconButton(
-                    icon = Icons.Default.AddAlert,
-                    style = ButtonStyles.secondaryIconButtonStyle(),
-                )
-            }
-            Spacer(modifier = Modifier.size(16.dp))
-            StreamBadgeBox(
-                text = "10",
-                style = StreamBadgeStyles.defaultBadgeStyle(),
-            ) {
-                StreamButton(
-                    icon = Icons.Default.Info,
-                    text = "Secondary Button",
-                    style = ButtonStyles.secondaryButtonStyle(),
-                )
-            }
-            Spacer(modifier = Modifier.size(16.dp))
-            StreamBadgeBox(
-                text = "10+",
-                style = StreamBadgeStyles.defaultBadgeStyle(),
-            ) {
-                StreamIconButton(
-                    icon = Icons.Default.QuestionAnswer,
-                    style = ButtonStyles.primaryIconButtonStyle(),
-                )
-            }
-            Spacer(modifier = Modifier.size(16.dp))
-            StreamBadgeBox(
-                showWithoutValue = false,
-                style = StreamBadgeStyles.defaultBadgeStyle(),
-            ) {
-                StreamIconButton(
-                    icon = Icons.Default.QuestionAnswer,
-                    style = ButtonStyles.primaryIconButtonStyle(),
-                )
-            }
+        BadgesWithButtonsPreview()
+    }
+}
+
+@Composable
+internal fun BadgesWithButtonsPreview() {
+    Column {
+        StreamBadgeBox(
+            text = "!",
+            style = StreamBadgeStyles.defaultBadgeStyle(),
+        ) {
+            StreamIconButton(
+                icon = Icons.Default.AddAlert,
+                style = ButtonStyles.secondaryIconButtonStyle(),
+            )
+        }
+        Spacer(modifier = Modifier.size(16.dp))
+        StreamBadgeBox(
+            text = "10",
+            style = StreamBadgeStyles.defaultBadgeStyle(),
+        ) {
+            StreamButton(
+                icon = Icons.Default.Info,
+                text = "Secondary Button",
+                style = ButtonStyles.secondaryButtonStyle(),
+            )
+        }
+        Spacer(modifier = Modifier.size(16.dp))
+        StreamBadgeBox(
+            text = "10+",
+            style = StreamBadgeStyles.defaultBadgeStyle(),
+        ) {
+            StreamIconButton(
+                icon = Icons.Default.QuestionAnswer,
+                style = ButtonStyles.primaryIconButtonStyle(),
+            )
+        }
+        Spacer(modifier = Modifier.size(16.dp))
+        StreamBadgeBox(
+            showWithoutValue = false,
+            style = StreamBadgeStyles.defaultBadgeStyle(),
+        ) {
+            StreamIconButton(
+                icon = Icons.Default.QuestionAnswer,
+                style = ButtonStyles.primaryIconButtonStyle(),
+            )
         }
     }
 }

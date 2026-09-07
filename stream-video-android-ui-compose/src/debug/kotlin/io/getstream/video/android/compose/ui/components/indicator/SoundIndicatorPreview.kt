@@ -16,31 +16,31 @@
 
 package io.getstream.video.android.compose.ui.components.indicator
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-private fun SoundIndicatorPreview() {
+private fun SoundIndicatorRootPreview() {
     VideoTheme {
-        Column {
-            SoundIndicator(
-                isSpeaking = true,
-                isAudioEnabled = true,
-                audioLevel = 0f,
-            )
-            SoundIndicator(
-                isSpeaking = false,
-                isAudioEnabled = false,
-                audioLevel = 0.5f,
-            )
-            SoundIndicator(
-                isSpeaking = false,
-                isAudioEnabled = true,
-                audioLevel = 0.5f,
-            )
-        }
+        SoundIndicatorPreview()
+    }
+}
+
+@Composable
+internal fun SoundIndicatorPreview() {
+    Row {
+        SoundIndicator(
+            isSpeaking = true,
+            isAudioEnabled = true,
+            audioLevel = 0f,
+        )
+        SoundIndicator(
+            isSpeaking = true,
+            isAudioEnabled = false,
+            audioLevel = 0f,
+        )
     }
 }

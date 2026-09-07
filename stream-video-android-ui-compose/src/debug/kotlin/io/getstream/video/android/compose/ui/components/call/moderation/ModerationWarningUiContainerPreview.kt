@@ -18,9 +18,17 @@ package io.getstream.video.android.compose.ui.components.call.moderation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-private fun ModerationWarningUiContentDemoPreview() {
+private fun ModerationWarningUiContentDemoRootPreview() {
+    VideoTheme {
+        ModerationWarningUiContentDemoPreview()
+    }
+}
+
+@Composable
+internal fun ModerationWarningUiContentDemoPreview() {
     ModerationWarningUiContentDemo()
 }

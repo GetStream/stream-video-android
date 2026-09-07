@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -28,45 +29,62 @@ import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.mock.previewParticipant
 import io.getstream.video.android.mock.previewParticipantsList
 
 @Preview
 @Composable
-private fun CallParticipantPreview() {
+private fun CallParticipantLocalRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        ParticipantVideo(
-            call = previewCall,
-            participant = previewParticipantsList[1],
-        )
+        CallParticipantLocalPreview()
     }
 }
 
 @Preview
 @Composable
-private fun ParticipantLabelPreview() {
+private fun CallParticipantRemoteRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        Box {
-            ParticipantLabel(
-                nameLabel = "The name",
-                isPinned = true,
-                labelPosition = BottomStart,
-                hasAudio = true,
-                isSpeaking = true,
-                audioLevel = 0f,
-                soundIndicatorContent = {
-                    SoundIndicator(
-                        isSpeaking = true,
-                        isAudioEnabled = true,
-                        audioLevel = 0.8f,
-                        modifier = Modifier
-                            .align(CenterVertically)
-                            .padding(horizontal = VideoTheme.dimens.spacingS),
-                    )
-                },
-            )
-        }
+        CallParticipantRemotePreview()
+    }
+}
+
+@Composable
+internal fun CallParticipantLocalPreview() {
+    ParticipantVideo(
+        call = previewCall,
+        participant = previewParticipantsList[0],
+        style = RegularVideoRendererStyle(isFocused = true),
+    )
+}
+
+@Composable
+internal fun CallParticipantRemotePreview() {
+    ParticipantVideo(
+        call = previewCall,
+        participant = previewParticipantsList[1],
+        style = RegularVideoRendererStyle(isFocused = true),
+    )
+}
+
+@Preview
+@Composable
+private fun ParticipantLabelRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        ParticipantLabelPreview()
+    }
+}
+
+@Composable
+internal fun ParticipantLabelPreview() {
+    Box {
+        ParticipantLabel(
+            call = previewCall,
+            participant = previewParticipantsList[1],
+            Alignment.BottomStart,
+        )
     }
 }
 
@@ -101,12 +119,17 @@ private fun ParticipantLabelPausedPreview() {
 
 @Preview
 @Composable
-private fun ParticipantVideoPreview() {
+private fun ParticipantVideoRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        ParticipantVideoRenderer(
-            call = previewCall,
-            participant = previewParticipantsList[1],
-        )
+        ParticipantVideoPreview()
     }
+}
+
+@Composable
+internal fun ParticipantVideoPreview() {
+    ParticipantVideoRenderer(
+        call = previewCall,
+        participant = previewParticipant,
+    ) {}
 }
