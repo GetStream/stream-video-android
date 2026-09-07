@@ -377,6 +377,12 @@ internal class Publisher(
      * degradation preference are — so it takes effect on the running encoder with no renegotiation.
      * The audio bitrate is not carried in the SDP on our side; it rides entirely on the encoding.
      *
+     * `setParameters` is called for its result rather than through the `parameters` property:
+     * WebRTC validates the encodings and answers with a boolean, and assigning the property
+     * throws that answer away. A rejected update would otherwise be reported to the caller as an
+     * applied stage, which is exactly what [io.getstream.video.android.core.AudioProfileResult]
+     * exists to prevent.
+     *
      * @return true when a live audio sender accepted the new parameters.
      */
     internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean {
@@ -392,9 +398,11 @@ internal class Publisher(
                 val params = sender.parameters ?: return@safeCallWithDefault false
                 if (params.encodings.isEmpty()) return@safeCallWithDefault false
                 params.encodings.forEach { it.maxBitrateBps = maxBitrateBps }
-                sender.parameters = params
-                logger.d { "[setAudioMaxBitrate] applied maxBitrateBps: $maxBitrateBps" }
-                true
+                sender.setParameters(params).also { accepted ->
+                    logger.d {
+                        "[setAudioMaxBitrate] maxBitrateBps: $maxBitrateBps, accepted: $accepted"
+                    }
+                }
             }
         }
     }

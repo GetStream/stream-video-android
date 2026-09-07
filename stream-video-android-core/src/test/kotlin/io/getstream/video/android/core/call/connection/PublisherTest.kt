@@ -871,6 +871,63 @@ class PublisherTest {
 
         assertFalse(publisher.replaceAudioTrack(mockk(relaxed = true)))
     }
+
+    /** A sender whose parameters carry one encoding, which is the audio case. */
+    private fun audioSenderWith(
+        parameters: RtpParameters,
+        accepts: Boolean,
+    ): RtpSender = mockk(relaxed = true) {
+        every { this@mockk.parameters } returns parameters
+        every { setParameters(any()) } returns accepts
+    }
+
+    /**
+     * `RtpParameters.encodings` is a public field, so it cannot be stubbed — the real object is
+     * built through the same reflection helper the publish-quality tests use.
+     */
+    private fun singleEncodingParameters(): RtpParameters =
+        buildRtpParams(rid = null, active = true, maxBitrate = 64_000)
+
+    private fun publishingAudioThrough(sender: RtpSender) {
+        val transceiver = mockk<RtpTransceiver>(relaxed = true) {
+            every { this@mockk.sender } returns sender
+        }
+        every {
+            mockTransceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO)
+        } returns listOf(transceiver)
+    }
+
+    @Test
+    fun `setAudioMaxBitrate applies the ceiling to every encoding`() = runTest {
+        val params = singleEncodingParameters()
+        val sender = audioSenderWith(params, accepts = true)
+        publishingAudioThrough(sender)
+
+        assertTrue(publisher.setAudioMaxBitrate(128_000))
+
+        assertEquals(128_000, params.encodings.single().maxBitrateBps)
+        coVerify { sender.setParameters(params) }
+    }
+
+    @Test
+    fun `setAudioMaxBitrate reports false when WebRTC rejects the parameters`() = runTest {
+        val sender = audioSenderWith(singleEncodingParameters(), accepts = false)
+        publishingAudioThrough(sender)
+
+        // Reporting success here would tell AudioProfileResult the bitrate stage applied while the
+        // encoder is still on the old ceiling — the half-applied switch the result type exists to
+        // surface.
+        assertFalse(publisher.setAudioMaxBitrate(128_000))
+    }
+
+    @Test
+    fun `setAudioMaxBitrate reports false when no audio is being published`() = runTest {
+        every {
+            mockTransceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO)
+        } returns emptyList()
+
+        assertFalse(publisher.setAudioMaxBitrate(128_000))
+    }
     //endregion
 
     // change publish quality region
