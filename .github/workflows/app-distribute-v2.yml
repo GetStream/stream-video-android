@@ -8,6 +8,10 @@ on:
   push:
     branches:
       - develop-v2
+      # TEMPORARY, remove before merging this PR. A push trigger reads the workflow file from
+      # the branch being pushed, so this is the only way to verify the pipeline before it
+      # reaches develop-v2. workflow_dispatch is not available until the file is on develop.
+      - andrerego/and-1497-distribute-v2-demo-app-builds-via-firebase-app-distribution
   workflow_dispatch:
 
 jobs:
