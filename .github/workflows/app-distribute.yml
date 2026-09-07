@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: demo-app-release
-          path: demo-app/build/outputs/apk/demo-app/release/
+          path: demo-app/build/outputs/apk/development/release/
       - name: Upload artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@bd494989dd4bec0343f78adee87fe66e48279ad6
         with:
