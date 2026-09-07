@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.shareIn
@@ -141,9 +142,10 @@ class CallJoinViewModel @Inject constructor(
             googleSignInClient.signOut()
 
             StreamVideo.instanceOrNull()?.let { streamVideo ->
-                streamVideo.getDevice().first()?.let { device ->
+                streamVideo.getDevice().firstOrNull()?.let { device ->
                     streamVideo.deleteDevice(device)
                 }
+                streamVideo.logOut()
             }
 
             StreamVideo.removeClient()
