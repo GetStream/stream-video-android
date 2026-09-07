@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
 
@@ -142,9 +143,12 @@ class CallJoinViewModel @Inject constructor(
             googleSignInClient.signOut()
 
             StreamVideo.instanceOrNull()?.let { streamVideo ->
-                streamVideo.getDevice().firstOrNull()?.let { device ->
-                    streamVideo.deleteDevice(device)
+                val device = try {
+                    streamVideo.getDevice().firstOrNull()
+                } catch (_: IOException) {
+                    null
                 }
+                device?.let { streamVideo.deleteDevice(it) }
                 streamVideo.logOut()
             }
 
