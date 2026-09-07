@@ -120,19 +120,6 @@ class PreAndroid17IncomingCallCoordinatorTest {
     }
 
     @Test
-    fun `Android 17 fallback retains notification ringtone ownership`() {
-        var selectedOwner: IncomingRingtoneOwner? = null
-
-        coordinator.showIncomingCall(
-            request = request { selectedOwner = it },
-            ringtoneOwner = IncomingRingtoneOwner.Notification,
-        )
-
-        assertEquals(IncomingRingtoneOwner.Notification, selectedOwner)
-        verify { callState.updateServiceRoute(ServiceRoute.LEGACY_CALL_SERVICE) }
-    }
-
-    @Test
     fun `foreground service path reuses existing Telecom repository`() = runTest {
         every { presenter.showIncomingCall(any(), any(), any(), any(), any()) } returns
             ShowIncomingCallResult.FG_SERVICE

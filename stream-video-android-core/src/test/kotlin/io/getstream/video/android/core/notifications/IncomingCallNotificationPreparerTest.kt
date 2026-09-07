@@ -44,7 +44,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 
 @RunWith(RobolectricTestRunner::class)
@@ -129,13 +128,18 @@ class IncomingCallNotificationPreparerTest {
     }
 
     @Test
-    fun `notification owner requires a channel ID`() {
-        assertFailsWith<IllegalArgumentException> {
-            preparer.prepare(
-                Notification(),
-                IncomingRingtoneOwner.Notification,
-                RingingState.Incoming(),
-            )
+    fun `notification owner returns original notification when channel ID is missing`() {
+        val notification = Notification()
+
+        val result = preparer.prepare(
+            notification,
+            IncomingRingtoneOwner.Notification,
+            RingingState.Incoming(),
+        )
+
+        assertSame(notification, result)
+        verify(exactly = 0) {
+            notificationManager.createNotificationChannel(any<NotificationChannelCompat>())
         }
     }
 
