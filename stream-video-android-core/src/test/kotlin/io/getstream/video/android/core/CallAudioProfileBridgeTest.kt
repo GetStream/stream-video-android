@@ -47,6 +47,10 @@ class CallAudioProfileBridgeTest : IntegrationTestBase(connectCoordinatorWS = fa
 
     private fun call(): Call = client.call("default", randomUUID())
 
+    /**
+     * Injected outside any `every { }` block on purpose: [injectSession] stubs the session's
+     * socket state itself, and MockK cannot record one stubbing block inside another.
+     */
     private fun Call.withSession(): RtcSession =
         mockk<RtcSession>(relaxed = true).also { injectSession(it) }
 
@@ -73,7 +77,8 @@ class CallAudioProfileBridgeTest : IntegrationTestBase(connectCoordinatorWS = fa
     @Test
     fun `audioMaxBitrate reads through the session`() = runTest {
         val call = call()
-        every { call.withSession().audioMaxBitrate() } returns 128_000
+        val session = call.withSession()
+        every { session.audioMaxBitrate() } returns 128_000
 
         assertEquals(128_000, call.audioMaxBitrate())
     }
@@ -81,7 +86,8 @@ class CallAudioProfileBridgeTest : IntegrationTestBase(connectCoordinatorWS = fa
     @Test
     fun `negotiatedAudioBitrate reads through the session`() = runTest {
         val call = call()
-        every { call.withSession().negotiatedAudioBitrate() } returns 64_000
+        val session = call.withSession()
+        every { session.negotiatedAudioBitrate() } returns 64_000
 
         assertEquals(64_000, call.negotiatedAudioBitrate())
     }
@@ -89,9 +95,9 @@ class CallAudioProfileBridgeTest : IntegrationTestBase(connectCoordinatorWS = fa
     @Test
     fun `audioBitrateFor reads through the session`() = runTest {
         val call = call()
+        val session = call.withSession()
         every {
-            call.withSession()
-                .audioBitrateFor(AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY)
+            session.audioBitrateFor(AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY)
         } returns 128_000
 
         assertEquals(
@@ -114,7 +120,8 @@ class CallAudioProfileBridgeTest : IntegrationTestBase(connectCoordinatorWS = fa
     @Test
     fun `rebuildAudioCapturePipeline reaches the session`() = runTest {
         val call = call()
-        every { call.withSession().rebuildAudioCapturePipeline() } returns true
+        val session = call.withSession()
+        every { session.rebuildAudioCapturePipeline() } returns true
 
         assertTrue(call.rebuildAudioCapturePipeline())
     }
