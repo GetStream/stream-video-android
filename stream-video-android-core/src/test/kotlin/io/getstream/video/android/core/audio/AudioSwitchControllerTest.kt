@@ -23,6 +23,7 @@ import com.twilio.audioswitch.AudioDeviceChangeListener
 import com.twilio.audioswitch.AudioSwitch
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -62,11 +63,23 @@ class AudioSwitchControllerTest {
         unmockkAll()
     }
 
+    /**
+     * The listener handed to AudioSwitch, which wraps [listener] so the requested audio mode
+     * survives the route changes AudioSwitch drives on its own.
+     */
+    private fun startedListener(): AudioDeviceChangeListener {
+        val slot = slot<AudioDeviceChangeListener>()
+        verify { audioSwitch.start(capture(slot)) }
+        return slot.captured
+    }
+
     @Test
     fun `start should create and start AudioSwitch`() {
         controller.start()
 
-        verify { audioSwitch.start(listener) }
+        startedListener().invoke(emptyList(), null)
+
+        verify { listener.invoke(emptyList(), null) }
     }
 
     @Test
@@ -75,7 +88,7 @@ class AudioSwitchControllerTest {
         controller.start()
 
         verify(exactly = 1) { controller.getAudioSwitch() }
-        verify(exactly = 1) { audioSwitch.start(listener) }
+        verify(exactly = 1) { audioSwitch.start(any()) }
     }
 
     @Test
@@ -163,6 +176,28 @@ class AudioSwitchControllerTest {
         controller.start()
 
         controller.selectDevice(mockk<AudioDevice>())
+
+        verify(exactly = 0) { audioManager.mode = any() }
+    }
+
+    @Test
+    fun `a route change should reapply the requested mode over the one AudioSwitch sets`() {
+        controller.start()
+        controller.setCommunicationModeEnabled(false)
+        // Taking audio focus to enumerate devices puts the device back in communication mode
+        // before the change listener runs.
+        every { audioManager.mode } returns AudioManager.MODE_IN_COMMUNICATION
+
+        startedListener().invoke(emptyList(), null)
+
+        verify(exactly = 2) { audioManager.mode = AudioManager.MODE_NORMAL }
+    }
+
+    @Test
+    fun `a route change should leave the mode alone when none was requested`() {
+        controller.start()
+
+        startedListener().invoke(emptyList(), null)
 
         verify(exactly = 0) { audioManager.mode = any() }
     }
