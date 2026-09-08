@@ -447,6 +447,90 @@ class MicrophoneManagerTest {
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `leaving music puts the noise-cancellation processor back on when it was on`() = runTest {
+        val call = mockAudioStagesCall(audioProcessingInitiallyEnabled = true)
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+        ).getOrThrow()
+
+        // A creator who finishes their song expects their noise cancellation back.
+        assertTrue(call.isAudioProcessingEnabled())
+    }
+
+    @Test
+    fun `leaving music leaves the noise-cancellation processor off when it was off`() = runTest {
+        val call = mockAudioStagesCall(audioProcessingInitiallyEnabled = false)
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+        ).getOrThrow()
+
+        // Deriving "voice means on" would switch the processor on for someone who had turned it
+        // off through the already-released Call.setAudioProcessingEnabled.
+        assertFalse(call.isAudioProcessingEnabled())
+        verify(exactly = 0) { call.setAudioProcessingEnabled(true) }
+    }
+
+    @Test
+    fun `a repeated music request does not forget what preceded the first one`() = runTest {
+        val call = mockAudioStagesCall(audioProcessingInitiallyEnabled = true)
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        repeat(2) {
+            microphoneManager.setAudioBitrateProfile(
+                AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+            ).getOrThrow()
+        }
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+        ).getOrThrow()
+
+        // The second music request must not remember the false the first one wrote.
+        assertTrue(call.isAudioProcessingEnabled())
+    }
+
+    @Test
+    fun `a voice profile on a call that never played music leaves the processor alone`() = runTest {
+        val call = mockAudioStagesCall(audioProcessingInitiallyEnabled = false)
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+        ).getOrThrow()
+
+        // Nothing was remembered, so there is nothing to put back and no business writing at all.
+        verify(exactly = 0) { call.setAudioProcessingEnabled(any()) }
+    }
+
+    @Test
+    fun `a partly applied switch does not switch the processor on`() = runTest {
+        val call = mockAudioStagesCall(
+            audioProcessingInitiallyEnabled = false,
+            audioMaxBitrateAccepted = false,
+        )
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+
+        // The bitrate stage refused, so the state reverts — to what was there, not to "voice
+        // means on".
+        assertFalse(result.complete)
+        assertFalse(call.isAudioProcessingEnabled())
+        verify(exactly = 0) { call.setAudioProcessingEnabled(true) }
+    }
+
+    @Test
     fun `setAudioBitrateProfile moves every reachable stage after joining`() = runTest {
         val call = mockAudioStagesCall(negotiatedAudioBitrate = 64_000)
         val microphoneManager = joinedMicrophoneManager(call)
@@ -528,10 +612,19 @@ class MicrophoneManagerTest {
 
     @Test
     fun `setAudioBitrateProfile reports a noise cancellation processor that refused`() = runTest {
-        val call = mockAudioStagesCall(audioProcessingReachable = true)
-        // Attached but not allowed on this call — setAudioProcessingEnabled(true) is refused.
-        every { call.isAudioProcessingEnabled() } returns false
+        // The refusal only matters where the stage has work to do, which is on the way out of
+        // music: the processor was on before it, so leaving music has to put it back.
+        val call = mockAudioStagesCall(
+            audioProcessingReachable = true,
+            audioProcessingInitiallyEnabled = true,
+        )
         val microphoneManager = joinedMicrophoneManager(call)
+        microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        ).getOrThrow()
+        // Attached but no longer allowed on this call — setAudioProcessingEnabled(true) is
+        // refused, so the processor cannot be put back.
+        every { call.isAudioProcessingEnabled() } returns false
 
         val result = microphoneManager.setAudioBitrateProfile(
             AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
@@ -585,7 +678,10 @@ class MicrophoneManagerTest {
     @Test
     @Config(sdk = [Build.VERSION_CODES.Q])
     fun `a refused switch puts the profile-derived state back`() = runTest {
-        val call = mockAudioStagesCall()
+        // The processor was running before the switch, so putting the state back means putting it
+        // back on. The case where it was off is covered by
+        // `a partly applied switch does not switch the processor on`.
+        val call = mockAudioStagesCall(audioProcessingInitiallyEnabled = true)
         every { call.setAudioMaxBitrate(any()) } returns false
         val microphoneManager = joinedMicrophoneManager(call)
 
@@ -716,9 +812,11 @@ class MicrophoneManagerTest {
         audioProcessingReachable: Boolean = true,
         negotiatedAudioBitrate: Int? = 64_000,
         hardwareNoiseSuppressorSupported: Boolean = true,
+        audioProcessingInitiallyEnabled: Boolean = false,
+        audioMaxBitrateAccepted: Boolean = true,
     ): Call {
         // Mirrors what was asked for, so a stage that accepts the change reports applied.
-        var audioProcessingEnabled = false
+        var audioProcessingEnabled = audioProcessingInitiallyEnabled
         return mockk<Call>(relaxed = true) {
             every { isAudioProcessingReachable() } returns audioProcessingReachable
             every { isHardwareNoiseSuppressorSupported() } returns hardwareNoiseSuppressorSupported
@@ -728,7 +826,7 @@ class MicrophoneManagerTest {
             every { isAudioProcessingEnabled() } answers { audioProcessingEnabled }
             every { setHardwareNoiseSuppressorEnabled(any()) } returns true
             every { rebuildAudioCapturePipeline() } returns true
-            every { setAudioMaxBitrate(any()) } returns true
+            every { setAudioMaxBitrate(any()) } returns audioMaxBitrateAccepted
             every { negotiatedAudioBitrate() } returns negotiatedAudioBitrate
             every { audioBitrateFor(any()) } returns null
         }

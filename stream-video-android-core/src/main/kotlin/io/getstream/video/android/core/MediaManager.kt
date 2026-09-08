@@ -1053,9 +1053,54 @@ class MicrophoneManager(
 
         val call = mediaManager.call
         call.setHardwareNoiseSuppressorEnabled(hardwareNoiseSuppressorEnabled)
-        call.setAudioProcessingEnabled(
-            previousProfile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
-        )
+        applyNoiseCancellationFor(previousProfile)
+    }
+
+    /**
+     * What the noise-cancellation processor was doing before this call switched into music, or
+     * null while the call is not in music.
+     *
+     * The other three stages are derived from the profile alone, which is lossless because they
+     * have no setter of their own left. This one does: [Call.setAudioProcessingEnabled] is public
+     * and released, so an app or a user can have turned the processor off deliberately, and
+     * deriving "voice means on" would switch it back on for them on the way out of music.
+     */
+    private var noiseCancellationBeforeMusic: Boolean? = null
+
+    /**
+     * Moves the noise-cancellation processor to what [profile] needs, and reports whether it got
+     * there.
+     *
+     * Music turns it off — where one is configured it is the dominant suppressor, and leaving it
+     * running makes every other stage inaudible. Leaving music puts back whatever was running
+     * before, rather than assuming on.
+     *
+     * A processor that is not reachable counts as applied: nothing is processing, so there is
+     * nothing for the profile to fix.
+     */
+    private fun applyNoiseCancellationFor(profile: AudioBitrateProfile): Boolean {
+        val call = mediaManager.call
+        val isMusic = profile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+        val reachable = call.isAudioProcessingReachable()
+
+        val wanted = if (isMusic) {
+            // Captured once, on the way in. A second request for music must not overwrite it with
+            // the false this stage itself wrote the first time.
+            if (noiseCancellationBeforeMusic == null) {
+                noiseCancellationBeforeMusic = call.isAudioProcessingEnabled()
+            }
+            false
+        } else {
+            // Nothing remembered means this call was never switched into music, so there is
+            // nothing to put back and no business touching the processor at all.
+            noiseCancellationBeforeMusic ?: return true
+        }
+
+        call.setAudioProcessingEnabled(wanted)
+        if (!isMusic) {
+            noiseCancellationBeforeMusic = null
+        }
+        return !reachable || call.isAudioProcessingEnabled() == wanted
     }
 
     /**
@@ -1070,16 +1115,8 @@ class MicrophoneManager(
         softwareAudioProcessingChanged: Boolean,
     ): AudioProfileResult {
         val call = mediaManager.call
-        val isMusic = profile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
 
-        // The noise-cancellation processor is the stage no other control on this class reaches,
-        // and where one is configured it is the dominant suppressor: leaving it running makes
-        // every other change inaudible.
-        val noiseCancellationWanted = !isMusic
-        val noiseCancellationReachable = call.isAudioProcessingReachable()
-        call.setAudioProcessingEnabled(noiseCancellationWanted)
-        val noiseCancellationApplied = !noiseCancellationReachable ||
-            call.isAudioProcessingEnabled() == noiseCancellationWanted
+        val noiseCancellationApplied = applyNoiseCancellationFor(profile)
 
         // A device with no platform noise suppressor has nothing suppressing, so the profile is
         // satisfied — the same rule as an absent noise-cancellation processor. The setter cannot
@@ -1172,6 +1209,9 @@ class MicrophoneManager(
     fun cleanup() {
         ifAudioHandlerInitialized { it.stop() }
         cleanupUsbDeviceDetection()
+        // Dropped with the call that captured it, so a value remembered from a call that ended in
+        // music cannot be put back onto the next one.
+        noiseCancellationBeforeMusic = null
         setupCompleted.set(false)
     }
 
