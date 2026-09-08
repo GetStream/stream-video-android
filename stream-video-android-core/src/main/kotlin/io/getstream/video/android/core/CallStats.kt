@@ -262,7 +262,20 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
                     timestampUs = it.timestampUs,
                 )
             }
-            statGroups["codec:audio"]?.firstOrNull()?.let {
+            // The publisher and the subscriber report are both fed through here, and each one
+            // describes only its own direction. Writing both sides from either report leaves
+            // whichever ran last showing on both, so the codec is resolved through the matching
+            // RTP statistic's own codecId — which also picks the right entry when a report
+            // carries more than one audio codec — and only that direction is updated.
+            val audioRtp = if (isPublisher) {
+                statGroups["outbound-rtp:audio"]
+            } else {
+                statGroups["inbound-rtp:audio"]
+            }?.firstOrNull()
+            val audioCodecStat = (audioRtp?.members?.get("codecId") as? String)
+                ?.let { codecId -> stats.origin.statsMap[codecId] }
+                ?: statGroups["codec:audio"]?.firstOrNull()
+            audioCodecStat?.let {
                 val mimeType = it.members["mimeType"] as? String
                 val clockRate = it.members["clockRate"] as? Long
                 val channels = it.members["channels"] as? Long
@@ -273,8 +286,11 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
                     channels?.let { count -> if (count > 1) "stereo" else "mono" },
                     fmtp,
                 ).joinToString(" ")
-                publisher._audioCodec.value = codec
-                subscriber._audioCodec.value = codec
+                if (isPublisher) {
+                    publisher._audioCodec.value = codec
+                } else {
+                    subscriber._audioCodec.value = codec
+                }
             }
 
             statGroups["candidate-pair"]?.firstOrNull()?.let {

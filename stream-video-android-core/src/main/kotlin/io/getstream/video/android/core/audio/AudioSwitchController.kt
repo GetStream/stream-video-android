@@ -48,7 +48,14 @@ internal class AudioSwitchController(
 
         audioSwitch = getAudioSwitch()
         isActivated = false
-        audioSwitch?.start(audioDeviceChangeListener)
+        // The listener is wrapped rather than handed over directly: an active AudioSwitch takes
+        // audio focus while it enumerates devices, which puts the device back in
+        // MODE_IN_COMMUNICATION before this callback runs. Route changes arrive here and nowhere
+        // else, so this is the only place a request made earlier can be re-applied over them.
+        audioSwitch?.start { devices, selected ->
+            applyRequestedAudioMode()
+            audioDeviceChangeListener(devices, selected)
+        }
     }
 
     override fun stop() {

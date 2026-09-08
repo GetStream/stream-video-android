@@ -60,6 +60,7 @@ import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
 import stream.video.sfu.event.VideoLayerSetting
 import stream.video.sfu.event.VideoSender
+import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.ErrorCode
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackInfo
@@ -380,6 +381,12 @@ internal class Publisher(
      * degradation preference are — so it takes effect on the running encoder with no renegotiation.
      * The audio bitrate is not carried in the SDP on our side; it rides entirely on the encoding.
      *
+     * `setParameters` is called for its result rather than through the `parameters` property:
+     * WebRTC validates the encodings and answers with a boolean, and assigning the property
+     * throws that answer away. A rejected update would otherwise be reported to the caller as an
+     * applied stage, which is exactly what [io.getstream.video.android.core.AudioProfileResult]
+     * exists to prevent.
+     *
      * @return true when a live audio sender accepted the new parameters.
      */
     internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean {
@@ -395,11 +402,38 @@ internal class Publisher(
                 val params = sender.parameters ?: return@safeCallWithDefault false
                 if (params.encodings.isEmpty()) return@safeCallWithDefault false
                 params.encodings.forEach { it.maxBitrateBps = maxBitrateBps }
-                sender.parameters = params
-                logger.d { "[setAudioMaxBitrate] applied maxBitrateBps: $maxBitrateBps" }
-                true
+                sender.setParameters(params).also { accepted ->
+                    logger.d {
+                        "[setAudioMaxBitrate] maxBitrateBps: $maxBitrateBps, accepted: $accepted"
+                    }
+                }
             }
         }
+    }
+
+    /**
+     * The bitrate the SFU offers for [profile], or null when it named none.
+     *
+     * The server sends one per profile in `PublishOption.audio_bitrate_profiles`, so a mid-call
+     * switch does not have to invent a number for the profile it is moving to — this is the same
+     * value a freshly created audio transceiver would be given for that profile.
+     */
+    internal fun audioBitrateFor(profile: AudioBitrateProfile): Int? = safeCallWithDefault(null) {
+        publishOptions.firstOrNull { it.track_type == TrackType.TRACK_TYPE_AUDIO }
+            ?.audio_bitrate_profiles
+            ?.firstOrNull { it.profile == profile }
+            ?.bitrate
+            ?.takeIf { it > 0 }
+    }
+
+    /**
+     * The audio bitrate the SFU negotiated for this publisher, or null when it publishes no audio.
+     *
+     * This is what the server asked for at join, for the audio bitrate profile the call joined
+     * with — the value to restore when a mid-call switch to music is undone.
+     */
+    internal fun negotiatedAudioBitrate(): Int? = safeCallWithDefault(null) {
+        publishOptions.firstOrNull { it.track_type == TrackType.TRACK_TYPE_AUDIO }?.bitrate
     }
 
     /** The maximum bitrate currently set on the live audio sender, or null when unknown. */

@@ -136,6 +136,27 @@ class MediaManagerAudioPipelineTest {
     }
 
     @Test
+    fun `the swap carries the live track state rather than the microphone flow`() {
+        val firstTrack = mockk<AudioTrack>(relaxed = true)
+        val secondTrack = mockk<AudioTrack>(relaxed = true)
+        stubSourcesAndTracks(
+            listOf(mockk(relaxed = true), mockk(relaxed = true)),
+            listOf(firstTrack, secondTrack),
+        )
+        val manager = mediaManager()
+        assertSame(firstTrack, manager.audioTrack)
+        // MicrophoneManager.enable(fromUser = false) — what a lifecycle-driven resume calls —
+        // turns the track on without moving _status, so the flow still reads disabled.
+        every { firstTrack.enabled() } returns true
+
+        manager.replaceAudioSourceAndTrack { true }
+
+        // Reading the flow here would mute a call that is publishing audio.
+        verify { secondTrack.setEnabled(true) }
+        verify(exactly = 0) { secondTrack.setEnabled(false) }
+    }
+
+    @Test
     fun `no swap happens after the media manager has been released`() {
         stubSourcesAndTracks(listOf(mockk(relaxed = true)), listOf(mockk(relaxed = true)))
         val manager = mediaManager()

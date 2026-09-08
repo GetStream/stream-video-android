@@ -74,6 +74,7 @@ import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateManager
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
+import stream.video.sfu.models.AudioBitrateProfile
 import java.nio.ByteBuffer
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -114,35 +115,6 @@ internal fun SettingsMenu(
         call.speaker.setAudioUsage(newAudioUsage)
     }
 
-    val isHardwareNoiseSuppressorEnabled by call.microphone.hardwareNoiseSuppressorEnabled
-        .collectAsStateWithLifecycle()
-    val isSoftwareAudioProcessingEnabled by call.microphone.softwareAudioProcessingEnabled
-        .collectAsStateWithLifecycle()
-
-    val onToggleHardwareNoiseSuppressor: (Boolean) -> Unit = { enabled ->
-        val applied = call.microphone.setHardwareNoiseSuppressorEnabled(enabled)
-        // The platform refuses on devices without the effect, and before capture starts. Surface
-        // it — otherwise a toggle that did nothing looks identical to one that worked.
-        if (!applied) {
-            Toast.makeText(
-                context,
-                "Noise suppressor not applied — no active capture, or unsupported on this device",
-                Toast.LENGTH_LONG,
-            ).show()
-        }
-    }
-
-    val onToggleSoftwareAudioProcessing: (Boolean) -> Unit = { enabled ->
-        val applied = call.microphone.setSoftwareAudioProcessingEnabled(enabled)
-        if (!applied) {
-            Toast.makeText(
-                context,
-                "Software audio processing not applied — the audio pipeline was not rebuilt",
-                Toast.LENGTH_LONG,
-            ).show()
-        }
-    }
-
     val isCommunicationAudioModeEnabled by call.microphone.communicationAudioModeEnabled
         .collectAsStateWithLifecycle()
 
@@ -157,27 +129,48 @@ internal fun SettingsMenu(
         }
     }
 
-    val audioMaxBitrateBps by call.microphone.audioMaxBitrateBps.collectAsStateWithLifecycle()
+    val audioBitrateProfile by call.microphone.audioBitrateProfile.collectAsStateWithLifecycle()
+    val isMusicAudioProfile =
+        audioBitrateProfile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
 
-    val onToggleAudioMaxBitrate: () -> Unit = {
-        // Flip between the SFU's rough voice and music values. Anything but the music value —
-        // including the untouched default — steps up, so the first tap always raises it.
-        val next = if (audioMaxBitrateBps == MUSIC_AUDIO_BITRATE_BPS) {
-            VOICE_AUDIO_BITRATE_BPS
+    val onToggleAudioProfile: () -> Unit = {
+        val next = if (isMusicAudioProfile) {
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED
         } else {
-            MUSIC_AUDIO_BITRATE_BPS
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
         }
-        val applied = call.microphone.setAudioMaxBitrate(next)
-        Toast.makeText(
-            context,
-            if (applied) {
-                "Audio bitrate set to ${next / 1000}k (applied: " +
-                    "${call.microphone.appliedAudioMaxBitrate()?.div(1000)}k)"
-            } else {
-                "Audio bitrate ${next / 1000}k not applied — nothing is publishing audio"
-            },
-            Toast.LENGTH_LONG,
-        ).show()
+        scope.launch {
+            call.microphone.setAudioBitrateProfile(next)
+                .onSuccess { result ->
+                    // Name the stages that did not move — a partial switch sounds like a failed
+                    // one, and with no per-stage controls left this is the only way to tell.
+                    val missed = buildList {
+                        if (!result.noiseCancellationApplied) add("noise cancellation")
+                        if (!result.platformNoiseSuppressorApplied) add("hardware NS")
+                        if (!result.softwareAudioProcessingApplied) add("software APM")
+                        if (!result.audioMaxBitrateApplied) add("bitrate")
+                    }
+                    Toast.makeText(
+                        context,
+                        if (missed.isEmpty()) {
+                            val bitrate = result.audioMaxBitrateBps
+                                ?.let { " at ${it / 1000}k" }
+                                .orEmpty()
+                            "Audio profile: $next$bitrate"
+                        } else {
+                            "Audio profile: $next — not applied: ${missed.joinToString()}"
+                        },
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+                .onFailure {
+                    Toast.makeText(
+                        context,
+                        "Audio profile not set: ${it.message}",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+        }
     }
 
     val onToggleAudioFilterClick: () -> Unit = {
@@ -426,14 +419,10 @@ internal fun SettingsMenu(
                 onToggleAudioUsage = onToggleAudioUsage,
                 selectedRecordingTypes = enabledRecordingTypes,
                 onSelectRecordingType = onSelectRecordingType,
-                isHardwareNoiseSuppressorEnabled = isHardwareNoiseSuppressorEnabled,
-                onToggleHardwareNoiseSuppressor = onToggleHardwareNoiseSuppressor,
-                isSoftwareAudioProcessingEnabled = isSoftwareAudioProcessingEnabled,
-                onToggleSoftwareAudioProcessing = onToggleSoftwareAudioProcessing,
-                audioMaxBitrateBps = audioMaxBitrateBps,
-                onToggleAudioMaxBitrate = onToggleAudioMaxBitrate,
                 isCommunicationAudioModeEnabled = isCommunicationAudioModeEnabled,
                 onToggleCommunicationAudioMode = onToggleCommunicationAudioMode,
+                isMusicAudioProfile = isMusicAudioProfile,
+                onToggleAudioProfile = onToggleAudioProfile,
             ),
         )
     }

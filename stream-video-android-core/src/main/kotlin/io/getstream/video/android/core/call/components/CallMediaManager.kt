@@ -324,6 +324,17 @@ internal class CallMediaManager(
         _peerConnectionFactory?.isAudioProcessingEnabled() ?: false
 
     /**
+     * Whether there is a noise-cancellation processor wired into this call's native factory at all.
+     *
+     * Distinguishes "the processor refused to change" from "there is no processor" — without it
+     * a call configured with no [org.webrtc.ManagedAudioProcessingFactory] looks like a failure
+     * every time noise cancellation is asked for. Never builds a factory, for the reason given on
+     * [isAudioProcessingEnabledIfCreated].
+     */
+    fun isAudioProcessingReachable(): Boolean =
+        _peerConnectionFactory?.hasAudioProcessingAttached() ?: false
+
+    /**
      * Whether this call wants audio processing, whether or not a factory exists to run it yet.
      *
      * The wanted state outlives the factory, so a policy that withholds noise cancellation has to
@@ -370,6 +381,13 @@ internal class CallMediaManager(
         desiredHardwareNoiseSuppressorEnabled = enabled
         return _peerConnectionFactory?.setHardwareNoiseSuppressorEnabled(enabled) ?: false
     }
+
+    /**
+     * Whether this device has a platform noise suppressor at all. Never builds a factory — the
+     * answer is a device capability, not a property of this call.
+     */
+    fun isHardwareNoiseSuppressorSupported(): Boolean =
+        _peerConnectionFactory?.isHardwareNoiseSuppressorSupported() ?: false
 
     /** Forgets the wanted noise-suppressor state, so nothing is re-applied after the call ends. */
     fun resetDesiredHardwareNoiseSuppressor() {
