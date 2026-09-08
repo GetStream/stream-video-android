@@ -27,8 +27,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -95,10 +96,10 @@ private const val PREVIEW_ASPECT_RATIO = 370f / 264f
  * @param onRenderedContent A video renderer, which renders a local video track before joining a call.
  * @param onDisabledContent Content is shown that a local camera is disabled. It displays user avatar by default.
  * @param videoPreviewModifier Modifier applied to the [Box] that wraps the local video preview. Defaults
- * to the full width with the design system tile aspect ratio in portrait, a fixed height in landscape,
- * and a 20dp rounded corner clip. The preview border (accent while the camera is on, subtle while it is
- * off) is drawn by the lobby with the same shape. Override to provide custom size, shape, padding, or
- * background, useful when the preview needs to match a host layout instead of the SDK's default sizing.
+ * to the design tile: the available width up to 480dp with the tile aspect ratio in portrait, at most
+ * 200dp tall in landscape, a 20dp rounded corner clip, and a border that is accent while the camera is
+ * on and subtle while it is off. Override to provide custom size, shape, border, padding, or background,
+ * useful when the preview needs to match a host layout instead of the SDK's default sizing.
  * @param participantLabelContent Slot for the participant label overlaid on the preview. Defaults to a
  * label showing the user's name and media state at [Alignment.BottomStart]. Pass `{}` to hide the
  * label entirely, or override to provide custom positioning and content (use [BoxScope.align] inside).
@@ -145,7 +146,7 @@ public fun CallLobby(
     onDisabledContent: @Composable () -> Unit = {
         DefaultOnDisabledSlot(user)
     },
-    videoPreviewModifier: Modifier = defaultVideoPreviewModifier(),
+    videoPreviewModifier: Modifier = defaultVideoPreviewModifier(isCameraEnabled),
     participantLabelContent: @Composable BoxScope.() -> Unit = {
         DefaultParticipantLabelSlot(
             call,
@@ -183,9 +184,7 @@ public fun CallLobby(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(StreamTokens.spacingSm)) {
             Box(
-                modifier = videoPreviewModifier
-                    .align(Alignment.CenterHorizontally)
-                    .previewBorder(isCameraEnabled),
+                modifier = videoPreviewModifier.align(Alignment.CenterHorizontally),
             ) {
                 if (isCameraEnabled) {
                     onRenderedContent.invoke(video)
@@ -357,9 +356,8 @@ private fun DefaultLobbyControlsSlot(
                     (action is ToggleMicrophone && isMicrophoneUnavailable)
                 if (needsPermission) {
                     permissions.launchPermissionRequest()
-                } else {
-                    onCallAction(action)
                 }
+                onCallAction(action)
             },
             isCameraUnavailable = isCameraUnavailable,
             isMicrophoneUnavailable = isMicrophoneUnavailable,
@@ -395,14 +393,13 @@ internal fun BoxScope.DefaultParticipantLabel(
     } else {
         user.userNameOrId
     }
-    val audioLevel = call?.localMicrophoneAudioLevel?.collectAsStateWithLifecycle()?.value ?: 0f
-
     ParticipantLabel(
         nameLabel = nameLabel,
         labelPosition = labelPosition,
         hasAudio = isMicrophoneEnabled,
         hasVideo = isCameraEnabled,
         soundIndicatorContent = {
+            val audioLevel = call?.localMicrophoneAudioLevel?.collectAsStateWithLifecycle()?.value ?: 0f
             with(VideoTheme.componentFactory) {
                 ParticipantLabelSoundIndicatorContent(
                     params = ParticipantLabelSoundIndicatorContentParams(
@@ -500,10 +497,6 @@ internal fun OnDisabledContent(user: User) {
 /** The shape of the lobby preview tile, shared by the clip and the border. */
 private fun previewShape() = RoundedCornerShape(StreamTokens.radius2xl)
 
-/**
- * The accent outline of the live preview, or the subtle outline of the avatar fallback. Drawn inside
- * the clipped bounds so it follows the rounded corners.
- */
 @Composable
 private fun Modifier.previewBorder(isCameraEnabled: Boolean): Modifier = border(
     width = if (isCameraEnabled) StreamTokens.strokeW200 else StreamTokens.strokeW100,
@@ -516,18 +509,20 @@ private fun Modifier.previewBorder(isCameraEnabled: Boolean): Modifier = border(
 )
 
 @Composable
-private fun defaultVideoPreviewModifier(): Modifier {
+private fun defaultVideoPreviewModifier(isCameraEnabled: Boolean): Modifier {
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
     val sizing = if (isPortrait) {
         Modifier
-            .fillMaxWidth()
+            .widthIn(max = StreamTokens.size480)
             .aspectRatio(PREVIEW_ASPECT_RATIO)
     } else {
-        // No landscape frame in the design; keep the portrait aspect ratio at a fixed height.
+        // No landscape frame in the design; keep the portrait aspect ratio at a bounded height.
         Modifier
-            .height(200.dp)
+            .heightIn(max = 200.dp)
             .aspectRatio(PREVIEW_ASPECT_RATIO, matchHeightConstraintsFirst = true)
     }
-    return sizing.clip(previewShape())
+    return sizing
+        .clip(previewShape())
+        .previewBorder(isCameraEnabled)
 }

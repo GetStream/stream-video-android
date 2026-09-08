@@ -16,13 +16,11 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -31,8 +29,8 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
-import io.getstream.video.android.compose.ui.components.base.StreamErrorBadge
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
+import io.getstream.video.android.compose.ui.components.base.errorBadge
 
 /**
  * A round icon button used for one-shot call actions such as leaving the call.
@@ -105,29 +103,25 @@ public fun ToggleAction(
         isActionActive -> onStyle
         else -> offStyle
     }
-    Box(modifier = modifier) {
-        StreamButton(
-            onClick = onAction,
-            enabled = enabled,
-            style = style,
-            size = size,
-        ) {
-            if (progress) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(size.iconSize),
-                    color = LocalContentColor.current,
-                    strokeWidth = StreamTokens.strokeW200,
-                )
-            } else {
-                Icon(
-                    painter = if (showActive) iconOnOff.first else iconOnOff.second,
-                    contentDescription = contentDescription,
-                    modifier = Modifier.size(size.iconSize),
-                )
-            }
-        }
-        if (isUnavailable) {
-            StreamErrorBadge(modifier = Modifier.align(Alignment.TopEnd))
+    StreamButton(
+        onClick = onAction,
+        modifier = modifier.then(if (isUnavailable) Modifier.errorBadge() else Modifier),
+        enabled = enabled,
+        style = style,
+        size = size,
+    ) {
+        if (progress) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(size.iconSize),
+                color = LocalContentColor.current,
+                strokeWidth = StreamTokens.strokeW200,
+            )
+        } else {
+            Icon(
+                painter = if (showActive) iconOnOff.first else iconOnOff.second,
+                contentDescription = contentDescription,
+                modifier = Modifier.size(size.iconSize),
+            )
         }
     }
 }

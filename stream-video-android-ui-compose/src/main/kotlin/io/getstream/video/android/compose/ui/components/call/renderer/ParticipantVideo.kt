@@ -308,6 +308,7 @@ public fun BoxScope.ParticipantLabel(
     call: Call,
     participant: ParticipantState,
     labelPosition: Alignment = BottomStart,
+    hasVideo: Boolean? = null,
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
         val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
         val audioLevel by if (participant.isLocal) {
@@ -355,7 +356,7 @@ public fun BoxScope.ParticipantLabel(
         // (so we ingore participant.isSpeaking)
         isSpeaking = participant.isLocal,
         isPaused = paused.value,
-        hasVideo = videoEnabled,
+        hasVideo = hasVideo ?: videoEnabled,
         soundIndicatorContent = soundIndicatorContent,
     )
 }

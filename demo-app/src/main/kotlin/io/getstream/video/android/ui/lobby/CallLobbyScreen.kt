@@ -65,13 +65,13 @@ import io.getstream.video.android.CallActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
+import io.getstream.video.android.compose.theme.CallLobbyControlsContentParams
 import io.getstream.video.android.compose.theme.CallLobbyJoinContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
-import io.getstream.video.android.compose.ui.components.call.lobby.buildDefaultLobbyControlActions
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.call.state.ToggleCamera
@@ -423,26 +423,23 @@ private fun LobbyControls(
 ) {
     val isCameraUnavailable = permissions.isCameraPermissionDenied
     val isMicrophoneUnavailable = permissions.isMicrophonePermissionDenied
-    val actions = buildDefaultLobbyControlActions(
-        call = call,
-        onCallAction = { action ->
-            val needsPermission = (action is ToggleCamera && isCameraUnavailable) ||
-                (action is ToggleMicrophone && isMicrophoneUnavailable)
-            if (needsPermission) permissions.launchPermissionRequest() else onCallAction(action)
-        },
-        isCameraEnabled = isCameraEnabled,
-        isMicrophoneEnabled = isMicrophoneEnabled,
-        isCameraUnavailable = isCameraUnavailable,
-        isMicrophoneUnavailable = isMicrophoneUnavailable,
-        showHifiAudioToggle = showHifiAudioToggle,
+    VideoTheme.componentFactory.CallLobbyControlsContent(
+        params = CallLobbyControlsContentParams(
+            call = call,
+            isCameraEnabled = isCameraEnabled,
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            modifier = modifier,
+            onCallAction = { action ->
+                val needsPermission = (action is ToggleCamera && isCameraUnavailable) ||
+                    (action is ToggleMicrophone && isMicrophoneUnavailable)
+                if (needsPermission) permissions.launchPermissionRequest()
+                onCallAction(action)
+            },
+            isCameraUnavailable = isCameraUnavailable,
+            isMicrophoneUnavailable = isMicrophoneUnavailable,
+            showHifiAudioToggle = showHifiAudioToggle,
+        ),
     )
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        actions.forEach { action -> action() }
-    }
 }
 
 /** The title block above the lobby. The title carries the participants-count tag the E2E suite asserts on. */

@@ -291,6 +291,7 @@ public interface VideoComponentFactory {
             call = params.call,
             participant = params.participant,
             labelPosition = params.labelPosition,
+            hasVideo = params.hasVideo,
         )
     }
 
@@ -470,6 +471,7 @@ public interface VideoComponentFactory {
             isMicrophoneEnabled = params.isMicrophoneEnabled,
             isCameraUnavailable = params.isCameraUnavailable,
             isMicrophoneUnavailable = params.isMicrophoneUnavailable,
+            showHifiAudioToggle = params.showHifiAudioToggle,
         )
         Row(
             modifier = params.modifier,

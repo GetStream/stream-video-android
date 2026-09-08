@@ -87,6 +87,7 @@ public fun ScreenShareVideoRenderer(
                     call = call,
                     participant = screenShareParticipant,
                     labelPosition = labelPosition,
+                    hasVideo = true,
                 ),
             )
         }

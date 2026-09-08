@@ -210,11 +210,14 @@ public data class ParticipantVideoParams(
  * @param call The call that contains all the participants state and tracks.
  * @param participant Participant to render the label for.
  * @param labelPosition The position of the label inside the participant video container.
+ * @param hasVideo Whether the tile shows video, or null to follow the participant's camera state.
+ * The screen share tile passes `true` so the label does not report the presenter's camera as off.
  */
 public data class ParticipantVideoLabelContentParams(
     val call: Call,
     val participant: ParticipantState,
     val labelPosition: Alignment = Alignment.BottomStart,
+    val hasVideo: Boolean? = null,
 )
 
 /**
@@ -355,6 +358,7 @@ public data class CallLobbyParticipantLabelContentParams(
  * denied. The camera toggle then shows an error badge.
  * @param isMicrophoneUnavailable Whether the microphone cannot be used, for example because its
  * permission was denied. The microphone toggle then shows an error badge.
+ * @param showHifiAudioToggle Whether the high quality audio toggle is part of the controls.
  */
 public data class CallLobbyControlsContentParams(
     val call: Call,
@@ -364,6 +368,7 @@ public data class CallLobbyControlsContentParams(
     val onCallAction: ((CallAction) -> Unit)? = null,
     val isCameraUnavailable: Boolean = false,
     val isMicrophoneUnavailable: Boolean = false,
+    val showHifiAudioToggle: Boolean = false,
 )
 
 /**
