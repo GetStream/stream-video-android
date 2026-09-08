@@ -295,7 +295,7 @@ fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean
         assertTrue(
             "Microphone",
             RingPage.microphoneEnabledToggle.waitDisplayed() ||
-                    RingPage.microphoneDisabledToggle.waitDisplayed(),
+                RingPage.microphoneDisabledToggle.waitDisplayed(),
         )
         if (audioOnly) {
             assertFalse("Camera enabled toggle", RingPage.cameraEnabledToggle.isDisplayed())
@@ -304,7 +304,7 @@ fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean
             assertTrue(
                 "Camera",
                 RingPage.cameraEnabledToggle.waitDisplayed() ||
-                        RingPage.cameraDisabledToggle.waitDisplayed(),
+                    RingPage.cameraDisabledToggle.waitDisplayed(),
             )
         }
     } else {
