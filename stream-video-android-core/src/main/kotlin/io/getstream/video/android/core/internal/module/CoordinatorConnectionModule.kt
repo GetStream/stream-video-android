@@ -64,25 +64,31 @@ internal class CoordinatorConnectionModule(
         Retrofit.Builder().baseUrl(apiUrl)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
-            .client(http).build()
+            // Not `client(http)`: that would build the client right here. See `http`.
+            .callFactory { request -> http.newCall(request) }
+            .build()
     }
 
     // API
 
-    override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(
-        HeadersInterceptor(HeadersUtil()),
-    )
-        .addInterceptor(authInterceptor).addInterceptor(
-            HttpLoggingInterceptor {
-                streamLog(tag = "Video:Http") { it }
-            }.apply {
-                level = loggingLevel.httpLoggingLevel.level
-            },
-        ).retryOnConnectionFailure(true)
-        .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-        .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-        .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
+    // Lazy so Compose previews can build the SDK: layoutlib identifies itself as Dalvik, which makes
+    // OkHttp pick its Android platform, and layoutlib lacks the conscrypt classes that needs.
+    override val http: OkHttpClient by lazy {
+        OkHttpClient.Builder().addInterceptor(
+            HeadersInterceptor(HeadersUtil()),
+        )
+            .addInterceptor(authInterceptor).addInterceptor(
+                HttpLoggingInterceptor {
+                    streamLog(tag = "Video:Http") { it }
+                }.apply {
+                    level = loggingLevel.httpLoggingLevel.level
+                },
+            ).retryOnConnectionFailure(true)
+            .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+            .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
+    }
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,
