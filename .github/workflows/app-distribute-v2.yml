@@ -1,0 +1,55 @@
+name: App Distribute CI v2
+
+# Temporary workflow to publish the v2 demo app to Firebase App Distribution in the shared
+# stream-android-32afb project. When v2 is released and `develop-v2` becomes `develop`, remove
+# this workflow and update the main `app-distribute.yml` instead.
+
+on:
+  push:
+    branches:
+      - develop-v2
+  workflow_dispatch:
+
+jobs:
+  build_v2_demo_app:
+    permissions:
+      contents: read
+    name: Build and Distribute V2 Demo App
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: GetStream/android-ci-actions/actions/setup-java@cb46e4f44d105a68738bfd2a1cfd156bb768665b
+      - name: Prepare environment
+        env:
+          ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
+          PASSPHRASE: ${{ secrets.PASSPHRASE }}
+          RELEASE_KEYSTORE: ${{ secrets.RELEASE_KEYSTORE }}
+          RELEASE_KEYSTORE_PROPERTIES: ${{ secrets.RELEASE_KEYSTORE_PROPERTIES }}
+        run: |
+          echo "$RELEASE_KEYSTORE" > .sign/release.keystore.asc
+          gpg -d --batch --pinentry-mode loopback --passphrase-fd 0 \
+            .sign/release.keystore.asc > .sign/release.keystore <<< "$PASSPHRASE"
+          echo "$RELEASE_KEYSTORE_PROPERTIES" > .sign/keystore.properties.asc
+          gpg -d --batch --pinentry-mode loopback --passphrase-fd 0 \
+            .sign/keystore.properties.asc > .sign/keystore.properties <<< "$PASSPHRASE"
+          echo "$ENV_PROPERTIES" > .env.properties
+      - name: Assemble
+        run: bash ./gradlew :demo-app:assembleDevelopmentRelease --stacktrace
+      - name: Remove signing material
+        if: always()
+        run: |
+          rm -f .sign/release.keystore .sign/release.keystore.asc \
+                .sign/keystore.properties .sign/keystore.properties.asc \
+                .env.properties
+      - name: Upload APK
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: demo-app-development-release
+          path: demo-app/build/outputs/apk/development/release/
+      - name: Upload artifact to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@bd494989dd4bec0343f78adee87fe66e48279ad6
+        with:
+          appId: ${{ secrets.FIREBASE_V2_DEMO_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.STREAM_ANDROID_FIREBASE_CREDENTIALS_APP_CONTENT }}
+          groups: stream-testers
+          file: demo-app/build/outputs/apk/development/release/demo-app-development-release.apk
