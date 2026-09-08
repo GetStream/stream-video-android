@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.ui.components.indicator
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
 
@@ -31,7 +32,7 @@ private fun SoundIndicatorRootPreview() {
 
 @Composable
 internal fun SoundIndicatorPreview() {
-    Row {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         SoundIndicator(
             isSpeaking = true,
             isAudioEnabled = true,

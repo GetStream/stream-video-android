@@ -444,6 +444,7 @@ public fun BoxScope.ParticipantLabel(
                     contentDescription = "Pause",
                 )
             }
+            soundIndicatorContent.invoke(this)
             if (!hasVideo) {
                 LabelIcon(
                     painter = painterResource(
@@ -452,7 +453,6 @@ public fun BoxScope.ParticipantLabel(
                     contentDescription = null,
                 )
             }
-            soundIndicatorContent.invoke(this)
         }
     }
 }

@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
- * Used to indicate the sound state of a given participant. Either shows a mute icon or the sound
- * levels.
+ * Used to indicate the sound state of a given participant. A muted participant gets a plain mute
+ * icon; an unmuted one gets the indicator box with the sound levels.
  *
  * @param modifier Modifier for styling.
  * @param isSpeaking Represents is user speaking or not.
@@ -38,8 +38,12 @@ public fun SoundIndicator(
     isAudioEnabled: Boolean,
     audioLevel: Float,
 ) {
+    if (!isAudioEnabled) {
+        MicrophoneIndicator(modifier = modifier, isMicrophoneEnabled = false)
+        return
+    }
     GenericIndicator(modifier = modifier, size = StreamTokens.size24) {
-        if (isAudioEnabled && isSpeaking) {
+        if (isSpeaking) {
             AudioVolumeIndicator(
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -47,7 +51,7 @@ public fun SoundIndicator(
                 audioLevels = audioLevel,
             )
         } else {
-            MicrophoneIndicator(isMicrophoneEnabled = isAudioEnabled)
+            MicrophoneIndicator(isMicrophoneEnabled = true)
         }
     }
 }
