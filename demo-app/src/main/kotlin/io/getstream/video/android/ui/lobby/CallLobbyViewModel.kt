@@ -26,9 +26,12 @@ import io.getstream.chat.android.client.ChatClient
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.e2ee.E2EEEventType
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -44,6 +47,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import stream.video.sfu.models.AudioBitrateProfile
 import javax.inject.Inject
 
@@ -53,6 +57,12 @@ class CallLobbyViewModel @Inject constructor(
     private val dataStore: StreamUserDataStore,
     private val googleSignInClient: GoogleSignInClient,
 ) : ViewModel() {
+
+    private companion object {
+        const val E2EE_KEY_INDEX = 0
+    }
+
+    private var e2eeManager: StreamEncryptionManager? = null
 
     private val cid: String = checkNotNull(savedStateHandle["cid"])
     val callId: StreamCallId = StreamCallId.fromCallCid(cid)
@@ -66,6 +76,11 @@ class CallLobbyViewModel @Inject constructor(
             // this way the lobby screen can already display the right mic/camera settings
             // This also starts listening to the call events to get the participant count
             val callGetOrCreateResult = call.create()
+            Log.i(
+                "CallLobbyViewModel",
+                "Call ${call.cid} encryption mode=" +
+                    "${call.state.settings.value?.encryption?.mode}",
+            )
             if (callGetOrCreateResult.isFailure) {
                 // in demo we can ignore this. The lobby screen will just display default camera/video,
                 // but we will show an error
@@ -190,6 +205,54 @@ class CallLobbyViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    suspend fun enableE2EE(passphrase: String): Result<Unit> {
+        val key = runCatching {
+            withContext(Dispatchers.Default) { deriveE2EEKey(passphrase) }
+        }.getOrElse { return Result.failure(it) }
+        val created = StreamEncryptionManager.create(call.user.id)
+            .getOrElse { return Result.failure(it) }
+        created.setEventListener { event ->
+            val message = "Native E2EE event: $event"
+            when (event.type) {
+                E2EEEventType.DECRYPTION_RESUMED -> Log.i("CallLobbyViewModel", message)
+                E2EEEventType.KEY_STATE,
+                E2EEEventType.PERF_REPORT,
+                -> Log.d("CallLobbyViewModel", message)
+                E2EEEventType.DECRYPTION_FAILED,
+                E2EEEventType.DECRYPTION_STALLED,
+                E2EEEventType.ENCRYPTION_FAILED,
+                E2EEEventType.MISSING_KEY,
+                E2EEEventType.UNENCRYPTED_FRAME,
+                E2EEEventType.UNSUPPORTED_VERSION,
+                E2EEEventType.UNKNOWN,
+                -> Log.w("CallLobbyViewModel", message)
+            }
+        }
+        created.enablePerformanceReporting(true)
+        created.setSharedKey(E2EE_KEY_INDEX, key)
+        val attached = call.setE2EEManager(created)
+        if (attached.isFailure) {
+            created.dispose()
+            return attached
+        }
+        val previous = e2eeManager
+        e2eeManager = created
+        previous?.dispose()
+        return Result.success(Unit)
+    }
+
+    fun disableE2EE(): Result<Unit> {
+        val current = e2eeManager
+        val detached = call.setE2EEManager(null)
+        if (detached.isFailure) return detached
+        try {
+            current?.dispose()
+        } finally {
+            e2eeManager = null
+        }
+        return Result.success(Unit)
     }
 
     fun signOut() {
