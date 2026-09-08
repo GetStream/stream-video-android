@@ -373,15 +373,12 @@ fun debugSubmenu(
     isMusicAudioProfile: Boolean = false,
     onToggleAudioProfile: () -> Unit = {},
 ) = listOf(
-    // The whole audio profile in one tap. "Audio mode" below is not part of it: it is the lever
-    // underneath every stage the profile reaches, and it costs echo cancellation and Bluetooth
-    // capture, so it stays a deliberate, separate choice.
+    // The whole audio profile in one tap, named for what a broadcaster is doing rather than for
+    // the enum behind it. "Audio mode" below is not part of it: it is the lever underneath every
+    // stage the profile reaches, and it costs echo cancellation and Bluetooth capture, so it
+    // stays a deliberate, separate choice.
     ActionMenuItem(
-        title = if (isMusicAudioProfile) {
-            "Audio profile: MUSIC (tap for voice)"
-        } else {
-            "Audio profile: VOICE (tap for music)"
-        },
+        title = if (isMusicAudioProfile) "Music mode: On" else "Music mode: Off",
         icon = Icons.Default.MusicNote,
         highlight = isMusicAudioProfile,
         action = onToggleAudioProfile,

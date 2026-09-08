@@ -139,6 +139,7 @@ internal fun SettingsMenu(
         } else {
             AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
         }
+        val turningOn = !isMusicAudioProfile
         scope.launch {
             call.microphone.setAudioBitrateProfile(next)
                 .onSuccess { result ->
@@ -150,15 +151,16 @@ internal fun SettingsMenu(
                         if (!result.softwareAudioProcessingApplied) add("software APM")
                         if (!result.audioMaxBitrateApplied) add("bitrate")
                     }
+                    val state = if (turningOn) "Music mode on" else "Music mode off"
                     Toast.makeText(
                         context,
                         if (missed.isEmpty()) {
                             val bitrate = result.audioMaxBitrateBps
-                                ?.let { " at ${it / 1000}k" }
+                                ?.let { " — ${it / 1000} kbps" }
                                 .orEmpty()
-                            "Audio profile: $next$bitrate"
+                            "$state$bitrate"
                         } else {
-                            "Audio profile: $next — not applied: ${missed.joinToString()}"
+                            "$state — not applied: ${missed.joinToString()}"
                         },
                         Toast.LENGTH_LONG,
                     ).show()
@@ -166,7 +168,7 @@ internal fun SettingsMenu(
                 .onFailure {
                     Toast.makeText(
                         context,
-                        "Audio profile not set: ${it.message}",
+                        "Music mode not changed: ${it.message}",
                         Toast.LENGTH_LONG,
                     ).show()
                 }
