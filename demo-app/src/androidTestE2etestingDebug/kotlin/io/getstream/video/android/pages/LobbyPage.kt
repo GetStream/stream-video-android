@@ -31,7 +31,7 @@ class LobbyPage {
         val microphoneDisabledIcon = By.res("Stream_UserMicrophone_Enabled_false")
         val cameraEnabledView = By.res("on_rendered_content")
         val cameraDisabledView = By.res("on_disabled_content")
-        val joinCallButton = By.res("Stream_JoinCallButton")
+        val joinCallButton = By.res("Stream_LobbyJoinCallButton")
         fun callParticipantsCount(count: Int): BySelector {
             return By.res("Stream_ParticipantsCount_$count")
         }

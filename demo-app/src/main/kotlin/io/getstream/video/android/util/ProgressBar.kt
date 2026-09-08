@@ -22,15 +22,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,12 +45,9 @@ fun FullScreenCircleProgressBar(text: String) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                painter = painterResource(id = R.drawable.stream_calls_logo),
+                modifier = Modifier.size(width = 234.dp, height = 160.dp),
+                painter = painterResource(id = R.drawable.start_call_illustration),
                 contentDescription = null,
-                contentScale = ContentScale.FillWidth,
             )
             Spacer(modifier = Modifier.size(32.dp))
             CircularProgressIndicator(color = VideoTheme.colors.accentPrimary)

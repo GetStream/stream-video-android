@@ -20,12 +20,17 @@ import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
-import io.getstream.video.android.compose.ui.components.call.lobby.CallLobbyCameraDisabledPreview
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobbyDeprecatedOverloadPreview
+import io.getstream.video.android.compose.ui.components.call.lobby.CallLobbyMicAndCameraIssuePreview
+import io.getstream.video.android.compose.ui.components.call.lobby.CallLobbyMicAndCameraOffPreview
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobbyPreview
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * The lobby is taller than half of the device, so light and dark mode are recorded as separate
+ * goldens instead of the two-half layout.
+ */
 internal class CallLobbyTest : PaparazziComposeTest {
 
     @get:Rule
@@ -36,21 +41,56 @@ internal class CallLobbyTest : PaparazziComposeTest {
 
     @Test
     fun `call lobby`() {
-        snapshotWithDarkMode {
+        snapshot {
             CallLobbyPreview()
         }
     }
 
     @Test
-    fun `call lobby with camera disabled`() {
-        snapshotWithDarkMode {
-            CallLobbyCameraDisabledPreview()
+    fun `call lobby in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            CallLobbyPreview()
+        }
+    }
+
+    @Test
+    fun `call lobby with mic and camera off`() {
+        snapshot {
+            CallLobbyMicAndCameraOffPreview()
+        }
+    }
+
+    @Test
+    fun `call lobby with mic and camera off in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            CallLobbyMicAndCameraOffPreview()
+        }
+    }
+
+    @Test
+    fun `call lobby with mic and camera issue`() {
+        snapshot {
+            CallLobbyMicAndCameraIssuePreview()
+        }
+    }
+
+    @Test
+    fun `call lobby with mic and camera issue in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            CallLobbyMicAndCameraIssuePreview()
         }
     }
 
     @Test
     fun `call lobby deprecated overload`() {
-        snapshotWithDarkMode {
+        snapshot {
+            CallLobbyDeprecatedOverloadPreview()
+        }
+    }
+
+    @Test
+    fun `call lobby deprecated overload in dark mode`() {
+        snapshot(isInDarkMode = true) {
             CallLobbyDeprecatedOverloadPreview()
         }
     }

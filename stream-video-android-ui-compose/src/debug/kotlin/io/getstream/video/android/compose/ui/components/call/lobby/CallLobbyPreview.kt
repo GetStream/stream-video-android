@@ -17,12 +17,15 @@
 package io.getstream.video.android.compose.ui.components.call.lobby
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 
@@ -37,28 +40,69 @@ private fun CallLobbyRootPreview() {
 
 @Preview
 @Composable
-private fun CallLobbyCameraDisabledRootPreview() {
+private fun CallLobbyMicAndCameraOffRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallLobbyCameraDisabledPreview()
+        CallLobbyMicAndCameraOffPreview()
     }
 }
 
+@Preview
+@Composable
+private fun CallLobbyMicAndCameraIssueRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallLobbyMicAndCameraIssuePreview()
+    }
+}
+
+/** The lobby with the camera and the microphone on, and the default join action. */
 @Composable
 internal fun CallLobbyPreview() {
     CallLobby(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(StreamTokens.spacingMd),
         call = previewCall,
+        onJoinCall = {},
     )
 }
 
+/** The lobby after the user turned both devices off: avatar preview and destructive toggles. */
 @Composable
-internal fun CallLobbyCameraDisabledPreview() {
+internal fun CallLobbyMicAndCameraOffPreview() {
     CallLobby(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(StreamTokens.spacingMd),
         call = previewCall,
         isCameraEnabled = false,
+        isMicrophoneEnabled = false,
+        onJoinCall = {},
     )
+}
+
+/** The lobby when both permissions were denied: the toggles carry an error badge. */
+@Composable
+internal fun CallLobbyMicAndCameraIssuePreview() {
+    CallLobby(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(StreamTokens.spacingMd),
+        call = previewCall,
+        isCameraEnabled = false,
+        isMicrophoneEnabled = false,
+        permissions = DeniedPermissionsState,
+        onJoinCall = {},
+    )
+}
+
+private object DeniedPermissionsState : VideoPermissionsState {
+    override val allPermissionsGranted: Boolean = false
+    override val shouldShowRationale: Boolean = false
+    override val isCameraPermissionDenied: Boolean = true
+    override val isMicrophonePermissionDenied: Boolean = true
+    override fun launchPermissionRequest() = Unit
 }
 
 @Preview
@@ -72,13 +116,15 @@ private fun CallLobbyDeprecatedOverloadRootPreview() {
 
 /**
  * Pins the deprecated [CallLobby] overload (the one taking `labelPosition`), which must keep
- * rendering exactly like the current overload until it is removed.
+ * rendering exactly like the current overload without a join action until it is removed.
  */
 @Suppress("DEPRECATION")
 @Composable
 internal fun CallLobbyDeprecatedOverloadPreview() {
     CallLobby(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(StreamTokens.spacingMd),
         call = previewCall,
         labelPosition = Alignment.BottomStart,
     )

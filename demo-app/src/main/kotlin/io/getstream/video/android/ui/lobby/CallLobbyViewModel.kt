@@ -29,6 +29,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import io.getstream.video.android.ui.NEW_CALL_ARG
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -56,6 +57,9 @@ class CallLobbyViewModel @Inject constructor(
 
     private val cid: String = checkNotNull(savedStateHandle["cid"])
     val callId: StreamCallId = StreamCallId.fromCallCid(cid)
+
+    /** True when the user is starting a new call, false when joining an existing one. */
+    val isNewCall: Boolean = savedStateHandle[NEW_CALL_ARG] ?: false
 
     val call: Call by lazy {
         val streamVideo = StreamVideo.instance()

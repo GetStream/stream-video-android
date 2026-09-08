@@ -35,6 +35,14 @@ import stream.video.sfu.models.AudioBitrateProfile
  * Builds the default set of Lobby Control actions based on the call device states.
  *
  * @param call The call that contains all the participants state and tracks.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param isCameraEnabled Whether the camera is enabled.
+ * @param isMicrophoneEnabled Whether the microphone is enabled.
+ * @param isCameraUnavailable Whether the camera cannot be used, for example because its permission was
+ * denied. The camera toggle then shows an error badge.
+ * @param isMicrophoneUnavailable Whether the microphone cannot be used, for example because its
+ * permission was denied. The microphone toggle then shows an error badge.
+ * @param showHifiAudioToggle Whether the high quality audio toggle is part of the actions.
  * @return [List] of call control actions that the user can trigger.
  */
 @Composable
@@ -51,6 +59,8 @@ public fun buildDefaultLobbyControlActions(
     } else {
         call.microphone.isEnabled.value
     },
+    isCameraUnavailable: Boolean = false,
+    isMicrophoneUnavailable: Boolean = false,
     showHifiAudioToggle: Boolean = false,
 ): List<@Composable () -> Unit> {
     val audioBitrateProfile by if (LocalInspectionMode.current) {
@@ -70,6 +80,7 @@ public fun buildDefaultLobbyControlActions(
                 modifier = Modifier
                     .testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
                 isMicrophoneEnabled = isMicrophoneEnabled,
+                isUnavailable = isMicrophoneUnavailable,
                 onCallAction = onCallAction,
             )
         },
@@ -78,6 +89,7 @@ public fun buildDefaultLobbyControlActions(
                 modifier = Modifier
                     .testTag("Stream_CameraToggle_Enabled_$isCameraEnabled"),
                 isCameraEnabled = isCameraEnabled,
+                isUnavailable = isCameraUnavailable,
                 onCallAction = onCallAction,
             )
         },

@@ -62,8 +62,8 @@ fun AppNavHost(
         composable(AppScreens.CallJoin.route) {
             CallJoinScreen(
                 prefilledCallId = prefilledCallId,
-                navigateToCallLobby = { cid ->
-                    navController.navigate(AppScreens.CallLobby.routeWithArg(cid))
+                navigateToCallLobby = { cid, isNewCall ->
+                    navController.navigate(AppScreens.CallLobby.lobbyRoute(cid, isNewCall))
                 },
                 navigateUpToLogin = { autoLogIn ->
                     navController.navigate(AppScreens.Login.routeWithArg(autoLogIn)) {
@@ -80,7 +80,13 @@ fun AppNavHost(
         }
         composable(
             AppScreens.CallLobby.route,
-            arguments = listOf(navArgument("cid") { type = NavType.StringType }),
+            arguments = listOf(
+                navArgument("cid") { type = NavType.StringType },
+                navArgument(NEW_CALL_ARG) {
+                    type = NavType.BoolType
+                    defaultValue = false
+                },
+            ),
         ) {
             CallLobbyScreen(
                 onBack = {
@@ -121,13 +127,20 @@ fun AppNavHost(
 enum class AppScreens(val route: String) {
     Login("login/{auto_log_in}"),
     CallJoin("call_join"),
-    CallLobby("call_lobby/{cid}"),
+    CallLobby("call_lobby/{cid}?$NEW_CALL_ARG={$NEW_CALL_ARG}"),
     DirectCallJoin("direct_call_join"),
     BarcodeScanning("barcode_scanning"), ;
 
     fun routeWithArg(argValue: Any): String = when (this) {
         Login -> this.route.replace("{auto_log_in}", argValue.toString())
-        CallLobby -> this.route.replace("{cid}", argValue.toString())
+        CallLobby -> lobbyRoute(argValue.toString(), isNewCall = false)
         else -> this.route
     }
+
+    /** The lobby route for [cid]; [isNewCall] selects the "start call" wording over "join call". */
+    fun lobbyRoute(cid: String, isNewCall: Boolean): String =
+        CallLobby.route.replace("{cid}", cid).replace("{$NEW_CALL_ARG}", isNewCall.toString())
 }
+
+/** Lobby route argument: whether the call was just created from the Start Call screen. */
+const val NEW_CALL_ARG = "new_call"

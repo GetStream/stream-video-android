@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
@@ -39,11 +40,11 @@ internal fun GenericIndicator(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(StreamTokens.radiusMd),
     backgroundColor: Color = VideoTheme.colors.backgroundCoreOverlayDarkStrong,
+    size: Dp = StreamTokens.size32,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    // val alphaColor = backgroundColor.copy(alpha = 0.3f)
     Box(
-        modifier = modifier.size(StreamTokens.size32),
+        modifier = modifier.size(size),
     ) {
         // Ensure content is center aligned and padded
         Box(

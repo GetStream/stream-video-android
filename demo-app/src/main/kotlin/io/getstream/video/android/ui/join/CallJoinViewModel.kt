@@ -72,7 +72,12 @@ class CallJoinViewModel @Inject constructor(
                 is CallJoinEvent.JoinCall -> {
                     val call = joinCall(event.callId)
                     if (call != null) {
-                        flowOf(CallJoinUiState.JoinCompleted(callId = call.cid))
+                        flowOf(
+                            CallJoinUiState.JoinCompleted(
+                                callId = call.cid,
+                                isNewCall = event.callId == null,
+                            ),
+                        )
                     } else {
                         flowOf(CallJoinUiState.GoBackToLogin)
                     }
@@ -166,7 +171,11 @@ class CallJoinViewModel @Inject constructor(
 sealed interface CallJoinUiState {
     object Nothing : CallJoinUiState
 
-    data class JoinCompleted(val callId: String) : CallJoinUiState
+    /**
+     * @param callId The call to open in the lobby.
+     * @param isNewCall True when the id was generated for a new call, false when the user entered it.
+     */
+    data class JoinCompleted(val callId: String, val isNewCall: Boolean = false) : CallJoinUiState
 
     object GoBackToLogin : CallJoinUiState
 }

@@ -16,11 +16,13 @@
 
 package io.getstream.video.android.compose.theme
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,6 +35,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.call.DefaultCallAppBarCenterContent
 import io.getstream.video.android.compose.ui.components.call.DefaultCallAppBarLeadingContent
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallControls
@@ -321,7 +325,7 @@ public interface VideoComponentFactory {
             networkQuality = params.networkQuality,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .height(StreamTokens.size32)
+                .padding(StreamTokens.spacingXs)
                 .testTag("Stream_ParticipantNetworkQualityIndicator"),
         )
     }
@@ -442,7 +446,9 @@ public interface VideoComponentFactory {
         DefaultParticipantLabel(
             user = params.user,
             isMicrophoneEnabled = params.isMicrophoneEnabled,
+            isCameraEnabled = params.isCameraEnabled,
             labelPosition = params.labelPosition,
+            call = params.call,
         )
     }
 
@@ -457,16 +463,38 @@ public interface VideoComponentFactory {
     public fun CallLobbyControlsContent(params: CallLobbyControlsContentParams) {
         val onCallAction = params.onCallAction
             ?: { DefaultOnCallActionHandler.onCallAction(params.call, it) }
-        io.getstream.video.android.compose.ui.components.call.controls.ControlActions(
+        val actions = buildDefaultLobbyControlActions(
             call = params.call,
-            modifier = params.modifier,
             onCallAction = onCallAction,
-            actions = buildDefaultLobbyControlActions(
-                call = params.call,
-                onCallAction = onCallAction,
-                isCameraEnabled = params.isCameraEnabled,
-                isMicrophoneEnabled = params.isMicrophoneEnabled,
-            ),
+            isCameraEnabled = params.isCameraEnabled,
+            isMicrophoneEnabled = params.isMicrophoneEnabled,
+            isCameraUnavailable = params.isCameraUnavailable,
+            isMicrophoneUnavailable = params.isMicrophoneUnavailable,
+        )
+        Row(
+            modifier = params.modifier,
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            actions.forEach { action -> action() }
+        }
+    }
+
+    /**
+     * The primary action of the call lobby that joins the call. The default implementation renders a
+     * full width [StreamTextButton] labelled "Join Call".
+     *
+     * @param params Parameters for this component.
+     */
+    @Composable
+    public fun CallLobbyJoinContent(params: CallLobbyJoinContentParams) {
+        StreamTextButton(
+            modifier = params.modifier
+                .fillMaxWidth()
+                .testTag("Stream_LobbyJoinCallButton"),
+            text = params.text ?: stringResource(R.string.stream_video_call_lobby_join_call),
+            size = StreamButtonSize.Large,
+            onClick = params.onJoinCall,
         )
     }
 

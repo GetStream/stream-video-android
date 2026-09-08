@@ -99,7 +99,7 @@ class LiveStreamMediaNotificationInterceptor(private val context: Context) : Str
                     .use { BitmapFactory.decodeStream(it) }
             } catch (e: Exception) {
                 // Fallback
-                BitmapFactory.decodeResource(context.resources, R.drawable.stream_calls_logo)
+                BitmapFactory.decodeResource(context.resources, R.drawable.start_call_illustration)
             }
         }
         return bitmap

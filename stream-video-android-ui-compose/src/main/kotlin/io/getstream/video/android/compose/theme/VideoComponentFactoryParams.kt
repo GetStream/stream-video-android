@@ -329,11 +329,17 @@ public data class CallLobbyOnDisabledContentParams(
  * @param user A user to display their name on the label.
  * @param isMicrophoneEnabled Whether the microphone is enabled or not.
  * @param labelPosition The position of the label inside the preview container.
+ * @param isCameraEnabled Whether the camera is enabled or not. The label shows a camera off icon when
+ * it is disabled.
+ * @param call The call whose local microphone level drives the sound indicator, or null for a
+ * static indicator.
  */
 public data class CallLobbyParticipantLabelContentParams(
     val user: User,
     val isMicrophoneEnabled: Boolean,
     val labelPosition: Alignment = Alignment.BottomStart,
+    val isCameraEnabled: Boolean = true,
+    val call: Call? = null,
 )
 
 /**
@@ -345,6 +351,10 @@ public data class CallLobbyParticipantLabelContentParams(
  * @param modifier Modifier for styling.
  * @param onCallAction Handler when the user triggers a Call Control Action. When `null`, the
  * default call action handler is used.
+ * @param isCameraUnavailable Whether the camera cannot be used, for example because its permission was
+ * denied. The camera toggle then shows an error badge.
+ * @param isMicrophoneUnavailable Whether the microphone cannot be used, for example because its
+ * permission was denied. The microphone toggle then shows an error badge.
  */
 public data class CallLobbyControlsContentParams(
     val call: Call,
@@ -352,6 +362,23 @@ public data class CallLobbyControlsContentParams(
     val isMicrophoneEnabled: Boolean,
     val modifier: Modifier = Modifier,
     val onCallAction: ((CallAction) -> Unit)? = null,
+    val isCameraUnavailable: Boolean = false,
+    val isMicrophoneUnavailable: Boolean = false,
+)
+
+/**
+ * Parameters for [VideoComponentFactory.CallLobbyJoinContent].
+ *
+ * @param call The call the user is about to join.
+ * @param onJoinCall Called when the user confirms joining the call.
+ * @param text The button label, or null for the default "Join Call" label.
+ * @param modifier Modifier for styling.
+ */
+public data class CallLobbyJoinContentParams(
+    val call: Call,
+    val onJoinCall: () -> Unit,
+    val text: String? = null,
+    val modifier: Modifier = Modifier,
 )
 
 /**

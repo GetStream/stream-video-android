@@ -19,7 +19,9 @@ package io.getstream.video.android.compose.permission
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -50,7 +52,14 @@ public fun rememberCallPermissionsState(
     val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
 
+    // A permission counts as denied only after the user answered a request, so a fresh screen does not
+    // flag the controls before the system dialog had a chance to show.
+    var isCameraDenied by remember(call) { mutableStateOf(false) }
+    var isMicrophoneDenied by remember(call) { mutableStateOf(false) }
+
     val permissionState = rememberMultiplePermissionsState(permissions) {
+        it[android.Manifest.permission.CAMERA]?.let { granted -> isCameraDenied = !granted }
+        it[android.Manifest.permission.RECORD_AUDIO]?.let { granted -> isMicrophoneDenied = !granted }
         if (onPermissionsResult != null) {
             onPermissionsResult.invoke(it)
         } else {
@@ -76,6 +85,10 @@ public fun rememberCallPermissionsState(
                 get() = permissionState.allPermissionsGranted
             override val shouldShowRationale: Boolean
                 get() = permissionState.shouldShowRationale
+            override val isCameraPermissionDenied: Boolean
+                get() = isCameraDenied
+            override val isMicrophonePermissionDenied: Boolean
+                get() = isMicrophoneDenied
 
             override fun launchPermissionRequest() {
                 permissionState.launchMultiplePermissionRequest()

@@ -25,19 +25,17 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -49,13 +47,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomStart
-import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -77,7 +73,6 @@ import io.getstream.video.android.compose.theme.indicatorSpeaking
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
 import io.getstream.video.android.compose.ui.components.call.pinning.participantActions
-import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
@@ -331,10 +326,6 @@ public fun BoxScope.ParticipantLabel(
                     audioLevel = audioLevel,
                     modifier = Modifier
                         .align(CenterVertically)
-                        .padding(
-                            vertical = StreamTokens.spacingXxs,
-                            horizontal = StreamTokens.spacingXs,
-                        )
                         .testTag("Stream_ParticipantMicrophone_Enabled_$audioEnabled"),
                 ),
             )
@@ -342,6 +333,7 @@ public fun BoxScope.ParticipantLabel(
     },
 ) {
     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
+    val videoEnabled by participant.videoEnabled.collectAsStateWithLifecycle()
     val pinnedParticipants by call.state.pinnedParticipants.collectAsStateWithLifecycle()
     val pinned = pinnedParticipants.containsKey(participant.sessionId)
 
@@ -363,10 +355,24 @@ public fun BoxScope.ParticipantLabel(
         // (so we ingore participant.isSpeaking)
         isSpeaking = participant.isLocal,
         isPaused = paused.value,
+        hasVideo = videoEnabled,
         soundIndicatorContent = soundIndicatorContent,
     )
 }
 
+/**
+ * The pill overlaid on a participant tile with the participant name and the media indicators.
+ *
+ * @param nameLabel The name shown on the label.
+ * @param isPinned Whether a pin icon is shown.
+ * @param labelPosition The position of the label inside the tile.
+ * @param hasAudio Whether the participant audio is enabled.
+ * @param isSpeaking Whether the participant is speaking; draws the audio level when [hasAudio] is set.
+ * @param isPaused Whether the participant video is paused; shows a warning icon.
+ * @param audioLevel The audio level drawn while speaking.
+ * @param hasVideo Whether the participant video is enabled. A camera off icon is shown otherwise.
+ * @param soundIndicatorContent The indicator of the audio state, at the end of the label.
+ */
 @Composable
 public fun BoxScope.ParticipantLabel(
     nameLabel: String,
@@ -376,6 +382,7 @@ public fun BoxScope.ParticipantLabel(
     isSpeaking: Boolean = false,
     isPaused: Boolean = false,
     audioLevel: Float = 0f,
+    hasVideo: Boolean = true,
     soundIndicatorContent: @Composable RowScope.() -> Unit = {
         with(VideoTheme.componentFactory) {
             ParticipantLabelSoundIndicatorContent(
@@ -383,90 +390,81 @@ public fun BoxScope.ParticipantLabel(
                     isSpeaking = isSpeaking,
                     isAudioEnabled = hasAudio,
                     audioLevel = audioLevel,
-                    modifier = Modifier
-                        .align(CenterVertically)
-                        .padding(horizontal = StreamTokens.spacingXs),
+                    modifier = Modifier.align(CenterVertically),
                 ),
             )
         }
     },
 ) {
-    var componentWidth by remember { mutableStateOf(0.dp) }
-    componentWidth = 100.dp
-    // get local density from composable
-    val density = LocalDensity.current
-    Box(
+    Row(
         modifier = Modifier
             .align(labelPosition)
+            .padding(StreamTokens.spacingXs)
             .height(StreamTokens.size32)
-            .wrapContentWidth()
             .background(
                 VideoTheme.colors.backgroundCoreOverlayDarkStrong,
-                shape = RoundedCornerShape(
-                    topStart = ZeroCornerSize,
-                    topEnd = StreamTokens.radiusXl,
-                    bottomEnd = ZeroCornerSize,
-                    bottomStart = ZeroCornerSize,
-                ),
+                shape = RoundedCornerShape(StreamTokens.radiusLg),
             )
-            .onGloballyPositioned {
-                componentWidth = with(density) {
-                    it.size.width.toDp()
-                }
-            },
+            .padding(
+                start = StreamTokens.spacingSm,
+                end = StreamTokens.spacingXxs,
+                top = StreamTokens.spacingXxs,
+                bottom = StreamTokens.spacingXxs,
+            ),
+        verticalAlignment = CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(StreamTokens.spacingXs),
     ) {
+        Text(
+            modifier = Modifier
+                .widthIn(max = 160.dp)
+                .testTag("Stream_ParticipantName"),
+            text = nameLabel,
+            style = VideoTheme.typography.metadataDefault,
+            color = VideoTheme.colors.textOnAccent,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
         Row(
-            modifier = Modifier.align(Center),
             verticalAlignment = CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(StreamTokens.spacingXxs),
         ) {
-            Text(
-                modifier = Modifier
-                    .widthIn(max = componentWidth)
-                    .padding(start = StreamTokens.spacingMd)
-                    .align(CenterVertically)
-                    .testTag("Stream_ParticipantName"),
-                text = nameLabel,
-                style = VideoTheme.typography.captionDefault,
-                color = VideoTheme.colors.textOnAccent,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-
             if (isPinned) {
-                Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
-                GenericIndicator {
-                    Icon(
-
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .size(StreamTokens.size16),
-                        painter = painterResource(
-                            io.getstream.video.android.compose.R.drawable.stream_design_ic_pin_fill,
-                        ),
-                        contentDescription = "Pin",
-                        tint = VideoTheme.colors.textOnAccent,
-                    )
-                }
+                LabelIcon(
+                    painter = painterResource(
+                        io.getstream.video.android.compose.R.drawable.stream_design_ic_pin_fill,
+                    ),
+                    contentDescription = "Pin",
+                )
             }
-
             if (isPaused) {
-                Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
-                GenericIndicator {
-                    Icon(
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .size(StreamTokens.size16),
-                        painter = painterResource(
-                            io.getstream.video.android.compose.R.drawable.stream_design_ic_exclamation_triangle_fill,
-                        ),
-                        contentDescription = "Pause",
-                        tint = VideoTheme.colors.textOnAccent,
-                    )
-                }
+                LabelIcon(
+                    painter = painterResource(
+                        io.getstream.video.android.compose.R.drawable.stream_design_ic_exclamation_triangle_fill,
+                    ),
+                    contentDescription = "Pause",
+                )
+            }
+            if (!hasVideo) {
+                LabelIcon(
+                    painter = painterResource(
+                        io.getstream.video.android.compose.R.drawable.stream_design_ic_video_off_fill,
+                    ),
+                    contentDescription = null,
+                )
             }
             soundIndicatorContent.invoke(this)
         }
     }
+}
+
+@Composable
+private fun LabelIcon(painter: Painter, contentDescription: String?) {
+    Icon(
+        modifier = Modifier.size(StreamTokens.size16),
+        painter = painter,
+        contentDescription = contentDescription,
+        tint = VideoTheme.colors.textOnAccent,
+    )
 }
 
 @Composable

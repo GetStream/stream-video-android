@@ -22,8 +22,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,12 +49,7 @@ public fun NetworkQualityIndicator(
 ) {
     val colors = barColorsFromQuality(networkQuality)
     GenericIndicator(
-        shape = RoundedCornerShape(
-            topStart = StreamTokens.radiusXl,
-            topEnd = ZeroCornerSize,
-            bottomEnd = ZeroCornerSize,
-            bottomStart = ZeroCornerSize,
-        ),
+        shape = CircleShape,
         modifier = modifier,
     ) {
         ConnectionBars(colors = colors)

@@ -317,8 +317,8 @@ private fun Logo(modifier: Modifier, selectedEnv: StreamEnvironment?) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
-            modifier = Modifier.size(width = 254.dp, height = 179.dp),
-            painter = painterResource(id = R.drawable.stream_calls_logo),
+            modifier = Modifier.size(width = 234.dp, height = 160.dp),
+            painter = painterResource(id = R.drawable.start_call_illustration),
             contentDescription = null,
         )
 

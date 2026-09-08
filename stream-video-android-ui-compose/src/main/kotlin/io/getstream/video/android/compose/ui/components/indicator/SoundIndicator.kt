@@ -16,9 +16,11 @@
 
 package io.getstream.video.android.compose.ui.components.indicator
 
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * Used to indicate the sound state of a given participant. Either shows a mute icon or the sound
@@ -36,10 +38,12 @@ public fun SoundIndicator(
     isAudioEnabled: Boolean,
     audioLevel: Float,
 ) {
-    GenericIndicator(modifier = modifier) {
+    GenericIndicator(modifier = modifier, size = StreamTokens.size24) {
         if (isAudioEnabled && isSpeaking) {
             AudioVolumeIndicator(
-                modifier = Modifier.align(Alignment.Center),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .height(StreamTokens.size10),
                 audioLevels = audioLevel,
             )
         } else {

@@ -32,6 +32,9 @@ import io.getstream.video.android.core.call.state.ToggleCamera
  * @param modifier The modifier applied to the button.
  * @param isCameraEnabled Whether the action is in its active state.
  * @param enabled Whether the action accepts clicks.
+ * @param isUnavailable Whether the camera cannot be used, for example because its permission was
+ * denied. The action then shows an error badge on a disabled background but stays clickable. See
+ * [ToggleAction].
  * @param onStyle The colors of the active state. See [StreamButtonStyleDefaults].
  * @param offStyle The colors of the inactive state. See [StreamButtonStyleDefaults].
  * @param size The visual size of the button.
@@ -42,6 +45,7 @@ public fun ToggleCameraAction(
     modifier: Modifier = Modifier,
     isCameraEnabled: Boolean,
     enabled: Boolean = true,
+    isUnavailable: Boolean = false,
     onStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
     offStyle: StreamButtonStyle = StreamButtonStyleDefaults.destructiveSolid,
     size: StreamButtonSize = StreamButtonSize.Medium,
@@ -57,6 +61,7 @@ public fun ToggleCameraAction(
         io.getstream.video.android.ui.common.R.string.stream_video_call_controls_toggle_camera,
     ),
     enabled = enabled,
+    isUnavailable = isUnavailable,
     onStyle = onStyle,
     offStyle = offStyle,
     size = size,

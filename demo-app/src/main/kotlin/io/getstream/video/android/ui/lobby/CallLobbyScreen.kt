@@ -29,18 +29,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.LockPerson
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -51,27 +47,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.CallActivity
 import io.getstream.video.android.R
+import io.getstream.video.android.compose.permission.VideoPermissionsState
+import io.getstream.video.android.compose.permission.rememberCallPermissionsState
+import io.getstream.video.android.compose.theme.CallLobbyJoinContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
-import io.getstream.video.android.compose.ui.components.base.StreamTextButton
-import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
 import io.getstream.video.android.compose.ui.components.call.lobby.buildDefaultLobbyControlActions
 import io.getstream.video.android.core.Call
@@ -86,6 +84,7 @@ import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.StreamCallActivity
 import kotlinx.coroutines.delay
+import io.getstream.video.android.compose.R as ComposeR
 
 @Composable
 fun CallLobbyScreen(
@@ -97,17 +96,22 @@ fun CallLobbyScreen(
     val isCameraEnabled by callLobbyViewModel.cameraEnabled.collectAsStateWithLifecycle()
     val hifiAudioEnabled by callLobbyViewModel.hifiAudioEnabled.collectAsStateWithLifecycle()
     val settingsLoaded by callLobbyViewModel.settingsLoaded.collectAsStateWithLifecycle()
+    val participantCounts by callLobbyViewModel.call.state.participantCounts.collectAsStateWithLifecycle()
     val call by remember {
         mutableStateOf(callLobbyViewModel.call)
     }
 
     val showHifiAudioToggle = settingsLoaded && hifiAudioEnabled
+    val isNewCall = callLobbyViewModel.isNewCall
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(VideoTheme.colors.backgroundCoreApp),
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(VideoTheme.colors.backgroundCoreApp)
                 .testTag("call_lobby"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -121,25 +125,19 @@ fun CallLobbyScreen(
 
             CallLobbyBodyResponsive(
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
                     .fillMaxWidth()
                     .weight(1f),
+                call = call,
                 isMicrophoneEnabled = isMicrophoneEnabled,
                 isCameraEnabled = isCameraEnabled,
                 showHifiAudioToggle = showHifiAudioToggle,
-                onToggleCamera = {
-                    callLobbyViewModel.enableCamera(it)
-                },
-                onToggleMicrophone = {
-                    callLobbyViewModel.enableMicrophone(it)
-                },
-                onToggleHifiAudio = {
-                    callLobbyViewModel.setAudioBitrateProfile(it)
-                },
-                call = call,
-            ) {
-                LobbyDescription(callLobbyViewModel = callLobbyViewModel)
-            }
+                isNewCall = isNewCall,
+                participantCounts = participantCounts,
+                onToggleCamera = callLobbyViewModel::enableCamera,
+                onToggleMicrophone = callLobbyViewModel::enableMicrophone,
+                onToggleHifiAudio = callLobbyViewModel::setAudioBitrateProfile,
+                onJoinCall = { callLobbyViewModel.handleUiEvent(CallLobbyEvent.JoinCall) },
+            )
         }
 
         if (isLoading) {
@@ -174,6 +172,7 @@ private fun CallLobbyHeader(
     }
 }
 
+/** The account header: avatar, user id and the close action. Demo only, not part of the SDK lobby. */
 @Composable
 private fun CallLobbyHeaderContent(
     user: State<User?>,
@@ -181,51 +180,40 @@ private fun CallLobbyHeaderContent(
 ) {
     Row(
         modifier = Modifier
-            .padding(
-                horizontal = 16.dp,
-                vertical = 4.dp,
-            )
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .fillMaxWidth()
+            .padding(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val userValue = user.value
         if (userValue != null) {
-            UserAvatar(
-                modifier = Modifier.size(32.dp),
-                userImage = userValue.image,
-                userName = userValue.userNameOrId,
-            )
-
-            Spacer(modifier = Modifier.width(4.dp))
+            Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                UserAvatar(
+                    modifier = Modifier.size(40.dp),
+                    userImage = userValue.image,
+                    userName = userValue.userNameOrId,
+                )
+            }
         }
 
         Text(
             modifier = Modifier.weight(1f),
-            color = Color.White,
             text = userValue?.id.orEmpty(),
+            style = VideoTheme.typography.headingExtraSmall,
+            color = VideoTheme.colors.textPrimary,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
-            fontSize = 16.sp,
         )
-        IconButton(
-            modifier = Modifier
-                .padding(8.dp)
-                .testTag("Stream_LobbyCloseButton"),
-            onClick = {
-                onBack()
-            },
-        ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = null,
-                tint = VideoTheme.colors.textPrimary,
-            )
-        }
+        StreamIconButton(
+            modifier = Modifier.testTag("Stream_LobbyCloseButton"),
+            onClick = onBack,
+            icon = painterResource(ComposeR.drawable.stream_design_ic_xmark),
+            contentDescription = stringResource(id = R.string.cancel),
+            style = StreamButtonStyleDefaults.secondaryGhost,
+        )
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun CallLobbyBodyResponsive(
     modifier: Modifier = Modifier,
@@ -233,41 +221,46 @@ private fun CallLobbyBodyResponsive(
     isCameraEnabled: Boolean,
     isMicrophoneEnabled: Boolean,
     showHifiAudioToggle: Boolean = false,
+    isNewCall: Boolean,
+    participantCounts: ParticipantCount?,
     onToggleCamera: (Boolean) -> Unit,
     onToggleMicrophone: (Boolean) -> Unit,
     onToggleHifiAudio: (Boolean) -> Unit,
-    description: @Composable () -> Unit,
+    onJoinCall: () -> Unit,
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     if (isLandscape) {
         CallLobbyBodyLandscape(
-            modifier,
-            call,
-            isCameraEnabled,
-            isMicrophoneEnabled,
-            showHifiAudioToggle,
-            onToggleCamera,
-            onToggleMicrophone,
-            onToggleHifiAudio,
-            description,
+            modifier = modifier,
+            call = call,
+            isCameraEnabled = isCameraEnabled,
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            showHifiAudioToggle = showHifiAudioToggle,
+            isNewCall = isNewCall,
+            participantCounts = participantCounts,
+            onToggleCamera = onToggleCamera,
+            onToggleMicrophone = onToggleMicrophone,
+            onToggleHifiAudio = onToggleHifiAudio,
+            onJoinCall = onJoinCall,
         )
     } else {
         CallLobbyBodyPortrait(
-            modifier,
-            call,
-            isCameraEnabled,
-            isMicrophoneEnabled,
-            showHifiAudioToggle,
-            onToggleCamera,
-            onToggleMicrophone,
-            onToggleHifiAudio,
-            description,
+            modifier = modifier,
+            call = call,
+            isCameraEnabled = isCameraEnabled,
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            showHifiAudioToggle = showHifiAudioToggle,
+            isNewCall = isNewCall,
+            participantCounts = participantCounts,
+            onToggleCamera = onToggleCamera,
+            onToggleMicrophone = onToggleMicrophone,
+            onToggleHifiAudio = onToggleHifiAudio,
+            onJoinCall = onJoinCall,
         )
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun CallLobbyBodyPortrait(
     modifier: Modifier = Modifier,
@@ -275,77 +268,37 @@ private fun CallLobbyBodyPortrait(
     isCameraEnabled: Boolean,
     isMicrophoneEnabled: Boolean,
     showHifiAudioToggle: Boolean = false,
+    isNewCall: Boolean,
+    participantCounts: ParticipantCount?,
     onToggleCamera: (Boolean) -> Unit,
     onToggleMicrophone: (Boolean) -> Unit,
     onToggleHifiAudio: (Boolean) -> Unit,
-    description: @Composable () -> Unit,
+    onJoinCall: () -> Unit,
 ) {
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .background(VideoTheme.colors.backgroundCoreApp)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 40.dp)
             .semantics { testTagsAsResourceId = true },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Text and Spacer elements remain unchanged
-
-        // LaunchedEffect to handle initial setup might need adjustments
-        // based on how you handle benchmarks or initial setup externally
-
-        Icon(
-            modifier = Modifier.size(36.dp),
-            imageVector = Icons.Default.Language,
-            tint = VideoTheme.colors.accentSuccess,
-            contentDescription = "",
-        )
-        Text(
-            modifier = Modifier.padding(16.dp),
-            text = "Set up your test call",
-            style = VideoTheme.typography.headingLarge,
-        )
-        val onCallAction: (CallAction) -> Unit = { action ->
-            when (action) {
-                is ToggleCamera -> onToggleCamera(action.isEnabled)
-                is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
-                is ToggleHifiAudio -> onToggleHifiAudio(action.isHifiAudioEnabled)
-                else -> Unit
-            }
-        }
-        CallLobby(
+        LobbyTitle(isNewCall = isNewCall, participantCounts = participantCounts)
+        Spacer(modifier = Modifier.height(32.dp))
+        DemoCallLobby(
             call = call,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
-            onCallAction = onCallAction,
-            lobbyControlsContent = { modifier, _ ->
-                ControlActions(
-                    modifier = modifier,
-                    call = call,
-                    actions = buildDefaultLobbyControlActions(
-                        call = call,
-                        onCallAction = onCallAction,
-                        isCameraEnabled = isCameraEnabled,
-                        isMicrophoneEnabled = isMicrophoneEnabled,
-                        showHifiAudioToggle = showHifiAudioToggle,
-                    ),
-                )
-            },
+            showHifiAudioToggle = showHifiAudioToggle,
+            isNewCall = isNewCall,
+            onToggleCamera = onToggleCamera,
+            onToggleMicrophone = onToggleMicrophone,
+            onToggleHifiAudio = onToggleHifiAudio,
+            onJoinCall = onJoinCall,
         )
-        if (BuildConfig.BUILD_TYPE == "benchmark") {
-            LaunchedEffect(key1 = Unit) {
-                delay(300)
-                onToggleCamera(true)
-                onToggleMicrophone(true)
-            }
-        }
-        description()
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun CallLobbyBodyLandscape(
     modifier: Modifier = Modifier,
@@ -353,155 +306,170 @@ private fun CallLobbyBodyLandscape(
     isCameraEnabled: Boolean,
     isMicrophoneEnabled: Boolean,
     showHifiAudioToggle: Boolean = false,
+    isNewCall: Boolean,
+    participantCounts: ParticipantCount?,
     onToggleCamera: (Boolean) -> Unit,
     onToggleMicrophone: (Boolean) -> Unit,
     onToggleHifiAudio: (Boolean) -> Unit,
-    description: @Composable () -> Unit,
+    onJoinCall: () -> Unit,
 ) {
-    Box(modifier = Modifier.background(VideoTheme.colors.backgroundCoreApp)) {
-        Row() {
-            Column(
-                modifier = modifier
-                    .weight(1f)
-                    .semantics { testTagsAsResourceId = true },
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                val onCallAction: (CallAction) -> Unit = { action ->
-                    when (action) {
-                        is ToggleCamera -> onToggleCamera(action.isEnabled)
-                        is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
-                        is ToggleHifiAudio -> onToggleHifiAudio(action.isHifiAudioEnabled)
-                        else -> Unit
-                    }
-                }
-
-                CallLobby(
-                    call = call,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = 16.dp,
-                            end = 16.dp,
-                        ),
-                    isCameraEnabled = isCameraEnabled,
-                    isMicrophoneEnabled = isMicrophoneEnabled,
-                    onCallAction = onCallAction,
-                    lobbyControlsContent = { _, _ ->
-                        ControlActions(
-                            modifier = Modifier.padding(),
-                            call = call,
-                            actions = buildDefaultLobbyControlActions(
-                                call = call,
-                                onCallAction = onCallAction,
-                                isCameraEnabled = isCameraEnabled,
-                                isMicrophoneEnabled = isMicrophoneEnabled,
-                                showHifiAudioToggle = showHifiAudioToggle,
-                            ),
-                        )
-                    },
-                )
-                if (BuildConfig.BUILD_TYPE == "benchmark") {
-                    LaunchedEffect(key1 = Unit) {
-                        delay(300)
-                        onToggleCamera(true)
-                        onToggleMicrophone(true)
-                    }
-                }
-            }
-
-            Column(
-                modifier = modifier
-                    .weight(1f)
-                    .align(Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                // Text and Spacer elements remain unchanged
-
-                // LaunchedEffect to handle initial setup might need adjustments
-                // based on how you handle benchmarks or initial setup externally
-                Icon(
-                    modifier = Modifier.size(36.dp),
-                    imageVector = Icons.Default.Language,
-                    tint = VideoTheme.colors.accentSuccess,
-                    contentDescription = "",
-                )
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = "Set up your test call",
-                    style = VideoTheme.typography.headingLarge,
-                )
-                description()
-            }
-        }
-    }
-}
-
-@Composable
-private fun LobbyDescription(
-    callLobbyViewModel: CallLobbyViewModel,
-) {
-    val participantCounts by callLobbyViewModel.call.state.participantCounts.collectAsStateWithLifecycle()
-
-    LobbyDescriptionContent(participantCounts = participantCounts) {
-        callLobbyViewModel.handleUiEvent(
-            CallLobbyEvent.JoinCall,
-        )
-    }
-}
-
-@Composable
-private fun LobbyDescriptionContent(participantCounts: ParticipantCount?, onClick: () -> Unit) {
-    val totalParticipants = participantCounts?.total ?: 0
-    val anonParticipants = participantCounts?.anonymous ?: 0
-
-    val text = if (totalParticipants != 0) {
-        Pair(
-            stringResource(
-                id = R.string.join_call_description,
-                totalParticipants,
-                anonParticipants,
-            ),
-            stringResource(id = R.string.join_call),
-        )
-    } else {
-        Pair(
-            "Start a private test call. This demo is\nbuilt on Stream’s SDKs and runs on our \nglobal edge network.",
-            "Start a test call",
-        )
-    }
-    Column(
-        modifier = Modifier.padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Row(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 24.dp)
+            .semantics { testTagsAsResourceId = true },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .wrapContentWidth()
-                .testTag("Stream_ParticipantsCount_$totalParticipants"),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = Icons.Default.LockPerson,
-                tint = VideoTheme.colors.textPrimary,
-                contentDescription = "",
-            )
-
-            Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                text = text.first,
-                style = VideoTheme.typography.captionDefault,
+        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            LobbyTitle(isNewCall = isNewCall, participantCounts = participantCounts)
+        }
+        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            DemoCallLobby(
+                call = call,
+                isCameraEnabled = isCameraEnabled,
+                isMicrophoneEnabled = isMicrophoneEnabled,
+                showHifiAudioToggle = showHifiAudioToggle,
+                isNewCall = isNewCall,
+                onToggleCamera = onToggleCamera,
+                onToggleMicrophone = onToggleMicrophone,
+                onToggleHifiAudio = onToggleHifiAudio,
+                onJoinCall = onJoinCall,
             )
         }
-        Spacer(modifier = Modifier.size(16.dp))
-        StreamTextButton(
-            style = StreamButtonStyleDefaults.primarySolid,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("Stream_JoinCallButton"),
-            text = text.second,
-            onClick = onClick,
+    }
+}
+
+/**
+ * The SDK lobby with the demo specific controls: the high quality audio toggle in development
+ * builds, and a join label that reads "Start Call" while nobody is in the call yet.
+ */
+@Composable
+private fun DemoCallLobby(
+    call: Call,
+    isCameraEnabled: Boolean,
+    isMicrophoneEnabled: Boolean,
+    showHifiAudioToggle: Boolean,
+    isNewCall: Boolean,
+    onToggleCamera: (Boolean) -> Unit,
+    onToggleMicrophone: (Boolean) -> Unit,
+    onToggleHifiAudio: (Boolean) -> Unit,
+    onJoinCall: () -> Unit,
+) {
+    val onCallAction: (CallAction) -> Unit = { action ->
+        when (action) {
+            is ToggleCamera -> onToggleCamera(action.isEnabled)
+            is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
+            is ToggleHifiAudio -> onToggleHifiAudio(action.isHifiAudioEnabled)
+            else -> Unit
+        }
+    }
+    val permissions = rememberCallPermissionsState(call = call)
+    val joinLabel = if (isNewCall) {
+        stringResource(id = R.string.start_call)
+    } else {
+        stringResource(id = R.string.join_call)
+    }
+
+    CallLobby(
+        call = call,
+        modifier = Modifier.fillMaxWidth(),
+        isCameraEnabled = isCameraEnabled,
+        isMicrophoneEnabled = isMicrophoneEnabled,
+        permissions = permissions,
+        onCallAction = onCallAction,
+        lobbyControlsContent = { modifier, _ ->
+            LobbyControls(
+                modifier = modifier,
+                call = call,
+                isCameraEnabled = isCameraEnabled,
+                isMicrophoneEnabled = isMicrophoneEnabled,
+                showHifiAudioToggle = showHifiAudioToggle,
+                permissions = permissions,
+                onCallAction = onCallAction,
+            )
+        },
+        onJoinCall = onJoinCall,
+        joinCallContent = { modifier, lobbyCall ->
+            VideoTheme.componentFactory.CallLobbyJoinContent(
+                params = CallLobbyJoinContentParams(
+                    call = lobbyCall,
+                    onJoinCall = onJoinCall,
+                    text = joinLabel,
+                    modifier = modifier,
+                ),
+            )
+        },
+    )
+
+    if (BuildConfig.BUILD_TYPE == "benchmark") {
+        LaunchedEffect(key1 = Unit) {
+            delay(300)
+            onToggleCamera(true)
+            onToggleMicrophone(true)
+        }
+    }
+}
+
+@Composable
+private fun LobbyControls(
+    modifier: Modifier,
+    call: Call,
+    isCameraEnabled: Boolean,
+    isMicrophoneEnabled: Boolean,
+    showHifiAudioToggle: Boolean,
+    permissions: VideoPermissionsState,
+    onCallAction: (CallAction) -> Unit,
+) {
+    val isCameraUnavailable = permissions.isCameraPermissionDenied
+    val isMicrophoneUnavailable = permissions.isMicrophonePermissionDenied
+    val actions = buildDefaultLobbyControlActions(
+        call = call,
+        onCallAction = { action ->
+            val needsPermission = (action is ToggleCamera && isCameraUnavailable) ||
+                (action is ToggleMicrophone && isMicrophoneUnavailable)
+            if (needsPermission) permissions.launchPermissionRequest() else onCallAction(action)
+        },
+        isCameraEnabled = isCameraEnabled,
+        isMicrophoneEnabled = isMicrophoneEnabled,
+        isCameraUnavailable = isCameraUnavailable,
+        isMicrophoneUnavailable = isMicrophoneUnavailable,
+        showHifiAudioToggle = showHifiAudioToggle,
+    )
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        actions.forEach { action -> action() }
+    }
+}
+
+/** The title block above the lobby. The title carries the participants-count tag the E2E suite asserts on. */
+@Composable
+private fun LobbyTitle(isNewCall: Boolean, participantCounts: ParticipantCount?) {
+    val totalParticipants = participantCounts?.total ?: 0
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(
+            modifier = Modifier.size(32.dp),
+            painter = painterResource(ComposeR.drawable.stream_design_ic_language),
+            tint = VideoTheme.colors.accentPrimary,
+            contentDescription = null,
+        )
+        Text(
+            modifier = Modifier.testTag("Stream_ParticipantsCount_$totalParticipants"),
+            text = if (isNewCall) {
+                stringResource(id = R.string.set_up_your_call)
+            } else {
+                stringResource(id = R.string.set_up_your_call_before_joining)
+            },
+            style = VideoTheme.typography.headingLarge,
+            color = VideoTheme.colors.textPrimary,
+            textAlign = TextAlign.Center,
         )
     }
 }
@@ -559,15 +527,17 @@ private fun CallLobbyBodyPortraitPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallLobbyBodyPortrait(
+            modifier = Modifier.background(VideoTheme.colors.backgroundCoreApp),
             isCameraEnabled = false,
             isMicrophoneEnabled = false,
             call = previewCall,
+            isNewCall = false,
+            participantCounts = ParticipantCount(1, 1),
             onToggleMicrophone = {},
             onToggleCamera = {},
             onToggleHifiAudio = {},
-        ) {
-            LobbyDescriptionContent(participantCounts = ParticipantCount(1, 1)) {}
-        }
+            onJoinCall = {},
+        )
     }
 }
 
@@ -582,14 +552,16 @@ private fun CallLobbyBodyLandscapePreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         CallLobbyBodyLandscape(
+            modifier = Modifier.background(VideoTheme.colors.backgroundCoreApp),
             isCameraEnabled = false,
             isMicrophoneEnabled = false,
             call = previewCall,
+            isNewCall = true,
+            participantCounts = ParticipantCount(0, 0),
             onToggleMicrophone = {},
             onToggleCamera = {},
             onToggleHifiAudio = {},
-        ) {
-            LobbyDescriptionContent(participantCounts = ParticipantCount(1, 1)) {}
-        }
+            onJoinCall = {},
+        )
     }
 }

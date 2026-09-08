@@ -29,14 +29,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -45,12 +43,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DriveFileMove
-import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.VideoCall
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,33 +56,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.R
@@ -110,23 +97,23 @@ import io.getstream.video.android.ui.LogFilesScreen
 import io.getstream.video.android.ui.SingleButtonDialog
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
+import io.getstream.video.android.compose.R as ComposeR
 
 @Composable
 fun CallJoinScreen(
     prefilledCallId: String? = null,
     callJoinViewModel: CallJoinViewModel = hiltViewModel(),
-    navigateToCallLobby: (callId: String) -> Unit,
+    navigateToCallLobby: (callId: String, isNewCall: Boolean) -> Unit,
     navigateUpToLogin: (autoLogIn: Boolean) -> Unit,
     navigateToDirectCallJoin: () -> Unit,
     navigateToBarcodeScanner: () -> Unit = {},
 ) {
     val uiState by callJoinViewModel.uiState.collectAsState(CallJoinUiState.Nothing)
     val user by callJoinViewModel.user.collectAsState(initial = null)
-
-    var isSignOutDialogVisible by remember { mutableStateOf(false) }
     val isLoggedOut by callJoinViewModel.isLoggedOut.collectAsState(initial = false)
     val isNetworkAvailable by callJoinViewModel.isNetworkAvailable.collectAsStateWithLifecycle()
 
+    var isSignOutDialogVisible by remember { mutableStateOf(false) }
     var renderLogsFileUi by remember { mutableStateOf(false) }
     var renderCallSettingsUi by remember { mutableStateOf(false) }
 
@@ -140,8 +127,6 @@ fun CallJoinScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(VideoTheme.colors.backgroundCoreApp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CallJoinHeader(
             user = user,
@@ -152,24 +137,21 @@ fun CallJoinScreen(
                 callJoinViewModel.autoLogInAfterLogOut = false
                 callJoinViewModel.logOut()
             },
-            onLogsClick = {
-                renderLogsFileUi = true
-            },
-            onCallSettingsClink = {
-                renderCallSettingsUi = true
-            },
+            onLeaveClick = { if (isNetworkAvailable) isSignOutDialogVisible = true },
+            onLogsClick = { renderLogsFileUi = true },
+            onCallSettingsClick = { renderCallSettingsUi = true },
         )
 
         CallJoinBody(
             modifier = Modifier
-                .fillMaxHeight()
-                .align(Alignment.CenterHorizontally)
-                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
                 .weight(1f),
+            user = user,
             prefilledCallId = prefilledCallId,
-            openCamera = { navigateToBarcodeScanner() },
-            callJoinViewModel = callJoinViewModel,
             isNetworkAvailable = isNetworkAvailable,
+            onJoinCall = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = it)) },
+            onNewCall = { callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall()) },
+            onScanQrCode = navigateToBarcodeScanner,
         )
     }
 
@@ -213,12 +195,15 @@ fun CallJoinScreen(
 @Composable
 private fun HandleCallJoinUiState(
     callJoinUiState: CallJoinUiState,
-    navigateToCallLobby: (callId: String) -> Unit,
+    navigateToCallLobby: (callId: String, isNewCall: Boolean) -> Unit,
     navigateUpToLogin: () -> Unit,
 ) {
     LaunchedEffect(key1 = callJoinUiState) {
         when (callJoinUiState) {
-            is CallJoinUiState.JoinCompleted -> navigateToCallLobby.invoke(callJoinUiState.callId)
+            is CallJoinUiState.JoinCompleted -> navigateToCallLobby.invoke(
+                callJoinUiState.callId,
+                callJoinUiState.isNewCall,
+            )
 
             is CallJoinUiState.GoBackToLogin -> navigateUpToLogin.invoke()
 
@@ -227,6 +212,11 @@ private fun HandleCallJoinUiState(
     }
 }
 
+/**
+ * The account header: avatar, user name and either the developer menu or the sign out action.
+ * Production builds without the menu sign out through the trailing icon; the avatar long press stays
+ * as a second entry point.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CallJoinHeader(
@@ -236,149 +226,176 @@ private fun CallJoinHeader(
     onAvatarLongClick: () -> Unit,
     onDirectCallClick: () -> Unit,
     onSignOutClick: () -> Unit,
+    onLeaveClick: () -> Unit,
     onLogsClick: () -> Unit,
-    onCallSettingsClink: () -> Unit,
+    onCallSettingsClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         user?.let {
             Box(
-                modifier = if (isProduction) {
-                    Modifier.combinedClickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {},
-                        onLongClick = onAvatarLongClick,
-                    )
-                } else {
-                    Modifier
-                },
+                modifier = Modifier
+                    .size(48.dp)
+                    .then(
+                        if (isProduction) {
+                            Modifier.combinedClickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {},
+                                onLongClick = onAvatarLongClick,
+                            )
+                        } else {
+                            Modifier
+                        },
+                    ),
+                contentAlignment = Alignment.Center,
             ) {
                 UserAvatar(
-                    modifier = Modifier.size(44.dp),
+                    modifier = Modifier.size(40.dp),
                     userImage = it.image,
                     userName = it.userNameOrId,
                 )
             }
-
-            Spacer(modifier = Modifier.width(8.dp))
         }
 
         Text(
             modifier = Modifier
                 .weight(1f)
                 .testTag("Stream_UserName"),
-            color = Color.White,
             text = user?.userNameOrId.orEmpty(),
+            style = VideoTheme.typography.headingExtraSmall,
+            color = VideoTheme.colors.textPrimary,
             maxLines = 1,
-            fontSize = 16.sp,
+            overflow = TextOverflow.Ellipsis,
         )
 
         if (!isProduction || showDirectCall) {
-            var showMenu by remember {
-                mutableStateOf(false)
-            }
-            var popupPosition by remember { mutableStateOf(IntOffset(0, 0)) }
-            var buttonSize by remember { mutableStateOf(IntSize(0, 0)) }
-
-            StreamIconButton(
-                onClick = { showMenu = !showMenu },
-                icon = rememberVectorPainter(Icons.Default.Settings),
-                contentDescription = null,
-                modifier = Modifier
-                    .onGloballyPositioned { coordinates ->
-                        val buttonBounds = coordinates.boundsInParent()
-                        popupPosition = IntOffset(
-                            x = buttonBounds.right.toInt() - buttonSize.width,
-                            y = buttonBounds.bottom.toInt(),
-                        )
-                        buttonSize = coordinates.size
-                    }
-                    .testTag("Stream_SettingsIcon"),
-                style = if (showMenu) StreamButtonStyleDefaults.primarySolid else StreamButtonStyleDefaults.secondarySolid,
+            DeveloperMenu(
+                isProduction = isProduction,
+                showDirectCall = showDirectCall,
+                onDirectCallClick = onDirectCallClick,
+                onSignOutClick = onSignOutClick,
+                onLogsClick = onLogsClick,
+                onCallSettingsClick = onCallSettingsClick,
             )
+        } else {
+            StreamIconButton(
+                onClick = onLeaveClick,
+                icon = painterResource(ComposeR.drawable.stream_design_ic_leave),
+                contentDescription = stringResource(id = R.string.sign_out),
+                style = StreamButtonStyleDefaults.secondaryGhost,
+            )
+        }
+    }
+}
 
-            if (showMenu) {
-                Popup(
-                    onDismissRequest = {
-                        showMenu = !showMenu
-                    },
-                    offset = popupPosition,
-                ) {
-                    Column(
+@Composable
+private fun DeveloperMenu(
+    isProduction: Boolean,
+    showDirectCall: Boolean,
+    onDirectCallClick: () -> Unit,
+    onSignOutClick: () -> Unit,
+    onLogsClick: () -> Unit,
+    onCallSettingsClick: () -> Unit,
+) {
+    var showMenu by remember { mutableStateOf(false) }
+    var popupPosition by remember { mutableStateOf(IntOffset(0, 0)) }
+    var buttonSize by remember { mutableStateOf(IntSize(0, 0)) }
+
+    StreamIconButton(
+        onClick = { showMenu = !showMenu },
+        icon = rememberVectorPainter(Icons.Default.Settings),
+        contentDescription = stringResource(id = R.string.call_settings),
+        modifier = Modifier
+            .onGloballyPositioned { coordinates ->
+                val buttonBounds = coordinates.boundsInParent()
+                popupPosition = IntOffset(
+                    x = buttonBounds.right.toInt() - buttonSize.width,
+                    y = buttonBounds.bottom.toInt(),
+                )
+                buttonSize = coordinates.size
+            }
+            .testTag("Stream_SettingsIcon"),
+        style = if (showMenu) {
+            StreamButtonStyleDefaults.primarySolid
+        } else {
+            StreamButtonStyleDefaults.secondaryGhost
+        },
+    )
+
+    if (showMenu) {
+        Popup(
+            onDismissRequest = { showMenu = false },
+            offset = popupPosition,
+        ) {
+            Column(
+                modifier = Modifier
+                    .width(220.dp)
+                    .background(
+                        VideoTheme.colors.backgroundCoreElevation1,
+                        RoundedCornerShape(16.dp),
+                    )
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (showDirectCall) {
+                    StreamTextButton(
                         modifier = Modifier
-                            .width(200.dp)
-                            .background(
-                                VideoTheme.colors.backgroundCoreSurfaceDefault,
-                                RoundedCornerShape(24.dp),
-                            )
-                            .padding(16.dp),
-                    ) {
-                        if (showDirectCall) {
-                            StreamTextButton(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("Stream_DirectCallButton"),
-                                text = stringResource(id = R.string.direct_call),
-                                leadingIcon = rememberVectorPainter(Icons.Default.Call),
-                                style = StreamButtonStyleDefaults.secondarySolid,
-                                onClick = {
-                                    showMenu = false
-                                    onDirectCallClick.invoke()
-                                },
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(5.dp))
-                        if (!isProduction) {
-                            StreamTextButton(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("Stream_CallSettingsButton"),
-                                leadingIcon = rememberVectorPainter(Icons.Default.Settings),
-                                style = StreamButtonStyleDefaults.secondaryGhost,
-                                text = stringResource(id = R.string.call_settings),
-                                onClick = {
-                                    showMenu = false
-                                    onCallSettingsClink()
-                                },
-                            )
-                            Spacer(modifier = Modifier.width(5.dp))
-                            StreamTextButton(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("Stream_ExportLogsButton"),
-                                leadingIcon = rememberVectorPainter(
-                                    Icons.AutoMirrored.Default.DriveFileMove,
-                                ),
-                                style = StreamButtonStyleDefaults.secondaryGhost,
-                                text = stringResource(id = R.string.logs),
-                                onClick = {
-                                    showMenu = false
-                                    onLogsClick()
-                                },
-                            )
-                            Spacer(modifier = Modifier.width(5.dp))
-                            StreamTextButton(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .testTag("Stream_SignOutButton"),
-                                leadingIcon = rememberVectorPainter(
-                                    Icons.AutoMirrored.Filled.Logout,
-                                ),
-                                style = StreamButtonStyleDefaults.secondaryGhost,
-                                text = stringResource(id = R.string.sign_out),
-                                onClick = {
-                                    showMenu = false
-                                    onSignOutClick()
-                                },
-                            )
-                        }
-                    }
+                            .fillMaxWidth()
+                            .testTag("Stream_DirectCallButton"),
+                        text = stringResource(id = R.string.direct_call),
+                        leadingIcon = rememberVectorPainter(Icons.Default.Call),
+                        style = StreamButtonStyleDefaults.secondaryGhost,
+                        onClick = {
+                            showMenu = false
+                            onDirectCallClick.invoke()
+                        },
+                    )
+                }
+                if (!isProduction) {
+                    StreamTextButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("Stream_CallSettingsButton"),
+                        leadingIcon = rememberVectorPainter(Icons.Default.Settings),
+                        style = StreamButtonStyleDefaults.secondaryGhost,
+                        text = stringResource(id = R.string.call_settings),
+                        onClick = {
+                            showMenu = false
+                            onCallSettingsClick()
+                        },
+                    )
+                    StreamTextButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("Stream_ExportLogsButton"),
+                        leadingIcon = rememberVectorPainter(
+                            Icons.AutoMirrored.Default.DriveFileMove,
+                        ),
+                        style = StreamButtonStyleDefaults.secondaryGhost,
+                        text = stringResource(id = R.string.logs),
+                        onClick = {
+                            showMenu = false
+                            onLogsClick()
+                        },
+                    )
+                    StreamTextButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("Stream_SignOutButton"),
+                        leadingIcon = rememberVectorPainter(Icons.AutoMirrored.Filled.Logout),
+                        style = StreamButtonStyleDefaults.secondaryGhost,
+                        text = stringResource(id = R.string.sign_out),
+                        onClick = {
+                            showMenu = false
+                            onSignOutClick()
+                        },
+                    )
                 }
             }
         }
@@ -388,97 +405,81 @@ private fun CallJoinHeader(
 @Composable
 private fun CallJoinBody(
     modifier: Modifier,
-    prefilledCallId: String? = null,
-    openCamera: () -> Unit,
-    callJoinViewModel: CallJoinViewModel = hiltViewModel(),
+    user: User?,
+    prefilledCallId: String?,
     isNetworkAvailable: Boolean,
+    onJoinCall: (String) -> Unit,
+    onNewCall: () -> Unit,
+    onScanQrCode: () -> Unit,
 ) {
-    val user by if (LocalInspectionMode.current) {
-        remember { mutableStateOf(previewUsers[0]) }
-    } else {
-        callJoinViewModel.user.collectAsState(initial = null)
-    }
-
     if (!isNetworkAvailable) {
-        NoInternetUiResponsive()
-    } else {
-        if (user != null) {
-            CallActualContentResponsive(
-                modifier = modifier.fillMaxSize(),
-                onJoinCall = {
-                    callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall(callId = it))
-                },
-                onNewCall = {
-                    callJoinViewModel.handleUiEvent(CallJoinEvent.JoinCall())
-                },
-                gotoQR = {
-                    openCamera()
-                },
-                prefilledCallId = prefilledCallId,
-            )
-        }
+        NoInternetUi(modifier = modifier)
+    } else if (user != null) {
+        CallActualContentResponsive(
+            modifier = modifier,
+            prefilledCallId = prefilledCallId,
+            onJoinCall = onJoinCall,
+            onNewCall = onNewCall,
+            onScanQrCode = onScanQrCode,
+        )
     }
 }
 
 @Composable
 private fun CallActualContentResponsive(
     modifier: Modifier = Modifier,
+    prefilledCallId: String? = null,
     onJoinCall: (String) -> Unit,
     onNewCall: () -> Unit,
-    gotoQR: () -> Unit,
-    prefilledCallId: String? = null,
+    onScanQrCode: () -> Unit,
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     if (isLandscape) {
-        CallActualContentLandscape(modifier, onJoinCall, onNewCall, gotoQR, prefilledCallId)
+        CallActualContentLandscape(
+            modifier = modifier,
+            prefilledCallId = prefilledCallId,
+            onJoinCall = onJoinCall,
+            onNewCall = onNewCall,
+            onScanQrCode = onScanQrCode,
+        )
     } else {
-        CallActualContentPortrait(modifier, onJoinCall, onNewCall, gotoQR, prefilledCallId)
+        CallActualContentPortrait(
+            modifier = modifier,
+            prefilledCallId = prefilledCallId,
+            onJoinCall = onJoinCall,
+            onNewCall = onNewCall,
+            onScanQrCode = onScanQrCode,
+        )
     }
 }
 
 @Composable
 private fun CallActualContentPortrait(
     modifier: Modifier = Modifier,
+    prefilledCallId: String? = null,
     onJoinCall: (String) -> Unit,
     onNewCall: () -> Unit,
-    gotoQR: () -> Unit,
-    prefilledCallId: String? = null,
-) = Box(modifier = Modifier.background(VideoTheme.colors.backgroundCoreApp)) {
+    onScanQrCode: () -> Unit,
+) {
     Column(
         modifier = modifier
-            .padding(horizontal = 16.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 40.dp)
             .semantics { testTagsAsResourceId = true },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        StreamLogo(Modifier.size(102.dp))
-        Spacer(modifier = Modifier.height(24.dp))
-        AppName()
-        Spacer(modifier = Modifier.height(20.dp))
-        Description(text = stringResource(id = R.string.join_description))
-        Spacer(modifier = Modifier.height(24.dp))
-        JoinCallForm(prefilledCallId) {
-            onJoinCall(it)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        StreamTextButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("Stream_StartNewCallButton"),
-            text = stringResource(id = R.string.start_a_new_call),
-            leadingIcon = rememberVectorPainter(Icons.Default.VideoCall),
-            onClick = { onNewCall() },
+        StartCallIntro(
+            modifier = Modifier.padding(horizontal = 40.dp),
+            description = stringResource(id = R.string.join_description),
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        StreamTextButton(
-            style = StreamButtonStyleDefaults.secondaryGhost,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("Stream_ScanQrCodeButton"),
-            text = stringResource(id = R.string.scan_qr_code),
-            leadingIcon = rememberVectorPainter(Icons.Default.QrCodeScanner),
-            onClick = { gotoQR() },
+        Spacer(modifier = Modifier.height(40.dp))
+        StartCallForm(
+            prefilledCallId = prefilledCallId,
+            onJoinCall = onJoinCall,
+            onNewCall = onNewCall,
+            onScanQrCode = onScanQrCode,
         )
     }
 }
@@ -486,162 +487,170 @@ private fun CallActualContentPortrait(
 @Composable
 private fun CallActualContentLandscape(
     modifier: Modifier = Modifier,
+    prefilledCallId: String? = null,
     onJoinCall: (String) -> Unit,
     onNewCall: () -> Unit,
-    gotoQR: () -> Unit,
-    prefilledCallId: String? = null,
-) = Box(modifier = Modifier.background(VideoTheme.colors.backgroundCoreApp)) {
-    Row {
-        Column(
-            modifier = modifier
-                .padding(horizontal = 16.dp)
-                .weight(1f)
-                .semantics { testTagsAsResourceId = true },
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            StreamLogo(Modifier.size(72.dp))
-            Spacer(modifier = Modifier.height(8.dp))
-            AppName()
-            Description(text = stringResource(id = R.string.join_description))
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        Column(
+    onScanQrCode: () -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 24.dp)
+            .semantics { testTagsAsResourceId = true },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        StartCallIntro(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 16.dp)
-                .align(Alignment.CenterVertically),
+                .padding(horizontal = 24.dp),
+            description = stringResource(id = R.string.join_description),
+        )
+        StartCallForm(
+            modifier = Modifier.weight(1f),
+            prefilledCallId = prefilledCallId,
+            onJoinCall = onJoinCall,
+            onNewCall = onNewCall,
+            onScanQrCode = onScanQrCode,
+        )
+    }
+}
+
+/** The illustration, title and description shared by the online and the offline states. */
+@Composable
+private fun StartCallIntro(
+    modifier: Modifier = Modifier,
+    description: String,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+    ) {
+        Image(
+            modifier = Modifier.size(width = 234.dp, height = 160.dp),
+            painter = painterResource(id = R.drawable.start_call_illustration),
+            contentDescription = null,
+        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            JoinCallForm(prefilledCallId) {
-                onJoinCall(it)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.stream_video_calling),
+                style = VideoTheme.typography.headingLarge,
+                color = VideoTheme.colors.textPrimary,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = description,
+                style = VideoTheme.typography.bodyDefault,
+                color = VideoTheme.colors.textSecondary,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+/**
+ * The call id field with its join action, the "OR" separator, and the new call and QR code actions.
+ * Joining is disabled while the field is blank.
+ */
+@Composable
+private fun StartCallForm(
+    modifier: Modifier = Modifier,
+    prefilledCallId: String? = null,
+    onJoinCall: (String) -> Unit,
+    onNewCall: () -> Unit,
+    onScanQrCode: () -> Unit,
+) {
+    var callId by remember {
+        mutableStateOf(TextFieldValue(prefilledCallId?.takeIf { it.isNotEmpty() } ?: defaultCallId))
+    }
+    val canJoin = callId.text.isNotBlank()
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(32.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            StreamTextField(
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag("Stream_CallIdInputField"),
+                value = callId,
+                onValueChange = { callId = it },
+                placeholder = stringResource(id = R.string.join_call_call_id_hint),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
+                keyboardActions = KeyboardActions(
+                    onDone = { if (canJoin) onJoinCall(callId.text) },
+                ),
+            )
+            StreamTextButton(
+                modifier = Modifier.testTag("Stream_JoinCallButton"),
+                text = stringResource(id = R.string.join_call),
+                style = StreamButtonStyleDefaults.primaryGhost,
+                size = StreamButtonSize.Large,
+                enabled = canJoin,
+                onClick = { onJoinCall(callId.text) },
+            )
+        }
+
+        OrSeparator()
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             StreamTextButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("Stream_StartNewCallButton"),
                 text = stringResource(id = R.string.start_a_new_call),
-                leadingIcon = rememberVectorPainter(Icons.Default.VideoCall),
-                onClick = { onNewCall() },
+                size = StreamButtonSize.Large,
+                onClick = onNewCall,
             )
-            Spacer(modifier = Modifier.height(8.dp))
             StreamTextButton(
-                style = StreamButtonStyleDefaults.secondaryGhost,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("Stream_ScanQrCodeButton"),
                 text = stringResource(id = R.string.scan_qr_code),
-                leadingIcon = rememberVectorPainter(Icons.Default.QrCodeScanner),
-                onClick = { gotoQR() },
+                style = StreamButtonStyleDefaults.secondaryGhost,
+                size = StreamButtonSize.Large,
+                leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_qr_code_fill),
+                onClick = onScanQrCode,
             )
         }
     }
 }
 
 @Composable
-private fun StreamLogo(modifier: Modifier) {
-    Image(
-        modifier = modifier,
-        painter = painterResource(id = R.drawable.ic_stream_video_meeting_logo),
-        contentDescription = null,
-    )
-}
-
-@Composable
-private fun AppName(env: StreamEnvironment? = null) {
-    Text(
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center,
-        text = buildAnnotatedString {
-            append("Stream\n")
-            append(
-                AnnotatedString(
-                    "[Video Calling]\n",
-                    spanStyle = SpanStyle(VideoTheme.colors.accentSuccess),
-                ),
-            )
-            append(env?.displayName ?: "")
-        },
-        color = Color.White,
-        fontSize = 24.sp,
-    )
-}
-
-@Composable
-private fun Description(text: String) {
-    Text(
-        text = text,
-        style = VideoTheme.typography.bodyDefault,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.widthIn(0.dp, 320.dp),
-    )
-}
-
-@Composable
-private fun Label(text: String) {
-    Text(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 35.dp),
-        text = text,
-        color = Color(0xFF979797),
-        fontSize = 13.sp,
-    )
-}
-
-@Composable
-private fun JoinCallForm(
-    prefilledCallId: String? = null,
-    joinCall: (String) -> Unit,
-) {
-    var callId by remember {
-        mutableStateOf(
-            TextFieldValue(
-                if (prefilledCallId?.isNotEmpty() == true) {
-                    prefilledCallId
-                } else {
-                    defaultCallId
-                },
-            ),
-        )
-    }
+private fun OrSeparator() {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        StreamTextField(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .testTag("Stream_CallIdInputField"),
-            onValueChange = { callId = it },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Email,
-            ),
-            value = callId,
-            placeholder = stringResource(id = R.string.join_call_call_id_hint),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    joinCall(callId.text)
-                },
-            ),
+        SeparatorLine(modifier = Modifier.weight(1f))
+        Text(
+            text = stringResource(id = R.string.or),
+            style = VideoTheme.typography.metadataEmphasis,
+            color = VideoTheme.colors.textDisabled,
         )
-
-        StreamTextButton(
-            leadingIcon = rememberVectorPainter(Icons.AutoMirrored.Filled.Login),
-            style = StreamButtonStyleDefaults.primarySolid,
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .fillMaxHeight()
-                .testTag("Stream_JoinCallButton"),
-            onClick = {
-                joinCall(callId.text)
-            },
-            text = stringResource(id = R.string.join_call),
-        )
+        SeparatorLine(modifier = Modifier.weight(1f))
     }
+}
+
+@Composable
+private fun SeparatorLine(modifier: Modifier) {
+    Box(
+        modifier = modifier
+            .height(1.dp)
+            .background(VideoTheme.colors.borderCoreDefault),
+    )
 }
 
 @Composable
@@ -670,70 +679,33 @@ private fun SignOutDialog(
     }
 }
 
-class BelowElementPositionProvider(
-    private val anchorBounds: androidx.compose.ui.geometry.Rect,
-    private val screenPadding: Int = 8, // Padding from screen edges
-) : PopupPositionProvider {
-    override fun calculatePosition(
-        anchorBounds: IntRect,
-        windowSize: IntSize,
-        layoutDirection: LayoutDirection,
-        popupContentSize: IntSize,
-    ): IntOffset {
-        val x = anchorBounds.left.coerceIn(
-            screenPadding,
-            (windowSize.width - popupContentSize.width - screenPadding),
-        )
-
-        val y = (this.anchorBounds.bottom + screenPadding).coerceIn(
-            screenPadding.toFloat(),
-            (windowSize.height - popupContentSize.height - screenPadding).toFloat(),
-        ).toInt()
-
-        return IntOffset(x, y)
-    }
-}
-
 @Composable
-private fun NoInternetUiResponsive() {
+private fun NoInternetUi(modifier: Modifier = Modifier) {
     val selectedEnv by AppConfig.currentEnvironment.collectAsStateWithLifecycle()
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    if (isLandscape) {
-        NoInternetUiLandscape(selectedEnv)
-    } else {
-        NoInternetUiPortrait(selectedEnv)
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        StartCallIntro(
+            modifier = Modifier.padding(horizontal = 40.dp),
+            description = stringResource(id = R.string.you_are_offline),
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        EnvironmentLabel(selectedEnv)
     }
 }
 
 @Composable
-private fun NoInternetUiPortrait(selectedEnv: StreamEnvironment) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        StreamLogo(Modifier.size(102.dp))
-        Spacer(modifier = Modifier.height(25.dp))
-        AppName(selectedEnv)
-        Spacer(modifier = Modifier.height(25.dp))
-        Description(text = stringResource(id = R.string.you_are_offline))
-    }
-}
-
-@Composable
-private fun NoInternetUiLandscape(selectedEnv: StreamEnvironment) {
-    Column(
-        modifier = Modifier.fillMaxHeight(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        StreamLogo(Modifier.size(72.dp))
-        Spacer(modifier = Modifier.height(12.dp))
-        AppName(selectedEnv)
-        Spacer(modifier = Modifier.height(12.dp))
-        Description(text = stringResource(id = R.string.you_are_offline))
-    }
+private fun EnvironmentLabel(env: StreamEnvironment) {
+    Text(
+        text = env.displayName,
+        style = VideoTheme.typography.captionDefault,
+        color = VideoTheme.colors.textTertiary,
+        textAlign = TextAlign.Center,
+    )
 }
 
 @Preview(
@@ -746,7 +718,15 @@ private fun NoInternetUiLandscape(selectedEnv: StreamEnvironment) {
 private fun CallJoinScreenPortraitPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallActualContentPortrait(onJoinCall = {}, onNewCall = {}, gotoQR = {})
+        Column(modifier = Modifier.background(VideoTheme.colors.backgroundCoreApp)) {
+            CallJoinHeader(previewUsers[0], true, false, {}, {}, {}, {}, {}, {})
+            CallActualContentPortrait(
+                modifier = Modifier.weight(1f),
+                onJoinCall = {},
+                onNewCall = {},
+                onScanQrCode = {},
+            )
+        }
     }
 }
 
@@ -760,15 +740,20 @@ private fun CallJoinScreenPortraitPreview() {
 private fun CallJoinScreenLandscapePreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallActualContentLandscape(onJoinCall = {}, onNewCall = {}, gotoQR = {})
+        CallActualContentLandscape(
+            modifier = Modifier.background(VideoTheme.colors.backgroundCoreApp),
+            onJoinCall = {},
+            onNewCall = {},
+            onScanQrCode = {},
+        )
     }
 }
 
 @Preview
 @Composable
-private fun CallJoinScreenHeader() {
+private fun CallJoinScreenHeaderPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        CallJoinHeader(previewUsers[0], false, true, {}, {}, {}, {}, {})
+        CallJoinHeader(previewUsers[0], false, true, {}, {}, {}, {}, {}, {})
     }
 }

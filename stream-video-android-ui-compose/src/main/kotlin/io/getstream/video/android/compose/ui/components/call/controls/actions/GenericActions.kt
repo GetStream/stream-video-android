@@ -16,18 +16,22 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamErrorBadge
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 
 /**
@@ -69,6 +73,9 @@ public fun GenericAction(
  * @param contentDescription The accessibility description of the action, or null when a parent describes it.
  * @param enabled Whether the action accepts clicks.
  * @param progress Whether a progress indicator replaces the icon while the action is pending.
+ * @param isUnavailable Whether the device behind the action cannot be used, for example because its
+ * permission was denied. The button then renders the inactive icon on a disabled background with an
+ * error badge, but stays clickable so the click can re-request the permission.
  * @param onStyle The colors of the active state. See [StreamButtonStyleDefaults].
  * @param offStyle The colors of the inactive state. See [StreamButtonStyleDefaults].
  * @param size The visual size of the button.
@@ -82,28 +89,45 @@ public fun ToggleAction(
     contentDescription: String? = null,
     enabled: Boolean = true,
     progress: Boolean = false,
+    isUnavailable: Boolean = false,
     onStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
     offStyle: StreamButtonStyle = StreamButtonStyleDefaults.destructiveSolid,
     size: StreamButtonSize = StreamButtonSize.Medium,
     onAction: () -> Unit,
-): Unit = StreamButton(
-    onClick = onAction,
-    modifier = modifier,
-    enabled = enabled,
-    style = if (isActionActive) onStyle else offStyle,
-    size = size,
 ) {
-    if (progress) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(size.iconSize),
-            color = LocalContentColor.current,
-            strokeWidth = StreamTokens.strokeW200,
+    val showActive = isActionActive && !isUnavailable
+    val style = when {
+        isUnavailable -> offStyle.copy(
+            containerColor = VideoTheme.colors.backgroundUtilityDisabled,
+            contentColor = VideoTheme.colors.textDisabled,
+            borderColor = null,
         )
-    } else {
-        Icon(
-            painter = if (isActionActive) iconOnOff.first else iconOnOff.second,
-            contentDescription = contentDescription,
-            modifier = Modifier.size(size.iconSize),
-        )
+        isActionActive -> onStyle
+        else -> offStyle
+    }
+    Box(modifier = modifier) {
+        StreamButton(
+            onClick = onAction,
+            enabled = enabled,
+            style = style,
+            size = size,
+        ) {
+            if (progress) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(size.iconSize),
+                    color = LocalContentColor.current,
+                    strokeWidth = StreamTokens.strokeW200,
+                )
+            } else {
+                Icon(
+                    painter = if (showActive) iconOnOff.first else iconOnOff.second,
+                    contentDescription = contentDescription,
+                    modifier = Modifier.size(size.iconSize),
+                )
+            }
+        }
+        if (isUnavailable) {
+            StreamErrorBadge(modifier = Modifier.align(Alignment.TopEnd))
+        }
     }
 }

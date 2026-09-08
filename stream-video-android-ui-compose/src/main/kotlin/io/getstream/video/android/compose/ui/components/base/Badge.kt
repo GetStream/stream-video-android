@@ -17,17 +17,22 @@
 package io.getstream.video.android.compose.ui.components.base
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 
@@ -51,6 +56,30 @@ public fun StreamBadgeBox(
         if (text != null || showWithoutValue) {
             Badge(text = text, modifier = Modifier.align(Alignment.TopEnd))
         }
+    }
+}
+
+/**
+ * A small error badge overlaid on a control whose device is unavailable, for example a microphone
+ * without the recording permission. Sized to sit on the corner of a 48dp hit target.
+ *
+ * @param modifier The modifier applied to the badge.
+ */
+@Composable
+internal fun StreamErrorBadge(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(StreamTokens.size20)
+            .background(VideoTheme.colors.badgeBgError, CircleShape)
+            .border(StreamTokens.strokeW200, VideoTheme.colors.badgeBorder, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.stream_design_ic_exclamation_mark_fill),
+            contentDescription = null,
+            modifier = Modifier.size(StreamTokens.iconSizeSm),
+            tint = VideoTheme.colors.badgeTextOnAccent,
+        )
     }
 }
 
