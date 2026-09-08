@@ -16,12 +16,14 @@
 
 package io.getstream.video.android.compose
 
+import androidx.compose.ui.graphics.Color
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.renderer.CallParticipantRemotePreview
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContentPreview
+import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabelPinnedAndPausedPreview
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideoPreview
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.ParticipantsColumnPreview
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatarsDeprecatedOverloadPreview
@@ -111,6 +113,13 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     fun `call participant remote in dark mode`() {
         snapshot(isInDarkMode = true) {
             CallParticipantRemotePreview()
+        }
+    }
+
+    @Test
+    fun `participant label with pin and pause`() {
+        snapshotWithDarkMode(backgroundColor = Color.Gray) {
+            ParticipantLabelPinnedAndPausedPreview()
         }
     }
 

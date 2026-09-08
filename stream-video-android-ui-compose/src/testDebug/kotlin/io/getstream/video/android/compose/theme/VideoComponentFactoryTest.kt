@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.theme
 
+import androidx.compose.ui.graphics.Color
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
@@ -61,6 +62,13 @@ internal class VideoComponentFactoryTest : PaparazziComposeTest {
     fun `factory call lobby controls`() {
         snapshotWithDarkMode {
             VideoComponentFactoryLobbyControlsPreview()
+        }
+    }
+
+    @Test
+    fun `factory call lobby participant label`() {
+        snapshotWithDarkMode(backgroundColor = Color.Gray) {
+            VideoComponentFactoryLobbyParticipantLabelPreview()
         }
     }
 

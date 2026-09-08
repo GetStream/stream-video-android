@@ -31,6 +31,7 @@ import io.getstream.video.android.core.model.ScreenSharingSession
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipantsList
+import io.getstream.video.android.mock.previewUsers
 
 /**
  * Previews for the [VideoComponentFactory] default implementations that are not reached through
@@ -87,8 +88,34 @@ internal fun VideoComponentFactoryLobbyControlsPreview() {
             call = previewCall,
             isCameraEnabled = true,
             isMicrophoneEnabled = false,
+            showHifiAudioToggle = true,
         ),
     )
+}
+
+@Preview
+@Composable
+private fun VideoComponentFactoryLobbyParticipantLabelRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        VideoComponentFactoryLobbyParticipantLabelPreview()
+    }
+}
+
+/** The lobby label from the factory without a call, so the sound indicator has no level to read. */
+@Composable
+internal fun VideoComponentFactoryLobbyParticipantLabelPreview() {
+    Box(modifier = Modifier.size(width = 240.dp, height = 64.dp)) {
+        with(VideoTheme.componentFactory) {
+            CallLobbyParticipantLabelContent(
+                params = CallLobbyParticipantLabelContentParams(
+                    user = previewUsers[0],
+                    isMicrophoneEnabled = true,
+                    isCameraEnabled = false,
+                ),
+            )
+        }
+    }
 }
 
 @Preview

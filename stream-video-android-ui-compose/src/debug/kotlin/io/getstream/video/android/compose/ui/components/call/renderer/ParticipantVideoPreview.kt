@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomStart
@@ -25,6 +26,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
@@ -115,4 +117,27 @@ internal fun ParticipantVideoPreview() {
         call = previewCall,
         participant = previewParticipant,
     ) {}
+}
+
+@Preview
+@Composable
+private fun ParticipantLabelPinnedAndPausedRootPreview() {
+    VideoTheme {
+        ParticipantLabelPinnedAndPausedPreview()
+    }
+}
+
+/** A label carrying every indicator: pinned, paused video, camera off and the sound indicator. */
+@Composable
+internal fun ParticipantLabelPinnedAndPausedPreview() {
+    Box(modifier = Modifier.size(width = 320.dp, height = 64.dp)) {
+        ParticipantLabel(
+            nameLabel = "Pinned and paused",
+            isPinned = true,
+            hasAudio = true,
+            isSpeaking = false,
+            isPaused = true,
+            hasVideo = false,
+        )
+    }
 }

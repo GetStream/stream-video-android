@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.ui
 
+import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -138,8 +139,9 @@ enum class AppScreens(val route: String) {
     }
 
     /** The lobby route for [cid]; [isNewCall] selects the "start call" wording over "join call". */
-    fun lobbyRoute(cid: String, isNewCall: Boolean): String =
-        CallLobby.route.replace("{cid}", cid).replace("{$NEW_CALL_ARG}", isNewCall.toString())
+    fun lobbyRoute(cid: String, isNewCall: Boolean): String = CallLobby.route
+        .replace("{cid}", Uri.encode(cid))
+        .replace("{$NEW_CALL_ARG}", isNewCall.toString())
 }
 
 /** Lobby route argument: whether the call was just created from the Start Call screen. */

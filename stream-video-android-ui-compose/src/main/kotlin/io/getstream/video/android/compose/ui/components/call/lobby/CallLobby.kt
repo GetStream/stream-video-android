@@ -181,11 +181,13 @@ public fun CallLobby(
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(StreamTokens.spacing2xl),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(StreamTokens.spacingSm)) {
-            Box(
-                modifier = videoPreviewModifier.align(Alignment.CenterHorizontally),
-            ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(StreamTokens.spacingSm),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(modifier = videoPreviewModifier) {
                 if (isCameraEnabled) {
                     onRenderedContent.invoke(video)
                 } else {
@@ -195,7 +197,7 @@ public fun CallLobby(
                 participantLabelContent()
             }
 
-            lobbyControlsContent.invoke(Modifier.align(Alignment.CenterHorizontally), call)
+            lobbyControlsContent.invoke(Modifier, call)
         }
 
         if (onJoinCall != null) {
@@ -343,26 +345,33 @@ private fun DefaultLobbyControlsSlot(
     permissions: VideoPermissionsState,
     onCallAction: (CallAction) -> Unit,
 ) {
-    val isCameraUnavailable = permissions.isCameraPermissionDenied
-    val isMicrophoneUnavailable = permissions.isMicrophonePermissionDenied
     VideoTheme.componentFactory.CallLobbyControlsContent(
         params = CallLobbyControlsContentParams(
             call = call,
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
             modifier = modifier,
-            onCallAction = { action ->
-                val needsPermission = (action is ToggleCamera && isCameraUnavailable) ||
-                    (action is ToggleMicrophone && isMicrophoneUnavailable)
-                if (needsPermission) {
-                    permissions.launchPermissionRequest()
-                }
-                onCallAction(action)
-            },
-            isCameraUnavailable = isCameraUnavailable,
-            isMicrophoneUnavailable = isMicrophoneUnavailable,
+            onCallAction = lobbyControlsCallActionHandler(permissions, onCallAction),
+            isCameraUnavailable = permissions.isCameraPermissionDenied,
+            isMicrophoneUnavailable = permissions.isMicrophonePermissionDenied,
         ),
     )
+}
+
+/**
+ * Wraps [onCallAction] so that toggling a device whose permission was denied also asks for the
+ * permission again. The toggle itself is still forwarded, so the device turns on once granted.
+ */
+internal fun lobbyControlsCallActionHandler(
+    permissions: VideoPermissionsState,
+    onCallAction: (CallAction) -> Unit,
+): (CallAction) -> Unit = { action ->
+    val needsPermission = (action is ToggleCamera && permissions.isCameraPermissionDenied) ||
+        (action is ToggleMicrophone && permissions.isMicrophonePermissionDenied)
+    if (needsPermission) {
+        permissions.launchPermissionRequest()
+    }
+    onCallAction(action)
 }
 
 @Composable

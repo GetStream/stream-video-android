@@ -88,6 +88,13 @@ internal class ControlActionsTest : PaparazziComposeTest {
     }
 
     @Test
+    fun `toggle action unavailable`() {
+        snapshotWithDarkMode {
+            ToggleActionUnavailablePreview()
+        }
+    }
+
+    @Test
     fun `settings action`() {
         snapshotWithDarkModeRow {
             ToggleSettingsActionPreview()
