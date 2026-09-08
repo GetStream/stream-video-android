@@ -24,21 +24,23 @@ import io.getstream.video.android.core.model.NetworkQuality
 
 @Preview
 @Composable
-private fun ConnectionQualityIndicatorPreview() {
+private fun ConnectionQualityIndicatorRootPreview() {
     VideoTheme {
-        Row {
-            NetworkQualityIndicator(
-                networkQuality = NetworkQuality.UnSpecified(),
-            )
-            NetworkQualityIndicator(
-                networkQuality = NetworkQuality.Poor(),
-            )
-            NetworkQualityIndicator(
-                networkQuality = NetworkQuality.Good(),
-            )
-            NetworkQualityIndicator(
-                networkQuality = NetworkQuality.Excellent(),
-            )
-        }
+        ConnectionQualityIndicatorPreview()
+    }
+}
+
+@Composable
+internal fun ConnectionQualityIndicatorPreview() {
+    Row {
+        NetworkQualityIndicator(
+            networkQuality = NetworkQuality.Poor(),
+        )
+        NetworkQualityIndicator(
+            networkQuality = NetworkQuality.Good(),
+        )
+        NetworkQualityIndicator(
+            networkQuality = NetworkQuality.Excellent(),
+        )
     }
 }

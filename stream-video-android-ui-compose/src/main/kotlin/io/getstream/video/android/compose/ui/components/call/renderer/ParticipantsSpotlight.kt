@@ -53,12 +53,7 @@ public fun ParticipantsSpotlight(
         participant: ParticipantState,
         style: VideoRendererStyle,
     ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        ParticipantVideo(
-            modifier = videoModifier,
-            call = videoCall,
-            participant = videoParticipant,
-            style = videoStyle,
-        )
+        DefaultParticipantVideoRenderer(videoModifier, videoCall, videoParticipant, videoStyle)
     },
 ) {
     val configuration = LocalConfiguration.current

@@ -22,8 +22,13 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-private fun DeclineCallActionPreview() {
+private fun DeclineCallActionRootPreview() {
     VideoTheme {
-        DeclineCallAction(onCallAction = {})
+        DeclineCallActionPreview()
     }
+}
+
+@Composable
+internal fun DeclineCallActionPreview() {
+    DeclineCallAction(onCallAction = {})
 }

@@ -33,6 +33,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  *
  * The shared work runs in [scope] (recommend a `CoroutineScope(SupervisorJob() + Dispatchers.IO)`),
  * so cancelling one awaiting caller does not cancel the shared execution.
+ *
+ * For the variant that cancels the shared job when the **last** waiter is cancelled, see
+ * [StreamRefCountedSingleFlightProcessor].
  */
 internal class StreamSingleFlightProcessorImpl(
     private val scope: CoroutineScope,

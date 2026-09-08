@@ -36,33 +36,38 @@ import io.getstream.video.android.ui.common.R
     device = "spec:width=411dp,height=891dp,dpi=420",
 )
 @Composable
-private fun LivestreamBackstagePortraitPreview() {
+private fun LivestreamBackstagePortraitPreviewRoot() {
     VideoTheme {
-        Box {
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = stringResource(
-                        id = R.string.stream_video_livestreaming_on_backstage,
-                    ),
-                    fontSize = 14.sp,
-                    color = VideoTheme.colors.basePrimary,
-                )
-                Text(
-                    modifier = Modifier,
-                    text = "2:00",
-                    fontSize = 16.sp,
-                    color = VideoTheme.colors.basePrimary,
-                )
-                Text(
-                    modifier = Modifier,
-                    text = "2 participants have joined the call",
-                    fontSize = 12.sp,
-                    color = VideoTheme.colors.baseSecondary,
-                )
-            }
+        LivestreamBackstagePortraitPreview()
+    }
+}
+
+@Composable
+internal fun LivestreamBackstagePortraitPreview() {
+    Box {
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(
+                    id = R.string.stream_video_livestreaming_on_backstage,
+                ),
+                fontSize = 14.sp,
+                color = VideoTheme.colors.basePrimary,
+            )
+            Text(
+                modifier = Modifier,
+                text = "2:00",
+                fontSize = 16.sp,
+                color = VideoTheme.colors.basePrimary,
+            )
+            Text(
+                modifier = Modifier,
+                text = "2 participants have joined the call",
+                fontSize = 12.sp,
+                color = VideoTheme.colors.baseSecondary,
+            )
         }
     }
 }

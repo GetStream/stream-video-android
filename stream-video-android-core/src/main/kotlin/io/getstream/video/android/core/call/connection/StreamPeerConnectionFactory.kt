@@ -29,6 +29,7 @@ import io.getstream.video.android.core.call.connection.coding.SelectiveVideoDeco
 import io.getstream.video.android.core.call.utils.addAndConvertBuffers
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.defaultAudioUsage
+import io.getstream.video.android.core.e2ee.E2EEManager
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
@@ -604,6 +605,8 @@ public class StreamPeerConnectionFactory(
         rejoin: () -> Unit,
         fastReconnect: () -> Unit,
         sfuConnectionModule: SfuConnectionModule,
+        e2eeManager: E2EEManager? = null,
+        userIdForSession: (String) -> String? = { null },
     ): Subscriber {
         val peerConnection = Subscriber(
             sessionId = sessionId,
@@ -615,6 +618,8 @@ public class StreamPeerConnectionFactory(
             fastReconnect = fastReconnect,
             sfuConnectionModule = sfuConnectionModule,
             onIceCandidateRequest = onIceCandidateRequest,
+            e2eeManager = e2eeManager,
+            userIdForSession = userIdForSession,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,
@@ -651,6 +656,7 @@ public class StreamPeerConnectionFactory(
         rejoin: () -> Unit = {},
         fastReconnect: () -> Unit = {},
         isHifiAudioEnabled: Boolean = false,
+        e2eeManager: E2EEManager? = null,
     ): Publisher {
         val peerConnection = Publisher(
             sessionId = sessionId,
@@ -669,6 +675,7 @@ public class StreamPeerConnectionFactory(
             rejoin = rejoin,
             fastReconnect = fastReconnect,
             isHifiAudioEnabled = isHifiAudioEnabled,
+            e2eeManager = e2eeManager,
         )
         val connection = makePeerConnectionInternal(
             configuration = configuration,

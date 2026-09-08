@@ -59,6 +59,7 @@ import io.getstream.video.android.core.call.utils.SessionFatalException
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishOptionsEvent
@@ -527,7 +528,8 @@ public class RtcSession internal constructor(
      * Creates and publishes an audio track for transmitting audio.
      * This is used both when microphone is enabled and when screen sharing starts with muted microphone.
      */
-    private suspend fun createAndPublishAudioTrack() {
+    @VisibleForTesting
+    internal suspend fun createAndPublishAudioTrack() {
         val canUserSendAudio = call.state.ownCapabilities.value.contains(
             OwnCapability.SendAudio,
         )
@@ -535,20 +537,33 @@ public class RtcSession internal constructor(
             return
         }
 
-        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
         val streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO)
-        val track = publisher.value?.publishStream(
+        val audio = publisher.value?.publishStream(
             streamId,
             TrackType.TRACK_TYPE_AUDIO,
-        )
+        ).asPublishedOrNull<org.webrtc.AudioTrack>(TrackType.TRACK_TYPE_AUDIO) ?: return
 
+        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_AUDIO)
         setLocalTrack(
             TrackType.TRACK_TYPE_AUDIO,
             AudioTrack(
                 streamId = streamId,
-                audio = track as org.webrtc.AudioTrack,
+                audio = audio,
             ),
         )
+    }
+
+    private inline fun <reified T : MediaStreamTrack> MediaStreamTrack?.asPublishedOrNull(
+        trackType: TrackType,
+    ): T? {
+        val typed = this as? T
+        if (typed == null) {
+            logger.w {
+                "[trackPublishing] Skipping $trackType: no track from publisher " +
+                    "(publisher missing, no publish options, or publish failed)"
+            }
+        }
+        return typed
     }
 
     /**
@@ -638,6 +653,38 @@ public class RtcSession internal constructor(
      */
     internal fun isSDKInitialized() = StreamVideo.isInstalled
 
+    /**
+     * Records whether the app attached an encryption manager to this call.
+     *
+     * [Call.setE2EEManager] has to run before [join], so no session and therefore no tracer exists
+     * at the moment the app calls it. Session creation is the first point where that choice can
+     * reach the stats pipeline, and it is also the point that acts on it: the publisher and the
+     * subscriber capture the manager as they are built, just below.
+     *
+     * Only the setup is traced, not the encryption events native reports afterwards: those arrive
+     * per frame on every client, which is far more volume than call stats should carry. Apps observe
+     * them through [StreamEncryptionManager.setEventListener] instead.
+     */
+    private fun traceE2EEConfiguration() {
+        val manager = call.e2eeManager
+        if (manager == null) {
+            sfuTracer.trace(PeerConnectionTraceKey.E2EE_SET_MANAGER.value, "none")
+            return
+        }
+
+        val algorithm = (manager as? StreamEncryptionManager)?.let {
+            // Reads native state, which an app-owned manager may already have disposed.
+            safeCallWithDefault(null) { it.algorithm.name }
+        }
+        sfuTracer.trace(
+            PeerConnectionTraceKey.E2EE_SET_MANAGER.value,
+            buildString {
+                append("manager=${manager.javaClass.simpleName}")
+                algorithm?.let { append(" algorithm=$it") }
+            },
+        )
+    }
+
     init {
         if (!isSDKInitialized()) {
             throw IllegalArgumentException(
@@ -645,6 +692,8 @@ public class RtcSession internal constructor(
             )
         }
         logger.i { "<init> #sfu; #track; no args" }
+
+        traceE2EEConfiguration()
 
         // step 1 setup the peer connections
         // publisher = createPublisher()
@@ -824,45 +873,25 @@ public class RtcSession internal constructor(
         }
     }
 
+    /** Applies [iceHealthTransition] to the current state. Internal for direct testing. */
+    internal fun evaluateIceHealth() {
+        val pubIce = publisher.value?.iceState?.value
+        val subIce = subscriber.value?.iceState?.value
+        val next = iceHealthTransition(
+            connection = call.state.connection.value,
+            sfuSocketConnected = _sfuSfuSocketState.value is SfuSocketState.Connected,
+            publisherIce = pubIce,
+            subscriberIce = subIce,
+        )
+        if (next != null) {
+            logger.i { "[iceMonitor] pub=$pubIce, sub=$subIce — marking $next" }
+            call.state._connection.value = next
+        }
+    }
+
     private fun startIceMonitoring() {
         if (iceMonitoringJob?.isActive == true) return
         iceMonitoringJob = coroutineScope.launch {
-            val badIceStates = setOf(
-                PeerConnection.IceConnectionState.DISCONNECTED,
-                PeerConnection.IceConnectionState.FAILED,
-            )
-            val goodIceStates = setOf(
-                PeerConnection.IceConnectionState.CONNECTED,
-                PeerConnection.IceConnectionState.COMPLETED,
-            )
-
-            fun evaluateIceHealth() {
-                val conn = call.state.connection.value
-                val pubIce = publisher.value?.iceState?.value
-                val subIce = subscriber.value?.iceState?.value
-
-                val pubBad = pubIce != null && pubIce in badIceStates
-                val subBad = subIce != null && subIce in badIceStates
-
-                if ((pubBad || subBad) && conn is RealtimeConnection.Connected) {
-                    logger.w {
-                        "[iceMonitor] ICE degraded (pub=$pubIce, sub=$subIce) — marking Reconnecting"
-                    }
-                    call.state._connection.value = RealtimeConnection.Reconnecting
-                } else if (conn is RealtimeConnection.Reconnecting &&
-                    _sfuSfuSocketState.value is SfuSocketState.Connected
-                ) {
-                    val pubOk = pubIce == null || pubIce in goodIceStates
-                    val subOk = subIce == null || subIce in goodIceStates
-                    if (pubOk && subOk) {
-                        logger.i {
-                            "[iceMonitor] ICE recovered (pub=$pubIce, sub=$subIce) — marking Connected"
-                        }
-                        call.state._connection.value = RealtimeConnection.Connected
-                    }
-                }
-            }
-
             launch {
                 publisher.collect { pub ->
                     pub?.iceState?.collect { evaluateIceHealth() }
@@ -872,6 +901,12 @@ public class RtcSession internal constructor(
                 subscriber.collect { sub ->
                     sub?.iceState?.collect { evaluateIceHealth() }
                 }
+            }
+            // The evaluation is edge-triggered by ICE changes, but after a reconnect the ICE
+            // states can settle before the SFU socket reports Connected. Re-evaluate on socket
+            // state changes too, so recovery does not depend on a later ICE transition.
+            launch {
+                _sfuSfuSocketState.collect { evaluateIceHealth() }
             }
         }
     }
@@ -1160,20 +1195,21 @@ public class RtcSession internal constructor(
                         logger.d { "Camera resolution: $resolution" }
                     }
                     if (canUserSendVideo) {
-                        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
                         val streamId = buildTrackId(TrackType.TRACK_TYPE_VIDEO)
 
-                        val track = publisher.value?.publishStream(
+                        val video = publisher.value?.publishStream(
                             streamId,
                             TrackType.TRACK_TYPE_VIDEO,
                             call.mediaManager.camera.resolution.value,
-                        )
+                        ).asPublishedOrNull<org.webrtc.VideoTrack>(TrackType.TRACK_TYPE_VIDEO)
+                            ?: return@collectLatest
 
+                        setMuteState(isEnabled = true, TrackType.TRACK_TYPE_VIDEO)
                         setLocalTrack(
                             TrackType.TRACK_TYPE_VIDEO,
                             VideoTrack(
                                 streamId = streamId,
-                                video = track as org.webrtc.VideoTrack,
+                                video = video,
                             ),
                         )
                     } else {
@@ -1207,18 +1243,20 @@ public class RtcSession internal constructor(
 
                 if (it == DeviceStatus.Enabled) {
                     if (canUserShareScreen) {
-                        setMuteState(true, TrackType.TRACK_TYPE_SCREEN_SHARE)
                         val streamId = buildTrackId(TrackType.TRACK_TYPE_SCREEN_SHARE)
-                        val track = publisher.value?.publishStream(
+                        val video = publisher.value?.publishStream(
                             streamId,
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
-                        )
+                        ).asPublishedOrNull<org.webrtc.VideoTrack>(
+                            TrackType.TRACK_TYPE_SCREEN_SHARE,
+                        ) ?: return@collectLatest
 
+                        setMuteState(true, TrackType.TRACK_TYPE_SCREEN_SHARE)
                         setLocalTrack(
                             TrackType.TRACK_TYPE_SCREEN_SHARE,
                             VideoTrack(
                                 streamId = streamId,
-                                video = track as org.webrtc.VideoTrack,
+                                video = video,
                             ),
                         )
                     }
@@ -1431,6 +1469,8 @@ public class RtcSession internal constructor(
                 // Empty, handled differently
             },
             onIceCandidateRequest = ::sendIceCandidate,
+            e2eeManager = call.e2eeManager,
+            userIdForSession = { call.state.getParticipantBySessionId(it)?.userId?.value },
         )
         return peerConnection
     }
@@ -1525,6 +1565,7 @@ public class RtcSession internal constructor(
                 // Empty on purpose
             },
             isHifiAudioEnabled = call.state.settings.value?.audio?.hifiAudioEnabled ?: false,
+            e2eeManager = call.e2eeManager,
         )
     }
 
@@ -2232,7 +2273,49 @@ public class RtcSession internal constructor(
     private fun connectInternalSafetyTimeoutMs(): Long =
         clientImpl.connectionTimeoutInMs * 2 + CONNECT_INTERNAL_SAFETY_GRACE_MS
 
-    private companion object {
+    internal companion object {
+        private val badIceStates = setOf(
+            PeerConnection.IceConnectionState.DISCONNECTED,
+            PeerConnection.IceConnectionState.FAILED,
+        )
+
+        /**
+         * Decides the ICE health transition for the realtime connection, or null for no change.
+         *
+         * Degrades a Connected call when either peer connection reports a bad ICE state.
+         * Recovers a Reconnecting call once the SFU socket is connected and no side is bad.
+         * NEW and CHECKING count as healthy for the recovery: a peer connection with nothing
+         * to negotiate stays NEW forever (e.g. the subscriber right after a reconnect with no
+         * inbound tracks), so requiring an established state on both sides deadlocks the
+         * recovery and the UI shows "Reconnecting" indefinitely. If a side later fails, the
+         * degraded branch marks Reconnecting again.
+         */
+        internal fun iceHealthTransition(
+            connection: RealtimeConnection,
+            sfuSocketConnected: Boolean,
+            publisherIce: PeerConnection.IceConnectionState?,
+            subscriberIce: PeerConnection.IceConnectionState?,
+        ): RealtimeConnection? {
+            val pubBad = publisherIce != null && publisherIce in badIceStates
+            val subBad = subscriberIce != null && subscriberIce in badIceStates
+            // CLOSED must also block a recovery: a closed peer connection never emits another
+            // ICE event, so recovering past it would lock in a wrong Connected state. It is
+            // deliberately not a degrade trigger, because peer connections close during
+            // legitimate teardowns and the closing flow owns the connection state there.
+            val pubBlocked = pubBad || publisherIce == PeerConnection.IceConnectionState.CLOSED
+            val subBlocked = subBad || subscriberIce == PeerConnection.IceConnectionState.CLOSED
+            return when {
+                (pubBad || subBad) && connection is RealtimeConnection.Connected ->
+                    RealtimeConnection.Reconnecting
+
+                connection is RealtimeConnection.Reconnecting && sfuSocketConnected &&
+                    !pubBlocked && !subBlocked ->
+                    RealtimeConnection.Connected
+
+                else -> null
+            }
+        }
+
         private const val CONNECT_INTERNAL_SAFETY_GRACE_MS = 1_000L
     }
 }

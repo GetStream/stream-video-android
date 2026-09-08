@@ -24,15 +24,20 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-public fun ClosedCaptionsToggleActionPreview() {
+private fun ClosedCaptionsToggleActionRootPreview() {
     VideoTheme {
-        Column {
-            Row {
-                ClosedCaptionsToggleAction(active = false) {
-                }
+        ClosedCaptionsToggleActionPreview()
+    }
+}
 
-                ClosedCaptionsToggleAction(active = true) {
-                }
+@Composable
+internal fun ClosedCaptionsToggleActionPreview() {
+    Column {
+        Row {
+            ClosedCaptionsToggleAction(active = false) {
+            }
+
+            ClosedCaptionsToggleAction(active = true) {
             }
         }
     }

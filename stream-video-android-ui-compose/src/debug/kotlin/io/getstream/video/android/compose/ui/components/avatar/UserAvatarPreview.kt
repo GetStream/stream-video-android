@@ -26,24 +26,25 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.mock.StreamPreviewDataUtils
-import io.getstream.video.android.mock.previewParticipantsList
-import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.mock.previewParticipant
 
 @Preview
 @Composable
-private fun UserAvatarPreview() {
+private fun UserAvatarRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        val participant = previewParticipantsList[0]
-        val userImage by participant.image.collectAsStateWithLifecycle()
-        val userName by participant.userNameOrId.collectAsStateWithLifecycle()
-
-        UserAvatar(
-            modifier = Modifier.size(82.dp),
-            userImage = userImage,
-            userName = userName,
-            previewModePlaceholder = R.drawable.stream_video_call_sample,
-            isShowingOnlineIndicator = true,
-        )
+        UserAvatarPreview()
     }
+}
+
+@Composable
+internal fun UserAvatarPreview() {
+    val name by previewParticipant.name.collectAsStateWithLifecycle()
+    val image by previewParticipant.image.collectAsStateWithLifecycle()
+    UserAvatar(
+        modifier = Modifier.size(82.dp),
+        userImage = image,
+        userName = name,
+        isShowingOnlineIndicator = true,
+    )
 }

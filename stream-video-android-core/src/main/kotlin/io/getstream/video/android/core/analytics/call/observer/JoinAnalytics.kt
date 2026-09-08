@@ -32,6 +32,9 @@ internal class JoinAnalytics(
 
     /**
      * Records the invocation of the public `Call.join()` API.
+     *
+     * Each invocation mints a new [JoinTelemetryState.joinStageAttemptId], including
+     * coalesced and already-joined calls.
      */
     fun onJoinFunctionStart() {
         val stageAttemptId = UUID.randomUUID().toString()

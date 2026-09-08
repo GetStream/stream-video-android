@@ -23,7 +23,7 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-private fun SoundIndicatorPreview() {
+private fun MicrophoneIndicatorPreview() {
     VideoTheme {
         Row {
             MicrophoneIndicator(isMicrophoneEnabled = true)

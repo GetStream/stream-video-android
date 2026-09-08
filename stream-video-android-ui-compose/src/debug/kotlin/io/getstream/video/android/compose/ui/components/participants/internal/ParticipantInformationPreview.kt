@@ -54,13 +54,17 @@ private fun ParticipantInformationThreeUsersPreview() {
 
 @Preview("More than 3 users")
 @Composable
-private fun ParticipantInformationPreview() {
+private fun ParticipantInformationRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        ParticipantInformation(
-            isVideoType = true,
-            callStatus = CallStatus.Incoming,
-            members = previewMemberListState,
-        )
+        ParticipantInformationPreview()
     }
+}
+
+@Composable
+internal fun ParticipantInformationPreview() {
+    ParticipantInformation(
+        callStatus = CallStatus.Incoming,
+        members = previewMemberListState,
+    )
 }

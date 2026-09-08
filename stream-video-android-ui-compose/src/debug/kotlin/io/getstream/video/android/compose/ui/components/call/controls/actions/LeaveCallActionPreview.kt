@@ -23,13 +23,18 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-public fun LeaveCalLActionPreview() {
+private fun LeaveCallActionRootPreview() {
     VideoTheme {
-        Row {
-            LeaveCallAction(enabled = false) {
-            }
-            LeaveCallAction {
-            }
+        LeaveCallActionPreview()
+    }
+}
+
+@Composable
+internal fun LeaveCallActionPreview() {
+    Row {
+        LeaveCallAction(enabled = false) {
+        }
+        LeaveCallAction {
         }
     }
 }

@@ -76,6 +76,8 @@ import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
+import io.getstream.video.android.core.e2ee.E2EEManager
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -87,6 +89,8 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomCal
 import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
+import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -100,6 +104,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
@@ -291,6 +297,7 @@ public class Call(
         callRegistry = callRegistry,
         callAnalytics = callAnalytics,
         sessionManager = sessionManager,
+        e2eeRequested = { e2eeManager != null },
     )
 
     /**
@@ -496,8 +503,8 @@ public class Call(
     private var desiredNoiseCancellationEnabled: Boolean = false
 
     /**
-     * Set when a signal had nowhere to go because no session was installed yet, so the state can
-     * be sent once one is.
+     * Set when a signal had nowhere to go because the SFU has not accepted this session yet, so
+     * the state can be sent once [JoinCallResponseEvent] arrives.
      */
     @Volatile
     private var noiseCancellationSignalPending: Boolean = false
@@ -549,6 +556,17 @@ public class Call(
         startsAt: OffsetDateTime? = null,
     ): Result<UpdateCallResponse> = apiClient.update(custom, settingsOverride, startsAt)
 
+    /**
+     * Joins the call. Concurrent callers share one in-flight attempt.
+     *
+     * Cancelling this coroutine does not abort that attempt — only [leave] does.
+     *
+     * Join flags (`create`, `ring`, and the rest) come from the caller that created the
+     * in-flight attempt. [CallJoinInterceptor] is first-non-cancelled-wins: the first
+     * waiter whose coroutine is not cancelled supplies it. A later `join(interceptor)`
+     * is used only if every earlier waiter has been cancelled. `join(null)` does not
+     * erase an earlier interceptor.
+     */
     suspend fun join(
         create: Boolean = false,
         createOptions: CreateCallOptions? = null,
@@ -577,6 +595,83 @@ public class Call(
         callJoinInterceptor,
     )
 
+    // region End-to-end encryption
+
+    @Volatile
+    private var _e2eeManager: E2EEManager? = null
+
+    /** Read by [RtcSession] when it builds the publisher and the subscriber. */
+    internal val e2eeManager: E2EEManager? get() = _e2eeManager
+
+    /**
+     * Attaches an end-to-end encryption manager, so that media published from and received by this
+     * call is encrypted before it reaches Stream's infrastructure.
+     *
+     * Must be called before [join]. The publisher and subscriber capture the manager when they are
+     * built, and the join request tells the coordinator whether this call is encrypted — a
+     * mismatch there is rejected server side. The manager survives rejoins and migrations, so it
+     * only needs to be set once.
+     *
+     * Pass [StreamEncryptionManager] for Stream's default AES-GCM implementation, or your own
+     * [E2EEManager] to keep the SDK out of your encryption entirely:
+     *
+     * ```
+     * StreamEncryptionManager.create(myUserId).onSuccess { e2ee ->
+     *     e2ee.setSharedKey(keyIndex = 0, key = myKeyBytes)
+     *     call.setE2EEManager(e2ee)
+     *     call.join()
+     * }
+     * ```
+     *
+     * Keys stay on the manager, deliberately: keep your reference to it to add, remove and rotate
+     * keys, during the call as well as before it. Generating and distributing key material has to
+     * stay outside Stream's infrastructure, so the SDK never holds or transports it.
+     *
+     * You own the manager's lifecycle too — the SDK does not dispose it, since the same instance is
+     * normally reused across rejoins and often across calls.
+     *
+     * Note that an encrypted call cannot be recorded, transcribed, closed-captioned, thumbnailed
+     * or broadcast over HLS: none of that content is readable by Stream, so the coordinator
+     * rejects those requests.
+     *
+     * @param manager The manager to use, or `null` to join unencrypted.
+     * @return Success when the manager was updated, or a failure if the call has already joined.
+     */
+    public fun setE2EEManager(manager: E2EEManager?): kotlin.Result<Unit> {
+        session.value?.let { activeSession ->
+            // Too late to encrypt this call, and the app may not check the result. Record it, since
+            // the SFU otherwise just sees a call that stayed unencrypted for no stated reason.
+            activeSession.sfuTracer.trace(
+                PeerConnectionTraceKey.E2EE_SET_MANAGER.value,
+                "rejected: call already joined",
+            )
+            return kotlin.Result.failure(
+                IllegalStateException(
+                    "setE2EEManager must be called before join(). The publisher and subscriber " +
+                        "capture the manager when the session is created, and the coordinator " +
+                        "validates the call's encryption mode against the join request.",
+                ),
+            )
+        }
+        _e2eeManager = manager
+        state.setE2eeEnabled(manager != null)
+        logger.i { "[setE2EEManager] manager: ${manager?.javaClass?.simpleName ?: "none"}" }
+        return kotlin.Result.success(Unit)
+    }
+
+    /**
+     * Drops only this call's reference to the app-owned manager. The active RTC session captured
+     * its own reference when it was created, so terminal teardown can finish safely. The app
+     * remains responsible for disposing the manager once it no longer uses it.
+     */
+    private fun detachE2EEManager() {
+        _e2eeManager = null
+        state.setE2eeEnabled(false)
+        logger.i { "[detachE2EEManager] detached app-owned manager" }
+    }
+
+    // endregion
+
     internal suspend fun collectStats(): CallStatsReport = statsReporter.collectStats()
 
     // region Reconnection — unified loop
@@ -600,9 +695,15 @@ public class Call(
     // endregion
 
     @InternalStreamVideoApi
-    fun leave(reason: CallLeaveReason) = lifecycle.leave(reason)
+    fun leave(reason: CallLeaveReason) {
+        detachE2EEManager()
+        lifecycle.leave(reason)
+    }
 
-    fun leave(reason: String = "user") = lifecycle.leave(reason)
+    fun leave(reason: String = "user") {
+        detachE2EEManager()
+        lifecycle.leave(reason)
+    }
 
     /** ends the call for yourself as well as other users */
     suspend fun end(): Result<Unit> = lifecycle.end()
@@ -838,9 +939,17 @@ public class Call(
         notify,
         hintHighScaleLivestreamPublisher,
         joinAnalyticsModel,
-    )
+        e2ee = e2eeManager != null,
+    ).also {
+        logger.i {
+            "[joinRequest] e2ee=${e2eeManager != null} " +
+                "encryptionMode=${state.settings.value?.encryption?.mode}"
+        }
+    }
 
-    fun cleanup() = lifecycle.cleanup()
+    fun cleanup() {
+        lifecycle.cleanup()
+    }
 
     suspend fun ring(): Result<GetCallResponse> = apiClient.ring()
 
@@ -1055,9 +1164,11 @@ public class Call(
             noiseCancellationSignals.submit("noiseCancellation") {
                 val session = session.value
                 val target = desiredNoiseCancellationEnabled
-                if (session == null) {
+                // RtcSession is installed before the SFU has accepted the join. Signalling in
+                // that window returns PARTICIPANT_NOT_FOUND and used to trigger a full rejoin.
+                if (session == null || !session.isSfuJoinComplete()) {
                     // Nothing to signal at yet. Sent by observeNoiseCancellationSignalTarget as
-                    // soon as a session is installed.
+                    // soon as the SFU delivers JoinCallResponseEvent.
                     noiseCancellationSignalPending = true
                     return@submit
                 }
@@ -1078,23 +1189,31 @@ public class Call(
     }
 
     /**
-     * Sends the noise-cancellation state to each session as it is installed.
+     * Sends the noise-cancellation state once the SFU has accepted each session.
      *
-     * Noise cancellation can be switched on before there is a session to signal at — the call
+     * Noise cancellation can be switched on before there is a participant on the SFU — the call
      * type's auto-on default and any pre-join change both land while joining is still in progress
      * — and a rejoin or migration replaces the session with one that was never told. Either way
      * the SFU would be left out of step with what is running locally.
      *
-     * Only signals when there is something to say: a signal that found no session, or noise
-     * cancellation actually being on. A call that never touches it costs no extra request.
+     * Only signals when there is something to say: a signal that found no joined session, or
+     * noise cancellation actually being on. A call that never touches it costs no extra request.
      */
     private fun observeNoiseCancellationSignalTarget() {
         scope.launch {
-            session.collect { session ->
-                if (session == null) return@collect
+            session.flatMapLatest { session ->
+                if (session == null) {
+                    flowOf(null)
+                } else {
+                    session.sfuSocketState.map { state ->
+                        session.takeIf { state is SfuSocketState.Connected }
+                    }
+                }
+            }.collect { joinedSession ->
+                if (joinedSession == null) return@collect
                 // Reads the applied state rather than replaying the last signal: a state wanted
                 // before the factory existed is applied as the factory is built, which happens
-                // while joining and after the signal that found no session.
+                // while joining and after the signal that found no joined session.
                 val applied = media.isAudioProcessingEnabledIfCreated()
                 if (noiseCancellationSignalPending || desiredNoiseCancellationEnabled || applied) {
                     publishAudioProcessingState()
@@ -1103,6 +1222,9 @@ public class Call(
             }
         }
     }
+
+    private fun RtcSession.isSfuJoinComplete(): Boolean =
+        sfuSocketState.value is SfuSocketState.Connected
 
     suspend fun startTranscription(): Result<StartTranscriptionResponse> =
         apiClient.startTranscription()

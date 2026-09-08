@@ -23,27 +23,24 @@ import io.getstream.video.android.compose.theme.VideoTheme
 
 @Preview
 @Composable
-private fun OutgoingCallOptionsPreview() {
+private fun OutgoingCallControlsRootPreview() {
     VideoTheme {
-        Column {
-            OutgoingCallControls(
-                isMicrophoneEnabled = true,
-                isCameraEnabled = true,
-                onCallAction = { },
-            )
+        OutgoingCallControlsPreview()
+    }
+}
 
-            OutgoingCallControls(
-                isMicrophoneEnabled = false,
-                isCameraEnabled = false,
-                onCallAction = { },
-            )
-
-            OutgoingCallControls(
-                isVideoCall = false,
-                isMicrophoneEnabled = false,
-                isCameraEnabled = false,
-                onCallAction = { },
-            )
-        }
+@Composable
+internal fun OutgoingCallControlsPreview() {
+    Column {
+        OutgoingCallControls(
+            isMicrophoneEnabled = true,
+            isCameraEnabled = true,
+            onCallAction = { },
+        )
+        OutgoingCallControls(
+            isMicrophoneEnabled = false,
+            isCameraEnabled = false,
+            onCallAction = { },
+        )
     }
 }
