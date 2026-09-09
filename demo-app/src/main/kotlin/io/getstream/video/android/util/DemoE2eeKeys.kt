@@ -16,8 +16,6 @@
 
 package io.getstream.video.android.util
 
-import java.util.concurrent.ConcurrentHashMap
-
 /**
  * Name of the invite-link query parameter carrying the shared passphrase. Read when joining and
  * written when sharing, so it lives in one place — the two sides have to agree on it, and they
@@ -26,25 +24,30 @@ import java.util.concurrent.ConcurrentHashMap
 internal const val E2EE_KEY_QUERY_PARAM = "encryption_key"
 
 /**
- * Passphrases of the calls this process joined encrypted, so the in-call share sheet can put one
- * back on the invite link.
+ * The passphrase of the call being joined, so the in-call share sheet can put it back on the
+ * invite link. The passphrase travels in that link anyway, so this is not about keeping it secret.
  *
- * Memory only, and deliberately: the passphrase is the key. Persisting it would leave key material
- * on disk, and putting it anywhere the coordinator stores — custom call data, a member field —
- * would hand the server the key and make the encryption pointless.
+ * It holds one call at a time, and [of] answers only for the cid it was stored against. Applying
+ * one call's passphrase to another is the thing to prevent: everyone who saw the first call's link
+ * could then decrypt the second. Demo call IDs are short and get reused, so a per-cid cache would
+ * happily serve a passphrase from an earlier session of the same ID — hence a single slot that
+ * every join overwrites, rather than a map that accumulates.
  */
 internal object DemoE2eeKeys {
 
-    private val passphrases = ConcurrentHashMap<String, String>()
+    @Volatile
+    private var current: Entry? = null
+
+    private data class Entry(val cid: String, val passphrase: String)
 
     fun remember(cid: String, passphrase: String) {
-        passphrases[cid] = passphrase
+        current = Entry(cid, passphrase)
     }
 
-    /** The passphrase for [cid], or null when this process did not join that call encrypted. */
-    fun of(cid: String): String? = passphrases[cid]
+    /** The passphrase stored for [cid], or null when the stored one belongs to another call. */
+    fun of(cid: String): String? = current?.takeIf { it.cid == cid }?.passphrase
 
     fun forget(cid: String) {
-        passphrases.remove(cid)
+        if (current?.cid == cid) current = null
     }
 }

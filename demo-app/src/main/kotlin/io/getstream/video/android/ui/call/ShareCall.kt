@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.PersonAddAlt1
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.core.Call
@@ -66,7 +68,8 @@ public fun ShareCallWithOthers(
     env: State<StreamEnvironment?>,
     context: Context,
 ) {
-    val shareUrl = shareUrl(env.value?.sharelink, call)
+    val encrypted by call.state.e2eeEnabled.collectAsStateWithLifecycle()
+    val shareUrl = shareUrl(env.value?.sharelink, call, encrypted)
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
@@ -94,12 +97,17 @@ public fun ShareCallWithOthers(
 }
 
 /**
- * The invite link for [call], carrying the shared passphrase when this process joined encrypted.
- * Without it the person scanning the code joins a call whose media they cannot decrypt, so the
- * parameter is what makes the QR code usable for an encrypted call at all.
+ * The invite link for [call], carrying the shared passphrase when the call is actually encrypted.
+ * Without it the person scanning the code joins a call whose media they cannot decrypt, which is
+ * what makes the parameter worth having at all.
+ *
+ * [encrypted] comes from the SDK's own call state, so a passphrase is only ever advertised for a
+ * call that really is using it — a leftover from an earlier session of the same call ID cannot be
+ * passed off as this call's key.
  */
-private fun shareUrl(sharelink: String?, call: Call): String {
+private fun shareUrl(sharelink: String?, call: Call, encrypted: Boolean): String {
     val base = "$sharelink${call.id}"
+    if (!encrypted) return base
     val passphrase = DemoE2eeKeys.of(call.cid) ?: return base
     return Uri.parse(base)
         .buildUpon()
