@@ -92,9 +92,12 @@ internal class PreJoinMicrophoneRecorder(
      */
     suspend fun stop() {
         val running = job ?: return
-        job = null
         logger.d { "[stop] releasing the microphone" }
         running.cancelAndJoin()
+        // Cleared only after the join: clearing it first would let a [start] in between open a
+        // second recorder while this one still holds the microphone. Compared by identity so a
+        // recorder started in the meantime is left alone.
+        if (job === running) job = null
     }
 
     /**
