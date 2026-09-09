@@ -41,6 +41,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.common.StreamCallActivity
+import io.getstream.video.android.util.E2EE_KEY_QUERY_PARAM
 import io.getstream.video.android.util.InitializedState
 import io.getstream.video.android.util.StreamVideoInitHelper
 import io.getstream.video.android.util.config.AppConfig
@@ -149,7 +150,7 @@ class DeeplinkingActivity : ComponentActivity() {
      * the web demo puts on its invite links, so a QR code generated there joins encrypted here.
      */
     private fun extractEncryptionKey(data: Uri?): String? =
-        data?.getQueryParameter("encryption_key")?.takeIf { it.isNotBlank() }
+        data?.getQueryParameter(E2EE_KEY_QUERY_PARAM)?.takeIf { it.isNotBlank() }
 
     private fun extractCallId(data: Uri?): String? {
         if (data == null) {

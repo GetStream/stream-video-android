@@ -49,6 +49,7 @@ import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import io.getstream.video.android.ui.lobby.deriveE2EEKey
+import io.getstream.video.android.util.DemoE2eeKeys
 import io.getstream.video.android.util.FullScreenCircleProgressBar
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.CoroutineScope
@@ -87,6 +88,7 @@ class CallActivity : ComposeStreamCallActivity() {
     private val previousRingingStates = ConcurrentHashMap.newKeySet<RingingState>()
     override val callJoinInterceptor = DemoCallJoinInterceptor(previousRingingStates)
     private var e2eeManager: StreamEncryptionManager? = null
+    private var e2eeCid: String? = null
 
     /**
      * This code is required to pass the UI-tests (as it hardcodes the configuration)
@@ -191,6 +193,9 @@ class CallActivity : ComposeStreamCallActivity() {
         }
         e2eeManager?.dispose()
         e2eeManager = manager
+        // Kept so the in-call share sheet can put the passphrase back on the invite link.
+        e2eeCid = call.cid
+        DemoE2eeKeys.remember(call.cid, passphrase)
     }
 
     private class StreamDemoUiDelegate : StreamCallActivityComposeDelegate() {
@@ -295,5 +300,7 @@ class CallActivity : ComposeStreamCallActivity() {
         previousRingingStates.clear()
         e2eeManager?.dispose()
         e2eeManager = null
+        e2eeCid?.let { DemoE2eeKeys.forget(it) }
+        e2eeCid = null
     }
 }

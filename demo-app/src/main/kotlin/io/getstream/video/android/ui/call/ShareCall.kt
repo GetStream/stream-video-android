@@ -21,6 +21,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,8 @@ import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.util.DemoE2eeKeys
+import io.getstream.video.android.util.E2EE_KEY_QUERY_PARAM
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
 @Composable
@@ -63,7 +66,7 @@ public fun ShareCallWithOthers(
     env: State<StreamEnvironment?>,
     context: Context,
 ) {
-    val shareUrl = "${env.value?.sharelink}${call.id}"
+    val shareUrl = shareUrl(env.value?.sharelink, call)
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
@@ -88,6 +91,21 @@ public fun ShareCallWithOthers(
             context.startActivity(shareIntent)
         }
     }
+}
+
+/**
+ * The invite link for [call], carrying the shared passphrase when this process joined encrypted.
+ * Without it the person scanning the code joins a call whose media they cannot decrypt, so the
+ * parameter is what makes the QR code usable for an encrypted call at all.
+ */
+private fun shareUrl(sharelink: String?, call: Call): String {
+    val base = "$sharelink${call.id}"
+    val passphrase = DemoE2eeKeys.of(call.cid) ?: return base
+    return Uri.parse(base)
+        .buildUpon()
+        .appendQueryParameter(E2EE_KEY_QUERY_PARAM, passphrase)
+        .build()
+        .toString()
 }
 
 @Composable
