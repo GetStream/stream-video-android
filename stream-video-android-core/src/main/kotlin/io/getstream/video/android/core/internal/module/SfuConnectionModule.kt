@@ -54,8 +54,7 @@ internal class SfuConnectionModule(
     // Internal logic
     override val http: OkHttpClient = buildSfuOkHttpClient()
 
-    // Twirp calls carry the SDK identity; the socket built on [http] sets its own X-Stream-Client,
-    // so the header is added here rather than on the shared client.
+    // Not on [http] — the socket built on it already sets its own X-Stream-Client.
     private val signalHttp: OkHttpClient by lazy {
         http.newBuilder().addInterceptor(SfuHeadersInterceptor(HeadersUtil())).build()
     }
