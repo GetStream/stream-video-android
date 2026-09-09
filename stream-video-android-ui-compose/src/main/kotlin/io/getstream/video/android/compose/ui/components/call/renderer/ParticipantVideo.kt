@@ -73,6 +73,7 @@ import io.getstream.video.android.compose.theme.ParticipantVideoLabelContentPara
 import io.getstream.video.android.compose.theme.ParticipantVideoReactionContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.video.android.compose.theme.indicatorSpeaking
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
 import io.getstream.video.android.compose.ui.components.call.pinning.participantActions
@@ -164,7 +165,7 @@ public fun ParticipantVideo(
             } else {
                 BorderStroke(
                     StreamTokens.size2,
-                    VideoTheme.colors.accentPrimary,
+                    VideoTheme.colors.indicatorSpeaking,
                 )
             },
             shape = containerShape,
