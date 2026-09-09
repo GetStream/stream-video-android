@@ -121,6 +121,7 @@ class ServiceLauncherTest {
 
         every { StreamVideo.instanceOrNull() } returns streamVideo
         every { StreamVideo.instance() } returns streamVideo
+        every { streamVideo.context } returns context
         every { jetpackTelecomRepositoryProvider.get(any()) } returns jetpackTelecomRepository
 
         serviceLauncher = ServiceLauncher(streamVideo)
