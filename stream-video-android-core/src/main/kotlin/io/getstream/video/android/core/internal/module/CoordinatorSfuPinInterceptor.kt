@@ -3,7 +3,6 @@
  *
  * Licensed under the Stream License;
  * you may not use this file except in compliance with the License.
- *
  * You may obtain a copy of the License at
  *
  *    https://github.com/GetStream/stream-video-android/blob/main/LICENSE
