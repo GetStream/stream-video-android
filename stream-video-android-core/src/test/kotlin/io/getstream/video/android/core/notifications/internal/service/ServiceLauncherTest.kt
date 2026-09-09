@@ -123,7 +123,7 @@ class ServiceLauncherTest {
         every { StreamVideo.instance() } returns streamVideo
         every { jetpackTelecomRepositoryProvider.get(any()) } returns jetpackTelecomRepository
 
-        serviceLauncher = ServiceLauncher(context, streamVideo)
+        serviceLauncher = ServiceLauncher(streamVideo)
     }
 
     @After
