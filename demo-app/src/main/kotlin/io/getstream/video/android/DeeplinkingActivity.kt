@@ -144,6 +144,13 @@ class DeeplinkingActivity : ComponentActivity() {
         return data?.getQueryParameter("type") ?: "default"
     }
 
+    /**
+     * The shared E2EE passphrase, when the link carries one. Matches the `encryption_key` parameter
+     * the web demo puts on its invite links, so a QR code generated there joins encrypted here.
+     */
+    private fun extractEncryptionKey(data: Uri?): String? =
+        data?.getQueryParameter("encryption_key")?.takeIf { it.isNotBlank() }
+
     private fun extractCallId(data: Uri?): String? {
         if (data == null) {
             // No data, return null
@@ -191,6 +198,9 @@ class DeeplinkingActivity : ComponentActivity() {
                             clazz = CallActivity::class.java,
                         ).apply {
                             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            extractEncryptionKey(data)?.let {
+                                putExtra(CallActivity.EXTRA_E2EE_PASSPHRASE, it)
+                            }
                         }
                         startActivity(intent)
                         finish()
