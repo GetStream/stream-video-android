@@ -50,9 +50,9 @@ public fun ChatDialogAction(
 ): Unit = StreamBadgeBox(
     showWithoutValue = false,
     text = messageCount?.toString(),
-) {
+) { contentModifier ->
     GenericAction(
-        modifier = modifier,
+        modifier = modifier.then(contentModifier),
         icon = icon ?: painterResource(R.drawable.stream_design_ic_message_bubbles_fill),
         enabled = enabled,
         style = style,

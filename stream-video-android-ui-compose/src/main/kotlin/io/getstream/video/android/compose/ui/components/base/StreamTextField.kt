@@ -138,7 +138,7 @@ public fun StreamTextField(
                             text = placeholder,
                             style = VideoTheme.typography.bodyDefault,
                             color = colors.inputTextPlaceholder,
-                            maxLines = 1,
+                            maxLines = maxOf(minLines, maxLines),
                         )
                     }
                     innerTextField()

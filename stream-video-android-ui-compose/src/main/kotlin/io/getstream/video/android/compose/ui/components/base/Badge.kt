@@ -47,7 +47,7 @@ public fun StreamBadgeBox(
     content: @Composable BoxScope.(Modifier) -> Unit,
 ) {
     Box(modifier = modifier) {
-        content(modifier.testTag("Stream_ParticipantsMenuIcon"))
+        content(Modifier.testTag("Stream_ParticipantsMenuIcon"))
         if (text != null || showWithoutValue) {
             Badge(text = text, modifier = Modifier.align(Alignment.TopEnd))
         }

@@ -49,7 +49,7 @@ public fun MicrophoneIndicator(
                 painter = painterResource(R.drawable.stream_design_ic_voice_fill),
                 tint = VideoTheme.colors.textOnAccent,
                 contentDescription = stringResource(
-                    io.getstream.video.android.ui.common.R.string.stream_video_call_participants_info_options_mute,
+                    io.getstream.video.android.ui.common.R.string.stream_video_microphone_indicator_on,
                 ),
             )
         } else {
@@ -58,7 +58,7 @@ public fun MicrophoneIndicator(
                 painter = painterResource(R.drawable.stream_design_ic_voice_off_fill),
                 tint = VideoTheme.colors.textOnAccent,
                 contentDescription = stringResource(
-                    io.getstream.video.android.ui.common.R.string.stream_video_call_participants_info_options_unmute,
+                    io.getstream.video.android.ui.common.R.string.stream_video_microphone_indicator_off,
                 ),
             )
         }
