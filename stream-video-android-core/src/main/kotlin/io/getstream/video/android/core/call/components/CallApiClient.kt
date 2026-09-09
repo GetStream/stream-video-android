@@ -125,7 +125,6 @@ internal class CallApiClient(
             migratingFromList = migratingFromList,
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
             e2ee = requestE2ee,
-            sfuId = clientImpl.pinnedSfuId,
         )
         result.onSuccess {
             callAnalytics.joinAnalytics.onJoinRequestSuccess(

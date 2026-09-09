@@ -863,7 +863,6 @@ internal class StreamVideoClient internal constructor(
         migratingFromList: List<String>? = null,
         hintHighScaleLivestreamPublisher: Boolean? = null,
         e2ee: Boolean? = null,
-        sfuId: String? = null,
     ): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest(
             create = create,
@@ -889,7 +888,6 @@ internal class StreamVideoClient internal constructor(
                 id = id,
                 joinCallRequest = joinCallRequest,
                 connectionId = waitForConnectionId(),
-                sfuId = sfuId,
             )
         }
         return result

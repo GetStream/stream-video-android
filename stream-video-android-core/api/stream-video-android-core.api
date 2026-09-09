@@ -29,8 +29,8 @@ public abstract interface class io/getstream/android/video/generated/apis/Produc
 	public static synthetic fun getOrCreateCall$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun goLive (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/GoLiveRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun goLive (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun joinCall (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/JoinCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun joinCall$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/JoinCallRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun joinCall (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/JoinCallRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun joinCall$default (Lio/getstream/android/video/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/JoinCallRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun kickUser (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/generated/models/KickUserRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun listDevices (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun listRecordings (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

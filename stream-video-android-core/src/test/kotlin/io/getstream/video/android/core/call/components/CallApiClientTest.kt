@@ -35,7 +35,6 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.recording.RecordingType
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -336,7 +335,7 @@ class CallApiClientTest {
         coEvery {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
 
@@ -349,7 +348,7 @@ class CallApiClientTest {
         coVerify {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(),
             )
         }
     }
@@ -375,7 +374,7 @@ class CallApiClientTest {
         coEvery {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
 
@@ -401,46 +400,6 @@ class CallApiClientTest {
                 migratingFromList = any(),
                 hintHighScaleLivestreamPublisher = any(),
                 e2ee = true,
-                sfuId = any(),
-            )
-        }
-    }
-
-    @Test
-    fun `joinRequest forwards the client pinned sfu id to the coordinator`() = runTest(
-        testDispatcher,
-    ) {
-        every { clientImpl.pinnedSfuId } returns "SFU-1"
-        coEvery {
-            clientImpl.joinCall(
-                any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any(),
-            )
-        } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
-
-        apiClient.joinRequest(
-            location = "test-location",
-            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
-        )
-
-        coVerify {
-            clientImpl.joinCall(
-                type = "default",
-                id = "call-id",
-                create = false,
-                members = null,
-                custom = null,
-                settingsOverride = null,
-                startsAt = null,
-                team = null,
-                ring = false,
-                notify = false,
-                location = "test-location",
-                migratingFrom = null,
-                migratingFromList = null,
-                hintHighScaleLivestreamPublisher = null,
-                e2ee = any(),
-                sfuId = "SFU-1",
             )
         }
     }

@@ -97,7 +97,7 @@ class CallE2EETest {
         coEvery {
             mockClientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Result.Failure(Error.GenericError("not under test"))
 
@@ -196,7 +196,6 @@ class CallE2EETest {
                 migratingFromList = any(),
                 hintHighScaleLivestreamPublisher = any(),
                 e2ee = true,
-                sfuId = any(),
             )
         }
     }
@@ -225,7 +224,6 @@ class CallE2EETest {
                 migratingFromList = any(),
                 hintHighScaleLivestreamPublisher = any(),
                 e2ee = false,
-                sfuId = any(),
             )
         }
     }
