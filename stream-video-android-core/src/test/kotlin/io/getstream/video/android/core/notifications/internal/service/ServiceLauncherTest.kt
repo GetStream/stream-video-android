@@ -124,7 +124,7 @@ class ServiceLauncherTest {
         every { streamVideo.context } returns context
         every { jetpackTelecomRepositoryProvider.get(any()) } returns jetpackTelecomRepository
 
-        serviceLauncher = ServiceLauncher(context, streamVideo)
+        serviceLauncher = ServiceLauncher(streamVideo)
     }
 
     @After
