@@ -116,7 +116,7 @@ class IncomingCallPresenterTest {
 
         val dispatcher = mockk<DefaultNotificationDispatcher>(relaxed = true)
         every {
-            StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()
+            streamVideoClient.getStreamNotificationDispatcher()
         } returns dispatcher
 
         // when
@@ -175,7 +175,7 @@ class IncomingCallPresenterTest {
 
         val dispatcher = mockk<DefaultNotificationDispatcher>(relaxed = true)
         every {
-            StreamVideo.instanceOrNull()?.getStreamNotificationDispatcher()
+            streamVideoClient.getStreamNotificationDispatcher()
         } returns dispatcher
 
         // when
@@ -224,14 +224,14 @@ class IncomingCallPresenterTest {
         val state = mockk<ClientState> {
             every { activeCall.value } returns null
         }
-        every { StreamVideo.instanceOrNull()?.state } returns state
+        every { streamVideoClient.state } returns state
     }
 
     private fun mockActiveCall() {
         val state = mockk<ClientState> {
             every { activeCall.value } returns mockk()
         }
-        every { StreamVideo.instanceOrNull()?.state } returns state
+        every { streamVideoClient.state } returns state
     }
 
     private fun mockNotificationPermission(granted: Boolean) {
