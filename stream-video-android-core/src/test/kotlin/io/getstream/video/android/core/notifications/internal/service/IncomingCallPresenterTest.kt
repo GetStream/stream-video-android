@@ -73,7 +73,7 @@ class IncomingCallPresenterTest {
         every { StreamVideo.instanceOrNull() } returns streamVideoClient
         every { StreamVideo.instance() } returns streamVideoClient
 
-        presenter = IncomingCallPresenter(serviceIntentBuilder)
+        presenter = IncomingCallPresenter(streamVideoClient, serviceIntentBuilder)
     }
 
     @After
