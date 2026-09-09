@@ -40,14 +40,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.menu.AudioUsageVoiceCommunicationUiState
 import io.getstream.video.android.ui.menu.TranscriptionAvailableUiState
@@ -243,15 +244,8 @@ private fun LazyListScope.menuItems(
     items(items.size) { index ->
         val item = items[index]
         val highlight = item.highlight
-        StreamToggleButton(
-            onText = item.title,
-            offText = item.title,
-            onIcon = item.icon,
-            onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(StyleSize.XS).copy(
-                iconStyle = VideoTheme.styles.iconStyles.customColorIconStyle(
-                    color = if (highlight) VideoTheme.colors.accentPrimary else VideoTheme.colors.textPrimary,
-                ),
-            ),
+        StreamTextButton(
+            modifier = Modifier.fillMaxWidth(),
             onClick = {
                 val actionItem = item as? ActionMenuItem
                 actionItem?.action?.invoke()
@@ -260,6 +254,9 @@ private fun LazyListScope.menuItems(
                     onNewSubmenu(it)
                 }
             },
+            text = item.title,
+            leadingIcon = rememberVectorPainter(item.icon),
+            style = if (highlight) StreamButtonStyleDefaults.primaryGhost else StreamButtonStyleDefaults.secondaryGhost,
         )
     }
 }

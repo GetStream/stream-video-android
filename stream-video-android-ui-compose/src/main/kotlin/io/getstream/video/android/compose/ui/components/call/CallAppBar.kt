@@ -130,7 +130,9 @@ internal fun DefaultCallAppBarLeadingContent(
         onClick = onBackButtonClicked,
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.stream_video_ic_arrow_back),
+            painter = painterResource(
+                id = io.getstream.video.android.compose.R.drawable.stream_design_ic_arrow_left,
+            ),
             contentDescription = stringResource(
                 id = R.string.stream_video_back_button_content_description,
             ),

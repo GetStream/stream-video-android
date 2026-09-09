@@ -34,28 +34,10 @@ private fun AudioCallContentRootPreview() {
 
 @Preview
 @Composable
-private fun AudioCallContentWithoutHeaderRootPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        AudioCallContentWithoutHeaderPreview()
-    }
-}
-
-@Preview
-@Composable
 private fun AudioOnlyCallContentRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         AudioOnlyCallContentPreview()
-    }
-}
-
-@Preview
-@Composable
-private fun AudioOnlyCallContentWithoutHeaderRootPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        AudioOnlyCallContentWithoutHeaderPreview()
     }
 }
 
@@ -69,28 +51,10 @@ internal fun AudioCallContentPreview() {
 }
 
 @Composable
-internal fun AudioCallContentWithoutHeaderPreview() {
-    AudioCallContent(
-        call = previewCall,
-        isMicrophoneEnabled = false,
-        isShowingHeader = false,
-    )
-}
-
-@Composable
 internal fun AudioOnlyCallContentPreview() {
     AudioOnlyCallContent(
         call = previewCall,
         isMicrophoneEnabled = false,
         durationPlaceholder = "11:45",
-    )
-}
-
-@Composable
-internal fun AudioOnlyCallContentWithoutHeaderPreview() {
-    AudioOnlyCallContent(
-        call = previewCall,
-        isMicrophoneEnabled = false,
-        isShowingHeader = false,
     )
 }

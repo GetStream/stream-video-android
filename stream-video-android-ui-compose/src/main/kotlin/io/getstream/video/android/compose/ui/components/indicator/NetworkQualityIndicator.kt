@@ -30,6 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.video.android.compose.theme.indicatorFair
+import io.getstream.video.android.compose.theme.indicatorGreat
+import io.getstream.video.android.compose.theme.indicatorPoor
 import io.getstream.video.android.core.model.NetworkQuality
 import stream.video.sfu.models.ConnectionQuality
 
@@ -63,24 +66,24 @@ internal fun barColorsFromQuality(
     networkQuality: NetworkQuality,
 ): Triple<Color, Color, Color> = when (networkQuality) {
     is NetworkQuality.Excellent -> Triple(
-        VideoTheme.colors.accentSuccess,
-        VideoTheme.colors.accentSuccess,
-        VideoTheme.colors.accentSuccess,
+        VideoTheme.colors.indicatorGreat,
+        VideoTheme.colors.indicatorGreat,
+        VideoTheme.colors.indicatorGreat,
     )
     is NetworkQuality.Good -> Triple(
-        VideoTheme.colors.accentWarning,
-        VideoTheme.colors.accentWarning,
-        VideoTheme.colors.textPrimary,
+        VideoTheme.colors.indicatorFair,
+        VideoTheme.colors.indicatorFair,
+        VideoTheme.colors.textOnAccent,
     )
     is NetworkQuality.Poor -> Triple(
-        VideoTheme.colors.accentError,
-        VideoTheme.colors.textPrimary,
-        VideoTheme.colors.textPrimary,
+        VideoTheme.colors.indicatorPoor,
+        VideoTheme.colors.textOnAccent,
+        VideoTheme.colors.textOnAccent,
     )
     is NetworkQuality.UnSpecified -> Triple(
-        VideoTheme.colors.textPrimary,
-        VideoTheme.colors.textPrimary,
-        VideoTheme.colors.textPrimary,
+        VideoTheme.colors.textOnAccent,
+        VideoTheme.colors.textOnAccent,
+        VideoTheme.colors.textOnAccent,
     )
 }
 

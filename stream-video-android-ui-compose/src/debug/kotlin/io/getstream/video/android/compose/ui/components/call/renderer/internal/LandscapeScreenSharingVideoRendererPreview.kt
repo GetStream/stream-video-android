@@ -45,14 +45,6 @@ private fun LandscapeScreenSharingContentRootPreview() {
     heightDp = 720,
 )
 @Composable
-private fun LandscapeScreenSharingMyContentRootPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        LandscapeScreenSharingMyContentPreview()
-    }
-}
-
-@Composable
 internal fun LandscapeScreenSharingContentPreview() {
     LandscapeScreenSharingVideoRenderer(
         call = previewCall,
@@ -61,6 +53,14 @@ internal fun LandscapeScreenSharingContentPreview() {
         dominantSpeaker = previewParticipantsList[1],
         modifier = Modifier.fillMaxSize(),
     )
+}
+
+@Composable
+private fun LandscapeScreenSharingMyContentRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        LandscapeScreenSharingMyContentPreview()
+    }
 }
 
 @Composable

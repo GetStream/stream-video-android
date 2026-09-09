@@ -40,9 +40,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PushPin
-import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -76,6 +73,7 @@ import io.getstream.video.android.compose.theme.ParticipantVideoLabelContentPara
 import io.getstream.video.android.compose.theme.ParticipantVideoReactionContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.video.android.compose.theme.indicatorSpeaking
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
 import io.getstream.video.android.compose.ui.components.call.pinning.participantActions
@@ -167,7 +165,7 @@ public fun ParticipantVideo(
             } else {
                 BorderStroke(
                     StreamTokens.size2,
-                    VideoTheme.colors.accentPrimary,
+                    VideoTheme.colors.indicatorSpeaking,
                 )
             },
             shape = containerShape,
@@ -442,7 +440,9 @@ public fun BoxScope.ParticipantLabel(
                         modifier = Modifier
                             .padding(horizontal = 4.dp)
                             .size(StreamTokens.size16),
-                        imageVector = Icons.Filled.PushPin,
+                        painter = painterResource(
+                            io.getstream.video.android.compose.R.drawable.stream_design_ic_pin_fill,
+                        ),
                         contentDescription = "Pin",
                         tint = VideoTheme.colors.textOnAccent,
                     )
@@ -456,7 +456,9 @@ public fun BoxScope.ParticipantLabel(
                         modifier = Modifier
                             .padding(horizontal = 4.dp)
                             .size(StreamTokens.size16),
-                        imageVector = Icons.Filled.SignalWifiBad,
+                        painter = painterResource(
+                            io.getstream.video.android.compose.R.drawable.stream_design_ic_exclamation_triangle_fill,
+                        ),
                         contentDescription = "Pause",
                         tint = VideoTheme.colors.textOnAccent,
                     )

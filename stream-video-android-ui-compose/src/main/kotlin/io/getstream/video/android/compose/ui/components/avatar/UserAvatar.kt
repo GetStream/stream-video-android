@@ -27,17 +27,13 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.model.User
 
 /**
  * Component that renders an image or a name as an avatar. If the image is `null` or unavailable, it uses the name initials.
  * Can also show an "is online" indicator.
- * If needed, the initials font size is gradually decreased automatically until the text fits within the avatar boundaries.
  *
  * @param modifier Modifier used for styling.
  * @param userImage The URL of the image to be displayed. Usually [User.image].
@@ -48,9 +44,7 @@ import io.getstream.video.android.model.User
  * @param imageRequestSize The image size to be requested. Original size by default.
  * @param loadingPlaceholder Placeholder image to be displayed while loading the remote image.
  * @param previewModePlaceholder Placeholder image to be displayed in Compose previews (IDE).
- * @param textStyle The [TextStyle] to be used for the initials text. The `fontSize`, `fontFamily` and `fontWeight` properties are used.
- * If the font size is too large, it will be gradually decreased automatically.
- * @param textOffset Offset to be applied to the initials text.
+ * @param textStyle The typography of the initials fallback, or null to pick one from the avatar size.
  * @param isShowingOnlineIndicator Flag used to display/hide the "is online" indicator. `False` by default.
  * @param onlineIndicatorAlignment Alignment of the "is online" indicator. `TopEnd` by default.
  * @param onlineIndicator A custom composable to represent the "is online" indicator. [DefaultOnlineIndicator] by default.
@@ -70,8 +64,7 @@ public fun UserAvatar(
     imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
     @DrawableRes previewModePlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
-    textStyle: TextStyle = VideoTheme.typography.headingLarge,
-    textOffset: DpOffset = DpOffset(0.dp, 0.dp),
+    textStyle: TextStyle? = null,
     isShowingOnlineIndicator: Boolean = false,
     onlineIndicatorAlignment: OnlineIndicatorAlignment = OnlineIndicatorAlignment.TopEnd,
     onlineIndicator: @Composable BoxScope.() -> Unit = {
@@ -93,7 +86,6 @@ public fun UserAvatar(
             loadingPlaceholder = loadingPlaceholder,
             previewModePlaceholder = previewModePlaceholder,
             textStyle = textStyle,
-            textOffset = textOffset,
             onClick = onClick,
         )
 

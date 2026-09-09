@@ -36,7 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 
 @Composable
 fun SingleButtonDialog(
@@ -71,8 +72,8 @@ fun SingleButtonDialog(
                     textAlign = TextAlign.Center,
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                StreamButton(
-                    style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
+                StreamTextButton(
+                    style = StreamButtonStyleDefaults.primarySolid,
                     text = buttonText,
                     onClick = onButtonClick,
                 )

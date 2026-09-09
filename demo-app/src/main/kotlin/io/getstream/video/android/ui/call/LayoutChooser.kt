@@ -18,24 +18,24 @@ package io.getstream.video.android.ui.call
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamToggleButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.tooling.extensions.toPx
@@ -79,24 +79,19 @@ internal fun LayoutChooser(
         ) {
             layouts.forEach { layout ->
 
-                val state = ToggleableState(layout.which == current)
+                val selected = layout.which == current
                 val icon = when (layout.which) {
-                    LayoutType.DYNAMIC -> Icons.Default.AutoAwesome
-                    LayoutType.SPOTLIGHT -> ImageVector.vectorResource(
-                        R.drawable.ic_layout_spotlight,
-                    )
-                    LayoutType.GRID -> ImageVector.vectorResource(R.drawable.ic_layout_grid)
+                    LayoutType.DYNAMIC -> rememberVectorPainter(Icons.Default.AutoAwesome)
+                    LayoutType.SPOTLIGHT -> painterResource(R.drawable.ic_layout_spotlight)
+                    LayoutType.GRID -> painterResource(R.drawable.ic_layout_grid)
                 }
-                StreamToggleButton(
-                    onText = layout.text,
-                    offText = layout.text,
-                    toggleState = rememberUpdatedState(newValue = state),
-                    onIcon = icon,
-                    onStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOn(),
-                    offStyle = VideoTheme.styles.buttonStyles.toggleButtonStyleOff(),
-                ) {
-                    onLayoutChoice(layout.which)
-                }
+                StreamTextButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onLayoutChoice(layout.which) },
+                    text = layout.text,
+                    leadingIcon = icon,
+                    style = if (selected) StreamButtonStyleDefaults.primarySolid else StreamButtonStyleDefaults.secondaryGhost,
+                )
             }
         }
     }

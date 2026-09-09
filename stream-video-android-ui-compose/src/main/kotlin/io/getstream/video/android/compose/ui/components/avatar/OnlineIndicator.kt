@@ -23,22 +23,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
- * Component that represents an online indicator to be used with
- * [UserAvatar].
+ * A small dot that marks a user as online, drawn over an avatar.
  *
- * @param modifier Modifier for styling.
+ * @param modifier The modifier applied to the indicator.
  */
 @Composable
 public fun OnlineIndicator(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .size(12.dp)
-            .background(VideoTheme.colors.backgroundCoreApp, CircleShape)
-            .padding(2.dp)
-            .background(VideoTheme.colors.accentSuccess, CircleShape),
+            .size(StreamTokens.size12)
+            .background(VideoTheme.colors.avatarPresenceBorder, CircleShape)
+            .padding(StreamTokens.strokeW200)
+            .background(VideoTheme.colors.avatarPresenceBgOnline, CircleShape),
     )
 }

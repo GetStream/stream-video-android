@@ -28,14 +28,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.call.controls.actions.AcceptCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DeclineCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.GenericAction
@@ -115,8 +116,7 @@ class BusyCallActivity : ComposeStreamCallActivity() {
 
                         if (isVideoType) {
                             ToggleCameraAction(
-                                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
-                                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
+                                onStyle = StreamButtonStyleDefaults.secondaryGhost,
                                 isCameraEnabled = isCameraEnabled,
                                 onCallAction = onCallAction,
                             )
@@ -139,16 +139,14 @@ fun BusyCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onCallAction: (BusyCall) -> Unit,
-    icon: ImageVector? = null,
-    bgColor: Color? = null,
-    iconTint: Color? = null,
+    icon: Painter? = null,
+    style: StreamButtonStyle = StreamButtonStyleDefaults.destructiveSolid,
 ): Unit = GenericAction(
     modifier = modifier,
+    icon = icon ?: rememberVectorPainter(Icons.Default.Close),
     enabled = enabled,
+    style = style,
     onAction = { onCallAction(BusyCall) },
-    icon = icon ?: Icons.Default.Close,
-    color = bgColor ?: VideoTheme.colors.accentError,
-    iconTint = iconTint ?: VideoTheme.colors.textPrimary,
 )
 
 data object BusyCall : CustomAction(tag = "busy")

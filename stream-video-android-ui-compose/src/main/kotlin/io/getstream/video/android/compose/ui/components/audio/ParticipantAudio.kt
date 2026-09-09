@@ -33,22 +33,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.theme.UserAvatarParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
-import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
 
 /**
@@ -82,12 +82,14 @@ public fun ParticipantAudio(
         verticalArrangement = Arrangement.Center,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            UserAvatar(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(StreamTokens.spacingMd),
-                userImage = userImage,
-                userName = nameOrId,
+            VideoTheme.componentFactory.UserAvatar(
+                UserAvatarParams(
+                    userImage = userImage,
+                    userName = nameOrId,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(StreamTokens.spacingMd),
+                ),
             )
 
             if (isSpeaking && style.isShowingSpeakingBorder) {
@@ -157,7 +159,7 @@ private fun BoxScope.DefaultMicrophoneIndicator(
         Icon(
 
             modifier = Modifier.align(alignment).fillMaxSize().padding(StreamTokens.spacingXs),
-            imageVector = Icons.Default.MicOff,
+            painter = painterResource(R.drawable.stream_design_ic_voice_off_fill),
             tint = VideoTheme.colors.accentError,
             contentDescription = null,
         )

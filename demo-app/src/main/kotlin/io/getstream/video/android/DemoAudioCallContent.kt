@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -28,8 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContent
 import io.getstream.video.android.compose.ui.components.call.controls.actions.LeaveCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
@@ -81,13 +79,8 @@ fun AudioOnlyCallControls(
                 "Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled",
             ),
             isMicrophoneEnabled = isMicrophoneEnabled,
+            size = StreamButtonSize.Large,
             onCallAction = onCallAction,
-            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
-                1.5f,
-            ),
-            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(
-                1.5f,
-            ),
         )
 
         ToggleSpeakerphoneAction(
@@ -95,29 +88,14 @@ fun AudioOnlyCallControls(
                 "Stream_SpeakerToggle_Enabled_$isSpeakerEnabled",
             ),
             isSpeakerphoneEnabled = isSpeakerEnabled,
-            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
-                1.5f,
-            ),
-            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(
-                1.5f,
-            ),
+            size = StreamButtonSize.Large,
             onCallAction = onCallAction,
         )
 
         LeaveCallAction(
             modifier = Modifier.testTag("Stream_HangUpButton"),
             onCallAction = onCallAction,
-            style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(
-                1.5f,
-            ),
+            size = StreamButtonSize.Large,
         )
     }
-}
-
-internal fun StreamFixedSizeButtonStyle.fillCircle(fraction: Float): StreamFixedSizeButtonStyle {
-    return this.copyFixed(
-        width * fraction,
-        height * fraction,
-        shape = CircleShape,
-    )
 }

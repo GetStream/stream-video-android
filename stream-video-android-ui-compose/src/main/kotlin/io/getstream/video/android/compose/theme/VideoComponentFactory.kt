@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatarBackground
 import io.getstream.video.android.compose.ui.components.call.DefaultCallAppBarCenterContent
 import io.getstream.video.android.compose.ui.components.call.DefaultCallAppBarLeadingContent
@@ -322,6 +323,21 @@ public interface VideoComponentFactory {
                 .align(Alignment.BottomEnd)
                 .height(StreamTokens.size32)
                 .testTag("Stream_ParticipantNetworkQualityIndicator"),
+        )
+    }
+
+    /**
+     * The avatar of a user, shown in participant lists, ringing screens and video fallbacks.
+     *
+     * @param params Parameters for this component.
+     */
+    @Composable
+    public fun UserAvatar(params: UserAvatarParams) {
+        UserAvatar(
+            modifier = params.modifier,
+            userImage = params.userImage,
+            userName = params.userName,
+            isShowingOnlineIndicator = params.isShowingOnlineIndicator,
         )
     }
 

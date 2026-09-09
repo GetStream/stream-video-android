@@ -16,41 +16,49 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.call.state.CallAction
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.core.call.state.Settings
 
 /**
- * A call action button represents displaying a chat dialog.
+ * Opens and closes the settings menu.
  *
- * @param modifier Optional Modifier for this action button.
- * @param enabled Whether or not this action button will handle input events.
- * @param onCallAction A [CallAction] event that will be fired.
+ * @param modifier The modifier applied to the button.
+ * @param isShowingSettings Whether the action is in its active state.
+ * @param enabled Whether the action accepts clicks.
+ * @param onStyle The colors of the active state. See [StreamButtonStyleDefaults].
+ * @param offStyle The colors of the inactive state. See [StreamButtonStyleDefaults].
+ * @param size The visual size of the button.
+ * @param onCallAction Called with [Settings] when the action is clicked.
  */
 @Composable
 public fun ToggleSettingsAction(
     modifier: Modifier = Modifier,
     isShowingSettings: Boolean,
     enabled: Boolean = true,
-    shape: Shape? = null,
-    enabledColor: Color? = null,
-    disabledColor: Color? = null,
+    onStyle: StreamButtonStyle = StreamButtonStyleDefaults.primarySolid,
+    offStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
+    size: StreamButtonSize = StreamButtonSize.Medium,
     onCallAction: (Settings) -> Unit,
 ): Unit = ToggleAction(
-    isActionActive = isShowingSettings,
-    iconOnOff =
-    Pair(Icons.Default.MoreVert, Icons.Default.MoreVert),
     modifier = modifier,
-    enabled = enabled, shape = shape,
-    enabledColor = enabledColor, disabledColor = disabledColor,
-    offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle(),
-    onStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
-) {
-    onCallAction(Settings(!isShowingSettings))
-}
+    isActionActive = isShowingSettings,
+    iconOnOff = Pair(
+        painterResource(R.drawable.stream_design_ic_more_vertical_fill),
+        painterResource(R.drawable.stream_design_ic_more_vertical_fill),
+    ),
+    contentDescription = stringResource(
+        io.getstream.video.android.ui.common.R.string.stream_video_call_controls_settings,
+    ),
+    enabled = enabled,
+    onStyle = onStyle,
+    offStyle = offStyle,
+    size = size,
+    onAction = { onCallAction(Settings(!isShowingSettings)) },
+)

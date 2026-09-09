@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2014-2026 Stream.io Inc. All rights reserved.
+
+    Licensed under the Stream License;
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+      https://github.com/GetStream/stream-video-android/blob/main/LICENSE
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20"
+    android:autoMirrored="true">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M18.13 14.59C18.56 13.69 18.77 12.71 18.75 11.71 18.72 10.72 18.46 9.75 17.98 8.88 17.51 8 16.83 7.26 16 6.7 15.18 6.14 14.23 5.79 13.25 5.67 12.92 4.91 12.44 4.22 11.84 3.64 11.24 3.06 10.54 2.61 9.76 2.31 8.99 2.01 8.16 1.87 7.33 1.89 6.5 1.92 5.68 2.11 4.92 2.45 4.16 2.79 3.48 3.29 2.92 3.9 2.35 4.51 1.92 5.22 1.63 6 1.35 6.79 1.22 7.62 1.26 8.45 1.3 9.28 1.51 10.09 1.87 10.84L1.3 12.77C1.24 12.99 1.23 13.22 1.29 13.43 1.34 13.65 1.46 13.85 1.62 14.01 1.78 14.17 1.97 14.28 2.19 14.34 2.41 14.39 2.64 14.39 2.85 14.32L4.78 13.76C5.4 14.05 6.07 14.25 6.75 14.33 7.08 15.11 7.57 15.81 8.18 16.39 8.79 16.98 9.51 17.43 10.3 17.73 11.1 18.02 11.94 18.16 12.78 18.12 13.63 18.08 14.45 17.87 15.22 17.51L17.15 18.07C17.36 18.14 17.59 18.14 17.81 18.09 18.03 18.03 18.22 17.92 18.38 17.76 18.54 17.6 18.65 17.4 18.71 17.18 18.77 16.97 18.76 16.74 18.7 16.52L18.13 14.59ZM16.86 14.71L17.5 16.88 15.33 16.24C15.17 16.19 15.01 16.21 14.86 16.29 13.71 16.9 12.37 17.04 11.11 16.68 9.86 16.32 8.8 15.48 8.15 14.34 9.01 14.25 9.84 13.99 10.59 13.56 11.33 13.14 11.99 12.56 12.5 11.88 13.02 11.19 13.39 10.4 13.58 9.56 13.78 8.72 13.8 7.85 13.65 7.01 14.39 7.18 15.09 7.53 15.68 8.02 16.27 8.5 16.74 9.12 17.06 9.82 17.37 10.52 17.52 11.28 17.5 12.04 17.47 12.81 17.27 13.56 16.91 14.23 16.83 14.38 16.81 14.55 16.86 14.71Z"/>
+</vector>

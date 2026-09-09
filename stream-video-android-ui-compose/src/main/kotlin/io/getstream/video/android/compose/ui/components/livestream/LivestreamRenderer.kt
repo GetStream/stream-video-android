@@ -96,7 +96,7 @@ internal fun LivestreamRenderer(
             Image(
                 modifier = Modifier.alpha(0.75f),
                 painter = painterResource(
-                    id = io.getstream.video.android.ui.common.R.drawable.stream_video_ic_play,
+                    id = io.getstream.video.android.compose.R.drawable.stream_design_ic_play_fill,
                 ),
                 contentDescription = null,
             )

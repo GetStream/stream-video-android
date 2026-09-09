@@ -16,20 +16,16 @@
 
 package io.getstream.video.android.compose.ui.components.base
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddAlert
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.QuestionAnswer
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
-import io.getstream.video.android.compose.ui.components.base.styling.StreamBadgeStyles
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 @Preview
 @Composable
@@ -39,48 +35,20 @@ private fun BadgesWithButtonsRootPreview() {
     }
 }
 
+/**
+ * Count badges over icon buttons: one digit, two digits, a plus label, and no badge.
+ */
 @Composable
 internal fun BadgesWithButtonsPreview() {
-    Column {
-        StreamBadgeBox(
-            text = "!",
-            style = StreamBadgeStyles.defaultBadgeStyle(),
-        ) {
-            StreamIconButton(
-                icon = Icons.Default.AddAlert,
-                style = ButtonStyles.secondaryIconButtonStyle(),
-            )
-        }
-        Spacer(modifier = Modifier.size(16.dp))
-        StreamBadgeBox(
-            text = "10",
-            style = StreamBadgeStyles.defaultBadgeStyle(),
-        ) {
-            StreamButton(
-                icon = Icons.Default.Info,
-                text = "Secondary Button",
-                style = ButtonStyles.secondaryButtonStyle(),
-            )
-        }
-        Spacer(modifier = Modifier.size(16.dp))
-        StreamBadgeBox(
-            text = "10+",
-            style = StreamBadgeStyles.defaultBadgeStyle(),
-        ) {
-            StreamIconButton(
-                icon = Icons.Default.QuestionAnswer,
-                style = ButtonStyles.primaryIconButtonStyle(),
-            )
-        }
-        Spacer(modifier = Modifier.size(16.dp))
-        StreamBadgeBox(
-            showWithoutValue = false,
-            style = StreamBadgeStyles.defaultBadgeStyle(),
-        ) {
-            StreamIconButton(
-                icon = Icons.Default.QuestionAnswer,
-                style = ButtonStyles.primaryIconButtonStyle(),
-            )
+    val icon = painterResource(R.drawable.stream_design_ic_message_bubbles_fill)
+    Row(
+        modifier = Modifier.padding(StreamTokens.spacingMd),
+        horizontalArrangement = Arrangement.spacedBy(StreamTokens.spacingMd),
+    ) {
+        listOf("1", "10", "99+", null).forEach { count ->
+            StreamBadgeBox(text = count, showWithoutValue = false) {
+                StreamIconButton(onClick = {}, icon = icon, contentDescription = null)
+            }
         }
     }
 }

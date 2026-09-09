@@ -17,29 +17,35 @@
 package io.getstream.video.android.ui.menu
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamDrawableToggleButton
-import io.getstream.video.android.compose.ui.components.base.StreamIconToggleButton
-import io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles
+import io.getstream.video.android.compose.ui.components.base.StreamButton
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 
 @Composable
@@ -97,13 +103,16 @@ private fun BlurredBackgroundToggleItem(
     toggleState: ToggleableState,
     onClick: () -> Unit = {},
 ) {
-    StreamIconToggleButton(
+    StreamIconButton(
+        onClick = onClick,
+        icon = rememberVectorPainter(icon),
+        contentDescription = null,
         modifier = Modifier.testTag("Stream_Background_${icon.name}_${toggleState.name}"),
-        toggleState = rememberUpdatedState(newValue = toggleState),
-        onIcon = icon,
-        onStyle = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(),
-        offStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle(),
-        onClick = { onClick() },
+        style = if (toggleState == ToggleableState.On) {
+            StreamButtonStyleDefaults.primarySolid
+        } else {
+            StreamButtonStyleDefaults.secondarySolid
+        },
     )
 }
 
@@ -113,14 +122,24 @@ private fun VirtualBackgroundToggleItem(
     toggleState: ToggleableState,
     onClick: () -> Unit = {},
 ) {
-    StreamDrawableToggleButton(
+    StreamButton(
+        onClick = onClick,
         modifier = Modifier.testTag("Stream_Background_Image_${toggleState.name}"),
-        toggleState = rememberUpdatedState(newValue = toggleState),
-        onDrawable = drawable,
-        onStyle = ButtonStyles.drawableToggleButtonStyleOn(),
-        offStyle = ButtonStyles.drawableToggleButtonStyleOff(),
-        onClick = { onClick() },
-    )
+        style = if (toggleState == ToggleableState.On) {
+            StreamButtonStyleDefaults.primaryOutline
+        } else {
+            StreamButtonStyleDefaults.secondaryGhost
+        },
+    ) {
+        Image(
+            painter = painterResource(drawable),
+            contentDescription = null,
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop,
+        )
+    }
 }
 
 @Preview(showBackground = true)

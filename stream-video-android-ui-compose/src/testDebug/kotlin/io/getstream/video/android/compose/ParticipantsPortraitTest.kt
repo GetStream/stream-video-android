@@ -20,12 +20,14 @@ import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
-import io.getstream.video.android.compose.ui.components.call.renderer.CallParticipantLocalPreview
 import io.getstream.video.android.compose.ui.components.call.renderer.CallParticipantRemotePreview
 import io.getstream.video.android.compose.ui.components.call.renderer.LocalVideoContentPreview
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideoPreview
 import io.getstream.video.android.compose.ui.components.call.renderer.internal.ParticipantsColumnPreview
+import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatarsDeprecatedOverloadPreview
+import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatarsOneMemberPreview
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatarsPreview
+import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatarsTwoMembersPreview
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantListAppBarPreview
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoActionsPreview
 import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsListPreview
@@ -46,6 +48,27 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     fun `participant avatars`() {
         snapshotWithDarkMode {
             ParticipantAvatarsPreview()
+        }
+    }
+
+    @Test
+    fun `participant avatars with one member`() {
+        snapshotWithDarkMode {
+            ParticipantAvatarsOneMemberPreview()
+        }
+    }
+
+    @Test
+    fun `participant avatars with two members`() {
+        snapshotWithDarkMode {
+            ParticipantAvatarsTwoMembersPreview()
+        }
+    }
+
+    @Test
+    fun `participant avatars deprecated overload`() {
+        snapshotWithDarkMode {
+            ParticipantAvatarsDeprecatedOverloadPreview()
         }
     }
 
@@ -74,20 +97,6 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     fun `call participants info app bar`() {
         snapshotWithDarkMode {
             CallParticipantListAppBarPreview()
-        }
-    }
-
-    @Test
-    fun `call participant local`() {
-        snapshot {
-            CallParticipantLocalPreview()
-        }
-    }
-
-    @Test
-    fun `call participant local in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            CallParticipantLocalPreview()
         }
     }
 

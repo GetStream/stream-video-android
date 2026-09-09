@@ -33,8 +33,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.StreamButton
-import io.getstream.video.android.compose.ui.components.base.styling.StyleSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.mock.StreamPreviewDataUtils
@@ -131,9 +132,10 @@ private fun ReactionItem(
             .requiredWidth(44.dp)
             .requiredHeight(44.dp)
     }
-    StreamButton(
+    StreamTextButton(
         modifier = modifier,
-        style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle(StyleSize.S),
+        style = StreamButtonStyleDefaults.secondarySolid,
+        size = StreamButtonSize.Small,
         text = text,
         onClick = { onEmojiSelected(reaction.emojiCode) },
     )

@@ -114,20 +114,6 @@ internal class LandscapeVideoRendererTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `landscape participants 7`() {
-        snapshot {
-            LandscapeParticipantsPreview7()
-        }
-    }
-
-    @Test
-    fun `landscape participants 7 in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            LandscapeParticipantsPreview7()
-        }
-    }
-
-    @Test
     fun `landscape screen sharing content for other participant`() {
         snapshot {
             LandscapeScreenSharingContentPreview()
@@ -138,6 +124,20 @@ internal class LandscapeVideoRendererTest : PaparazziComposeTest {
     fun `landscape screen sharing content for other participant in dark mode`() {
         snapshot(isInDarkMode = true) {
             LandscapeScreenSharingContentPreview()
+        }
+    }
+
+    @Test
+    fun `landscape participants 7`() {
+        snapshot {
+            LandscapeParticipantsPreview7()
+        }
+    }
+
+    @Test
+    fun `landscape participants 7 in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            LandscapeParticipantsPreview7()
         }
     }
 

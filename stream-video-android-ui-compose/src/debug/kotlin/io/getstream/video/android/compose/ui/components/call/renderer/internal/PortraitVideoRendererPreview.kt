@@ -75,21 +75,17 @@ private fun PortraitParticipantsRootPreview5() {
     }
 }
 
+@Composable
+internal fun PortraitParticipantsPreview5() {
+    PortraitParticipants(participantCount = 5)
+}
+
 @Preview
 @Composable
 private fun PortraitParticipantsRootPreview6() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         PortraitParticipantsPreview6()
-    }
-}
-
-@Preview
-@Composable
-private fun PortraitParticipantsRootPreview7() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        PortraitParticipantsPreview7()
     }
 }
 
@@ -114,18 +110,8 @@ internal fun PortraitParticipantsPreview4() {
 }
 
 @Composable
-internal fun PortraitParticipantsPreview5() {
-    PortraitParticipants(participantCount = 5)
-}
-
-@Composable
 internal fun PortraitParticipantsPreview6() {
     PortraitParticipants(participantCount = 6)
-}
-
-@Composable
-internal fun PortraitParticipantsPreview7() {
-    PortraitParticipants(participantCount = 7)
 }
 
 @Composable
@@ -146,4 +132,18 @@ private fun PortraitParticipants(participantCount: Int) {
             parentSize = IntSize(screenWidth, screenHeight),
         )
     }
+}
+
+@Preview
+@Composable
+private fun PortraitParticipantsRootPreview7() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        PortraitParticipantsPreview7()
+    }
+}
+
+@Composable
+internal fun PortraitParticipantsPreview7() {
+    PortraitParticipants(participantCount = 7)
 }

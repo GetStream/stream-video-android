@@ -16,39 +16,43 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
-import io.getstream.video.android.core.call.state.CallAction
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.core.call.state.CancelCall
 
 /**
- * A call action button represents canceling a call.
+ * Cancels an outgoing call.
  *
- * @param modifier Optional Modifier for this action button.
- * @param enabled Whether or not this action button will handle input events.
- * @param onCallAction A [CallAction] event that will be fired.
+ * @param modifier The modifier applied to the button.
+ * @param enabled Whether the action accepts clicks.
+ * @param icon The icon of the action, or null for the default one.
+ * @param style The colors of the button, or null for the default style.
+ * @param size The visual size of the button.
+ * @param onCallAction Called with [CancelCall] when the action is clicked.
  */
 @Composable
 public fun CancelCallAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    icon: ImageVector? = null,
-    bgColor: Color? = null,
-    iconTint: Color? = null,
-    style: StreamFixedSizeButtonStyle? = null,
+    icon: Painter? = null,
+    style: StreamButtonStyle? = null,
+    size: StreamButtonSize = StreamButtonSize.Medium,
     onCallAction: (CancelCall) -> Unit,
 ): Unit = GenericAction(
     modifier = modifier,
+    icon = icon ?: painterResource(R.drawable.stream_design_ic_phone_down_fill),
+    contentDescription = stringResource(
+        io.getstream.video.android.ui.common.R.string.stream_video_call_controls_cancel_call,
+    ),
     enabled = enabled,
-    style = style,
+    style = style ?: StreamButtonStyleDefaults.destructiveSolid,
+    size = size,
     onAction = { onCallAction(CancelCall) },
-    icon = icon ?: Icons.Default.Call,
-    color = bgColor ?: VideoTheme.colors.accentError,
-    iconTint = iconTint ?: VideoTheme.colors.textPrimary,
 )

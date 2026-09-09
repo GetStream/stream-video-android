@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.call.controls.actions.CancelCallAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
@@ -97,13 +97,8 @@ private fun OutgoingCallControls(
             modifier = Modifier
                 .testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
             isMicrophoneEnabled = isMicrophoneEnabled,
+            size = StreamButtonSize.Large,
             onCallAction = onCallAction,
-            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
-                1.5f,
-            ),
-            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(
-                1.5f,
-            ),
         )
 
         ToggleSpeakerphoneAction(
@@ -111,12 +106,7 @@ private fun OutgoingCallControls(
                 "Stream_SpeakerToggle_Enabled_$isSpeakerEnabled",
             ),
             isSpeakerphoneEnabled = isSpeakerEnabled,
-            offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
-                1.5f,
-            ),
-            onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(
-                1.5f,
-            ),
+            size = StreamButtonSize.Large,
             onCallAction = onCallAction,
         )
 
@@ -124,13 +114,8 @@ private fun OutgoingCallControls(
             ToggleCameraAction(
                 modifier = Modifier
                     .testTag("Stream_CameraToggle_Enabled_$isCameraEnabled"),
-                offStyle = VideoTheme.styles.buttonStyles.secondaryIconButtonStyle().fillCircle(
-                    1.5f,
-                ),
-                onStyle = VideoTheme.styles.buttonStyles.tertiaryIconButtonStyle().fillCircle(
-                    1.5f,
-                ),
                 isCameraEnabled = isCameraEnabled,
+                size = StreamButtonSize.Large,
                 onCallAction = onCallAction,
             )
         }
@@ -138,9 +123,7 @@ private fun OutgoingCallControls(
         CancelCallAction(
             modifier = Modifier.testTag("Stream_DeclineCallButton"),
             onCallAction = onCallAction,
-            style = VideoTheme.styles.buttonStyles.primaryIconButtonStyle().fillCircle(
-                1.5f,
-            ),
+            size = StreamButtonSize.Large,
         )
     }
 }
