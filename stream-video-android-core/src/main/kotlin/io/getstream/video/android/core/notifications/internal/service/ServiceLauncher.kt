@@ -61,9 +61,9 @@ internal class ServiceLauncher(private val client: StreamVideoClient) {
 
     private val context = client.context
     private val serviceIntentBuilder = ServiceIntentBuilder()
-    private val incomingCallPresenter = IncomingCallPresenter(serviceIntentBuilder)
-    private val telecomHelper = TelecomHelper(client)
-    private val telecomPermissions = TelecomPermissions(client)
+    private val incomingCallPresenter = IncomingCallPresenter(client, serviceIntentBuilder)
+    private val telecomHelper = TelecomHelper()
+    private val telecomPermissions = TelecomPermissions()
     private val jetpackTelecomRepositoryProvider = JetpackTelecomRepositoryProvider(client)
     private val throttler = Throttler()
 
