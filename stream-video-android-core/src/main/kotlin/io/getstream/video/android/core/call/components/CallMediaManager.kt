@@ -26,15 +26,19 @@ import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
+import io.getstream.video.android.core.MicrophoneManager
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.call.utils.PreJoinMicrophoneRecorder
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.webrtc.EglBase
 import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -48,6 +52,8 @@ import kotlinx.coroutines.launch
  * isn't created until the media manager / factory actually needs it.
  * @param mediaManagerFactory creates the [MediaManagerImpl]; owned by the Call facade so the
  * public type's `call` dependency never leaks into this component.
+ * @param preJoinMicrophoneRecorderFactory creates the recorder that meters the microphone before
+ * the call is joined; injected so tests never open a real microphone.
  */
 internal class CallMediaManager(
     private val type: String,
@@ -58,6 +64,10 @@ internal class CallMediaManager(
     private val sessionManager: CallSessionManager,
     private val eglBase: () -> EglBase,
     private val mediaManagerFactory: MediaManagerFactory,
+    preJoinMicrophoneRecorderFactory: PreJoinMicrophoneRecorderFactory =
+        PreJoinMicrophoneRecorderFactory { onSamples ->
+            PreJoinMicrophoneRecorder(clientImpl.context, scope, onSamples)
+        },
 ) {
     private val logger by taggedLogger("Call:MediaManager:$type:$id")
 
@@ -67,6 +77,14 @@ internal class CallMediaManager(
         }
     })
     private val audioLevelOutputHelper = RampValueUpAndDownHelper()
+
+    /**
+     * Feeds the same processor the WebRTC samples callback feeds, so the level reaches
+     * [localMicrophoneAudioLevel] through one path whether or not the call is joined.
+     */
+    private val preJoinMicrophoneRecorder = preJoinMicrophoneRecorderFactory.create { pcm ->
+        soundInputProcessor.processSoundInput(pcm)
+    }
 
     /** Smoothed local microphone volume level (0..1). */
     val localMicrophoneAudioLevel: StateFlow<Float> = audioLevelOutputHelper.currentLevel
@@ -112,7 +130,11 @@ internal class CallMediaManager(
         mediaManagerFactory.create(
             audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
             audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
-        )
+        ).also {
+            // Observed here and not from the call's init: reading the microphone state there
+            // would build the media manager up front, and with it the native EGL context.
+            observePreJoinMicrophone(it.microphone)
+        }
     }
 
     /** Starts streaming smoothed microphone audio levels into [localMicrophoneAudioLevel]. */
@@ -122,6 +144,32 @@ internal class CallMediaManager(
                 audioLevelOutputHelper.rampToValue(it)
             }
         }
+    }
+
+    /**
+     * Reads the microphone while the call has no session, so the lobby shows a live level.
+     *
+     * WebRTC and this recorder must never hold the microphone at the same time, so this one runs
+     * only while there is no session. The session is installed before WebRTC starts capturing, so
+     * the level hands over to the samples callback there, and back when the session is cleared.
+     *
+     * Muting keeps the WebRTC capture running on purpose (it is what detects speaking while
+     * muted), but there is nothing to detect before the call is joined, so a disabled microphone
+     * stops the recorder instead.
+     */
+    private fun observePreJoinMicrophone(microphone: MicrophoneManager) {
+        combine(
+            microphone.isEnabled,
+            sessionManager.session,
+        ) { microphoneEnabled, session ->
+            microphoneEnabled && session == null
+        }.distinctUntilChanged().onEach { shouldRecord ->
+            if (shouldRecord) {
+                preJoinMicrophoneRecorder.start()
+            } else {
+                preJoinMicrophoneRecorder.stop()
+            }
+        }.launchIn(scope)
     }
 
     fun processAudioSample(audioSample: AudioSamples) {
@@ -359,6 +407,7 @@ internal class CallMediaManager(
         // The wanted state must not outlive the call: a reused Call would otherwise re-apply it
         // to the factory built for the next session.
         resetDesiredAudioProcessing()
+        preJoinMicrophoneRecorder.stop()
         mediaManager.cleanup()
     }
 }
