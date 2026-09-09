@@ -29,7 +29,6 @@ import io.getstream.video.android.core.notifications.internal.service.permission
 import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -51,14 +50,12 @@ internal class CallServiceNotificationUpdateObserver(
 ) {
 
     private val logger by taggedLogger("NotificationUpdateObserver")
-    private val incomingRingingNotificationStabilization by lazy {
-        scope.async {
-            val delayMillis = streamVideo.streamNotificationManager
-                .notificationConfig
-                .incomingRingingNotificationUpdateDelayMillis
-            if (delayMillis > 0 && call.state.notificationIdFlow.value != null) {
-                delay(delayMillis)
-            }
+    private suspend fun delayIncomingRingingNotificationUpdate() {
+        val delayMillis = streamVideo.streamNotificationManager
+            .notificationConfig
+            .incomingRingingNotificationUpdateDelayMillis
+        if (delayMillis > 0) {
+            delay(delayMillis)
         }
     }
 
@@ -117,8 +114,11 @@ internal class CallServiceNotificationUpdateObserver(
                 logger.d { "[updateNotification] Skipping equivalent incoming-call update" }
                 return
             }
-            if (shouldStabilizeIncomingRingingNotification(ringingState)) {
-                incomingRingingNotificationStabilization.await()
+            if (
+                shouldStabilizeIncomingRingingNotification(ringingState) &&
+                call.state.notificationIdFlow.value != null
+            ) {
+                delayIncomingRingingNotificationUpdate()
             }
             showNotificationForState(context, ringingState, notification)
         } else {
