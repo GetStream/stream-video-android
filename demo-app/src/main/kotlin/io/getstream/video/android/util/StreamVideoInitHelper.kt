@@ -81,6 +81,8 @@ public enum class InitializedState {
  * @property secret API secret from the local coordinator — used to sign a JWT for [userId].
  * @property userId User ID to connect as.
  * @property token Pre-generated JWT token. If null, one is generated from [secret].
+ * @property sfuId Coordinator edge pin (`?sfu_id=` / `WithPinToSFUID`). When set,
+ * every join / rejoin / migrate asks the coordinator for this SFU.
  */
 data class LocalDevConfig(
     val coordinatorAddress: String,
@@ -88,6 +90,7 @@ data class LocalDevConfig(
     val userId: String,
     val secret: String? = null,
     val token: String? = null,
+    val sfuId: String? = null,
 ) {
     init {
         require(secret != null || token != null) {
@@ -196,6 +199,7 @@ object StreamVideoInitHelper {
                     token = localCfg.resolveToken(),
                     loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
                     localCoordinatorAddress = localCfg.coordinatorAddress,
+                    sfuId = localCfg.sfuId,
                     localTokenProvider = object : TokenProvider {
                         override suspend fun loadToken(): String = localCfg.resolveToken()
                     },
@@ -375,6 +379,7 @@ object StreamVideoInitHelper {
         token: String,
         loggingLevel: LoggingLevel,
         localCoordinatorAddress: String? = null,
+        sfuId: String? = null,
         localTokenProvider: TokenProvider? = null,
     ): StreamVideo {
         val callServiceConfigRegistry = CallServiceConfigRegistry()
@@ -410,6 +415,7 @@ object StreamVideoInitHelper {
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             localCoordinatorAddress = localCoordinatorAddress,
+            sfuId = sfuId,
             callServiceConfigRegistry = callServiceConfigRegistry,
             vibrationConfig = enableRingingCallVibrationConfig(),
             notificationConfig = testNotificationConfig ?: NotificationConfig(

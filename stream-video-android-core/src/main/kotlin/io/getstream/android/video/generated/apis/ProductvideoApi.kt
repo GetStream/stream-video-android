@@ -218,12 +218,16 @@ interface ProductvideoApi {
     /**
      * Join call
      * Request to join a call
+     *
+     * [sfuId] is a coordinator query pin (`WithPinToSFUID`), not part of the
+     * published OpenAPI join body. Re-apply after OpenAPI regeneration.
      */
     @POST("/video/call/{type}/{id}/join")
     suspend fun joinCall(
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String,
-        @Query("connection_id") connectionId: kotlin.String? = null ,
+        @Query("connection_id") connectionId: kotlin.String? = null,
+        @Query("sfu_id") sfuId: kotlin.String? = null,
         @Body joinCallRequest: io.getstream.android.video.generated.models.JoinCallRequest
     ): io.getstream.android.video.generated.models.JoinCallResponse
     
