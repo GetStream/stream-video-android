@@ -104,7 +104,7 @@ internal fun ChatDialog(
             modifier = Modifier.fillMaxWidth(),
             sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             sheetState = state,
-            sheetBackgroundColor = VideoTheme.colors.baseSheetPrimary,
+            sheetBackgroundColor = VideoTheme.colors.backgroundCoreApp,
             sheetContent = {
                 if (state.isVisible) {
                     Column(

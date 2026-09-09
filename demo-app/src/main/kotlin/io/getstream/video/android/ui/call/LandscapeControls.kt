@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CallEnd
@@ -79,7 +80,7 @@ fun LandscapeControls(
         alignment = Alignment.TopEnd,
         offset = IntOffset(
             0,
-            (VideoTheme.dimens.componentHeightL + VideoTheme.dimens.spacingM).toPx().toInt(),
+            (44.dp + 16.dp).toPx().toInt(),
         ),
     ) {
         LandscapeControlsContent(
@@ -112,8 +113,8 @@ fun LandscapeControlsContent(
     Box(
         modifier = Modifier
             .background(
-                color = VideoTheme.colors.baseSheetPrimary,
-                shape = VideoTheme.shapes.dialog,
+                color = VideoTheme.colors.backgroundCoreApp,
+                shape = RoundedCornerShape(24.dp),
             )
             .width(400.dp),
     ) {

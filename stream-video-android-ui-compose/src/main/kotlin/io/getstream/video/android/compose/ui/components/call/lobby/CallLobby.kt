@@ -51,6 +51,7 @@ import io.getstream.video.android.compose.theme.CallLobbyOnDisabledContentParams
 import io.getstream.video.android.compose.theme.CallLobbyOnRenderedContentParams
 import io.getstream.video.android.compose.theme.CallLobbyParticipantLabelContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
@@ -153,7 +154,7 @@ public fun CallLobby(
             participantLabelContent()
         }
 
-        Spacer(modifier = Modifier.height(VideoTheme.dimens.spacingM))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingMd))
 
         lobbyControlsContent.invoke(Modifier.align(Alignment.Start), call)
     }
@@ -310,7 +311,7 @@ internal fun BoxScope.DefaultParticipantLabel(
         soundIndicatorContent = {
             MicrophoneIndicator(
                 modifier = Modifier
-                    .padding(horizontal = VideoTheme.dimens.spacingM)
+                    .padding(horizontal = StreamTokens.spacingMd)
                     .testTag("Stream_UserMicrophone_Enabled_$isMicrophoneEnabled"),
                 isMicrophoneEnabled = isMicrophoneEnabled,
             )
@@ -350,7 +351,7 @@ internal fun OnRenderedContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetTertiary)
+            .background(VideoTheme.colors.backgroundCoreSurfaceDefault)
             .testTag("on_rendered_content"),
     ) {
         VideoRenderer(
@@ -377,12 +378,12 @@ internal fun OnDisabledContent(user: User) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(VideoTheme.colors.baseSheetTertiary)
+            .background(VideoTheme.colors.backgroundCoreSurfaceDefault)
             .testTag("on_disabled_content"),
     ) {
         UserAvatar(
             modifier = Modifier
-                .size(VideoTheme.dimens.genericMax)
+                .size(100.dp)
                 .align(Alignment.Center),
             userImage = user.image,
             userName = user.name.takeUnless { it.isNullOrBlank() } ?: user.id,

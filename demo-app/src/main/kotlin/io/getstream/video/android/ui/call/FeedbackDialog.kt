@@ -78,7 +78,7 @@ fun FeedbackDialog(call: Call, onDismiss: () -> Unit) {
                     Icon(
                         imageVector = Icons.Default.ErrorOutline,
                         contentDescription = "alert",
-                        tint = VideoTheme.colors.alertWarning,
+                        tint = VideoTheme.colors.accentError,
                     )
                     Spacer(modifier = Modifier.size(8.dp))
                 }
@@ -88,7 +88,7 @@ fun FeedbackDialog(call: Call, onDismiss: () -> Unit) {
                         fontSize = 24.sp,
                         lineHeight = 28.sp,
                         fontWeight = FontWeight(500),
-                        color = VideoTheme.colors.basePrimary,
+                        color = VideoTheme.colors.textPrimary,
                         textAlign = TextAlign.Center,
                     ),
                 )
@@ -106,7 +106,7 @@ fun FeedbackDialog(call: Call, onDismiss: () -> Unit) {
                         fontSize = 16.sp,
                         lineHeight = 18.5.sp,
                         fontWeight = FontWeight(400),
-                        color = VideoTheme.colors.baseSecondary,
+                        color = VideoTheme.colors.textSecondary,
                         textAlign = TextAlign.Center,
                     ),
                 )
@@ -137,7 +137,7 @@ fun FeedbackDialog(call: Call, onDismiss: () -> Unit) {
                         fontSize = 24.sp,
                         lineHeight = 28.sp,
                         fontWeight = FontWeight(500),
-                        color = VideoTheme.colors.basePrimary,
+                        color = VideoTheme.colors.textPrimary,
                         textAlign = TextAlign.Center,
                     ),
                 )
@@ -148,7 +148,7 @@ fun FeedbackDialog(call: Call, onDismiss: () -> Unit) {
                         fontSize = 16.sp,
                         lineHeight = 18.5.sp,
                         fontWeight = FontWeight(400),
-                        color = VideoTheme.colors.baseSecondary,
+                        color = VideoTheme.colors.textSecondary,
                         textAlign = TextAlign.Center,
                     ),
                 )

@@ -30,11 +30,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.IncomingCallControlsContentParams
 import io.getstream.video.android.compose.theme.IncomingCallDetailsContentParams
 import io.getstream.video.android.compose.theme.IncomingCallHeaderContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.background.CallBackground
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.MemberState
@@ -153,9 +155,9 @@ public fun IncomingCallContent(
             }
 
             val topPadding = if (participants.size == 1) {
-                VideoTheme.dimens.spacingL
+                StreamTokens.spacingXl
             } else {
-                VideoTheme.dimens.spacingM
+                StreamTokens.spacingMd
             }
             detailsContent?.invoke(this, participants, topPadding)
                 ?: with(VideoTheme.componentFactory) {
@@ -167,7 +169,7 @@ public fun IncomingCallContent(
                         ),
                     )
                 }
-            Spacer(modifier = Modifier.height(VideoTheme.dimens.genericMax))
+            Spacer(modifier = Modifier.height(100.dp))
         }
 
         controlsContent?.invoke(this) ?: with(VideoTheme.componentFactory) {

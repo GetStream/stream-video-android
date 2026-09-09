@@ -20,6 +20,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -63,13 +64,13 @@ public fun UserAvatar(
     modifier: Modifier = Modifier,
     userImage: String? = null,
     userName: String? = null,
-    shape: Shape = VideoTheme.shapes.circle,
+    shape: Shape = CircleShape,
     imageScale: ContentScale = ContentScale.Crop,
     imageDescription: String? = null,
     imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
     @DrawableRes previewModePlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
-    textStyle: TextStyle = VideoTheme.typography.titleM,
+    textStyle: TextStyle = VideoTheme.typography.headingLarge,
     textOffset: DpOffset = DpOffset(0.dp, 0.dp),
     isShowingOnlineIndicator: Boolean = false,
     onlineIndicatorAlignment: OnlineIndicatorAlignment = OnlineIndicatorAlignment.TopEnd,

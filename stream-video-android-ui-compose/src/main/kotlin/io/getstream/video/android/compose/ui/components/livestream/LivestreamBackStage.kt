@@ -55,7 +55,7 @@ internal fun BoxScope.LivestreamBackStage(call: Call) {
                 id = R.string.stream_video_livestreaming_on_backstage_v2,
             ),
             fontSize = 18.sp,
-            color = VideoTheme.colors.basePrimary,
+            color = VideoTheme.colors.textPrimary,
         )
         Spacer(Modifier.height(16.dp))
 
@@ -80,7 +80,7 @@ internal fun BoxScope.LivestreamBackStage() {
             id = R.string.stream_video_livestreaming_on_backstage,
         ),
         fontSize = 14.sp,
-        color = VideoTheme.colors.basePrimary,
+        color = VideoTheme.colors.textPrimary,
     )
 }
 
@@ -95,7 +95,7 @@ internal fun ParticipantCountUi(call: Call) {
         Text(
             "$it participants have joined early",
             fontSize = 16.sp,
-            color = VideoTheme.colors.baseSecondary,
+            color = VideoTheme.colors.textSecondary,
         )
     }
 }
@@ -134,6 +134,6 @@ internal fun CountDownTimerUi(targetUtcTime: String) {
         text = countDownText,
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
-        color = VideoTheme.colors.basePrimary,
+        color = VideoTheme.colors.textPrimary,
     )
 }

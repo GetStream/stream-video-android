@@ -36,7 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
@@ -67,7 +67,7 @@ public fun ParticipantAvatars(
                 val participant = participants.first()
 
                 UserAvatar(
-                    modifier = Modifier.size(VideoTheme.dimens.genericMax),
+                    modifier = Modifier.size(100.dp),
                     userName = participant.user.userNameOrId,
                     userImage = participant.user.image,
                 )
@@ -76,7 +76,7 @@ public fun ParticipantAvatars(
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                         items(participants.take(2)) { participant ->
                             UserAvatar(
-                                modifier = Modifier.size(VideoTheme.dimens.genericL),
+                                modifier = Modifier.size(StreamTokens.size24),
                                 userName = participant.user.userNameOrId,
                                 userImage = participant.user.image,
                             )
@@ -85,7 +85,7 @@ public fun ParticipantAvatars(
 
                     if (participants.size >= 3) {
                         UserAvatar(
-                            modifier = Modifier.size(VideoTheme.dimens.genericM),
+                            modifier = Modifier.size(StreamTokens.size16),
                             userName = participants[2].user.userNameOrId,
                             userImage = participants[2].user.image,
                         )
@@ -127,7 +127,7 @@ public fun ParticipantAvatars(
                 val user = callUsers.first()
                 UserAvatar(
                     modifier = Modifier
-                        .size(VideoTheme.dimens.genericMax * 2)
+                        .size(100.dp * 2)
                         .testTag("Stream_ParticipantAvatar"),
                     userName = user.name ?: user.id,
                     userImage = user.imageUrl,
@@ -137,15 +137,15 @@ public fun ParticipantAvatars(
                 Row {
                     UserAvatar(
                         modifier = Modifier
-                            .size(VideoTheme.dimens.genericMax)
+                            .size(100.dp)
                             .testTag("Stream_ParticipantAvatar"),
                         userName = firstThree[0].userNameOrId,
                         userImage = firstThree[0].imageUrl,
                     )
-                    Spacer(modifier = Modifier.width(VideoTheme.dimens.spacingL))
+                    Spacer(modifier = Modifier.width(StreamTokens.spacingXl))
                     UserAvatar(
                         modifier = Modifier
-                            .size(VideoTheme.dimens.genericMax)
+                            .size(100.dp)
                             .testTag("Stream_ParticipantAvatar"),
                         userName = firstThree[1].userNameOrId,
                         userImage = firstThree[1].imageUrl,
@@ -165,15 +165,15 @@ public fun ParticipantAvatars(
                     Row {
                         UserAvatar(
                             modifier = Modifier
-                                .size(VideoTheme.dimens.genericMax)
+                                .size(100.dp)
                                 .testTag("Stream_ParticipantAvatar"),
                             userName = firstThree[1].userNameOrId,
                             userImage = firstThree[1].imageUrl,
                         )
-                        Spacer(modifier = Modifier.width(VideoTheme.dimens.spacingL))
+                        Spacer(modifier = Modifier.width(StreamTokens.spacingXl))
                         UserAvatar(
                             modifier = Modifier
-                                .size(VideoTheme.dimens.genericMax)
+                                .size(100.dp)
                                 .testTag("Stream_ParticipantAvatar"),
                             userName = firstThree[2].userNameOrId,
                             userImage = firstThree[2].imageUrl,

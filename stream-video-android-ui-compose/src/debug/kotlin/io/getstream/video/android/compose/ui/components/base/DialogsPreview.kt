@@ -51,7 +51,7 @@ internal fun StreamDialogPreview() {
         title = "This Call is Being Recorded",
         // Color is for preview only
         style = StreamDialogStyles.defaultDialogStyle().copy(
-            backgroundColor = VideoTheme.colors.baseSheetTertiary,
+            backgroundColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
         ),
         contentText = "By staying in the call you’re consenting to being recorded.",
         positiveButton = Triple(
@@ -87,7 +87,7 @@ internal fun StreamDialogWithInputPreview() {
                     fontSize = 24.sp,
                     lineHeight = 28.sp,
                     fontWeight = FontWeight(500),
-                    color = VideoTheme.colors.basePrimary,
+                    color = VideoTheme.colors.textPrimary,
                     textAlign = TextAlign.Center,
                 ),
             )
@@ -98,7 +98,7 @@ internal fun StreamDialogWithInputPreview() {
                     fontSize = 16.sp,
                     lineHeight = 18.5.sp,
                     fontWeight = FontWeight(400),
-                    color = VideoTheme.colors.baseSecondary,
+                    color = VideoTheme.colors.textSecondary,
                     textAlign = TextAlign.Center,
                 ),
             )
@@ -121,7 +121,7 @@ internal fun StreamDialogWithInputPreview() {
         },
         // Color is for preview only
         style = StreamDialogStyles.defaultDialogStyle().copy(
-            backgroundColor = VideoTheme.colors.baseSheetTertiary,
+            backgroundColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
         ),
         positiveButton = Triple(
             "Submit",

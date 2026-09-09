@@ -66,11 +66,11 @@ class DeeplinkingActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(VideoTheme.colors.baseSheetPrimary),
+                        .background(VideoTheme.colors.backgroundCoreApp),
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = VideoTheme.colors.brandPrimary,
+                        color = VideoTheme.colors.accentPrimary,
                     )
                 }
             }

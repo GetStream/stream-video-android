@@ -66,8 +66,8 @@ fun AvailableDeviceMenu(
         Card(
             modifier = Modifier.width(140.dp),
             shape = RoundedCornerShape(12.dp),
-            contentColor = VideoTheme.colors.basePrimary,
-            backgroundColor = VideoTheme.colors.baseSheetPrimary,
+            contentColor = VideoTheme.colors.textPrimary,
+            backgroundColor = VideoTheme.colors.backgroundCoreApp,
             elevation = 6.dp,
         ) {
             LazyColumn(
@@ -90,7 +90,7 @@ fun AvailableDeviceMenu(
                                     .show()
                             },
                         text = audioDevice.name,
-                        color = VideoTheme.colors.basePrimary,
+                        color = VideoTheme.colors.textPrimary,
                     )
                 }
             }

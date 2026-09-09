@@ -136,7 +136,7 @@ private fun PortraitParticipants(participantCount: Int) {
     val screenHeight = configuration.screenHeightDp
 
     Box(
-        modifier = Modifier.background(color = VideoTheme.colors.baseSheetPrimary),
+        modifier = Modifier.background(color = VideoTheme.colors.backgroundCoreApp),
     ) {
         PortraitVideoRenderer(
             call = gridCall.call,

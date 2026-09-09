@@ -20,18 +20,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 @Composable
 public fun GenericContainer(
     modifier: Modifier = Modifier,
-    background: Color = VideoTheme.colors.buttonPrimaryDefault,
-    roundness: Dp = VideoTheme.dimens.roundnessL,
+    background: Color = VideoTheme.colors.buttonSecondaryBg,
+    roundness: CornerSize = StreamTokens.radius3xl,
     content: @Composable BoxScope.() -> Unit,
 ): Unit = Box(
     modifier = modifier
@@ -39,6 +40,6 @@ public fun GenericContainer(
             color = background,
             shape = RoundedCornerShape(roundness),
         )
-        .padding(VideoTheme.dimens.spacingXs),
+        .padding(StreamTokens.spacingXxs),
     content = content,
 )

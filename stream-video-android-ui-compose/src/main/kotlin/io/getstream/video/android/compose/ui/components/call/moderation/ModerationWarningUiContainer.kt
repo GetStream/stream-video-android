@@ -46,13 +46,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.moderation.ModerationDefaults
 import io.getstream.video.android.ui.moderation.ModerationThemeConfig
@@ -62,7 +62,7 @@ import kotlinx.coroutines.delay
 internal fun DefaultModerationWarningUiContainer(
     call: Call,
     message: String? = null,
-    config: ModerationThemeConfig = ModerationDefaults.defaultTheme,
+    config: ModerationThemeConfig = defaultModerationThemeConfig(),
     moderationWarningAnimationConfig: ModerationWarningAnimationConfig =
         ModerationWarningAnimationConfig(),
 ) {
@@ -152,7 +152,7 @@ internal fun ModerationWarningUiContent(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                Color.White,
+                moderationThemeConfig.backgroundColor,
                 shape = RoundedCornerShape(
                     topStart = 8.dp,
                     bottomStart = 8.dp,
@@ -193,10 +193,22 @@ internal fun ModerationWarningUiContent(
     }
 }
 
+/**
+ * The default moderation warning look, taken from the theme colors.
+ */
+@Composable
+internal fun defaultModerationThemeConfig(): ModerationThemeConfig =
+    ModerationDefaults.defaultTheme.copy(
+        backgroundColor = VideoTheme.colors.backgroundCoreElevation3,
+        titleColor = VideoTheme.colors.textPrimary,
+        messageColor = VideoTheme.colors.textSecondary,
+        warningStripColor = VideoTheme.colors.accentWarning,
+    )
+
 @Composable
 internal fun ModerationWarningUiContentDemo() {
     ModerationWarningUiContent(
-        ModerationThemeConfig(),
+        defaultModerationThemeConfig(),
         ModerationText("Warning title", "Warning Message"),
     )
 }

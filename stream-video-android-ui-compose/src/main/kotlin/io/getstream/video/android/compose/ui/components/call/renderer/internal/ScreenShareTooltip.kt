@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.ui.common.R
 
@@ -48,32 +49,32 @@ internal fun ScreenShareTooltip(
 
     Row(
         modifier = modifier
-            .height(VideoTheme.dimens.componentHeightM)
+            .height(StreamTokens.size32)
             .wrapContentWidth()
             .clip(RoundedCornerShape(bottomEnd = 8.dp))
             .background(
-                color = VideoTheme.colors.baseSheetQuarternary,
+                color = VideoTheme.colors.backgroundCoreOverlayDarkStrong,
                 shape = RoundedCornerShape(bottomEnd = 8.dp),
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             modifier = Modifier.padding(
-                start = VideoTheme.dimens.spacingXs,
-                end = VideoTheme.dimens.spacingXs,
+                start = StreamTokens.spacingXxs,
+                end = StreamTokens.spacingXxs,
             ),
             painter = painterResource(id = R.drawable.stream_video_ic_screensharing),
-            tint = VideoTheme.colors.basePrimary,
+            tint = VideoTheme.colors.textOnAccent,
             contentDescription = "Presenting",
         )
 
         Text(
             modifier = Modifier.padding(
-                end = VideoTheme.dimens.spacingXs,
+                end = StreamTokens.spacingXxs,
             ).testTag("Stream_ParticipantScreenSharingLabel"),
             text = stringResource(id = R.string.stream_video_screen_sharing_title, userNameOrId),
-            color = VideoTheme.colors.basePrimary,
-            style = VideoTheme.typography.titleXs,
+            color = VideoTheme.colors.textOnAccent,
+            style = VideoTheme.typography.headingExtraSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

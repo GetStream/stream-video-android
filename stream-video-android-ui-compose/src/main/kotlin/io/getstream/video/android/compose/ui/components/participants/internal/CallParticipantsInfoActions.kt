@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.ui.common.R
@@ -59,7 +60,7 @@ internal fun CallParticipantsInfoActions(
             text = stringResource(id = R.string.stream_video_call_participants_info_options_invite),
             style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
         )
-        Spacer(modifier = Modifier.size(VideoTheme.dimens.spacingM))
+        Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
         ToggleMicrophoneAction(
             isMicrophoneEnabled = isLocalAudioEnabled,
             onCallAction = { onMute(!isLocalAudioEnabled) },

@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle
@@ -54,7 +55,7 @@ fun DemoAudioCallContent(
             AudioOnlyCallControls(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = VideoTheme.dimens.genericXxl),
+                    .padding(bottom = 44.dp),
                 isMicrophoneEnabled = micEnabled,
                 isSpeakerEnabled = isSpeakerEnabled,
                 onCallAction = onCallAction,

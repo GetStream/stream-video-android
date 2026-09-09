@@ -17,11 +17,13 @@
 package io.getstream.video.android.compose.ui.components.base.styling
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 public data class DialogStyle(
     public val shape: Shape,
@@ -35,12 +37,12 @@ public data class DialogStyle(
 public open class DialogStyleProvider {
     @Composable
     public fun defaultDialogStyle(): DialogStyle = DialogStyle(
-        shape = VideoTheme.shapes.dialog,
-        backgroundColor = VideoTheme.colors.baseSheetSecondary,
+        shape = RoundedCornerShape(StreamTokens.radius3xl),
+        backgroundColor = VideoTheme.colors.backgroundCoreElevation1,
         titleStyle = StreamTextStyles.defaultTitle(StyleSize.S).default.platform,
         contentTextStyle = StreamTextStyles.defaultBody(StyleSize.S).default.platform,
         iconStyle = IconStyles.defaultIconStyle().default,
-        contentPaddings = PaddingValues(VideoTheme.dimens.spacingL),
+        contentPaddings = PaddingValues(StreamTokens.spacingXl),
     )
 }
 

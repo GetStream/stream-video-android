@@ -20,6 +20,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,14 +58,14 @@ public fun UserAvatarBackground(
     modifier: Modifier = Modifier,
     userImage: String?,
     userName: String?,
-    shape: Shape = VideoTheme.shapes.circle,
-    avatarSize: Dp = VideoTheme.dimens.genericMax,
+    shape: Shape = CircleShape,
+    avatarSize: Dp = 100.dp,
     imageScale: ContentScale = ContentScale.Crop,
     imageDescription: String? = null,
     imageRequestSize: IntSize = IntSize(DEFAULT_IMAGE_SIZE, DEFAULT_IMAGE_SIZE),
     @DrawableRes loadingPlaceholder: Int? = LocalAvatarPreviewProvider.getLocalAvatarLoadingPlaceholder(),
     @DrawableRes previewModePlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
-    textStyle: TextStyle = VideoTheme.typography.titleM,
+    textStyle: TextStyle = VideoTheme.typography.headingLarge,
     textOffset: DpOffset = DpOffset(0.dp, 0.dp),
 ) {
     Box(modifier = modifier.fillMaxSize()) {

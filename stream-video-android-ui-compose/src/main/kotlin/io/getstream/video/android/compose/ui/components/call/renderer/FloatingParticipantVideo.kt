@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.ParticipantVideoParams
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
@@ -87,7 +88,7 @@ public fun BoxScope.FloatingParticipantVideo(
                 participant = participant,
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(VideoTheme.shapes.dialog),
+                    .clip(RoundedCornerShape(StreamTokens.radius3xl)),
                 style = style,
             ),
         )
@@ -104,23 +105,23 @@ public fun BoxScope.FloatingParticipantVideo(
         offsetY = 0f
     }
 
-    val paddingOffset = density.run { VideoTheme.dimens.spacingS.toPx() }
+    val paddingOffset = density.run { StreamTokens.spacingXs.toPx() }
 
     if (LocalInspectionMode.current) {
-        val width = VideoTheme.dimens.genericMax * 2
+        val width = 100.dp * 2
         val height = width * 1.2f
         Card(
             elevation = 8.dp,
             modifier = Modifier
                 .then(modifier)
                 .align(alignment)
-                .padding(VideoTheme.dimens.spacingS)
+                .padding(StreamTokens.spacingXs)
                 .onGloballyPositioned { videoSize = it.size }
                 .size(
                     height = height,
                     width = width,
                 )
-                .clip(VideoTheme.shapes.dialog),
+                .clip(RoundedCornerShape(StreamTokens.radius3xl)),
             shape = RoundedCornerShape(16.dp),
         ) {
             Image(
@@ -142,8 +143,8 @@ public fun BoxScope.FloatingParticipantVideo(
         modifier = Modifier
             .align(alignment)
             .size(
-                height = VideoTheme.dimens.genericMax * 2.2f,
-                width = VideoTheme.dimens.genericMax * 1.5f,
+                height = 100.dp * 2.2f,
+                width = 100.dp * 1.5f,
             )
             .offset { IntOffset(offset.x.toInt(), offset.y.toInt()) }
             .pointerInput(parentBounds) {
@@ -181,9 +182,9 @@ public fun BoxScope.FloatingParticipantVideo(
                 }
             }
             .then(modifier)
-            .padding(VideoTheme.dimens.spacingS)
+            .padding(StreamTokens.spacingXs)
             .onGloballyPositioned { videoSize = it.size },
-        shape = VideoTheme.shapes.dialog,
+        shape = RoundedCornerShape(StreamTokens.radius3xl),
     ) {
         videoRenderer.invoke(participant)
     }

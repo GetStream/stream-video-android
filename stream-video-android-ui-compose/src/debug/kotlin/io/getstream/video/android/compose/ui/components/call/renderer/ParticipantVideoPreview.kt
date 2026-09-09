@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.indicator.SoundIndicator
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
@@ -109,7 +110,7 @@ private fun ParticipantLabelPausedPreview() {
                         audioLevel = 0.8f,
                         modifier = Modifier
                             .align(CenterVertically)
-                            .padding(horizontal = VideoTheme.dimens.spacingS),
+                            .padding(horizontal = StreamTokens.spacingXs),
                     )
                 },
             )

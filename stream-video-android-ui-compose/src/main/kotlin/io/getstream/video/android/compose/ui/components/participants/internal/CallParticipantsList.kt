@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.ui.common.R
@@ -65,7 +66,7 @@ internal fun CallParticipantsList(
 ) {
     Scaffold(
         modifier = modifier,
-        backgroundColor = VideoTheme.colors.baseSheetPrimary,
+        backgroundColor = VideoTheme.colors.backgroundCoreApp,
         topBar = {
             CallParticipantListAppBar(
                 numberOfParticipants = participants.size,
@@ -74,7 +75,7 @@ internal fun CallParticipantsList(
         },
         bottomBar = {
             CallParticipantsInfoActions(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = VideoTheme.dimens.spacingM),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = StreamTokens.spacingMd),
                 isLocalAudioEnabled = isLocalAudioEnabled,
                 onInviteUser = onInviteUser,
                 onMute = onMute,
@@ -85,7 +86,7 @@ internal fun CallParticipantsList(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(VideoTheme.colors.baseSheetPrimary),
+                .background(VideoTheme.colors.backgroundCoreApp),
             contentPadding = PaddingValues(16.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -118,7 +119,7 @@ private fun CallParticipantInfoItem(
         val userName by participant.userNameOrId.collectAsStateWithLifecycle()
         val userImage by participant.image.collectAsStateWithLifecycle()
         UserAvatar(
-            modifier = Modifier.size(VideoTheme.dimens.genericL),
+            modifier = Modifier.size(StreamTokens.size24),
             userImage = userImage,
             userName = userName,
             isShowingOnlineIndicator = true,
@@ -129,8 +130,8 @@ private fun CallParticipantInfoItem(
                 .padding(start = 8.dp)
                 .weight(1f),
             text = userName,
-            style = VideoTheme.typography.bodyM,
-            color = VideoTheme.colors.basePrimary,
+            style = VideoTheme.typography.bodyDefault,
+            color = VideoTheme.colors.textPrimary,
             fontSize = 16.sp,
             maxLines = 1,
         )
@@ -140,7 +141,7 @@ private fun CallParticipantInfoItem(
             if (!audioEnabled) {
                 Icon(
                     painter = painterResource(id = R.drawable.stream_video_ic_mic_off),
-                    tint = VideoTheme.colors.alertWarning,
+                    tint = VideoTheme.colors.accentError,
                     contentDescription = null,
                 )
             }
@@ -151,7 +152,7 @@ private fun CallParticipantInfoItem(
             if (!videoEnabled) {
                 Icon(
                     painter = painterResource(id = R.drawable.stream_video_ic_videocam_off),
-                    tint = VideoTheme.colors.alertWarning,
+                    tint = VideoTheme.colors.accentError,
                     contentDescription = null,
                 )
             }
@@ -162,7 +163,7 @@ private fun CallParticipantInfoItem(
                 Icon(
                     modifier = Modifier.clickable { onUserOptionsSelected(participant) },
                     painter = painterResource(id = R.drawable.stream_video_ic_options),
-                    tint = VideoTheme.colors.basePrimary,
+                    tint = VideoTheme.colors.textPrimary,
                     contentDescription = null,
                 )
 

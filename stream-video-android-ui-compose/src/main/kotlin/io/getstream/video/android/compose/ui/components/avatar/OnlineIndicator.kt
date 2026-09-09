@@ -37,8 +37,8 @@ public fun OnlineIndicator(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .size(12.dp)
-            .background(VideoTheme.colors.baseSheetPrimary, CircleShape)
+            .background(VideoTheme.colors.backgroundCoreApp, CircleShape)
             .padding(2.dp)
-            .background(VideoTheme.colors.alertSuccess, CircleShape),
+            .background(VideoTheme.colors.accentSuccess, CircleShape),
     )
 }

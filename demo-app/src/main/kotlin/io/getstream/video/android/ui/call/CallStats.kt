@@ -236,7 +236,7 @@ fun HeaderWithIconAndBody(icon: ImageVector, header: String, body: String) {
             style = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight(400),
-                color = VideoTheme.colors.basePrimary,
+                color = VideoTheme.colors.textPrimary,
             ),
         )
     }
@@ -369,7 +369,7 @@ fun UserAndCallId(call: Call, clipboardManager: ClipboardManager?) {
                             fontSize = 16.sp,
                             lineHeight = 16.sp,
                             fontWeight = FontWeight.W400,
-                            color = VideoTheme.colors.baseSecondary,
+                            color = VideoTheme.colors.textSecondary,
                         ),
                     )
                 }

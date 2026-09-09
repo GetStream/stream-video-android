@@ -28,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
@@ -73,7 +74,7 @@ fun BoxScope.CustomReactionContent(
     val emojiCode = currentReaction?.response?.emojiCode
     if (currentReaction != null && emojiCode != null) {
         var isEmojiVisible by remember { mutableStateOf(true) }
-        val emojiMapper = VideoTheme.reactionMapper
+        val emojiMapper = VideoTheme.config.reactionMapper
         val emojiText = emojiMapper.map(emojiCode)
 
         LaunchedEffect(key1 = Unit) {
@@ -88,7 +89,7 @@ fun BoxScope.CustomReactionContent(
                     modifier = Modifier
                         .padding(top = maxHeight * 0.10f)
                         .align(style.reactionPosition),
-                    fontSize = VideoTheme.dimens.componentHeightM.value.sp,
+                    fontSize = 32.dp.value.sp,
                 )
             }
         }

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 public data class BadgeStyle(
     public val size: Dp,
@@ -36,15 +37,15 @@ public data class BadgeStyle(
 public open class BadgeStyleProvider {
     @Composable
     public fun defaultBadgeStyle(): BadgeStyle = BadgeStyle(
-        color = VideoTheme.colors.alertSuccess,
+        color = VideoTheme.colors.accentSuccess,
         size = 16.dp,
         textStyle = TextStyle(
             fontSize = 8.sp,
             lineHeight = 10.sp,
             fontWeight = FontWeight.W600,
-            color = VideoTheme.colors.baseTertiary,
+            color = VideoTheme.colors.textTertiary,
         ),
-        contentPaddings = PaddingValues(VideoTheme.dimens.genericXs, 0.dp),
+        contentPaddings = PaddingValues(StreamTokens.size4, 0.dp),
     )
 }
 
