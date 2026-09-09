@@ -408,7 +408,7 @@ public fun BoxScope.ParticipantLabel(
             )
             .padding(
                 start = StreamTokens.spacingSm,
-                end = StreamTokens.spacingXxs,
+                end = StreamTokens.spacingXs,
                 top = StreamTokens.spacingXxs,
                 bottom = StreamTokens.spacingXxs,
             ),
