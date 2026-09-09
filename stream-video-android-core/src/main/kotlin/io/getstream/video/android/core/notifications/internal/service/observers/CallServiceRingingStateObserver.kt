@@ -20,11 +20,11 @@ import android.content.Context
 import android.media.AudioManager
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
-import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -66,11 +66,11 @@ internal class CallServiceRingingStateObserver(
      * Handles incoming call state - plays ringtone and vibrates.
      */
     private fun handleIncomingState(state: RingingState.Incoming) {
-        if (!state.acceptedByMe) {
-            if (isAndroid17OrHigher()) {
-                return
-            }
+        if (call.state.incomingRingtoneOwner.value == IncomingRingtoneOwner.Notification) {
+            return
+        }
 
+        if (!state.acceptedByMe) {
             // Start vibration if allowed
             if (shouldVibrate()) {
                 val pattern = streamVideo.vibrationConfig.vibratePattern
