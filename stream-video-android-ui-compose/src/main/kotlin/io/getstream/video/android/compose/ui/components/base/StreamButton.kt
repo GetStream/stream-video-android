@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -111,7 +112,7 @@ public fun StreamButton(
     )
     if (showProgress) {
         CircularProgressIndicator(
-            color = textStyle.value.platform.color,
+            color = LocalContentColor.current,
             modifier = Modifier.height(StreamTokens.size8),
         )
     }

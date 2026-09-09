@@ -883,14 +883,14 @@ private fun BadNetworkLabel(
                     .align(CenterVertically),
                 imageVector = Icons.Default.SignalWifiBad,
                 contentDescription = null,
-                tint = VideoTheme.colors.textPrimary,
+                tint = VideoTheme.colors.textOnAccent,
             )
             Text(
                 modifier = Modifier.padding(12.dp),
                 text = stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network,
                 ),
-                color = VideoTheme.colors.textPrimary,
+                color = VideoTheme.colors.textOnAccent,
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp,
             )

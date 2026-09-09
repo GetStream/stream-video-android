@@ -162,7 +162,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun LoginScreen(onUserSelected: (TutorialUser) -> Unit) {
-    Surface(modifier = Modifier.fillMaxSize(), color = VideoTheme.colors.textTertiary) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = VideoTheme.colors.backgroundCoreSurfaceDefault,
+    ) {
         Column(
             modifier = Modifier.fillMaxSize(),
         ) {
@@ -184,7 +187,10 @@ fun LoginScreen(onUserSelected: (TutorialUser) -> Unit) {
 
 @Composable
 fun HomeScreen(onLogoutClick: () -> Unit, onDialClick: (callees: List<String>) -> Unit) {
-    Surface(modifier = Modifier.fillMaxSize(), color = VideoTheme.colors.textTertiary) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = VideoTheme.colors.backgroundCoreSurfaceDefault,
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
             HomeHeader(onLogoutClick)
             Spacer(modifier = Modifier.weight(1f))
@@ -249,7 +255,7 @@ private fun UserList(
                 },
             )
             if (idx < users.lastIndex) {
-                Divider(color = VideoTheme.colors.textSecondary, thickness = 1.dp)
+                Divider(color = VideoTheme.colors.borderCoreDefault, thickness = 1.dp)
             }
         }
     }

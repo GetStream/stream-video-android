@@ -192,7 +192,7 @@ public fun CallContent(
     } else {
         Scaffold(
             backgroundColor = VideoTheme.colors.backgroundCoreApp,
-            contentColor = VideoTheme.colors.backgroundCoreApp,
+            contentColor = VideoTheme.colors.textPrimary,
             topBar = {
                 if (orientation == ORIENTATION_PORTRAIT) {
                     appBarContent.invoke(call)

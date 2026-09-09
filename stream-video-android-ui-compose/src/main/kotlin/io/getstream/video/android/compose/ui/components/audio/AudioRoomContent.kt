@@ -155,7 +155,7 @@ public fun AudioRoomContent(
             modifier = modifier
                 .background(VideoTheme.colors.backgroundCoreApp)
                 .padding(32.dp),
-            contentColor = VideoTheme.colors.backgroundCoreApp,
+            contentColor = VideoTheme.colors.textPrimary,
             topBar = {
                 if (isShowingAppBar) {
                     appBarContent.invoke(call)

@@ -181,6 +181,7 @@ public open class ButtonStyleProvider {
                 backgroundColor = VideoTheme.colors.buttonSecondaryBg,
                 contentColor = VideoTheme.colors.textPrimary,
                 disabledBackgroundColor = VideoTheme.colors.backgroundUtilityDisabled,
+                disabledContentColor = VideoTheme.colors.textDisabled,
             ),
             contentPadding = PaddingValues(
                 start = StreamTokens.spacingMd,
@@ -195,8 +196,9 @@ public open class ButtonStyleProvider {
         genericButtonStyle(size = size).copy(
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = VideoTheme.colors.buttonPrimaryBg,
-                contentColor = VideoTheme.colors.textPrimary,
+                contentColor = VideoTheme.colors.buttonPrimaryTextOnAccent,
                 disabledBackgroundColor = VideoTheme.colors.backgroundUtilityDisabled,
+                disabledContentColor = VideoTheme.colors.textDisabled,
             ),
         )
 
@@ -207,6 +209,7 @@ public open class ButtonStyleProvider {
                 backgroundColor = VideoTheme.colors.backgroundCoreApp,
                 contentColor = VideoTheme.colors.textPrimary,
                 disabledBackgroundColor = VideoTheme.colors.backgroundCoreApp,
+                disabledContentColor = VideoTheme.colors.textDisabled,
             ),
             border = BorderStroke(1.dp, VideoTheme.colors.borderCoreDefault),
         )
@@ -218,6 +221,7 @@ public open class ButtonStyleProvider {
                 backgroundColor = VideoTheme.colors.buttonSecondaryBg,
                 contentColor = VideoTheme.colors.textPrimary,
                 disabledBackgroundColor = VideoTheme.colors.backgroundUtilityDisabled,
+                disabledContentColor = VideoTheme.colors.textDisabled,
             ),
             iconStyle = IconStyles.customColorIconStyle(
                 color = VideoTheme.colors.accentPrimary,
@@ -231,6 +235,7 @@ public open class ButtonStyleProvider {
                 backgroundColor = VideoTheme.colors.backgroundCoreApp,
                 contentColor = VideoTheme.colors.textPrimary,
                 disabledBackgroundColor = VideoTheme.colors.backgroundCoreApp,
+                disabledContentColor = VideoTheme.colors.textDisabled,
             ),
         )
 
@@ -239,8 +244,9 @@ public open class ButtonStyleProvider {
         genericButtonStyle(size = size).copy(
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = VideoTheme.colors.buttonDestructiveBg,
-                contentColor = VideoTheme.colors.textPrimary,
+                contentColor = VideoTheme.colors.buttonDestructiveTextOnAccent,
                 disabledBackgroundColor = VideoTheme.colors.backgroundUtilityDisabled,
+                disabledContentColor = VideoTheme.colors.textDisabled,
             ),
         )
 
@@ -383,6 +389,7 @@ public open class ButtonStyleProvider {
                     backgroundColor = VideoTheme.colors.buttonSecondaryBg,
                     contentColor = VideoTheme.colors.textPrimary,
                     disabledBackgroundColor = VideoTheme.colors.backgroundUtilityDisabled,
+                    disabledContentColor = VideoTheme.colors.textDisabled,
                 ),
                 drawableStyle = ButtonDrawableStyles.defaultButtonDrawableStyle(),
             ),
@@ -408,6 +415,7 @@ public open class ButtonStyleProvider {
                     backgroundColor = VideoTheme.colors.backgroundCoreApp,
                     contentColor = VideoTheme.colors.textPrimary,
                     disabledBackgroundColor = VideoTheme.colors.backgroundCoreApp,
+                    disabledContentColor = VideoTheme.colors.textDisabled,
                 ),
                 drawableStyle = ButtonDrawableStyles.customColorFilterButtonDrawableStyle(
                     colorFilter = ColorFilter.lighting(Color.Gray, Color.Transparent),
