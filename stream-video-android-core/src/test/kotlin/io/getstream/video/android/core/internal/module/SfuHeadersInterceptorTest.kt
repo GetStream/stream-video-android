@@ -36,7 +36,7 @@ class SfuHeadersInterceptorTest {
         val request = sendTwirpRequest()
 
         assertThat(request.header("X-Stream-Client"))
-            .isEqualTo("stream-video-android@${BuildConfig.STREAM_VIDEO_VERSION}")
+            .isEqualTo("stream-video-android-v${BuildConfig.STREAM_VIDEO_VERSION}")
     }
 
     @Test

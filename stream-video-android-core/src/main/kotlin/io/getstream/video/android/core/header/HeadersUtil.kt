@@ -86,9 +86,9 @@ class HeadersUtil {
         }.sanitize()
     }
 
-    /** Builds the X-Stream-Client header sent to the SFU, e.g. `stream-video-android@1.30.0`. */
+    /** Builds the X-Stream-Client header sent to the SFU, e.g. `stream-video-android-v1.30.0`. */
     internal fun buildSfuSdkTrackingHeader(): String =
-        "stream-video-android@${BuildConfig.STREAM_VIDEO_VERSION}"
+        "stream-video-android-v${BuildConfig.STREAM_VIDEO_VERSION}"
 
     private fun buildAppVersionForHeader() = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.let { streamVideoImpl ->
         "|app_version=" + (streamVideoImpl.appVersion ?: getAppVersionName())
