@@ -150,8 +150,10 @@ internal class CallMediaManager(
      * Reads the microphone while the call has no session, so the lobby shows a live level.
      *
      * WebRTC and this recorder must never hold the microphone at the same time, so this one runs
-     * only while there is no session. The session is installed before WebRTC starts capturing, so
-     * the level hands over to the samples callback there, and back when the session is cleared.
+     * only while there is no session. The session is installed before WebRTC starts capturing, and
+     * stopping waits for the microphone to be released, so the device is free by the time WebRTC
+     * asks for it. The level hands over to the samples callback there, and back when the session
+     * is cleared.
      *
      * Muting keeps the WebRTC capture running on purpose (it is what detects speaking while
      * muted), but there is nothing to detect before the call is joined, so a disabled microphone
@@ -407,7 +409,9 @@ internal class CallMediaManager(
         // The wanted state must not outlive the call: a reused Call would otherwise re-apply it
         // to the factory built for the next session.
         resetDesiredAudioProcessing()
-        preJoinMicrophoneRecorder.stop()
+        // Not the awaiting stop: teardown runs after the call scope is cancelled, so there is no
+        // coroutine left to wait in and nothing is queuing up for the microphone.
+        preJoinMicrophoneRecorder.stopWithoutWaiting()
         mediaManager.cleanup()
     }
 }

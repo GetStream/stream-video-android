@@ -32,6 +32,7 @@ import io.getstream.video.android.core.call.utils.PreJoinMicrophoneRecorder
 import io.getstream.webrtc.ManagedAudioProcessingFactory
 import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import io.mockk.clearMocks
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -327,7 +328,7 @@ class CallMediaManagerTest {
         session.value = mockk(relaxed = true)
         advanceUntilIdle()
 
-        verify { preJoinMicrophoneRecorder.stop() }
+        coVerify { preJoinMicrophoneRecorder.stop() }
     }
 
     @Test
@@ -340,13 +341,13 @@ class CallMediaManagerTest {
         microphoneEnabled.value = false
         advanceUntilIdle()
 
-        verify { preJoinMicrophoneRecorder.stop() }
+        coVerify { preJoinMicrophoneRecorder.stop() }
     }
 
     @Test
     fun `cleanup releases the microphone`() {
         managerObservingMicrophone().cleanup()
 
-        verify { preJoinMicrophoneRecorder.stop() }
+        verify { preJoinMicrophoneRecorder.stopWithoutWaiting() }
     }
 }

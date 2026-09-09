@@ -30,6 +30,7 @@ import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -61,8 +62,8 @@ private const val BYTES_PER_WINDOW = SAMPLE_RATE_HZ * BYTES_PER_SAMPLE * READ_WI
  * recorder fills that gap with a plain [AudioRecord] and hands the same 16 bit PCM buffers to
  * [onSamples], the way iOS meters an `AVAudioRecorder` in its pre-join view.
  *
- * Only one recorder may hold the microphone, so the caller must [stop] this one before the session
- * starts capturing.
+ * Only one recorder may hold the microphone, so the caller must [stop] this one and wait for it to
+ * return before the session starts capturing.
  */
 internal class PreJoinMicrophoneRecorder(
     private val context: Context,
@@ -85,14 +86,23 @@ internal class PreJoinMicrophoneRecorder(
     }
 
     /**
-     * Stops reading and releases the microphone. The read in flight returns first, so the device is
-     * free at most [READ_WINDOW_MS] later.
+     * Stops reading and returns once the microphone has been released, so the caller can hand the
+     * device to WebRTC. The read in flight has to return first, which takes at most
+     * [READ_WINDOW_MS].
      */
-    fun stop() {
-        job?.let {
-            logger.d { "[stop] releasing the microphone" }
-            it.cancel()
-        }
+    suspend fun stop() {
+        val running = job ?: return
+        job = null
+        logger.d { "[stop] releasing the microphone" }
+        running.cancelAndJoin()
+    }
+
+    /**
+     * Stops reading without waiting for the release. For call teardown, which runs after the call
+     * scope is cancelled and has nothing waiting to take the microphone.
+     */
+    fun stopWithoutWaiting() {
+        job?.cancel()
         job = null
     }
 

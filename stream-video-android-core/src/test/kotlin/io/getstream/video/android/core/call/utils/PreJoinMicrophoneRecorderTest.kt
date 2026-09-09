@@ -29,6 +29,10 @@ import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkAll
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -36,6 +40,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Unit tests for [PreJoinMicrophoneRecorder], which reads the microphone while the call has no
@@ -123,7 +130,43 @@ class PreJoinMicrophoneRecorderTest {
     }
 
     @Test
-    fun `stop is safe before anything was started`() {
+    fun `stop is safe before anything was started`() = runTest(testDispatcher) {
         recorder().stop()
+    }
+
+    /**
+     * The session takes the microphone as soon as the recorder lets go, so [
+     * PreJoinMicrophoneRecorder.stop] has to return after the device is released rather than
+     * after the read loop is merely asked to end.
+     *
+     * Runs the read loop on a real dispatcher with a blocking read, the way a microphone behaves:
+     * on the test dispatcher the loop never yields, so nothing would be in flight to wait for.
+     */
+    @Test
+    fun `stop returns only once the microphone has been released`() = runBlocking {
+        DispatcherProvider.set(testDispatcher, Dispatchers.IO)
+        val reading = CountDownLatch(1)
+        val released = AtomicBoolean(false)
+        givenMicrophone(firstRead = 320)
+        every { anyConstructed<AudioRecord>().release() } answers { released.set(true) }
+        every { anyConstructed<AudioRecord>().read(any<ByteArray>(), any(), any()) } answers {
+            reading.countDown()
+            Thread.sleep(BLOCKING_READ_MS)
+            320
+        }
+        val scope = CoroutineScope(Dispatchers.IO)
+        val recorder = PreJoinMicrophoneRecorder(context, scope) { samples.add(it) }
+
+        recorder.start()
+        assertThat(reading.await(5, TimeUnit.SECONDS)).isTrue()
+        recorder.stop()
+
+        assertThat(released.get()).isTrue()
+        scope.cancel()
+    }
+
+    private companion object {
+        /** Long enough that a stop which does not wait would return mid-read. */
+        const val BLOCKING_READ_MS = 200L
     }
 }
