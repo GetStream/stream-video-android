@@ -23,10 +23,12 @@ import android.telecom.TelecomManager
 import androidx.core.content.ContextCompat
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 
-internal class TelecomPermissions(val client: StreamVideoClient) {
+// TODO pass StreamVideo instance in constructor on v2
+class TelecomPermissions {
 
     private val logger: TaggedLogger by taggedLogger("TelecomPermissions")
 
@@ -66,7 +68,7 @@ internal class TelecomPermissions(val client: StreamVideoClient) {
         }
     }
 
-    private fun optedForTelecom() = client.telecomConfig != null
+    private fun optedForTelecom() = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.telecomConfig != null
 
     fun canUseTelecom(callServiceConfig: CallServiceConfig, context: Context): Boolean {
         return callServiceConfig.enableTelecom && optedForTelecom() && supportsTelecom(context) && hasPermissions(context)
