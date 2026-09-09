@@ -110,13 +110,8 @@ internal class PreJoinMicrophoneRecorder(
     }
 
     private suspend fun read() {
-        val recorder = createRecorder() ?: return
+        val recorder = openRecording() ?: return
         try {
-            safeCall { recorder.startRecording() }
-            if (recorder.recordingState != AudioRecord.RECORDSTATE_RECORDING) {
-                logger.w { "[read] the microphone did not start recording" }
-                return
-            }
             val buffer = ByteArray(BYTES_PER_WINDOW)
             while (currentCoroutineContext().isActive) {
                 val bytesRead = recorder.read(buffer, 0, buffer.size)
@@ -134,18 +129,23 @@ internal class PreJoinMicrophoneRecorder(
     }
 
     /**
-     * Opens the microphone, preferring the source a call uses so the recorder follows the device
-     * the user picked in the lobby, and falling back to the plain one where that is unavailable.
+     * Opens the microphone and starts it, preferring the source a call uses so the recorder follows
+     * the device the user picked in the lobby, and falling back to the plain one where that is
+     * unavailable.
+     *
+     * Starting is part of what each source is tried for: a source can be constructed and still
+     * refuse to record, for example while another app holds the device, and that has to fall
+     * through to the next source rather than give up.
      */
     @SuppressLint("MissingPermission") // checked in start()
-    private fun createRecorder(): AudioRecord? {
+    private fun openRecording(): AudioRecord? {
         val minBufferSize = AudioRecord.getMinBufferSize(
             SAMPLE_RATE_HZ,
             CHANNEL_CONFIG,
             AUDIO_ENCODING,
         )
         if (minBufferSize <= 0) {
-            logger.w { "[createRecorder] no buffer size for ${SAMPLE_RATE_HZ}Hz: $minBufferSize" }
+            logger.w { "[openRecording] no buffer size for ${SAMPLE_RATE_HZ}Hz: $minBufferSize" }
             return null
         }
         val bufferSize = maxOf(minBufferSize, BYTES_PER_WINDOW)
@@ -157,10 +157,15 @@ internal class PreJoinMicrophoneRecorder(
             val recorder = safeCallWithDefault(null) {
                 AudioRecord(source, SAMPLE_RATE_HZ, CHANNEL_CONFIG, AUDIO_ENCODING, bufferSize)
             } ?: continue
-            if (recorder.state == AudioRecord.STATE_INITIALIZED) return recorder
+            if (recorder.state == AudioRecord.STATE_INITIALIZED) {
+                safeCall { recorder.startRecording() }
+                if (recorder.recordingState == AudioRecord.RECORDSTATE_RECORDING) return recorder
+                logger.w { "[openRecording] source $source did not start recording" }
+                safeCall { recorder.stop() }
+            }
             safeCall { recorder.release() }
         }
-        logger.w { "[createRecorder] could not open the microphone" }
+        logger.w { "[openRecording] could not open the microphone" }
         return null
     }
 

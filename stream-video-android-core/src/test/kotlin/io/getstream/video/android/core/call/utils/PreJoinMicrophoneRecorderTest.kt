@@ -117,6 +117,26 @@ class PreJoinMicrophoneRecorderTest {
         assertThat(samples).isEmpty()
     }
 
+    /**
+     * A source can be constructed and still refuse to record, so the fallback has to cover the
+     * start as well as the construction.
+     */
+    @Test
+    fun `a source that will not start recording falls back to the next one`() = runTest(
+        testDispatcher,
+    ) {
+        givenMicrophone(firstRead = 320)
+        var starts = 0
+        every { anyConstructed<AudioRecord>().recordingState } answers {
+            if (starts++ == 0) AudioRecord.RECORDSTATE_STOPPED else AudioRecord.RECORDSTATE_RECORDING
+        }
+
+        recorder().start()
+        advanceUntilIdle()
+
+        assertThat(samples).hasSize(1)
+    }
+
     @Test
     fun `an unusable microphone is given up on instead of reading`() = runTest(testDispatcher) {
         givenMicrophone(firstRead = 320)
