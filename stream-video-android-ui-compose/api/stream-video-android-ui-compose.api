@@ -36,6 +36,8 @@ public final class io/getstream/video/android/compose/permission/SinglePermissio
 public abstract interface class io/getstream/video/android/compose/permission/VideoPermissionsState {
 	public abstract fun getAllPermissionsGranted ()Z
 	public abstract fun getShouldShowRationale ()Z
+	public fun isCameraPermissionDenied ()Z
+	public fun isMicrophonePermissionDenied ()Z
 	public abstract fun launchPermissionRequest ()V
 }
 

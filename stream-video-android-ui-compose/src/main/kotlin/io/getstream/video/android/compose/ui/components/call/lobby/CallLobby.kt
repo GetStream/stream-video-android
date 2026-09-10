@@ -63,6 +63,8 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.model.User
@@ -76,7 +78,8 @@ import io.getstream.video.android.ui.common.R
  * @param call The call includes states and will be rendered with participants.
  * @param user A user to display their name and avatar image on the preview.
  * @param video A participant video to render on the preview renderer.
- * @param permissions Android permissions that should be required to render a video call properly.
+ * @param permissions Android permissions that should be required to render a video call properly. When
+ * the camera or microphone permission was denied, tapping the matching control requests it again.
  * @param onRenderedContent A video renderer, which renders a local video track before joining a call.
  * @param onDisabledContent Content is shown that a local camera is disabled. It displays user avatar by default.
  * @param videoPreviewModifier Modifier applied to the [Box] that wraps the local video preview. Defaults
@@ -134,7 +137,14 @@ public fun CallLobby(
         DefaultOnCallActionHandler.onCallAction(call, it)
     },
     lobbyControlsContent: @Composable (modifier: Modifier, call: Call) -> Unit = { modifier, call ->
-        DefaultLobbyControlsSlot(modifier, call, isCameraEnabled, isMicrophoneEnabled, onCallAction)
+        DefaultLobbyControlsSlot(
+            modifier = modifier,
+            call = call,
+            isCameraEnabled = isCameraEnabled,
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            permissions = permissions,
+            onCallAction = onCallAction,
+        )
     },
 ) {
     DefaultPermissionHandler(videoPermission = permissions)
@@ -212,7 +222,14 @@ public fun CallLobby(
         DefaultOnCallActionHandler.onCallAction(call, it)
     },
     lobbyControlsContent: @Composable (modifier: Modifier, call: Call) -> Unit = { modifier, call ->
-        DefaultLobbyControlsSlot(modifier, call, isCameraEnabled, isMicrophoneEnabled, onCallAction)
+        DefaultLobbyControlsSlot(
+            modifier = modifier,
+            call = call,
+            isCameraEnabled = isCameraEnabled,
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            permissions = permissions,
+            onCallAction = onCallAction,
+        )
     },
 ) {
     CallLobby(
@@ -279,6 +296,7 @@ private fun DefaultLobbyControlsSlot(
     call: Call,
     isCameraEnabled: Boolean,
     isMicrophoneEnabled: Boolean,
+    permissions: VideoPermissionsState,
     onCallAction: (CallAction) -> Unit,
 ) {
     VideoTheme.componentFactory.CallLobbyControlsContent(
@@ -287,9 +305,25 @@ private fun DefaultLobbyControlsSlot(
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
             modifier = modifier,
-            onCallAction = onCallAction,
+            onCallAction = lobbyControlsCallActionHandler(permissions, onCallAction),
         ),
     )
+}
+
+/**
+ * Wraps [onCallAction] so that toggling a device whose permission was denied also asks for the
+ * permission again. The toggle itself is still forwarded, so the device turns on once granted.
+ */
+internal fun lobbyControlsCallActionHandler(
+    permissions: VideoPermissionsState,
+    onCallAction: (CallAction) -> Unit,
+): (CallAction) -> Unit = { action ->
+    val needsPermission = (action is ToggleCamera && permissions.isCameraPermissionDenied) ||
+        (action is ToggleMicrophone && permissions.isMicrophonePermissionDenied)
+    if (needsPermission) {
+        permissions.launchPermissionRequest()
+    }
+    onCallAction(action)
 }
 
 @Composable
