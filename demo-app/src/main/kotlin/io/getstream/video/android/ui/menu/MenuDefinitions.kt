@@ -367,11 +367,7 @@ fun debugSubmenu(
     onToggleAudioProfile: () -> Unit = {},
 ) = listOf(
     ActionMenuItem(
-        title = if (isMusicAudioProfile) {
-            "Audio profile: MUSIC (tap for voice)"
-        } else {
-            "Audio profile: VOICE (tap for music)"
-        },
+        title = if (isMusicAudioProfile) "Music mode: On" else "Music mode: Off",
         icon = Icons.Default.MusicNote,
         highlight = isMusicAudioProfile,
         action = onToggleAudioProfile,
