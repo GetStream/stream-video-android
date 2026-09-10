@@ -33,7 +33,6 @@ import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PhoneInTalk
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RawOff
 import androidx.compose.material.icons.filled.RawOn
@@ -98,8 +97,6 @@ fun defaultStreamMenu(
     onToggleAudioUsage: () -> Unit = {},
     selectedRecordingTypes: Set<RecordingType> = emptySet(),
     onSelectRecordingType: (RecordingType) -> Unit = {},
-    isCommunicationAudioModeEnabled: Boolean = true,
-    onToggleCommunicationAudioMode: (Boolean) -> Unit = {},
     isMusicAudioProfile: Boolean = false,
     onToggleAudioProfile: () -> Unit = {},
 ) = buildList<MenuItem> {
@@ -181,8 +178,6 @@ fun defaultStreamMenu(
                     onToggleAudioUsage,
                     selectedRecordingTypes,
                     onSelectRecordingType,
-                    isCommunicationAudioModeEnabled,
-                    onToggleCommunicationAudioMode,
                     isMusicAudioProfile,
                     onToggleAudioProfile,
                 ),
@@ -368,14 +363,9 @@ fun debugSubmenu(
     onToggleAudioUsage: () -> Unit,
     selectedRecordingTypes: Set<RecordingType>,
     onSelectRecordingType: (RecordingType) -> Unit,
-    isCommunicationAudioModeEnabled: Boolean = true,
-    onToggleCommunicationAudioMode: (Boolean) -> Unit = {},
     isMusicAudioProfile: Boolean = false,
     onToggleAudioProfile: () -> Unit = {},
 ) = listOf(
-    // The whole audio profile in one tap. "Audio mode" below is not part of it: it is the lever
-    // underneath every stage the profile reaches, and it costs echo cancellation and Bluetooth
-    // capture, so it stays a deliberate, separate choice.
     ActionMenuItem(
         title = if (isMusicAudioProfile) {
             "Audio profile: MUSIC (tap for voice)"
@@ -385,16 +375,6 @@ fun debugSubmenu(
         icon = Icons.Default.MusicNote,
         highlight = isMusicAudioProfile,
         action = onToggleAudioProfile,
-    ),
-    ActionMenuItem(
-        title = if (isCommunicationAudioModeEnabled) {
-            "Audio mode: IN_COMMUNICATION"
-        } else {
-            "Audio mode: NORMAL"
-        },
-        icon = Icons.Default.PhoneInTalk,
-        highlight = isCommunicationAudioModeEnabled,
-        action = { onToggleCommunicationAudioMode(!isCommunicationAudioModeEnabled) },
     ),
     DynamicSubMenuItem(
         title = "List Transcriptions",

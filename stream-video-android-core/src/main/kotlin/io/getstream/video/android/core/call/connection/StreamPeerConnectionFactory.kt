@@ -19,9 +19,11 @@ package io.getstream.video.android.core.call.connection
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioDeviceInfo
+import android.media.AudioManager
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
+import androidx.core.content.getSystemService
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.api.SignalServerService
@@ -36,7 +38,10 @@ import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.trace.Tracer
+import io.getstream.video.android.core.utils.audioSourceName
+import io.getstream.video.android.core.utils.captureAudioSourceFor
 import io.getstream.video.android.core.utils.defaultHardwareAudioEffectsEnabled
+import io.getstream.video.android.core.utils.formatAudioCaptureKnobs
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import kotlinx.coroutines.CoroutineScope
 import org.webrtc.AudioSource
@@ -228,6 +233,13 @@ public class StreamPeerConnectionFactory(
     private var desiredHardwareNoiseSuppressorEnabled: Boolean? = null
 
     /**
+     * Same lifetime as [desiredHardwareNoiseSuppressorEnabled]: the built-in AEC is attached
+     * to the current recording session and rebuilt from the builder flag on the next start.
+     */
+    @Volatile
+    private var desiredHardwareAcousticEchoCancelerEnabled: Boolean? = null
+
+    /**
      * Enables or disables the platform noise suppressor on the live recording session.
      *
      * Unlike the builder flag this takes effect immediately, but only while audio is being
@@ -269,6 +281,46 @@ public class StreamPeerConnectionFactory(
         }
         audioLogger.d {
             "[reapplyHardwareNoiseSuppressor] desired: $desired, applied: $applied"
+        }
+    }
+
+    /**
+     * Enables or disables the platform acoustic echo canceller on the live recording session.
+     *
+     * Counterpart of [setHardwareNoiseSuppressorEnabled]. The request is remembered and
+     * re-applied when capture restarts, including after [setCaptureAudioSource] rebuilds
+     * the AudioRecord — without that, a music-mode source change would resurrect AEC from
+     * the builder flag.
+     */
+    internal fun setHardwareAcousticEchoCancelerEnabled(enabled: Boolean): Boolean {
+        desiredHardwareAcousticEchoCancelerEnabled = enabled
+        return safeCallWithDefault(false) {
+            adm?.setAcousticEchoCancelerEnabled(enabled) ?: false
+        }
+    }
+
+    /**
+     * Whether this device has a platform acoustic echo canceller at all.
+     *
+     * Same split as [isHardwareNoiseSuppressorSupported]: a device with no canceller has
+     * nothing cancelling, which is not a refused stage.
+     */
+    internal fun isHardwareAcousticEchoCancelerSupported(): Boolean = safeCallWithDefault(false) {
+        JavaAudioDeviceModule.isBuiltInAcousticEchoCancelerSupported()
+    }
+
+    /**
+     * Re-applies [desiredHardwareAcousticEchoCancelerEnabled] to the recording session that
+     * has just started. No-op when the caller never expressed a preference.
+     */
+    @VisibleForTesting
+    internal fun reapplyHardwareAcousticEchoCanceler() {
+        val desired = desiredHardwareAcousticEchoCancelerEnabled ?: return
+        val applied = safeCallWithDefault(false) {
+            adm?.setAcousticEchoCancelerEnabled(desired) ?: false
+        }
+        audioLogger.d {
+            "[reapplyHardwareAcousticEchoCanceler] desired: $desired, applied: $applied"
         }
     }
 
@@ -345,17 +397,66 @@ public class StreamPeerConnectionFactory(
             .also { factoryCreated = true }
     }
 
+    /**
+     * Switches the live capture source on the audio device module.
+     *
+     * Android cannot change the source of an open AudioRecord, so the module releases and rebuilds
+     * it. Must not be called from the main thread: the rebuild takes the same lock recording
+     * teardown holds while it joins the capture thread.
+     *
+     * @return true when the source now in effect is [audioSource]. False when no module exists
+     * yet, or the platform refused the source and restored the last one that worked.
+     */
+    internal fun setCaptureAudioSource(audioSource: Int): Boolean {
+        return safeCallWithDefault(false) {
+            val module = adm ?: return@safeCallWithDefault false
+            module.setAudioSource(audioSource)
+            module.audioSource == audioSource
+        }.also { applied ->
+            audioLogger.i {
+                "[setCaptureAudioSource] requested=${audioSourceName(audioSource)} " +
+                    "applied=$applied ${currentAudioCaptureKnobs()}"
+            }
+        }
+    }
+
+    private fun currentAudioCaptureKnobs(): String {
+        val profile = audioBitrateProfileProvider?.invoke() ?: audioBitrateProfile
+        return formatAudioCaptureKnobs(
+            profile = profile,
+            audioMode = context.getSystemService<AudioManager>()?.mode,
+            audioSource = safeCallWithDefault(null) { adm?.audioSource },
+            hwAec = desiredHardwareAcousticEchoCancelerEnabled
+                ?: defaultHardwareAudioEffectsEnabled(profile),
+            hwNs = desiredHardwareNoiseSuppressorEnabled
+                ?: defaultHardwareAudioEffectsEnabled(profile),
+        )
+    }
+
     private fun initAudioDeviceModule(): JavaAudioDeviceModule? {
         // Capture the audio bitrate profile when initializing the audio device module
         audioBitrateProfile = audioBitrateProfileProvider?.invoke()
 
+        val audioSource = captureAudioSourceFor(audioBitrateProfile)
         val useHardwareAcousticEchoCanceler =
             defaultHardwareAudioEffectsEnabled(audioBitrateProfile)
         val useHardwareNoiseSuppressor =
             defaultHardwareAudioEffectsEnabled(audioBitrateProfile)
 
+        audioLogger.i {
+            "[initAudioDeviceModule] " +
+                formatAudioCaptureKnobs(
+                    profile = audioBitrateProfile,
+                    audioMode = context.getSystemService<AudioManager>()?.mode,
+                    audioSource = audioSource,
+                    hwAec = useHardwareAcousticEchoCanceler,
+                    hwNs = useHardwareNoiseSuppressor,
+                )
+        }
+
         adm = JavaAudioDeviceModule
             .builder(context)
+            .setAudioSource(audioSource)
             .setUseHardwareAcousticEchoCanceler(useHardwareAcousticEchoCanceler)
             .apply {
                 if (audioUsageProvider.invoke() != defaultAudioUsage) {
@@ -403,10 +504,13 @@ public class StreamPeerConnectionFactory(
             .setAudioRecordStateCallback(object :
                 JavaAudioDeviceModule.AudioRecordStateCallback {
                 override fun onWebRtcAudioRecordStart() {
-                    audioLogger.d { "[onWebRtcAudioRecordStart] no args" }
+                    audioLogger.d {
+                        "[onWebRtcAudioRecordStart] ${currentAudioCaptureKnobs()}"
+                    }
                     // The platform effects are rebuilt from the builder flags for every recording
                     // session, so a runtime override has to be re-applied here or it is lost.
                     reapplyHardwareNoiseSuppressor()
+                    reapplyHardwareAcousticEchoCanceler()
                 }
 
                 override fun onWebRtcAudioRecordStop() {

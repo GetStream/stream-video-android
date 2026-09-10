@@ -54,6 +54,7 @@ import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RtpParameters
+import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
@@ -390,9 +391,7 @@ internal class Publisher(
      * @return true when a live audio sender accepted the new parameters.
      */
     internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean {
-        val senders = safeCallWithDefault(emptyList()) {
-            transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO).mapNotNull { it.sender }
-        }
+        val senders = audioSenders()
         if (senders.isEmpty()) {
             logger.d { "[setAudioMaxBitrate] no audio sender to apply $maxBitrateBps to" }
             return false
@@ -409,6 +408,18 @@ internal class Publisher(
                 }
             }
         }
+    }
+
+    /**
+     * Whether an audio sender exists to take a bitrate ceiling.
+     *
+     * No sender is not a refused stage: [computeTransceiverEncodings] reads the published
+     * profile when the transceiver is added, so the next publish already has the right ceiling.
+     */
+    internal fun hasLiveAudioSender(): Boolean = audioSenders().isNotEmpty()
+
+    private fun audioSenders(): List<RtpSender> = safeCallWithDefault(emptyList()) {
+        transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO).mapNotNull { it.sender }
     }
 
     /**

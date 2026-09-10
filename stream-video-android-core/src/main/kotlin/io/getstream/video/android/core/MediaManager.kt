@@ -57,7 +57,9 @@ import io.getstream.video.android.core.camera.DefaultCameraCharacteristicsValida
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCallAction
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.utils.buildAudioConstraints
+import io.getstream.video.android.core.utils.captureAudioSourceFor
 import io.getstream.video.android.core.utils.defaultHardwareAudioEffectsEnabled
 import io.getstream.video.android.core.utils.defaultSoftwareAudioProcessingEnabled
 import io.getstream.video.android.core.utils.mapState
@@ -71,6 +73,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Capturer
@@ -652,11 +655,10 @@ class MicrophoneManager(
      * Whether the device is being asked to stay in `AudioManager.MODE_IN_COMMUNICATION`, which is
      * where a call puts it by default, rather than `AudioManager.MODE_NORMAL`.
      *
-     * A stage of its own, below every stage the audio bitrate profile reaches: on some devices the
-     * audio mode, not the requested capture source, is what selects the vendor's VoIP capture
-     * chain. Follows the default until [setCommunicationAudioModeEnabled] is called.
+     * Follows [audioBitrateProfile] — off under MUSIC_HIGH_QUALITY. Not a public knob:
+     * the profile decides the mode so this state and [audioBitrateProfile] cannot disagree.
      */
-    val communicationAudioModeEnabled: StateFlow<Boolean> = _communicationAudioModeEnabled
+    internal val communicationAudioModeEnabled: StateFlow<Boolean> = _communicationAudioModeEnabled
 
     // API
     /** Enable the audio, the rtc engine will automatically inform the SFU */
@@ -933,9 +935,11 @@ class MicrophoneManager(
      * starts playing music switch to MUSIC_HIGH_QUALITY without rejoining.
      *
      * A mid-call switch is therefore not identical to joining under the same profile. Hardware
-     * echo cancellation and the capture audio source are fixed when the pipeline is built, and the
-     * Opus bitrate and channel count in the SDP come from the server at join — the SFU is not
-     * asked again. It is everything that is left once the call is running.
+     * echo cancellation is still fixed when the pipeline is built, and the Opus bitrate and
+     * channel count in the SDP come from the server at join — the SFU is not asked again. The
+     * capture audio source can move with the profile: the audio device module rebuilds
+     * AudioRecord onto MIC for MUSIC_HIGH_QUALITY and back onto VOICE_COMMUNICATION for a
+     * voice profile. It is everything that is left once the call is running.
      *
      * **Expect a brief gap in captured audio** on a mid-call switch that changes the software
      * audio processing stage: those constraints are fixed when the audio source is created, so the
@@ -946,9 +950,19 @@ class MicrophoneManager(
      * when joining under that profile. With speakers that sends echo to everyone else, so treat
      * music as a headphones setting.
      *
-     * [setCommunicationAudioModeEnabled] is deliberately not part of any profile: it costs echo
-     * cancellation, communication routing and Bluetooth capture outright, which is well past what
-     * asking for a music profile should imply.
+     * MUSIC_HIGH_QUALITY also leaves `AudioManager.MODE_IN_COMMUNICATION` for `MODE_NORMAL`,
+     * and switches the live capture source to `MediaRecorder.AudioSource.MIC` (voice profiles
+     * put both back). Those two have to land together, and the mode has to land first: the
+     * source alone still sits in the vendor VoIP graph while the device is in communication
+     * mode, and the mode alone against `VOICE_COMMUNICATION` parks capture on a near-silent
+     * path. The mode is not a reported [AudioProfileResult] stage: routing may not be managed
+     * (`USAGE_MEDIA`) or may not have started yet, and treating that as a refused stage would
+     * hide a profile that otherwise took. The request is still recorded on
+     * [communicationAudioModeEnabled] and applied when routing starts. The source is reported
+     * as [AudioProfileResult.captureAudioSourceApplied].
+     *
+     * **Costs communication routing and Bluetooth capture** while music is on: SCO only runs in
+     * communication mode.
      *
      * @param profile The audio bitrate profile to use.
      * @return the profile and, for a mid-call switch, what each stage did — see
@@ -1002,6 +1016,10 @@ class MicrophoneManager(
             // Nothing is capturing or publishing yet, so there is no stage to move: the pipeline
             // is built from the profile when the call joins, and the SFU picks the bitrate. The
             // profile is in force by construction, so it is published unconditionally here.
+            // The audio mode has to be requested now: AudioSwitch enters communication mode when
+            // it activates, which is after this returns, and Samsung binds the VoIP capture chain
+            // to that mode at AudioRecord open.
+            applyCommunicationAudioModeForProfile(profile)
             _audioBitrateProfile.value = profile
             return Result.success(
                 AudioProfileResult(
@@ -1009,8 +1027,10 @@ class MicrophoneManager(
                     audioMaxBitrateBps = null,
                     noiseCancellationApplied = true,
                     platformNoiseSuppressorApplied = true,
+                    platformAcousticEchoCancelerApplied = true,
                     softwareAudioProcessingApplied = true,
                     audioMaxBitrateApplied = true,
+                    captureAudioSourceApplied = true,
                 ),
             )
         }
@@ -1046,31 +1066,50 @@ class MicrophoneManager(
      * noise-cancellation processor — are re-requested, because the values they remember are
      * re-applied when capture restarts and would otherwise resurrect the profile this call just
      * decided it is not on.
+     *
+     * Mode and capture source have to revert together. Leaving `MODE_NORMAL` against
+     * `VOICE_COMMUNICATION` (or the reverse) is the pair that parks capture on a near-silent
+     * path on some vendors.
      */
-    private fun revertProfileDerivedState(previousProfile: AudioBitrateProfile) {
+    private suspend fun revertProfileDerivedState(previousProfile: AudioBitrateProfile) {
         hardwareNoiseSuppressorEnabled = defaultHardwareAudioEffectsEnabled(previousProfile)
         softwareAudioProcessingEnabled = defaultSoftwareAudioProcessingEnabled(previousProfile)
 
         val call = mediaManager.call
         call.setHardwareNoiseSuppressorEnabled(hardwareNoiseSuppressorEnabled)
+        call.setHardwareAcousticEchoCancelerEnabled(hardwareNoiseSuppressorEnabled)
         call.setAudioProcessingEnabled(
             previousProfile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
         )
+        applyCommunicationAudioModeForProfile(previousProfile)
+        applyCaptureAudioSourceForProfile(previousProfile)
     }
 
     /**
      * Moves each stage of the running pipeline onto [profile], reporting what reached the device.
      *
-     * The four stages fail independently and for unrelated reasons, so each is applied and
+     * The stages fail independently and for unrelated reasons, so each is applied and
      * reported on its own rather than short-circuiting on the first refusal — a caller needs to
      * know *which* stage is still processing its audio the old way.
      */
-    private fun applyProfileToRunningCall(
+    private suspend fun applyProfileToRunningCall(
         profile: AudioBitrateProfile,
         softwareAudioProcessingChanged: Boolean,
     ): AudioProfileResult {
         val call = mediaManager.call
         val isMusic = profile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+
+        // First: the vendor capture graph is selected by the audio mode on some devices.
+        // Applied before the source rebuild so a new AudioRecord, if one is opened, sees
+        // MODE_NORMAL rather than being migrated afterwards.
+        applyCommunicationAudioModeForProfile(profile)
+        val captureAudioSourceApplied = applyCaptureAudioSourceForProfile(profile)
+        if (!captureAudioSourceApplied) {
+            logger.w {
+                "[setAudioBitrateProfile] capture source did not move; the audio device " +
+                    "module is still on the previous source"
+            }
+        }
 
         // The noise-cancellation processor is the stage no other control on this class reaches,
         // and where one is configured it is the dominant suppressor: leaving it running makes
@@ -1081,16 +1120,37 @@ class MicrophoneManager(
         val noiseCancellationApplied = !noiseCancellationReachable ||
             call.isAudioProcessingEnabled() == noiseCancellationWanted
 
+        // Joined muted (or otherwise not publishing) is the same as a switch before joining:
+        // there is no recording session and no sender, so there is nothing to move. The
+        // requests are remembered and applied when the first audio track is created —
+        // platform effects on AudioRecord start, software constraints on the next source,
+        // bitrate on addTransceiver. A live sender that refused is the refused stage.
+        val audioIsLive = call.hasLiveAudioSender()
+
         // A device with no platform noise suppressor has nothing suppressing, so the profile is
         // satisfied — the same rule as an absent noise-cancellation processor. The setter cannot
         // tell the two apart: it returns false for "unsupported" and "refused" alike.
         val platformNoiseSuppressorApplied =
             call.setHardwareNoiseSuppressorEnabled(hardwareNoiseSuppressorEnabled) ||
-                !call.isHardwareNoiseSuppressorSupported()
+                !call.isHardwareNoiseSuppressorSupported() ||
+                !audioIsLive
         if (!platformNoiseSuppressorApplied) {
             logger.w {
                 "[setAudioBitrateProfile] the platform did not take the noise suppressor " +
                     "request; it will be retried when capture restarts"
+            }
+        }
+
+        // Same rule and the same profile bit as the noise suppressor: music turns both
+        // platform effects off, voice turns them back on. A device with no AEC is satisfied.
+        val platformAcousticEchoCancelerApplied =
+            call.setHardwareAcousticEchoCancelerEnabled(hardwareNoiseSuppressorEnabled) ||
+                !call.isHardwareAcousticEchoCancelerSupported() ||
+                !audioIsLive
+        if (!platformAcousticEchoCancelerApplied) {
+            logger.w {
+                "[setAudioBitrateProfile] the platform did not take the acoustic echo " +
+                    "canceller request; it will be retried when capture restarts"
             }
         }
 
@@ -1100,7 +1160,8 @@ class MicrophoneManager(
             if (!softwareAudioProcessingChanged) {
                 true
             } else {
-                call.rebuildAudioCapturePipeline().also { applied ->
+                val rebuilt = call.rebuildAudioCapturePipeline()
+                (rebuilt || !audioIsLive).also { applied ->
                     if (!applied) {
                         logger.w {
                             "[setAudioBitrateProfile] the audio pipeline was not rebuilt; the " +
@@ -1115,48 +1176,54 @@ class MicrophoneManager(
             serverBitrateBps = call.audioBitrateFor(profile),
             negotiatedBitrateBps = call.negotiatedAudioBitrate(),
         )
-        val audioMaxBitrateApplied = call.setAudioMaxBitrate(maxBitrateBps)
+        val bitrateReachedASender = call.setAudioMaxBitrate(maxBitrateBps)
+        val audioMaxBitrateApplied = bitrateReachedASender || !audioIsLive
         if (!audioMaxBitrateApplied) {
             logger.w {
-                "[setAudioBitrateProfile] requested $maxBitrateBps bps but no live audio " +
-                    "sender took it"
+                "[setAudioBitrateProfile] requested $maxBitrateBps bps but the live audio " +
+                    "sender did not take it"
             }
         }
 
         return AudioProfileResult(
             profile = profile,
-            audioMaxBitrateBps = maxBitrateBps.takeIf { audioMaxBitrateApplied },
+            audioMaxBitrateBps = maxBitrateBps.takeIf { bitrateReachedASender },
             noiseCancellationApplied = noiseCancellationApplied,
             platformNoiseSuppressorApplied = platformNoiseSuppressorApplied,
+            platformAcousticEchoCancelerApplied = platformAcousticEchoCancelerApplied,
             softwareAudioProcessingApplied = softwareAudioProcessingApplied,
             audioMaxBitrateApplied = audioMaxBitrateApplied,
+            captureAudioSourceApplied = captureAudioSourceApplied,
         ).also { logger.i { "[setAudioBitrateProfile] $it" } }
     }
 
     /**
-     * Switches the device between `AudioManager.MODE_IN_COMMUNICATION` and
-     * `AudioManager.MODE_NORMAL` while the call is running.
-     *
-     * Where the other controls turn off a processing stage, this one decides which capture chain
-     * the platform builds in the first place. Some vendors — Samsung in particular — key their
-     * VoIP processing off the audio mode rather than the requested capture source, and that
-     * processing sits below the `AudioEffect` API, so it survives every stage
-     * [setAudioBitrateProfile] reaches. Leaving communication mode is the only lever that reaches
-     * it.
-     *
-     * **Costs echo cancellation and communication routing.** Bluetooth loses capture altogether:
-     * SCO only runs in communication mode. Try the audio bitrate profile first and reach for this
-     * one when the platform is still gating audio after it.
-     *
-     * The request is re-applied on every route change, because the routing layer sets the mode
-     * itself whenever it activates a device.
-     *
-     * @return true when the mode was applied. False means audio routing is not running yet, or
-     * this call does not manage it at all because audio usage is `USAGE_MEDIA`. The request is
-     * still recorded and picked up if routing starts later;
-     * [communicationAudioModeEnabled] reports it either way.
+     * MUSIC_HIGH_QUALITY asks for [AudioManager.MODE_NORMAL]; every voice profile asks for
+     * [AudioManager.MODE_IN_COMMUNICATION]. Recorded even when routing is not running yet so
+     * [setup] can apply it before AudioSwitch activates.
      */
-    fun setCommunicationAudioModeEnabled(enabled: Boolean): Boolean {
+    private fun applyCommunicationAudioModeForProfile(profile: AudioBitrateProfile) {
+        setCommunicationAudioModeEnabled(
+            profile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        )
+    }
+
+    /**
+     * Puts the live AudioRecord on the capture source [profile] asks for.
+     *
+     * Off the main thread: the audio device module rebuilds the record and can join the capture
+     * thread doing it. Same source as the last call is a no-op in the module.
+     */
+    private suspend fun applyCaptureAudioSourceForProfile(profile: AudioBitrateProfile): Boolean =
+        withContext(DispatcherProvider.IO) {
+            mediaManager.call.setCaptureAudioSource(captureAudioSourceFor(profile))
+        }
+
+    /**
+     * Applies the audio mode [setAudioBitrateProfile] asked for. Not a public override — the
+     * profile is the only way to change it.
+     */
+    internal fun setCommunicationAudioModeEnabled(enabled: Boolean): Boolean {
         _communicationAudioModeEnabled.value = enabled
         var applied = false
         ifAudioHandlerInitialized { applied = it.setCommunicationModeEnabled(enabled) }

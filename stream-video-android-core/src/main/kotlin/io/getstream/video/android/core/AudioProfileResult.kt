@@ -48,25 +48,47 @@ public data class AudioProfileResult(
     /**
      * The platform (hardware) noise suppressor now matches [profile].
      *
-     * False when audio is not being captured yet, or the device has no platform noise suppressor.
-     * The request is remembered and re-applied when capture restarts either way.
+     * True when nothing is capturing yet: there is no recording session to attach the effect
+     * to, and the request is re-applied when capture starts. A device with no suppressor has
+     * nothing suppressing, so the profile is satisfied. False only when a live suppressor refused.
      */
     val platformNoiseSuppressorApplied: Boolean,
     /**
+     * The platform (hardware) acoustic echo canceller now matches [profile].
+     *
+     * Same rule as [platformNoiseSuppressorApplied]: a device with no canceller has nothing
+     * cancelling, so the profile is satisfied. False when a live canceller refused.
+     */
+    val platformAcousticEchoCancelerApplied: Boolean,
+    /**
      * WebRTC's software audio processing now matches [profile].
      *
-     * False when the audio pipeline could not be rebuilt; the next source built picks the value up.
+     * True when nothing is publishing audio yet: there is no source to rebuild, and the next
+     * one is built from [profile]. False only when a live pipeline rebuild failed.
      */
     val softwareAudioProcessingApplied: Boolean,
     /**
      * The bitrate the profile calls for is in force.
      *
-     * False when nothing is publishing audio yet, so no ceiling could be put on a sender.
+     * True when nothing is publishing audio yet: there is no ceiling to move, and the next
+     * audio transceiver is built from [profile]. False only when a live sender refused the
+     * new parameters.
      */
     val audioMaxBitrateApplied: Boolean,
+    /**
+     * The capture audio source now matches [profile]: MIC under MUSIC_HIGH_QUALITY,
+     * VOICE_COMMUNICATION otherwise.
+     *
+     * False when no audio device module exists yet, or the platform refused the source and
+     * restored the last one that worked. The audio mode is not this stage — it is applied
+     * first so a new AudioRecord opens under the right graph.
+     */
+    val captureAudioSourceApplied: Boolean,
 ) {
     /** Every stage reached. */
     val complete: Boolean
         get() = noiseCancellationApplied && platformNoiseSuppressorApplied &&
-            softwareAudioProcessingApplied && audioMaxBitrateApplied
+            platformAcousticEchoCancelerApplied &&
+            softwareAudioProcessingApplied && audioMaxBitrateApplied &&
+            captureAudioSourceApplied
 }

@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core
 
+import android.media.MediaRecorder
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
@@ -70,8 +71,22 @@ class CallAudioProfileBridgeTest : IntegrationTestBase(connectCoordinatorWS = fa
 
     @Test
     fun `setAudioMaxBitrate reports false before a session exists`() = runTest {
-        // Nothing is publishing, so the bitrate stage could not be applied.
+        // Nothing is publishing, so the live setter has nowhere to put the ceiling.
         assertFalse(call().setAudioMaxBitrate(128_000))
+    }
+
+    @Test
+    fun `hasLiveAudioSender is false before a session exists`() = runTest {
+        assertFalse(call().hasLiveAudioSender())
+    }
+
+    @Test
+    fun `hasLiveAudioSender reaches the session`() = runTest {
+        val call = call()
+        val session = call.withSession()
+        every { session.hasLiveAudioSender() } returns true
+
+        assertTrue(call.hasLiveAudioSender())
     }
 
     @Test
@@ -139,6 +154,21 @@ class CallAudioProfileBridgeTest : IntegrationTestBase(connectCoordinatorWS = fa
     //region media-backed bridges
 
     @Test
+    fun `setCaptureAudioSource reaches the media component`() = runTest {
+        val call = call()
+        val factory = call.withFactory()
+        every { factory.setCaptureAudioSource(MediaRecorder.AudioSource.MIC) } returns true
+
+        assertTrue(call.setCaptureAudioSource(MediaRecorder.AudioSource.MIC))
+        verify { factory.setCaptureAudioSource(MediaRecorder.AudioSource.MIC) }
+    }
+
+    @Test
+    fun `setCaptureAudioSource reports false before a factory exists`() = runTest {
+        assertFalse(call().setCaptureAudioSource(MediaRecorder.AudioSource.MIC))
+    }
+
+    @Test
     fun `setHardwareNoiseSuppressorEnabled reaches the media component`() = runTest {
         val call = call()
         val factory = call.withFactory()
@@ -146,6 +176,16 @@ class CallAudioProfileBridgeTest : IntegrationTestBase(connectCoordinatorWS = fa
 
         assertTrue(call.setHardwareNoiseSuppressorEnabled(false))
         verify { factory.setHardwareNoiseSuppressorEnabled(false) }
+    }
+
+    @Test
+    fun `setHardwareAcousticEchoCancelerEnabled reaches the media component`() = runTest {
+        val call = call()
+        val factory = call.withFactory()
+        every { factory.setHardwareAcousticEchoCancelerEnabled(false) } returns true
+
+        assertTrue(call.setHardwareAcousticEchoCancelerEnabled(false))
+        verify { factory.setHardwareAcousticEchoCancelerEnabled(false) }
     }
 
     @Test
@@ -171,6 +211,15 @@ class CallAudioProfileBridgeTest : IntegrationTestBase(connectCoordinatorWS = fa
         every { factory.isHardwareNoiseSuppressorSupported() } returns true
 
         assertTrue(call.isHardwareNoiseSuppressorSupported())
+    }
+
+    @Test
+    fun `isHardwareAcousticEchoCancelerSupported follows the device capability`() = runTest {
+        val call = call()
+        val factory = call.withFactory()
+        every { factory.isHardwareAcousticEchoCancelerSupported() } returns true
+
+        assertTrue(call.isHardwareAcousticEchoCancelerSupported())
     }
 
     //endregion

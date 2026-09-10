@@ -578,8 +578,12 @@ public class RtcSession internal constructor(
     internal fun rebuildAudioCapturePipeline(): Boolean =
         call.mediaManager.replaceAudioSourceAndTrack { newTrack ->
             val publisher = publisher.value
-                // Nothing published yet, so there is no sender to move and the new pair stands.
-                ?: return@replaceAudioSourceAndTrack true
+            // Nothing published yet — no publisher, or a publisher with no audio sender
+            // (joined muted) — so there is no sender to move and the new pair stands. The
+            // next publishStream reads mediaManager.audioSource, which is now this pair.
+            if (publisher == null || !publisher.hasLiveAudioSender()) {
+                return@replaceAudioSourceAndTrack true
+            }
 
             publisher.replaceAudioTrack(newTrack).also { replaced ->
                 if (replaced) {
@@ -602,6 +606,13 @@ public class RtcSession internal constructor(
      */
     internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean =
         publisher.value?.setAudioMaxBitrate(maxBitrateBps) ?: false
+
+    /**
+     * Whether an audio sender exists to take a bitrate ceiling. No publisher is the same as
+     * no sender: the next transceiver is built from the published profile.
+     */
+    internal fun hasLiveAudioSender(): Boolean =
+        publisher.value?.hasLiveAudioSender() ?: false
 
     /** The maximum bitrate on the live audio sender, or null when nothing is publishing audio. */
     internal fun audioMaxBitrate(): Int? = publisher.value?.audioMaxBitrate()

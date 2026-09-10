@@ -1050,6 +1050,23 @@ public class Call(
         media.setHardwareNoiseSuppressorEnabled(enabled)
 
     /**
+     * Applies a platform acoustic-echo-canceller change for this call.
+     *
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile].
+     */
+    internal fun setHardwareAcousticEchoCancelerEnabled(enabled: Boolean): Boolean =
+        media.setHardwareAcousticEchoCancelerEnabled(enabled)
+
+    /**
+     * Switches the live capture audio source on the audio device module.
+     *
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile]. Must not be called from
+     * the main thread: the module rebuilds AudioRecord and can join the capture thread.
+     */
+    internal fun setCaptureAudioSource(audioSource: Int): Boolean =
+        media.setCaptureAudioSource(audioSource)
+
+    /**
      * Rebuilds the audio source and track so audio-source constraints take effect mid-call.
      *
      * Internal bridge for [MicrophoneManager.setAudioBitrateProfile]. Before a session
@@ -1066,6 +1083,17 @@ public class Call(
      */
     internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean =
         session.value?.setAudioMaxBitrate(maxBitrateBps) ?: false
+
+    /**
+     * Whether an audio sender exists to take a live profile change.
+     *
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile]. No session (or no
+     * sender yet — joined muted) is not a refused stage: platform effects, software
+     * constraints and the bitrate ceiling are applied when the first audio track is
+     * created, the same as a switch before joining.
+     */
+    internal fun hasLiveAudioSender(): Boolean =
+        session.value?.hasLiveAudioSender() ?: false
 
     /** The maximum bitrate on the live audio sender, or null when nothing is publishing audio. */
     internal fun audioMaxBitrate(): Int? = session.value?.audioMaxBitrate()
@@ -1093,6 +1121,15 @@ public class Call(
      */
     internal fun isHardwareNoiseSuppressorSupported(): Boolean =
         media.isHardwareNoiseSuppressorSupported()
+
+    /**
+     * Whether this device has a platform acoustic echo canceller at all.
+     *
+     * Internal bridge for [MicrophoneManager.setAudioBitrateProfile]: a device with no
+     * canceller has nothing cancelling, which is not the same as a canceller that refused.
+     */
+    internal fun isHardwareAcousticEchoCancelerSupported(): Boolean =
+        media.isHardwareAcousticEchoCancelerSupported()
 
     fun toggleAudioProcessing(): Boolean {
         // Reads without building a factory: the gate runs before join, and a factory created

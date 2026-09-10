@@ -931,6 +931,22 @@ class PublisherTest {
     }
 
     @Test
+    fun `hasLiveAudioSender is false when no audio is being published`() = runTest {
+        every {
+            mockTransceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO)
+        } returns emptyList()
+
+        assertFalse(publisher.hasLiveAudioSender())
+    }
+
+    @Test
+    fun `hasLiveAudioSender is true when an audio sender exists`() = runTest {
+        publishingAudioThrough(audioSenderWith(singleEncodingParameters(), accepts = true))
+
+        assertTrue(publisher.hasLiveAudioSender())
+    }
+
+    @Test
     fun `audioMaxBitrate reads the ceiling off the live sender`() = runTest {
         publishingAudioThrough(
             audioSenderWith(

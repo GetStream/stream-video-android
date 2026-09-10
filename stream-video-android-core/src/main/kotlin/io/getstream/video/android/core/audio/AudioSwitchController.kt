@@ -24,6 +24,7 @@ import com.twilio.audioswitch.AudioDeviceChangeListener
 import com.twilio.audioswitch.AudioSwitch
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.audio.AudioSwitchHandler.Companion.onAudioFocusChangeListener
+import io.getstream.video.android.core.utils.audioModeName
 
 internal class AudioSwitchController(
     private val context: Context,
@@ -91,9 +92,8 @@ internal class AudioSwitchController(
      * `AudioEffectStage: input_normal_input_voice_changer`, and logs
      * `PreProcess_RA: no solutions for recording` — the AOSP effects are not in the path at all.
      * That chain gates music, and it sits below the `AudioEffect` API, so the audio device module
-     * flags, the audio-source constraints and
-     * [io.getstream.video.android.core.MicrophoneManager.setHardwareNoiseSuppressorEnabled] all
-     * miss it. Leaving communication mode is the only lever that reaches it.
+     * flags, the audio-source constraints and the profile stages all miss it. Leaving
+     * communication mode is the only lever that reaches it.
      *
      * Costs the echo cancellation and routing that communication mode brings, and Bluetooth
      * capture with it: SCO carries the headset microphone and only runs in communication mode, so
@@ -119,7 +119,9 @@ internal class AudioSwitchController(
 
         if (audioManager.mode == mode) return true
 
-        logger.i { "[applyRequestedAudioMode] mode ${audioManager.mode} -> $mode" }
+        logger.i {
+            "[applyRequestedAudioMode] ${audioModeName(audioManager.mode)} -> ${audioModeName(mode)}"
+        }
         audioManager.mode = mode
         return true
     }

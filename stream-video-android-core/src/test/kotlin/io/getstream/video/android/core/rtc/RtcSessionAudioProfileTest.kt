@@ -151,6 +151,7 @@ class RtcSessionAudioProfileTest {
     fun `rebuilding moves the publisher onto the new track`() {
         val newTrack = mockk<AudioTrack>(relaxed = true)
         val publisher = publishing()
+        every { publisher.hasLiveAudioSender() } returns true
         every { publisher.replaceAudioTrack(newTrack) } returns true
         mediaManagerHandsOver(newTrack)
 
@@ -169,9 +170,22 @@ class RtcSessionAudioProfileTest {
     }
 
     @Test
+    fun `rebuilding accepts the new pair when the publisher has no audio sender`() {
+        val publisher = publishing()
+        every { publisher.hasLiveAudioSender() } returns false
+        mediaManagerHandsOver(mockk(relaxed = true))
+
+        // Joined muted: a publisher exists but nothing is sending audio. The new pair becomes
+        // current and the next publishStream reads it — same as no publisher at all.
+        assertTrue(session.rebuildAudioCapturePipeline())
+        verify(exactly = 0) { publisher.replaceAudioTrack(any()) }
+    }
+
+    @Test
     fun `rebuilding reports the publisher's refusal`() {
         val newTrack = mockk<AudioTrack>(relaxed = true)
         val publisher = publishing()
+        every { publisher.hasLiveAudioSender() } returns true
         every { publisher.replaceAudioTrack(newTrack) } returns false
         mediaManagerHandsOver(newTrack)
 
@@ -193,6 +207,19 @@ class RtcSessionAudioProfileTest {
     @Test
     fun `setAudioMaxBitrate reports false with no publisher`() {
         assertFalse(session.setAudioMaxBitrate(128_000))
+    }
+
+    @Test
+    fun `hasLiveAudioSender is false with no publisher`() {
+        assertFalse(session.hasLiveAudioSender())
+    }
+
+    @Test
+    fun `hasLiveAudioSender goes to the publisher`() {
+        val publisher = publishing()
+        every { publisher.hasLiveAudioSender() } returns true
+
+        assertTrue(session.hasLiveAudioSender())
     }
 
     @Test

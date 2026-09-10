@@ -115,20 +115,6 @@ internal fun SettingsMenu(
         call.speaker.setAudioUsage(newAudioUsage)
     }
 
-    val isCommunicationAudioModeEnabled by call.microphone.communicationAudioModeEnabled
-        .collectAsStateWithLifecycle()
-
-    val onToggleCommunicationAudioMode: (Boolean) -> Unit = { enabled ->
-        val applied = call.microphone.setCommunicationAudioModeEnabled(enabled)
-        if (!applied) {
-            Toast.makeText(
-                context,
-                "Audio mode not applied — this call does not manage audio routing",
-                Toast.LENGTH_LONG,
-            ).show()
-        }
-    }
-
     val audioBitrateProfile by call.microphone.audioBitrateProfile.collectAsStateWithLifecycle()
     val isMusicAudioProfile =
         audioBitrateProfile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
@@ -147,8 +133,10 @@ internal fun SettingsMenu(
                     val missed = buildList {
                         if (!result.noiseCancellationApplied) add("noise cancellation")
                         if (!result.platformNoiseSuppressorApplied) add("hardware NS")
+                        if (!result.platformAcousticEchoCancelerApplied) add("hardware AEC")
                         if (!result.softwareAudioProcessingApplied) add("software APM")
                         if (!result.audioMaxBitrateApplied) add("bitrate")
+                        if (!result.captureAudioSourceApplied) add("capture source")
                     }
                     Toast.makeText(
                         context,
@@ -419,8 +407,6 @@ internal fun SettingsMenu(
                 onToggleAudioUsage = onToggleAudioUsage,
                 selectedRecordingTypes = enabledRecordingTypes,
                 onSelectRecordingType = onSelectRecordingType,
-                isCommunicationAudioModeEnabled = isCommunicationAudioModeEnabled,
-                onToggleCommunicationAudioMode = onToggleCommunicationAudioMode,
                 isMusicAudioProfile = isMusicAudioProfile,
                 onToggleAudioProfile = onToggleAudioProfile,
             ),

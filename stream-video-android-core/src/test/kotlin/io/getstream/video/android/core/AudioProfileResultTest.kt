@@ -27,26 +27,30 @@ import stream.video.sfu.models.AudioBitrateProfile
  * Every stage has to hold. A single stage left behind means something is still processing the
  * audio the old way, and a toggle sitting on MUSIC while a suppressor eats the music is
  * indistinguishable from the bug this feature exists to fix — so the flag is only true when all
- * four agree, and each one has to be able to veto on its own.
+ * six agree, and each one has to be able to veto on its own.
  */
 class AudioProfileResultTest {
 
     private fun result(
         noiseCancellation: Boolean = true,
         platformSuppressor: Boolean = true,
+        platformAec: Boolean = true,
         softwareProcessing: Boolean = true,
         maxBitrate: Boolean = true,
+        captureSource: Boolean = true,
     ) = AudioProfileResult(
         profile = AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
         audioMaxBitrateBps = 128_000,
         noiseCancellationApplied = noiseCancellation,
         platformNoiseSuppressorApplied = platformSuppressor,
+        platformAcousticEchoCancelerApplied = platformAec,
         softwareAudioProcessingApplied = softwareProcessing,
         audioMaxBitrateApplied = maxBitrate,
+        captureAudioSourceApplied = captureSource,
     )
 
     @Test
-    fun `all four stages applied is complete`() {
+    fun `all six stages applied is complete`() {
         assertTrue(result().complete)
     }
 
@@ -61,6 +65,11 @@ class AudioProfileResultTest {
     }
 
     @Test
+    fun `the platform acoustic echo canceller alone can veto`() {
+        assertFalse(result(platformAec = false).complete)
+    }
+
+    @Test
     fun `the software audio processing stage alone can veto`() {
         assertFalse(result(softwareProcessing = false).complete)
     }
@@ -69,5 +78,10 @@ class AudioProfileResultTest {
     fun `the bitrate stage alone can veto`() {
         // The quietest failure of the four: nothing sounds different, the ceiling is just wrong.
         assertFalse(result(maxBitrate = false).complete)
+    }
+
+    @Test
+    fun `the capture audio source alone can veto`() {
+        assertFalse(result(captureSource = false).complete)
     }
 }

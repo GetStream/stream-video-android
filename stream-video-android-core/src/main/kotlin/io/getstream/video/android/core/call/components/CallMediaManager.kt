@@ -94,6 +94,12 @@ internal class CallMediaManager(
      */
     private var desiredHardwareNoiseSuppressorEnabled: Boolean? = null
 
+    /**
+     * Platform acoustic-echo-canceller state this call asked for, or null while the builder
+     * default stands. Same reason as [desiredHardwareNoiseSuppressorEnabled].
+     */
+    private var desiredHardwareAcousticEchoCancelerEnabled: Boolean? = null
+
     var peerConnectionFactory: StreamPeerConnectionFactory
         get() {
             if (_peerConnectionFactory == null) {
@@ -109,6 +115,9 @@ internal class CallMediaManager(
                     factory.setAudioProcessingEnabled(desiredAudioProcessingEnabled)
                     desiredHardwareNoiseSuppressorEnabled?.let {
                         factory.setHardwareNoiseSuppressorEnabled(it)
+                    }
+                    desiredHardwareAcousticEchoCancelerEnabled?.let {
+                        factory.setHardwareAcousticEchoCancelerEnabled(it)
                     }
                 }
             }
@@ -383,15 +392,46 @@ internal class CallMediaManager(
     }
 
     /**
+     * Records the wanted platform acoustic-echo-canceller state and applies it if a factory
+     * exists. Never builds one.
+     *
+     * @return true when the running capture session accepted the change.
+     */
+    fun setHardwareAcousticEchoCancelerEnabled(enabled: Boolean): Boolean {
+        desiredHardwareAcousticEchoCancelerEnabled = enabled
+        return _peerConnectionFactory?.setHardwareAcousticEchoCancelerEnabled(enabled) ?: false
+    }
+
+    /**
+     * Switches the live capture audio source. Never builds a factory: a module created here
+     * would capture the pre-join profile and pin it for the rest of the call.
+     *
+     * @return true when the running audio device module is now on [audioSource].
+     */
+    fun setCaptureAudioSource(audioSource: Int): Boolean =
+        _peerConnectionFactory?.setCaptureAudioSource(audioSource) ?: false
+
+    /**
      * Whether this device has a platform noise suppressor at all. Never builds a factory — the
      * answer is a device capability, not a property of this call.
      */
     fun isHardwareNoiseSuppressorSupported(): Boolean =
         _peerConnectionFactory?.isHardwareNoiseSuppressorSupported() ?: false
 
+    /**
+     * Whether this device has a platform acoustic echo canceller at all. Never builds a factory.
+     */
+    fun isHardwareAcousticEchoCancelerSupported(): Boolean =
+        _peerConnectionFactory?.isHardwareAcousticEchoCancelerSupported() ?: false
+
     /** Forgets the wanted noise-suppressor state, so nothing is re-applied after the call ends. */
     fun resetDesiredHardwareNoiseSuppressor() {
         desiredHardwareNoiseSuppressorEnabled = null
+    }
+
+    /** Forgets the wanted acoustic-echo-canceller state. */
+    fun resetDesiredHardwareAcousticEchoCanceler() {
+        desiredHardwareAcousticEchoCancelerEnabled = null
     }
 
     /** Disables all local capture devices. Used when leaving the call. */
@@ -406,6 +446,7 @@ internal class CallMediaManager(
         // to the factory built for the next session.
         resetDesiredAudioProcessing()
         resetDesiredHardwareNoiseSuppressor()
+        resetDesiredHardwareAcousticEchoCanceler()
         mediaManager.cleanup()
     }
 }
