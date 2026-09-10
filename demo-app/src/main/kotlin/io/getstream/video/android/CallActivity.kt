@@ -19,6 +19,7 @@ package io.getstream.video.android
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
@@ -81,6 +82,7 @@ class CallActivity : ComposeStreamCallActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         observeRingingState()
     }
