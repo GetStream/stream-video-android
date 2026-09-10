@@ -160,7 +160,9 @@ class UserRobot {
     }
 
     fun waitForIncomingCall(): UserRobot {
-        RingPage.acceptCallButton.waitToAppear(timeOutMillis = 15.seconds)
+        // Ring delivery goes through the coordinator and the push or socket path before the
+        // incoming screen renders, and 15s timed out on the nightlies.
+        RingPage.acceptCallButton.waitToAppear(timeOutMillis = 30.seconds)
         return this
     }
 
@@ -364,15 +366,18 @@ class UserRobot {
 
     fun acceptCallRecording(): UserRobot {
         // The recording-consent dialog only appears once the backend composite recorder
-        // emits call.recording_started, which can take 20-30s, so 10s is too short.
-        CallPage.RecordingButtons.accept.waitToAppearAndClick(timeOutMillis = 30.seconds)
+        // emits call.recording_started. The buddy starts the recording within seconds, so
+        // this wait is really the recorder's start-up latency: usually 10-20s, but 30s still
+        // timed out four times in the nightlies. Callers with a recording window have to
+        // outlive this wait, see testReconnectionDuringCallRecording.
+        CallPage.RecordingButtons.accept.waitToAppearAndClick(timeOutMillis = 60.seconds)
         return this
     }
 
     fun declineCallRecording(): UserRobot {
         // See acceptCallRecording: the consent dialog is gated on the backend recorder
-        // starting (call.recording_started), which can take 20-30s.
-        CallPage.RecordingButtons.leave.waitToAppearAndClick(timeOutMillis = 30.seconds)
+        // starting (call.recording_started).
+        CallPage.RecordingButtons.leave.waitToAppearAndClick(timeOutMillis = 60.seconds)
         return this
     }
 
