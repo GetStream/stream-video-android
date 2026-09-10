@@ -35,6 +35,10 @@ import stream.video.sfu.models.AudioBitrateProfile
  * Builds the default set of Lobby Control actions based on the call device states.
  *
  * @param call The call that contains all the participants state and tracks.
+ * @param onCallAction Handler when the user triggers a Call Control Action.
+ * @param isCameraEnabled Whether the camera is enabled.
+ * @param isMicrophoneEnabled Whether the microphone is enabled.
+ * @param showHifiAudioToggle Whether the high quality audio toggle is part of the actions.
  * @return [List] of call control actions that the user can trigger.
  */
 @Composable
