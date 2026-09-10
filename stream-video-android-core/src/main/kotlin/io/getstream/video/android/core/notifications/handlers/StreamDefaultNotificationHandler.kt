@@ -330,9 +330,14 @@ constructor(
             "[getRingingCallNotification] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
         return if (ringingState is RingingState.Incoming) {
-            val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+            val contentPendingIntent = intentResolver.searchIncomingCallPendingIntent(
                 callId,
                 payload = payload,
+            )
+            val fullScreenPendingIntent = searchIncomingCallFullScreenPendingIntent(
+                callId,
+                payload,
+                contentPendingIntent,
             )
             val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(
                 callId,
@@ -356,15 +361,31 @@ constructor(
                 call.state.incomingNotificationData = IncomingNotificationData(map)
             }
 
-            if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
-                getIncomingCallNotification(
+            if (
+                contentPendingIntent != null &&
+                fullScreenPendingIntent != null &&
+                acceptCallPendingIntent != null &&
+                rejectCallPendingIntent != null
+            ) {
+                getIncomingCallNotificationInternal(
                     fullScreenPendingIntent,
+                    contentPendingIntent,
                     acceptCallPendingIntent,
                     rejectCallPendingIntent,
                     callDisplayName,
-                    shouldHaveContentIntent,
                     payload,
-                ).configureIncomingCallAlert(ringingState)
+                    shouldHaveContentIntent,
+                ) {
+                    initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
+                        this,
+                        fullScreenPendingIntent,
+                        acceptCallPendingIntent,
+                        rejectCallPendingIntent,
+                        callDisplayName,
+                        shouldHaveContentIntent,
+                        payload,
+                    )
+                }.configureIncomingCallAlert(ringingState)
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
                 null
@@ -395,6 +416,20 @@ constructor(
         }
     }
 
+    private fun searchIncomingCallFullScreenPendingIntent(
+        callId: StreamCallId,
+        payload: Map<String, Any?>,
+        contentPendingIntent: PendingIntent?,
+    ): PendingIntent? =
+        if (isAndroid17OrHigher() && intentResolver is DefaultStreamIntentResolver) {
+            intentResolver.searchIncomingCallFullScreenPendingIntent(
+                callId = callId,
+                payload = payload,
+            )
+        } else {
+            contentPendingIntent
+        }
+
     private inline fun getRingingCallNotificationInternal(
         ringingState: RingingState,
         callId: StreamCallId,
@@ -408,9 +443,14 @@ constructor(
             "[getRingingCallNotificationInternal] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
         return if (ringingState is RingingState.Incoming) {
-            val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+            val contentPendingIntent = intentResolver.searchIncomingCallPendingIntent(
                 callId,
                 payload = payload,
+            )
+            val fullScreenPendingIntent = searchIncomingCallFullScreenPendingIntent(
+                callId,
+                payload,
+                contentPendingIntent,
             )
             val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(
                 callId,
@@ -421,9 +461,15 @@ constructor(
                 payload = payload,
             )
 
-            if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
+            if (
+                contentPendingIntent != null &&
+                fullScreenPendingIntent != null &&
+                acceptCallPendingIntent != null &&
+                rejectCallPendingIntent != null
+            ) {
                 getIncomingCallNotificationInternal(
                     fullScreenPendingIntent,
+                    contentPendingIntent,
                     acceptCallPendingIntent,
                     rejectCallPendingIntent,
                     callDisplayName,
@@ -464,6 +510,7 @@ constructor(
 
     private inline fun getIncomingCallNotificationInternal(
         fullScreenPendingIntent: PendingIntent,
+        contentPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
         callerName: String?,
@@ -502,7 +549,7 @@ constructor(
             setCategory(NotificationCompat.CATEGORY_CALL)
             setFullScreenIntent(fullScreenPendingIntent, true)
             if (shouldHaveContentIntent) {
-                setContentIntent(fullScreenPendingIntent)
+                setContentIntent(contentPendingIntent)
             } else {
                 val emptyIntent = PendingIntent.getActivity(
                     application,
@@ -530,6 +577,7 @@ constructor(
             "[getIncomingCallNotification] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
         return getIncomingCallNotificationInternal(
+            fullScreenPendingIntent,
             fullScreenPendingIntent,
             acceptCallPendingIntent,
             rejectCallPendingIntent,
@@ -604,9 +652,14 @@ constructor(
                     else -> notificationChannels.incomingCallChannel
                 }
 
-                val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+                val contentPendingIntent = intentResolver.searchIncomingCallPendingIntent(
                     callId,
                     payload = emptyMap(),
+                )
+                val fullScreenPendingIntent = searchIncomingCallFullScreenPendingIntent(
+                    callId = callId,
+                    payload = emptyMap(),
+                    contentPendingIntent = contentPendingIntent,
                 )
 
                 if (fullScreenPendingIntent == null) {
@@ -627,7 +680,7 @@ constructor(
                     setOngoing(true)
                     setCategory(NotificationCompat.CATEGORY_CALL)
                     setFullScreenIntent(fullScreenPendingIntent, true)
-                    setContentIntent(fullScreenPendingIntent)
+                    setContentIntent(contentPendingIntent)
                 }
             }
 
@@ -945,9 +998,14 @@ constructor(
             existingChannelId = (call.state.atomicNotification.get() as? Notification)
                 ?.let(NotificationCompat::getChannelId),
             intercept = {
-                val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+                val contentPendingIntent = intentResolver.searchIncomingCallPendingIntent(
                     callId,
                     payload = payload,
+                )
+                val fullScreenPendingIntent = searchIncomingCallFullScreenPendingIntent(
+                    callId = callId,
+                    payload = payload,
+                    contentPendingIntent = contentPendingIntent,
                 )
                 val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(
                     callId,
