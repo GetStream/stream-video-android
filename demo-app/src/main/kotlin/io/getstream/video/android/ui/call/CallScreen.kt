@@ -41,12 +41,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.SignalWifiBad
@@ -67,7 +65,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -79,7 +76,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
@@ -88,6 +84,7 @@ import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamBadgeBox
 import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
@@ -141,6 +138,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
+import io.getstream.video.android.compose.R as ComposeR
 
 @OptIn(FlowPreview::class)
 @Composable
@@ -223,7 +221,12 @@ fun CallScreen(
         }
     }
     val paddings = if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-        PaddingValues(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 16.dp)
+        PaddingValues(
+            start = StreamTokens.spacing2xs,
+            end = StreamTokens.spacing2xs,
+            top = StreamTokens.spacingXs,
+            bottom = StreamTokens.spacingMd,
+        )
     } else {
         PaddingValues(0.dp)
     }
@@ -335,7 +338,7 @@ fun CallScreen(
                         },
                         appBarContent = {
                             CallAppBar(
-                                modifier = Modifier.padding(horizontal = 8.dp),
+                                modifier = Modifier.padding(horizontal = StreamTokens.spacingXs),
                                 call = call,
                                 leadingContent = {
                                     val iconOnOff = painterResource(R.drawable.ic_layout_grid)
@@ -350,11 +353,7 @@ fun CallScreen(
                                                 !isShowingLayoutChooseMenu
                                         }
 
-                                        Spacer(
-                                            modifier = Modifier.size(
-                                                16.dp,
-                                            ),
-                                        )
+                                        Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
 
                                         FlipCameraAction(
                                             modifier = Modifier.testTag(
@@ -496,7 +495,7 @@ fun CallScreen(
                                         ParticipantVideo(
                                             modifier = Modifier
                                                 .fillMaxSize()
-                                                .clip(RoundedCornerShape(24.dp))
+                                                .clip(RoundedCornerShape(StreamTokens.radius3xl))
                                                 .testTag("Stream_FloatingVideoView"),
                                             call = call,
                                             participant = participant,
@@ -607,19 +606,16 @@ fun CallScreen(
                             context = context,
                         )
 
-                        IconButton(
+                        StreamIconButton(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .padding(top = 10.dp, end = 10.dp)
+                                .padding(top = StreamTokens.spacingXs, end = StreamTokens.spacingXs)
                                 .testTag("Stream_InviteCloseButton"),
                             onClick = { showShareDialog = false },
-                        ) {
-                            Icon(
-                                tint = Color.White,
-                                imageVector = Icons.Default.Close,
-                                contentDescription = Icons.Default.Close.name,
-                            )
-                        }
+                            icon = painterResource(ComposeR.drawable.stream_design_ic_xmark),
+                            contentDescription = "Close",
+                            style = StreamButtonStyleDefaults.secondaryGhost,
+                        )
                     }
                 }
             }
@@ -878,10 +874,10 @@ private fun BadNetworkLabel(
         Row(
             modifier = modifier
                 .align(Alignment.BottomCenter)
-                .padding(vertical = 90.dp, horizontal = 16.dp)
+                .padding(vertical = 90.dp, horizontal = StreamTokens.spacingMd)
                 .background(
                     color = VideoTheme.colors.backgroundCoreOverlayDarkStrong,
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(StreamTokens.radiusXl),
                 )
                 .testTag("video_renderer_fallback_bad_network"),
             horizontalArrangement = Arrangement.Center,
@@ -889,20 +885,20 @@ private fun BadNetworkLabel(
         ) {
             Icon(
                 modifier = Modifier
-                    .padding(12.dp)
+                    .padding(StreamTokens.spacingSm)
                     .align(CenterVertically),
                 imageVector = Icons.Default.SignalWifiBad,
                 contentDescription = null,
                 tint = VideoTheme.colors.textOnAccent,
             )
             Text(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.padding(StreamTokens.spacingSm),
                 text = stringResource(
                     id = io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network,
                 ),
+                style = VideoTheme.typography.captionDefault,
                 color = VideoTheme.colors.textOnAccent,
                 textAlign = TextAlign.Center,
-                fontSize = 14.sp,
             )
         }
     }
