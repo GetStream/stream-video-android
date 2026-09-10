@@ -27,8 +27,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -42,7 +40,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.CallAppBarCenterContentParams
 import io.getstream.video.android.compose.theme.CallAppBarLeadingContentParams
@@ -50,6 +47,8 @@ import io.getstream.video.android.compose.theme.CallAppBarTrailingContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.GenericContainer
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.recording.RecordingType
@@ -126,19 +125,16 @@ public fun CallAppBar(
 internal fun DefaultCallAppBarLeadingContent(
     onBackButtonClicked: () -> Unit,
 ) {
-    IconButton(
+    StreamIconButton(
         onClick = onBackButtonClicked,
-    ) {
-        Icon(
-            painter = painterResource(
-                id = io.getstream.video.android.compose.R.drawable.stream_design_ic_arrow_left,
-            ),
-            contentDescription = stringResource(
-                id = R.string.stream_video_back_button_content_description,
-            ),
-            tint = VideoTheme.colors.textPrimary,
-        )
-    }
+        icon = painterResource(
+            id = io.getstream.video.android.compose.R.drawable.stream_design_ic_arrow_left,
+        ),
+        contentDescription = stringResource(
+            id = R.string.stream_video_back_button_content_description,
+        ),
+        style = StreamButtonStyleDefaults.secondaryGhost,
+    )
 }
 
 /**
@@ -187,7 +183,7 @@ internal fun CalLCenterContent(
                             color = VideoTheme.colors.accentError,
                             shape = CircleShape,
                         )
-                        .border(2.dp, VideoTheme.colors.textPrimary, CircleShape)
+                        .border(StreamTokens.strokeW200, VideoTheme.colors.textPrimary, CircleShape)
                         .testTag("Stream_RecordingIcon"),
                 )
             }
@@ -205,7 +201,7 @@ internal fun CalLCenterContent(
                 } else {
                     text
                 },
-                fontSize = StreamTokens.fontSizeMd,
+                style = VideoTheme.typography.bodyDefault,
                 color = VideoTheme.colors.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

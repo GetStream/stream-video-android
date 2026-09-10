@@ -27,8 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.utils.initials
@@ -67,7 +69,8 @@ internal fun InitialsAvatar(
 }
 
 /**
- * Picks the initials typography for an avatar of this size.
+ * Picks the initials typography for an avatar of this size. Avatars from 80dp up have no matching
+ * text style in the design tokens, so the initials scale with the avatar instead.
  */
 @Composable
 @ReadOnlyComposable
@@ -78,6 +81,18 @@ internal fun Dp.toAvatarTextStyle(): TextStyle {
         this < StreamTokens.size32 -> typography.captionEmphasis
         this < StreamTokens.size48 -> typography.bodyEmphasis
         this < StreamTokens.size80 -> typography.headingLarge
-        else -> typography.numericExtraLarge
+        else -> {
+            val scaled = with(LocalDensity.current) {
+                (this@toAvatarTextStyle * LARGE_AVATAR_TEXT_RATIO).toSp()
+            }
+            val fontSize = if (scaled > LARGE_AVATAR_MAX_TEXT_SIZE) LARGE_AVATAR_MAX_TEXT_SIZE else scaled
+            typography.headingLarge.copy(fontSize = fontSize, lineHeight = fontSize)
+        }
     }
 }
+
+/** The initials height relative to the avatar size, for avatars without a token text style. */
+private const val LARGE_AVATAR_TEXT_RATIO = 0.4f
+
+/** The initials size of the 1.x SDK for every large avatar, kept as the upper bound. */
+private val LARGE_AVATAR_MAX_TEXT_SIZE = 48.sp

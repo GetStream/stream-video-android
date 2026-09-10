@@ -108,8 +108,6 @@ public fun BoxScope.FloatingParticipantVideo(
     val paddingOffset = density.run { StreamTokens.spacingXs.toPx() }
 
     if (LocalInspectionMode.current) {
-        val width = 100.dp * 2
-        val height = width * 1.2f
         Card(
             elevation = 8.dp,
             modifier = Modifier
@@ -118,11 +116,11 @@ public fun BoxScope.FloatingParticipantVideo(
                 .padding(StreamTokens.spacingXs)
                 .onGloballyPositioned { videoSize = it.size }
                 .size(
-                    height = height,
-                    width = width,
+                    height = StreamTokens.size208,
+                    width = StreamTokens.size144,
                 )
                 .clip(RoundedCornerShape(StreamTokens.radius3xl)),
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(StreamTokens.radius3xl),
         ) {
             Image(
                 modifier = Modifier
@@ -143,8 +141,8 @@ public fun BoxScope.FloatingParticipantVideo(
         modifier = Modifier
             .align(alignment)
             .size(
-                height = 100.dp * 2.2f,
-                width = 100.dp * 1.5f,
+                height = StreamTokens.size208,
+                width = StreamTokens.size144,
             )
             .offset { IntOffset(offset.x.toInt(), offset.y.toInt()) }
             .pointerInput(parentBounds) {
