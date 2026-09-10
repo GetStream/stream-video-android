@@ -302,7 +302,7 @@ internal class StreamVideoClient internal constructor(
      */
     internal suspend fun <T : Any> apiCall(
         apiCall: suspend () -> T,
-    ): Result<T> = safeSuspendingCallWithResult {
+    ): Result<T> {
         // Guest users have an asynchronous setup (createGuest) that fetches their JWT.
         // Any authenticated request that fires before that completes goes out without
         // an Authorization header and stream-auth-type "anonymous", so the backend
@@ -313,27 +313,60 @@ internal class StreamVideoClient internal constructor(
         // await throw if setupGuestUser failed — safeSuspendingCallWithResult turns
         // it into Result.Failure, which is the right outcome (the caller didn't get
         // a valid guest session, so the request can't proceed).
-        guestUserJob?.takeIf { currentCoroutineContext()[Job] !== it }?.await()
-        try {
-            apiCall()
-        } catch (e: HttpException) {
-            // Retry once with a new token if the token is expired
-            if (e.isAuthError()) {
-                val newToken = tokenProvider.loadToken()
-                tokenRepository.updateToken(newToken)
-                token = newToken
-                coordinatorConnectionModule.updateToken(newToken)
-                apiCall()
-            } else {
-                throw e
+        val prepared = safeSuspendingCallWithResult {
+            guestUserJob?.takeIf { currentCoroutineContext()[Job] !== it }?.await()
+            Unit
+        }
+        if (prepared is Failure) return prepared
+
+        return try {
+            try {
+                Success(apiCall())
+            } catch (e: HttpException) {
+                handleCoordinatorHttpFailure(e, apiCall)
             }
+        } catch (e: Exception) {
+            safeSuspendingCallWithResult<T> { throw e }
         }
     }
 
-    private fun HttpException.isAuthError(): Boolean {
-        val failure = parseError(this)
-        val parsedError = failure.value as Error.NetworkError
-        return when (parsedError.serverErrorCode) {
+    /**
+     * parseError consumes the body, so each HttpException is parsed once. The failure
+     * keeps [HttpException] as [Error.ThrowableError.cause] so callers that classify
+     * HTTP errors by type still work. Wrapping it in a generic Exception would break
+     * that contract. The retry is parsed the same way — a second HttpException after
+     * token refresh must not fall through as a raw "HTTP 4xx".
+     */
+    private suspend fun <T : Any> handleCoordinatorHttpFailure(
+        first: HttpException,
+        apiCall: suspend () -> T,
+    ): Result<T> {
+        val firstError = parseError(first).value as Error.NetworkError
+        if (firstError.isAuthError()) {
+            val newToken = tokenProvider.loadToken()
+            tokenRepository.updateToken(newToken)
+            token = newToken
+            coordinatorConnectionModule.updateToken(newToken)
+            return try {
+                Success(apiCall())
+            } catch (retry: HttpException) {
+                coordinatorHttpFailure(retry)
+            }
+        }
+        return coordinatorHttpFailure(first, firstError)
+    }
+
+    private fun coordinatorHttpFailure(
+        exception: HttpException,
+        parsed: Error.NetworkError? = null,
+    ): Failure {
+        val networkError = parsed ?: parseError(exception).value as Error.NetworkError
+        logger.e { "[apiCall] HTTP ${exception.code()}: ${networkError.message}" }
+        return Failure(Error.ThrowableError(networkError.message, exception))
+    }
+
+    private fun Error.NetworkError.isAuthError(): Boolean {
+        return when (serverErrorCode) {
             VideoErrorCode.AUTHENTICATION_ERROR.code,
             VideoErrorCode.TOKEN_EXPIRED.code,
             VideoErrorCode.TOKEN_NOT_VALID.code,
@@ -373,23 +406,30 @@ internal class StreamVideoClient internal constructor(
                     ignoreUnknownKeys = true
                 }
                 format.decodeFromString<ErrorResponse>(errorBody)
-            } catch (e: Exception) {
+            } catch (parseException: Exception) {
                 return Failure(
                     Error.NetworkError(
-                        "failed to parse error response from server: ${e.message}",
-                        VideoErrorCode.PARSER_ERROR.code,
+                        message = "failed to parse error response from server: ${parseException.message}",
+                        serverErrorCode = VideoErrorCode.PARSER_ERROR.code,
+                        statusCode = e.code(),
+                        cause = e,
                     ),
                 )
             }
         } ?: return Failure(
-            Error.NetworkError("failed to parse error response from server", e.code()),
+            Error.NetworkError(
+                message = "failed to parse error response from server",
+                serverErrorCode = e.code(),
+                statusCode = e.code(),
+                cause = e,
+            ),
         )
         return Failure(
             Error.NetworkError(
                 message = error.message,
                 serverErrorCode = error.code,
                 statusCode = error.statusCode,
-                cause = Throwable(error.moreInfo),
+                cause = e,
             ),
         )
     }
