@@ -90,7 +90,7 @@ internal fun PortraitScreenSharingVideoRenderer(
         ?.collectAsStateWithLifecycle(initialValue = false)
         ?: remember { mutableStateOf(false) }
 
-    val paddedModifier = modifier.padding(StreamTokens.spacingXxxs)
+    val paddedModifier = modifier.padding(StreamTokens.spacing3xs)
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         LazyVerticalGrid(
             modifier = Modifier.fillMaxSize(),
@@ -144,7 +144,7 @@ private fun BoxWithConstraintsScope.ScreenSharingContent(
     }
     Column(
         modifier = modifier
-            .padding(StreamTokens.spacingXxxs),
+            .padding(StreamTokens.spacing3xs),
     ) {
         Box(
             modifier = Modifier

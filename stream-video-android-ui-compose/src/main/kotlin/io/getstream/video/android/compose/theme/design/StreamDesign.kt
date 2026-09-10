@@ -799,7 +799,7 @@ public object StreamDesign {
                 numericMedium = TextStyle(
                     fontFamily = fontFamily,
                     fontWeight = StreamTokens.fontWeightBold,
-                    fontSize = StreamTokens.fontSizeXxs,
+                    fontSize = StreamTokens.fontSize2xs,
                 ),
                 numericLarge = TextStyle(
                     fontFamily = fontFamily,

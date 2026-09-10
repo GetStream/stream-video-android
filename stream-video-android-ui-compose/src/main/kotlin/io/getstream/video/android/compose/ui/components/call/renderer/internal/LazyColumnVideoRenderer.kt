@@ -71,7 +71,7 @@ internal fun LazyColumnVideoRenderer(
         modifier = modifier,
         state = state,
         verticalArrangement = Arrangement.spacedBy(
-            StreamTokens.spacingXxs,
+            StreamTokens.spacing2xs,
         ),
         horizontalAlignment = Alignment.CenterHorizontally,
         content = {
@@ -81,7 +81,7 @@ internal fun LazyColumnVideoRenderer(
             ) { index, participant ->
                 ListVideoRenderer(
                     modifier = itemModifier.topOrBottomPadding(
-                        value = StreamTokens.spacingXxs,
+                        value = StreamTokens.spacing2xs,
                         index = index,
                         first = 0,
                         last = participants.lastIndex,

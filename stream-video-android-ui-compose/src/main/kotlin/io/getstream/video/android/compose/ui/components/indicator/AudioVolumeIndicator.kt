@@ -48,10 +48,10 @@ public fun AudioVolumeIndicator(
     Row(
         modifier = modifier
             .height(height = StreamTokens.size24)
-            .padding(horizontal = StreamTokens.spacingXxxs),
+            .padding(horizontal = StreamTokens.spacing3xs),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(
-            StreamTokens.spacingXxxs,
+            StreamTokens.spacing3xs,
         ),
     ) {
         repeat(3) { index ->
@@ -72,7 +72,7 @@ public fun AudioVolumeIndicator(
                 }
             Spacer(
                 modifier = Modifier
-                    .width(StreamTokens.spacingXxxs)
+                    .width(StreamTokens.spacing3xs)
                     .fillMaxHeight(
                         if (audioLevel == 0f) {
                             defaultBarHeight

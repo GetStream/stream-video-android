@@ -67,7 +67,7 @@ internal fun StreamListItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = StreamTokens.spacingXxs)
+            .padding(horizontal = StreamTokens.spacing2xs)
             .defaultMinSize(minHeight = StreamTokens.size48)
             .clip(RoundedCornerShape(StreamTokens.radiusMd))
             .then(
@@ -91,7 +91,7 @@ internal fun StreamListItem(
             leadingContent?.invoke()
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(StreamTokens.spacingXxxs),
+                verticalArrangement = Arrangement.spacedBy(StreamTokens.spacing3xs),
             ) {
                 Text(
                     text = title,

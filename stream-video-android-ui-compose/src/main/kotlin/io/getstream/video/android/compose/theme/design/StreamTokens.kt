@@ -32,8 +32,8 @@ public object StreamTokens {
 
     // Spacing
     public val spacingNone: Dp = 0.dp
-    public val spacingXxxs: Dp = 2.dp
-    public val spacingXxs: Dp = 4.dp
+    public val spacing3xs: Dp = 2.dp
+    public val spacing2xs: Dp = 4.dp
     public val spacingXs: Dp = 8.dp
     public val spacingSm: Dp = 12.dp
     public val spacingMd: Dp = 16.dp
@@ -44,7 +44,7 @@ public object StreamTokens {
 
     // Radius
     public val radiusNone: CornerSize = CornerSize(0.dp)
-    public val radiusXxs: CornerSize = CornerSize(2.dp)
+    public val radius2xs: CornerSize = CornerSize(2.dp)
     public val radiusXs: CornerSize = CornerSize(4.dp)
     public val radiusSm: CornerSize = CornerSize(6.dp)
     public val radiusMd: CornerSize = CornerSize(8.dp)
@@ -103,7 +103,7 @@ public object StreamTokens {
     public val fontWeightSemiBold: FontWeight = FontWeight.W600
     public val fontWeightBold: FontWeight = FontWeight.W700
     public val fontSizeMicro: TextUnit = 8.sp
-    public val fontSizeXxs: TextUnit = 10.sp
+    public val fontSize2xs: TextUnit = 10.sp
     public val fontSizeXs: TextUnit = 12.sp
     public val fontSizeSm: TextUnit = 14.sp
     public val fontSizeMd: TextUnit = 16.sp

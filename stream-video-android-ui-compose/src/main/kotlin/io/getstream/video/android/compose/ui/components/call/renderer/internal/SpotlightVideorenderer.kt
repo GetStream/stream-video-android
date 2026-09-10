@@ -115,7 +115,7 @@ internal fun SpotlightVideoRenderer(
         } else {
             // *2 to account for the controls
             Column(
-                modifier = Modifier.padding(bottom = StreamTokens.spacingXxxs * 2),
+                modifier = Modifier.padding(bottom = StreamTokens.spacing3xs * 2),
             ) {
                 SpotlightContentPortrait(
                     modifier = modifier.weight(1f),

@@ -1051,13 +1051,13 @@ public final class io/getstream/video/android/compose/theme/design/StreamTokens 
 	public final fun getEmojiSm-XSAIIZE ()J
 	public final fun getEmojiXl-XSAIIZE ()J
 	public final fun getFontSize2xl-XSAIIZE ()J
+	public final fun getFontSize2xs-XSAIIZE ()J
 	public final fun getFontSizeLg-XSAIIZE ()J
 	public final fun getFontSizeMd-XSAIIZE ()J
 	public final fun getFontSizeMicro-XSAIIZE ()J
 	public final fun getFontSizeSm-XSAIIZE ()J
 	public final fun getFontSizeXl-XSAIIZE ()J
 	public final fun getFontSizeXs-XSAIIZE ()J
-	public final fun getFontSizeXxs-XSAIIZE ()J
 	public final fun getFontWeightBold ()Landroidx/compose/ui/text/font/FontWeight;
 	public final fun getFontWeightMedium ()Landroidx/compose/ui/text/font/FontWeight;
 	public final fun getFontWeightRegular ()Landroidx/compose/ui/text/font/FontWeight;
@@ -1077,6 +1077,7 @@ public final class io/getstream/video/android/compose/theme/design/StreamTokens 
 	public final fun getLineHeightRelaxed-XSAIIZE ()J
 	public final fun getLineHeightTight-XSAIIZE ()J
 	public final fun getRadius2xl ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getRadius2xs ()Landroidx/compose/foundation/shape/CornerSize;
 	public final fun getRadius3xl ()Landroidx/compose/foundation/shape/CornerSize;
 	public final fun getRadius4xl ()Landroidx/compose/foundation/shape/CornerSize;
 	public final fun getRadiusLg ()Landroidx/compose/foundation/shape/CornerSize;
@@ -1086,7 +1087,6 @@ public final class io/getstream/video/android/compose/theme/design/StreamTokens 
 	public final fun getRadiusSm ()Landroidx/compose/foundation/shape/CornerSize;
 	public final fun getRadiusXl ()Landroidx/compose/foundation/shape/CornerSize;
 	public final fun getRadiusXs ()Landroidx/compose/foundation/shape/CornerSize;
-	public final fun getRadiusXxs ()Landroidx/compose/foundation/shape/CornerSize;
 	public final fun getSize10-D9Ej5fM ()F
 	public final fun getSize12-D9Ej5fM ()F
 	public final fun getSize128-D9Ej5fM ()F
@@ -1119,15 +1119,15 @@ public final class io/getstream/video/android/compose/theme/design/StreamTokens 
 	public final fun getSize8-D9Ej5fM ()F
 	public final fun getSize80-D9Ej5fM ()F
 	public final fun getSpacing2xl-D9Ej5fM ()F
+	public final fun getSpacing2xs-D9Ej5fM ()F
 	public final fun getSpacing3xl-D9Ej5fM ()F
+	public final fun getSpacing3xs-D9Ej5fM ()F
 	public final fun getSpacingLg-D9Ej5fM ()F
 	public final fun getSpacingMd-D9Ej5fM ()F
 	public final fun getSpacingNone-D9Ej5fM ()F
 	public final fun getSpacingSm-D9Ej5fM ()F
 	public final fun getSpacingXl-D9Ej5fM ()F
 	public final fun getSpacingXs-D9Ej5fM ()F
-	public final fun getSpacingXxs-D9Ej5fM ()F
-	public final fun getSpacingXxxs-D9Ej5fM ()F
 	public final fun getStrokeW100-D9Ej5fM ()F
 	public final fun getStrokeW120-D9Ej5fM ()F
 	public final fun getStrokeW150-D9Ej5fM ()F

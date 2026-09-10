@@ -82,7 +82,7 @@ internal fun BoxScope.LandscapeVideoRenderer(
         ?: remember { mutableStateOf(false) }
 
     val remoteParticipants by call.state.remoteParticipants.collectAsStateWithLifecycle()
-    val paddedModifier = modifier.padding(StreamTokens.spacingXxxs)
+    val paddedModifier = modifier.padding(StreamTokens.spacing3xs)
     when (callParticipants.size) {
         1, 2 -> {
             val participant = if (remoteParticipants.isEmpty()) {

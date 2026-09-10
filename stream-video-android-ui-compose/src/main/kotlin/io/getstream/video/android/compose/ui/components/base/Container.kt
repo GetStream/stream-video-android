@@ -40,6 +40,6 @@ public fun GenericContainer(
             color = background,
             shape = RoundedCornerShape(roundness),
         )
-        .padding(StreamTokens.spacingXxs),
+        .padding(StreamTokens.spacing2xs),
     content = content,
 )

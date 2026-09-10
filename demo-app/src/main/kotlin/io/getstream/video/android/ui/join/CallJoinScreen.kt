@@ -329,7 +329,7 @@ private fun CallJoinHeader(
                                 },
                             )
                         }
-                        Spacer(modifier = Modifier.width(StreamTokens.spacingXxs))
+                        Spacer(modifier = Modifier.width(StreamTokens.spacing2xs))
                         if (!isProduction) {
                             StreamTextButton(
                                 modifier = Modifier
@@ -345,7 +345,7 @@ private fun CallJoinHeader(
                                     onCallSettingsClink()
                                 },
                             )
-                            Spacer(modifier = Modifier.width(StreamTokens.spacingXxs))
+                            Spacer(modifier = Modifier.width(StreamTokens.spacing2xs))
                             StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -360,7 +360,7 @@ private fun CallJoinHeader(
                                     onLogsClick()
                                 },
                             )
-                            Spacer(modifier = Modifier.width(StreamTokens.spacingXxs))
+                            Spacer(modifier = Modifier.width(StreamTokens.spacing2xs))
                             StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
