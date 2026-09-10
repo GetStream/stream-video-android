@@ -200,11 +200,6 @@ internal class StreamVideoClient internal constructor(
         coordinatorConnectionModule.api,
         scope,
     ),
-    /**
-     * Coordinator edge pin sent as `?sfu_id=` on every join / rejoin / migrate
-     * (`WithPinToSFUID`). Set from [StreamVideoBuilder] / local-dev config.
-     */
-    internal val pinnedSfuId: String? = null,
 ) : StreamVideo, NotificationHandler by streamNotificationManager {
 
     private var locationJob: Deferred<Result<String>>? = null

@@ -92,7 +92,6 @@ import java.net.ConnectException
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig]. (Deprecated) Use `callServiceConfigRegistry` instead.
  * @property localCoordinatorAddress Local coordinator address (IP:port) to be used for testing. Leave null if not needed.
- * @property sfuId Optional coordinator edge pin (`?sfu_id=` / `WithPinToSFUID`) for local SFU testing.
  * @property sounds Overwrite the default SDK sounds. See [io.getstream.video.android.core.sounds.RingingConfig].
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
@@ -167,13 +166,13 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val telecomConfig: TelecomConfig? = null,
     private val connectOnInit: Boolean = true,
     private val rejectCallWhenBusy: Boolean = false,
-    private val sfuId: String? = null,
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
 
     private var apiUrl: String? = null
     private var wssUrl: String? = null
+    private var sfuId: String? = null
 
     /**
      * Set the API URL to be used for the video client.
@@ -193,6 +192,16 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     @InternalStreamVideoApi
     public fun forceWssUrl(value: String): StreamVideoBuilder = apply {
         wssUrl = value
+    }
+
+    /**
+     * Set the SFU id the coordinator should pin every join, rejoin and migrate to.
+     *
+     * For testing purposes only.
+     */
+    @InternalStreamVideoApi
+    public fun forceSfuId(value: String): StreamVideoBuilder = apply {
+        sfuId = value
     }
 
     /**
@@ -312,7 +321,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             telecomConfig = telecomConfig,
             tokenRepository = tokenRepository,
             rejectCallWhenBusy = rejectCallWhenBusy,
-            pinnedSfuId = sfuId?.takeIf { it.isNotBlank() },
         )
 
         if (user.type == UserType.Guest) {

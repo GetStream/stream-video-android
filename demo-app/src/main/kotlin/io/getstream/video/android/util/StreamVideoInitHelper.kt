@@ -33,6 +33,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.moderations.ModerationConfig
 import io.getstream.video.android.core.moderations.ModerationWarningConfig
@@ -371,7 +372,7 @@ object StreamVideoInitHelper {
     }
 
     /** Sets up and returns the [StreamVideo] required to connect to the API. */
-    @OptIn(ExperimentalStreamVideoApi::class)
+    @OptIn(ExperimentalStreamVideoApi::class, InternalStreamVideoApi::class)
     private fun initializeStreamVideo(
         context: Context,
         apiKey: ApiKey,
@@ -415,7 +416,6 @@ object StreamVideoInitHelper {
             loggingLevel = loggingLevel,
             ensureSingleInstance = false,
             localCoordinatorAddress = localCoordinatorAddress,
-            sfuId = sfuId,
             callServiceConfigRegistry = callServiceConfigRegistry,
             vibrationConfig = enableRingingCallVibrationConfig(),
             notificationConfig = testNotificationConfig ?: NotificationConfig(
@@ -512,6 +512,8 @@ object StreamVideoInitHelper {
             telecomConfig = TelecomConfig(context.packageName),
             connectOnInit = false,
             rejectCallWhenBusy = false,
-        ).build()
+        ).apply {
+            sfuId?.takeIf { it.isNotBlank() }?.let(::forceSfuId)
+        }.build()
     }
 }
