@@ -54,10 +54,10 @@ import io.getstream.video.android.core.audio.UsbAudioInputDevice.Companion.isUsb
 import io.getstream.video.android.core.call.video.FilterVideoProcessor
 import io.getstream.video.android.core.camera.CameraCharacteristicsValidator
 import io.getstream.video.android.core.camera.DefaultCameraCharacteristicsValidator
+import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCallAction
 import io.getstream.video.android.core.screenshare.StreamScreenShareService
-import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.utils.buildAudioConstraints
 import io.getstream.video.android.core.utils.captureAudioSourceFor
 import io.getstream.video.android.core.utils.defaultHardwareAudioEffectsEnabled

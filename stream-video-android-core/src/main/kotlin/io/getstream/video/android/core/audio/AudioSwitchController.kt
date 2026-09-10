@@ -120,7 +120,9 @@ internal class AudioSwitchController(
         if (audioManager.mode == mode) return true
 
         logger.i {
-            "[applyRequestedAudioMode] ${audioModeName(audioManager.mode)} -> ${audioModeName(mode)}"
+            "[applyRequestedAudioMode] ${audioModeName(
+                audioManager.mode,
+            )} -> ${audioModeName(mode)}"
         }
         audioManager.mode = mode
         return true
