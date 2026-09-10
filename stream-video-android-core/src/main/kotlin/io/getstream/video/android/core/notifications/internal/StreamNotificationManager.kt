@@ -38,7 +38,6 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.notifications.DefaultNotificationUpdateComparator
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.NotificationHandler
-import io.getstream.video.android.core.notifications.NotificationUpdateComparator
 import io.getstream.video.android.core.notifications.handlers.CompatibilityStreamNotificationHandler
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.model.Device
@@ -56,9 +55,8 @@ internal class StreamNotificationManager private constructor(
     private val notificationPermissionManager: NotificationPermissionManager?,
 ) : NotificationHandler by notificationConfig.notificationHandler {
 
-    internal var notificationUpdateDeduplicator: NotificationUpdateDeduplicator =
+    internal val notificationUpdateDeduplicator: NotificationUpdateDeduplicator =
         NotificationUpdateDeduplicator(DefaultNotificationUpdateComparator)
-        private set
 
     suspend fun registerPushDevice() {
         logger.d { "[registerPushDevice] no args" }
@@ -196,7 +194,6 @@ internal class StreamNotificationManager private constructor(
             context: Context,
             scope: CoroutineScope,
             notificationConfig: NotificationConfig,
-            incomingCallNotificationUpdateComparator: NotificationUpdateComparator,
             api: ProductvideoApi,
             deviceTokenStorage: DeviceTokenStorage,
         ): StreamNotificationManager {
@@ -237,8 +234,6 @@ internal class StreamNotificationManager private constructor(
                         notificationPermissionManager,
                     )
                 }
-                internalStreamNotificationManager.notificationUpdateDeduplicator =
-                    NotificationUpdateDeduplicator(incomingCallNotificationUpdateComparator)
                 return internalStreamNotificationManager
             }
         }
