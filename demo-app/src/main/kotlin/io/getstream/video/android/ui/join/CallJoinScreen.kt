@@ -45,7 +45,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -476,7 +475,7 @@ private fun CallActualContentPortrait(
                 .fillMaxWidth()
                 .testTag("Stream_ScanQrCodeButton"),
             text = stringResource(id = R.string.scan_qr_code),
-            leadingIcon = rememberVectorPainter(Icons.Default.QrCodeScanner),
+            leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_qr_code_fill),
             onClick = { gotoQR() },
         )
     }
@@ -531,7 +530,7 @@ private fun CallActualContentLandscape(
                     .fillMaxWidth()
                     .testTag("Stream_ScanQrCodeButton"),
                 text = stringResource(id = R.string.scan_qr_code),
-                leadingIcon = rememberVectorPainter(Icons.Default.QrCodeScanner),
+                leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_qr_code_fill),
                 onClick = { gotoQR() },
             )
         }
