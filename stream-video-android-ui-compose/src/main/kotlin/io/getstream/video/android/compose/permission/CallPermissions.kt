@@ -54,24 +54,19 @@ public fun rememberCallPermissionsState(
     val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
 
-    // A permission counts as denied only after the user answered a request, so a fresh screen does not
-    // flag the controls before the system dialog had a chance to show. The live status is read on top,
-    // so a permission granted later in the system settings clears the flag.
-    var cameraRequestAnswered by remember(call) { mutableStateOf(false) }
-    var microphoneRequestAnswered by remember(call) { mutableStateOf(false) }
+    // A permission counts as denied only after a request completed, so a fresh screen does not flag
+    // the controls before the system dialog had a chance to show. A dismissed dialog reports an empty
+    // result, so the flag is set on every result rather than per permission; the state requests all
+    // its permissions together anyway. The live status is read on top, so a permission granted later
+    // in the system settings clears the flag.
+    var permissionRequestAnswered by remember(call) { mutableStateOf(false) }
 
-    val permissionState = rememberMultiplePermissionsState(permissions) {
-        if (android.Manifest.permission.CAMERA in it) cameraRequestAnswered = true
-        if (android.Manifest.permission.RECORD_AUDIO in it) microphoneRequestAnswered = true
+    val permissionState = rememberMultiplePermissionsState(permissions) { result ->
+        permissionRequestAnswered = true
         if (onPermissionsResult != null) {
-            onPermissionsResult.invoke(it)
+            onPermissionsResult(result)
         } else {
-            if (it[android.Manifest.permission.CAMERA] == true && isCameraEnabled) {
-                call.camera.setEnabled(true, fromUser = false)
-            }
-            if (it[android.Manifest.permission.RECORD_AUDIO] == true && isMicrophoneEnabled) {
-                call.microphone.setEnabled(true, fromUser = false)
-            }
+            call.enableGrantedDevices(result, isCameraEnabled, isMicrophoneEnabled)
         }
     }
 
@@ -89,16 +84,29 @@ public fun rememberCallPermissionsState(
             override val shouldShowRationale: Boolean
                 get() = permissionState.shouldShowRationale
             override val isCameraPermissionDenied: Boolean
-                get() = cameraRequestAnswered &&
+                get() = permissionRequestAnswered &&
                     !permissionState.isGranted(android.Manifest.permission.CAMERA)
             override val isMicrophonePermissionDenied: Boolean
-                get() = microphoneRequestAnswered &&
+                get() = permissionRequestAnswered &&
                     !permissionState.isGranted(android.Manifest.permission.RECORD_AUDIO)
 
             override fun launchPermissionRequest() {
                 permissionState.launchMultiplePermissionRequest()
             }
         }
+    }
+}
+
+private fun Call.enableGrantedDevices(
+    result: Map<String, Boolean>,
+    isCameraEnabled: Boolean,
+    isMicrophoneEnabled: Boolean,
+) {
+    if (result[android.Manifest.permission.CAMERA] == true && isCameraEnabled) {
+        camera.setEnabled(true, fromUser = false)
+    }
+    if (result[android.Manifest.permission.RECORD_AUDIO] == true && isMicrophoneEnabled) {
+        microphone.setEnabled(true, fromUser = false)
     }
 }
 

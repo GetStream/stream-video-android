@@ -305,21 +305,25 @@ private fun DefaultLobbyControlsSlot(
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
             modifier = modifier,
-            onCallAction = lobbyControlsCallActionHandler(permissions, onCallAction),
+            onCallAction = remember(permissions, onCallAction) {
+                lobbyControlsCallActionHandler(permissions, onCallAction)
+            },
         ),
     )
 }
 
 /**
- * Wraps [onCallAction] so that toggling a device whose permission was denied also asks for the
- * permission again. The toggle itself is still forwarded, so the device turns on once granted.
+ * Wraps [onCallAction] so that turning on a device whose permission was denied also asks for the
+ * permission again. Turning a device off never asks. The toggle itself is still forwarded, so the
+ * device turns on once granted.
  */
 internal fun lobbyControlsCallActionHandler(
     permissions: VideoPermissionsState,
     onCallAction: (CallAction) -> Unit,
 ): (CallAction) -> Unit = { action ->
-    val needsPermission = (action is ToggleCamera && permissions.isCameraPermissionDenied) ||
-        (action is ToggleMicrophone && permissions.isMicrophonePermissionDenied)
+    val needsPermission =
+        (action is ToggleCamera && action.isEnabled && permissions.isCameraPermissionDenied) ||
+            (action is ToggleMicrophone && action.isEnabled && permissions.isMicrophonePermissionDenied)
     if (needsPermission) {
         permissions.launchPermissionRequest()
     }

@@ -60,6 +60,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.CallActivity
 import io.getstream.video.android.R
+import io.getstream.video.android.compose.permission.VideoPermissionsState
+import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -290,14 +292,13 @@ private fun CallLobbyBodyPortrait(
             text = "Set up your test call",
             style = VideoTheme.typography.headingLarge,
         )
-        val onCallAction: (CallAction) -> Unit = { action ->
-            when (action) {
-                is ToggleCamera -> onToggleCamera(action.isEnabled)
-                is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
-                is ToggleHifiAudio -> onToggleHifiAudio(action.isHifiAudioEnabled)
-                else -> Unit
-            }
-        }
+        val permissions = rememberCallPermissionsState(call = call)
+        val onCallAction = lobbyCallActionHandler(
+            permissions,
+            onToggleCamera,
+            onToggleMicrophone,
+            onToggleHifiAudio,
+        )
         CallLobby(
             call = call,
             modifier = Modifier
@@ -305,6 +306,7 @@ private fun CallLobbyBodyPortrait(
                 .padding(StreamTokens.spacingMd),
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
+            permissions = permissions,
             onCallAction = onCallAction,
             lobbyControlsContent = { modifier, _ ->
                 ControlActions(
@@ -353,14 +355,13 @@ private fun CallLobbyBodyLandscape(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                val onCallAction: (CallAction) -> Unit = { action ->
-                    when (action) {
-                        is ToggleCamera -> onToggleCamera(action.isEnabled)
-                        is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
-                        is ToggleHifiAudio -> onToggleHifiAudio(action.isHifiAudioEnabled)
-                        else -> Unit
-                    }
-                }
+                val permissions = rememberCallPermissionsState(call = call)
+                val onCallAction = lobbyCallActionHandler(
+                    permissions,
+                    onToggleCamera,
+                    onToggleMicrophone,
+                    onToggleHifiAudio,
+                )
 
                 CallLobby(
                     call = call,
@@ -372,6 +373,7 @@ private fun CallLobbyBodyLandscape(
                         ),
                     isCameraEnabled = isCameraEnabled,
                     isMicrophoneEnabled = isMicrophoneEnabled,
+                    permissions = permissions,
                     onCallAction = onCallAction,
                     lobbyControlsContent = { modifier, _ ->
                         ControlActions(
@@ -420,6 +422,34 @@ private fun CallLobbyBodyLandscape(
                 description()
             }
         }
+    }
+}
+
+/**
+ * Routes the lobby toggles to the view model. Turning on a device whose permission was denied asks
+ * for the permission again first, the same way the SDK default lobby controls do.
+ */
+private fun lobbyCallActionHandler(
+    permissions: VideoPermissionsState,
+    onToggleCamera: (Boolean) -> Unit,
+    onToggleMicrophone: (Boolean) -> Unit,
+    onToggleHifiAudio: (Boolean) -> Unit,
+): (CallAction) -> Unit = { action ->
+    when (action) {
+        is ToggleCamera -> {
+            if (action.isEnabled && permissions.isCameraPermissionDenied) {
+                permissions.launchPermissionRequest()
+            }
+            onToggleCamera(action.isEnabled)
+        }
+        is ToggleMicrophone -> {
+            if (action.isEnabled && permissions.isMicrophonePermissionDenied) {
+                permissions.launchPermissionRequest()
+            }
+            onToggleMicrophone(action.isEnabled)
+        }
+        is ToggleHifiAudio -> onToggleHifiAudio(action.isHifiAudioEnabled)
+        else -> Unit
     }
 }
 

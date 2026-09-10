@@ -78,6 +78,19 @@ internal class LobbyControlsCallActionHandlerTest {
     }
 
     @Test
+    fun `turning a device off never requests its permission`() {
+        val permissions =
+            FakePermissions(isCameraPermissionDenied = true, isMicrophonePermissionDenied = true)
+        val handler = lobbyControlsCallActionHandler(permissions) { forwarded += it }
+
+        handler(ToggleCamera(isEnabled = false))
+        handler(ToggleMicrophone(isEnabled = false))
+
+        assertEquals(0, permissions.requests)
+        assertEquals(2, forwarded.size)
+    }
+
+    @Test
     fun `other actions never request a permission`() {
         val permissions =
             FakePermissions(isCameraPermissionDenied = true, isMicrophonePermissionDenied = true)
