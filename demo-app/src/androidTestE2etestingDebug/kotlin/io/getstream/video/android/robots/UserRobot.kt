@@ -108,7 +108,10 @@ class UserRobot {
         if (callId != null) {
             CallDetailsPage.callIdInputField.waitToAppear().typeText(callId)
         }
-        CallDetailsPage.joinCallButton.waitToAppearAndClick()
+        // The call details screen is the first screen after launch or login, so this wait
+        // overlaps app startup on an emulator that is still settling. The 5s default was the
+        // single most common nightly failure, so the window is deliberately wider.
+        CallDetailsPage.joinCallButton.waitToAppearAndClick(timeOutMillis = 15.seconds)
         waitForLobbyToOpen()
         return this
     }
@@ -127,7 +130,9 @@ class UserRobot {
     }
 
     private fun waitForLobbyToOpen(): UserRobot {
-        LobbyPage.closeButton.waitToAppear()
+        // Reached right after a login, so the lobby composes while the app is still starting
+        // up. At the 5s default this failed about half the time locally on the re-enter tests.
+        LobbyPage.closeButton.waitToAppear(timeOutMillis = 15.seconds)
         return this
     }
 
@@ -342,7 +347,8 @@ class UserRobot {
         CallPage.callViewButton.waitToAppearAndClick()
         // With many live video tiles the emulator UI is busy, and the opened menu can take
         // several seconds to land in the accessibility tree, so the items get a wide window.
-        val timeOutMillis = 15.seconds
+        // 15s still timed out on the six-participant test, so the window is wider again.
+        val timeOutMillis = 30.seconds
         when (mode) {
             VideoView.DYNAMIC -> CallPage.ViewMenu.dynamic.waitToAppearAndClick(timeOutMillis)
             VideoView.SPOTLIGHT -> CallPage.ViewMenu.spotlight.waitToAppearAndClick(timeOutMillis)
