@@ -62,10 +62,10 @@ public fun User.Companion.builtInUsers(): List<User> {
             image = "https://ca.slack-edge.com/T02RM6X6B-U05UD37MA1G-f062f8b7afc2-512",
         ),
         User(
-            id = "liviu",
-            name = "Liviu",
+            id = "andrerego",
+            name = "André",
             role = "user",
-            image = "https://ca.slack-edge.com/T02RM6X6B-U0604NCKKRA-76f99b6ba2c8-512",
+            image = "https://ca.slack-edge.com/T02RM6X6B-U083JCB6ZEY-2da235988b74-512",
         ),
         User(
             id = "kanat",
