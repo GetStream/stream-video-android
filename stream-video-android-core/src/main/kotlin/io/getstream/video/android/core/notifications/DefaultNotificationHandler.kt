@@ -50,8 +50,6 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.handlers.defaultIncomingCallChannelIdRes
-import io.getstream.video.android.core.notifications.handlers.incomingCallNotificationFlags
-import io.getstream.video.android.core.notifications.handlers.shouldNotificationOwnIncomingRingtone
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
 import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
@@ -342,9 +340,8 @@ public open class DefaultNotificationHandler(
         callDisplayName: String,
     ): Notification? = null
 
-    protected val notificationDispatcher: NotificationDispatcher by lazy {
-        DefaultNotificationDispatcher(notificationManager, StreamVideo.instance())
-    }
+    protected val notificationDispatcher: NotificationDispatcher =
+        DefaultNotificationDispatcher(notificationManager)
 
     override fun getStreamNotificationDispatcher(): NotificationDispatcher {
         return notificationDispatcher
@@ -895,9 +892,6 @@ public open class DefaultNotificationHandler(
     open fun getChannelId(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_id,
     )
-
-    private fun streamVideoClient(): StreamVideoClient? =
-        StreamVideo.instanceOrNull() as? StreamVideoClient
 
     open fun getChannelName(): String = application.getString(
         R.string.stream_video_incoming_call_notification_channel_title,

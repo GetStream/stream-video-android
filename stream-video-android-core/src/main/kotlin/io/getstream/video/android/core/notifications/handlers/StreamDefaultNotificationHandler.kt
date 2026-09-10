@@ -56,7 +56,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_NOTIFICATION
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.StreamIntentResolver
-import io.getstream.video.android.core.notifications.dispatchers.LazyDefaultNotificationDispatcher
+import io.getstream.video.android.core.notifications.dispatchers.DefaultNotificationDispatcher
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.extractor.DefaultNotificationContentExtractor
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
@@ -138,7 +138,7 @@ constructor(
             updateNotificationBuilderInterceptor,
         ),
     protected val notificationDispatcher: NotificationDispatcher =
-        LazyDefaultNotificationDispatcher(notificationManager),
+        DefaultNotificationDispatcher(notificationManager),
     @ExperimentalStreamVideoApi
     private val permissionChecker: (
         context: Context,

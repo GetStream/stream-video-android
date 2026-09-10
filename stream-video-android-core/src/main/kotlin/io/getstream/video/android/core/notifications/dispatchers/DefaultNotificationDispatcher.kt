@@ -22,63 +22,20 @@ import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.StreamVideo
-import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.model.StreamCallId
 
-class DefaultNotificationDispatcher private constructor(
+class DefaultNotificationDispatcher(
     val notificationManager: NotificationManagerCompat,
-    private val streamVideoProvider: () -> StreamVideo?,
 ) : NotificationDispatcher {
-
-    public constructor(
-        notificationManager: NotificationManagerCompat,
-        streamVideo: StreamVideo,
-    ) : this(notificationManager, { streamVideo })
-
-    public constructor(
-        notificationManager: NotificationManagerCompat,
-    ) : this(notificationManager, StreamVideo::instanceOrNull)
 
     private val logger by taggedLogger("DefaultNotificationDispatcher")
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun notify(streamCallId: StreamCallId, id: Int, notification: Notification) {
         logger.d { "[notify] callId: ${streamCallId.id}, notificationId: $id" }
-        val streamVideo = streamVideoProvider()
-        val streamVideoClient = streamVideo as? StreamVideoClient
-        val call = streamVideo?.call(streamCallId.type, streamCallId.id)
-        if (streamVideoClient != null && call != null) {
-            val callState = call.state
-            val ringingState = callState.ringingState.value
-            if (streamVideoClient.streamNotificationManager.notificationUpdateDeduplicator.isDuplicate(
-                    call = call,
-                    ringingState = ringingState,
-                    existingNotificationId = callState.notificationIdFlow.value,
-                    existingNotification = callState.atomicNotification.get(),
-                    updatedNotificationId = id,
-                    updatedNotification = notification,
-                )
-            ) {
-                logger.d { "[notify] Skipping equivalent incoming-call notification update" }
-                return
-            }
-        }
-
-        call?.state?.updateNotification(id, notification)
+        StreamVideo.instanceOrNull()?.call(streamCallId.type, streamCallId.id)
+            ?.state?.updateNotification(id, notification)
 
         notificationManager.notify(id, notification)
-    }
-}
-
-internal class LazyDefaultNotificationDispatcher(
-    private val notificationManager: NotificationManagerCompat,
-) : NotificationDispatcher {
-
-    private val delegate by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        DefaultNotificationDispatcher(notificationManager, StreamVideo.instance())
-    }
-
-    override fun notify(streamCallId: StreamCallId, id: Int, notification: Notification) {
-        delegate.notify(streamCallId, id, notification)
     }
 }

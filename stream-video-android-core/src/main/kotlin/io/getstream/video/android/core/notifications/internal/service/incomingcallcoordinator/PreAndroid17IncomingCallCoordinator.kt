@@ -25,7 +25,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
-import io.getstream.video.android.core.notifications.handlers.shouldNotificationOwnIncomingRingtone
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig

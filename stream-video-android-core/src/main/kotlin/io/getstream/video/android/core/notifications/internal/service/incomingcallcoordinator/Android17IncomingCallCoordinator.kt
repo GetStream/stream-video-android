@@ -124,7 +124,7 @@ internal class Android17IncomingCallCoordinator(
 
     private fun fallbackToCallService(request: IncomingCallRequest) {
         logger.w { "[showIncomingCall] Telecom unavailable; falling back to CallService" }
-        fallbackCoordinator.showIncomingCall(request, IncomingRingtoneOwner.Notification)
+        fallbackCoordinator.showIncomingCall(request)
     }
 
     private fun connectCoordinatorWebSocket(call: Call) {

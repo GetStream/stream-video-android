@@ -29,7 +29,6 @@ import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
