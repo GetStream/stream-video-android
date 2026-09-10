@@ -112,6 +112,7 @@ class CallJoinCoordinatorTest {
         every { state._connection } returns connectionFlow
         every { state.connection } returns connectionFlow
         every { state.settings } returns MutableStateFlow<CallSettingsResponse?>(null)
+        every { state.e2eeEnabled } returns MutableStateFlow(false)
         coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
     }
 
@@ -141,7 +142,7 @@ class CallJoinCoordinatorTest {
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {
         coEvery {
             apiClient.joinRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns result
     }
@@ -157,6 +158,30 @@ class CallJoinCoordinatorTest {
         assertThat(result).isInstanceOf(Success::class.java)
         assertThat((result as Success).value).isSameInstanceAs(mockSession)
         verify { sessionMonitor.monitorSession(mockJoinResponse) }
+    }
+
+    @Test
+    fun `first join passes e2ee from call state`() = runTest(testDispatcher) {
+        every { state.e2eeEnabled } returns MutableStateFlow(true)
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+
+        coordinator().join()
+        advanceUntilIdle()
+
+        coVerify {
+            apiClient.joinRequest(
+                create = any(),
+                location = any(),
+                migratingFrom = any(),
+                migratingFromList = any(),
+                ring = any(),
+                notify = any(),
+                hintHighScaleLivestreamPublisher = any(),
+                joinAnalyticsModel = any(),
+                e2ee = true,
+            )
+        }
     }
 
     @Test
@@ -200,6 +225,7 @@ class CallJoinCoordinatorTest {
                 any(),
                 any(),
                 any(),
+                any(),
             )
         }
     }
@@ -222,7 +248,7 @@ class CallJoinCoordinatorTest {
         verify(exactly = 0) { sessionManager.setActiveSession(null) }
         verify(exactly = 1) { callAnalytics.joinAnalytics.onJoinFunctionStart() }
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         // The single outer gate must also stop a second RtcSession from being installed.
         verify(exactly = 0) { sessionManager.setActiveSession(mockSession) }
@@ -240,7 +266,7 @@ class CallJoinCoordinatorTest {
         val joinAnalytics = callAnalytics.joinAnalytics
         verify(exactly = 1) { joinAnalytics.onJoinFunctionStart() }
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -259,7 +285,7 @@ class CallJoinCoordinatorTest {
         assertThat(result).isInstanceOf(Success::class.java)
         assertThat((result as Success).value).isSameInstanceAs(existing)
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         verify { existing.sfuTracer.trace("join-already-joined", any()) }
         // The guard must not tear down the live session's SFU observers: nothing on this path
@@ -319,7 +345,7 @@ class CallJoinCoordinatorTest {
         assertThat(results.map { (it as Success).value }.distinct()).hasSize(1)
         // One join request and one SFU connect for five callers.
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         coVerify(exactly = 1) { mockSession.connectInternal() }
         verify(exactly = 1) { sessionManager.setActiveSession(mockSession) }
@@ -429,7 +455,7 @@ class CallJoinCoordinatorTest {
 
         verify(exactly = 1) { state.callJoinInterceptor = interceptor }
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
 
         guestGate.complete(Unit)
@@ -454,7 +480,7 @@ class CallJoinCoordinatorTest {
         advanceUntilIdle()
 
         coVerify(exactly = 2) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -487,7 +513,7 @@ class CallJoinCoordinatorTest {
 
         assertThat(secondResult).isInstanceOf(Success::class.java)
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         coVerify(exactly = 1) { mockSession.connectInternal() }
     }
@@ -496,7 +522,7 @@ class CallJoinCoordinatorTest {
     fun `cancelling the last waiter does not abort the shared join`() = runTest(testDispatcher) {
         val joinRequestGate = CompletableDeferred<Unit>()
         coEvery {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         } coAnswers {
             joinRequestGate.await()
             Success(mockJoinResponse)
@@ -528,7 +554,7 @@ class CallJoinCoordinatorTest {
         assertThat(retry).isInstanceOf(Success::class.java)
         assertThat((retry as Success).value).isSameInstanceAs(mockSession)
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -538,7 +564,7 @@ class CallJoinCoordinatorTest {
     ) {
         val joinRequestGate = CompletableDeferred<Unit>()
         coEvery {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         } coAnswers {
             joinRequestGate.await()
             Success(mockJoinResponse)
@@ -592,7 +618,7 @@ class CallJoinCoordinatorTest {
         assertThat(retry).isInstanceOf(Success::class.java)
         assertThat((retry as Success).value).isSameInstanceAs(mockSession)
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 

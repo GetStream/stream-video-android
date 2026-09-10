@@ -100,10 +100,11 @@ class JoinRecoverableFailureTest {
         every { state._connection } returns connectionFlow
         every { state.connection } returns connectionFlow
         every { state.settings } returns MutableStateFlow<CallSettingsResponse?>(null)
+        every { state.e2eeEnabled } returns MutableStateFlow(false)
         coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
         coEvery {
             apiClient.joinRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Success(mockJoinResponse)
     }

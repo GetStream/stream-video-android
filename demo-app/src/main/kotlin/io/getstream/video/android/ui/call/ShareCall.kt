@@ -21,6 +21,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.filled.CopyAll
 import androidx.compose.material.icons.filled.PersonAddAlt1
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,11 +50,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
+import io.getstream.video.android.util.DemoE2eeKeys
+import io.getstream.video.android.util.E2EE_KEY_QUERY_PARAM
 import io.getstream.video.android.util.config.types.StreamEnvironment
 
 @Composable
@@ -63,7 +68,8 @@ public fun ShareCallWithOthers(
     env: State<StreamEnvironment?>,
     context: Context,
 ) {
-    val shareUrl = "${env.value?.sharelink}${call.id}"
+    val encrypted by call.state.e2eeEnabled.collectAsStateWithLifecycle()
+    val shareUrl = shareUrl(env.value?.sharelink, call, encrypted)
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
@@ -88,6 +94,26 @@ public fun ShareCallWithOthers(
             context.startActivity(shareIntent)
         }
     }
+}
+
+/**
+ * The invite link for [call], carrying the shared passphrase when the call is actually encrypted.
+ * Without it the person scanning the code joins a call whose media they cannot decrypt, which is
+ * what makes the parameter worth having at all.
+ *
+ * [encrypted] comes from the SDK's own call state, so a passphrase is only ever advertised for a
+ * call that really is using it — a leftover from an earlier session of the same call ID cannot be
+ * passed off as this call's key.
+ */
+private fun shareUrl(sharelink: String?, call: Call, encrypted: Boolean): String {
+    val base = "$sharelink${call.id}"
+    if (!encrypted) return base
+    val passphrase = DemoE2eeKeys.of(call.cid) ?: return base
+    return Uri.parse(base)
+        .buildUpon()
+        .appendQueryParameter(E2EE_KEY_QUERY_PARAM, passphrase)
+        .build()
+        .toString()
 }
 
 @Composable
