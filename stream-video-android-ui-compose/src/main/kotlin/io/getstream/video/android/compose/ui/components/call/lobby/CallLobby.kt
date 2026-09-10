@@ -80,9 +80,9 @@ import io.getstream.video.android.ui.common.R
  * @param onRenderedContent A video renderer, which renders a local video track before joining a call.
  * @param onDisabledContent Content is shown that a local camera is disabled. It displays user avatar by default.
  * @param videoPreviewModifier Modifier applied to the [Box] that wraps the local video preview. Defaults
- * to a responsive height (180/280/200dp depending on screen size and orientation), full width, and a
- * 12dp rounded corner clip. Override to provide custom size, shape, padding, or background — useful
- * when the preview needs to match a host layout instead of the SDK's default sizing.
+ * to a responsive height (180/280/200dp depending on screen size and orientation), full width, and the
+ * design system large corner radius clip. Override to provide custom size, shape, padding, or
+ * background, useful when the preview needs to match a host layout instead of the SDK's default sizing.
  * @param participantLabelContent Slot for the participant label overlaid on the preview. Defaults to a
  * label showing the user's name and microphone state at [Alignment.BottomStart]. Pass `{}` to hide the
  * label entirely, or override to provide custom positioning and content (use [BoxScope.align] inside).
@@ -386,7 +386,7 @@ internal fun OnDisabledContent(user: User) {
                 userImage = user.image,
                 userName = user.name.takeUnless { it.isNullOrBlank() } ?: user.id,
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(StreamTokens.size80)
                     .align(Alignment.Center),
             ),
         )
@@ -400,7 +400,7 @@ private fun defaultVideoPreviewModifier(): Modifier {
     return Modifier
         .responsiveHeight(isPortrait = isPortrait, screenHeightDp = configuration.screenHeightDp)
         .fillMaxWidth()
-        .clip(RoundedCornerShape(12.dp))
+        .clip(RoundedCornerShape(StreamTokens.radiusLg))
 }
 
 private fun Modifier.responsiveHeight(isPortrait: Boolean, screenHeightDp: Int): Modifier {
