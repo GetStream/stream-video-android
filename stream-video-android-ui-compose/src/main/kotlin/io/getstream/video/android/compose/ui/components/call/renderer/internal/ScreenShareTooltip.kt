@@ -60,8 +60,8 @@ internal fun ScreenShareTooltip(
     ) {
         Icon(
             modifier = Modifier.padding(
-                start = StreamTokens.spacingXxs,
-                end = StreamTokens.spacingXxs,
+                start = StreamTokens.spacing2xs,
+                end = StreamTokens.spacing2xs,
             ),
             painter = painterResource(
                 id = io.getstream.video.android.compose.R.drawable.stream_design_ic_present_mobile_fill,
@@ -72,7 +72,7 @@ internal fun ScreenShareTooltip(
 
         Text(
             modifier = Modifier.padding(
-                end = StreamTokens.spacingXxs,
+                end = StreamTokens.spacing2xs,
             ).testTag("Stream_ParticipantScreenSharingLabel"),
             text = stringResource(id = R.string.stream_video_screen_sharing_title, userNameOrId),
             color = VideoTheme.colors.textOnAccent,

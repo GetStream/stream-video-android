@@ -36,6 +36,21 @@ public interface VideoPermissionsState {
     public val shouldShowRationale: Boolean
 
     /**
+     * When `true`, a permission request completed (answered or dismissed) and the camera permission
+     * was not granted. It stays `false` while no request has completed yet, so the UI can tell a
+     * denied permission apart from one that was simply not asked for.
+     */
+    public val isCameraPermissionDenied: Boolean
+        get() = false
+
+    /**
+     * When `true`, a permission request completed (answered or dismissed) and the microphone
+     * permission was not granted. It stays `false` while no request has completed yet.
+     */
+    public val isMicrophonePermissionDenied: Boolean
+        get() = false
+
+    /**
      * Request the permissions to the user.
      *
      * This should always be triggered from non-composable scope, for example, from a side-effect

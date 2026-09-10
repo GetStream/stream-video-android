@@ -88,7 +88,7 @@ internal fun BoxScope.PortraitVideoRenderer(
         ?.collectAsStateWithLifecycle(initialValue = false)
         ?: remember { mutableStateOf(false) }
 
-    val paddedModifier = modifier.padding(StreamTokens.spacingXxxs)
+    val paddedModifier = modifier.padding(StreamTokens.spacing3xs)
     when (callParticipants.size) {
         1, 2 -> {
             val participant = if (remoteParticipants.isEmpty()) {

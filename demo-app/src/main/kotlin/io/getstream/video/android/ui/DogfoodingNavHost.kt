@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.ui
 
+import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -127,7 +128,7 @@ enum class AppScreens(val route: String) {
 
     fun routeWithArg(argValue: Any): String = when (this) {
         Login -> this.route.replace("{auto_log_in}", argValue.toString())
-        CallLobby -> this.route.replace("{cid}", argValue.toString())
+        CallLobby -> this.route.replace("{cid}", Uri.encode(argValue.toString()))
         else -> this.route
     }
 }

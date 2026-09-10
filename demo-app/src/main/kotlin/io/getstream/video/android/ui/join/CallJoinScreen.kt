@@ -44,13 +44,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DriveFileMove
 import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.VideoCall
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,7 +55,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -85,7 +78,6 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -93,6 +85,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.R
 import io.getstream.video.android.app
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
@@ -110,6 +103,7 @@ import io.getstream.video.android.ui.LogFilesScreen
 import io.getstream.video.android.ui.SingleButtonDialog
 import io.getstream.video.android.util.config.AppConfig
 import io.getstream.video.android.util.config.types.StreamEnvironment
+import io.getstream.video.android.compose.R as ComposeR
 
 @Composable
 fun CallJoinScreen(
@@ -241,7 +235,7 @@ private fun CallJoinHeader(
 ) {
     Row(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(StreamTokens.spacingMd)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround,
@@ -260,23 +254,23 @@ private fun CallJoinHeader(
                 },
             ) {
                 UserAvatar(
-                    modifier = Modifier.size(44.dp),
+                    modifier = Modifier.size(StreamTokens.size40),
                     userImage = it.image,
                     userName = it.userNameOrId,
                 )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(StreamTokens.spacingXs))
         }
 
         Text(
             modifier = Modifier
                 .weight(1f)
                 .testTag("Stream_UserName"),
-            color = Color.White,
             text = user?.userNameOrId.orEmpty(),
+            style = VideoTheme.typography.bodyDefault,
+            color = VideoTheme.colors.textPrimary,
             maxLines = 1,
-            fontSize = 16.sp,
         )
 
         if (!isProduction || showDirectCall) {
@@ -288,7 +282,7 @@ private fun CallJoinHeader(
 
             StreamIconButton(
                 onClick = { showMenu = !showMenu },
-                icon = rememberVectorPainter(Icons.Default.Settings),
+                icon = painterResource(ComposeR.drawable.stream_design_ic_settings),
                 contentDescription = null,
                 modifier = Modifier
                     .onGloballyPositioned { coordinates ->
@@ -312,12 +306,12 @@ private fun CallJoinHeader(
                 ) {
                     Column(
                         modifier = Modifier
-                            .width(200.dp)
+                            .width(StreamTokens.size208)
                             .background(
                                 VideoTheme.colors.backgroundCoreSurfaceDefault,
-                                RoundedCornerShape(24.dp),
+                                RoundedCornerShape(StreamTokens.radius3xl),
                             )
-                            .padding(16.dp),
+                            .padding(StreamTokens.spacingMd),
                     ) {
                         if (showDirectCall) {
                             StreamTextButton(
@@ -325,7 +319,9 @@ private fun CallJoinHeader(
                                     .fillMaxWidth()
                                     .testTag("Stream_DirectCallButton"),
                                 text = stringResource(id = R.string.direct_call),
-                                leadingIcon = rememberVectorPainter(Icons.Default.Call),
+                                leadingIcon = painterResource(
+                                    ComposeR.drawable.stream_design_ic_phone_fill,
+                                ),
                                 style = StreamButtonStyleDefaults.secondarySolid,
                                 onClick = {
                                     showMenu = false
@@ -333,13 +329,15 @@ private fun CallJoinHeader(
                                 },
                             )
                         }
-                        Spacer(modifier = Modifier.width(5.dp))
+                        Spacer(modifier = Modifier.width(StreamTokens.spacing2xs))
                         if (!isProduction) {
                             StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_CallSettingsButton"),
-                                leadingIcon = rememberVectorPainter(Icons.Default.Settings),
+                                leadingIcon = painterResource(
+                                    ComposeR.drawable.stream_design_ic_settings,
+                                ),
                                 style = StreamButtonStyleDefaults.secondaryGhost,
                                 text = stringResource(id = R.string.call_settings),
                                 onClick = {
@@ -347,13 +345,13 @@ private fun CallJoinHeader(
                                     onCallSettingsClink()
                                 },
                             )
-                            Spacer(modifier = Modifier.width(5.dp))
+                            Spacer(modifier = Modifier.width(StreamTokens.spacing2xs))
                             StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_ExportLogsButton"),
-                                leadingIcon = rememberVectorPainter(
-                                    Icons.AutoMirrored.Default.DriveFileMove,
+                                leadingIcon = painterResource(
+                                    ComposeR.drawable.stream_design_ic_file,
                                 ),
                                 style = StreamButtonStyleDefaults.secondaryGhost,
                                 text = stringResource(id = R.string.logs),
@@ -362,13 +360,13 @@ private fun CallJoinHeader(
                                     onLogsClick()
                                 },
                             )
-                            Spacer(modifier = Modifier.width(5.dp))
+                            Spacer(modifier = Modifier.width(StreamTokens.spacing2xs))
                             StreamTextButton(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("Stream_SignOutButton"),
-                                leadingIcon = rememberVectorPainter(
-                                    Icons.AutoMirrored.Filled.Logout,
+                                leadingIcon = painterResource(
+                                    ComposeR.drawable.stream_design_ic_leave,
                                 ),
                                 style = StreamButtonStyleDefaults.secondaryGhost,
                                 text = stringResource(id = R.string.sign_out),
@@ -447,37 +445,37 @@ private fun CallActualContentPortrait(
 ) = Box(modifier = Modifier.background(VideoTheme.colors.backgroundCoreApp)) {
     Column(
         modifier = modifier
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = StreamTokens.spacingMd)
             .semantics { testTagsAsResourceId = true },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         StreamLogo(Modifier.size(102.dp))
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXl))
         AppName()
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingLg))
         Description(text = stringResource(id = R.string.join_description))
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXl))
         JoinCallForm(prefilledCallId) {
             onJoinCall(it)
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
         StreamTextButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("Stream_StartNewCallButton"),
             text = stringResource(id = R.string.start_a_new_call),
-            leadingIcon = rememberVectorPainter(Icons.Default.VideoCall),
+            leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_video_fill),
             onClick = { onNewCall() },
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
         StreamTextButton(
             style = StreamButtonStyleDefaults.secondaryGhost,
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag("Stream_ScanQrCodeButton"),
             text = stringResource(id = R.string.scan_qr_code),
-            leadingIcon = rememberVectorPainter(Icons.Default.QrCodeScanner),
+            leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_qr_code_fill),
             onClick = { gotoQR() },
         )
     }
@@ -494,45 +492,45 @@ private fun CallActualContentLandscape(
     Row {
         Column(
             modifier = modifier
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = StreamTokens.spacingMd)
                 .weight(1f)
                 .semantics { testTagsAsResourceId = true },
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             StreamLogo(Modifier.size(72.dp))
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
             AppName()
             Description(text = stringResource(id = R.string.join_description))
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
         }
 
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = StreamTokens.spacingMd)
                 .align(Alignment.CenterVertically),
         ) {
             JoinCallForm(prefilledCallId) {
                 onJoinCall(it)
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
             StreamTextButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("Stream_StartNewCallButton"),
                 text = stringResource(id = R.string.start_a_new_call),
-                leadingIcon = rememberVectorPainter(Icons.Default.VideoCall),
+                leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_video_fill),
                 onClick = { onNewCall() },
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
             StreamTextButton(
                 style = StreamButtonStyleDefaults.secondaryGhost,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("Stream_ScanQrCodeButton"),
                 text = stringResource(id = R.string.scan_qr_code),
-                leadingIcon = rememberVectorPainter(Icons.Default.QrCodeScanner),
+                leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_qr_code_fill),
                 onClick = { gotoQR() },
             )
         }
@@ -563,8 +561,8 @@ private fun AppName(env: StreamEnvironment? = null) {
             )
             append(env?.displayName ?: "")
         },
-        color = Color.White,
-        fontSize = 24.sp,
+        color = VideoTheme.colors.textPrimary,
+        fontSize = StreamTokens.fontSize2xl,
     )
 }
 
@@ -574,19 +572,7 @@ private fun Description(text: String) {
         text = text,
         style = VideoTheme.typography.bodyDefault,
         textAlign = TextAlign.Center,
-        modifier = Modifier.widthIn(0.dp, 320.dp),
-    )
-}
-
-@Composable
-private fun Label(text: String) {
-    Text(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 35.dp),
-        text = text,
-        color = Color(0xFF979797),
-        fontSize = 13.sp,
+        modifier = Modifier.widthIn(max = StreamTokens.size320),
     )
 }
 
@@ -609,7 +595,7 @@ private fun JoinCallForm(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp),
+            .height(StreamTokens.size48),
     ) {
         StreamTextField(
             modifier = Modifier
@@ -633,7 +619,7 @@ private fun JoinCallForm(
             leadingIcon = rememberVectorPainter(Icons.AutoMirrored.Filled.Login),
             style = StreamButtonStyleDefaults.primarySolid,
             modifier = Modifier
-                .padding(start = 16.dp)
+                .padding(start = StreamTokens.spacingMd)
                 .fillMaxHeight()
                 .testTag("Stream_JoinCallButton"),
             onClick = {
@@ -714,9 +700,9 @@ private fun NoInternetUiPortrait(selectedEnv: StreamEnvironment) {
         verticalArrangement = Arrangement.Center,
     ) {
         StreamLogo(Modifier.size(102.dp))
-        Spacer(modifier = Modifier.height(25.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXl))
         AppName(selectedEnv)
-        Spacer(modifier = Modifier.height(25.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXl))
         Description(text = stringResource(id = R.string.you_are_offline))
     }
 }
@@ -729,9 +715,9 @@ private fun NoInternetUiLandscape(selectedEnv: StreamEnvironment) {
         verticalArrangement = Arrangement.Center,
     ) {
         StreamLogo(Modifier.size(72.dp))
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingSm))
         AppName(selectedEnv)
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingSm))
         Description(text = stringResource(id = R.string.you_are_offline))
     }
 }

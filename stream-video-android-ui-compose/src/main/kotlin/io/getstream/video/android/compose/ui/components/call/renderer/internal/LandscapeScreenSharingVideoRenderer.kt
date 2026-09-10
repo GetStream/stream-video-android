@@ -80,7 +80,7 @@ internal fun LandscapeScreenSharingVideoRenderer(
     ) {
         Box(
             modifier = Modifier
-                .padding(StreamTokens.spacingXxs)
+                .padding(StreamTokens.spacing2xs)
                 .clip(RoundedCornerShape(16.dp))
                 .fillMaxWidth()
                 .weight(0.65f)

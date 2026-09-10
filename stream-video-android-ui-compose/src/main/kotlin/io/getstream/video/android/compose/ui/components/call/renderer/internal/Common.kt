@@ -122,7 +122,7 @@ internal fun SpotlightContentLandscape(
 ) {
     Row(
         modifier = modifier
-            .padding(end = StreamTokens.spacingXxs),
+            .padding(end = StreamTokens.spacing2xs),
     ) {
         Box(
             modifier = Modifier

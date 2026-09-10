@@ -332,7 +332,7 @@ public fun BoxScope.ParticipantLabel(
                     modifier = Modifier
                         .align(CenterVertically)
                         .padding(
-                            vertical = StreamTokens.spacingXxs,
+                            vertical = StreamTokens.spacing2xs,
                             horizontal = StreamTokens.spacingXs,
                         )
                         .testTag("Stream_ParticipantMicrophone_Enabled_$audioEnabled"),

@@ -61,7 +61,7 @@ private fun Badge(text: String?, modifier: Modifier = Modifier) {
             .height(StreamTokens.size16)
             .defaultMinSize(minWidth = StreamTokens.size16)
             .background(VideoTheme.colors.badgeBgPrimary, CircleShape)
-            .padding(horizontal = StreamTokens.spacingXxs),
+            .padding(horizontal = StreamTokens.spacing2xs),
         contentAlignment = Alignment.Center,
     ) {
         Text(

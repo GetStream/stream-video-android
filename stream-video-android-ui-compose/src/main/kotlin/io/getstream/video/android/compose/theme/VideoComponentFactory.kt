@@ -164,7 +164,7 @@ public interface VideoComponentFactory {
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f)
-                .padding(bottom = StreamTokens.spacingXxxs),
+                .padding(bottom = StreamTokens.spacing3xs),
             style = params.style,
             videoRenderer = params.videoRenderer,
             floatingVideoRenderer = params.floatingVideoRenderer,

@@ -72,14 +72,14 @@ internal fun LazyRowVideoRenderer(
         state = state,
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(
-            StreamTokens.spacingXxs,
+            StreamTokens.spacing2xs,
         ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         itemsIndexed(items = participants, key = { _, it -> it.sessionId }) { index, participant ->
             ListVideoRenderer(
                 modifier = itemModifier.startOrEndPadding(
-                    value = StreamTokens.spacingXxs,
+                    value = StreamTokens.spacing2xs,
                     index = index,
                     first = 0,
                     last = participants.lastIndex,

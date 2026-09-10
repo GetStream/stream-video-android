@@ -63,6 +63,8 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.call.state.ToggleCamera
+import io.getstream.video.android.core.call.state.ToggleMicrophone
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.model.User
@@ -76,13 +78,14 @@ import io.getstream.video.android.ui.common.R
  * @param call The call includes states and will be rendered with participants.
  * @param user A user to display their name and avatar image on the preview.
  * @param video A participant video to render on the preview renderer.
- * @param permissions Android permissions that should be required to render a video call properly.
+ * @param permissions Android permissions that should be required to render a video call properly. When
+ * the camera or microphone permission was denied, tapping the matching control requests it again.
  * @param onRenderedContent A video renderer, which renders a local video track before joining a call.
  * @param onDisabledContent Content is shown that a local camera is disabled. It displays user avatar by default.
  * @param videoPreviewModifier Modifier applied to the [Box] that wraps the local video preview. Defaults
- * to a responsive height (180/280/200dp depending on screen size and orientation), full width, and a
- * 12dp rounded corner clip. Override to provide custom size, shape, padding, or background — useful
- * when the preview needs to match a host layout instead of the SDK's default sizing.
+ * to a responsive height (180/280/200dp depending on screen size and orientation), full width, and the
+ * design system large corner radius clip. Override to provide custom size, shape, padding, or
+ * background, useful when the preview needs to match a host layout instead of the SDK's default sizing.
  * @param participantLabelContent Slot for the participant label overlaid on the preview. Defaults to a
  * label showing the user's name and microphone state at [Alignment.BottomStart]. Pass `{}` to hide the
  * label entirely, or override to provide custom positioning and content (use [BoxScope.align] inside).
@@ -134,7 +137,14 @@ public fun CallLobby(
         DefaultOnCallActionHandler.onCallAction(call, it)
     },
     lobbyControlsContent: @Composable (modifier: Modifier, call: Call) -> Unit = { modifier, call ->
-        DefaultLobbyControlsSlot(modifier, call, isCameraEnabled, isMicrophoneEnabled, onCallAction)
+        DefaultLobbyControlsSlot(
+            modifier = modifier,
+            call = call,
+            isCameraEnabled = isCameraEnabled,
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            permissions = permissions,
+            onCallAction = onCallAction,
+        )
     },
 ) {
     DefaultPermissionHandler(videoPermission = permissions)
@@ -212,7 +222,14 @@ public fun CallLobby(
         DefaultOnCallActionHandler.onCallAction(call, it)
     },
     lobbyControlsContent: @Composable (modifier: Modifier, call: Call) -> Unit = { modifier, call ->
-        DefaultLobbyControlsSlot(modifier, call, isCameraEnabled, isMicrophoneEnabled, onCallAction)
+        DefaultLobbyControlsSlot(
+            modifier = modifier,
+            call = call,
+            isCameraEnabled = isCameraEnabled,
+            isMicrophoneEnabled = isMicrophoneEnabled,
+            permissions = permissions,
+            onCallAction = onCallAction,
+        )
     },
 ) {
     CallLobby(
@@ -279,6 +296,7 @@ private fun DefaultLobbyControlsSlot(
     call: Call,
     isCameraEnabled: Boolean,
     isMicrophoneEnabled: Boolean,
+    permissions: VideoPermissionsState,
     onCallAction: (CallAction) -> Unit,
 ) {
     VideoTheme.componentFactory.CallLobbyControlsContent(
@@ -287,9 +305,29 @@ private fun DefaultLobbyControlsSlot(
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
             modifier = modifier,
-            onCallAction = onCallAction,
+            onCallAction = remember(permissions, onCallAction) {
+                lobbyControlsCallActionHandler(permissions, onCallAction)
+            },
         ),
     )
+}
+
+/**
+ * Wraps [onCallAction] so that turning on a device whose permission was denied also asks for the
+ * permission again. Turning a device off never asks. The toggle itself is still forwarded, so the
+ * device turns on once granted.
+ */
+internal fun lobbyControlsCallActionHandler(
+    permissions: VideoPermissionsState,
+    onCallAction: (CallAction) -> Unit,
+): (CallAction) -> Unit = { action ->
+    val needsPermission =
+        (action is ToggleCamera && action.isEnabled && permissions.isCameraPermissionDenied) ||
+            (action is ToggleMicrophone && action.isEnabled && permissions.isMicrophonePermissionDenied)
+    if (needsPermission) {
+        permissions.launchPermissionRequest()
+    }
+    onCallAction(action)
 }
 
 @Composable
@@ -386,7 +424,7 @@ internal fun OnDisabledContent(user: User) {
                 userImage = user.image,
                 userName = user.name.takeUnless { it.isNullOrBlank() } ?: user.id,
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(StreamTokens.size80)
                     .align(Alignment.Center),
             ),
         )
@@ -400,7 +438,7 @@ private fun defaultVideoPreviewModifier(): Modifier {
     return Modifier
         .responsiveHeight(isPortrait = isPortrait, screenHeightDp = configuration.screenHeightDp)
         .fillMaxWidth()
-        .clip(RoundedCornerShape(12.dp))
+        .clip(RoundedCornerShape(StreamTokens.radiusLg))
 }
 
 private fun Modifier.responsiveHeight(isPortrait: Boolean, screenHeightDp: Int): Modifier {

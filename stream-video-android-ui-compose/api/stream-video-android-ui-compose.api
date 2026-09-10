@@ -36,6 +36,8 @@ public final class io/getstream/video/android/compose/permission/SinglePermissio
 public abstract interface class io/getstream/video/android/compose/permission/VideoPermissionsState {
 	public abstract fun getAllPermissionsGranted ()Z
 	public abstract fun getShouldShowRationale ()Z
+	public fun isCameraPermissionDenied ()Z
+	public fun isMicrophonePermissionDenied ()Z
 	public abstract fun launchPermissionRequest ()V
 }
 
@@ -1013,6 +1015,126 @@ public final class io/getstream/video/android/compose/theme/design/StreamDesign$
 public final class io/getstream/video/android/compose/theme/design/StreamDesign$Typography$Companion {
 	public final fun default (Landroidx/compose/ui/text/font/FontFamily;)Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography;
 	public static synthetic fun default$default (Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography$Companion;Landroidx/compose/ui/text/font/FontFamily;ILjava/lang/Object;)Lio/getstream/video/android/compose/theme/design/StreamDesign$Typography;
+}
+
+public final class io/getstream/video/android/compose/theme/design/StreamTokens {
+	public static final field $stable I
+	public static final field INSTANCE Lio/getstream/video/android/compose/theme/design/StreamTokens;
+	public final fun getButtonHitTargetMinHeight-D9Ej5fM ()F
+	public final fun getButtonHitTargetMinWidth-D9Ej5fM ()F
+	public final fun getButtonPaddingXIconOnlyLg-D9Ej5fM ()F
+	public final fun getButtonPaddingXIconOnlyMd-D9Ej5fM ()F
+	public final fun getButtonPaddingXIconOnlySm-D9Ej5fM ()F
+	public final fun getButtonPaddingXIconOnlyXs-D9Ej5fM ()F
+	public final fun getButtonPaddingXWithLabelLg-D9Ej5fM ()F
+	public final fun getButtonPaddingXWithLabelMd-D9Ej5fM ()F
+	public final fun getButtonPaddingXWithLabelSm-D9Ej5fM ()F
+	public final fun getButtonPaddingXWithLabelXs-D9Ej5fM ()F
+	public final fun getButtonPaddingYLg-D9Ej5fM ()F
+	public final fun getButtonPaddingYMd-D9Ej5fM ()F
+	public final fun getButtonPaddingYSm-D9Ej5fM ()F
+	public final fun getButtonPaddingYXs-D9Ej5fM ()F
+	public final fun getButtonRadiusFull ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getButtonRadiusLg ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getButtonRadiusMd ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getButtonRadiusSm ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getButtonVisualHeightLg-D9Ej5fM ()F
+	public final fun getButtonVisualHeightMd-D9Ej5fM ()F
+	public final fun getButtonVisualHeightSm-D9Ej5fM ()F
+	public final fun getButtonVisualHeightXs-D9Ej5fM ()F
+	public final fun getDeviceRadius ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getDeviceSafeAreaBottom-D9Ej5fM ()F
+	public final fun getDeviceSafeAreaTop-D9Ej5fM ()F
+	public final fun getEmoji2xl-XSAIIZE ()J
+	public final fun getEmojiLg-XSAIIZE ()J
+	public final fun getEmojiMd-XSAIIZE ()J
+	public final fun getEmojiSm-XSAIIZE ()J
+	public final fun getEmojiXl-XSAIIZE ()J
+	public final fun getFontSize2xl-XSAIIZE ()J
+	public final fun getFontSize2xs-XSAIIZE ()J
+	public final fun getFontSizeLg-XSAIIZE ()J
+	public final fun getFontSizeMd-XSAIIZE ()J
+	public final fun getFontSizeMicro-XSAIIZE ()J
+	public final fun getFontSizeSm-XSAIIZE ()J
+	public final fun getFontSizeXl-XSAIIZE ()J
+	public final fun getFontSizeXs-XSAIIZE ()J
+	public final fun getFontWeightBold ()Landroidx/compose/ui/text/font/FontWeight;
+	public final fun getFontWeightMedium ()Landroidx/compose/ui/text/font/FontWeight;
+	public final fun getFontWeightRegular ()Landroidx/compose/ui/text/font/FontWeight;
+	public final fun getFontWeightSemiBold ()Landroidx/compose/ui/text/font/FontWeight;
+	public final fun getIconSizeLg-D9Ej5fM ()F
+	public final fun getIconSizeMd-D9Ej5fM ()F
+	public final fun getIconSizeSm-D9Ej5fM ()F
+	public final fun getIconSizeXs-D9Ej5fM ()F
+	public final fun getIconStrokeDefault-D9Ej5fM ()F
+	public final fun getIconStrokeEmphasis-D9Ej5fM ()F
+	public final fun getIconStrokeSubtle-D9Ej5fM ()F
+	public final fun getInputRadiusOptionCard ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getInputRadiusSearchInput ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getInputRadiusSelectInput ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getInputRadiusTextInput ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getLineHeightNormal-XSAIIZE ()J
+	public final fun getLineHeightRelaxed-XSAIIZE ()J
+	public final fun getLineHeightTight-XSAIIZE ()J
+	public final fun getRadius2xl ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getRadius2xs ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getRadius3xl ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getRadius4xl ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getRadiusLg ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getRadiusMax ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getRadiusMd ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getRadiusNone ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getRadiusSm ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getRadiusXl ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getRadiusXs ()Landroidx/compose/foundation/shape/CornerSize;
+	public final fun getSize10-D9Ej5fM ()F
+	public final fun getSize12-D9Ej5fM ()F
+	public final fun getSize128-D9Ej5fM ()F
+	public final fun getSize13-D9Ej5fM ()F
+	public final fun getSize14-D9Ej5fM ()F
+	public final fun getSize144-D9Ej5fM ()F
+	public final fun getSize15-D9Ej5fM ()F
+	public final fun getSize16-D9Ej5fM ()F
+	public final fun getSize17-D9Ej5fM ()F
+	public final fun getSize18-D9Ej5fM ()F
+	public final fun getSize2-D9Ej5fM ()F
+	public final fun getSize20-D9Ej5fM ()F
+	public final fun getSize208-D9Ej5fM ()F
+	public final fun getSize22-D9Ej5fM ()F
+	public final fun getSize24-D9Ej5fM ()F
+	public final fun getSize240-D9Ej5fM ()F
+	public final fun getSize28-D9Ej5fM ()F
+	public final fun getSize32-D9Ej5fM ()F
+	public final fun getSize320-D9Ej5fM ()F
+	public final fun getSize4-D9Ej5fM ()F
+	public final fun getSize40-D9Ej5fM ()F
+	public final fun getSize48-D9Ej5fM ()F
+	public final fun getSize480-D9Ej5fM ()F
+	public final fun getSize56-D9Ej5fM ()F
+	public final fun getSize560-D9Ej5fM ()F
+	public final fun getSize6-D9Ej5fM ()F
+	public final fun getSize64-D9Ej5fM ()F
+	public final fun getSize640-D9Ej5fM ()F
+	public final fun getSize760-D9Ej5fM ()F
+	public final fun getSize8-D9Ej5fM ()F
+	public final fun getSize80-D9Ej5fM ()F
+	public final fun getSpacing2xl-D9Ej5fM ()F
+	public final fun getSpacing2xs-D9Ej5fM ()F
+	public final fun getSpacing3xl-D9Ej5fM ()F
+	public final fun getSpacing3xs-D9Ej5fM ()F
+	public final fun getSpacingLg-D9Ej5fM ()F
+	public final fun getSpacingMd-D9Ej5fM ()F
+	public final fun getSpacingNone-D9Ej5fM ()F
+	public final fun getSpacingSm-D9Ej5fM ()F
+	public final fun getSpacingXl-D9Ej5fM ()F
+	public final fun getSpacingXs-D9Ej5fM ()F
+	public final fun getStrokeW100-D9Ej5fM ()F
+	public final fun getStrokeW120-D9Ej5fM ()F
+	public final fun getStrokeW150-D9Ej5fM ()F
+	public final fun getStrokeW200-D9Ej5fM ()F
+	public final fun getStrokeW300-D9Ej5fM ()F
+	public final fun getStrokeW400-D9Ej5fM ()F
+	public final fun getStrokeW80-D9Ej5fM ()F
 }
 
 public final class io/getstream/video/android/compose/ui/ComposableSingletons$StreamCallActivityComposeDelegateKt {

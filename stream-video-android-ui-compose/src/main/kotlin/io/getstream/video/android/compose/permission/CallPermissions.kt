@@ -19,11 +19,15 @@ package io.getstream.video.android.compose.permission
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
@@ -50,16 +54,19 @@ public fun rememberCallPermissionsState(
     val isCameraEnabled by call.camera.isEnabled.collectAsStateWithLifecycle()
     val isMicrophoneEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
 
-    val permissionState = rememberMultiplePermissionsState(permissions) {
+    // A permission counts as denied only after a request completed, so a fresh screen does not flag
+    // the controls before the system dialog had a chance to show. A dismissed dialog reports an empty
+    // result, so the flag is set on every result rather than per permission; the state requests all
+    // its permissions together anyway. The live status is read on top, so a permission granted later
+    // in the system settings clears the flag.
+    var permissionRequestAnswered by remember(call) { mutableStateOf(false) }
+
+    val permissionState = rememberMultiplePermissionsState(permissions) { result ->
+        permissionRequestAnswered = true
         if (onPermissionsResult != null) {
-            onPermissionsResult.invoke(it)
+            onPermissionsResult(result)
         } else {
-            if (it[android.Manifest.permission.CAMERA] == true && isCameraEnabled) {
-                call.camera.setEnabled(true, fromUser = false)
-            }
-            if (it[android.Manifest.permission.RECORD_AUDIO] == true && isMicrophoneEnabled) {
-                call.microphone.setEnabled(true, fromUser = false)
-            }
+            call.enableGrantedDevices(result, isCameraEnabled, isMicrophoneEnabled)
         }
     }
 
@@ -76,6 +83,12 @@ public fun rememberCallPermissionsState(
                 get() = permissionState.allPermissionsGranted
             override val shouldShowRationale: Boolean
                 get() = permissionState.shouldShowRationale
+            override val isCameraPermissionDenied: Boolean
+                get() = permissionRequestAnswered &&
+                    !permissionState.isGranted(android.Manifest.permission.CAMERA)
+            override val isMicrophonePermissionDenied: Boolean
+                get() = permissionRequestAnswered &&
+                    !permissionState.isGranted(android.Manifest.permission.RECORD_AUDIO)
 
             override fun launchPermissionRequest() {
                 permissionState.launchMultiplePermissionRequest()
@@ -83,6 +96,23 @@ public fun rememberCallPermissionsState(
         }
     }
 }
+
+private fun Call.enableGrantedDevices(
+    result: Map<String, Boolean>,
+    isCameraEnabled: Boolean,
+    isMicrophoneEnabled: Boolean,
+) {
+    if (result[android.Manifest.permission.CAMERA] == true && isCameraEnabled) {
+        camera.setEnabled(true, fromUser = false)
+    }
+    if (result[android.Manifest.permission.RECORD_AUDIO] == true && isMicrophoneEnabled) {
+        microphone.setEnabled(true, fromUser = false)
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+private fun MultiplePermissionsState.isGranted(permission: String): Boolean =
+    permissions.any { it.permission == permission && it.status.isGranted }
 
 @Composable
 private fun getPermissions(): List<String> {

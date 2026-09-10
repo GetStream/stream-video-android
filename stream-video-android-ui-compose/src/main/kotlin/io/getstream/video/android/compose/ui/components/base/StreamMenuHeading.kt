@@ -44,7 +44,7 @@ internal fun StreamMenuHeading(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = StreamTokens.spacingXxs)
+            .padding(horizontal = StreamTokens.spacing2xs)
             .defaultMinSize(minHeight = StreamTokens.size40)
             .padding(StreamTokens.spacingSm),
         contentAlignment = Alignment.CenterStart,

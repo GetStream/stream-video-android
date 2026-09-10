@@ -35,12 +35,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.LockPerson
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -51,25 +46,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.CallActivity
 import io.getstream.video.android.R
+import io.getstream.video.android.compose.permission.VideoPermissionsState
+import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobby
@@ -86,6 +83,7 @@ import io.getstream.video.android.mock.previewUsers
 import io.getstream.video.android.model.User
 import io.getstream.video.android.ui.common.StreamCallActivity
 import kotlinx.coroutines.delay
+import io.getstream.video.android.compose.R as ComposeR
 
 @Composable
 fun CallLobbyScreen(
@@ -181,10 +179,7 @@ private fun CallLobbyHeaderContent(
 ) {
     Row(
         modifier = Modifier
-            .padding(
-                horizontal = 16.dp,
-                vertical = 4.dp,
-            )
+            .padding(StreamTokens.spacingMd)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -192,36 +187,29 @@ private fun CallLobbyHeaderContent(
         val userValue = user.value
         if (userValue != null) {
             UserAvatar(
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(StreamTokens.size40),
                 userImage = userValue.image,
                 userName = userValue.userNameOrId,
             )
 
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(StreamTokens.spacingXs))
         }
 
         Text(
             modifier = Modifier.weight(1f),
-            color = Color.White,
             text = userValue?.id.orEmpty(),
+            style = VideoTheme.typography.bodyDefault,
+            color = VideoTheme.colors.textPrimary,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
-            fontSize = 16.sp,
         )
-        IconButton(
-            modifier = Modifier
-                .padding(8.dp)
-                .testTag("Stream_LobbyCloseButton"),
-            onClick = {
-                onBack()
-            },
-        ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = null,
-                tint = VideoTheme.colors.textPrimary,
-            )
-        }
+        StreamIconButton(
+            modifier = Modifier.testTag("Stream_LobbyCloseButton"),
+            onClick = onBack,
+            icon = painterResource(ComposeR.drawable.stream_design_ic_xmark),
+            contentDescription = null,
+            style = StreamButtonStyleDefaults.secondaryGhost,
+        )
     }
 }
 
@@ -294,31 +282,31 @@ private fun CallLobbyBodyPortrait(
         // based on how you handle benchmarks or initial setup externally
 
         Icon(
-            modifier = Modifier.size(36.dp),
-            imageVector = Icons.Default.Language,
+            modifier = Modifier.size(StreamTokens.iconSizeLg),
+            painter = painterResource(ComposeR.drawable.stream_design_ic_language),
             tint = VideoTheme.colors.accentSuccess,
             contentDescription = "",
         )
         Text(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(StreamTokens.spacingMd),
             text = "Set up your test call",
             style = VideoTheme.typography.headingLarge,
         )
-        val onCallAction: (CallAction) -> Unit = { action ->
-            when (action) {
-                is ToggleCamera -> onToggleCamera(action.isEnabled)
-                is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
-                is ToggleHifiAudio -> onToggleHifiAudio(action.isHifiAudioEnabled)
-                else -> Unit
-            }
-        }
+        val permissions = rememberCallPermissionsState(call = call)
+        val onCallAction = lobbyCallActionHandler(
+            permissions,
+            onToggleCamera,
+            onToggleMicrophone,
+            onToggleHifiAudio,
+        )
         CallLobby(
             call = call,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(StreamTokens.spacingMd),
             isCameraEnabled = isCameraEnabled,
             isMicrophoneEnabled = isMicrophoneEnabled,
+            permissions = permissions,
             onCallAction = onCallAction,
             lobbyControlsContent = { modifier, _ ->
                 ControlActions(
@@ -367,29 +355,29 @@ private fun CallLobbyBodyLandscape(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                val onCallAction: (CallAction) -> Unit = { action ->
-                    when (action) {
-                        is ToggleCamera -> onToggleCamera(action.isEnabled)
-                        is ToggleMicrophone -> onToggleMicrophone(action.isEnabled)
-                        is ToggleHifiAudio -> onToggleHifiAudio(action.isHifiAudioEnabled)
-                        else -> Unit
-                    }
-                }
+                val permissions = rememberCallPermissionsState(call = call)
+                val onCallAction = lobbyCallActionHandler(
+                    permissions,
+                    onToggleCamera,
+                    onToggleMicrophone,
+                    onToggleHifiAudio,
+                )
 
                 CallLobby(
                     call = call,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            start = 16.dp,
-                            end = 16.dp,
+                            start = StreamTokens.spacingMd,
+                            end = StreamTokens.spacingMd,
                         ),
                     isCameraEnabled = isCameraEnabled,
                     isMicrophoneEnabled = isMicrophoneEnabled,
+                    permissions = permissions,
                     onCallAction = onCallAction,
-                    lobbyControlsContent = { _, _ ->
+                    lobbyControlsContent = { modifier, _ ->
                         ControlActions(
-                            modifier = Modifier.padding(),
+                            modifier = modifier,
                             call = call,
                             actions = buildDefaultLobbyControlActions(
                                 call = call,
@@ -421,19 +409,47 @@ private fun CallLobbyBodyLandscape(
                 // LaunchedEffect to handle initial setup might need adjustments
                 // based on how you handle benchmarks or initial setup externally
                 Icon(
-                    modifier = Modifier.size(36.dp),
-                    imageVector = Icons.Default.Language,
+                    modifier = Modifier.size(StreamTokens.iconSizeLg),
+                    painter = painterResource(ComposeR.drawable.stream_design_ic_language),
                     tint = VideoTheme.colors.accentSuccess,
                     contentDescription = "",
                 )
                 Text(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(StreamTokens.spacingMd),
                     text = "Set up your test call",
                     style = VideoTheme.typography.headingLarge,
                 )
                 description()
             }
         }
+    }
+}
+
+/**
+ * Routes the lobby toggles to the view model. Turning on a device whose permission was denied asks
+ * for the permission again first, the same way the SDK default lobby controls do.
+ */
+private fun lobbyCallActionHandler(
+    permissions: VideoPermissionsState,
+    onToggleCamera: (Boolean) -> Unit,
+    onToggleMicrophone: (Boolean) -> Unit,
+    onToggleHifiAudio: (Boolean) -> Unit,
+): (CallAction) -> Unit = { action ->
+    when (action) {
+        is ToggleCamera -> {
+            if (action.isEnabled && permissions.isCameraPermissionDenied) {
+                permissions.launchPermissionRequest()
+            }
+            onToggleCamera(action.isEnabled)
+        }
+        is ToggleMicrophone -> {
+            if (action.isEnabled && permissions.isMicrophonePermissionDenied) {
+                permissions.launchPermissionRequest()
+            }
+            onToggleMicrophone(action.isEnabled)
+        }
+        is ToggleHifiAudio -> onToggleHifiAudio(action.isHifiAudioEnabled)
+        else -> Unit
     }
 }
 
@@ -471,7 +487,7 @@ private fun LobbyDescriptionContent(participantCounts: ParticipantCount?, onClic
         )
     }
     Column(
-        modifier = Modifier.padding(16.dp),
+        modifier = Modifier.padding(StreamTokens.spacingMd),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -483,18 +499,18 @@ private fun LobbyDescriptionContent(participantCounts: ParticipantCount?, onClic
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = Icons.Default.LockPerson,
+                painter = painterResource(ComposeR.drawable.stream_design_ic_lock),
                 tint = VideoTheme.colors.textPrimary,
                 contentDescription = "",
             )
 
             Text(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = StreamTokens.spacingMd),
                 text = text.first,
                 style = VideoTheme.typography.captionDefault,
             )
         }
-        Spacer(modifier = Modifier.size(16.dp))
+        Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
         StreamTextButton(
             style = StreamButtonStyleDefaults.primarySolid,
             modifier = Modifier
