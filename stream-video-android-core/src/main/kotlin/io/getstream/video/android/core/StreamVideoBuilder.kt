@@ -272,7 +272,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
             tokenRepository = tokenRepository,
-            pinnedSfuId = sfuId?.takeIf { it.isNotBlank() },
+            pinnedSfuId = sfuId,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)

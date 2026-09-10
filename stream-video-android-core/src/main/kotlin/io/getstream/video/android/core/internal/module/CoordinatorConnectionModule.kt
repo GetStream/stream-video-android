@@ -76,7 +76,11 @@ internal class CoordinatorConnectionModule(
     override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(
         HeadersInterceptor(HeadersUtil()),
     )
-        .addInterceptor(CoordinatorSfuPinInterceptor(pinnedSfuId))
+        .apply {
+            if (!pinnedSfuId.isNullOrBlank()) {
+                addInterceptor(CoordinatorSfuPinInterceptor(pinnedSfuId))
+            }
+        }
         .addInterceptor(authInterceptor).addInterceptor(
             HttpLoggingInterceptor {
                 streamLog(tag = "Video:Http") { it }
