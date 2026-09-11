@@ -9,7 +9,7 @@ on:
         description: 'Android API level to run on'
         type: string
         required: false
-        default: '34'
+        default: '36'
       test_class:
         description: 'Fully qualified test class to run on its own, optionally with #method. Every batch job then runs it, giving independent samples of a flaky test.'
         type: string
