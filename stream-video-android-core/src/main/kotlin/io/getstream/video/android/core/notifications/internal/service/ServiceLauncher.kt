@@ -44,7 +44,6 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.internal.Throttler
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
 import io.getstream.video.android.core.notifications.internal.service.incomingcallcoordinator.Android17IncomingCallCoordinator
-import io.getstream.video.android.core.notifications.internal.service.incomingcallcoordinator.IncomingCallCoordinator
 import io.getstream.video.android.core.notifications.internal.service.incomingcallcoordinator.PreAndroid17IncomingCallCoordinator
 import io.getstream.video.android.core.notifications.internal.service.models.ServiceRoute
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
@@ -98,7 +97,13 @@ internal class ServiceLauncher(private val client: StreamVideoClient) {
         payload: Map<String, Any?>,
         notificationProvider: (IncomingRingtoneOwner) -> Notification?,
     ) {
-        getIncomingCallCoordinator().showIncomingCall(
+        val initialIncomingCallCoordinator = if (isAndroid17OrHigher()) {
+            android17IncomingCallCoordinator
+        } else {
+            preAndroid17IncomingCallCoordinator
+        }
+
+        initialIncomingCallCoordinator.showIncomingCall(
             IncomingCallRequest(
                 callId = callId,
                 callDisplayName = callDisplayName,
@@ -186,10 +191,15 @@ internal class ServiceLauncher(private val client: StreamVideoClient) {
     }
 
     fun removeIncomingCall(
-        callId: StreamCallId,
+        call: Call,
         config: CallServiceConfig = DefaultCallConfigurations.default,
     ) {
-        getIncomingCallCoordinator().dismissIncomingCall(callId, config)
+        val incomingCallCoordinator = if (call.state.serviceRoute.value == ServiceRoute.TELECOM) {
+            android17IncomingCallCoordinator
+        } else {
+            preAndroid17IncomingCallCoordinator
+        }
+        incomingCallCoordinator.dismissIncomingCall(StreamCallId.fromCallCid(call.cid), config)
     }
 
     /**
@@ -227,13 +237,6 @@ internal class ServiceLauncher(private val client: StreamVideoClient) {
             }
         }
     }
-
-    private fun getIncomingCallCoordinator(): IncomingCallCoordinator =
-        if (isAndroid17OrHigher()) {
-            android17IncomingCallCoordinator
-        } else {
-            preAndroid17IncomingCallCoordinator
-        }
 
     private fun logBundle(bundle: Bundle) {
         val keys = bundle.keySet()

@@ -58,6 +58,7 @@ internal class PreAndroid17IncomingCallCoordinator(
     override fun showIncomingCall(request: IncomingCallRequest) {
         val call = client.call(request.callId.type, request.callId.id)
         call.state.updateServiceRoute(ServiceRoute.LEGACY_CALL_SERVICE)
+        call.state.updateIncomingRingtoneOwner(IncomingRingtoneOwner.Legacy)
         val notification = request.notificationProvider(IncomingRingtoneOwner.Legacy)
         val result = incomingCallPresenter.showIncomingCall(
             context = context,
@@ -75,7 +76,7 @@ internal class PreAndroid17IncomingCallCoordinator(
             return
         }
 
-        updateIncomingCallNotification(request, client, notification)
+        updateIncomingCallNotification(request, notification)
         val jetpackTelecomRepository = call.state.jetpackTelecomRepository
             ?: jetpackTelecomRepositoryProvider.get(request.callId).also {
                 call.state.jetpackTelecomRepository = it
@@ -120,7 +121,6 @@ internal class PreAndroid17IncomingCallCoordinator(
 
     private fun updateIncomingCallNotification(
         request: IncomingCallRequest,
-        client: StreamVideoClient,
         notification: android.app.Notification?,
     ) {
         notification?.let {
