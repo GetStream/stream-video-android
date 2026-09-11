@@ -172,6 +172,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
     private var apiUrl: String? = null
     private var wssUrl: String? = null
+    private var sfuId: String? = null
 
     /**
      * Set the API URL to be used for the video client.
@@ -191,6 +192,16 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     @InternalStreamVideoApi
     public fun forceWssUrl(value: String): StreamVideoBuilder = apply {
         wssUrl = value
+    }
+
+    /**
+     * Set the SFU id the coordinator should pin every join, rejoin and migrate to.
+     *
+     * For testing purposes only.
+     */
+    @InternalStreamVideoApi
+    public fun forceSfuId(value: String): StreamVideoBuilder = apply {
+        sfuId = value
     }
 
     /**
@@ -261,6 +272,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             tokenProvider = tokenProvider,
             lifecycle = lifecycle,
             tokenRepository = tokenRepository,
+            pinnedSfuId = sfuId,
         )
 
         val deviceTokenStorage = DeviceTokenStorage(context)
