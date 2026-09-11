@@ -44,7 +44,7 @@ public fun ToggleSpeakerphoneAction(
     enabled: Boolean = true,
     onStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
     offStyle: StreamButtonStyle = StreamButtonStyleDefaults.destructiveSolid,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onCallAction: (ToggleSpeakerphone) -> Unit,
 ): Unit = ToggleAction(
     modifier = modifier,

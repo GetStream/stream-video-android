@@ -40,7 +40,7 @@ public fun CallBackground(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(color = VideoTheme.colors.backgroundCoreSurfaceDefault),
+            .background(color = VideoTheme.colors.backgroundCoreApp),
     ) {
         backgroundContent?.invoke(this)
         content()

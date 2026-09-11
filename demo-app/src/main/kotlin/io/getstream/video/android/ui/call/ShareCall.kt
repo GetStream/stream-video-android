@@ -32,29 +32,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CopyAll
-import androidx.compose.material.icons.filled.PersonAddAlt1
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.util.config.types.StreamEnvironment
+import io.getstream.video.android.compose.R as ComposeR
 
 @Composable
 public fun ShareCallWithOthers(
@@ -103,45 +101,45 @@ public fun ShareSettingsBox(
         modifier = modifier
             .background(
                 color = VideoTheme.colors.backgroundCoreSurfaceDefault,
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(StreamTokens.radius3xl),
             ),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(StreamTokens.spacingXl),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = "Your meeting is live!",
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                style = VideoTheme.typography.headingLarge.copy(fontSize = 20.sp),
+                style = VideoTheme.typography.headingLarge,
             )
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             StreamTextButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(36.dp),
                 text = "Add others",
-                leadingIcon = rememberVectorPainter(Icons.Default.PersonAddAlt1),
+                leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_user_add_fill),
                 style = StreamButtonStyleDefaults.primarySolid,
                 onClick = { onShare(call.id) },
             )
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             StreamTextButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(36.dp),
                 text = "Call ID: ${call.id}",
-                leadingIcon = rememberVectorPainter(Icons.Default.CopyAll),
-                style = StreamButtonStyleDefaults.secondarySolid,
+                leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_copy_fill),
+                style = StreamButtonStyleDefaults.secondaryOutline,
                 onClick = {
                     val clipData = ClipData.newPlainText("Call ID", call.id)
                     clipboardManager?.setPrimaryClip(clipData)
                 },
             )
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             JoinCallQRCode(shareUrl = shareUrl)
         }
     }
@@ -159,21 +157,21 @@ public fun ShareSettingsBoxLandscape(
         modifier = modifier
             .background(
                 color = VideoTheme.colors.backgroundCoreSurfaceDefault,
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(StreamTokens.radius3xl),
             ),
     ) {
         Row {
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(32.dp),
+                    .padding(StreamTokens.spacing2xl),
             ) {
                 JoinCallQRCode(shareUrl = shareUrl)
             }
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(24.dp)
+                    .padding(StreamTokens.spacingXl)
                     .align(Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -181,32 +179,32 @@ public fun ShareSettingsBoxLandscape(
                     text = "Your meeting is live!",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    style = VideoTheme.typography.headingLarge.copy(fontSize = 20.sp),
+                    style = VideoTheme.typography.headingLarge,
                 )
-                Spacer(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
                 StreamTextButton(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(36.dp),
                     text = "Add others",
-                    leadingIcon = rememberVectorPainter(Icons.Default.PersonAddAlt1),
+                    leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_user_add_fill),
                     style = StreamButtonStyleDefaults.primarySolid,
                     onClick = { onShare(call.id) },
                 )
-                Spacer(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
                 StreamTextButton(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(36.dp),
                     text = "Call ID: ${call.id}",
-                    leadingIcon = rememberVectorPainter(Icons.Default.CopyAll),
-                    style = StreamButtonStyleDefaults.secondarySolid,
+                    leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_copy_fill),
+                    style = StreamButtonStyleDefaults.secondaryOutline,
                     onClick = {
                         val clipData = ClipData.newPlainText("Call ID", call.id)
                         clipboardManager?.setPrimaryClip(clipData)
                     },
                 )
-                Spacer(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             }
         }
     }
@@ -217,15 +215,16 @@ private fun JoinCallQRCode(shareUrl: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = Color.Black, shape = RoundedCornerShape(16.dp))
-            .padding(16.dp),
+            .background(color = Color.Black, shape = RoundedCornerShape(StreamTokens.radiusXl))
+            .padding(StreamTokens.spacingMd),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         QRCode(content = shareUrl, size = 150.dp)
-        Spacer(modifier = Modifier.size(16.dp))
+        Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
         Text(
             text = "Scan the QR code to join from another device",
             style = VideoTheme.typography.metadataEmphasis.copy(fontWeight = FontWeight.W400),
+            color = Color.White,
         )
     }
 }
