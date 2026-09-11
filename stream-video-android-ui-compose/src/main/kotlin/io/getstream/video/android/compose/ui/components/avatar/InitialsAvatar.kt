@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.utils.initials
@@ -82,10 +82,8 @@ internal fun Dp.toAvatarTextStyle(): TextStyle {
         this < StreamTokens.size48 -> typography.bodyEmphasis
         this < StreamTokens.size80 -> typography.headingLarge
         else -> {
-            val scaled = with(LocalDensity.current) {
-                (this@toAvatarTextStyle * LARGE_AVATAR_TEXT_RATIO).toSp()
-            }
-            val fontSize = if (scaled > LARGE_AVATAR_MAX_TEXT_SIZE) LARGE_AVATAR_MAX_TEXT_SIZE else scaled
+            val capped = (this * LARGE_AVATAR_TEXT_RATIO).coerceAtMost(LARGE_AVATAR_MAX_TEXT_SIZE)
+            val fontSize = with(LocalDensity.current) { capped.toSp() }
             typography.headingLarge.copy(fontSize = fontSize, lineHeight = fontSize)
         }
     }
@@ -94,5 +92,10 @@ internal fun Dp.toAvatarTextStyle(): TextStyle {
 /** The initials height relative to the avatar size, for avatars without a token text style. */
 private const val LARGE_AVATAR_TEXT_RATIO = 0.4f
 
-/** The initials size of the 1.x SDK for every large avatar, kept as the upper bound. */
-private val LARGE_AVATAR_MAX_TEXT_SIZE = 48.sp
+/**
+ * The initials size of the 1.x SDK for every large avatar, kept as the upper bound.
+ *
+ * Declared in [Dp] so the cap holds at any font scale. Capping the converted [androidx.compose.ui.unit.TextUnit]
+ * instead would let the rendered size grow with the font scale setting, because the conversion divides it out.
+ */
+private val LARGE_AVATAR_MAX_TEXT_SIZE = 48.dp
