@@ -35,6 +35,7 @@ import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
@@ -144,7 +145,41 @@ class CallActivity : ComposeStreamCallActivity() {
         intent.getStringExtra(EXTRA_E2EE_PASSPHRASE)
             ?.takeIf { it.isNotBlank() }
             ?.let { enableE2EE(call, it) }
+        // Lobby already attached a manager and then died (CLEAR_TASK). Adopt it so leave/finish
+        // can dispose it — Call.leave() only detaches, and the 1 Hz PERF_REPORT timer keeps
+        // firing until dispose().
+        if (e2eeManager == null) {
+            DemoE2eeKeys.manager(call.cid)?.let { existing ->
+                e2eeManager = existing
+                e2eeCid = call.cid
+            }
+        }
         super.join(call, onSuccess, onError)
+    }
+
+    @StreamCallActivityDelicateApi
+    override fun leave(
+        call: Call,
+        callLeaveReason: CallLeaveReason,
+        onSuccess: (suspend (Call) -> Unit)?,
+        onError: (suspend (Exception) -> Unit)?,
+    ) {
+        super.leave(
+            call,
+            callLeaveReason,
+            onSuccess = { left ->
+                releaseE2EE()
+                onSuccess?.invoke(left)
+            },
+            onError,
+        )
+    }
+
+    private fun releaseE2EE() {
+        e2eeManager?.dispose()
+        e2eeManager = null
+        e2eeCid?.let { DemoE2eeKeys.forget(it) }
+        e2eeCid = null
     }
 
     private fun enableE2EE(call: Call, passphrase: String) {
@@ -195,7 +230,7 @@ class CallActivity : ComposeStreamCallActivity() {
         e2eeManager = manager
         // Kept so the in-call share sheet can put the passphrase back on the invite link.
         e2eeCid = call.cid
-        DemoE2eeKeys.remember(call.cid, passphrase)
+        DemoE2eeKeys.remember(call.cid, passphrase, manager)
     }
 
     private class StreamDemoUiDelegate : StreamCallActivityComposeDelegate() {
@@ -298,9 +333,6 @@ class CallActivity : ComposeStreamCallActivity() {
         observeCallReadyToJoinJob?.cancel()
         observeRingingJob?.cancel()
         previousRingingStates.clear()
-        e2eeManager?.dispose()
-        e2eeManager = null
-        e2eeCid?.let { DemoE2eeKeys.forget(it) }
-        e2eeCid = null
+        releaseE2EE()
     }
 }
