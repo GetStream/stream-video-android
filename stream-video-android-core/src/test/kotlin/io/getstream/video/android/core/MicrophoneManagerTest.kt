@@ -737,18 +737,21 @@ class MicrophoneManagerTest {
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.Q])
-    fun `a refused switch does not swap the live track back`() = runTest {
+    fun `a refused switch does not swap the live track at all`() = runTest {
         val call = mockAudioStagesCall()
         every { call.setAudioMaxBitrate(any()) } returns false
         val microphoneManager = joinedMicrophoneManager(call)
 
-        microphoneManager.setAudioBitrateProfile(
+        val result = microphoneManager.setAudioBitrateProfile(
             AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
         )
 
-        // Rebuilding back would be a second RtpSender.setTrack swap on a live connection: another
-        // gap in captured audio, and the publisher's disposed-track path. Once, going in, only.
-        verify(exactly = 1) { call.rebuildAudioCapturePipeline() }
+        // The goog* constraints have no setter, so a swap in either direction is an
+        // RtpSender.setTrack on a live connection: a gap in captured audio and the publisher's
+        // disposed-track path. The rebuild runs after every stage that can refuse and is skipped
+        // when one did, so a failed switch costs no swap going in and needs none coming back.
+        assertTrue(result.isFailure)
+        verify(exactly = 0) { call.rebuildAudioCapturePipeline() }
     }
 
     @Test
@@ -916,6 +919,28 @@ class MicrophoneManagerTest {
     )
 
     /** A [Call] with every audio stage present and accepting changes. */
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.Q])
+    fun `a refused rebuild puts the bitrate back`() = runTest {
+        // The bitrate is applied before the rebuild, so it is the stage that can already have
+        // moved when the rebuild refuses. It has a live setter, so the revert undoes it.
+        val call = mockAudioStagesCall(negotiatedAudioBitrate = 96_000)
+        every { call.rebuildAudioCapturePipeline() } returns false
+        val microphoneManager = joinedMicrophoneManager(call)
+
+        val result = microphoneManager.setAudioBitrateProfile(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
+        )
+
+        assertTrue(result.isFailure)
+        verify { call.setAudioMaxBitrate(128_000) }
+        verify { call.setAudioMaxBitrate(96_000) }
+        assertEquals(
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+            microphoneManager.audioBitrateProfile.value,
+        )
+    }
+
     private fun mockAudioStagesCall(
         audioProcessingReachable: Boolean = true,
         negotiatedAudioBitrate: Int? = 64_000,

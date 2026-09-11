@@ -1012,13 +1012,14 @@ class MicrophoneManager(
     }
 
     /**
-     * Puts profile-derived state back to [previousProfile] after a switch that did not complete,
-     * so nothing disagrees with [audioBitrateProfile] about which profile this call is on.
+     * Puts the pipeline and the state derived from it back to [previousProfile] after a switch that
+     * did not complete, so nothing disagrees with [audioBitrateProfile] about which profile this
+     * call is on.
      *
-     * Restores *state*, not the live pipeline: the stages that did move stay until the next source
-     * rebuild picks the restored values up. Undoing the software audio processing stage would mean
-     * a second `RtpSender.setTrack` swap on a live connection — another gap in captured audio and
-     * back into the publisher's disposed-track path.
+     * Every stage with a live setter is put back, the bitrate included — it is applied before the
+     * source rebuild, so it can be the stage that already moved when a later one refused. The
+     * software audio processing stage is not here: it has no setter, and it runs last in
+     * [applyProfileToRunningCall] precisely so a refusal cannot leave it moved.
      *
      * Mode and capture source revert together; `MODE_NORMAL` against `VOICE_COMMUNICATION` (or the
      * reverse) is the pair that parks capture on a near-silent path on some vendors.
@@ -1033,6 +1034,13 @@ class MicrophoneManager(
         applyNoiseCancellationFor(previousProfile)
         applyCommunicationAudioModeForProfile(previousProfile)
         applyCaptureAudioSourceForProfile(previousProfile)
+        call.setAudioMaxBitrate(
+            targetAudioMaxBitrateBps(
+                previousProfile,
+                serverBitrateBps = call.audioBitrateFor(previousProfile),
+                negotiatedBitrateBps = call.negotiatedAudioBitrate(),
+            ),
+        )
     }
 
     /**
@@ -1132,23 +1140,6 @@ class MicrophoneManager(
             }
         }
 
-        // Fixed when the audio source is created, so this rebuilds the source and track and moves
-        // the live sender across. Skipped when the value already holds — rebuilding drops audio.
-        val softwareAudioProcessingApplied =
-            if (!softwareAudioProcessingChanged) {
-                true
-            } else {
-                val rebuilt = call.rebuildAudioCapturePipeline()
-                (rebuilt || !audioIsLive).also { applied ->
-                    if (!applied) {
-                        logger.w {
-                            "[setAudioBitrateProfile] the audio pipeline was not rebuilt; the " +
-                                "next source built will use the new constraints"
-                        }
-                    }
-                }
-            }
-
         val maxBitrateBps = targetAudioMaxBitrateBps(
             profile,
             serverBitrateBps = call.audioBitrateFor(profile),
@@ -1162,6 +1153,38 @@ class MicrophoneManager(
                     "sender did not take it"
             }
         }
+
+        // Last, and the only stage that is skipped when an earlier one refused. The goog*
+        // constraints are fixed when the AudioSource is created, so moving them means building a
+        // new source and track and swapping the live sender — no setter, and nothing
+        // [revertProfileDerivedState] can undo without a second swap and another audio gap. Since
+        // the switch is already going to fail, moving them would strand the one stage that cannot
+        // be put back. Not moving them is also the truthful answer: the source is still on the
+        // previous profile's constraints, so the stage reports unapplied either way.
+        val earlierStagesApplied = captureAudioSourceApplied && noiseCancellationApplied &&
+            platformNoiseSuppressorApplied && platformAcousticEchoCancelerApplied &&
+            audioMaxBitrateApplied
+        val softwareAudioProcessingApplied =
+            if (!softwareAudioProcessingChanged) {
+                // Already the value this profile wants; rebuilding would drop audio for nothing.
+                true
+            } else if (!earlierStagesApplied) {
+                logger.w {
+                    "[setAudioBitrateProfile] skipped the audio pipeline rebuild because an " +
+                        "earlier stage refused; the source keeps the previous constraints"
+                }
+                false
+            } else {
+                val rebuilt = call.rebuildAudioCapturePipeline()
+                (rebuilt || !audioIsLive).also { applied ->
+                    if (!applied) {
+                        logger.w {
+                            "[setAudioBitrateProfile] the audio pipeline was not rebuilt; the " +
+                                "next source built will use the new constraints"
+                        }
+                    }
+                }
+            }
 
         return AudioProfileResult(
             profile = profile,
