@@ -133,7 +133,7 @@ public fun ShareSettingsBox(
                     .height(36.dp),
                 text = "Call ID: ${call.id}",
                 leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_copy_fill),
-                style = StreamButtonStyleDefaults.secondarySolid,
+                style = StreamButtonStyleDefaults.secondaryOutline,
                 onClick = {
                     val clipData = ClipData.newPlainText("Call ID", call.id)
                     clipboardManager?.setPrimaryClip(clipData)
@@ -198,7 +198,7 @@ public fun ShareSettingsBoxLandscape(
                         .height(36.dp),
                     text = "Call ID: ${call.id}",
                     leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_copy_fill),
-                    style = StreamButtonStyleDefaults.secondarySolid,
+                    style = StreamButtonStyleDefaults.secondaryOutline,
                     onClick = {
                         val clipData = ClipData.newPlainText("Call ID", call.id)
                         clipboardManager?.setPrimaryClip(clipData)

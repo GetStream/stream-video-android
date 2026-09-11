@@ -194,7 +194,7 @@ public fun AudioOnlyCallContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(color = VideoTheme.colors.backgroundCoreSurfaceDefault),
+            .background(color = VideoTheme.colors.backgroundCoreApp),
     ) {
         Column(
             modifier = modifier
