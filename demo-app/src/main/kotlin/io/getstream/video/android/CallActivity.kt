@@ -318,17 +318,17 @@ class CallActivity : ComposeStreamCallActivity() {
         }
 
         private fun StreamCallActivity.goBackToMainScreen() {
-            if (!isFinishing) {
-                val intent = Intent(this, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
-                startActivity(intent)
-                safeFinish()
-            }
+            safeFinish()
         }
     }
 
     override fun finish() {
+        if (isTaskRoot && !isFinishing) {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
+        }
         super.finish()
         observeCallReadyToJoinJob?.cancel()
         observeRingingJob?.cancel()
