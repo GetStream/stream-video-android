@@ -71,7 +71,7 @@ internal fun LayoutChooser(
     ) {
         Column(
             Modifier.background(
-                color = VideoTheme.colors.backgroundCoreApp,
+                color = VideoTheme.colors.backgroundCoreSurfaceDefault,
                 shape = RoundedCornerShape(StreamTokens.radiusXl),
             )
                 .width(300.dp),

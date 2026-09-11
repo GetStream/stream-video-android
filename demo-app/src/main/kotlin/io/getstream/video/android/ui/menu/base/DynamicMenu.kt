@@ -73,7 +73,7 @@ fun DynamicMenu(header: (@Composable LazyItemScope.() -> Unit)? = null, items: L
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = VideoTheme.colors.backgroundCoreApp,
+                color = VideoTheme.colors.backgroundCoreSurfaceDefault,
                 shape = RoundedCornerShape(StreamTokens.radius3xl),
             )
             .semantics { testTagsAsResourceId = true },
@@ -81,10 +81,6 @@ fun DynamicMenu(header: (@Composable LazyItemScope.() -> Unit)? = null, items: L
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    shape = RoundedCornerShape(StreamTokens.radiusXl),
-                    color = VideoTheme.colors.backgroundCoreApp,
-                )
                 .padding(StreamTokens.spacingSm),
         ) {
             if (historyTitles.isEmpty()) {
@@ -128,7 +124,7 @@ private fun LazyListScope.submenuStickyHeader(currentTitle: String, onBackClick:
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .background(VideoTheme.colors.backgroundCoreApp)
+                .background(VideoTheme.colors.backgroundCoreSurfaceDefault)
                 .fillMaxWidth(),
         ) {
             StreamIconButton(

@@ -111,7 +111,7 @@ fun LandscapeControlsContent(
     Box(
         modifier = Modifier
             .background(
-                color = VideoTheme.colors.backgroundCoreApp,
+                color = VideoTheme.colors.backgroundCoreSurfaceDefault,
                 shape = RoundedCornerShape(StreamTokens.radius3xl),
             )
             .width(400.dp),
@@ -152,7 +152,7 @@ fun LandscapeControlsContent(
                 Spacer(modifier = Modifier.height(StreamTokens.spacingMd))
                 StreamTextButton(
                     modifier = Modifier.fillMaxWidth(),
-                    style = StreamButtonStyleDefaults.secondarySolid,
+                    style = StreamButtonStyleDefaults.secondaryOutline,
                     leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_settings),
                     text = "Settings",
                     onClick = onSettings,

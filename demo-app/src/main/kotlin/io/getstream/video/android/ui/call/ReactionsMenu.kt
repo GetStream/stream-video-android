@@ -134,7 +134,7 @@ private fun ReactionItem(
     }
     StreamTextButton(
         modifier = modifier,
-        style = StreamButtonStyleDefaults.secondarySolid,
+        style = StreamButtonStyleDefaults.secondaryOutline,
         size = StreamButtonSize.Small,
         text = text,
         onClick = { onEmojiSelected(reaction.emojiCode) },

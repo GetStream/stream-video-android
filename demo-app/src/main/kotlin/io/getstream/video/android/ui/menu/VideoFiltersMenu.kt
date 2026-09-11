@@ -110,7 +110,7 @@ private fun BlurredBackgroundToggleItem(
         style = if (toggleState == ToggleableState.On) {
             StreamButtonStyleDefaults.primarySolid
         } else {
-            StreamButtonStyleDefaults.secondarySolid
+            StreamButtonStyleDefaults.secondaryOutline
         },
     )
 }

@@ -68,7 +68,7 @@ fun AvailableDeviceMenu(
             modifier = Modifier.width(140.dp),
             shape = RoundedCornerShape(StreamTokens.radiusLg),
             contentColor = VideoTheme.colors.textPrimary,
-            backgroundColor = VideoTheme.colors.backgroundCoreApp,
+            backgroundColor = VideoTheme.colors.backgroundCoreSurfaceDefault,
             elevation = StreamTokens.size6,
         ) {
             LazyColumn(
