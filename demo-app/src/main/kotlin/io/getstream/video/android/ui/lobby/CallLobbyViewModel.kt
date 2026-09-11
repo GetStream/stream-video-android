@@ -242,7 +242,7 @@ class CallLobbyViewModel @Inject constructor(
         e2eeManager = created
         previous?.dispose()
         // Kept so the in-call share sheet can put the passphrase back on the invite link.
-        DemoE2eeKeys.remember(call.cid, passphrase)
+        DemoE2eeKeys.remember(call.cid, passphrase, created)
         return Result.success(Unit)
     }
 
@@ -272,6 +272,9 @@ class CallLobbyViewModel @Inject constructor(
 
     fun leaveCall() {
         call.leave()
+        e2eeManager?.dispose()
+        e2eeManager = null
+        DemoE2eeKeys.forget(call.cid)
     }
 }
 

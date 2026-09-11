@@ -215,13 +215,18 @@ public class StreamEncryptionManager private constructor(
     }
 
     /**
-     * Releases the native manager and wipes its keys. Subsequent key operations are ignored;
-     * attempting to attach an encryptor or decryptor returns a failure so the SDK cannot treat an
-     * unprotected track as configured. Dispose only once you are done with every call that uses it.
+     * Releases the native manager and wipes its keys. Drops the [setEventListener] observer first
+     * so a listener that captured a ViewModel or Activity is not kept alive by native. Subsequent
+     * key operations are ignored; attempting to attach an encryptor or decryptor returns a failure
+     * so the SDK cannot treat an unprotected track as configured. Dispose only once you are done
+     * with every call that uses it.
      */
     public fun dispose() {
         if (native.isDisposed) return
         val disposedUserId = userId
+        // Before native.dispose(): setObserver rejects a disposed manager, and a listener that
+        // captured UI would otherwise stay reachable until the Java wrapper is collected.
+        setEventListener(null)
         safeCall { native.dispose() }
         logger.d { "[dispose] released native manager for $disposedUserId" }
     }

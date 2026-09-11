@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.util
 
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
+
 /**
  * Name of the invite-link query parameter carrying the shared passphrase. Read when joining and
  * written when sharing, so it lives in one place — the two sides have to agree on it, and they
@@ -38,14 +40,30 @@ internal object DemoE2eeKeys {
     @Volatile
     private var current: Entry? = null
 
-    private data class Entry(val cid: String, val passphrase: String)
+    private data class Entry(
+        val cid: String,
+        val passphrase: String,
+        val manager: StreamEncryptionManager?,
+    )
 
-    fun remember(cid: String, passphrase: String) {
-        current = Entry(cid, passphrase)
+    fun remember(
+        cid: String,
+        passphrase: String,
+        manager: StreamEncryptionManager? = null,
+    ) {
+        current = Entry(cid, passphrase, manager)
     }
 
     /** The passphrase stored for [cid], or null when the stored one belongs to another call. */
     fun of(cid: String): String? = current?.takeIf { it.cid == cid }?.passphrase
+
+    /**
+     * The manager created for [cid], so [io.getstream.video.android.CallActivity] can adopt it
+     * after the lobby ViewModel is destroyed. Join starts the call activity with CLEAR_TASK, so
+     * the lobby cannot dispose this instance.
+     */
+    fun manager(cid: String): StreamEncryptionManager? =
+        current?.takeIf { it.cid == cid }?.manager
 
     fun forget(cid: String) {
         if (current?.cid == cid) current = null
