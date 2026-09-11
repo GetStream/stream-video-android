@@ -17,7 +17,6 @@
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.app.Notification
-import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.model.StreamCallId
 
 internal data class IncomingCallRequest(
