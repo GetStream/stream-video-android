@@ -22,6 +22,7 @@ import android.content.Context
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.util.Log
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -39,14 +40,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AvTimer
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,20 +55,20 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
@@ -81,6 +76,7 @@ import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import io.getstream.video.android.compose.R as ComposeR
 
 @Composable
 fun CallStatsDialog(call: Call, onDismiss: () -> Unit) {
@@ -92,17 +88,17 @@ fun CallStatsDialog(call: Call, onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    color = Color.Black,
+                    color = VideoTheme.colors.backgroundCoreApp,
                 ),
         ) {
             CallStats(call = call)
-            IconButton(modifier = Modifier.align(Alignment.TopEnd), onClick = onDismiss) {
-                Icon(
-                    tint = Color.White,
-                    imageVector = Icons.Default.Close,
-                    contentDescription = Icons.Default.Close.name,
-                )
-            }
+            StreamIconButton(
+                modifier = Modifier.align(Alignment.TopEnd),
+                onClick = onDismiss,
+                icon = painterResource(ComposeR.drawable.stream_design_ic_xmark),
+                contentDescription = "Close",
+                style = StreamButtonStyleDefaults.secondaryGhost,
+            )
         }
     }
 }
@@ -117,53 +113,49 @@ fun CallStats(call: Call) {
     }
     Column(
         modifier = Modifier
-            .background(Color(0xFF101213))
+            .background(VideoTheme.colors.backgroundCoreApp)
             .verticalScroll(rememberScrollState()),
     ) {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp),
+                .padding(top = StreamTokens.spacingMd),
             text = "Stats",
-            style = TextStyle(
-                fontSize = 16.sp,
-                lineHeight = 24.sp,
-                fontWeight = FontWeight(600),
-                color = Color.White,
-                textAlign = TextAlign.Center,
-            ),
+            style = VideoTheme.typography.headingSmall,
+            color = VideoTheme.colors.textPrimary,
+            textAlign = TextAlign.Center,
         )
-        Spacer(modifier = Modifier.size(32.dp))
+        Spacer(modifier = Modifier.size(StreamTokens.spacing2xl))
         UserAndCallId(call = call, clipboardManager)
         HeaderWithIconAndBody(
-            icon = Icons.Default.AvTimer,
+            icon = ComposeR.drawable.stream_design_ic_clock,
             "Call latency",
             "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.",
         )
-        Spacer(modifier = Modifier.size(6.dp))
+        Spacer(modifier = Modifier.size(StreamTokens.spacingXs))
         if (LocalInspectionMode.current) {
             LineChartPreview()
         } else {
             LineChart(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp),
+                    .height(StreamTokens.size208),
                 data = latencyHistory.map {
                     it.toFloat()
                 },
                 dates = emptyList(),
             )
-            Spacer(modifier = Modifier.size(6.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingXs))
         }
-        Spacer(modifier = Modifier.size(6.dp))
+        Spacer(modifier = Modifier.size(StreamTokens.spacingXs))
         HeaderWithIconAndBody(
-            icon = Icons.Default.BarChart,
+            icon = ComposeR.drawable.stream_design_ic_stats_fill,
             "Call performance",
             "Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.",
         )
-        Spacer(modifier = Modifier.size(16.dp))
+        Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
 
-        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = StreamTokens.spacingMd)) {
             val latency by call.state.stats.publisher.latency.collectAsStateWithLifecycle()
             LaunchedEffect(call) {
                 call.statsReport.collectLatest {
@@ -183,61 +175,52 @@ fun CallStats(call: Call) {
             val subscriberCodecLabel = if (subscriberVideoCodec.isNotEmpty()) "($subscriberVideoCodec)" else ""
 
             LatencyOrJitter(title = "Latency", value = latency)
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             LatencyOrJitter(title = "Receive jitter", value = subscriberJitter)
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             LatencyOrJitter(title = "Publish jitter", value = publisherJitter)
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             StatItem(title = "Region", value = statsReport?.local?.sfu)
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             StatItem(title = "Publish resolution $publisherCodecLabel", value = publisherResolution)
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             StatItem(title = "Publish quality drop reason", value = publisherDropReason)
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             StatItem(
                 title = "Receiving resolution $subscriberCodecLabel",
                 value = subscriberResolution,
             )
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             StatItem(title = "Publish bitrate", value = "$publisherBitrate Kbps")
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             StatItem(title = "Receiving bitrate", value = "$subscriberBitrate Kbps")
         }
     }
 }
 
 @Composable
-fun HeaderWithIconAndBody(icon: ImageVector, header: String, body: String) {
-    val color = remember { Color(0xFFFFFFFF) }
-    Column(modifier = Modifier.padding(16.dp)) {
+fun HeaderWithIconAndBody(@DrawableRes icon: Int, header: String, body: String) {
+    Column(modifier = Modifier.padding(StreamTokens.spacingMd)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 modifier = Modifier
-                    .padding(1.dp)
-                    .width(28.dp)
-                    .height(28.dp),
-                imageVector = icon,
-                contentDescription = icon.name,
-                tint = color,
+                    .width(StreamTokens.size28)
+                    .height(StreamTokens.size28),
+                painter = painterResource(icon),
+                contentDescription = header,
+                tint = VideoTheme.colors.textPrimary,
             )
-            Spacer(modifier = Modifier.size(8.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingXs))
             Text(
                 text = header,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight(500),
-                    color = color,
-                ),
+                style = VideoTheme.typography.bodyEmphasis,
+                color = VideoTheme.colors.textPrimary,
             )
         }
         Text(
             text = body,
-            style = TextStyle(
-                fontSize = 16.sp,
-                fontWeight = FontWeight(400),
-                color = VideoTheme.colors.textPrimary,
-            ),
+            style = VideoTheme.typography.bodyDefault,
+            color = VideoTheme.colors.textPrimary,
         )
     }
 }
@@ -249,11 +232,11 @@ fun LatencyOrJitter(title: String, value: Int?, okRange: IntRange = IntRange(75,
     val indicatorData = if (value == null) {
         null
     } else if (okRange.contains(value)) {
-        Pair(Color(0xFFFFD646), "Ok")
+        Pair(VideoTheme.colors.accentWarning, "Ok")
     } else if (okRange.first > value) {
-        Pair(Color(0xFF00E2A1), "Good")
+        Pair(VideoTheme.colors.accentSuccess, "Good")
     } else {
-        Pair(Color(0xFFDC433B), "Bad")
+        Pair(VideoTheme.colors.accentError, "Bad")
     }
 
     StatItem(title = title, value = dataText) {
@@ -274,17 +257,16 @@ fun StatItem(
     Log.d("SKALI", "Recomposing (StatItem): $text")
     Column(
         modifier = modifier
-            .background(color = Color.Black, shape = RoundedCornerShape(16.dp))
-            .padding(16.dp),
+            .background(
+                color = VideoTheme.colors.backgroundCoreSurfaceDefault,
+                shape = RoundedCornerShape(StreamTokens.radiusXl),
+            )
+            .padding(StreamTokens.spacingMd),
     ) {
         Text(
             text = title,
-            style = TextStyle(
-                fontSize = 10.sp,
-                lineHeight = 16.sp,
-                fontWeight = FontWeight.W600,
-                color = Color(0xFF979CA0),
-            ),
+            style = VideoTheme.typography.metadataEmphasis,
+            color = VideoTheme.colors.textSecondary,
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -293,16 +275,12 @@ fun StatItem(
             Text(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = StreamTokens.spacingXs),
                 text = value ?: "--",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    lineHeight = 24.sp,
-                    fontWeight = FontWeight.W600,
-                    color = Color.White,
-                ),
+                style = VideoTheme.typography.headingSmall,
+                color = VideoTheme.colors.textPrimary,
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(StreamTokens.spacingXs))
             indicator()
         }
     }
@@ -312,83 +290,74 @@ fun StatItem(
 fun StatIndicator(modifier: Modifier = Modifier, indicatorColor: Color, indicatorText: String) {
     Box(
         modifier = modifier
-            .width(80.dp)
+            .width(StreamTokens.size80)
             .background(
                 color = indicatorColor.copy(alpha = 0.16f),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(StreamTokens.radiusMd),
             )
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(
+                horizontal = StreamTokens.spacingSm,
+                vertical = StreamTokens.spacingXs,
+            ),
     ) {
         Text(
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             text = indicatorText,
-            style = TextStyle(
-                fontSize = 12.sp,
-                lineHeight = 16.sp,
-                fontWeight = FontWeight.W600,
-                color = indicatorColor,
-            ),
+            style = VideoTheme.typography.metadataEmphasis,
+            color = indicatorColor,
         )
     }
 }
 
 @Composable
 fun UserAndCallId(call: Call, clipboardManager: ClipboardManager?) {
-    Box(modifier = Modifier.padding(16.dp)) {
+    Box(modifier = Modifier.padding(StreamTokens.spacingMd)) {
         Row(
             modifier = Modifier
-                .background(color = Color.Black, shape = RoundedCornerShape(16.dp))
-                .padding(16.dp).fillMaxWidth(),
+                .background(
+                    color = VideoTheme.colors.backgroundCoreSurfaceDefault,
+                    shape = RoundedCornerShape(StreamTokens.radiusXl),
+                )
+                .padding(StreamTokens.spacingMd).fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom,
         ) {
             Row(
+                modifier = Modifier.weight(1f),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 UserAvatar(
-                    modifier = Modifier.size(44.dp),
+                    modifier = Modifier.size(StreamTokens.size48),
                     userImage = call.user.image,
                     userName = call.user.userNameOrId,
                 )
-                Column(modifier = Modifier.padding(start = 8.dp)) {
+                Column(modifier = Modifier.padding(start = StreamTokens.spacingXs)) {
                     Text(
                         text = "Call ID:",
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            lineHeight = 20.sp,
-                            fontWeight = FontWeight(500),
-                            color = Color.White,
-                        ),
+                        style = VideoTheme.typography.bodyEmphasis,
+                        color = VideoTheme.colors.textPrimary,
                     )
                     Text(
                         text = call.cid,
                         softWrap = true,
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            lineHeight = 16.sp,
-                            fontWeight = FontWeight.W400,
-                            color = VideoTheme.colors.textSecondary,
-                        ),
+                        style = VideoTheme.typography.bodyDefault,
+                        color = VideoTheme.colors.textSecondary,
                     )
                 }
             }
             clipboardManager?.let {
-                Spacer(modifier = Modifier.size(8.dp))
-                IconButton(
-                    modifier = Modifier.size(32.dp),
+                Spacer(modifier = Modifier.size(StreamTokens.spacingXs))
+                StreamIconButton(
                     onClick = {
                         val clipData = ClipData.newPlainText("Call ID", call.cid)
                         clipboardManager.setPrimaryClip(clipData)
                     },
-                ) {
-                    Icon(
-                        tint = Color.White,
-                        imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copy",
-                    )
-                }
+                    icon = painterResource(ComposeR.drawable.stream_design_ic_copy_fill),
+                    contentDescription = "Copy",
+                    style = StreamButtonStyleDefaults.secondaryGhost,
+                )
             }
         }
     }
@@ -401,12 +370,18 @@ fun LineChart(
     dates: List<Date>,
     xAxisFormat: String = "HH:mm:ss",
     yAxisSuffix: String = "ms",
-    lineColor: Color = Color(0xFF00E2A1),
+    lineColor: Color = VideoTheme.colors.accentSuccess,
     axisColor: Color = Color.Transparent,
-    gridColor: Color = Color(0xFF4D535F),
-    labelTextColor: Color = Color(0xFF75808A),
+    gridColor: Color = VideoTheme.colors.borderCoreDefault,
+    labelTextColor: Color = VideoTheme.colors.textTertiary,
 ) {
-    Canvas(modifier = modifier.padding(end = 44.dp, top = 16.dp, bottom = 24.dp)) {
+    Canvas(
+        modifier = modifier.padding(
+            end = 44.dp,
+            top = StreamTokens.spacingMd,
+            bottom = StreamTokens.spacingXl,
+        ),
+    ) {
         val maxDataValue = data.maxOrNull() ?: 100f
         val thirdOfMax = maxDataValue / 3
         val maxValue = if (maxDataValue > 100) {
@@ -422,7 +397,7 @@ fun LineChart(
             color = axisColor,
             start = Offset(size.width + 10f, -40f),
             end = Offset(size.width + 10f, size.height.plus(10)),
-            strokeWidth = 2.dp.toPx(),
+            strokeWidth = StreamTokens.strokeW200.toPx(),
         )
 
         // Draw x-axis
@@ -430,7 +405,7 @@ fun LineChart(
             color = axisColor,
             start = Offset(40f, size.height.plus(10)),
             end = Offset(size.width.plus(10), size.height.plus(10)),
-            strokeWidth = 2.dp.toPx(),
+            strokeWidth = StreamTokens.strokeW200.toPx(),
         )
 
         // Draw y-axis labels and grid lines
@@ -442,16 +417,16 @@ fun LineChart(
                 color = gridColor,
                 start = Offset(0f, size.height - (i * labelYStep).minus(10)),
                 end = Offset(size.width - 10, size.height - (i * labelYStep).minus(10)),
-                strokeWidth = 1.dp.toPx(),
+                strokeWidth = StreamTokens.strokeW100.toPx(),
             )
             drawIntoCanvas {
                 it.nativeCanvas.drawText(
                     label,
                     size.width,
-                    size.height - i * labelYStep + 8.dp.toPx(),
+                    size.height - i * labelYStep + StreamTokens.spacingXs.toPx(),
                     Paint().apply {
                         color = labelTextColor.toArgb()
-                        textSize = 12.sp.toPx()
+                        textSize = StreamTokens.fontSizeXs.toPx()
                         isAntiAlias = true
                         typeface = Typeface.DEFAULT
                     },
@@ -467,17 +442,17 @@ fun LineChart(
                 color = gridColor,
                 start = Offset(x, 0f),
                 end = Offset(x, size.height.minus(20)),
-                strokeWidth = 1.dp.toPx(),
+                strokeWidth = StreamTokens.strokeW100.toPx(),
             )
             drawIntoCanvas {
                 it.nativeCanvas.drawText(
                     label,
                     x,
-                    size.height + 20.dp.toPx(),
+                    size.height + StreamTokens.spacingLg.toPx(),
                     Paint().apply {
                         color = labelTextColor.toArgb()
                         textAlign = android.graphics.Paint.Align.CENTER
-                        textSize = 12.sp.toPx()
+                        textSize = StreamTokens.fontSizeXs.toPx()
                         isAntiAlias = true
                         typeface = Typeface.DEFAULT
                     },
@@ -502,7 +477,7 @@ fun LineChart(
                 path.cubicTo(cpx1, cpy1, cpx2, cpy2, x, y)
             }
         }
-        drawPath(path, color = lineColor, style = Stroke(width = 2.dp.toPx()))
+        drawPath(path, color = lineColor, style = Stroke(width = StreamTokens.strokeW200.toPx()))
     }
 }
 
@@ -529,8 +504,8 @@ fun LineChartPreview() {
     )
     VideoTheme {
         Surface(
-            modifier = Modifier.size(400.dp, 200.dp),
-            color = Color(0xFAFAFA),
+            modifier = Modifier.size(400.dp, StreamTokens.size208),
+            color = VideoTheme.colors.backgroundCoreApp,
         ) {
             LineChart(
                 data = listOf(100f, 200f, 150f, 300f, 0f),
@@ -547,17 +522,23 @@ fun StatsItemPreview() {
     VideoTheme {
         Column {
             StatItem(title = "Latency", value = "12 ms") {
-                StatIndicator(indicatorColor = Color(0xFF00E2A1), indicatorText = "Good")
+                StatIndicator(
+                    indicatorColor = VideoTheme.colors.accentSuccess,
+                    indicatorText = "Good",
+                )
             }
-            Spacer(Modifier.size(16.dp))
+            Spacer(Modifier.size(StreamTokens.spacingMd))
             StatItem(title = "Latency", value = "122 ms") {
-                StatIndicator(indicatorColor = Color(0xFFFFD646), indicatorText = "Ok")
+                StatIndicator(
+                    indicatorColor = VideoTheme.colors.accentWarning,
+                    indicatorText = "Ok",
+                )
             }
-            Spacer(Modifier.size(16.dp))
+            Spacer(Modifier.size(StreamTokens.spacingMd))
             StatItem(title = "Latency", value = "432 ms") {
-                StatIndicator(indicatorColor = Color(0xFFDC433B), indicatorText = "Bad")
+                StatIndicator(indicatorColor = VideoTheme.colors.accentError, indicatorText = "Bad")
             }
-            Spacer(Modifier.size(16.dp))
+            Spacer(Modifier.size(StreamTokens.spacingMd))
             StatItem(
                 title = "Region",
                 value = "sfu-7d887ab5-9c00-4f1f-b6b0-d8f097164727-7d887ab5-9c00-4f1f-b6b0-d8f097164727",
@@ -571,10 +552,10 @@ fun StatsItemPreview() {
 fun StatsIndicatorPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            StatIndicator(indicatorColor = Color(0xFF00E2A1), indicatorText = "Good")
-            StatIndicator(indicatorColor = Color(0xFFDC433B), indicatorText = "Bad")
-            StatIndicator(indicatorColor = Color(0xFFFFD646), indicatorText = "Ok")
+        Row(horizontalArrangement = Arrangement.spacedBy(StreamTokens.spacingMd)) {
+            StatIndicator(indicatorColor = VideoTheme.colors.accentSuccess, indicatorText = "Good")
+            StatIndicator(indicatorColor = VideoTheme.colors.accentError, indicatorText = "Bad")
+            StatIndicator(indicatorColor = VideoTheme.colors.accentWarning, indicatorText = "Ok")
         }
     }
 }

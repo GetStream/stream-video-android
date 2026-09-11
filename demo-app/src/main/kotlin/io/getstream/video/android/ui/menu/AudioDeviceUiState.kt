@@ -16,12 +16,12 @@
 
 package io.getstream.video.android.ui.menu
 
-import androidx.compose.ui.graphics.vector.ImageVector
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.ui.menu.base.MenuIcon
 
 data class AudioDeviceUiState(
     val streamAudioDevice: StreamAudioDevice,
     val text: String,
-    val icon: ImageVector, // Assuming it's a drawable resource ID
+    val icon: MenuIcon,
     val highlight: Boolean,
 )

@@ -26,18 +26,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.widget.Toast
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BluetoothAudio
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.HeadsetMic
-import androidx.compose.material.icons.filled.SpeakerPhone
-import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -46,8 +40,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -58,6 +52,9 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.audio.StreamAudioDevice
@@ -71,10 +68,12 @@ import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicMenu
 import io.getstream.video.android.ui.menu.base.MenuItem
+import io.getstream.video.android.ui.menu.base.menuIcon
 import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateManager
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
+import io.getstream.video.android.compose.R as ComposeR
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -184,7 +183,7 @@ internal fun SettingsMenu(
                     call.listRecordings().getOrNull()?.recordings?.map {
                         ActionMenuItem(
                             title = it.filename,
-                            icon = Icons.Default.VideoFile,
+                            icon = menuIcon(ComposeR.drawable.stream_design_ic_file),
                             action = {
                                 context.downloadFile(it.url, it.filename)
                                 onDismissed()
@@ -222,10 +221,12 @@ internal fun SettingsMenu(
     val selectedMicroPhoneDevice by call.microphone.selectedDevice.collectAsStateWithLifecycle()
     val audioDeviceUiStateList: List<AudioDeviceUiState> = availableDevices.map {
         val icon = when (it) {
-            is StreamAudioDevice.BluetoothHeadset -> Icons.Default.BluetoothAudio
-            is StreamAudioDevice.Earpiece -> Icons.Default.Headphones
-            is StreamAudioDevice.Speakerphone -> Icons.Default.SpeakerPhone
-            is StreamAudioDevice.WiredHeadset -> Icons.Default.HeadsetMic
+            is StreamAudioDevice.BluetoothHeadset -> menuIcon(Icons.Default.BluetoothAudio)
+            is StreamAudioDevice.Earpiece -> menuIcon(Icons.Default.Headphones)
+            is StreamAudioDevice.Speakerphone -> menuIcon(
+                ComposeR.drawable.stream_design_ic_speaker_bottom_fill,
+            )
+            is StreamAudioDevice.WiredHeadset -> menuIcon(Icons.Default.HeadsetMic)
         }
         // Compare devices by type and audioDeviceInfo ID (if available) since audio can be null when using custom audio switch
         val selected = selectedMicroPhoneDevice
@@ -276,7 +277,7 @@ internal fun SettingsMenu(
                     call.listTranscription().getOrNull()?.transcriptions?.map {
                         ActionMenuItem(
                             title = it.filename,
-                            icon = Icons.Default.VideoFile, // TODO Rahul check this later
+                            icon = menuIcon(ComposeR.drawable.stream_design_ic_file),
                             action = {
                                 context.downloadFile(it.url, it.filename)
                                 onDismissed()
@@ -329,15 +330,11 @@ internal fun SettingsMenu(
     ) {
         DynamicMenu(
             header = {
-                Icon(
-                    tint = Color.White,
-                    imageVector = Icons.Default.Close,
-                    contentDescription = Icons.Default.Close.name,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 10.dp)
-                        .clickable {
-                            onDismissed()
-                        },
+                StreamIconButton(
+                    onClick = onDismissed,
+                    icon = painterResource(ComposeR.drawable.stream_design_ic_xmark),
+                    contentDescription = "Close",
+                    style = StreamButtonStyleDefaults.secondaryGhost,
                 )
                 ReactionsMenu(
                     call = call,
@@ -345,7 +342,7 @@ internal fun SettingsMenu(
                 ) {
                     onDismissed()
                 }
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(StreamTokens.spacingXs))
                 VideoFiltersMenu(
                     selectedFilterIndex = selectedVideoFilter,
                     onSelectFilter = { filterIndex ->
@@ -353,7 +350,7 @@ internal fun SettingsMenu(
                         onSelectVideoFilter(filterIndex)
                     },
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(StreamTokens.spacingXs))
             },
             items = defaultStreamMenu(
                 showDebugOptions = showDebugOptions,

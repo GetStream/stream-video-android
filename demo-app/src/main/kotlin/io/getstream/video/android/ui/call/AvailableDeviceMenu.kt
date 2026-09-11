@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.Call
 import kotlinx.coroutines.delay
 
@@ -65,19 +66,19 @@ fun AvailableDeviceMenu(
     ) {
         Card(
             modifier = Modifier.width(140.dp),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(StreamTokens.radiusLg),
             contentColor = VideoTheme.colors.textPrimary,
             backgroundColor = VideoTheme.colors.backgroundCoreApp,
-            elevation = 6.dp,
+            elevation = StreamTokens.size6,
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(12.dp),
+                contentPadding = PaddingValues(StreamTokens.spacingSm),
             ) {
                 items(items = availableDevices, key = { it.name }) { audioDevice ->
                     Text(
                         modifier = Modifier
-                            .padding(bottom = 12.dp)
+                            .padding(bottom = StreamTokens.spacingSm)
                             .clickable {
                                 call.microphone.select(audioDevice)
                                 onDismissed.invoke()

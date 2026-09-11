@@ -20,6 +20,7 @@ package io.getstream.video.android.ui.call
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,10 +46,11 @@ import io.getstream.chat.android.compose.viewmodel.messages.MessageListViewModel
 import io.getstream.chat.android.compose.viewmodel.messages.MessagesViewModelFactory
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.ui.common.R
 import java.time.Instant
 import java.util.Date
+import io.getstream.video.android.compose.R as ComposeR
 
 @Composable
 internal fun ChatDialog(
@@ -99,10 +101,15 @@ internal fun ChatDialog(
         )
     }
 
-    ChatTheme(isInDarkMode = true) {
+    ChatTheme(isInDarkMode = isSystemInDarkTheme()) {
         ModalBottomSheetLayout(
             modifier = Modifier.fillMaxWidth(),
-            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            sheetShape = RoundedCornerShape(
+                topStart = StreamTokens.radiusXl,
+                topEnd = StreamTokens.radiusXl,
+                bottomEnd = StreamTokens.radiusNone,
+                bottomStart = StreamTokens.radiusNone,
+            ),
             sheetState = state,
             sheetBackgroundColor = VideoTheme.colors.backgroundCoreApp,
             sheetContent = {
@@ -116,11 +123,13 @@ internal fun ChatDialog(
                         Icon(
                             modifier = Modifier
                                 .align(Alignment.End)
-                                .padding(16.dp)
+                                .padding(StreamTokens.spacingMd)
                                 .clickable { onDismissed.invoke() }
                                 .testTag("Stream_CloseChatButton"),
                             tint = ChatTheme.colors.textHighEmphasis,
-                            painter = painterResource(id = R.drawable.stream_video_ic_close),
+                            painter = painterResource(
+                                id = ComposeR.drawable.stream_design_ic_xmark,
+                            ),
                             contentDescription = null,
                         )
 

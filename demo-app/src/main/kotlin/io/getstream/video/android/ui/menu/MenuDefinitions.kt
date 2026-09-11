@@ -19,33 +19,10 @@ package io.getstream.video.android.ui.menu
 import android.media.MediaCodecInfo
 import android.os.Build
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ReadMore
-import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.AspectRatio
-import androidx.compose.material.icons.filled.Audiotrack
-import androidx.compose.material.icons.filled.AutoGraph
 import androidx.compose.material.icons.filled.Balance
-import androidx.compose.material.icons.filled.ClosedCaption
-import androidx.compose.material.icons.filled.ClosedCaptionDisabled
-import androidx.compose.material.icons.filled.ClosedCaptionOff
 import androidx.compose.material.icons.filled.Crop
-import androidx.compose.material.icons.filled.CropFree
-import androidx.compose.material.icons.filled.Feedback
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.RadioButtonChecked
-import androidx.compose.material.icons.filled.RawOff
-import androidx.compose.material.icons.filled.RawOn
-import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.material.icons.filled.SettingsBackupRestore
-import androidx.compose.material.icons.filled.SettingsVoice
 import androidx.compose.material.icons.filled.SpatialAudioOff
-import androidx.compose.material.icons.filled.SwitchLeft
-import androidx.compose.material.icons.filled.VideoFile
-import androidx.compose.material.icons.filled.VideoLibrary
-import androidx.compose.material.icons.filled.VideoSettings
-import androidx.compose.material.icons.filled.Videocam
-import androidx.compose.material.icons.filled.VideocamOff
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -55,8 +32,11 @@ import io.getstream.video.android.ui.menu.base.ActionMenuItem
 import io.getstream.video.android.ui.menu.base.DynamicSubMenuItem
 import io.getstream.video.android.ui.menu.base.MenuItem
 import io.getstream.video.android.ui.menu.base.SubMenuItem
+import io.getstream.video.android.ui.menu.base.menuIcon
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import io.getstream.video.android.compose.R as ComposeR
+import io.getstream.video.android.ui.common.R as CommonR
 
 /**
  * Defines the default Stream menu for the demo app.
@@ -101,7 +81,7 @@ fun defaultStreamMenu(
         add(
             ActionMenuItem(
                 title = "Noise cancellation",
-                icon = Icons.Default.SpatialAudioOff,
+                icon = menuIcon(Icons.Default.SpatialAudioOff),
                 highlight = noiseCancellationEnabled,
                 action = onNoiseCancellation,
             ),
@@ -129,7 +109,7 @@ fun defaultStreamMenu(
     add(
         SubMenuItem(
             title = "Choose audio device",
-            icon = Icons.Default.SettingsVoice,
+            icon = menuIcon(ComposeR.drawable.stream_design_ic_voice_fill),
             items = audioDeviceUiStateList.map {
                 ActionMenuItem(
                     title = it.text,
@@ -143,7 +123,7 @@ fun defaultStreamMenu(
     add(
         ActionMenuItem(
             title = "Call stats",
-            icon = Icons.Default.AutoGraph,
+            icon = menuIcon(ComposeR.drawable.stream_design_ic_stats_fill),
             action = onShowCallStats,
         ),
     )
@@ -152,7 +132,7 @@ fun defaultStreamMenu(
         add(
             SubMenuItem(
                 title = "Debug options",
-                icon = Icons.AutoMirrored.Default.ReadMore,
+                icon = menuIcon(ComposeR.drawable.stream_design_ic_more_horizontal),
                 items = debugSubmenu(
                     codecList,
                     onCodecSelected,
@@ -189,7 +169,7 @@ fun getCCActionMenu(
         is ClosedCaptionUiState.Available -> {
             ActionMenuItem(
                 title = "Start Closed Caption",
-                icon = Icons.Default.ClosedCaptionOff,
+                icon = menuIcon(ComposeR.drawable.stream_design_ic_caption_fill),
                 action = onToggleClosedCaptions,
             )
         }
@@ -197,7 +177,8 @@ fun getCCActionMenu(
         is ClosedCaptionUiState.Running -> {
             ActionMenuItem(
                 title = "Stop Closed Caption",
-                icon = Icons.Default.ClosedCaption,
+                icon = menuIcon(ComposeR.drawable.stream_design_ic_caption_fill),
+                highlight = true,
                 action = onToggleClosedCaptions,
             )
         }
@@ -205,7 +186,7 @@ fun getCCActionMenu(
         is ClosedCaptionUiState.UnAvailable -> {
             ActionMenuItem(
                 title = "Closed Caption are unavailable",
-                icon = Icons.Default.ClosedCaptionDisabled,
+                icon = menuIcon(ComposeR.drawable.stream_design_ic_no_sign),
                 action = { },
             )
         }
@@ -224,7 +205,7 @@ fun codecMenu(codecList: List<MediaCodecInfo>, onCodecSelected: (MediaCodecInfo)
         }
         ActionMenuItem(
             title = it.name,
-            icon = Icons.Default.VideoFile,
+            icon = menuIcon(ComposeR.drawable.stream_design_ic_file),
             highlight = isHw,
             action = { onCodecSelected(it) },
         )
@@ -240,32 +221,32 @@ fun reconnectMenu(
 ) = listOf(
     ActionMenuItem(
         title = "Publisher - ICE restart",
-        icon = Icons.Default.SettingsBackupRestore,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_refresh),
         action = onRestartPublisherIceClick,
     ),
     ActionMenuItem(
         title = "Subscriber - ICE restart",
-        icon = Icons.Default.SettingsBackupRestore,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_refresh),
         action = onRestartSubscriberIceClick,
     ),
     ActionMenuItem(
         title = "Reconnect SFU - migrate",
-        icon = Icons.Default.SwitchLeft,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_left_to_right),
         action = onSwitchSfuClick,
     ),
     ActionMenuItem(
         title = "Reconnect SFU - rejoin",
-        icon = Icons.Default.Replay,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_retry),
         action = onSfuRejoinClick,
     ),
     ActionMenuItem(
         title = "Reconnect SFU - fast",
-        icon = Icons.Default.RestartAlt,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_refresh),
         action = onSfuFastReconnectClick,
     ),
     ActionMenuItem(
         title = "Simulate SFU Full (700)",
-        icon = Icons.Default.Feedback,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_feedback),
         action = onSimulateSfuFullClick,
     ),
 )
@@ -273,17 +254,17 @@ fun reconnectMenu(
 fun scaleTypeMenu(onSelectScaleType: (VideoScalingType) -> Unit): List<MenuItem> = listOf(
     ActionMenuItem(
         title = "Scale FIT",
-        icon = Icons.Default.CropFree,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_fullscreen_fill),
         action = { onSelectScaleType(VideoScalingType.SCALE_ASPECT_FIT) },
     ),
     ActionMenuItem(
         title = "Scale FILL",
-        icon = Icons.Default.Crop,
+        icon = menuIcon(Icons.Default.Crop),
         action = { onSelectScaleType(VideoScalingType.SCALE_ASPECT_FILL) },
     ),
     ActionMenuItem(
         title = "Scale BALANCED",
-        icon = Icons.Default.Balance,
+        icon = menuIcon(Icons.Default.Balance),
         action = { onSelectScaleType(VideoScalingType.SCALE_ASPECT_BALANCED) },
     ),
 )
@@ -297,9 +278,9 @@ fun recordingTypeMenu(onSelectRecording: (RecordingType) -> Unit, selectedRecord
                 "Start raw recording"
             },
             icon = if (selectedRecordingTypes.contains(RecordingType.Raw)) {
-                Icons.Default.RawOn
+                menuIcon(ComposeR.drawable.stream_design_ic_recording_fill)
             } else {
-                Icons.Default.RawOff
+                menuIcon(ComposeR.drawable.stream_design_ic_recording_stop_fill)
             },
             highlight = selectedRecordingTypes.contains(RecordingType.Raw),
             action = { onSelectRecording(RecordingType.Raw) },
@@ -313,7 +294,7 @@ fun recordingTypeMenu(onSelectRecording: (RecordingType) -> Unit, selectedRecord
             } else {
                 "Start individual recording"
             },
-            icon = Icons.Default.Person,
+            icon = menuIcon(ComposeR.drawable.stream_design_ic_user),
             highlight = selectedRecordingTypes.contains(RecordingType.Individual),
             action = { onSelectRecording(RecordingType.Individual) },
         ),
@@ -326,7 +307,7 @@ fun recordingTypeMenu(onSelectRecording: (RecordingType) -> Unit, selectedRecord
             } else {
                 "Start composite recording"
             },
-            icon = Icons.Default.CropFree,
+            icon = menuIcon(ComposeR.drawable.stream_design_ic_fullscreen_fill),
             highlight = selectedRecordingTypes.contains(RecordingType.Composite),
             action = { onSelectRecording(RecordingType.Composite) },
         ),
@@ -361,22 +342,22 @@ fun debugSubmenu(
 ) = listOf(
     DynamicSubMenuItem(
         title = "List Transcriptions",
-        icon = Icons.AutoMirrored.Filled.ReceiptLong,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_spreadsheet),
         itemsLoader = loadTranscriptions,
     ),
     SubMenuItem(
         title = "Incoming video settings",
-        icon = Icons.Default.VideoSettings,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_settings_fill),
         items = listOf(
             ActionMenuItem(
                 title = "Auto Quality",
-                icon = Icons.Default.AspectRatio,
+                icon = menuIcon(Icons.Default.AspectRatio),
                 highlight = selectedIncomingVideoResolution == null,
                 action = { onSelectIncomingVideoResolution(null) },
             ),
             ActionMenuItem(
                 title = "4K 2160p",
-                icon = Icons.Default.AspectRatio,
+                icon = menuIcon(Icons.Default.AspectRatio),
                 highlight = selectedIncomingVideoResolution == PreferredVideoResolution(3840, 2160),
                 action = {
                     onSelectIncomingVideoResolution(PreferredVideoResolution(3840, 2160))
@@ -384,7 +365,7 @@ fun debugSubmenu(
             ),
             ActionMenuItem(
                 title = "Full HD 1080p",
-                icon = Icons.Default.AspectRatio,
+                icon = menuIcon(Icons.Default.AspectRatio),
                 highlight = selectedIncomingVideoResolution == PreferredVideoResolution(1920, 1080),
                 action = {
                     onSelectIncomingVideoResolution(PreferredVideoResolution(1920, 1080))
@@ -392,7 +373,7 @@ fun debugSubmenu(
             ),
             ActionMenuItem(
                 title = "HD 720p",
-                icon = Icons.Default.AspectRatio,
+                icon = menuIcon(Icons.Default.AspectRatio),
                 highlight = selectedIncomingVideoResolution == PreferredVideoResolution(1280, 720),
                 action = {
                     onSelectIncomingVideoResolution(PreferredVideoResolution(1280, 720))
@@ -400,7 +381,7 @@ fun debugSubmenu(
             ),
             ActionMenuItem(
                 title = "SD 480p",
-                icon = Icons.Default.AspectRatio,
+                icon = menuIcon(Icons.Default.AspectRatio),
                 highlight = selectedIncomingVideoResolution == PreferredVideoResolution(640, 480),
                 action = {
                     onSelectIncomingVideoResolution(PreferredVideoResolution(640, 480))
@@ -408,7 +389,7 @@ fun debugSubmenu(
             ),
             ActionMenuItem(
                 title = "Data Saver 144p",
-                icon = Icons.Default.AspectRatio,
+                icon = menuIcon(Icons.Default.AspectRatio),
                 highlight = selectedIncomingVideoResolution == PreferredVideoResolution(256, 144),
                 action = {
                     onSelectIncomingVideoResolution(PreferredVideoResolution(256, 144))
@@ -416,26 +397,32 @@ fun debugSubmenu(
             ),
             ActionMenuItem(
                 title = if (isIncomingVideoEnabled) "Disable incoming video" else "Enable incoming video",
-                icon = if (isIncomingVideoEnabled) Icons.Default.VideocamOff else Icons.Default.Videocam,
+                icon = if (isIncomingVideoEnabled) {
+                    menuIcon(
+                        ComposeR.drawable.stream_design_ic_video_off_fill,
+                    )
+                } else {
+                    menuIcon(ComposeR.drawable.stream_design_ic_video_fill)
+                },
                 action = { onToggleIncomingVideoEnabled(!isIncomingVideoEnabled) },
             ),
         ),
     ),
     SubMenuItem(
         title = "Scale type",
-        icon = Icons.Default.AspectRatio,
+        icon = menuIcon(Icons.Default.AspectRatio),
         items = scaleTypeMenu(
             onSelectScaleType,
         ),
     ),
     SubMenuItem(
         title = "Available video codecs",
-        icon = Icons.Default.VideoSettings,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_code),
         items = codecMenu(codecList, onCodecSelected),
     ),
     ActionMenuItem(
         title = "Toggle audio filter",
-        icon = Icons.Default.Audiotrack,
+        icon = menuIcon(CommonR.drawable.stream_video_ic_music_note),
         action = onToggleAudioFilterClick,
     ),
     ActionMenuItem(
@@ -446,22 +433,22 @@ fun debugSubmenu(
     ),
     SubMenuItem(
         title = "Start/stop recording",
-        icon = Icons.Default.RadioButtonChecked,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_recording_fill),
         items = recordingTypeMenu(onSelectRecordingType, selectedRecordingTypes),
     ),
     DynamicSubMenuItem(
         title = "Recordings",
-        icon = Icons.Default.VideoLibrary,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_record_library_fill),
         itemsLoader = loadRecordings,
     ),
     ActionMenuItem(
         title = "Feedback",
-        icon = Icons.Default.Feedback,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_feedback),
         action = onShowFeedback,
     ),
     SubMenuItem(
         title = "Reconnect V2",
-        icon = Icons.Default.Replay,
+        icon = menuIcon(ComposeR.drawable.stream_design_ic_retry),
         items = reconnectMenu(
             onRestartPublisherIceClick,
             onRestartSubscriberIceClick,
