@@ -52,4 +52,37 @@ public data class NotificationConfig(
      */
     @ExperimentalStreamVideoApi
     val notificationUpdateTriggers: (Call) -> Flow<*>? = { _ -> null },
-)
+) {
+    /**
+     * Delay before replacing an unaccepted incoming-call notification whose channel owns ringing.
+     * Android may stop an insistent alert when that notification is immediately replaced.
+     * Set this to `0` to disable the delay.
+     */
+    public var incomingRingingNotificationUpdateDelayMillis: Long = 1_300L
+        private set
+
+    public constructor(
+        pushDeviceGenerators: List<PushDeviceGenerator> = emptyList(),
+        requestPermissionOnAppLaunch: () -> Boolean = { true },
+        notificationHandler: NotificationHandler = NoOpNotificationHandler,
+        autoRegisterPushDevice: Boolean = true,
+        requestPermissionOnDeviceRegistration: () -> Boolean = { true },
+        hideRingingNotificationInForeground: Boolean = false,
+        enableCallNotificationUpdates: Boolean = true,
+        mediaNotificationCallTypes: Set<String> = hashSetOf(CallType.Livestream.name),
+        notificationUpdateTriggers: (Call) -> Flow<*>? = { _ -> null },
+        incomingRingingNotificationUpdateDelayMillis: Long,
+    ) : this(
+        pushDeviceGenerators = pushDeviceGenerators,
+        requestPermissionOnAppLaunch = requestPermissionOnAppLaunch,
+        notificationHandler = notificationHandler,
+        autoRegisterPushDevice = autoRegisterPushDevice,
+        requestPermissionOnDeviceRegistration = requestPermissionOnDeviceRegistration,
+        hideRingingNotificationInForeground = hideRingingNotificationInForeground,
+        enableCallNotificationUpdates = enableCallNotificationUpdates,
+        mediaNotificationCallTypes = mediaNotificationCallTypes,
+        notificationUpdateTriggers = notificationUpdateTriggers,
+    ) {
+        this.incomingRingingNotificationUpdateDelayMillis = incomingRingingNotificationUpdateDelayMillis
+    }
+}

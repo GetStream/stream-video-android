@@ -63,6 +63,35 @@ public class DefaultStreamIntentResolver(
     }
 
     /**
+     * Creates the incoming-call full-screen intent without the notification-dismiss trampoline.
+     * Android can launch this intent without user interaction, so launching it must not dismiss a
+     * notification that owns the incoming ringtone.
+     */
+    internal fun searchIncomingCallFullScreenPendingIntent(
+        callId: StreamCallId,
+        notificationId: Int = callId.getNotificationId(NotificationType.Incoming),
+        payload: Map<String, Any?>,
+    ): PendingIntent? {
+        val intent = Intent(NotificationHandler.ACTION_INCOMING_CALL)
+            .putExtras(
+                notificationIntentBundleResolver.getIncomingCallBundle(
+                    callId,
+                    notificationId,
+                    payload,
+                ),
+            )
+        return searchResolveInfo { context.packageManager.queryIntentActivities(intent, 0) }
+            ?.let { resolveInfo ->
+                PendingIntent.getActivity(
+                    context,
+                    0,
+                    buildComponentIntent(intent, resolveInfo, callId),
+                    DefaultNotificationHandler.PENDING_INTENT_FLAG,
+                )
+            }
+    }
+
+    /**
      * Search for an activity that is used for outgoing calls.
      * Calls are considered outgoing until the call is accepted.
      *
