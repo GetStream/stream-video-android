@@ -21,6 +21,7 @@ import android.content.Context
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
@@ -38,7 +39,7 @@ import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.launch
 
-/** Coordinates the existing incoming-call service and optional Telecom registration path. */
+/** Coordinates the legacy incoming-call flow, where CallService owns the ringtone. */
 internal class PreAndroid17IncomingCallCoordinator(
     private val context: Context,
     private val client: StreamVideoClient,
@@ -53,12 +54,13 @@ internal class PreAndroid17IncomingCallCoordinator(
 
     @SuppressLint("MissingPermission", "NewApi")
     override fun showIncomingCall(request: IncomingCallRequest) {
+        val notification = request.notificationProvider(IncomingRingtoneOwner.Legacy)
         val result = incomingCallPresenter.showIncomingCall(
             context = context,
             callId = request.callId,
             callDisplayName = request.callDisplayName,
             callServiceConfiguration = request.callServiceConfiguration,
-            notification = request.notification,
+            notification = notification,
         )
         logger.d { "[showIncomingCall] service start result: $result" }
 
@@ -69,7 +71,7 @@ internal class PreAndroid17IncomingCallCoordinator(
             return
         }
 
-        updateIncomingCallNotification(request, client)
+        updateIncomingCallNotification(request, client, notification)
         val jetpackTelecomRepository = jetpackTelecomRepositoryProvider.get(request.callId)
         val addressUri = "${client.telecomConfig?.schema}:${request.callId.id}".toUri()
         val formattedCallDisplayName = request.callDisplayName
@@ -113,8 +115,9 @@ internal class PreAndroid17IncomingCallCoordinator(
     private fun updateIncomingCallNotification(
         request: IncomingCallRequest,
         client: StreamVideoClient,
+        notification: android.app.Notification?,
     ) {
-        request.notification?.let { notification ->
+        notification?.let {
             val notificationId = request.callId.getNotificationId(NotificationType.Incoming)
             client.call(request.callId.type, request.callId.id)
                 .state.updateNotification(notificationId, notification)

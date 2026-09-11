@@ -836,6 +836,10 @@ public class CallState(
     @Volatile
     internal var callJoinInterceptorProvider: (() -> CallJoinInterceptor?)? = null
 
+    internal val incomingRingtoneOwner = MutableStateFlow<IncomingRingtoneOwner>(
+        IncomingRingtoneOwner.Legacy,
+    )
+
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
 
@@ -1904,6 +1908,10 @@ public class CallState(
     fun updateNotification(notificationId: Int, notification: Notification) {
         this._notificationIdFlow.value = notificationId
         this.atomicNotification.set(notification)
+    }
+
+    internal fun updateIncomingRingtoneOwner(incomingRingtoneOwner: IncomingRingtoneOwner) {
+        this.incomingRingtoneOwner.value = incomingRingtoneOwner
     }
 
     @InternalStreamVideoApi

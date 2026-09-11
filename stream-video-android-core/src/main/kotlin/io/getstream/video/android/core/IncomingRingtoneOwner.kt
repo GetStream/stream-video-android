@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.utils
+package io.getstream.video.android.core
 
-import android.os.Build
-
-// Polyfills for Build.VERSION_CODES values not yet available at the current compileSdk.
-// TODO: delete each once compileSdk covers it, replacing usages with the real constant.
-internal const val BUILD_VERSION_CODES_BAKLAVA = 36 // Build.VERSION_CODES.BAKLAVA — needs compileSdk 36
-internal const val BUILD_VERSION_CODES_CINNAMON_BUN = 37 // Build.VERSION_CODES.CINNAMON_BUN — needs compileSdk 37
-
-internal fun isAndroid17OrHigher(sdkInt: Int = Build.VERSION.SDK_INT): Boolean =
-    sdkInt >= BUILD_VERSION_CODES_CINNAMON_BUN
+internal sealed interface IncomingRingtoneOwner {
+    data object Notification : IncomingRingtoneOwner
+    data object Legacy : IncomingRingtoneOwner
+}
