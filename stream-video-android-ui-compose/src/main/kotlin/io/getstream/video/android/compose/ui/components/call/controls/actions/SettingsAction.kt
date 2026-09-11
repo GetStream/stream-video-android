@@ -44,7 +44,7 @@ public fun ToggleSettingsAction(
     enabled: Boolean = true,
     onStyle: StreamButtonStyle = StreamButtonStyleDefaults.primarySolid,
     offStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onCallAction: (Settings) -> Unit,
 ): Unit = ToggleAction(
     modifier = modifier,

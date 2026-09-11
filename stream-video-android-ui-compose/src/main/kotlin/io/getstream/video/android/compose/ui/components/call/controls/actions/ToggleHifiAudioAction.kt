@@ -44,7 +44,7 @@ public fun ToggleHifiAudioAction(
     enabled: Boolean = true,
     onStyle: StreamButtonStyle = StreamButtonStyleDefaults.primarySolid,
     offStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onCallAction: (ToggleHifiAudio) -> Unit,
 ): Unit = ToggleAction(
     modifier = modifier,

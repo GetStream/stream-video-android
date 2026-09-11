@@ -47,6 +47,7 @@ import io.getstream.video.android.compose.theme.CallAppBarTrailingContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.GenericContainer
+import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.core.Call
@@ -134,6 +135,7 @@ internal fun DefaultCallAppBarLeadingContent(
             id = R.string.stream_video_back_button_content_description,
         ),
         style = StreamButtonStyleDefaults.secondaryGhost,
+        size = StreamButtonSize.Large,
     )
 }
 
