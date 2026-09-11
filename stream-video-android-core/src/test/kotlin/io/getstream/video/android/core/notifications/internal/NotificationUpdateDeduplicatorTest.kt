@@ -20,7 +20,6 @@ import android.app.Notification
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationUpdateComparator
-import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
