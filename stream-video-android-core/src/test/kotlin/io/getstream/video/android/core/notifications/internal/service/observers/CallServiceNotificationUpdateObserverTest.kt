@@ -198,7 +198,7 @@ class CallServiceNotificationUpdateObserverTest {
         atomicNotification.set(notification)
         ringingStateFlow.value = RingingState.Incoming()
 
-        observer.observe(context)
+        observer.observe()
         runCurrent()
 
         assertNull(startArgs)
@@ -226,7 +226,7 @@ class CallServiceNotificationUpdateObserverTest {
         atomicNotification.set(notification)
         ringingStateFlow.value = RingingState.Incoming()
 
-        observer.observe(context)
+        observer.observe()
         runCurrent()
 
         assertNull(startArgs)
@@ -242,7 +242,7 @@ class CallServiceNotificationUpdateObserverTest {
     @Test
     fun `null notification id does not disable delay for later incoming update`() = runTest {
         every { isAndroid17OrHigher() } returns true
-        observer.observe(context)
+        observer.observe()
         runCurrent()
 
         ringingStateFlow.value = RingingState.Incoming()
