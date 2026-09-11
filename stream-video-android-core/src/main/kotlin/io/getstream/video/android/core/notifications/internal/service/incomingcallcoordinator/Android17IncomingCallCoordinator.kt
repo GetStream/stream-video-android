@@ -69,7 +69,7 @@ internal class Android17IncomingCallCoordinator(
 
     @SuppressLint("MissingPermission", "NewApi")
     override fun showIncomingCall(request: IncomingCallRequest) {
-        if (!telecomPermissions.canUseTelecom(context) ||
+        if (!telecomPermissions.canUseTelecom(request.callServiceConfiguration, context) ||
             !telecomHelper.canUseJetpackTelecom() ||
             !hasNotificationPermission()
         ) {
