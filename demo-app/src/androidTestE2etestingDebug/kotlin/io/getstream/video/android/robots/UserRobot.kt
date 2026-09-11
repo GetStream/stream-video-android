@@ -74,9 +74,14 @@ class UserRobot {
         return this
     }
 
-    fun directCall(audioOnly: Boolean): UserRobot {
+    fun directCall(audioOnly: Boolean, joinAndRing: Boolean = false): UserRobot {
         CallDetailsPage.wheelIcon.waitToAppearAndClick()
         CallDetailsPage.directCallButton.waitToAppearAndClick()
+        DirectCallPage.joinAndRingCheckbox.waitToAppear().let { checkbox ->
+            if (checkbox.isChecked != joinAndRing) {
+                checkbox.click()
+            }
+        }
         DirectCallPage.participantName.waitToAppearAndClick()
         val callButton = if (audioOnly) audioCallButton else videoCallButton
         callButton.waitToAppearAndClick()
@@ -103,7 +108,10 @@ class UserRobot {
         if (callId != null) {
             CallDetailsPage.callIdInputField.waitToAppear().typeText(callId)
         }
-        CallDetailsPage.joinCallButton.waitToAppearAndClick()
+        // The call details screen is the first screen after launch or login, so this wait
+        // overlaps app startup on an emulator that is still settling. The 5s default was the
+        // single most common nightly failure, so the window is deliberately wider.
+        CallDetailsPage.joinCallButton.waitToAppearAndClick(timeOutMillis = 15.seconds)
         waitForLobbyToOpen()
         return this
     }
@@ -122,7 +130,9 @@ class UserRobot {
     }
 
     private fun waitForLobbyToOpen(): UserRobot {
-        LobbyPage.closeButton.waitToAppear()
+        // Reached right after a login, so the lobby composes while the app is still starting
+        // up. At the 5s default this failed about half the time locally on the re-enter tests.
+        LobbyPage.closeButton.waitToAppear(timeOutMillis = 15.seconds)
         return this
     }
 
@@ -150,7 +160,9 @@ class UserRobot {
     }
 
     fun waitForIncomingCall(): UserRobot {
-        RingPage.acceptCallButton.waitToAppear(timeOutMillis = 15.seconds)
+        // Ring delivery goes through the coordinator and the push or socket path before the
+        // incoming screen renders, and 15s timed out on the nightlies.
+        RingPage.acceptCallButton.waitToAppear(timeOutMillis = 30.seconds)
         return this
     }
 
@@ -337,7 +349,8 @@ class UserRobot {
         CallPage.callViewButton.waitToAppearAndClick()
         // With many live video tiles the emulator UI is busy, and the opened menu can take
         // several seconds to land in the accessibility tree, so the items get a wide window.
-        val timeOutMillis = 15.seconds
+        // 15s still timed out on the six-participant test, so the window is wider again.
+        val timeOutMillis = 30.seconds
         when (mode) {
             VideoView.DYNAMIC -> CallPage.ViewMenu.dynamic.waitToAppearAndClick(timeOutMillis)
             VideoView.SPOTLIGHT -> CallPage.ViewMenu.spotlight.waitToAppearAndClick(timeOutMillis)
@@ -353,15 +366,18 @@ class UserRobot {
 
     fun acceptCallRecording(): UserRobot {
         // The recording-consent dialog only appears once the backend composite recorder
-        // emits call.recording_started, which can take 20-30s, so 10s is too short.
-        CallPage.RecordingButtons.accept.waitToAppearAndClick(timeOutMillis = 30.seconds)
+        // emits call.recording_started. The buddy starts the recording within seconds, so
+        // this wait is really the recorder's start-up latency: usually 10-20s, but 30s still
+        // timed out four times in the nightlies. Callers with a recording window have to
+        // outlive this wait, see testReconnectionDuringCallRecording.
+        CallPage.RecordingButtons.accept.waitToAppearAndClick(timeOutMillis = 60.seconds)
         return this
     }
 
     fun declineCallRecording(): UserRobot {
         // See acceptCallRecording: the consent dialog is gated on the backend recorder
-        // starting (call.recording_started), which can take 20-30s.
-        CallPage.RecordingButtons.leave.waitToAppearAndClick(timeOutMillis = 30.seconds)
+        // starting (call.recording_started).
+        CallPage.RecordingButtons.leave.waitToAppearAndClick(timeOutMillis = 60.seconds)
         return this
     }
 

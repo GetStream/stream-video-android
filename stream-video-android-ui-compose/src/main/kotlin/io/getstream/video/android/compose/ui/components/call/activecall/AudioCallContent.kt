@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
+import io.getstream.video.android.compose.permission.getDefaultPermissionList
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.AudioOnlyCallControlsContentParams
 import io.getstream.video.android.compose.theme.AudioOnlyCallDetailsContentParams
@@ -85,9 +86,7 @@ public fun AudioCallContent(
     isMicrophoneEnabled: Boolean,
     permissions: VideoPermissionsState = rememberCallPermissionsState(
         call = call,
-        permissions = listOf(
-            android.Manifest.permission.RECORD_AUDIO,
-        ),
+        permissions = getDefaultPermissionList(isVideoCall = false),
     ),
     onCallAction: (CallAction) -> Unit = { action: CallAction ->
         DefaultOnCallActionHandler.onCallAction(call, action)
@@ -166,9 +165,7 @@ public fun AudioOnlyCallContent(
     isMicrophoneEnabled: Boolean,
     permissions: VideoPermissionsState = rememberCallPermissionsState(
         call = call,
-        permissions = listOf(
-            android.Manifest.permission.RECORD_AUDIO,
-        ),
+        permissions = getDefaultPermissionList(isVideoCall = false),
     ),
     isShowingHeader: Boolean = true,
     headerContent: (@Composable ColumnScope.() -> Unit)? = null,

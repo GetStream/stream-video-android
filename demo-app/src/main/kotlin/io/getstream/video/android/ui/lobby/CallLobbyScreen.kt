@@ -163,7 +163,13 @@ private fun CallLobbyHeader(
         callLobbyViewModel = callLobbyViewModel,
     )
 
-    CallLobbyHeaderContent(user, onBack)
+    CallLobbyHeaderContent(
+        user = user,
+        call = callLobbyViewModel.call,
+        onEnableE2EE = callLobbyViewModel::enableE2EE,
+        onDisableE2EE = callLobbyViewModel::disableE2EE,
+        onBack = onBack,
+    )
 
     LaunchedEffect(key1 = isLoggedOut) {
         if (isLoggedOut) {
@@ -175,6 +181,9 @@ private fun CallLobbyHeader(
 @Composable
 private fun CallLobbyHeaderContent(
     user: State<User?>,
+    call: Call,
+    onEnableE2EE: suspend (String) -> Result<Unit>,
+    onDisableE2EE: () -> Result<Unit>,
     onBack: () -> Unit,
 ) {
     Row(
@@ -203,6 +212,13 @@ private fun CallLobbyHeaderContent(
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
         )
+        E2EELobbyButton(
+            call = call,
+            onEnable = onEnableE2EE,
+            onDisable = onDisableE2EE,
+            modifier = Modifier.padding(end = StreamTokens.spacingXs),
+        )
+
         StreamIconButton(
             modifier = Modifier.testTag("Stream_LobbyCloseButton"),
             onClick = onBack,
@@ -559,6 +575,9 @@ private fun CallLobbyHeaderPreview() {
             user = remember {
                 mutableStateOf(previewUsers[0])
             },
+            call = previewCall,
+            onEnableE2EE = { Result.success(Unit) },
+            onDisableE2EE = { Result.success(Unit) },
         ) {
         }
     }

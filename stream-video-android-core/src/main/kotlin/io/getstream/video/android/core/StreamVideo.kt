@@ -35,6 +35,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.io.IOException
 
 /**
  * The main interface to control the Video calls. [StreamVideoClient] implements this interface.
@@ -112,7 +113,12 @@ public interface StreamVideo : NotificationHandler {
     /**
      * Get a cached device used to receive push notifications.
      *
+     * Collecting the returned [Flow] accesses persistent storage and may throw an [IOException]
+     * if the stored device cannot be read. Consumers that treat device retrieval as a best-effort
+     * operation should handle [IOException] explicitly without swallowing coroutine cancellation.
+     *
      * @return stream of Device.
+     * @throws IOException when the returned flow is collected and persistent storage cannot be read.
      */
     public fun getDevice(): Flow<Device?>
 
