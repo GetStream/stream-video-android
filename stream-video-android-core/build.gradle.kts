@@ -37,6 +37,13 @@ wire {
 
 generateRPCServices {}
 
+// Robolectric loads a large android-all-instrumented jar into the forked test worker, which
+// defaults to a 512 MB heap. The whole suite shares one worker, so as it grew that load started
+// failing with OutOfMemoryError in whichever Robolectric class happened to run first.
+tasks.withType<Test>().configureEach {
+    maxHeapSize = "4g"
+}
+
 apiValidation {
     /**
      * Classes (fully qualified) that are excluded from public API dumps even if they

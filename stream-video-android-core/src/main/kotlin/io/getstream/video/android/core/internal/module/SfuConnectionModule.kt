@@ -22,6 +22,7 @@ import androidx.lifecycle.Lifecycle
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.utils.RetryableSignalingServiceDecorator
+import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
@@ -53,8 +54,13 @@ internal class SfuConnectionModule(
     // Internal logic
     override val http: OkHttpClient = buildSfuOkHttpClient()
 
+    // Not on [http] — the socket built on it already sets its own X-Stream-Client.
+    private val signalHttp: OkHttpClient by lazy {
+        http.newBuilder().addInterceptor(SfuHeadersInterceptor(HeadersUtil())).build()
+    }
+
     private val signalRetrofitClient: Retrofit by lazy {
-        Retrofit.Builder().client(http).addConverterFactory(WireConverterFactory.create())
+        Retrofit.Builder().client(signalHttp).addConverterFactory(WireConverterFactory.create())
             .baseUrl("$apiUrl/").build()
     }
     private fun buildSfuOkHttpClient(): OkHttpClient {

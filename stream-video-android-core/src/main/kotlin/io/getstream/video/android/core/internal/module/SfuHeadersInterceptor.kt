@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.util
+package io.getstream.video.android.core.internal.module
 
-import android.util.Log
-import com.google.firebase.messaging.FirebaseMessaging
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.tasks.await
+import io.getstream.video.android.core.header.HeadersUtil
+import okhttp3.Interceptor
+import okhttp3.Response
 
-val fcmToken: String?
-    get() = runBlocking {
-        try {
-            FirebaseMessaging.getInstance().token.await()
-        } catch (e: Exception) {
-            Log.e("FCM Token", "Failed to retrieve FCM token", e)
-            null
-        }
+internal class SfuHeadersInterceptor(private val headersUtil: HeadersUtil) : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+            .newBuilder()
+            .addHeader("X-Stream-Client", headersUtil.buildSfuSdkTrackingHeader())
+            .build()
+        return chain.proceed(request)
     }
+}
