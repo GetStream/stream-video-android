@@ -21,6 +21,7 @@ io.getstream.video.android.core.call.video
 io.getstream.video.android.core.camera
 io.getstream.video.android.core.closedcaptions
 io.getstream.video.android.core.dispatchers
+io.getstream.video.android.core.e2ee
 io.getstream.video.android.core.errors
 io.getstream.video.android.core.events
 io.getstream.video.android.core.filter

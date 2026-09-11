@@ -1,0 +1,344 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>StreamEncryptionManager</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
+                    stream-video-android
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">1.33.0
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":stream-video-android-core/main">androidJvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":stream-video-android-core/main" data-filter=":stream-video-android-core/main">
+                                <span class="checkbox--icon"></span>
+                                androidJvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    stream-video-android
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="stream-video-android-core::io.getstream.video.android.core.e2ee/StreamEncryptionManager///PointingToDeclaration//-224610753">
+  <div class="breadcrumbs"><a href="../../index.html">stream-video-android-core</a><span class="delimiter">/</span><a href="../index.html">io.getstream.video.android.core.e2ee</a><span class="delimiter">/</span><span class="current">StreamEncryptionManager</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Stream</span><wbr><span>Encryption</span><wbr><span><span>Manager</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">StreamEncryptionManager</a> : <a href="../-e2-e-e-manager/index.html">E2EEManager</a></div><p class="paragraph">The SDK's default <a href="../-e2-e-e-manager/index.html">E2EEManager</a>, backed by WebRTC's framed AES-GCM encryption. Frames are encrypted before they leave the device and decrypted after they arrive, so the SFU forwards media it cannot read.</p><p class="paragraph">Typical use, matching the JavaScript and iOS SDKs:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">StreamEncryptionManager.create(myUserId).onSuccess { e2ee -&gt;<br>    e2ee.setSharedKey(keyIndex = 0, key = myKeyBytes)<br>    call.setE2EEManager(e2ee)<br>    call.join()<br>}</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><p class="paragraph">You own the instance you create: keep it for as long as you need to rotate keys, and call <a href="dispose.html">dispose</a> when you are done with it. The SDK does not dispose managers it did not create, since the same manager is usually reused across rejoins and often across calls.</p><p class="paragraph">Instances are safe to use from any thread. Key changes take effect on the frames encrypted after they are applied.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="2132973198%2FClasslikes%2F-224610753" anchor-label="Companion" id="2132973198%2FClasslikes%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2132973198%2FClasslikes%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-2099078216%2FProperties%2F-224610753" anchor-label="algorithm" id="-2099078216%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="algorithm.html"><span><span>algorithm</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2099078216%2FProperties%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="algorithm.html">algorithm</a><span class="token operator">: </span><a href="../-e2-e-e-algorithm/index.html">E2EEAlgorithm</a></div><div class="brief "><p class="paragraph">The AES-GCM variant this manager encrypts with.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1712802541%2FProperties%2F-224610753" anchor-label="userId" id="1712802541%2FProperties%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="user-id.html"><span>user</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1712802541%2FProperties%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="user-id.html">userId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The local user these keys and outgoing frames belong to.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-203493263%2FFunctions%2F-224610753" anchor-label="decrypt" id="-203493263%2FFunctions%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="decrypt.html"><span><span>decrypt</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-203493263%2FFunctions%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="decrypt.html"><span class="token function">decrypt</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">receiver<span class="token operator">: </span><span data-unresolved-link="org.webrtc/RtpReceiver///PointingToDeclaration/">RtpReceiver</span><span class="token punctuation">, </span></span><span class="parameter ">userId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">trackType<span class="token operator">: </span><a href="../-e2-e-e-track-type/index.html">E2EETrackType</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-result/index.html">Result</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Called once per incoming track, when the subscriber learns which participant it belongs to. The implementation is expected to install a frame decryptor on <a href="../-e2-e-e-manager/decrypt.html">receiver</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1785247096%2FFunctions%2F-224610753" anchor-label="dispose" id="-1785247096%2FFunctions%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="dispose.html"><span><span>dispose</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1785247096%2FFunctions%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="dispose.html"><span class="token function">dispose</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Releases the native manager and wipes its keys. Drops the <a href="set-event-listener.html">setEventListener</a> observer first so a listener that captured a ViewModel or Activity is not kept alive by native. Subsequent key operations are ignored; attempting to attach an encryptor or decryptor returns a failure so the SDK cannot treat an unprotected track as configured. Dispose only once you are done with every call that uses it.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="760779863%2FFunctions%2F-224610753" anchor-label="enablePerformanceReporting" id="760779863%2FFunctions%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="enable-performance-reporting.html"><span>enable</span><wbr><span>Performance</span><wbr><span><span>Reporting</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="760779863%2FFunctions%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="enable-performance-reporting.html"><span class="token function">enablePerformanceReporting</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">enabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Turns on periodic <a href="../-e2-e-e-event-type/-p-e-r-f_-r-e-p-o-r-t/index.html">E2EEEventType.PERF_REPORT</a> events carrying per-track crypto timings. Off by default; it costs a timing measurement per frame, so leave it off outside diagnostics.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1188858336%2FFunctions%2F-224610753" anchor-label="encrypt" id="-1188858336%2FFunctions%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="encrypt.html"><span><span>encrypt</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1188858336%2FFunctions%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="encrypt.html"><span class="token function">encrypt</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sender<span class="token operator">: </span><span data-unresolved-link="org.webrtc/RtpSender///PointingToDeclaration/">RtpSender</span><span class="token punctuation">, </span></span><span class="parameter ">codec<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">trackType<span class="token operator">: </span><a href="../-e2-e-e-track-type/index.html">E2EETrackType</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-result/index.html">Result</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Called once per outgoing track, right after the publisher adds its transceiver. The implementation is expected to install a frame encryptor on <a href="../-e2-e-e-manager/encrypt.html">sender</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1209918098%2FFunctions%2F-224610753" anchor-label="removeAllKeys" id="-1209918098%2FFunctions%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remove-all-keys.html"><span>remove</span><wbr><span>All</span><wbr><span><span>Keys</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1209918098%2FFunctions%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="remove-all-keys.html"><span class="token function">removeAllKeys</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">userId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Drops every key held for <a href="remove-all-keys.html">userId</a>, at every index, falling back to the shared key for that participant. Shared keys are untouched — use <a href="remove-shared-key.html">removeSharedKey</a> for those.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-308765627%2FFunctions%2F-224610753" anchor-label="removeKey" id="-308765627%2FFunctions%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remove-key.html"><span>remove</span><wbr><span><span>Key</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-308765627%2FFunctions%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="remove-key.html"><span class="token function">removeKey</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">userId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">keyIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Drops <a href="remove-key.html">userId</a>'s key at <a href="remove-key.html">keyIndex</a>, falling back to the shared key for that participant.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2028137295%2FFunctions%2F-224610753" anchor-label="removeSharedKey" id="2028137295%2FFunctions%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remove-shared-key.html"><span>remove</span><wbr><span>Shared</span><wbr><span><span>Key</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2028137295%2FFunctions%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="remove-shared-key.html"><span class="token function">removeSharedKey</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">keyIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Drops the shared key at <a href="remove-shared-key.html">keyIndex</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="10165190%2FFunctions%2F-224610753" anchor-label="requestKeyState" id="10165190%2FFunctions%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="request-key-state.html"><span>request</span><wbr><span>Key</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="10165190%2FFunctions%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="request-key-state.html"><span class="token function">requestKeyState</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Asks for a <a href="../-e2-e-e-event-type/-k-e-y_-s-t-a-t-e/index.html">E2EEEventType.KEY_STATE</a> event describing the keys currently held. Answered asynchronously through the listener registered with <a href="set-event-listener.html">setEventListener</a>, so register first.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2106587513%2FFunctions%2F-224610753" anchor-label="setEventListener" id="2106587513%2FFunctions%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-event-listener.html"><span>set</span><wbr><span>Event</span><wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2106587513%2FFunctions%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-event-listener.html"><span class="token function">setEventListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">listener<span class="token operator">: </span><a href="../-e2-e-e-event-listener/index.html">E2EEEventListener</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Observes encryption state changes, most importantly decryption failures. Pass <code class="lang-kotlin">null</code> to stop observing. The listener is invoked on a WebRTC internal thread, so hop to your own dispatcher before touching UI state.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1043089964%2FFunctions%2F-224610753" anchor-label="setKey" id="1043089964%2FFunctions%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-key.html"><span>set</span><wbr><span><span>Key</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1043089964%2FFunctions%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-key.html"><span class="token function">setKey</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">userId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">keyIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Sets the key for a single participant, which takes precedence over the shared key. Use this when each participant publishes under their own key. See <a href="set-shared-key.html">setSharedKey</a> for rotation.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1820178846%2FFunctions%2F-224610753" anchor-label="setSharedKey" id="-1820178846%2FFunctions%2F-224610753" data-filterable-set=":stream-video-android-core/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":stream-video-android-core/main" data-filterable-set=":stream-video-android-core/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-shared-key.html"><span>set</span><wbr><span>Shared</span><wbr><span><span>Key</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1820178846%2FFunctions%2F-224610753"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stream-video-android-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-shared-key.html"><span class="token function">setSharedKey</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">keyIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">key<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Sets the key used for every participant that has no per-user key, including your own outgoing media. Use this when everyone in the call shares one passphrase-derived key.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
