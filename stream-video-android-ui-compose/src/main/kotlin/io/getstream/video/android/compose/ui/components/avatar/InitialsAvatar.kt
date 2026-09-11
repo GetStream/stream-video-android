@@ -78,9 +78,9 @@ internal fun Dp.toAvatarTextStyle(): TextStyle {
     val typography = VideoTheme.typography
     return when {
         this < StreamTokens.size24 -> typography.metadataEmphasis
-        this < StreamTokens.size32 -> typography.captionEmphasis
+        this < StreamTokens.size40 -> typography.captionEmphasis
         this < StreamTokens.size48 -> typography.bodyEmphasis
-        this < StreamTokens.size80 -> typography.headingLarge
+        this < StreamTokens.size80 -> typography.headingMedium
         else -> {
             val capped = (this * LARGE_AVATAR_TEXT_RATIO).coerceAtMost(LARGE_AVATAR_MAX_TEXT_SIZE)
             val fontSize = with(LocalDensity.current) { capped.toSp() }
