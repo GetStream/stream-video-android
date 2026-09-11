@@ -398,7 +398,7 @@ fun CallScreen(
                                             .testTag(
                                                 "Stream_CallSettingsToggle_Open_$isShowingSettingMenu",
                                             ),
-                                        isShowingSettings = !isShowingSettingMenu,
+                                        isShowingSettings = isShowingSettingMenu,
                                         onCallAction = {
                                             isShowingSettingMenu = !isShowingSettingMenu
                                         },
