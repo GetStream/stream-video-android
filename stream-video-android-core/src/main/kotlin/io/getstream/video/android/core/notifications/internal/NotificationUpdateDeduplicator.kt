@@ -36,9 +36,7 @@ internal class NotificationUpdateDeduplicator(
         existingNotification: Notification?,
         updatedNotificationId: Int,
         updatedNotification: Notification,
-        sdkInt: Int = Build.VERSION.SDK_INT,
     ): Boolean {
-        if (sdkInt < BUILD_VERSION_CODES_CINNAMON_BUN) return false
         if (ringingState !is RingingState.Incoming || ringingState.acceptedByMe) return false
         if (existingNotification == null || existingNotificationId != updatedNotificationId) {
             return false

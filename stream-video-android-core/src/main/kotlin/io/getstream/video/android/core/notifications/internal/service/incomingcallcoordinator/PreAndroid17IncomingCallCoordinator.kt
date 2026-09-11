@@ -59,7 +59,7 @@ internal class PreAndroid17IncomingCallCoordinator(
         val call = client.call(request.callId.type, request.callId.id)
         call.state.updateServiceRoute(ServiceRoute.LEGACY_CALL_SERVICE)
         call.state.updateIncomingRingtoneOwner(IncomingRingtoneOwner.Legacy)
-        val notification = request.notificationProvider(IncomingRingtoneOwner.Legacy)
+        val notification = request.notificationProvider()
         val result = incomingCallPresenter.showIncomingCall(
             context = context,
             callId = request.callId,

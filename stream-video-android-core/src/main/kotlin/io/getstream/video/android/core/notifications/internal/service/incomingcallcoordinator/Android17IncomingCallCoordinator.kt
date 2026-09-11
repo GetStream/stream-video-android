@@ -90,9 +90,8 @@ internal class Android17IncomingCallCoordinator(
                 isIncoming = true,
                 isVideoCall = request.isVideo,
                 onRegistered = {
-                    val notification = request.notificationProvider(
-                        IncomingRingtoneOwner.Notification,
-                    )
+                    call.state.updateIncomingRingtoneOwner(IncomingRingtoneOwner.Notification)
+                    val notification = request.notificationProvider()
                     val result = incomingCallPresenter.showIncomingCallNotification(
                         context,
                         request.callId,
