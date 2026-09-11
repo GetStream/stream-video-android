@@ -116,7 +116,7 @@ public fun AudioCallContent(
         call = call,
         isVideoType = false,
         detailsContent = detailsContent ?: { members, topPadding ->
-            Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center) {
+            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center) {
                 ParticipantAvatars(members = members)
                 Spacer(modifier = Modifier.height(StreamTokens.spacingMd))
                 ParticipantInformation(
@@ -197,7 +197,7 @@ public fun AudioOnlyCallContent(
             .background(color = VideoTheme.colors.backgroundCoreApp),
     ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.Center),
             verticalArrangement = Arrangement.Center,
