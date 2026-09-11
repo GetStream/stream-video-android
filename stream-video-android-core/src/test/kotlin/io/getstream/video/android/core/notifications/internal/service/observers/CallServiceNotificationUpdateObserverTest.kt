@@ -164,7 +164,7 @@ class CallServiceNotificationUpdateObserverTest {
 
     @Test
     fun `incoming ringing state starts incoming foreground notification`() = runTest {
-        observer.observe(context)
+        observer.observe()
 
         ringingStateFlow.value = RingingState.Incoming()
         advanceUntilIdle()
@@ -198,7 +198,7 @@ class CallServiceNotificationUpdateObserverTest {
         atomicNotification.set(notification)
         ringingStateFlow.value = RingingState.Incoming()
 
-        observer.observe(context)
+        observer.observe()
         runCurrent()
 
         assertNull(startArgs)
@@ -226,7 +226,7 @@ class CallServiceNotificationUpdateObserverTest {
         atomicNotification.set(notification)
         ringingStateFlow.value = RingingState.Incoming()
 
-        observer.observe(context)
+        observer.observe()
         runCurrent()
 
         assertNull(startArgs)
@@ -242,7 +242,7 @@ class CallServiceNotificationUpdateObserverTest {
     @Test
     fun `null notification id does not disable delay for later incoming update`() = runTest {
         every { isAndroid17OrHigher() } returns true
-        observer.observe(context)
+        observer.observe()
         runCurrent()
 
         ringingStateFlow.value = RingingState.Incoming()
@@ -265,7 +265,7 @@ class CallServiceNotificationUpdateObserverTest {
 
     @Test
     fun `outgoing ringing state starts outgoing foreground notification`() = runTest {
-        observer.observe(context)
+        observer.observe()
         advanceUntilIdle()
 
         ringingStateFlow.value = RingingState.Outgoing()
@@ -289,7 +289,7 @@ class CallServiceNotificationUpdateObserverTest {
         every { streamVideo.getStreamNotificationDispatcher() } returns notificationDispatcher
         coEvery { streamVideo.onCallNotificationUpdate(call) } returns mockNotification
 
-        observer.observe(context)
+        observer.observe()
 
         advanceUntilIdle()
 
@@ -313,7 +313,7 @@ class CallServiceNotificationUpdateObserverTest {
     fun `no notification generated does not start foreground service`() = runTest {
         coEvery { streamVideo.onCallNotificationUpdate(call) } returns null
 
-        observer.observe(context)
+        observer.observe()
         advanceUntilIdle()
 
         ringingStateFlow.value = RingingState.Incoming()

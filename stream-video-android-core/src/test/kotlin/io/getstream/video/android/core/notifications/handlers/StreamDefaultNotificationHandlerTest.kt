@@ -18,7 +18,9 @@ package io.getstream.video.android.core.notifications.handlers
 
 import android.app.Application
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -27,7 +29,6 @@ import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.ClientState
-import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
@@ -123,11 +124,17 @@ class StreamDefaultNotificationHandlerTest {
         val mockState = mockk<ClientState>(relaxed = true)
         val mockCallConfigRegistry = mockk<CallServiceConfigRegistry>(relaxed = true)
         val mockCallServiceConfig = mockk<CallServiceConfig>(relaxed = true)
-
         every { StreamVideo.instance() } returns mockStreamVideo
+        every { mockStreamVideo.context } returns mockApplication
         every { mockStreamVideo.state } returns mockState
         serviceLauncher = mockk(relaxed = true)
         every { mockState.serviceLauncher } returns serviceLauncher
+        every {
+            serviceLauncher.showIncomingCall(any(), any(), any(), any(), any(), any())
+        } answers {
+            arg<() -> Notification?>(5)()
+            Unit
+        }
         every { mockState.callConfigRegistry } returns mockCallConfigRegistry
         every { mockStreamVideo.callServiceConfigRegistry } returns mockCallConfigRegistry
         every { mockCallConfigRegistry.get(any()) } returns mockCallServiceConfig
@@ -181,6 +188,9 @@ class StreamDefaultNotificationHandlerTest {
         every { mockApplication.getString(any()) } returns "Test String"
         every { mockApplication.getString(any(), any()) } returns "Test String with param"
         every { mockApplication.applicationInfo } returns mockk(relaxed = true)
+        every {
+            mockApplication.getSystemService(Context.NOTIFICATION_SERVICE)
+        } returns mockk<NotificationManager>(relaxed = true)
 
         // Mock call state
         every { mockCall.cid } returns "default:test-call-123"
@@ -230,7 +240,7 @@ class StreamDefaultNotificationHandlerTest {
     fun `onRingingCall shows incoming call notification when caller is not busy with comprehensive verification`() {
         // Given
         val callDisplayName = "John Doe"
-        val notificationProvider = slot<(IncomingRingtoneOwner) -> Notification?>()
+        val notificationProvider = slot<() -> Notification?>()
         every { callBusyHandler.isBusyWithAnotherCall(testCallId.cid) } returns false
         every {
             serviceLauncher.showIncomingCall(
@@ -272,7 +282,7 @@ class StreamDefaultNotificationHandlerTest {
 
         // When
         testHandler.onRingingCall(testCallId, callDisplayName, payload)
-        notificationProvider.captured(IncomingRingtoneOwner.Legacy)
+        notificationProvider.captured()
 
         // Then - Verify all intent resolver calls
         verify { mockIntentResolver.searchIncomingCallPendingIntent(testCallId, payload = payload) }
@@ -425,6 +435,12 @@ class StreamDefaultNotificationHandlerTest {
             )
         }
 
+        // Incoming notification cleanup belongs to its service route.
+        verify(exactly = 0) {
+            mockNotificationManager.cancel(
+                testCallId.getNotificationId(NotificationType.Incoming),
+            )
+        }
         // Verify notification manager is called to show notification
         verify { mockNotificationManager.notify(notificationId, any()) }
     }

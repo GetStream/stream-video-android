@@ -38,6 +38,7 @@ import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.android.video.generated.models.LocalCallMissedEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.R
@@ -48,7 +49,6 @@ import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.DefaultNotificationIntentBundleResolver
 import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
-import io.getstream.video.android.core.notifications.IncomingCallNotificationPreparer
 import io.getstream.video.android.core.notifications.IncomingNotificationAction
 import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_LIVE_CALL
@@ -89,7 +89,7 @@ constructor(
     private val notificationChannels: StreamNotificationChannels = StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_notification_channel_id,
+            defaultIncomingCallChannelIdRes(),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
@@ -124,7 +124,7 @@ constructor(
         ),
         incomingCallLowImportanceChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_low_priority_notification_channel_id,
+            defaultIncomingCallLowImportanceChannelIdRes(),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_low_priority_notification_channel_description,
             NotificationManager.IMPORTANCE_DEFAULT,
@@ -170,11 +170,7 @@ constructor(
     ) {
         logger.d { "[onRingingCall] #ringing; callId: ${callId.id}" }
         val streamVideo = StreamVideo.instance() as StreamVideoClient
-        val notificationPreparer = IncomingCallNotificationPreparer(streamVideo)
-        if (shouldShowIncomingCallNotification(
-                (streamVideo as StreamVideoClient).callBusyHandler,
-                callId.cid,
-            )
+        if (shouldShowIncomingCallNotification(streamVideo.callBusyHandler, callId.cid)
         ) {
             val canRunService =
                 streamVideo.callServiceConfigRegistry.get(callId.type).runCallServiceInForeground
@@ -185,7 +181,7 @@ constructor(
                     streamVideo.state.callConfigRegistry.get(callId.type),
                     isVideo = isVideoCall(callId, payload),
                     payload = payload,
-                    notificationProvider = { owner ->
+                    notificationProvider = {
                         val ringingState = RingingState.Incoming()
                         getRingingCallNotification(
                             ringingState,
@@ -193,9 +189,7 @@ constructor(
                             callDisplayName,
                             shouldHaveContentIntent = true,
                             payload,
-                        )?.let { notification ->
-                            notificationPreparer.prepare(notification, owner, ringingState)
-                        }
+                        )
                     },
                 )
             }
@@ -232,6 +226,7 @@ constructor(
         payload: Map<String, Any?>,
     ) {
         logger.d { "[onMissedCall] #ringing; callId: ${callId.id}" }
+        notificationManager.cancel(callId.getNotificationId(NotificationType.Incoming))
         val notificationId = callId.getNotificationId(NotificationType.Missed)
         getMissedCallNotification(
             callId,
@@ -347,7 +342,7 @@ constructor(
                 callId,
                 payload = payload,
             )
-
+            var ringtoneOwner: IncomingRingtoneOwner = IncomingRingtoneOwner.Legacy
             val streamVideo = StreamVideo.instanceOrNull()
             streamVideo?.let { streamVideoInstance ->
                 val call = streamVideoInstance.call(callId.type, callId.id)
@@ -359,6 +354,8 @@ constructor(
                     map[IncomingNotificationAction.Reject] = pendingIntent
                 }
                 call.state.incomingNotificationData = IncomingNotificationData(map)
+
+                ringtoneOwner = call.state.incomingRingtoneOwner.value
             }
 
             if (
@@ -368,6 +365,8 @@ constructor(
                 rejectCallPendingIntent != null
             ) {
                 getIncomingCallNotificationInternal(
+                    ringtoneOwner,
+                    ringingState,
                     fullScreenPendingIntent,
                     contentPendingIntent,
                     acceptCallPendingIntent,
@@ -385,7 +384,7 @@ constructor(
                         shouldHaveContentIntent,
                         payload,
                     )
-                }.configureIncomingCallAlert(ringingState)
+                }
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
                 null
@@ -436,6 +435,7 @@ constructor(
         callDisplayName: String?,
         payload: Map<String, Any?>,
         shouldHaveContentIntent: Boolean,
+        ringtoneOwner: IncomingRingtoneOwner,
         existingChannelId: String? = null,
         intercept: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification? {
@@ -468,6 +468,8 @@ constructor(
                 rejectCallPendingIntent != null
             ) {
                 getIncomingCallNotificationInternal(
+                    ringtoneOwner,
+                    ringingState,
                     fullScreenPendingIntent,
                     contentPendingIntent,
                     acceptCallPendingIntent,
@@ -477,7 +479,7 @@ constructor(
                     shouldHaveContentIntent,
                     existingChannelId,
                     intercept,
-                ).configureIncomingCallAlert(ringingState)
+                )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
                 null
@@ -509,6 +511,8 @@ constructor(
     }
 
     private inline fun getIncomingCallNotificationInternal(
+        ringtoneOwner: IncomingRingtoneOwner,
+        ringingState: RingingState.Incoming,
         fullScreenPendingIntent: PendingIntent,
         contentPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
@@ -533,7 +537,11 @@ constructor(
             }
         }
 
-        return ensureIncomingCallChannelAndBuildNotification(notificationChannel) {
+        return ensureIncomingCallChannelAndBuildNotification(
+            notificationChannel,
+            ringtoneOwner,
+            ringingState,
+        ) {
             priority = if (hideRingingNotificationInForeground) {
                 NotificationCompat.PRIORITY_LOW
             } else {
@@ -565,6 +573,10 @@ constructor(
         }
     }
 
+    /**
+     * This is a dead method, it is not invoked from within SDK.
+     * It is present here for compatibility. Should be removed in v2
+     */
     override fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
@@ -577,6 +589,8 @@ constructor(
             "[getIncomingCallNotification] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
         return getIncomingCallNotificationInternal(
+            IncomingRingtoneOwner.Legacy,
+            RingingState.Incoming(),
             fullScreenPendingIntent,
             fullScreenPendingIntent,
             acceptCallPendingIntent,
@@ -991,6 +1005,7 @@ constructor(
         val callId = StreamCallId.fromCallCid(call.cid)
         val payload = emptyMap<String, Any?>()
         return getRingingCallNotificationInternal(
+            ringtoneOwner = call.state.incomingRingtoneOwner.value,
             ringingState = call.state.ringingState.value,
             callId = callId,
             callDisplayName = callDisplayName,
@@ -1123,6 +1138,7 @@ constructor(
         }
         val payload = emptyMap<String, Any?>()
         return getRingingCallNotificationInternal(
+            ringtoneOwner = call.state.incomingRingtoneOwner.value,
             ringingState = call.state.ringingState.value,
             callId = StreamCallId.fromCallCid(call.cid),
             callDisplayName = callDisplayName,
@@ -1313,10 +1329,12 @@ constructor(
 
     private inline fun ensureIncomingCallChannelAndBuildNotification(
         channelInfo: StreamNotificationChannelInfo,
+        ringtoneOwner: IncomingRingtoneOwner,
+        ringingState: RingingState.Incoming,
         builder: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification {
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
-        if (isAndroid17OrHigher() && streamVideo != null) {
+        if (streamVideo != null && ringtoneOwner == IncomingRingtoneOwner.Notification) {
             val audioAttributes = AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -1333,7 +1351,14 @@ constructor(
         } else {
             channelInfo.create(notificationManager)
         }
-        return NotificationCompat.Builder(application, channelInfo.id).let(builder).build()
+        return NotificationCompat.Builder(application, channelInfo.id)
+            .let(builder)
+            .build()
+            .apply {
+                if (ringtoneOwner == IncomingRingtoneOwner.Notification) {
+                    flags = incomingCallNotificationFlags(flags, ringingState)
+                }
+            }
     }
 
     @OptIn(ExperimentalStreamVideoApi::class)
@@ -1374,12 +1399,4 @@ internal fun incomingCallNotificationFlags(
 } else {
     val withoutOnlyAlertOnce = currentFlags and Notification.FLAG_ONLY_ALERT_ONCE.inv()
     withoutOnlyAlertOnce or Notification.FLAG_INSISTENT
-}
-
-private fun Notification?.configureIncomingCallAlert(
-    ringingState: RingingState.Incoming,
-): Notification? = this?.apply {
-    if (isAndroid17OrHigher()) {
-        flags = incomingCallNotificationFlags(flags, ringingState)
-    }
 }

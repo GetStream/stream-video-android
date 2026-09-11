@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.service
+package io.getstream.video.android.core.notifications.internal.service.observers
 
 import android.app.Notification
+import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.model.StreamCallId
 
-internal data class IncomingCallRequest(
-    val callId: StreamCallId,
-    val callDisplayName: String?,
-    val callServiceConfiguration: CallServiceConfig,
-    val isVideo: Boolean,
-    val payload: Map<String, Any?>,
-    val notificationProvider: () -> Notification?,
-)
+internal interface NotificationUpdateObserver {
+    fun observe()
+    suspend fun updateNotification()
+    fun showNotificationForState(ringingState: RingingState, notification: Notification)
+    fun showActiveCallNotification(callId: StreamCallId, notification: Notification)
+    fun showOutgoingCallNotification(callId: StreamCallId, notification: Notification)
+    fun showIncomingCallNotification(callId: StreamCallId, notification: Notification)
+}
