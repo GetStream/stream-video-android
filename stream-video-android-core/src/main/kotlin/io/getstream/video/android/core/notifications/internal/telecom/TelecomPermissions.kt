@@ -27,6 +27,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 
+// TODO pass StreamVideo instance in constructor on v2
 class TelecomPermissions {
 
     private val logger: TaggedLogger by taggedLogger("TelecomPermissions")
