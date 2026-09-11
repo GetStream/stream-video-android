@@ -31,6 +31,7 @@ import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
+import io.getstream.video.android.util.DemoE2eeKeys
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -240,6 +241,8 @@ class CallLobbyViewModel @Inject constructor(
         val previous = e2eeManager
         e2eeManager = created
         previous?.dispose()
+        // Kept so the in-call share sheet can put the passphrase back on the invite link.
+        DemoE2eeKeys.remember(call.cid, passphrase)
         return Result.success(Unit)
     }
 
@@ -251,6 +254,7 @@ class CallLobbyViewModel @Inject constructor(
             current?.dispose()
         } finally {
             e2eeManager = null
+            DemoE2eeKeys.forget(call.cid)
         }
         return Result.success(Unit)
     }
