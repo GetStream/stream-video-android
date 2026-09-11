@@ -95,7 +95,7 @@ internal class ServiceLauncher(private val client: StreamVideoClient) {
         callServiceConfiguration: CallServiceConfig,
         isVideo: Boolean,
         payload: Map<String, Any?>,
-        notificationProvider: (IncomingRingtoneOwner) -> Notification?,
+        notificationProvider: () -> Notification?,
     ) {
         val initialIncomingCallCoordinator = if (isAndroid17OrHigher()) {
             android17IncomingCallCoordinator

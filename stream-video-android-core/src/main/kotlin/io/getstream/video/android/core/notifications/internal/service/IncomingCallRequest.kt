@@ -26,5 +26,5 @@ internal data class IncomingCallRequest(
     val callServiceConfiguration: CallServiceConfig,
     val isVideo: Boolean,
     val payload: Map<String, Any?>,
-    val notificationProvider: (IncomingRingtoneOwner) -> Notification?,
+    val notificationProvider: () -> Notification?,
 )
