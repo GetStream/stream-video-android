@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.ClosedCaptionOff
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Feedback
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RawOff
@@ -96,6 +97,8 @@ fun defaultStreamMenu(
     onToggleAudioUsage: () -> Unit = {},
     selectedRecordingTypes: Set<RecordingType> = emptySet(),
     onSelectRecordingType: (RecordingType) -> Unit = {},
+    isMusicAudioProfile: Boolean = false,
+    onToggleAudioProfile: () -> Unit = {},
 ) = buildList<MenuItem> {
     if (noiseCancellationFeatureEnabled) {
         add(
@@ -175,6 +178,8 @@ fun defaultStreamMenu(
                     onToggleAudioUsage,
                     selectedRecordingTypes,
                     onSelectRecordingType,
+                    isMusicAudioProfile,
+                    onToggleAudioProfile,
                 ),
             ),
         )
@@ -358,7 +363,15 @@ fun debugSubmenu(
     onToggleAudioUsage: () -> Unit,
     selectedRecordingTypes: Set<RecordingType>,
     onSelectRecordingType: (RecordingType) -> Unit,
+    isMusicAudioProfile: Boolean = false,
+    onToggleAudioProfile: () -> Unit = {},
 ) = listOf(
+    ActionMenuItem(
+        title = if (isMusicAudioProfile) "Music mode: On" else "Music mode: Off",
+        icon = Icons.Default.MusicNote,
+        highlight = isMusicAudioProfile,
+        action = onToggleAudioProfile,
+    ),
     DynamicSubMenuItem(
         title = "List Transcriptions",
         icon = Icons.AutoMirrored.Filled.ReceiptLong,

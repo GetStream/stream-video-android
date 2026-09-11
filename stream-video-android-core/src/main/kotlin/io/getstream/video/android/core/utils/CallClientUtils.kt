@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.core.utils
 
+import android.media.AudioManager
+import android.media.MediaRecorder
+import android.os.Build
 import io.getstream.video.android.core.model.IceServer
 import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
@@ -194,14 +197,120 @@ internal val iceRestartConstraints = MediaConstraints().apply {
     optional.add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"))
 }
 
+// Builder defaults for [profile], shared by the module builder and the mid-call setters so the
+// value reported to callers cannot drift from what the pipeline was actually built with.
+
+/** Platform (hardware) audio effects: run in the audio device module. */
+@JvmSynthetic
+internal fun defaultHardwareAudioEffectsEnabled(profile: AudioBitrateProfile?): Boolean =
+    profile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+
+/**
+ * WebRTC's own software audio processing: a separate stage from
+ * [defaultHardwareAudioEffectsEnabled], fixed for the lifetime of the audio source it is passed to.
+ */
+@JvmSynthetic
+internal fun defaultSoftwareAudioProcessingEnabled(profile: AudioBitrateProfile?): Boolean =
+    profile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+
+/**
+ * Capture source for [profile]. MUSIC_HIGH_QUALITY asks for [MediaRecorder.AudioSource.MIC] so the
+ * platform builds the ordinary record graph instead of the VoIP one;
+ * [MediaRecorder.AudioSource.VOICE_COMMUNICATION] is WebRTC's default.
+ */
+@JvmSynthetic
+internal fun captureAudioSourceFor(profile: AudioBitrateProfile?): Int =
+    if (profile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY) {
+        MediaRecorder.AudioSource.MIC
+    } else {
+        MediaRecorder.AudioSource.VOICE_COMMUNICATION
+    }
+
+/** Readable name for [AudioManager.mode], so logs do not force a lookup of 0 vs 3. */
+@JvmSynthetic
+internal fun audioModeName(mode: Int?): String = when (mode) {
+    AudioManager.MODE_NORMAL -> "MODE_NORMAL"
+    AudioManager.MODE_RINGTONE -> "MODE_RINGTONE"
+    AudioManager.MODE_IN_CALL -> "MODE_IN_CALL"
+    AudioManager.MODE_IN_COMMUNICATION -> "MODE_IN_COMMUNICATION"
+    else -> if (mode == null) "unset" else "MODE_UNKNOWN($mode)"
+}
+
+/** Readable name for [MediaRecorder.AudioSource], so logs do not force a lookup of 1 vs 7. */
+@JvmSynthetic
+internal fun audioSourceName(source: Int?): String = when (source) {
+    MediaRecorder.AudioSource.DEFAULT -> "DEFAULT"
+    MediaRecorder.AudioSource.MIC -> "MIC"
+    MediaRecorder.AudioSource.VOICE_RECOGNITION -> "VOICE_RECOGNITION"
+    MediaRecorder.AudioSource.VOICE_COMMUNICATION -> "VOICE_COMMUNICATION"
+    MediaRecorder.AudioSource.UNPROCESSED -> "UNPROCESSED"
+    else -> if (source == null) "unset" else "AUDIO_SOURCE_UNKNOWN($source)"
+}
+
+/**
+ * One line for the capture knobs that decide whether music survives the vendor graph.
+ * Same order everywhere so the three log sites can be grepped as a single story.
+ */
+@JvmSynthetic
+internal fun formatAudioCaptureKnobs(
+    profile: AudioBitrateProfile?,
+    audioMode: Int?,
+    audioSource: Int?,
+    hwAec: Boolean?,
+    hwNs: Boolean?,
+): String = "profile=${profile ?: "unset"} " +
+    "audioMode=${audioModeName(audioMode)} " +
+    "audioSource=${audioSourceName(audioSource)} " +
+    "hwAec=${hwAec ?: "unset"} " +
+    "hwNs=${hwNs ?: "unset"}"
+
+/** Roughly what the SFU asks for on the standard voice profile. */
+internal const val VOICE_MAX_AUDIO_BITRATE_BPS: Int = 64_000
+
+/** Roughly what the SFU asks for on the music profile. */
+internal const val MUSIC_MAX_AUDIO_BITRATE_BPS: Int = 128_000
+
+/**
+ * The maximum audio bitrate to put on the publisher for [profile].
+ *
+ * The SFU is not asked again mid-call, so switching profiles has to move the encoder's own ceiling.
+ * It does not have to guess at the number, though: the server sends one bitrate per profile in
+ * `PublishOption.audio_bitrate_profiles`, and [serverBitrateBps] is the one for [profile] — the
+ * same value a freshly created audio transceiver would be given. Only when the server named none
+ * does this fall back to what was negotiated at join, and then to a constant.
+ */
+@JvmSynthetic
+internal fun targetAudioMaxBitrateBps(
+    profile: AudioBitrateProfile,
+    serverBitrateBps: Int?,
+    negotiatedBitrateBps: Int?,
+): Int {
+    serverBitrateBps?.takeIf { it > 0 }?.let { return it }
+    return if (profile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY) {
+        maxOf(MUSIC_MAX_AUDIO_BITRATE_BPS, negotiatedBitrateBps ?: 0)
+    } else {
+        negotiatedBitrateBps?.takeIf { it > 0 } ?: VOICE_MAX_AUDIO_BITRATE_BPS
+    }
+}
+
 @JvmSynthetic
 internal fun buildAudioConstraints(
     audioBitrateProfileProvider: (() -> AudioBitrateProfile)? = null,
-): MediaConstraints {
+): MediaConstraints = buildAudioConstraints(
+    defaultSoftwareAudioProcessingEnabled(audioBitrateProfileProvider?.invoke()),
+)
+
+/**
+ * Builds the audio-source constraints with WebRTC's software audio processing explicitly on or off.
+ *
+ * These are fixed when the [org.webrtc.AudioSource] is created, so changing them means building a
+ * new source and swapping the published track.
+ */
+@JvmSynthetic
+internal fun buildAudioConstraints(softwareAudioProcessingEnabled: Boolean): MediaConstraints {
     val mediaConstraints = MediaConstraints()
-    val isMusicHighQuality = audioBitrateProfileProvider?.invoke() ==
-        AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
-    val constraintValue = if (isMusicHighQuality) false else true
+    val constraintValue = softwareAudioProcessingEnabled
 
     val items = listOf(
         MediaConstraints.KeyValuePair(

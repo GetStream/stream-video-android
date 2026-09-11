@@ -17,11 +17,13 @@
 package io.getstream.video.android.core.audio
 
 import android.content.Context
+import android.media.AudioManager
 import com.twilio.audioswitch.AudioDevice
 import com.twilio.audioswitch.AudioDeviceChangeListener
 import com.twilio.audioswitch.AudioSwitch
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -29,12 +31,15 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Before
 import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AudioSwitchControllerTest {
 
     private val context = mockk<Context>(relaxed = true)
     private val listener = mockk<AudioDeviceChangeListener>(relaxed = true)
+    private val audioManager = mockk<AudioManager>(relaxed = true)
 
     private lateinit var controller: AudioSwitchController
     private lateinit var audioSwitch: AudioSwitch
@@ -42,6 +47,9 @@ class AudioSwitchControllerTest {
     @Before
     fun setup() {
         audioSwitch = mockk(relaxed = true)
+
+        every { context.getSystemService(Context.AUDIO_SERVICE) } returns audioManager
+        every { audioManager.mode } returns AudioManager.MODE_IN_COMMUNICATION
 
         controller = spyk(
             AudioSwitchController(context, emptyList(), listener),
@@ -55,11 +63,23 @@ class AudioSwitchControllerTest {
         unmockkAll()
     }
 
+    /**
+     * The listener handed to AudioSwitch, which wraps [listener] so the requested audio mode
+     * survives the route changes AudioSwitch drives on its own.
+     */
+    private fun startedListener(): AudioDeviceChangeListener {
+        val slot = slot<AudioDeviceChangeListener>()
+        verify { audioSwitch.start(capture(slot)) }
+        return slot.captured
+    }
+
     @Test
     fun `start should create and start AudioSwitch`() {
         controller.start()
 
-        verify { audioSwitch.start(listener) }
+        startedListener().invoke(emptyList(), null)
+
+        verify { listener.invoke(emptyList(), null) }
     }
 
     @Test
@@ -68,7 +88,7 @@ class AudioSwitchControllerTest {
         controller.start()
 
         verify(exactly = 1) { controller.getAudioSwitch() }
-        verify(exactly = 1) { audioSwitch.start(listener) }
+        verify(exactly = 1) { audioSwitch.start(any()) }
     }
 
     @Test
@@ -110,5 +130,88 @@ class AudioSwitchControllerTest {
         controller.selectDevice(device)
 
         verify(exactly = 0) { audioSwitch.selectDevice(any()) }
+    }
+
+    @Test
+    fun `setCommunicationModeEnabled false should move the device to MODE_NORMAL`() {
+        controller.start()
+
+        assertTrue(controller.setCommunicationModeEnabled(false))
+
+        verify { audioManager.mode = AudioManager.MODE_NORMAL }
+    }
+
+    @Test
+    fun `setCommunicationModeEnabled true should move the device to MODE_IN_COMMUNICATION`() {
+        controller.start()
+        every { audioManager.mode } returns AudioManager.MODE_NORMAL
+
+        assertTrue(controller.setCommunicationModeEnabled(true))
+
+        verify { audioManager.mode = AudioManager.MODE_IN_COMMUNICATION }
+    }
+
+    @Test
+    fun `setCommunicationModeEnabled should report failure with no AudioManager`() {
+        every { context.getSystemService(Context.AUDIO_SERVICE) } returns null
+        controller.start()
+
+        assertFalse(controller.setCommunicationModeEnabled(false))
+    }
+
+    @Test
+    fun `selectDevice should reapply the requested mode over the one activate sets`() {
+        controller.start()
+        controller.setCommunicationModeEnabled(false)
+        // activate() puts the device back in communication mode behind our back.
+        every { audioManager.mode } returns AudioManager.MODE_IN_COMMUNICATION
+
+        controller.selectDevice(mockk<AudioDevice>())
+
+        verify(exactly = 2) { audioManager.mode = AudioManager.MODE_NORMAL }
+    }
+
+    @Test
+    fun `selectDevice should leave the mode alone when none was requested`() {
+        controller.start()
+
+        controller.selectDevice(mockk<AudioDevice>())
+
+        verify(exactly = 0) { audioManager.mode = any() }
+    }
+
+    @Test
+    fun `a route change should reapply the requested mode over the one AudioSwitch sets`() {
+        controller.start()
+        controller.setCommunicationModeEnabled(false)
+        // Taking audio focus to enumerate devices puts the device back in communication mode
+        // before the change listener runs.
+        every { audioManager.mode } returns AudioManager.MODE_IN_COMMUNICATION
+
+        startedListener().invoke(emptyList(), null)
+
+        verify(exactly = 2) { audioManager.mode = AudioManager.MODE_NORMAL }
+    }
+
+    @Test
+    fun `a route change should leave the mode alone when none was requested`() {
+        controller.start()
+
+        startedListener().invoke(emptyList(), null)
+
+        verify(exactly = 0) { audioManager.mode = any() }
+    }
+
+    @Test
+    fun `stop should drop the request so the next session does not inherit it`() {
+        controller.start()
+        controller.setCommunicationModeEnabled(false)
+
+        controller.stop()
+        controller.start()
+        controller.selectDevice(mockk<AudioDevice>())
+
+        // Once from the explicit request, and not again for the session that followed it.
+        verify(exactly = 1) { audioManager.mode = AudioManager.MODE_NORMAL }
     }
 }

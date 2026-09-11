@@ -87,6 +87,14 @@ internal class CallMediaManager(
      */
     private var desiredAudioProcessingEnabled: Boolean = false
 
+    /**
+     * Platform noise-suppressor and echo-canceller states this call asked for, or null while the
+     * builder defaults stand. Kept alongside [desiredAudioProcessingEnabled] and for the same
+     * reason: the wanted state must outlive the factory so a recreation cannot silently drop it.
+     */
+    private var desiredHardwareNoiseSuppressorEnabled: Boolean? = null
+    private var desiredHardwareAcousticEchoCancelerEnabled: Boolean? = null
+
     var peerConnectionFactory: StreamPeerConnectionFactory
         get() {
             if (_peerConnectionFactory == null) {
@@ -100,6 +108,12 @@ internal class CallMediaManager(
                     webRtcLoggingLevel = clientImpl.loggingLevel.webRtcLoggingLevel,
                 ).also { factory ->
                     factory.setAudioProcessingEnabled(desiredAudioProcessingEnabled)
+                    desiredHardwareNoiseSuppressorEnabled?.let {
+                        factory.setHardwareNoiseSuppressorEnabled(it)
+                    }
+                    desiredHardwareAcousticEchoCancelerEnabled?.let {
+                        factory.setHardwareAcousticEchoCancelerEnabled(it)
+                    }
                 }
             }
             return _peerConnectionFactory!!
@@ -314,6 +328,14 @@ internal class CallMediaManager(
         _peerConnectionFactory?.isAudioProcessingEnabled() ?: false
 
     /**
+     * Whether a noise-cancellation processor is wired into this call's native factory at all, so
+     * "refused to change" can be told from "there is no processor". Without it, a call configured
+     * with no [org.webrtc.ManagedAudioProcessingFactory] looks like a failure every time.
+     */
+    fun isAudioProcessingReachable(): Boolean =
+        _peerConnectionFactory?.hasAudioProcessingAttached() ?: false
+
+    /**
      * Whether this call wants audio processing, whether or not a factory exists to run it yet.
      *
      * The wanted state outlives the factory, so a policy that withholds noise cancellation has to
@@ -348,6 +370,39 @@ internal class CallMediaManager(
         return isAudioProcessingEnabled()
     }
 
+    // None of the following builds a factory: like [setAudioProcessingEnabled], one created here
+    // would capture the pre-join audio bitrate profile and pin it for the rest of the call. The
+    // wanted state is recorded, and a factory built later picks it up on creation. The setters
+    // return true when the running capture session accepted the change.
+
+    fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean {
+        desiredHardwareNoiseSuppressorEnabled = enabled
+        return _peerConnectionFactory?.setHardwareNoiseSuppressorEnabled(enabled) ?: false
+    }
+
+    fun setHardwareAcousticEchoCancelerEnabled(enabled: Boolean): Boolean {
+        desiredHardwareAcousticEchoCancelerEnabled = enabled
+        return _peerConnectionFactory?.setHardwareAcousticEchoCancelerEnabled(enabled) ?: false
+    }
+
+    fun setCaptureAudioSource(audioSource: Int): Boolean =
+        _peerConnectionFactory?.setCaptureAudioSource(audioSource) ?: false
+
+    fun isHardwareNoiseSuppressorSupported(): Boolean =
+        _peerConnectionFactory?.isHardwareNoiseSuppressorSupported() ?: false
+
+    fun isHardwareAcousticEchoCancelerSupported(): Boolean =
+        _peerConnectionFactory?.isHardwareAcousticEchoCancelerSupported() ?: false
+
+    /** Forgets the wanted states, so nothing is re-applied after the call ends. */
+    fun resetDesiredHardwareNoiseSuppressor() {
+        desiredHardwareNoiseSuppressorEnabled = null
+    }
+
+    fun resetDesiredHardwareAcousticEchoCanceler() {
+        desiredHardwareAcousticEchoCancelerEnabled = null
+    }
+
     /** Disables all local capture devices. Used when leaving the call. */
     fun disableLocalCapture() {
         stopScreenSharing()
@@ -359,6 +414,8 @@ internal class CallMediaManager(
         // The wanted state must not outlive the call: a reused Call would otherwise re-apply it
         // to the factory built for the next session.
         resetDesiredAudioProcessing()
+        resetDesiredHardwareNoiseSuppressor()
+        resetDesiredHardwareAcousticEchoCanceler()
         mediaManager.cleanup()
     }
 }
