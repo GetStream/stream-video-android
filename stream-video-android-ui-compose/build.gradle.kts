@@ -20,7 +20,9 @@ plugins {
 
 android {
     namespace = "io.getstream.video.android.compose"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    // Paparazzi 1.3.4's layoutlib cannot load Android 16 framework classes. Keep this module on
+    // API 35 until the project can move to Kotlin 2 and Paparazzi 2; other modules remain on API 36.
+    compileSdk = libs.versions.paparazziCompileSdk.get().toInt()
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
