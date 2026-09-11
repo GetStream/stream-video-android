@@ -47,7 +47,6 @@ class NotificationUpdateDeduplicatorTest {
                 existing,
                 1,
                 updated,
-                BUILD_VERSION_CODES_CINNAMON_BUN,
             ),
         )
     }
@@ -62,7 +61,6 @@ class NotificationUpdateDeduplicatorTest {
                 existing,
                 1,
                 updated,
-                BUILD_VERSION_CODES_CINNAMON_BUN,
             ),
         )
         verify(exactly = 0) { comparator.areEquivalent(any(), any(), any(), any()) }
@@ -78,7 +76,6 @@ class NotificationUpdateDeduplicatorTest {
                 existing,
                 1,
                 updated,
-                BUILD_VERSION_CODES_CINNAMON_BUN - 1,
             ),
         )
         verify(exactly = 0) { comparator.areEquivalent(any(), any(), any(), any()) }
