@@ -197,36 +197,27 @@ internal val iceRestartConstraints = MediaConstraints().apply {
     optional.add(MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"))
 }
 
-/**
- * Whether the platform (hardware) audio effects are requested when the audio device module is
- * built for [profile].
- *
- * Single source of truth for the builder defaults so the value reported to callers before any
- * runtime change cannot drift from the value the module was actually built with.
- */
+// Builder defaults for [profile], shared by the module builder and the mid-call setters so the
+// value reported to callers cannot drift from what the pipeline was actually built with.
+
+/** Platform (hardware) audio effects: run in the audio device module. */
 @JvmSynthetic
 internal fun defaultHardwareAudioEffectsEnabled(profile: AudioBitrateProfile?): Boolean =
     profile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY &&
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
 /**
- * Whether WebRTC's own software audio processing is requested for a source built under [profile].
- *
- * Companion to [defaultHardwareAudioEffectsEnabled] for the software layer, which is a separate
- * stage: the platform effects run in the audio device module, these run in WebRTC's audio
- * processing module and are fixed for the lifetime of the audio source they are passed to.
+ * WebRTC's own software audio processing: a separate stage from
+ * [defaultHardwareAudioEffectsEnabled], fixed for the lifetime of the audio source it is passed to.
  */
 @JvmSynthetic
 internal fun defaultSoftwareAudioProcessingEnabled(profile: AudioBitrateProfile?): Boolean =
     profile != AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
 
 /**
- * Capture source the audio device module should use for [profile].
- *
- * [MediaRecorder.AudioSource.VOICE_COMMUNICATION] is WebRTC's default and the voice-call path.
- * MUSIC_HIGH_QUALITY asks for [MediaRecorder.AudioSource.MIC] so the platform builds the ordinary
- * record graph instead of the VoIP one. Shared by the module builder and the mid-call setter so
- * the two cannot drift.
+ * Capture source for [profile]. MUSIC_HIGH_QUALITY asks for [MediaRecorder.AudioSource.MIC] so the
+ * platform builds the ordinary record graph instead of the VoIP one;
+ * [MediaRecorder.AudioSource.VOICE_COMMUNICATION] is WebRTC's default.
  */
 @JvmSynthetic
 internal fun captureAudioSourceFor(profile: AudioBitrateProfile?): Int =

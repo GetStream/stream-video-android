@@ -352,11 +352,9 @@ internal class Publisher(
     /**
      * Swaps the track on the live audio sender, without renegotiating.
      *
-     * Passes `takeOwnership = false` deliberately. [MediaManagerImpl] owns the audio track and is
-     * what disposes it, so the sender must not dispose it too: [RtpSender.setTrack] disposes the
-     * track it currently holds only when it owns it, and leaving ownership with the media manager
-     * keeps disposal in exactly one place. The replaced track therefore stays valid until the
-     * caller disposes it.
+     * `takeOwnership = false` is deliberate: [MediaManagerImpl] owns and disposes the audio track,
+     * and [RtpSender.setTrack] disposes the track it holds only when it owns it, so disposal stays
+     * in one place and the replaced track stays valid until the caller disposes it.
      *
      * @return true when a live audio sender was found and accepted the track.
      */
@@ -378,15 +376,13 @@ internal class Publisher(
     /**
      * Sets the maximum bitrate on the live audio sender.
      *
-     * Applied through the sender's [RtpParameters], the same way the video layers and the
-     * degradation preference are — so it takes effect on the running encoder with no renegotiation.
-     * The audio bitrate is not carried in the SDP on our side; it rides entirely on the encoding.
+     * Applied through the sender's [RtpParameters], like the video layers, so it takes effect on
+     * the running encoder with no renegotiation — the audio bitrate is not carried in the SDP on
+     * our side, it rides entirely on the encoding.
      *
      * `setParameters` is called for its result rather than through the `parameters` property:
-     * WebRTC validates the encodings and answers with a boolean, and assigning the property
-     * throws that answer away. A rejected update would otherwise be reported to the caller as an
-     * applied stage, which is exactly what [io.getstream.video.android.core.AudioProfileResult]
-     * exists to prevent.
+     * WebRTC validates the encodings and answers with a boolean, and assigning the property throws
+     * that answer away, which would report a rejected update as an applied one.
      *
      * @return true when a live audio sender accepted the new parameters.
      */
@@ -411,10 +407,9 @@ internal class Publisher(
     }
 
     /**
-     * Whether an audio sender exists to take a bitrate ceiling.
-     *
-     * No sender is not a refused stage: [computeTransceiverEncodings] reads the published
-     * profile when the transceiver is added, so the next publish already has the right ceiling.
+     * Whether an audio sender exists to take a bitrate ceiling. No sender is not a refused stage:
+     * [computeTransceiverEncodings] reads the published profile when the transceiver is added, so
+     * the next publish already has the right ceiling.
      */
     internal fun hasLiveAudioSender(): Boolean = audioSenders().isNotEmpty()
 
@@ -423,11 +418,9 @@ internal class Publisher(
     }
 
     /**
-     * The bitrate the SFU offers for [profile], or null when it named none.
-     *
-     * The server sends one per profile in `PublishOption.audio_bitrate_profiles`, so a mid-call
-     * switch does not have to invent a number for the profile it is moving to — this is the same
-     * value a freshly created audio transceiver would be given for that profile.
+     * The bitrate the SFU offers for [profile], or null when it named none. The server sends one
+     * per profile in `PublishOption.audio_bitrate_profiles`, so a mid-call switch does not have to
+     * invent a number — this is what a freshly created audio transceiver would be given.
      */
     internal fun audioBitrateFor(profile: AudioBitrateProfile): Int? = safeCallWithDefault(null) {
         publishOptions.firstOrNull { it.track_type == TrackType.TRACK_TYPE_AUDIO }
@@ -438,10 +431,8 @@ internal class Publisher(
     }
 
     /**
-     * The audio bitrate the SFU negotiated for this publisher, or null when it publishes no audio.
-     *
-     * This is what the server asked for at join, for the audio bitrate profile the call joined
-     * with — the value to restore when a mid-call switch to music is undone.
+     * The audio bitrate the SFU negotiated at join for the profile the call joined with, or null
+     * when it publishes no audio — the value to restore when a switch to music is undone.
      */
     internal fun negotiatedAudioBitrate(): Int? = safeCallWithDefault(null) {
         publishOptions.firstOrNull { it.track_type == TrackType.TRACK_TYPE_AUDIO }?.bitrate

@@ -49,10 +49,9 @@ internal class AudioSwitchController(
 
         audioSwitch = getAudioSwitch()
         isActivated = false
-        // The listener is wrapped rather than handed over directly: an active AudioSwitch takes
-        // audio focus while it enumerates devices, which puts the device back in
-        // MODE_IN_COMMUNICATION before this callback runs. Route changes arrive here and nowhere
-        // else, so this is the only place a request made earlier can be re-applied over them.
+        // Wrapped rather than handed over directly: activating AudioSwitch puts the device back in
+        // MODE_IN_COMMUNICATION, and route changes arrive here and nowhere else, so this is the
+        // only place an earlier request can be re-applied over them.
         audioSwitch?.start { devices, selected ->
             applyRequestedAudioMode()
             audioDeviceChangeListener(devices, selected)
@@ -86,21 +85,14 @@ internal class AudioSwitchController(
      * Chooses between [AudioManager.MODE_IN_COMMUNICATION] and [AudioManager.MODE_NORMAL] for the
      * running call.
      *
-     * Some vendors pick their VoIP capture chain from the audio mode rather than from the
-     * requested `MediaRecorder.AudioSource`. Samsung is the one we have measured: in
-     * communication mode their HAL reports `needCallRouteDrive: ... for ap call case`, attaches
-     * `AudioEffectStage: input_normal_input_voice_changer`, and logs
-     * `PreProcess_RA: no solutions for recording` — the AOSP effects are not in the path at all.
-     * That chain gates music, and it sits below the `AudioEffect` API, so the audio device module
-     * flags, the audio-source constraints and the profile stages all miss it. Leaving
-     * communication mode is the only lever that reaches it.
+     * Some vendors pick their VoIP capture chain from the audio mode rather than from the requested
+     * `MediaRecorder.AudioSource`, and that chain sits below the `AudioEffect` API where the audio
+     * device module flags and source constraints cannot reach it. Leaving communication mode is the
+     * only lever on it, at the cost of communication routing and Bluetooth capture — SCO carries
+     * the headset microphone and only runs in communication mode.
      *
-     * Costs the echo cancellation and routing that communication mode brings, and Bluetooth
-     * capture with it: SCO carries the headset microphone and only runs in communication mode, so
-     * asking for [AudioManager.MODE_NORMAL] on that route gives up the input entirely.
-     *
-     * The request is remembered and re-applied on every route change for as long as this handler
-     * runs, because AudioSwitch sets the mode itself when it activates a device.
+     * Remembered and re-applied on every route change, because AudioSwitch sets the mode itself
+     * when it activates a device.
      *
      * @return true when the mode was applied, false when there is no [AudioManager] to apply it to.
      */

@@ -616,31 +616,26 @@ class MicrophoneManager(
      * The audio bitrate profile currently in force — observe this to drive a music/voice toggle.
      *
      * Only moves when the profile actually took. Set before joining it always does, since the
-     * pipeline is then built from it. Set on a running call it moves only if every reachable stage
-     * accepted the change; if one did not, this keeps reporting the previous profile, so a toggle
-     * bound to it snaps back rather than claiming a switch the audio did not make.
-     *
-     * Which stage refused is on the [AudioProfileResult] returned by [setAudioBitrateProfile].
+     * pipeline is then built from it. On a running call it moves only if every reachable stage
+     * accepted the change; otherwise it keeps reporting the previous profile, so a toggle bound to
+     * it snaps back rather than claiming a switch the audio did not make, and
+     * [setAudioBitrateProfile] fails naming the stages that refused.
      */
     val audioBitrateProfile: StateFlow<AudioBitrateProfile> = _audioBitrateProfile
 
     /**
-     * The platform (hardware) noise suppressor state this call has asked the device for.
-     *
-     * Derived from [audioBitrateProfile] alone — on, except under MUSIC_HIGH_QUALITY or below
-     * Android Q. There is no per-stage setter: the profile decides every stage, so that this
-     * state and [audioBitrateProfile] cannot disagree about what the call is doing.
+     * The platform (hardware) noise suppressor and echo canceller state this call has asked the
+     * device for. Derived from [audioBitrateProfile] alone — on, except under MUSIC_HIGH_QUALITY
+     * or below Android Q. There is no per-stage setter, so the two cannot disagree.
      */
     private var hardwareNoiseSuppressorEnabled =
         defaultHardwareAudioEffectsEnabled(_audioBitrateProfile.value)
 
     /**
      * Whether WebRTC's own software audio processing — echo cancellation, noise suppression,
-     * automatic gain control and the high-pass filter — is applied to captured audio.
-     *
-     * A separate stage from [hardwareNoiseSuppressorEnabled]: those effects run in the audio
-     * device module, these run in WebRTC's audio processing module. Also derived from
-     * [audioBitrateProfile] alone.
+     * automatic gain control, high-pass filter — is applied to captured audio. A separate stage
+     * from [hardwareNoiseSuppressorEnabled], which runs in the audio device module. Also derived
+     * from [audioBitrateProfile] alone.
      */
     private var softwareAudioProcessingEnabled =
         defaultSoftwareAudioProcessingEnabled(_audioBitrateProfile.value)
@@ -925,53 +920,28 @@ class MicrophoneManager(
     // ==================== End USB Audio Input Device Support ====================
 
     /**
-     * Sets the audio bitrate profile, before joining or on a running call.
+     * Sets the audio bitrate profile, before joining or on a running call, so a broadcaster who
+     * starts playing music can switch to MUSIC_HIGH_QUALITY without rejoining.
      *
-     * Before joining, the profile decides how the whole audio pipeline is built and what the SFU
-     * is asked to negotiate. After joining, the pipeline and the negotiated bitrate are already
-     * fixed, so the profile is applied to the stages that can still be reached: the
-     * noise-cancellation processor, the platform noise suppressor, WebRTC's software audio
-     * processing and the publisher's maximum audio bitrate. That is what lets a broadcaster who
-     * starts playing music switch to MUSIC_HIGH_QUALITY without rejoining.
+     * Requires HiFi audio enabled in the dashboard settings. The Opus bitrate and channel count
+     * come from the server at join, so a mid-call switch does not renegotiate them.
      *
-     * A mid-call switch is therefore not identical to joining under the same profile. Hardware
-     * echo cancellation is still fixed when the pipeline is built, and the Opus bitrate and
-     * channel count in the SDP come from the server at join — the SFU is not asked again. The
-     * capture audio source can move with the profile: the audio device module rebuilds
-     * AudioRecord onto MIC for MUSIC_HIGH_QUALITY and back onto VOICE_COMMUNICATION for a
-     * voice profile. It is everything that is left once the call is running.
+     * **Expect a brief gap in captured audio** on a mid-call switch: the platform rebuilds its
+     * capture path. The call is not interrupted otherwise.
      *
-     * **Expect a brief gap in captured audio** on a mid-call switch that changes the software
-     * audio processing stage: those constraints are fixed when the audio source is created, so the
-     * source and track are rebuilt and the live sender moved onto the new one. There is no
-     * renegotiation and the call is not interrupted otherwise.
-     *
-     * **Echo cancellation goes off with the rest under MUSIC_HIGH_QUALITY**, exactly as it does
-     * when joining under that profile. With speakers that sends echo to everyone else, so treat
-     * music as a headphones setting.
-     *
-     * MUSIC_HIGH_QUALITY also leaves `AudioManager.MODE_IN_COMMUNICATION` for `MODE_NORMAL`,
-     * and switches the live capture source to `MediaRecorder.AudioSource.MIC` (voice profiles
-     * put both back). Those two have to land together, and the mode has to land first: the
-     * source alone still sits in the vendor VoIP graph while the device is in communication
-     * mode, and the mode alone against `VOICE_COMMUNICATION` parks capture on a near-silent
-     * path. The mode is not a reported [AudioProfileResult] stage: routing may not be managed
-     * (`USAGE_MEDIA`) or may not have started yet, and treating that as a refused stage would
-     * hide a profile that otherwise took. The request is still recorded on
-     * [communicationAudioModeEnabled] and applied when routing starts. The source is reported
-     * as [AudioProfileResult.captureAudioSourceApplied].
-     *
-     * **Costs communication routing and Bluetooth capture** while music is on: SCO only runs in
+     * **Echo cancellation goes off under MUSIC_HIGH_QUALITY**, so treat music as a headphones
+     * setting. It also costs communication routing and Bluetooth capture — SCO only runs in
      * communication mode.
      *
-     * @param profile The audio bitrate profile to use.
-     * @return the profile and, for a mid-call switch, what each stage did — see
-     * [AudioProfileResult]. Failure when HiFi audio is not enabled in the dashboard settings, or
-     * when the call settings could not be fetched to find out.
+     * Read the profile in force back from [audioBitrateProfile].
+     *
+     * @return success once the profile is in force; failure when HiFi audio is off, the call
+     * settings could not be fetched, or a running stage refused — the profile is then left where
+     * it was so the caller can retry.
      */
     suspend fun setAudioBitrateProfile(
         profile: AudioBitrateProfile,
-    ): Result<AudioProfileResult> {
+    ): Result<Unit> {
         val connectionState = mediaManager.call.state.connection.value
         val isJoined = connectionState is RealtimeConnection.Joined ||
             connectionState is RealtimeConnection.Connected
@@ -1013,63 +983,45 @@ class MicrophoneManager(
         softwareAudioProcessingEnabled = defaultSoftwareAudioProcessingEnabled(profile)
 
         if (!isJoined) {
-            // Nothing is capturing or publishing yet, so there is no stage to move: the pipeline
-            // is built from the profile when the call joins, and the SFU picks the bitrate. The
-            // profile is in force by construction, so it is published unconditionally here.
-            // The audio mode has to be requested now: AudioSwitch enters communication mode when
-            // it activates, which is after this returns, and Samsung binds the VoIP capture chain
-            // to that mode at AudioRecord open.
+            // Nothing is capturing or publishing yet, so there is no stage to move and the profile
+            // is in force by construction. The audio mode has to be requested now: routing enters
+            // communication mode when it activates, after this returns, and some vendors bind the
+            // VoIP capture chain to the mode at AudioRecord open.
             applyCommunicationAudioModeForProfile(profile)
             _audioBitrateProfile.value = profile
-            return Result.success(
-                AudioProfileResult(
-                    profile = profile,
-                    audioMaxBitrateBps = null,
-                    noiseCancellationApplied = true,
-                    platformNoiseSuppressorApplied = true,
-                    platformAcousticEchoCancelerApplied = true,
-                    softwareAudioProcessingApplied = true,
-                    audioMaxBitrateApplied = true,
-                    captureAudioSourceApplied = true,
-                ),
-            )
+            return Result.success(Unit)
         }
 
         val result = applyProfileToRunningCall(profile, softwareAudioProcessingChanged)
-        if (result.complete) {
-            _audioBitrateProfile.value = profile
-        } else {
-            // Not every reachable stage moved, so the audio is not what this profile means and the
-            // profile is not published: a toggle stuck on MUSIC while a suppressor still eats the
-            // music looks exactly like success. Leaving the flow where it was makes it snap back,
-            // which is the truth, and lets the caller retry.
-            logger.w {
-                "[setAudioBitrateProfile] $profile only partly applied, not publishing it: $result"
-            }
+        if (!result.complete) {
+            // A stage still processing the old way means the audio is not what this profile
+            // means, so the profile is not published: a toggle stuck on MUSIC while a suppressor
+            // still eats the music looks exactly like success. Leaving the flow where it was is
+            // the truth and lets the caller retry.
+            logger.w { "[setAudioBitrateProfile] $profile only partly applied: $result" }
             revertProfileDerivedState(previousProfile)
+            return Result.failure(
+                IllegalStateException(
+                    "$profile not applied; still on the previous profile: " +
+                        result.missedStages.joinToString(),
+                ),
+            )
         }
-        return Result.success(result)
+        _audioBitrateProfile.value = profile
+        return Result.success(Unit)
     }
 
     /**
-     * Puts the state derived from the audio bitrate profile back to [previousProfile] after a
-     * switch that did not complete, so nothing disagrees with [audioBitrateProfile] about which
-     * profile this call is on.
+     * Puts profile-derived state back to [previousProfile] after a switch that did not complete,
+     * so nothing disagrees with [audioBitrateProfile] about which profile this call is on.
      *
-     * This restores *state*, not the live pipeline. The stages that did move stay where they are
-     * until the next source rebuild picks the restored values up, deliberately: undoing the
-     * software audio processing stage means a second `RtpSender.setTrack` swap on a live
-     * connection, which costs another gap in captured audio and re-enters the disposed-track path
-     * in the publisher. Trading a partial switch for a possible force-rejoin is a bad bargain.
+     * Restores *state*, not the live pipeline: the stages that did move stay until the next source
+     * rebuild picks the restored values up. Undoing the software audio processing stage would mean
+     * a second `RtpSender.setTrack` swap on a live connection — another gap in captured audio and
+     * back into the publisher's disposed-track path.
      *
-     * The two stages that cost nothing to put back — the platform noise suppressor and the
-     * noise-cancellation processor — are re-requested, because the values they remember are
-     * re-applied when capture restarts and would otherwise resurrect the profile this call just
-     * decided it is not on.
-     *
-     * Mode and capture source have to revert together. Leaving `MODE_NORMAL` against
-     * `VOICE_COMMUNICATION` (or the reverse) is the pair that parks capture on a near-silent
-     * path on some vendors.
+     * Mode and capture source revert together; `MODE_NORMAL` against `VOICE_COMMUNICATION` (or the
+     * reverse) is the pair that parks capture on a near-silent path on some vendors.
      */
     private suspend fun revertProfileDerivedState(previousProfile: AudioBitrateProfile) {
         hardwareNoiseSuppressorEnabled = defaultHardwareAudioEffectsEnabled(previousProfile)
@@ -1084,26 +1036,21 @@ class MicrophoneManager(
     }
 
     /**
-     * What the noise-cancellation processor was doing before this call switched into music, or
-     * null while the call is not in music.
+     * What the noise-cancellation processor was doing before this call switched into music, or null
+     * while not in music.
      *
-     * The other stages are derived from the profile alone, which is lossless because they
-     * have no setter of their own left. This one does: [Call.setAudioProcessingEnabled] is public
-     * and released, so an app or a user can have turned the processor off deliberately, and
-     * deriving "voice means on" would switch it back on for them on the way out of music.
+     * Remembered rather than derived from the profile: [Call.setAudioProcessingEnabled] is public
+     * and released, so an app or user may have turned the processor off deliberately, and deriving
+     * "voice means on" would switch it back on for them on the way out of music.
      */
     private var noiseCancellationBeforeMusic: Boolean? = null
 
     /**
-     * Moves the noise-cancellation processor to what [profile] needs, and reports whether it got
-     * there.
+     * Moves the noise-cancellation processor to what [profile] needs and reports whether it got
+     * there. An unreachable processor counts as applied — nothing is processing.
      *
-     * Music turns it off — where one is configured it is the dominant suppressor, and leaving it
-     * running makes every other stage inaudible. Leaving music puts back whatever was running
-     * before, rather than assuming on.
-     *
-     * A processor that is not reachable counts as applied: nothing is processing, so there is
-     * nothing for the profile to fix.
+     * Music turns it off: where one is configured it is the dominant suppressor, and leaving it
+     * running makes every other stage inaudible. Leaving music restores what ran before.
      */
     private fun applyNoiseCancellationFor(profile: AudioBitrateProfile): Boolean {
         val call = mediaManager.call
@@ -1133,9 +1080,8 @@ class MicrophoneManager(
     /**
      * Moves each stage of the running pipeline onto [profile], reporting what reached the device.
      *
-     * The stages fail independently and for unrelated reasons, so each is applied and
-     * reported on its own rather than short-circuiting on the first refusal — a caller needs to
-     * know *which* stage is still processing its audio the old way.
+     * Stages fail independently and for unrelated reasons, so each is applied and reported on its
+     * own instead of short-circuiting on the first refusal.
      */
     private suspend fun applyProfileToRunningCall(
         profile: AudioBitrateProfile,
@@ -1143,9 +1089,8 @@ class MicrophoneManager(
     ): AudioProfileResult {
         val call = mediaManager.call
 
-        // First: the vendor capture graph is selected by the audio mode on some devices.
-        // Applied before the source rebuild so a new AudioRecord, if one is opened, sees
-        // MODE_NORMAL rather than being migrated afterwards.
+        // The audio mode selects the vendor capture graph on some devices, so it goes first: a
+        // new AudioRecord then opens under the right graph rather than being migrated afterwards.
         applyCommunicationAudioModeForProfile(profile)
         val captureAudioSourceApplied = applyCaptureAudioSourceForProfile(profile)
         if (!captureAudioSourceApplied) {
@@ -1157,16 +1102,14 @@ class MicrophoneManager(
 
         val noiseCancellationApplied = applyNoiseCancellationFor(profile)
 
-        // Joined muted (or otherwise not publishing) is the same as a switch before joining:
-        // there is no recording session and no sender, so there is nothing to move. The
-        // requests are remembered and applied when the first audio track is created —
-        // platform effects on AudioRecord start, software constraints on the next source,
-        // bitrate on addTransceiver. A live sender that refused is the refused stage.
+        // No audio sender means nothing was ever published, so there is no stage to move: the
+        // requests are remembered and land when the transceiver is created. Note this is not the
+        // same as being muted — mute only flips the track's enabled flag, the sender survives.
         val audioIsLive = call.hasLiveAudioSender()
 
-        // A device with no platform noise suppressor has nothing suppressing, so the profile is
-        // satisfied — the same rule as an absent noise-cancellation processor. The setter cannot
-        // tell the two apart: it returns false for "unsupported" and "refused" alike.
+        // The setters return false for "unsupported" and "refused" alike, so an absent effect is
+        // read as satisfied: nothing is suppressing, nothing for the profile to fix. Music turns
+        // both platform effects off, voice turns them back on, from the same profile bit.
         val platformNoiseSuppressorApplied =
             call.setHardwareNoiseSuppressorEnabled(hardwareNoiseSuppressorEnabled) ||
                 !call.isHardwareNoiseSuppressorSupported() ||
@@ -1178,8 +1121,6 @@ class MicrophoneManager(
             }
         }
 
-        // Same rule and the same profile bit as the noise suppressor: music turns both
-        // platform effects off, voice turns them back on. A device with no AEC is satisfied.
         val platformAcousticEchoCancelerApplied =
             call.setHardwareAcousticEchoCancelerEnabled(hardwareNoiseSuppressorEnabled) ||
                 !call.isHardwareAcousticEchoCancelerSupported() ||

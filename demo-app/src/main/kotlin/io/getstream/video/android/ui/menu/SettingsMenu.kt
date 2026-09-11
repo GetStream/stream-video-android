@@ -128,28 +128,10 @@ internal fun SettingsMenu(
         val turningOn = !isMusicAudioProfile
         scope.launch {
             call.microphone.setAudioBitrateProfile(next)
-                .onSuccess { result ->
-                    // Name the stages that did not move — a partial switch sounds like a failed
-                    // one, and with no per-stage controls left this is the only way to tell.
-                    val missed = buildList {
-                        if (!result.noiseCancellationApplied) add("noise cancellation")
-                        if (!result.platformNoiseSuppressorApplied) add("hardware NS")
-                        if (!result.platformAcousticEchoCancelerApplied) add("hardware AEC")
-                        if (!result.softwareAudioProcessingApplied) add("software APM")
-                        if (!result.audioMaxBitrateApplied) add("bitrate")
-                        if (!result.captureAudioSourceApplied) add("capture source")
-                    }
-                    val state = if (turningOn) "Music mode on" else "Music mode off"
+                .onSuccess {
                     Toast.makeText(
                         context,
-                        if (missed.isEmpty()) {
-                            val bitrate = result.audioMaxBitrateBps
-                                ?.let { " — ${it / 1000} kbps" }
-                                .orEmpty()
-                            "$state$bitrate"
-                        } else {
-                            "$state — not applied: ${missed.joinToString()}"
-                        },
+                        if (turningOn) "Music mode on" else "Music mode off",
                         Toast.LENGTH_LONG,
                     ).show()
                 }

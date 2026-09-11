@@ -243,11 +243,8 @@ public class StreamPeerConnectionFactory(
      * Enables or disables the platform noise suppressor on the live recording session.
      *
      * Unlike the builder flag this takes effect immediately, but only while audio is being
-     * captured — the effect exists for the lifetime of a recording session. Returns false when
-     * nothing was changed: no module built yet, no active capture, or a device whose platform
-     * noise suppressor is unsupported or ignores the request.
-     *
-     * The request is remembered either way and re-applied whenever capture restarts.
+     * captured. Returns false when nothing changed: no module yet, no active capture, or a device
+     * that is unsupported or ignores the request. The request is remembered either way.
      */
     internal fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean {
         desiredHardwareNoiseSuppressorEnabled = enabled
@@ -257,13 +254,9 @@ public class StreamPeerConnectionFactory(
     }
 
     /**
-     * Whether this device has a platform noise suppressor at all.
-     *
-     * Separates "there is nothing to switch off" from "it refused", which
-     * [setHardwareNoiseSuppressorEnabled] cannot: it returns false for both. Callers reporting
-     * whether an audio profile took need the difference — on a device with no suppressor there is
-     * nothing suppressing, so the profile is satisfied, and calling that a failed stage would send
-     * every such device chasing a problem it does not have.
+     * Whether this device has a platform noise suppressor at all — the difference
+     * [setHardwareNoiseSuppressorEnabled] cannot report, since it returns false for "unsupported"
+     * and "refused" alike. Nothing suppressing means the profile is satisfied, not failed.
      */
     internal fun isHardwareNoiseSuppressorSupported(): Boolean = safeCallWithDefault(false) {
         JavaAudioDeviceModule.isBuiltInNoiseSuppressorSupported()
@@ -285,12 +278,9 @@ public class StreamPeerConnectionFactory(
     }
 
     /**
-     * Enables or disables the platform acoustic echo canceller on the live recording session.
-     *
-     * Counterpart of [setHardwareNoiseSuppressorEnabled]. The request is remembered and
-     * re-applied when capture restarts, including after [setCaptureAudioSource] rebuilds
-     * the AudioRecord — without that, a music-mode source change would resurrect AEC from
-     * the builder flag.
+     * Counterpart of [setHardwareNoiseSuppressorEnabled] for the acoustic echo canceller. The
+     * request is re-applied when capture restarts, including after [setCaptureAudioSource] rebuilds
+     * AudioRecord — without that, a source change would resurrect AEC from the builder flag.
      */
     internal fun setHardwareAcousticEchoCancelerEnabled(enabled: Boolean): Boolean {
         desiredHardwareAcousticEchoCancelerEnabled = enabled
@@ -299,20 +289,12 @@ public class StreamPeerConnectionFactory(
         }
     }
 
-    /**
-     * Whether this device has a platform acoustic echo canceller at all.
-     *
-     * Same split as [isHardwareNoiseSuppressorSupported]: a device with no canceller has
-     * nothing cancelling, which is not a refused stage.
-     */
+    /** Whether this device has a platform acoustic echo canceller at all. */
     internal fun isHardwareAcousticEchoCancelerSupported(): Boolean = safeCallWithDefault(false) {
         JavaAudioDeviceModule.isBuiltInAcousticEchoCancelerSupported()
     }
 
-    /**
-     * Re-applies [desiredHardwareAcousticEchoCancelerEnabled] to the recording session that
-     * has just started. No-op when the caller never expressed a preference.
-     */
+    /** Re-applies [desiredHardwareAcousticEchoCancelerEnabled] to a session that has just started. */
     @VisibleForTesting
     internal fun reapplyHardwareAcousticEchoCanceler() {
         val desired = desiredHardwareAcousticEchoCancelerEnabled ?: return
@@ -398,14 +380,14 @@ public class StreamPeerConnectionFactory(
     }
 
     /**
-     * Switches the live capture source on the audio device module.
+     * Puts the audio device module on [audioSource].
      *
-     * Android cannot change the source of an open AudioRecord, so the module releases and rebuilds
-     * it. Must not be called from the main thread: the rebuild takes the same lock recording
-     * teardown holds while it joins the capture thread.
+     * Android cannot change the source of an open AudioRecord, so this takes effect on the next
+     * one the module opens — which the audio-mode change accompanying a profile switch triggers.
+     * Must not be called from the main thread: the module can join the capture thread.
      *
-     * @return true when the source now in effect is [audioSource]. False when no module exists
-     * yet, or the platform refused the source and restored the last one that worked.
+     * @return true when the module is now on [audioSource], false when no module exists yet or it
+     * kept the previous source. Reflects the module's requested source, not a live AudioRecord.
      */
     internal fun setCaptureAudioSource(audioSource: Int): Boolean {
         return safeCallWithDefault(false) {

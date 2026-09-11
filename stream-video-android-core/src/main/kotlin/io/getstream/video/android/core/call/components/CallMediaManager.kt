@@ -88,16 +88,11 @@ internal class CallMediaManager(
     private var desiredAudioProcessingEnabled: Boolean = false
 
     /**
-     * Platform noise-suppressor state this call asked for, or null while the builder default
-     * stands. Kept alongside [desiredAudioProcessingEnabled] and for the same reason: the wanted
-     * state has to outlive the factory so a recreation cannot silently drop it.
+     * Platform noise-suppressor and echo-canceller states this call asked for, or null while the
+     * builder defaults stand. Kept alongside [desiredAudioProcessingEnabled] and for the same
+     * reason: the wanted state must outlive the factory so a recreation cannot silently drop it.
      */
     private var desiredHardwareNoiseSuppressorEnabled: Boolean? = null
-
-    /**
-     * Platform acoustic-echo-canceller state this call asked for, or null while the builder
-     * default stands. Same reason as [desiredHardwareNoiseSuppressorEnabled].
-     */
     private var desiredHardwareAcousticEchoCancelerEnabled: Boolean? = null
 
     var peerConnectionFactory: StreamPeerConnectionFactory
@@ -333,12 +328,9 @@ internal class CallMediaManager(
         _peerConnectionFactory?.isAudioProcessingEnabled() ?: false
 
     /**
-     * Whether there is a noise-cancellation processor wired into this call's native factory at all.
-     *
-     * Distinguishes "the processor refused to change" from "there is no processor" — without it
-     * a call configured with no [org.webrtc.ManagedAudioProcessingFactory] looks like a failure
-     * every time noise cancellation is asked for. Never builds a factory, for the reason given on
-     * [isAudioProcessingEnabledIfCreated].
+     * Whether a noise-cancellation processor is wired into this call's native factory at all, so
+     * "refused to change" can be told from "there is no processor". Without it, a call configured
+     * with no [org.webrtc.ManagedAudioProcessingFactory] looks like a failure every time.
      */
     fun isAudioProcessingReachable(): Boolean =
         _peerConnectionFactory?.hasAudioProcessingAttached() ?: false
@@ -378,58 +370,35 @@ internal class CallMediaManager(
         return isAudioProcessingEnabled()
     }
 
-    /**
-     * Records the wanted platform noise-suppressor state and applies it if a factory exists.
-     *
-     * Never builds one: like [setAudioProcessingEnabled], a factory created here would capture the
-     * pre-join audio bitrate profile. A factory built later picks the value up on creation.
-     *
-     * @return true when the running capture session accepted the change.
-     */
+    // None of the following builds a factory: like [setAudioProcessingEnabled], one created here
+    // would capture the pre-join audio bitrate profile and pin it for the rest of the call. The
+    // wanted state is recorded, and a factory built later picks it up on creation. The setters
+    // return true when the running capture session accepted the change.
+
     fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean {
         desiredHardwareNoiseSuppressorEnabled = enabled
         return _peerConnectionFactory?.setHardwareNoiseSuppressorEnabled(enabled) ?: false
     }
 
-    /**
-     * Records the wanted platform acoustic-echo-canceller state and applies it if a factory
-     * exists. Never builds one.
-     *
-     * @return true when the running capture session accepted the change.
-     */
     fun setHardwareAcousticEchoCancelerEnabled(enabled: Boolean): Boolean {
         desiredHardwareAcousticEchoCancelerEnabled = enabled
         return _peerConnectionFactory?.setHardwareAcousticEchoCancelerEnabled(enabled) ?: false
     }
 
-    /**
-     * Switches the live capture audio source. Never builds a factory: a module created here
-     * would capture the pre-join profile and pin it for the rest of the call.
-     *
-     * @return true when the running audio device module is now on [audioSource].
-     */
     fun setCaptureAudioSource(audioSource: Int): Boolean =
         _peerConnectionFactory?.setCaptureAudioSource(audioSource) ?: false
 
-    /**
-     * Whether this device has a platform noise suppressor at all. Never builds a factory — the
-     * answer is a device capability, not a property of this call.
-     */
     fun isHardwareNoiseSuppressorSupported(): Boolean =
         _peerConnectionFactory?.isHardwareNoiseSuppressorSupported() ?: false
 
-    /**
-     * Whether this device has a platform acoustic echo canceller at all. Never builds a factory.
-     */
     fun isHardwareAcousticEchoCancelerSupported(): Boolean =
         _peerConnectionFactory?.isHardwareAcousticEchoCancelerSupported() ?: false
 
-    /** Forgets the wanted noise-suppressor state, so nothing is re-applied after the call ends. */
+    /** Forgets the wanted states, so nothing is re-applied after the call ends. */
     fun resetDesiredHardwareNoiseSuppressor() {
         desiredHardwareNoiseSuppressorEnabled = null
     }
 
-    /** Forgets the wanted acoustic-echo-canceller state. */
     fun resetDesiredHardwareAcousticEchoCanceler() {
         desiredHardwareAcousticEchoCancelerEnabled = null
     }
