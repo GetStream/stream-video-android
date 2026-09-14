@@ -89,7 +89,7 @@ constructor(
     private val notificationChannels: StreamNotificationChannels = StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            defaultIncomingCallChannelIdRes(),
+            defaultIncomingCallChannelIdRes(IncomingRingtoneOwner.Legacy),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
@@ -124,7 +124,7 @@ constructor(
         ),
         incomingCallLowImportanceChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            defaultIncomingCallLowImportanceChannelIdRes(),
+            defaultIncomingCallLowImportanceChannelIdRes(IncomingRingtoneOwner.Legacy),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_low_priority_notification_channel_description,
             NotificationManager.IMPORTANCE_DEFAULT,
@@ -153,6 +153,10 @@ constructor(
     private val logger by taggedLogger("Video:StreamNotificationHandler")
     private val styleProvider = StyleProvider(application)
     private val batteryRestrictions = BackgroundRestrictions(application)
+    private val incomingCallChannelResolver = IncomingCallChannelResolver(
+        context = application.applicationContext,
+        notificationChannels = notificationChannels,
+    )
 
     internal fun shouldShowIncomingCallNotification(
         callBusyHandler: CallBusyHandler,
@@ -526,16 +530,12 @@ constructor(
         logger.d {
             "[getIncomingCallNotificationInternal] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
-        val notificationChannel = when (existingChannelId) {
-            notificationChannels.incomingCallChannel.id -> notificationChannels.incomingCallChannel
-            notificationChannels.incomingCallLowImportanceChannel.id ->
-                notificationChannels.incomingCallLowImportanceChannel
-            else -> when {
-                isAppInForeground() && hideRingingNotificationInForeground ->
-                    notificationChannels.incomingCallLowImportanceChannel
-                else -> notificationChannels.incomingCallChannel
-            }
-        }
+        val notificationChannel = incomingCallChannelResolver.resolve(
+            ringtoneOwner = ringtoneOwner,
+            existingChannelId = existingChannelId,
+            useLowImportanceChannel =
+            isAppInForeground() && hideRingingNotificationInForeground,
+        )
 
         return ensureIncomingCallChannelAndBuildNotification(
             notificationChannel,

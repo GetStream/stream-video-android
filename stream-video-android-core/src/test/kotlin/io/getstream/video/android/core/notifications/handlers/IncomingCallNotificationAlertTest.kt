@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.notifications.handlers
 
 import android.app.Notification
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
@@ -30,7 +31,10 @@ class IncomingCallNotificationAlertTest {
     fun `incoming call channel uses legacy ID before Android 17`() {
         assertEquals(
             R.string.stream_video_incoming_call_notification_channel_id,
-            defaultIncomingCallChannelIdRes(BUILD_VERSION_CODES_CINNAMON_BUN - 1),
+            defaultIncomingCallChannelIdRes(
+                IncomingRingtoneOwner.Legacy,
+                BUILD_VERSION_CODES_CINNAMON_BUN - 1,
+            ),
         )
     }
 
@@ -38,7 +42,10 @@ class IncomingCallNotificationAlertTest {
     fun `incoming call channel uses ringing ID on Android 17`() {
         assertEquals(
             R.string.stream_video_incoming_call_ringing_notification_channel_id,
-            defaultIncomingCallChannelIdRes(BUILD_VERSION_CODES_CINNAMON_BUN),
+            defaultIncomingCallChannelIdRes(
+                IncomingRingtoneOwner.Notification,
+                BUILD_VERSION_CODES_CINNAMON_BUN,
+            ),
         )
     }
 
@@ -46,7 +53,10 @@ class IncomingCallNotificationAlertTest {
     fun `low importance incoming call channel uses legacy ID before Android 17`() {
         assertEquals(
             R.string.stream_video_incoming_call_low_priority_notification_channel_id,
-            defaultIncomingCallLowImportanceChannelIdRes(BUILD_VERSION_CODES_CINNAMON_BUN - 1),
+            defaultIncomingCallLowImportanceChannelIdRes(
+                IncomingRingtoneOwner.Legacy,
+                BUILD_VERSION_CODES_CINNAMON_BUN - 1,
+            ),
         )
     }
 
@@ -54,7 +64,10 @@ class IncomingCallNotificationAlertTest {
     fun `low importance incoming call channel uses ringing ID on Android 17`() {
         assertEquals(
             R.string.stream_video_incoming_call_ringing_low_priority_notification_channel_id,
-            defaultIncomingCallLowImportanceChannelIdRes(BUILD_VERSION_CODES_CINNAMON_BUN),
+            defaultIncomingCallLowImportanceChannelIdRes(
+                IncomingRingtoneOwner.Notification,
+                BUILD_VERSION_CODES_CINNAMON_BUN,
+            ),
         )
     }
 
