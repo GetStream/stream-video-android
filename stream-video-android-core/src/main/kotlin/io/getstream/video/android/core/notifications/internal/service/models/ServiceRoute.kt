@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.service
+package io.getstream.video.android.core.notifications.internal.service.models
 
-import android.app.Notification
-import io.getstream.video.android.model.StreamCallId
+/** Identifies the route selected by the SDK to manage a call. */
+internal enum class ServiceRoute {
 
-internal data class IncomingCallRequest(
-    val callId: StreamCallId,
-    val callDisplayName: String?,
-    val callServiceConfiguration: CallServiceConfig,
-    val isVideo: Boolean,
-    val payload: Map<String, Any?>,
-    val notificationProvider: () -> Notification?,
-)
+    /** A route has not been selected yet. */
+    UNDECIDED,
+
+    /** The call is managed through CallService. */
+    LEGACY_CALL_SERVICE,
+
+    /** The call is managed through Telecom. */
+    TELECOM,
+}

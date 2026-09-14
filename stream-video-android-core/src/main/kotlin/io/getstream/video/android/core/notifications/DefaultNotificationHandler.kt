@@ -118,13 +118,15 @@ public open class DefaultNotificationHandler(
             streamVideo.state.callConfigRegistry.get(callId.type),
             isVideo = isVideoCall(callId, payload),
             payload = payload,
-            notification = getRingingCallNotification(
-                RingingState.Incoming(),
-                callId,
-                callDisplayName,
-                shouldHaveContentIntent = true,
-                payload,
-            ),
+            notificationProvider = {
+                getRingingCallNotification(
+                    RingingState.Incoming(),
+                    callId,
+                    callDisplayName,
+                    shouldHaveContentIntent = true,
+                    payload,
+                )
+            },
         )
     }
 

@@ -17,24 +17,25 @@
 package io.getstream.video.android.core.notifications.internal.service.observers
 
 import android.app.Notification
-import android.content.Context
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.NotificationType
+import io.getstream.video.android.core.notifications.handlers.shouldNotificationOwnIncomingRingtone
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.permissions.ForegroundServicePermissionManager
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-internal class CallServiceNotificationUpdateObserver(
+internal open class CallServiceNotificationUpdateObserver(
     private val call: Call,
     private val streamVideo: StreamVideoClient,
     private val scope: CoroutineScope,
@@ -45,22 +46,30 @@ internal class CallServiceNotificationUpdateObserver(
         trigger: String,
         foregroundServiceType: Int,
     ) -> Unit,
-) {
+) : NotificationUpdateObserver {
 
     private val logger by taggedLogger("NotificationUpdateObserver")
+    private suspend fun delayIncomingRingingNotificationUpdate() {
+        val delayMillis = streamVideo.streamNotificationManager
+            .notificationConfig
+            .incomingRingingNotificationUpdateDelayMillis
+        if (delayMillis > 0) {
+            delay(delayMillis)
+        }
+    }
 
     /**
      * Starts observing notification update triggers.
      */
     @OptIn(ExperimentalStreamVideoApi::class)
-    fun observe(context: Context) {
+    override fun observe() {
         scope.launch {
             logger.d { "Observing notification updates for call: ${call.cid}" }
 
             val updateTriggers = getUpdateTriggers()
 
             updateTriggers.collectLatest { _ ->
-                updateNotification(context)
+                updateNotification()
             }
         }
     }
@@ -92,7 +101,7 @@ internal class CallServiceNotificationUpdateObserver(
     /**
      * Updates the notification based on current call state.
      */
-    private suspend fun updateNotification(context: Context) {
+    override suspend fun updateNotification() {
         val ringingState = call.state.ringingState.value
         val notification = streamVideo.onCallNotificationUpdate(call)
         logger.d {
@@ -100,17 +109,49 @@ internal class CallServiceNotificationUpdateObserver(
         }
 
         if (notification != null) {
-            showNotificationForState(context, ringingState, notification)
+            if (shouldSkipIncomingRingingNotificationUpdate(ringingState, notification)) {
+                logger.d { "[updateNotification] Skipping equivalent incoming-call update" }
+                return
+            }
+            if (
+                shouldStabilizeIncomingRingingNotification(ringingState) &&
+                call.state.notificationIdFlow.value != null
+            ) {
+                delayIncomingRingingNotificationUpdate()
+            }
+            showNotificationForState(ringingState, notification)
         } else {
             logger.w { "[updateNotification] No notification generated" }
         }
     }
 
+    private fun shouldStabilizeIncomingRingingNotification(ringingState: RingingState): Boolean =
+        ringingState is RingingState.Incoming &&
+            !ringingState.acceptedByMe &&
+            shouldNotificationOwnIncomingRingtone()
+
+    private fun shouldSkipIncomingRingingNotificationUpdate(
+        ringingState: RingingState,
+        updatedNotification: Notification,
+    ): Boolean {
+        if (!shouldStabilizeIncomingRingingNotification(ringingState)) return false
+        val callId = StreamCallId(call.type, call.id)
+        val updatedNotificationId = call.state.notificationIdFlow.value
+            ?: callId.getNotificationId(NotificationType.Incoming)
+        return streamVideo.streamNotificationManager.notificationUpdateDeduplicator.isDuplicate(
+            call = call,
+            ringingState = ringingState,
+            existingNotificationId = call.state.notificationIdFlow.value,
+            existingNotification = call.state.atomicNotification.get(),
+            updatedNotificationId = updatedNotificationId,
+            updatedNotification = updatedNotification,
+        )
+    }
+
     /**
      * Shows the appropriate notification based on ringing state.
      */
-    private fun showNotificationForState(
-        context: Context,
+    override fun showNotificationForState(
         ringingState: RingingState,
         notification: Notification,
     ) {
@@ -121,10 +162,10 @@ internal class CallServiceNotificationUpdateObserver(
                 showActiveCallNotification(callId, notification)
             }
             is RingingState.Outgoing -> {
-                showOutgoingCallNotification(context, callId, notification)
+                showOutgoingCallNotification(callId, notification)
             }
             is RingingState.Incoming -> {
-                showIncomingCallNotification(context, callId, notification)
+                showIncomingCallNotification(callId, notification)
             }
             else -> {
                 logger.d { "[updateNotification] Unhandled ringing state: $ringingState" }
@@ -132,7 +173,7 @@ internal class CallServiceNotificationUpdateObserver(
         }
     }
 
-    private fun showActiveCallNotification(
+    override fun showActiveCallNotification(
         callId: StreamCallId,
         notification: Notification,
     ) {
@@ -149,8 +190,7 @@ internal class CallServiceNotificationUpdateObserver(
             )
     }
 
-    private fun showOutgoingCallNotification(
-        context: Context,
+    override fun showOutgoingCallNotification(
         callId: StreamCallId,
         notification: Notification,
     ) {
@@ -161,12 +201,14 @@ internal class CallServiceNotificationUpdateObserver(
             notificationId,
             notification,
             CallService.Companion.TRIGGER_OUTGOING_CALL,
-            permissionManager.getServiceType(context, CallService.Companion.TRIGGER_OUTGOING_CALL),
+            permissionManager.getServiceType(
+                streamVideo.context,
+                CallService.Companion.TRIGGER_OUTGOING_CALL,
+            ),
         )
     }
 
-    private fun showIncomingCallNotification(
-        context: Context,
+    override fun showIncomingCallNotification(
         callId: StreamCallId,
         notification: Notification,
     ) {
@@ -177,7 +219,10 @@ internal class CallServiceNotificationUpdateObserver(
             notificationId,
             notification,
             CallService.Companion.TRIGGER_INCOMING_CALL,
-            permissionManager.getServiceType(context, CallService.Companion.TRIGGER_INCOMING_CALL),
+            permissionManager.getServiceType(
+                streamVideo.context,
+                CallService.Companion.TRIGGER_INCOMING_CALL,
+            ),
         )
     }
 

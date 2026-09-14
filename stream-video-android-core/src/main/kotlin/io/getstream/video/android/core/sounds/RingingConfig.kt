@@ -78,6 +78,11 @@ public interface RingingConfig {
  * This configuration allows overriding that behavior for incoming
  * and outgoing call sounds.
  *
+ * This configuration does not apply to incoming-call ringing owned by a notification channel.
+ * Android does not provide a supported way for a notification ringtone to bypass silent mode.
+ * It continues to apply when incoming ringing is played directly by the SDK and to outgoing
+ * call sounds.
+ *
  * @param playIncomingSoundIfMuted Whether the incoming call sound should play even if the device is muted.
  * @param playOutgoingSoundIfMuted Whether the outgoing ringing sound should play even if the device is muted.
  */

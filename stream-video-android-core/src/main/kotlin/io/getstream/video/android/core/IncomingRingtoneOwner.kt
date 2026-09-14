@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.service
+package io.getstream.video.android.core
 
-import android.app.Notification
-import io.getstream.video.android.model.StreamCallId
+/** Identifies which component owns incoming-call ringing. */
+internal sealed interface IncomingRingtoneOwner {
 
-internal data class IncomingCallRequest(
-    val callId: StreamCallId,
-    val callDisplayName: String?,
-    val callServiceConfiguration: CallServiceConfig,
-    val isVideo: Boolean,
-    val payload: Map<String, Any?>,
-    val notificationProvider: () -> Notification?,
-)
+    /** The incoming-call notification produces the ringtone and vibration. */
+    data object Notification : IncomingRingtoneOwner
+
+    /** The SDK sound and vibration player produces the ringtone and vibration. */
+    data object Legacy : IncomingRingtoneOwner
+}

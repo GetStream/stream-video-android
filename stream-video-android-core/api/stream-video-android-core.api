@@ -13866,6 +13866,8 @@ public final class io/getstream/video/android/core/notifications/NotificationCon
 	public fun <init> ()V
 	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZZLjava/util/Set;Lkotlin/jvm/functions/Function1;)V
 	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZZLjava/util/Set;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZZLjava/util/Set;Lkotlin/jvm/functions/Function1;J)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/functions/Function0;Lio/getstream/video/android/core/notifications/NotificationHandler;ZLkotlin/jvm/functions/Function0;ZZLjava/util/Set;Lkotlin/jvm/functions/Function1;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Lkotlin/jvm/functions/Function0;
 	public final fun component3 ()Lio/getstream/video/android/core/notifications/NotificationHandler;
@@ -13881,6 +13883,7 @@ public final class io/getstream/video/android/core/notifications/NotificationCon
 	public final fun getAutoRegisterPushDevice ()Z
 	public final fun getEnableCallNotificationUpdates ()Z
 	public final fun getHideRingingNotificationInForeground ()Z
+	public final fun getIncomingRingingNotificationUpdateDelayMillis ()J
 	public final fun getMediaNotificationCallTypes ()Ljava/util/Set;
 	public final fun getNotificationHandler ()Lio/getstream/video/android/core/notifications/NotificationHandler;
 	public final fun getNotificationUpdateTriggers ()Lkotlin/jvm/functions/Function1;
