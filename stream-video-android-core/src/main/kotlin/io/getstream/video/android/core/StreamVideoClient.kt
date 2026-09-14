@@ -32,6 +32,7 @@ import io.getstream.android.video.generated.models.CollectUserFeedbackRequest
 import io.getstream.android.video.generated.models.CreateGuestRequest
 import io.getstream.android.video.generated.models.CreateGuestResponse
 import io.getstream.android.video.generated.models.GetCallResponse
+import io.getstream.android.video.generated.models.GetCallRingStateResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallRequest
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveRequest
@@ -1159,6 +1160,16 @@ internal class StreamVideoClient internal constructor(
     ): Result<ListRecordingsResponse> {
         return apiCall {
             coordinatorConnectionModule.api.listRecordings(type, id)
+        }
+    }
+
+    suspend fun getCallRingState(
+        callType: String,
+        id: String,
+        callSessionId: String,
+    ): Result<GetCallRingStateResponse> {
+        return apiCall {
+            coordinatorConnectionModule.api.getCallRingState(callType, id, callSessionId)
         }
     }
 
