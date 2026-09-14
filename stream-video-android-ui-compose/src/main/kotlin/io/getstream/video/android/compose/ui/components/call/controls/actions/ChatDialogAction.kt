@@ -45,7 +45,7 @@ public fun ChatDialogAction(
     messageCount: Int? = null,
     icon: Painter? = null,
     style: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onCallAction: (ChatDialog) -> Unit,
 ): Unit = StreamBadgeBox(
     showWithoutValue = false,

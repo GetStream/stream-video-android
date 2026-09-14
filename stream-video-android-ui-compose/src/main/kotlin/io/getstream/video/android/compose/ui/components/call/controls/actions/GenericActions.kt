@@ -48,7 +48,7 @@ public fun GenericAction(
     contentDescription: String? = null,
     enabled: Boolean = true,
     style: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onAction: () -> Unit,
 ): Unit = StreamIconButton(
     onClick = onAction,
@@ -84,7 +84,7 @@ public fun ToggleAction(
     progress: Boolean = false,
     onStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
     offStyle: StreamButtonStyle = StreamButtonStyleDefaults.destructiveSolid,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onAction: () -> Unit,
 ): Unit = StreamButton(
     onClick = onAction,

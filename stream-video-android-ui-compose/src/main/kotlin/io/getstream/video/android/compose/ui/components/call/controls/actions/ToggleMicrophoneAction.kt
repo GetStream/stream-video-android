@@ -44,7 +44,7 @@ public fun ToggleMicrophoneAction(
     enabled: Boolean = true,
     onStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
     offStyle: StreamButtonStyle = StreamButtonStyleDefaults.destructiveSolid,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onCallAction: (ToggleMicrophone) -> Unit,
 ): Unit = ToggleAction(
     modifier = modifier,

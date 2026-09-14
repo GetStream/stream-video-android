@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 
@@ -57,7 +56,7 @@ internal fun GenericIndicator(
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(4.dp),
+                .padding(StreamTokens.spacing2xs),
         ) {
             Box(modifier = Modifier.align(Alignment.Center)) {
                 content(this)

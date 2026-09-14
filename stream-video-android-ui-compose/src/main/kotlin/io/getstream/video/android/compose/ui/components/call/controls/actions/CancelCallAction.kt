@@ -43,7 +43,7 @@ public fun CancelCallAction(
     enabled: Boolean = true,
     icon: Painter? = null,
     style: StreamButtonStyle? = null,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onCallAction: (CancelCall) -> Unit,
 ): Unit = GenericAction(
     modifier = modifier,

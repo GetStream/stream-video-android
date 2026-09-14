@@ -33,7 +33,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.Call
 import kotlinx.coroutines.flow.Flow
@@ -97,7 +96,7 @@ internal fun SpotlightContentPortrait(
     ) {
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(StreamTokens.radiusXl))
                 .background(background)
                 .fillMaxWidth(),
         ) {
@@ -126,7 +125,7 @@ internal fun SpotlightContentLandscape(
     ) {
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(StreamTokens.radiusXl))
                 .background(background)
                 .fillMaxSize(),
         ) {

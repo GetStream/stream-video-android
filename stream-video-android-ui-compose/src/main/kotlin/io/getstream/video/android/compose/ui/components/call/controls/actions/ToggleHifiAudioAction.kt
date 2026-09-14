@@ -44,14 +44,14 @@ public fun ToggleHifiAudioAction(
     enabled: Boolean = true,
     onStyle: StreamButtonStyle = StreamButtonStyleDefaults.primarySolid,
     offStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onCallAction: (ToggleHifiAudio) -> Unit,
 ): Unit = ToggleAction(
     modifier = modifier,
     isActionActive = isMusicHighQuality,
     iconOnOff = Pair(
-        painterResource(R.drawable.stream_design_ic_sliders_fill),
-        painterResource(R.drawable.stream_design_ic_sliders_fill),
+        painterResource(io.getstream.video.android.ui.common.R.drawable.stream_video_ic_music_note),
+        painterResource(io.getstream.video.android.ui.common.R.drawable.stream_video_ic_music_off),
     ),
     contentDescription = stringResource(
         io.getstream.video.android.ui.common.R.string.stream_video_call_controls_toggle_hifi_audio,

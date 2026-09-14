@@ -22,11 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.compose.theme.ParticipantVideoActionsContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoReactionContentParams
 import io.getstream.video.android.compose.theme.VideoComponentFactory
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantActions
 import io.getstream.video.android.compose.ui.components.call.renderer.copy
@@ -60,7 +60,7 @@ object DemoComponentFactory : VideoComponentFactory {
         ParticipantActions(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(8.dp)
+                .padding(StreamTokens.spacingXs)
                 .testTag("Stream_ParticipantActionsIcon"),
             actions = params.actions + listOf(
                 ParticipantAction(

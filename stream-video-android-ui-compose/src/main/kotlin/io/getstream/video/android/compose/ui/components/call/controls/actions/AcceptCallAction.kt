@@ -45,7 +45,7 @@ public fun AcceptCallAction(
     enabled: Boolean = true,
     icon: Painter? = null,
     style: StreamButtonStyle? = null,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onCallAction: (AcceptCall) -> Unit,
 ): Unit = GenericAction(
     modifier = modifier,

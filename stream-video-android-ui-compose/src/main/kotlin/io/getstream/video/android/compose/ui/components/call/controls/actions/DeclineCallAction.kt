@@ -43,7 +43,7 @@ public fun DeclineCallAction(
     enabled: Boolean = true,
     icon: Painter? = null,
     style: StreamButtonStyle? = null,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onCallAction: (DeclineCall) -> Unit,
 ): Unit = GenericAction(
     modifier = modifier,

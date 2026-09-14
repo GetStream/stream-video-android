@@ -27,8 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.utils.initials
@@ -67,7 +69,8 @@ internal fun InitialsAvatar(
 }
 
 /**
- * Picks the initials typography for an avatar of this size.
+ * Picks the initials typography for an avatar of this size. Avatars from 80dp up have no matching
+ * text style in the design tokens, so the initials scale with the avatar instead.
  */
 @Composable
 @ReadOnlyComposable
@@ -75,9 +78,24 @@ internal fun Dp.toAvatarTextStyle(): TextStyle {
     val typography = VideoTheme.typography
     return when {
         this < StreamTokens.size24 -> typography.metadataEmphasis
-        this < StreamTokens.size32 -> typography.captionEmphasis
+        this < StreamTokens.size40 -> typography.captionEmphasis
         this < StreamTokens.size48 -> typography.bodyEmphasis
-        this < StreamTokens.size80 -> typography.headingLarge
-        else -> typography.numericExtraLarge
+        this < StreamTokens.size80 -> typography.headingMedium
+        else -> {
+            val capped = (this * LARGE_AVATAR_TEXT_RATIO).coerceAtMost(LARGE_AVATAR_MAX_TEXT_SIZE)
+            val fontSize = with(LocalDensity.current) { capped.toSp() }
+            typography.headingLarge.copy(fontSize = fontSize, lineHeight = fontSize)
+        }
     }
 }
+
+/** The initials height relative to the avatar size, for avatars without a token text style. */
+private const val LARGE_AVATAR_TEXT_RATIO = 0.4f
+
+/**
+ * The initials size of the 1.x SDK for every large avatar, kept as the upper bound.
+ *
+ * Declared in [Dp] so the cap holds at any font scale. Capping the converted [androidx.compose.ui.unit.TextUnit]
+ * instead would let the rendered size grow with the font scale setting, because the conversion divides it out.
+ */
+private val LARGE_AVATAR_MAX_TEXT_SIZE = 48.dp

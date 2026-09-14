@@ -36,14 +36,14 @@ public enum class StreamButtonSize(
         labelPadding = StreamTokens.buttonPaddingXWithLabelSm,
     ),
 
-    /** 40dp tall, 20dp icons. The size of the call control buttons. */
+    /** 40dp tall, 20dp icons. */
     Medium(
         minimumSize = StreamTokens.buttonVisualHeightMd,
         iconSize = StreamTokens.iconSizeMd,
         labelPadding = StreamTokens.buttonPaddingXWithLabelMd,
     ),
 
-    /** 48dp tall, 20dp icons. The size of full-width actions such as "Start Call". */
+    /** 48dp tall, 20dp icons. The size of the call control buttons and of full-width actions such as "Start Call". */
     Large(
         minimumSize = StreamTokens.buttonVisualHeightLg,
         iconSize = StreamTokens.iconSizeMd,

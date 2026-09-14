@@ -44,7 +44,7 @@ public fun ClosedCaptionsToggleAction(
     enabled: Boolean = true,
     onStyle: StreamButtonStyle = StreamButtonStyleDefaults.primarySolid,
     offStyle: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onCallAction: (ClosedCaptionsAction) -> Unit,
 ): Unit = ToggleAction(
     modifier = modifier,

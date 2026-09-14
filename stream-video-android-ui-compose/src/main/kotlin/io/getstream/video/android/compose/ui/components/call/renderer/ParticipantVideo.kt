@@ -18,7 +18,7 @@ package io.getstream.video.android.compose.ui.components.call.renderer
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.repeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -61,7 +61,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -438,7 +437,7 @@ public fun BoxScope.ParticipantLabel(
                     Icon(
 
                         modifier = Modifier
-                            .padding(horizontal = 4.dp)
+                            .padding(horizontal = StreamTokens.spacing2xs)
                             .size(StreamTokens.size16),
                         painter = painterResource(
                             io.getstream.video.android.compose.R.drawable.stream_design_ic_pin_fill,
@@ -454,7 +453,7 @@ public fun BoxScope.ParticipantLabel(
                 GenericIndicator {
                     Icon(
                         modifier = Modifier
-                            .padding(horizontal = 4.dp)
+                            .padding(horizontal = StreamTokens.spacing2xs)
                             .size(StreamTokens.size16),
                         painter = painterResource(
                             io.getstream.video.android.compose.R.drawable.stream_design_ic_exclamation_triangle_fill,
@@ -569,12 +568,8 @@ internal fun BoxScope.DefaultReaction(
         }
     }
 
-    val size: Dp by animateDpAsState(
-        targetValue = if (currentReaction != null) {
-            StreamTokens.size48
-        } else {
-            0.dp
-        },
+    val fontSize by animateFloatAsState(
+        targetValue = if (currentReaction != null) StreamTokens.emojiXl.value else 0f,
         animationSpec = repeatable(
             iterations = 2,
             animation = tween(
@@ -593,7 +588,7 @@ internal fun BoxScope.DefaultReaction(
         Text(
             text = emojiText,
             modifier = Modifier.align(style.reactionPosition),
-            fontSize = size.value.sp,
+            fontSize = fontSize.sp,
         )
     }
 }

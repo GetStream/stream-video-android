@@ -40,7 +40,7 @@ public fun FlipCameraAction(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     style: StreamButtonStyle = StreamButtonStyleDefaults.secondarySolid,
-    size: StreamButtonSize = StreamButtonSize.Medium,
+    size: StreamButtonSize = StreamButtonSize.Large,
     onCallAction: (FlipCamera) -> Unit,
 ): Unit = GenericAction(
     modifier = modifier,
