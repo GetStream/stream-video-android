@@ -45,8 +45,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Snackbar
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.SignalWifiBad
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -65,7 +63,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -228,7 +225,7 @@ fun CallScreen(
             bottom = StreamTokens.spacingMd,
         )
     } else {
-        PaddingValues(0.dp)
+        PaddingValues(StreamTokens.spacingNone)
     }
 
     /**
@@ -388,7 +385,7 @@ fun CallScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 8.dp),
+                                    .padding(horizontal = StreamTokens.spacingXs),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
@@ -403,7 +400,7 @@ fun CallScreen(
                                             isShowingSettingMenu = !isShowingSettingMenu
                                         },
                                     )
-                                    Spacer(modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
                                     if (isTablet()) {
                                         ScreenShareToggleAction(
                                             active = isScreenSharing,
@@ -424,9 +421,7 @@ fun CallScreen(
                                             },
                                         )
                                         Spacer(
-                                            modifier = Modifier.size(
-                                                16.dp,
-                                            ),
+                                            modifier = Modifier.size(StreamTokens.spacingMd),
                                         )
                                     }
                                     ToggleCameraAction(
@@ -437,7 +432,7 @@ fun CallScreen(
                                         isCameraEnabled = isCameraEnabled,
                                         onCallAction = { call.camera.setEnabled(it.isEnabled) },
                                     )
-                                    Spacer(modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
                                     ToggleMicrophoneAction(
                                         modifier = Modifier
                                             .testTag(
@@ -450,19 +445,21 @@ fun CallScreen(
                                             )
                                         },
                                     )
-                                    Spacer(modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
                                 }
                                 Row {
                                     StreamBadgeBox(
                                         text = participantsSize.size.toString(),
                                     ) {
                                         GenericAction(
-                                            icon = rememberVectorPainter(Icons.Default.People),
+                                            icon = painterResource(
+                                                ComposeR.drawable.stream_design_ic_users_fill,
+                                            ),
                                         ) {
                                             showParticipants = !showParticipants
                                         }
                                     }
-                                    Spacer(modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
                                     ChatDialogAction(
                                         modifier = Modifier.testTag("Stream_ChatButton"),
                                         messageCount = unreadCount,
@@ -536,11 +533,13 @@ fun CallScreen(
                     if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                         StreamIconButton(
                             onClick = { showingLandscapeControls = !showingLandscapeControls },
-                            icon = rememberVectorPainter(Icons.Default.MoreVert),
+                            icon = painterResource(
+                                ComposeR.drawable.stream_design_ic_more_vertical_fill,
+                            ),
                             contentDescription = null,
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .padding(16.dp),
+                                .padding(StreamTokens.spacingMd),
                             style = if (showingLandscapeControls) {
                                 StreamButtonStyleDefaults.primarySolid
                             } else {

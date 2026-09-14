@@ -17,28 +17,27 @@
 package io.getstream.video.android.ui.menu
 
 import android.media.AudioAttributes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Audiotrack
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.ui.graphics.vector.ImageVector
+import io.getstream.video.android.ui.menu.base.MenuIcon
+import io.getstream.video.android.ui.menu.base.menuIcon
+import io.getstream.video.android.compose.R as ComposeR
 
 sealed class AudioUsageUiState(
     val text: String,
-    val icon: ImageVector,
+    val icon: MenuIcon,
     val highlight: Boolean,
     val audioUsage: Int,
 )
 
 data object AudioUsageMediaUiState : AudioUsageUiState(
     text = "Toggle to mono playout",
-    icon = Icons.Default.Audiotrack,
+    icon = menuIcon(ComposeR.drawable.stream_design_ic_audio),
     highlight = false,
     audioUsage = AudioAttributes.USAGE_MEDIA,
 )
 
 data object AudioUsageVoiceCommunicationUiState : AudioUsageUiState(
     text = "Toggle to stereo playout",
-    icon = Icons.Default.Phone,
+    icon = menuIcon(ComposeR.drawable.stream_design_ic_phone_fill),
     highlight = true,
     audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION,
 )

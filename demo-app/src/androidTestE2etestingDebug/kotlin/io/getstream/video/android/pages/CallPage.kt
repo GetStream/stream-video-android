@@ -74,14 +74,10 @@ class CallPage {
         companion object {
             val raiseHandButton = By.text("✋ Raise hand")
             val lowerHandButton = By.text("TODO") // https://linear.app/stream/issue/AND-562
-            val defaultBackgroundEnabledToggle = By.res(
-                "Stream_Background_Filled.AccountCircle_On",
-            )
-            val defaultBackgroundDisabledToggle = By.res(
-                "Stream_Background_Filled.AccountCircle_Off",
-            )
-            val blurBackgroundEnabledToggle = By.res("Stream_Background_Filled.BlurOn_On")
-            val blurBackgroundDisabledToggle = By.res("Stream_Background_Filled.BlurOn_Off")
+            val defaultBackgroundEnabledToggle = By.res("Stream_Background_None_On")
+            val defaultBackgroundDisabledToggle = By.res("Stream_Background_None_Off")
+            val blurBackgroundEnabledToggle = By.res("Stream_Background_Blur_On")
+            val blurBackgroundDisabledToggle = By.res("Stream_Background_Blur_Off")
             val imageBackgroundEnabledToggle = By.res("Stream_Background_Image_On")
             val imageBackgroundDisabledToggle = By.res("Stream_Background_Image_Off")
             val noiseCancellationButton = By.text("Noise cancellation")

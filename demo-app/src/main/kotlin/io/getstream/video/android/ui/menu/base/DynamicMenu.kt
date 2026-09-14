@@ -26,12 +26,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
@@ -40,14 +36,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.menu.AudioUsageVoiceCommunicationUiState
@@ -55,6 +52,7 @@ import io.getstream.video.android.ui.menu.TranscriptionAvailableUiState
 import io.getstream.video.android.ui.menu.debugSubmenu
 import io.getstream.video.android.ui.menu.defaultStreamMenu
 import io.getstream.video.android.ui.menu.reconnectMenu
+import io.getstream.video.android.compose.R as ComposeR
 
 /**
  * A composable capable of loading a menu based on a list structure of menu items and sub menus.
@@ -75,19 +73,15 @@ fun DynamicMenu(header: (@Composable LazyItemScope.() -> Unit)? = null, items: L
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = VideoTheme.colors.backgroundCoreApp,
-                shape = RoundedCornerShape(24.dp),
+                color = VideoTheme.colors.backgroundCoreSurfaceDefault,
+                shape = RoundedCornerShape(StreamTokens.radius3xl),
             )
             .semantics { testTagsAsResourceId = true },
     ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    shape = RoundedCornerShape(16.dp),
-                    color = VideoTheme.colors.backgroundCoreApp,
-                )
-                .padding(12.dp),
+                .padding(StreamTokens.spacingSm),
         ) {
             if (historyTitles.isEmpty()) {
                 // First Level Menu
@@ -130,16 +124,15 @@ private fun LazyListScope.submenuStickyHeader(currentTitle: String, onBackClick:
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .background(VideoTheme.colors.backgroundCoreApp)
+                .background(VideoTheme.colors.backgroundCoreSurfaceDefault)
                 .fillMaxWidth(),
         ) {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    tint = VideoTheme.colors.textPrimary,
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = "Back",
-                )
-            }
+            StreamIconButton(
+                onClick = onBackClick,
+                icon = painterResource(ComposeR.drawable.stream_design_ic_arrow_left),
+                contentDescription = "Back",
+                style = StreamButtonStyleDefaults.secondaryGhost,
+            )
             Text(
                 text = currentTitle,
                 style = VideoTheme.typography.bodyDefault,
@@ -216,7 +209,7 @@ private fun LazyListScope.loadingItems(
         }
         LinearProgressIndicator(
             modifier = Modifier
-                .padding(33.dp)
+                .padding(StreamTokens.spacing3xl)
                 .fillMaxWidth(),
             color = VideoTheme.colors.textPrimary,
         )
@@ -228,7 +221,7 @@ private fun LazyListScope.noItems() {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(32.dp),
+                .padding(StreamTokens.spacing2xl),
             textAlign = TextAlign.Center,
             text = "No items",
             style = VideoTheme.typography.bodyDefault,
@@ -255,7 +248,7 @@ private fun LazyListScope.menuItems(
                 }
             },
             text = item.title,
-            leadingIcon = rememberVectorPainter(item.icon),
+            leadingIcon = item.icon.painter(),
             style = if (highlight) StreamButtonStyleDefaults.primaryGhost else StreamButtonStyleDefaults.secondaryGhost,
         )
     }

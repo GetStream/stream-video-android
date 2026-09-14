@@ -16,13 +16,13 @@
 
 package io.getstream.video.android.ui.menu
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.ui.graphics.vector.ImageVector
+import io.getstream.video.android.ui.menu.base.MenuIcon
+import io.getstream.video.android.ui.menu.base.menuIcon
+import io.getstream.video.android.compose.R as ComposeR
 
 sealed class TranscriptionUiState(
     val text: String,
-    val icon: ImageVector, // Assuming it's a drawable resource ID
+    val icon: MenuIcon,
     val highlight: Boolean,
 )
 
@@ -35,18 +35,18 @@ sealed class TranscriptionUiState(
 
 data object TranscriptionAvailableUiState : TranscriptionUiState(
     text = "Transcribe the call",
-    icon = Icons.Default.Description,
+    icon = menuIcon(ComposeR.drawable.stream_design_ic_file),
     highlight = false,
 )
 
 data object TranscriptionStoppedUiState : TranscriptionUiState(
     text = "Stop Transcription",
-    icon = Icons.Default.Description,
+    icon = menuIcon(ComposeR.drawable.stream_design_ic_file),
     highlight = true,
 )
 
 data object TranscriptionDisabledUiState : TranscriptionUiState(
     text = "Transcription not available",
-    icon = Icons.Default.Description,
+    icon = menuIcon(ComposeR.drawable.stream_design_ic_file),
     highlight = false,
 )

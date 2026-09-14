@@ -21,11 +21,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,11 +31,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.call.renderer.LayoutType
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.tooling.extensions.toPx
+import io.getstream.video.android.compose.R as ComposeR
 
 private data class LayoutChooserDataItem(
     val which: LayoutType,
@@ -72,8 +71,8 @@ internal fun LayoutChooser(
     ) {
         Column(
             Modifier.background(
-                color = VideoTheme.colors.backgroundCoreApp,
-                shape = RoundedCornerShape(16.dp),
+                color = VideoTheme.colors.backgroundCoreSurfaceDefault,
+                shape = RoundedCornerShape(StreamTokens.radiusXl),
             )
                 .width(300.dp),
         ) {
@@ -81,7 +80,9 @@ internal fun LayoutChooser(
 
                 val selected = layout.which == current
                 val icon = when (layout.which) {
-                    LayoutType.DYNAMIC -> rememberVectorPainter(Icons.Default.AutoAwesome)
+                    LayoutType.DYNAMIC -> painterResource(
+                        ComposeR.drawable.stream_design_ic_bolt_fill,
+                    )
                     LayoutType.SPOTLIGHT -> painterResource(R.drawable.ic_layout_spotlight)
                     LayoutType.GRID -> painterResource(R.drawable.ic_layout_grid)
                 }

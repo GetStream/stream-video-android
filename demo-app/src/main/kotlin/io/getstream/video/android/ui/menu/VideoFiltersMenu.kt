@@ -25,28 +25,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.compose.R as ComposeR
 
 @Composable
 internal fun VideoFiltersMenu(selectedFilterIndex: Int = 0, onSelectFilter: (Int) -> Unit) {
@@ -54,7 +50,7 @@ internal fun VideoFiltersMenu(selectedFilterIndex: Int = 0, onSelectFilter: (Int
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(state = rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(StreamTokens.spacingMd),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         availableVideoFilters.forEachIndexed { index, filter ->
@@ -62,12 +58,14 @@ internal fun VideoFiltersMenu(selectedFilterIndex: Int = 0, onSelectFilter: (Int
 
             when (filter) {
                 is VideoFilter.None -> BlurredBackgroundToggleItem(
-                    icon = Icons.Default.AccountCircle,
+                    icon = ComposeR.drawable.stream_design_ic_account,
+                    label = "None",
                     toggleState = toggleState,
                     onClick = { onSelectFilter(index) },
                 )
                 is VideoFilter.BlurredBackground -> BlurredBackgroundToggleItem(
-                    icon = Icons.Default.BlurOn,
+                    icon = ComposeR.drawable.stream_design_ic_blur_fill,
+                    label = "Blur",
                     toggleState = toggleState,
                     onClick = { onSelectFilter(index) },
                 )
@@ -99,19 +97,20 @@ sealed class VideoFilter {
 
 @Composable
 private fun BlurredBackgroundToggleItem(
-    icon: ImageVector,
+    @DrawableRes icon: Int,
+    label: String,
     toggleState: ToggleableState,
     onClick: () -> Unit = {},
 ) {
     StreamIconButton(
         onClick = onClick,
-        icon = rememberVectorPainter(icon),
-        contentDescription = null,
-        modifier = Modifier.testTag("Stream_Background_${icon.name}_${toggleState.name}"),
+        icon = painterResource(icon),
+        contentDescription = label,
+        modifier = Modifier.testTag("Stream_Background_${label}_${toggleState.name}"),
         style = if (toggleState == ToggleableState.On) {
             StreamButtonStyleDefaults.primarySolid
         } else {
-            StreamButtonStyleDefaults.secondarySolid
+            StreamButtonStyleDefaults.secondaryOutline
         },
     )
 }
@@ -135,7 +134,7 @@ private fun VirtualBackgroundToggleItem(
             painter = painterResource(drawable),
             contentDescription = null,
             modifier = Modifier
-                .size(40.dp)
+                .size(StreamTokens.size40)
                 .clip(CircleShape),
             contentScale = ContentScale.Crop,
         )

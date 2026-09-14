@@ -30,37 +30,33 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.MicOff
-import androidx.compose.material.icons.filled.Videocam
-import androidx.compose.material.icons.filled.VideocamOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
+import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.mock.previewParticipantsList
 import io.getstream.video.android.util.config.AppConfig
+import io.getstream.video.android.compose.R as ComposeR
 
 @Composable
 public fun ParticipantsDialog(call: Call, onDismiss: () -> Unit) {
@@ -72,25 +68,19 @@ public fun ParticipantsDialog(call: Call, onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    color = Color.Black,
+                    color = VideoTheme.colors.backgroundCoreApp,
                 ),
         ) {
             ParticipantsList(call = call)
-            IconButton(
+            StreamIconButton(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .testTag("Stream_ParticipantsListCloseButton"),
-                onClick = {
-                    onDismiss()
-                },
-            ) {
-                Icon(
-                    tint = Color.White,
-                    imageVector = Icons.Default.Close,
-                    contentDescription = Icons.Default.Close.name,
-                )
-            }
-            Spacer(modifier = Modifier.size(16.dp))
+                onClick = onDismiss,
+                icon = painterResource(ComposeR.drawable.stream_design_ic_xmark),
+                contentDescription = "Close",
+                style = StreamButtonStyleDefaults.secondaryGhost,
+            )
         }
     }
 }
@@ -118,22 +108,22 @@ fun ParticipantsListContent(
                 text = "Participants (${participants.size})",
                 style = VideoTheme.typography.bodyEmphasis,
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(StreamTokens.spacingMd)
                     .fillMaxWidth(),
                 textAlign = TextAlign.Center,
             )
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
             val env = AppConfig.currentEnvironment.collectAsStateWithLifecycle()
             ShareCallWithOthers(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(StreamTokens.spacingMd),
                 call,
                 clipboardManager,
                 env,
                 context,
             )
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
         }
 
         items(count = participants.size, key = { index -> participants[index].sessionId }) {
@@ -141,31 +131,34 @@ fun ParticipantsListContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = StreamTokens.spacingMd),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     val userName by participant.userNameOrId.collectAsStateWithLifecycle()
                     val userImage by participant.image.collectAsStateWithLifecycle()
                     UserAvatar(
                         modifier = Modifier
-                            .size(44.dp)
+                            .size(StreamTokens.size48)
                             .testTag("Stream_ParticipantsListUserAvatar"),
                         userImage = userImage,
                         userName = userName,
                         isShowingOnlineIndicator = false,
                     )
-                    Spacer(modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
                     Text(
                         modifier = Modifier
-                            .padding(start = 8.dp)
+                            .padding(start = StreamTokens.spacingXs)
                             .testTag("Stream_ParticipantsListUserName"),
                         text = userName,
                         style = VideoTheme.typography.bodyDefault,
                         color = VideoTheme.colors.textPrimary,
-                        fontSize = 16.sp,
                         maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
@@ -175,36 +168,36 @@ fun ParticipantsListContent(
                 ) {
                     val audioEnabled by participant.audioEnabled.collectAsStateWithLifecycle()
                     val iconAudio = if (audioEnabled) {
-                        Icons.Default.Mic
+                        ComposeR.drawable.stream_design_ic_voice_fill
                     } else {
-                        Icons.Default.MicOff
+                        ComposeR.drawable.stream_design_ic_voice_off_fill
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(StreamTokens.spacingXs))
                     Icon(
                         modifier = Modifier
                             .testTag("Stream_ParticipantsListUserMicrophone_Enabled_$audioEnabled"),
                         tint = VideoTheme.colors.textPrimary,
-                        imageVector = iconAudio,
+                        painter = painterResource(iconAudio),
                         contentDescription = null,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(StreamTokens.spacingXs))
 
                     val videoEnabled by participant.videoEnabled.collectAsStateWithLifecycle()
                     val iconVideo = if (videoEnabled) {
-                        Icons.Default.Videocam
+                        ComposeR.drawable.stream_design_ic_video_fill
                     } else {
-                        Icons.Default.VideocamOff
+                        ComposeR.drawable.stream_design_ic_video_off_fill
                     }
                     Icon(
                         modifier = Modifier
                             .testTag("Stream_ParticipantsListUserCamera_Enabled_$videoEnabled"),
                         tint = VideoTheme.colors.textPrimary,
-                        imageVector = iconVideo,
+                        painter = painterResource(iconVideo),
                         contentDescription = null,
                     )
                 }
             }
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
         }
     }
 }

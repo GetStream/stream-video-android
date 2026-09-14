@@ -17,7 +17,6 @@
 package io.getstream.video.android.ui.call
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,25 +27,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CallEnd
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
+import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ChatDialogAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
@@ -57,6 +52,7 @@ import io.getstream.video.android.core.mapper.ReactionMapper
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 import io.getstream.video.android.tooling.extensions.toPx
+import io.getstream.video.android.compose.R as ComposeR
 
 @Composable
 fun LandscapeControls(
@@ -115,22 +111,20 @@ fun LandscapeControlsContent(
     Box(
         modifier = Modifier
             .background(
-                color = VideoTheme.colors.backgroundCoreApp,
-                shape = RoundedCornerShape(24.dp),
+                color = VideoTheme.colors.backgroundCoreSurfaceDefault,
+                shape = RoundedCornerShape(StreamTokens.radius3xl),
             )
             .width(400.dp),
     ) {
         Column(
             modifier = Modifier
-                .padding(12.dp),
+                .padding(StreamTokens.spacingSm),
         ) {
-            Icon(
-                tint = Color.White,
-                imageVector = Icons.Default.Close,
-                contentDescription = Icons.Default.Close.name,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp).clickable {
-                    onDismiss()
-                },
+            StreamIconButton(
+                onClick = onDismiss,
+                icon = painterResource(ComposeR.drawable.stream_design_ic_xmark),
+                contentDescription = "Close",
+                style = StreamButtonStyleDefaults.secondaryGhost,
             )
             ReactionsMenu(call = call, reactionMapper = ReactionMapper.defaultReactionMapper()) {
                 onDismiss()
@@ -155,18 +149,20 @@ fun LandscapeControlsContent(
                         onCallAction = { onChat() },
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(StreamTokens.spacingMd))
                 StreamTextButton(
                     modifier = Modifier.fillMaxWidth(),
-                    style = StreamButtonStyleDefaults.secondarySolid,
-                    leadingIcon = rememberVectorPainter(Icons.Default.Settings),
+                    style = StreamButtonStyleDefaults.secondaryOutline,
+                    leadingIcon = painterResource(ComposeR.drawable.stream_design_ic_settings),
                     text = "Settings",
                     onClick = onSettings,
                 )
                 StreamTextButton(
                     modifier = Modifier.fillMaxWidth(),
                     style = StreamButtonStyleDefaults.destructiveSolid,
-                    leadingIcon = rememberVectorPainter(Icons.Default.CallEnd),
+                    leadingIcon = painterResource(
+                        ComposeR.drawable.stream_design_ic_phone_down_fill,
+                    ),
                     text = "Leave call",
                     onClick = onClick,
                 )
