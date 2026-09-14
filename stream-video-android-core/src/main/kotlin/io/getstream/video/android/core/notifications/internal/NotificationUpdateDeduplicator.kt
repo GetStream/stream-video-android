@@ -17,12 +17,10 @@
 package io.getstream.video.android.core.notifications.internal
 
 import android.app.Notification
-import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationUpdateComparator
-import io.getstream.video.android.core.utils.BUILD_VERSION_CODES_CINNAMON_BUN
 
 internal class NotificationUpdateDeduplicator(
     private val comparator: NotificationUpdateComparator,
@@ -36,9 +34,7 @@ internal class NotificationUpdateDeduplicator(
         existingNotification: Notification?,
         updatedNotificationId: Int,
         updatedNotification: Notification,
-        sdkInt: Int = Build.VERSION.SDK_INT,
     ): Boolean {
-        if (sdkInt < BUILD_VERSION_CODES_CINNAMON_BUN) return false
         if (ringingState !is RingingState.Incoming || ringingState.acceptedByMe) return false
         if (existingNotification == null || existingNotificationId != updatedNotificationId) {
             return false
