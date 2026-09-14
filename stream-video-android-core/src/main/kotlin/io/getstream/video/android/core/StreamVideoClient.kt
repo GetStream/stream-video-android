@@ -134,6 +134,7 @@ import io.getstream.video.android.model.ApiKey
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -331,11 +332,16 @@ internal class StreamVideoClient internal constructor(
     }
 
     /**
-     * parseError consumes the body, so each HttpException is parsed once. The failure
-     * keeps [HttpException] as [Error.ThrowableError.cause] so callers that classify
-     * HTTP errors by type still work. Wrapping it in a generic Exception would break
-     * that contract. The retry is parsed the same way — a second HttpException after
-     * token refresh must not fall through as a raw "HTTP 4xx".
+     * Parses a coordinator [HttpException] and either retries after a token refresh
+     * or returns the failure.
+     *
+     * Auth errors refresh the token once and retry the same request. If refresh
+     * throws, the original coordinator error is returned. The retry is parsed
+     * through the same path as the first attempt.
+     *
+     * Failures are [Error.ThrowableError] with the [HttpException] as cause.
+     * The message is the coordinator body when it is Stream JSON, otherwise the
+     * HTTP status line.
      */
     private suspend fun <T : Any> handleCoordinatorHttpFailure(
         first: HttpException,
@@ -343,10 +349,17 @@ internal class StreamVideoClient internal constructor(
     ): Result<T> {
         val firstError = parseError(first).value as Error.NetworkError
         if (firstError.isAuthError()) {
-            val newToken = tokenProvider.loadToken()
-            tokenRepository.updateToken(newToken)
-            token = newToken
-            coordinatorConnectionModule.updateToken(newToken)
+            try {
+                val newToken = tokenProvider.loadToken()
+                tokenRepository.updateToken(newToken)
+                token = newToken
+                coordinatorConnectionModule.updateToken(newToken)
+            } catch (ce: CancellationException) {
+                throw ce
+            } catch (refreshError: Exception) {
+                logger.e(refreshError) { "[apiCall] token refresh failed after auth error" }
+                return coordinatorHttpFailure(first, firstError)
+            }
             return try {
                 Success(apiCall())
             } catch (retry: HttpException) {
@@ -361,8 +374,31 @@ internal class StreamVideoClient internal constructor(
         parsed: Error.NetworkError? = null,
     ): Failure {
         val networkError = parsed ?: parseError(exception).value as Error.NetworkError
-        logger.e { "[apiCall] HTTP ${exception.code()}: ${networkError.message}" }
-        return Failure(Error.ThrowableError(networkError.message, exception))
+        val message = displayedCoordinatorError(exception, networkError)
+        logger.e { "[apiCall] HTTP ${exception.code()}: $message" }
+        return Failure(Error.ThrowableError(message, exception))
+    }
+
+    /**
+     * Display string for a coordinator HTTP failure.
+     *
+     * Stream JSON bodies use the formatted coordinator message (server error
+     * code, reason, moreInfo). HTML, empty, or missing bodies use
+     * `HTTP <code> <reason>` so the status stays in the message.
+     */
+    private fun displayedCoordinatorError(
+        exception: HttpException,
+        networkError: Error.NetworkError,
+    ): String {
+        if (networkError.isUnparsedCoordinatorError()) {
+            return "HTTP ${exception.code()} ${exception.message()}"
+        }
+        return networkError.message
+    }
+
+    private fun Error.NetworkError.isUnparsedCoordinatorError(): Boolean {
+        return serverErrorCode == VideoErrorCode.PARSER_ERROR.code ||
+            serverErrorCode == VideoErrorCode.NO_ERROR_BODY.code
     }
 
     private fun Error.NetworkError.isAuthError(): Boolean {
@@ -419,19 +455,36 @@ internal class StreamVideoClient internal constructor(
         } ?: return Failure(
             Error.NetworkError(
                 message = "failed to parse error response from server",
-                serverErrorCode = e.code(),
+                serverErrorCode = VideoErrorCode.NO_ERROR_BODY.code,
                 statusCode = e.code(),
                 cause = e,
             ),
         )
         return Failure(
             Error.NetworkError(
-                message = error.message,
+                message = formatCoordinatorErrorMessage(error),
                 serverErrorCode = error.code,
                 statusCode = error.statusCode,
                 cause = e,
             ),
         )
+    }
+
+    /**
+     * Formats a parsed coordinator [ErrorResponse] as
+     * `[serverErrorCode] message (moreInfo)`.
+     *
+     * [Error.ThrowableError] only stores a message, so the server error code
+     * and moreInfo are included here for callers and logs.
+     */
+    private fun formatCoordinatorErrorMessage(error: ErrorResponse): String {
+        val moreInfo = error.moreInfo.takeIf { it.isNotBlank() }
+        return buildString {
+            append("[${error.code}] ${error.message}")
+            if (moreInfo != null) {
+                append(" ($moreInfo)")
+            }
+        }
     }
 
     public override fun subscribeFor(

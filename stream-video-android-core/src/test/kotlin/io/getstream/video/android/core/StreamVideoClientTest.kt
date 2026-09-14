@@ -388,10 +388,107 @@ class StreamVideoClientTest {
             "expected coordinator reason in ${error.message}",
         )
         assertTrue(
+            error.message.contains("[4]"),
+            "expected serverErrorCode in ${error.message}",
+        )
+        assertTrue(
             error.cause is HttpException,
             "HTTP failures must keep HttpException as the cause, got ${error.cause}",
         )
         assertEquals(thrown, error.cause)
+    }
+
+    @Test
+    fun `apiCall includes moreInfo in the coordinator error message`() = runTest {
+        val reason = "User 'marcelo' with role 'user' is not allowed to perform action UpdateCall"
+        val moreInfo = "https://getstream.io/video/docs/api/errors/#4"
+        val thrown = coordinatorHttpException(
+            code = 403,
+            message = reason,
+            serverCode = 4,
+            moreInfo = moreInfo,
+        )
+        val result = client.apiCall<String> { throw thrown }
+
+        assertTrue(result is Result.Failure, "expected Failure, got $result")
+        val error = result.value
+        assertTrue(error is Error.ThrowableError, "expected ThrowableError, got $error")
+        assertEquals("[4] $reason ($moreInfo)", error.message)
+        assertEquals(thrown, error.cause)
+    }
+
+    @Test
+    fun `apiCall keeps the HTTP status when the error body is not coordinator JSON`() = runTest {
+        val thrown = httpException(
+            code = 502,
+            statusMessage = "Bad Gateway",
+            body = "<html>bad gateway</html>",
+            contentType = "text/html",
+        )
+        val result = client.apiCall<String> { throw thrown }
+
+        assertTrue(result is Result.Failure, "expected Failure, got $result")
+        val error = result.value
+        assertTrue(error is Error.ThrowableError, "expected ThrowableError, got $error")
+        assertEquals("HTTP 502 Bad Gateway", error.message)
+        assertEquals(thrown, error.cause)
+    }
+
+    @Test
+    fun `apiCall keeps the HTTP status when the error body is empty`() = runTest {
+        val thrown = httpException(
+            code = 502,
+            statusMessage = "Bad Gateway",
+            body = "",
+            contentType = "text/html",
+        )
+        val result = client.apiCall<String> { throw thrown }
+
+        assertTrue(result is Result.Failure, "expected Failure, got $result")
+        val error = result.value
+        assertTrue(error is Error.ThrowableError, "expected ThrowableError, got $error")
+        assertEquals("HTTP 502 Bad Gateway", error.message)
+        assertEquals(thrown, error.cause)
+    }
+
+    @Test
+    fun `apiCall keeps the HTTP status when the error body is missing`() = runTest {
+        val thrown = mockk<HttpException>()
+        every { thrown.code() } returns 504
+        every { thrown.message() } returns "Gateway Timeout"
+        every { thrown.response() } returns null
+        val result = client.apiCall<String> { throw thrown }
+
+        assertTrue(result is Result.Failure, "expected Failure, got $result")
+        val error = result.value
+        assertTrue(error is Error.ThrowableError, "expected ThrowableError, got $error")
+        assertEquals("HTTP 504 Gateway Timeout", error.message)
+        assertEquals(thrown, error.cause)
+    }
+
+    @Test
+    fun `apiCall keeps the coordinator 401 when token refresh throws`() = runTest {
+        val tokenProvider = mockk<TokenProvider>()
+        coEvery { tokenProvider.loadToken() } throws IllegalStateException("token provider unavailable")
+        val client = prepareClient(tokenProvider = tokenProvider)
+        val reason = "token expired"
+        val thrown = coordinatorHttpException(code = 401, message = reason, serverCode = 40)
+
+        val result = client.apiCall<String> { throw thrown }
+
+        assertTrue(result is Result.Failure, "expected Failure, got $result")
+        val error = result.value
+        assertTrue(error is Error.ThrowableError, "expected ThrowableError, got $error")
+        assertTrue(
+            error.message.contains(reason),
+            "expected coordinator 401 in ${error.message}",
+        )
+        assertFalse(
+            error.message.contains("Safe call failed"),
+            "token refresh must not replace the coordinator message: ${error.message}",
+        )
+        assertEquals(thrown, error.cause)
+        coVerify(exactly = 1) { tokenProvider.loadToken() }
     }
 
     @Test
@@ -542,9 +639,29 @@ class StreamVideoClientTest {
         code: Int,
         message: String,
         serverCode: Int,
+        moreInfo: String = "",
     ): HttpException {
-        val json = """{"code":$serverCode,"message":"$message","StatusCode":$code,"more_info":""}"""
+        val json =
+            """{"code":$serverCode,"message":"$message","StatusCode":$code,"more_info":"$moreInfo"}"""
         val body = json.toResponseBody("application/json".toMediaType())
         return HttpException(Response.error<Unit>(code, body))
+    }
+
+    private fun httpException(
+        code: Int,
+        statusMessage: String,
+        body: String,
+        contentType: String,
+    ): HttpException {
+        val mediaType = contentType.toMediaType()
+        val errorBody = body.toResponseBody(mediaType)
+        val raw = okhttp3.Response.Builder()
+            .request(okhttp3.Request.Builder().url("https://video.stream-io-api.com/").build())
+            .protocol(okhttp3.Protocol.HTTP_1_1)
+            .code(code)
+            .message(statusMessage)
+            .body(body.toResponseBody(mediaType))
+            .build()
+        return HttpException(Response.error<Unit>(errorBody, raw))
     }
 }
