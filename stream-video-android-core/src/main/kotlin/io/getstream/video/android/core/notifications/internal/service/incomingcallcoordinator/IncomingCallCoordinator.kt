@@ -16,10 +16,17 @@
 
 package io.getstream.video.android.core.notifications.internal.service.incomingcallcoordinator
 
+import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.IncomingCallRequest
 import io.getstream.video.android.model.StreamCallId
 
+/**
+ * Coordinates registration, presentation, and cleanup of incoming calls.
+ *
+ * Implementations select the service route and ringtone owner before starting
+ * the corresponding incoming-call flow.
+ */
 internal interface IncomingCallCoordinator {
 
     fun showIncomingCall(request: IncomingCallRequest)
@@ -28,4 +35,6 @@ internal interface IncomingCallCoordinator {
         callId: StreamCallId,
         config: CallServiceConfig,
     )
+
+    fun finishIncomingCall(call: Call)
 }

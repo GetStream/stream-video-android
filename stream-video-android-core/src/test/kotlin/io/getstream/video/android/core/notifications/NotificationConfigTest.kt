@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core
+package io.getstream.video.android.core.notifications
 
-/** Identifies which component owns incoming-call ringing. */
-internal sealed interface IncomingRingtoneOwner {
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
-    /** The incoming-call notification produces the ringtone and vibration. */
-    data object Notification : IncomingRingtoneOwner
+class NotificationConfigTest {
 
-    /** The SDK sound and vibration player produces the ringtone and vibration. */
-    data object Legacy : IncomingRingtoneOwner
+    @Test
+    fun `incoming ringing notification update delay has the expected default`() {
+        val config = NotificationConfig()
+
+        assertEquals(1_300L, config.incomingRingingNotificationUpdateDelayMillis)
+    }
+
+    @Test
+    fun `incoming ringing notification update delay can be configured`() {
+        val config = NotificationConfig(incomingRingingNotificationUpdateDelayMillis = 0L)
+
+        assertEquals(0L, config.incomingRingingNotificationUpdateDelayMillis)
+    }
 }
