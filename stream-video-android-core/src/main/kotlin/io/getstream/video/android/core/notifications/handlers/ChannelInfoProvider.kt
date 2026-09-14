@@ -24,13 +24,17 @@ import android.os.Build
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.core.utils.safeCall
 
 @StringRes
-internal fun defaultIncomingCallChannelIdRes(sdkInt: Int = Build.VERSION.SDK_INT): Int =
-    if (isAndroid17OrHigher(sdkInt)) {
+internal fun defaultIncomingCallChannelIdRes(
+    ringtoneOwner: IncomingRingtoneOwner,
+    sdkInt: Int = Build.VERSION.SDK_INT,
+): Int =
+    if (isAndroid17OrHigher(sdkInt) && ringtoneOwner == IncomingRingtoneOwner.Notification) {
         R.string.stream_video_incoming_call_ringing_notification_channel_id
     } else {
         R.string.stream_video_incoming_call_notification_channel_id
@@ -38,8 +42,11 @@ internal fun defaultIncomingCallChannelIdRes(sdkInt: Int = Build.VERSION.SDK_INT
 
 @StringRes
 internal fun defaultIncomingCallLowImportanceChannelIdRes(
+    ringtoneOwner: IncomingRingtoneOwner,
     sdkInt: Int = Build.VERSION.SDK_INT,
-): Int = if (isAndroid17OrHigher(sdkInt)) {
+): Int = if (
+    isAndroid17OrHigher(sdkInt) && ringtoneOwner == IncomingRingtoneOwner.Notification
+) {
     R.string.stream_video_incoming_call_ringing_low_priority_notification_channel_id
 } else {
     R.string.stream_video_incoming_call_low_priority_notification_channel_id

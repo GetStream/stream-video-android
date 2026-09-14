@@ -39,7 +39,6 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.runs
 import io.mockk.unmockkAll
 import io.mockk.verify
@@ -71,7 +70,6 @@ class PreAndroid17IncomingCallCoordinatorTest {
 
     @Before
     fun setup() {
-        mockkStatic("io.getstream.video.android.core.notifications.handlers.ChannelInfoProviderKt")
         callScope = TestScope(StandardTestDispatcher())
         every { client.call(callId.type, callId.id) } returns call
         every { client.telecomConfig } returns TelecomConfig("stream")
