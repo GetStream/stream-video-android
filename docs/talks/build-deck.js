@@ -139,46 +139,62 @@ pres.title = "SVC on Android, Debugged";
   s.background = { data: BG_CONTENT };
   addChrome(s, "VP9 SVC 101", "What is Scalable Video Coding?");
 
-  addCard(s, 0.4, 2.15, 1.55, 1.7);
-  s.addText("01", { x: 0.52, y: 2.25, w: 1.3, h: 0.22, fontFace: FONT, fontSize: 11, color: C.kicker, margin: 0 });
-  s.addText("Encode\nonce", { x: 0.52, y: 2.5, w: 1.3, h: 0.7, fontFace: FONT, fontSize: 18, color: C.white, margin: 0 });
-  s.addText("1 encoder\n1 stream", { x: 0.52, y: 3.25, w: 1.3, h: 0.45, fontFace: FONT, fontSize: 12, color: "8AABB8", margin: 0 });
+  addCard(s, 0.35, 2.15, 1.35, 1.75);
+  s.addText("01", { x: 0.45, y: 2.25, w: 1.15, h: 0.2, fontFace: FONT, fontSize: 11, color: C.kicker, margin: 0 });
+  s.addText("Encode\nonce", { x: 0.45, y: 2.5, w: 1.15, h: 0.7, fontFace: FONT, fontSize: 16, color: C.white, margin: 0 });
+  s.addText("1 encoder\n1 stream", { x: 0.45, y: 3.25, w: 1.15, h: 0.5, fontFace: FONT, fontSize: 11, color: "8AABB8", margin: 0 });
 
-  s.addText("→", { x: 1.95, y: 2.75, w: 0.35, h: 0.45, fontFace: FONT, fontSize: 22, color: C.blue, align: "center", valign: "middle", margin: 0 });
+  s.addText("→", { x: 1.7, y: 2.8, w: 0.28, h: 0.4, fontFace: FONT, fontSize: 20, color: C.blue, align: "center", valign: "middle", margin: 0 });
 
-  s.addText("L3T3", { x: 2.35, y: 2.12, w: 2.7, h: 0.22, fontFace: FONT, fontSize: 11, color: C.blue, align: "center", charSpacing: 1.2, margin: 0 });
-  const layers = [
-    { y: 2.38, w: 2.7, label: "S2  ·  720p  ·  30 fps" },
-    { y: 2.92, w: 2.15, label: "S1  ·  360p  ·  15 fps" },
-    { y: 3.46, w: 1.6, label: "S0  ·  180p  ·  7.5 fps" },
+  s.addText("L3T3  ·  3 spatial × 3 temporal", { x: 1.98, y: 2.08, w: 3.55, h: 0.2, fontFace: FONT, fontSize: 10, color: C.blue, align: "center", charSpacing: 0.4, margin: 0 });
+  const temps = [
+    { label: "T0", fps: "7.5" },
+    { label: "T1", fps: "15" },
+    { label: "T2", fps: "30" },
   ];
-  layers.forEach(({ y, w, label }) => {
-    const x = 2.35 + (2.7 - w) / 2;
-    addCard(s, x, y, w, 0.48, { fill: C.cardBg, line: C.blue });
-    s.addText(label, { x, y, w, h: 0.48, fontFace: FONT, fontSize: 11, color: C.white, align: "center", valign: "middle", margin: 0 });
+  temps.forEach(({ label, fps }, i) => {
+    const x = 2.72 + i * 0.88;
+    s.addText(label, { x, y: 2.28, w: 0.8, h: 0.16, fontFace: FONT, fontSize: 10, color: C.kicker, align: "center", margin: 0 });
+    s.addText(fps, { x, y: 2.42, w: 0.8, h: 0.14, fontFace: FONT, fontSize: 9, color: C.kickerDim, align: "center", margin: 0 });
+  });
+  const spatials = [
+    { id: "S2", res: "720p" },
+    { id: "S1", res: "360p" },
+    { id: "S0", res: "180p" },
+  ];
+  spatials.forEach(({ id, res }, r) => {
+    const y = 2.6 + r * 0.42;
+    s.addText(id, { x: 1.98, y, w: 0.38, h: 0.38, fontFace: FONT, fontSize: 11, color: C.white, align: "right", valign: "middle", margin: 0 });
+    temps.forEach((_, c) => {
+      const x = 2.72 + c * 0.88;
+      addCard(s, x, y, 0.8, 0.38, { fill: C.cardBg, line: C.blue });
+      s.addText(res, { x, y, w: 0.8, h: 0.38, fontFace: FONT, fontSize: 10, color: C.white, align: "center", valign: "middle", margin: 0 });
+    });
   });
 
-  s.addText("→", { x: 5.1, y: 2.75, w: 0.35, h: 0.45, fontFace: FONT, fontSize: 22, color: C.blue, align: "center", valign: "middle", margin: 0 });
+  s.addText("→", { x: 5.4, y: 2.8, w: 0.28, h: 0.4, fontFace: FONT, fontSize: 20, color: C.blue, align: "center", valign: "middle", margin: 0 });
 
-  addCard(s, 5.5, 2.15, 1.7, 1.7, { fill: C.cardBg, line: C.blue });
-  s.addText("02", { x: 5.62, y: 2.25, w: 1.45, h: 0.22, fontFace: FONT, fontSize: 11, color: C.kicker, margin: 0 });
-  s.addText("SFU drops\nlayers", { x: 5.62, y: 2.5, w: 1.45, h: 0.7, fontFace: FONT, fontSize: 16, color: C.white, margin: 0 });
-  s.addText("No decode\nNo re-encode", { x: 5.62, y: 3.25, w: 1.45, h: 0.45, fontFace: FONT, fontSize: 12, color: "8AABB8", margin: 0 });
+  addCard(s, 5.68, 2.15, 1.55, 1.75, { fill: C.cardBg, line: C.blue });
+  s.addText("02", { x: 5.8, y: 2.25, w: 1.3, h: 0.2, fontFace: FONT, fontSize: 11, color: C.kicker, margin: 0 });
+  s.addText("SFU drops\nlayers", { x: 5.8, y: 2.5, w: 1.3, h: 0.7, fontFace: FONT, fontSize: 15, color: C.white, margin: 0 });
+  s.addText("No decode\nNo re-encode", { x: 5.8, y: 3.25, w: 1.3, h: 0.5, fontFace: FONT, fontSize: 11, color: "8AABB8", margin: 0 });
 
-  s.addText("→", { x: 7.25, y: 2.75, w: 0.35, h: 0.45, fontFace: FONT, fontSize: 22, color: C.blue, align: "center", valign: "middle", margin: 0 });
+  s.addText("→", { x: 7.23, y: 2.8, w: 0.28, h: 0.4, fontFace: FONT, fontSize: 20, color: C.blue, align: "center", valign: "middle", margin: 0 });
 
-  addCard(s, 7.65, 2.15, 1.9, 0.78);
-  s.addText("720p viewer", { x: 7.65, y: 2.15, w: 1.9, h: 0.78, fontFace: FONT, fontSize: 13, color: C.white, align: "center", valign: "middle", margin: 0 });
-  addCard(s, 7.65, 3.07, 1.9, 0.78);
-  s.addText("180p viewer", { x: 7.65, y: 3.07, w: 1.9, h: 0.78, fontFace: FONT, fontSize: 13, color: C.white, align: "center", valign: "middle", margin: 0 });
+  addCard(s, 7.52, 2.15, 2.03, 0.8);
+  s.addText("S2T2 viewer", { x: 7.52, y: 2.2, w: 2.03, h: 0.38, fontFace: FONT, fontSize: 13, color: C.white, align: "center", valign: "middle", margin: 0 });
+  s.addText("720p  ·  30 fps", { x: 7.52, y: 2.52, w: 2.03, h: 0.32, fontFace: FONT, fontSize: 11, color: C.kicker, align: "center", margin: 0 });
+  addCard(s, 7.52, 3.1, 2.03, 0.8);
+  s.addText("S0T0 viewer", { x: 7.52, y: 3.15, w: 2.03, h: 0.38, fontFace: FONT, fontSize: 13, color: C.white, align: "center", valign: "middle", margin: 0 });
+  s.addText("180p  ·  7.5 fps", { x: 7.52, y: 3.47, w: 2.03, h: 0.32, fontFace: FONT, fontSize: 11, color: C.kicker, align: "center", margin: 0 });
 
-  addCard(s, 0.4, 4.1, 4.5, 1.05);
-  s.addText("SPATIAL", { x: 0.55, y: 4.2, w: 4.2, h: 0.22, fontFace: FONT, fontSize: 11, color: C.kicker, charSpacing: 1, margin: 0 });
-  s.addText("Resolution  ·  720p → 360p → 180p", { x: 0.55, y: 4.48, w: 4.2, h: 0.45, fontFace: FONT, fontSize: 14, color: C.white, margin: 0 });
+  addCard(s, 0.35, 4.1, 4.55, 1.05);
+  s.addText("SPATIAL", { x: 0.5, y: 4.2, w: 4.25, h: 0.22, fontFace: FONT, fontSize: 11, color: C.kicker, charSpacing: 1, margin: 0 });
+  s.addText("S0 / S1 / S2  ·  180p → 360p → 720p", { x: 0.5, y: 4.48, w: 4.25, h: 0.45, fontFace: FONT, fontSize: 14, color: C.white, margin: 0 });
 
   addCard(s, 5.1, 4.1, 4.45, 1.05);
   s.addText("TEMPORAL", { x: 5.25, y: 4.2, w: 4.15, h: 0.22, fontFace: FONT, fontSize: 11, color: C.kicker, charSpacing: 1, margin: 0 });
-  s.addText("Frame rate  ·  30 → 15 → 7.5 fps", { x: 5.25, y: 4.48, w: 4.15, h: 0.45, fontFace: FONT, fontSize: 14, color: C.white, margin: 0 });
+  s.addText("T0 / T1 / T2 on every S  ·  7.5 → 15 → 30 fps", { x: 5.25, y: 4.48, w: 4.15, h: 0.45, fontFace: FONT, fontSize: 14, color: C.white, margin: 0 });
 }
 
 // ═══ 6. WHY SVC vs SIMULCAST ═══
@@ -304,11 +320,15 @@ pres.title = "SVC on Android, Debugged";
   });
 }
 
-// ═══ 11. ENCODER THRASHING LOOP ═══
+// ═══ 11. ENCODER THRASHING LOOP — THE PROBLEM ═══
 {
   let s = pres.addSlide();
   s.background = { data: BG_CONTENT };
   addChrome(s, "Debugging", "The Encoder Thrashing Loop");
+
+  s.addText("QualityScaler flips resolution. Hardware VP9 cannot scale in-place — each flip tears the encoder down twice.", {
+    x: 0.45, y: 2.05, w: 9.1, h: 0.32, fontFace: FONT, fontSize: 13, color: C.kicker, margin: 0,
+  });
 
   const steps = [
     { num: "01", tag: "QUALITYSCALER", title: "720p → 540p", body: "QP too high" },
@@ -318,31 +338,85 @@ pres.title = "SVC on Android, Debugged";
   ];
   steps.forEach(({ num, tag, title, body }, i) => {
     const x = 0.4 + i * 2.4;
-    addCard(s, x, 2.12, 2.15, 1.5);
-    addAccentCard(s, x, 2.12, 2.15, 0.08);
-    s.addText(num, { x: x + 0.1, y: 2.26, w: 1.95, h: 0.22, fontFace: FONT, fontSize: 11, color: C.kicker, margin: 0 });
-    s.addText(tag, { x: x + 0.1, y: 2.48, w: 1.95, h: 0.2, fontFace: FONT, fontSize: 9, color: C.kickerDim, charSpacing: 0.8, margin: 0 });
-    s.addText(title, { x: x + 0.1, y: 2.7, w: 1.95, h: 0.42, fontFace: FONT, fontSize: 14, color: C.white, margin: 0 });
-    s.addText(body, { x: x + 0.1, y: 3.14, w: 1.95, h: 0.3, fontFace: FONT, fontSize: 12, color: "8AABB8", margin: 0 });
+    addCard(s, x, 2.48, 2.15, 1.5);
+    addAccentCard(s, x, 2.48, 2.15, 0.08);
+    s.addText(num, { x: x + 0.1, y: 2.62, w: 1.95, h: 0.22, fontFace: FONT, fontSize: 11, color: C.kicker, margin: 0 });
+    s.addText(tag, { x: x + 0.1, y: 2.84, w: 1.95, h: 0.2, fontFace: FONT, fontSize: 9, color: C.kickerDim, charSpacing: 0.8, margin: 0 });
+    s.addText(title, { x: x + 0.1, y: 3.06, w: 1.95, h: 0.42, fontFace: FONT, fontSize: 14, color: C.white, margin: 0 });
+    s.addText(body, { x: x + 0.1, y: 3.5, w: 1.95, h: 0.3, fontFace: FONT, fontSize: 12, color: "8AABB8", margin: 0 });
     if (i < 3) {
-      s.addText("→", { x: x + 2.08, y: 2.65, w: 0.38, h: 0.4, fontFace: FONT, fontSize: 20, color: C.blue, align: "center", valign: "middle", margin: 0 });
+      s.addText("→", { x: x + 2.08, y: 3.01, w: 0.38, h: 0.4, fontFace: FONT, fontSize: 20, color: C.blue, align: "center", valign: "middle", margin: 0 });
     }
   });
 
-  s.addShape("rect", { x: 1.42, y: 3.78, w: 0.03, h: 0.22, fill: { color: C.blue }, line: { color: C.blue } });
-  s.addShape("rect", { x: 8.62, y: 3.62, w: 0.03, h: 0.38, fill: { color: C.blue }, line: { color: C.blue } });
-  s.addShape("rect", { x: 1.42, y: 3.98, w: 7.23, h: 0.03, fill: { color: C.blue }, line: { color: C.blue } });
+  s.addShape("rect", { x: 1.42, y: 4.14, w: 0.03, h: 0.22, fill: { color: C.blue }, line: { color: C.blue } });
+  s.addShape("rect", { x: 8.62, y: 3.98, w: 0.03, h: 0.38, fill: { color: C.blue }, line: { color: C.blue } });
+  s.addShape("rect", { x: 1.42, y: 4.34, w: 7.23, h: 0.03, fill: { color: C.blue }, line: { color: C.blue } });
   s.addText("←   back to 720p   ·   repeats every 5–10 seconds", {
-    x: 1.7, y: 4.04, w: 6.7, h: 0.26, fontFace: FONT, fontSize: 12, color: C.blue, align: "center", margin: 0,
+    x: 1.7, y: 4.4, w: 6.7, h: 0.26, fontFace: FONT, fontSize: 12, color: C.blue, align: "center", margin: 0,
   });
 
-  addCard(s, 0.45, 4.4, 9.1, 0.9, { fill: C.cardBg, line: C.blue });
-  s.addText("Looked like the bitrate problem. We disabled QualityScaler — the loop stopped. The SFU still marked this stream as poor. So we went deeper.", {
-    x: 0.65, y: 4.4, w: 8.7, h: 0.9, fontFace: FONT, fontSize: 13.5, color: C.white, margin: 0, valign: "middle",
+  addCard(s, 0.45, 4.78, 9.1, 0.52, { fill: C.cardBg, line: C.cardBorder });
+  s.addText("Software VP9 scales in-place. Hardware cannot — so QualityScaler turns a QP adjustment into a full encoder recreate loop.", {
+    x: 0.65, y: 4.78, w: 8.7, h: 0.52, fontFace: FONT, fontSize: 13, color: C.white, margin: 0, valign: "middle",
   });
 }
 
-// ═══ 12. ROOT CAUSE ═══
+// ═══ 12. QUALITYSCALER OFF — STOPPED THE LOOP, NOT THE PROBLEM ═══
+{
+  let s = pres.addSlide();
+  s.background = { data: BG_CONTENT };
+  addChrome(s, "Debugging", "QualityScaler Off Stopped the Loop");
+
+  addCard(s, 0.45, 2.15, 4.45, 2.35);
+  addAccentCard(s, 0.45, 2.15, 0.08, 2.35);
+  s.addText("WHAT WE DID", { x: 0.7, y: 2.28, w: 4.0, h: 0.24, fontFace: FONT, fontSize: 11, color: C.green, charSpacing: 1.2, margin: 0 });
+  s.addText("Turned QualityScaler off", { x: 0.7, y: 2.56, w: 4.0, h: 0.36, fontFace: FONT, fontSize: 18, color: C.white, margin: 0 });
+  s.addText(makeBullets([
+    "degradationPreference disabled the scaler",
+    "720p ↔ 540p flipping stopped",
+    "Encoder recreate loop stopped",
+  ], { fontSize: 14, spacing: 6 }), { x: 0.7, y: 3.05, w: 4.0, h: 1.25, margin: 0, valign: "top" });
+
+  addCard(s, 5.1, 2.15, 4.45, 2.35);
+  addAccentCard(s, 5.1, 2.15, 0.08, 2.35);
+  s.addText("WHAT WAS LEFT", { x: 5.35, y: 2.28, w: 4.0, h: 0.24, fontFace: FONT, fontSize: 11, color: C.red, charSpacing: 1.2, margin: 0 });
+  s.addText("SFU still said poor", { x: 5.35, y: 2.56, w: 4.0, h: 0.36, fontFace: FONT, fontSize: 18, color: C.white, margin: 0 });
+  s.addText(makeBullets([
+    "Quality score never recovered",
+    "Resolution switch was gone",
+    "The stream was still broken",
+  ], { fontSize: 14, spacing: 6 }), { x: 5.35, y: 3.05, w: 4.0, h: 1.25, margin: 0, valign: "top" });
+
+  addCard(s, 0.45, 4.7, 9.1, 0.6, { fill: C.cardBg, line: C.blue });
+  s.addText("The oscillation was real — and we stopped it. It was not the reason the SFU marked this stream as poor.", {
+    x: 0.65, y: 4.7, w: 8.7, h: 0.6, fontFace: FONT, fontSize: 15, color: C.white, margin: 0, valign: "middle",
+  });
+}
+
+// ═══ 13. TARGETBITRATE WAS ALSO NOT THE PROBLEM ═══
+{
+  let s = pres.addSlide();
+  s.background = { data: BG_CONTENT };
+  addChrome(s, "Debugging", "71 kbps Was a WebRTC Stats Bug");
+
+  addCard(s, 0.45, 2.15, 4.45, 2.2);
+  s.addText("WHAT STATS SAID", { x: 0.65, y: 2.28, w: 4.05, h: 0.22, fontFace: FONT, fontSize: 11, color: C.red, charSpacing: 1.2, margin: 0 });
+  s.addText("71 kbps", { x: 0.65, y: 2.55, w: 4.05, h: 0.7, fontFace: FONT, fontSize: 40, color: C.white, margin: 0 });
+  s.addText("targetBitrate at 720×1280\nLooked like the encoder was starved", { x: 0.65, y: 3.3, w: 4.05, h: 0.8, fontFace: FONT, fontSize: 14, color: C.kicker, margin: 0 });
+
+  addCard(s, 5.1, 2.15, 4.45, 2.2, { fill: C.cardBg, line: C.blue });
+  s.addText("WHAT WAS ACTUALLY SENT", { x: 5.3, y: 2.28, w: 4.05, h: 0.22, fontFace: FONT, fontSize: 11, color: C.green, charSpacing: 1.2, margin: 0 });
+  s.addText("~1.4 Mbps", { x: 5.3, y: 2.55, w: 4.05, h: 0.7, fontFace: FONT, fontSize: 40, color: C.white, margin: 0 });
+  s.addText("bytesSent  ·  SFU cap 1.5 Mbps\nBWE ~3 Mbps  —  not starved", { x: 5.3, y: 3.3, w: 4.05, h: 0.8, fontFace: FONT, fontSize: 14, color: C.kicker, margin: 0 });
+
+  addCard(s, 0.45, 4.5, 9.1, 0.85, { fill: C.cardBg, line: C.blue });
+  s.addText("send_statistics_proxy.cc reports GetSpatialLayerSum(*simulcast_index) — the base spatial layer only, on single-SSRC VP9 SVC. The 71 kbps figure was a reporting artifact. Also not the real problem.", {
+    x: 0.65, y: 4.5, w: 8.7, h: 0.85, fontFace: FONT, fontSize: 14, color: C.white, margin: 0, valign: "middle",
+  });
+}
+
+// ═══ 14. ROOT CAUSE ═══
 {
   let s = pres.addSlide();
   s.background = { data: BG_CONTENT };
@@ -378,32 +452,39 @@ pres.title = "SVC on Android, Debugged";
   });
 }
 
-// ═══ 13. WHY DID THIS HAPPEN ═══
+// ═══ 15. THE REAL PROBLEM ═══
 {
   let s = pres.addSlide();
   s.background = { data: BG_CONTENT };
-  addChrome(s, "Debugging", "Why Those Symptoms Happened");
+  addChrome(s, "Debugging", "The Real Problem");
 
-  const reasons = [
-    { num: "01", symptom: "SFU marked the stream as poor", reason: "SFU expected 3 spatial layers. Hardware sent 1." },
-    { num: "02", symptom: "Encoder re-created in a loop", reason: "QualityScaler flipped 720p ↔ 540p every 5–10s. Each flip recreates the HW encoder twice." },
-    { num: "03", symptom: "Stats looked starved", reason: "VP9 SVC stats bug — reports only the base layer, not the total (~1.5 Mbps)." },
-  ];
-  reasons.forEach(({ num, symptom, reason }, i) => {
-    const y = 2.15 + i * 0.85;
-    addAccentCard(s, 0.45, y, 0.55, 0.72);
-    s.addText(num, { x: 0.45, y, w: 0.55, h: 0.72, fontFace: FONT, fontSize: 13, color: C.white, align: "center", valign: "middle", margin: 0 });
-    s.addText(symptom, { x: 1.15, y: y + 0.04, w: 8.2, h: 0.28, fontFace: FONT, fontSize: 14, color: C.kicker, margin: 0 });
-    s.addText(reason, { x: 1.15, y: y + 0.34, w: 8.2, h: 0.32, fontFace: FONT, fontSize: 15, color: C.white, margin: 0 });
+  s.addText("We stopped the thrashing loop. The 71 kbps figure was a stats bug. The SFU was still right — the stream was broken.", {
+    x: 0.45, y: 2.05, w: 9.1, h: 0.32, fontFace: FONT, fontSize: 13, color: C.kicker, margin: 0,
   });
 
-  addCard(s, 0.45, 4.75, 9.1, 0.55, { fill: C.cardBg, line: C.blue });
-  s.addText("Software VP9 never hit 01 or 02 — it produces real L3T3 layers and never tears down the encoder.", {
-    x: 0.65, y: 4.75, w: 8.7, h: 0.55, fontFace: FONT, fontSize: 13, color: C.white, margin: 0, valign: "middle",
+  addCard(s, 0.45, 2.5, 4.45, 2.15, { fill: C.cardBg, line: C.red });
+  addAccentCard(s, 0.45, 2.5, 0.08, 2.15);
+  s.addText("HARDWARE VP9", { x: 0.7, y: 2.62, w: 4.0, h: 0.22, fontFace: FONT, fontSize: 11, color: C.red, charSpacing: 1.2, margin: 0 });
+  s.addText("Temporal layers only", { x: 0.7, y: 2.88, w: 4.0, h: 0.32, fontFace: FONT, fontSize: 18, color: C.white, margin: 0 });
+  s.addText("Asked L3T3_KEY. Encoder sent one flat 720p stream. Wrapper hardcodes num_spatial_layers = 1. SFU expected three layers and marked the stream poor.", {
+    x: 0.7, y: 3.28, w: 4.0, h: 1.2, fontFace: FONT, fontSize: 14, color: "8AABB8", margin: 0,
+  });
+
+  addCard(s, 5.1, 2.5, 4.45, 2.15);
+  addAccentCard(s, 5.1, 2.5, 0.08, 2.15);
+  s.addText("SOFTWARE VP9", { x: 5.35, y: 2.62, w: 4.0, h: 0.22, fontFace: FONT, fontSize: 11, color: C.green, charSpacing: 1.2, margin: 0 });
+  s.addText("This never happens", { x: 5.35, y: 2.88, w: 4.0, h: 0.32, fontFace: FONT, fontSize: 18, color: C.white, margin: 0 });
+  s.addText("libvpx produces real L3T3 — all three spatial layers. It scales in-place. No encoder teardown. SFU quality stays stable.", {
+    x: 5.35, y: 3.28, w: 4.0, h: 1.2, fontFace: FONT, fontSize: 14, color: "8AABB8", margin: 0,
+  });
+
+  addCard(s, 0.45, 4.85, 9.1, 0.5, { fill: C.cardBg, line: C.blue });
+  s.addText("The encoder cannot produce spatial layers. That is what the SFU was scoring. Everything else was noise.", {
+    x: 0.65, y: 4.85, w: 8.7, h: 0.5, fontFace: FONT, fontSize: 14, color: C.white, margin: 0, valign: "middle",
   });
 }
 
-// ═══ 14. SECTION: QUERYING HARDWARE ═══
+// ═══ 16. SECTION: QUERYING HARDWARE ═══
 {
   let s = pres.addSlide();
   s.background = { data: BG_SECTION };
@@ -413,7 +494,7 @@ pres.title = "SVC on Android, Debugged";
   s.addText("Querying Hardware\nCapabilities", { x: 0.45, y: 2.45, w: 7, h: 1.4, fontFace: FONT, fontSize: 48, color: C.white, margin: 0 });
 }
 
-// ═══ 15. MEDIACODEC SVC SUPPORT ═══
+// ═══ 17. MEDIACODEC SVC SUPPORT ═══
 {
   let s = pres.addSlide();
   s.background = { data: BG_CONTENT };
@@ -437,7 +518,7 @@ pres.title = "SVC on Android, Debugged";
   });
 }
 
-// ═══ 16. SECTION: WAY FORWARD ═══
+// ═══ 18. SECTION: WAY FORWARD ═══
 {
   let s = pres.addSlide();
   s.background = { data: BG_SECTION };
@@ -447,7 +528,7 @@ pres.title = "SVC on Android, Debugged";
   s.addText("Way Forward", { x: 0.45, y: 2.45, w: 7, h: 1.2, fontFace: FONT, fontSize: 54, color: C.white, margin: 0 });
 }
 
-// ═══ 17. SOFTWARE VP9 PROS & CONS ═══
+// ═══ 19. SOFTWARE VP9 PROS & CONS ═══
 {
   let s = pres.addSlide();
   s.background = { data: BG_CONTENT };
@@ -468,7 +549,7 @@ pres.title = "SVC on Android, Debugged";
   s.addText("Today's only complete fix for spatial SVC — but the CPU/battery cost is real on mobile.", { x: 0.45, y: 4.8, w: 9.1, h: 0.4, fontFace: FONT, fontSize: 13, color: C.kicker, margin: 0 });
 }
 
-// ═══ 18. PRODUCTION DATA ═══
+// ═══ 20. PRODUCTION DATA ═══
 {
   let s = pres.addSlide();
   s.background = { data: BG_CONTENT };
@@ -510,7 +591,7 @@ pres.title = "SVC on Android, Debugged";
   });
 }
 
-// ═══ 19. BROADCASTER MODE ═══
+// ═══ 21. BROADCASTER MODE ═══
 {
   let s = pres.addSlide();
   s.background = { data: BG_CONTENT };
@@ -551,7 +632,7 @@ pres.title = "SVC on Android, Debugged";
   });
 }
 
-// ═══ 20. TAKEAWAYS ═══
+// ═══ 22. TAKEAWAYS ═══
 {
   let s = pres.addSlide();
   s.background = { data: BG_CONTENT };
@@ -570,7 +651,7 @@ pres.title = "SVC on Android, Debugged";
   });
 }
 
-// ═══ 21. THANK YOU ═══
+// ═══ 23. THANK YOU ═══
 {
   let s = pres.addSlide();
   s.background = { data: BG_SECTION };
