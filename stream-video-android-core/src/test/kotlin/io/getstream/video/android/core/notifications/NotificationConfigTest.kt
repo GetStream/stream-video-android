@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.telecom
+package io.getstream.video.android.core.notifications
 
-import android.os.Build
-import io.getstream.video.android.core.StreamVideo
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
-// TODO pass StreamVideo instance in constructor on v2
-internal class TelecomHelper {
+class NotificationConfigTest {
 
-    fun canUseJetpackTelecom(): Boolean {
-        val integrationTypeIsJetpack = (StreamVideo.instanceOrNull())?.state?.getTelecomIntegrationType() == TelecomIntegrationType.JETPACK_TELECOM
-        return integrationTypeIsJetpack && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+    @Test
+    fun `incoming ringing notification update delay has the expected default`() {
+        val config = NotificationConfig()
+
+        assertEquals(1_300L, config.incomingRingingNotificationUpdateDelayMillis)
+    }
+
+    @Test
+    fun `incoming ringing notification update delay can be configured`() {
+        val config = NotificationConfig(incomingRingingNotificationUpdateDelayMillis = 0L)
+
+        assertEquals(0L, config.incomingRingingNotificationUpdateDelayMillis)
     }
 }

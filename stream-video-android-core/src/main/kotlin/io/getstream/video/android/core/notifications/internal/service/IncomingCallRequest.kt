@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.telecom
+package io.getstream.video.android.core.notifications.internal.service
 
-import android.os.Build
-import io.getstream.video.android.core.StreamVideo
+import android.app.Notification
+import io.getstream.video.android.model.StreamCallId
 
-// TODO pass StreamVideo instance in constructor on v2
-internal class TelecomHelper {
-
-    fun canUseJetpackTelecom(): Boolean {
-        val integrationTypeIsJetpack = (StreamVideo.instanceOrNull())?.state?.getTelecomIntegrationType() == TelecomIntegrationType.JETPACK_TELECOM
-        return integrationTypeIsJetpack && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-    }
-}
+internal data class IncomingCallRequest(
+    val callId: StreamCallId,
+    val callDisplayName: String?,
+    val callServiceConfiguration: CallServiceConfig,
+    val isVideo: Boolean,
+    val payload: Map<String, Any?>,
+    val notificationProvider: () -> Notification?,
+)

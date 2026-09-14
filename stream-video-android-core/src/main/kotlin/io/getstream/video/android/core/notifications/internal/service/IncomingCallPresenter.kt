@@ -28,7 +28,7 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.model.StreamCallId
 
-internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIntentBuilder) {
+internal class IncomingCallPresenter(private val client: StreamVideo, private val serviceIntentBuilder: ServiceIntentBuilder) {
     private val logger by taggedLogger("IncomingCallPresenter")
 
     fun showIncomingCall(
@@ -61,6 +61,17 @@ internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIn
         }
         return result
     }
+
+    fun showIncomingCallNotification(
+        context: Context,
+        callId: StreamCallId,
+        notification: Notification?,
+    ): ShowIncomingCallResult = showNotification(
+        context = context,
+        notification = notification,
+        callId = callId,
+        error = null,
+    )
 
     // ----------------------------------
     // Decision branches
@@ -114,9 +125,9 @@ internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIn
             return ShowIncomingCallResult.ERROR
         }
 
-        StreamVideo.instanceOrNull()
-            ?.getStreamNotificationDispatcher()
-            ?.notify(
+        client
+            .getStreamNotificationDispatcher()
+            .notify(
                 callId,
                 callId.getNotificationId(NotificationType.Incoming),
                 notification,
@@ -131,7 +142,7 @@ internal class IncomingCallPresenter(private val serviceIntentBuilder: ServiceIn
 
     private fun hasNoActiveCall(): Boolean {
         val hasActiveCall =
-            StreamVideo.instanceOrNull()?.state?.activeCall?.value != null
+            client.state.activeCall?.value != null
         logger.d { "[showIncomingCall] hasActiveCall: $hasActiveCall" }
         return !hasActiveCall
     }

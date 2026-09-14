@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.telecom
+package io.getstream.video.android.core.notifications.internal.service.models
 
-import android.os.Build
-import io.getstream.video.android.core.StreamVideo
+/** Identifies the route selected by the SDK to manage a call. */
+internal enum class ServiceRoute {
 
-// TODO pass StreamVideo instance in constructor on v2
-internal class TelecomHelper {
+    /** A route has not been selected yet. */
+    UNDECIDED,
 
-    fun canUseJetpackTelecom(): Boolean {
-        val integrationTypeIsJetpack = (StreamVideo.instanceOrNull())?.state?.getTelecomIntegrationType() == TelecomIntegrationType.JETPACK_TELECOM
-        return integrationTypeIsJetpack && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-    }
+    /** The call is managed through CallService. */
+    LEGACY_CALL_SERVICE,
+
+    /** The call is managed through Telecom. */
+    TELECOM,
 }
