@@ -35,21 +35,22 @@ package io.getstream.video.android.core.notifications.internal.service
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.os.Bundle
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.Throttler
 import io.getstream.video.android.core.notifications.internal.VideoPushDelegate.Companion.DEFAULT_CALL_TEXT
-import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
+import io.getstream.video.android.core.notifications.internal.service.incomingcallcoordinator.Android17IncomingCallCoordinator
+import io.getstream.video.android.core.notifications.internal.service.incomingcallcoordinator.PreAndroid17IncomingCallCoordinator
+import io.getstream.video.android.core.notifications.internal.service.models.ServiceRoute
+import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomHelper
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomPermissions
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCallAction
-import io.getstream.video.android.core.utils.safeCallWithResult
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -66,6 +67,25 @@ internal class ServiceLauncher(private val client: StreamVideoClient) {
     private val telecomPermissions = TelecomPermissions()
     private val jetpackTelecomRepositoryProvider = JetpackTelecomRepositoryProvider(client)
     private val throttler = Throttler()
+    private val preAndroid17IncomingCallCoordinator = PreAndroid17IncomingCallCoordinator(
+        context = context,
+        client = client,
+        incomingCallPresenter = incomingCallPresenter,
+        serviceIntentBuilder = serviceIntentBuilder,
+        telecomPermissions = telecomPermissions,
+        telecomHelper = telecomHelper,
+        jetpackTelecomRepositoryProvider = jetpackTelecomRepositoryProvider,
+    )
+    private val android17IncomingCallCoordinator = Android17IncomingCallCoordinator(
+        context = context,
+        client = client,
+        incomingCallPresenter = incomingCallPresenter,
+        telecomPermissions = telecomPermissions,
+        telecomHelper = telecomHelper,
+        jetpackTelecomRepositoryProvider = jetpackTelecomRepositoryProvider,
+        fallbackCoordinator = preAndroid17IncomingCallCoordinator,
+        telecomCallController = TelecomCallController(context),
+    )
 
     @SuppressLint("MissingPermission", "NewApi")
     fun showIncomingCall(
@@ -74,51 +94,33 @@ internal class ServiceLauncher(private val client: StreamVideoClient) {
         callServiceConfiguration: CallServiceConfig,
         isVideo: Boolean,
         payload: Map<String, Any?>,
-        notification: Notification?,
+        notificationProvider: () -> Notification?,
     ) {
-        val result = incomingCallPresenter.showIncomingCall(
-            context,
-            callId,
-            callDisplayName,
-            callServiceConfiguration,
-            notification,
-        )
-        logger.d { "[showIncomingCall] service start result: $result" }
-        if (telecomPermissions.canUseTelecom(callServiceConfiguration, context)) {
-            if (telecomHelper.canUseJetpackTelecom()) {
-                when (result) {
-                    ShowIncomingCallResult.FG_SERVICE -> {
-                        updateIncomingCallNotification(notification, callId)
-
-                        val jetpackTelecomRepository = jetpackTelecomRepositoryProvider.get(callId)
-
-                        val appSchema = client.telecomConfig?.schema
-                        val addressUri = "$appSchema:${callId.id}".toUri()
-                        val formattedCallDisplayName = callDisplayName?.takeIf { it.isNotBlank() } ?: DEFAULT_CALL_TEXT
-
-                        val call = client.call(callId.type, callId.id)
-
-                        call.state.jetpackTelecomRepository = (jetpackTelecomRepository)
-
-                        call.scope.launch {
-                            jetpackTelecomRepository.registerCall(
-                                formattedCallDisplayName,
-                                addressUri,
-                                true,
-                                isVideo,
-                            )
-                        }
-                    }
-                    else -> {}
-                }
-            }
+        val initialIncomingCallCoordinator = if (isAndroid17OrHigher()) {
+            android17IncomingCallCoordinator
+        } else {
+            preAndroid17IncomingCallCoordinator
         }
+
+        initialIncomingCallCoordinator.showIncomingCall(
+            IncomingCallRequest(
+                callId = callId,
+                callDisplayName = callDisplayName,
+                callServiceConfiguration = callServiceConfiguration,
+                isVideo = isVideo,
+                payload = payload,
+                notificationProvider = notificationProvider,
+            ),
+        )
     }
 
     fun showOnGoingCall(call: Call, trigger: String) {
         val callConfig = client.callServiceConfigRegistry.get(call.type)
         if (!callConfig.runCallServiceInForeground) {
             return
+        }
+        if (call.state.serviceRoute.value == ServiceRoute.UNDECIDED) {
+            call.state.updateServiceRoute(ServiceRoute.LEGACY_CALL_SERVICE)
         }
         val callId = StreamCallId.fromCallCid(call.cid)
         val serviceIntent = ServiceIntentBuilder().buildStartIntent(
@@ -187,45 +189,16 @@ internal class ServiceLauncher(private val client: StreamVideoClient) {
         }
     }
 
-    /**
-     * Because we need to retrieve the notification
-     * in [io.getstream.video.android.core.notifications.internal.telecom.connection.SuccessIncomingTelecomConnection]
-     */
-    private fun updateIncomingCallNotification(
-        notification: Notification?,
-        callId: StreamCallId,
-    ) {
-        notification?.let {
-            val notificationId = callId.getNotificationId(NotificationType.Incoming)
-            client.call(callId.type, callId.id)
-                .state.updateNotification(notificationId, notification)
-        }
-    }
-
     fun removeIncomingCall(
-        callId: StreamCallId,
+        call: Call,
         config: CallServiceConfig = DefaultCallConfigurations.default,
     ) {
-        safeCallWithResult {
-            context.startService(
-                serviceIntentBuilder.buildStartIntent(
-                    context,
-                    StartServiceParam(
-                        callId,
-                        TRIGGER_REMOVE_INCOMING_CALL,
-                        callServiceConfiguration = config,
-                    ),
-                ),
-            )!!
-        }.onError {
-            logger.d {
-                "[removeIncomingCall] notificationId: ${callId.getNotificationId(
-                    NotificationType.Incoming,
-                )}"
-            }
-            NotificationManagerCompat.from(context)
-                .cancel(callId.getNotificationId(NotificationType.Incoming))
+        val incomingCallCoordinator = if (call.state.serviceRoute.value == ServiceRoute.TELECOM) {
+            android17IncomingCallCoordinator
+        } else {
+            preAndroid17IncomingCallCoordinator
         }
+        incomingCallCoordinator.dismissIncomingCall(StreamCallId.fromCallCid(call.cid), config)
     }
 
     /**
@@ -242,6 +215,13 @@ internal class ServiceLauncher(private val client: StreamVideoClient) {
     private fun stopCallServiceInternal(call: Call) {
         logger.d { "[stopCallServiceInternal]" }
         val callConfig = client.callServiceConfigRegistry.get(call.type)
+        if (isAndroid17OrHigher() &&
+            call.state.serviceRoute.value == ServiceRoute.TELECOM &&
+            !serviceIntentBuilder.isServiceRunning(context, callConfig.serviceClass)
+        ) {
+            android17IncomingCallCoordinator.finishIncomingCall(call)
+            return
+        }
         if (callConfig.runCallServiceInForeground) {
             val serviceIntent = serviceIntentBuilder.buildStopIntent(
                 context,
