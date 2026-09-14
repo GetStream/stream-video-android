@@ -22,7 +22,6 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.notifications.handlers.shouldNotificationOwnIncomingRingtone
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.IncomingCallPresenter
 import io.getstream.video.android.core.notifications.internal.service.IncomingCallRequest
@@ -73,7 +72,6 @@ class PreAndroid17IncomingCallCoordinatorTest {
     @Before
     fun setup() {
         mockkStatic("io.getstream.video.android.core.notifications.handlers.ChannelInfoProviderKt")
-        every { shouldNotificationOwnIncomingRingtone() } returns false
         callScope = TestScope(StandardTestDispatcher())
         every { client.call(callId.type, callId.id) } returns call
         every { client.telecomConfig } returns TelecomConfig("stream")

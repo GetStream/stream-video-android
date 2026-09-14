@@ -23,9 +23,9 @@ import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.notifications.NotificationType
-import io.getstream.video.android.core.notifications.handlers.shouldNotificationOwnIncomingRingtone
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.permissions.ForegroundServicePermissionManager
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -128,7 +128,7 @@ internal open class CallServiceNotificationUpdateObserver(
     private fun shouldStabilizeIncomingRingingNotification(ringingState: RingingState): Boolean =
         ringingState is RingingState.Incoming &&
             !ringingState.acceptedByMe &&
-            shouldNotificationOwnIncomingRingtone()
+            isAndroid17OrHigher()
 
     private fun shouldSkipIncomingRingingNotificationUpdate(
         ringingState: RingingState,

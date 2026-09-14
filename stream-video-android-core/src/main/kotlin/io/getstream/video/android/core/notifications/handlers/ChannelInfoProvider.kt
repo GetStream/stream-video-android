@@ -28,10 +28,6 @@ import io.getstream.video.android.core.R
 import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.core.utils.safeCall
 
-internal fun shouldNotificationOwnIncomingRingtone(
-    sdkInt: Int = Build.VERSION.SDK_INT,
-): Boolean = isAndroid17OrHigher(sdkInt)
-
 @StringRes
 internal fun defaultIncomingCallChannelIdRes(sdkInt: Int = Build.VERSION.SDK_INT): Int =
     if (isAndroid17OrHigher(sdkInt)) {
