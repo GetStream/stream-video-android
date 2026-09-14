@@ -18,10 +18,36 @@ package io.getstream.video.android.core.notifications.handlers
 
 import android.app.NotificationManager
 import android.content.Context
+import android.media.AudioAttributes
+import android.net.Uri
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
+import io.getstream.video.android.core.R
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.core.utils.safeCall
+
+internal fun shouldNotificationOwnIncomingRingtone(
+    sdkInt: Int = Build.VERSION.SDK_INT,
+): Boolean = isAndroid17OrHigher(sdkInt)
+
+@StringRes
+internal fun defaultIncomingCallChannelIdRes(sdkInt: Int = Build.VERSION.SDK_INT): Int =
+    if (isAndroid17OrHigher(sdkInt)) {
+        R.string.stream_video_incoming_call_ringing_notification_channel_id
+    } else {
+        R.string.stream_video_incoming_call_notification_channel_id
+    }
+
+@StringRes
+internal fun defaultIncomingCallLowImportanceChannelIdRes(
+    sdkInt: Int = Build.VERSION.SDK_INT,
+): Int = if (isAndroid17OrHigher(sdkInt)) {
+    R.string.stream_video_incoming_call_ringing_low_priority_notification_channel_id
+} else {
+    R.string.stream_video_incoming_call_low_priority_notification_channel_id
+}
 
 /**
  * Provides a way to create a custom channel for the notification.
@@ -87,6 +113,23 @@ internal fun StreamNotificationChannelInfo.create(manager: NotificationManagerCo
     )
 }
 
+/** Creates an incoming-call channel whose sound and vibration are owned by the system. */
+internal fun StreamNotificationChannelInfo.createRingingChannel(
+    manager: NotificationManagerCompat,
+    soundUri: Uri?,
+    audioAttributes: AudioAttributes,
+    vibrationPattern: LongArray?,
+) = safeCall {
+    manager.createNotificationChannel(
+        NotificationChannelCompat.Builder(id, importance)
+            .setName(name)
+            .setDescription(description)
+            .setSound(soundUri, audioAttributes)
+            .setVibrationPattern(vibrationPattern)
+            .build(),
+    )
+}
+
 /**
  * Provides the channel information for the notification.
  *
@@ -105,7 +148,9 @@ data class StreamNotificationChannelInfo(
 /**
  * Provides the channel information for the notification.
  *
- * @param incomingCallChannel High importance channel for incoming calls (Notification will pop-up on screen)
+ * @param incomingCallChannel High importance channel for incoming calls. On Android 17 and above,
+ * notification-owned ringing requires a channel ID that has not previously been created without
+ * sound. Integrators supplying a custom channel should migrate to a new ID for Android 17.
  * @param ongoingCallChannel Low importance channel for ongoing calls.
  * @param outgoingCallChannel Low importance channel for call setup.
  * @param missedCallChannel High importance channel for missed call.

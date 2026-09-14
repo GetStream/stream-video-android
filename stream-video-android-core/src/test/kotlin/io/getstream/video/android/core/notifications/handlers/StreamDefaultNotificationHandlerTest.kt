@@ -18,7 +18,9 @@ package io.getstream.video.android.core.notifications.handlers
 
 import android.app.Application
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
@@ -27,16 +29,20 @@ import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.ClientState
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.CallBusyHandler
+import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
+import io.getstream.video.android.core.notifications.internal.service.ServiceLauncher
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.StreamCallId
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -48,6 +54,7 @@ import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
+import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.unmockkObject
 import io.mockk.verify
@@ -104,6 +111,8 @@ class StreamDefaultNotificationHandlerTest {
     @RelaxedMockK
     internal lateinit var callBusyHandler: CallBusyHandler
 
+    private lateinit var serviceLauncher: ServiceLauncher
+
     @Before
     fun setUp2() {
         MockKAnnotations.init(this, relaxUnitFun = true, relaxed = true)
@@ -116,9 +125,17 @@ class StreamDefaultNotificationHandlerTest {
         val mockState = mockk<ClientState>(relaxed = true)
         val mockCallConfigRegistry = mockk<CallServiceConfigRegistry>(relaxed = true)
         val mockCallServiceConfig = mockk<CallServiceConfig>(relaxed = true)
-
         every { StreamVideo.instance() } returns mockStreamVideo
+        every { mockStreamVideo.context } returns mockApplication
         every { mockStreamVideo.state } returns mockState
+        serviceLauncher = mockk(relaxed = true)
+        every { mockState.serviceLauncher } returns serviceLauncher
+        every {
+            serviceLauncher.showIncomingCall(any(), any(), any(), any(), any(), any())
+        } answers {
+            arg<() -> Notification?>(5)()
+            Unit
+        }
         every { mockState.callConfigRegistry } returns mockCallConfigRegistry
         every { mockStreamVideo.callServiceConfigRegistry } returns mockCallConfigRegistry
         every { mockCallConfigRegistry.get(any()) } returns mockCallServiceConfig
@@ -172,12 +189,16 @@ class StreamDefaultNotificationHandlerTest {
         every { mockApplication.getString(any()) } returns "Test String"
         every { mockApplication.getString(any(), any()) } returns "Test String with param"
         every { mockApplication.applicationInfo } returns mockk(relaxed = true)
+        every {
+            mockApplication.getSystemService(Context.NOTIFICATION_SERVICE)
+        } returns mockk<NotificationManager>(relaxed = true)
 
         // Mock call state
         every { mockCall.cid } returns "default:test-call-123"
         every { mockCall.state } returns mockCallState
         every { mockCall.state.createdBy } returns MutableStateFlow(null)
         every { mockCallState.ringingState } returns MutableStateFlow(RingingState.Incoming())
+        every { mockCall.state.incomingRingtoneOwner.value } returns IncomingRingtoneOwner.Legacy
         every { mockCallState.members } returns MutableStateFlow(emptyList())
         every { mockCallState.remoteParticipants } returns MutableStateFlow(emptyList())
         every { mockCallState.atomicNotification } returns java.util.concurrent.atomic.AtomicReference(null)
@@ -221,7 +242,18 @@ class StreamDefaultNotificationHandlerTest {
     fun `onRingingCall shows incoming call notification when caller is not busy with comprehensive verification`() {
         // Given
         val callDisplayName = "John Doe"
+        val notificationProvider = slot<() -> Notification?>()
         every { callBusyHandler.isBusyWithAnotherCall(testCallId.cid) } returns false
+        every {
+            serviceLauncher.showIncomingCall(
+                callId = testCallId,
+                callDisplayName = callDisplayName,
+                callServiceConfiguration = any(),
+                isVideo = any(),
+                payload = payload,
+                notificationProvider = capture(notificationProvider),
+            )
+        } returns Unit
         // Mock intent resolver calls
         every {
             mockIntentResolver.searchIncomingCallPendingIntent(testCallId, payload = payload)
@@ -252,6 +284,7 @@ class StreamDefaultNotificationHandlerTest {
 
         // When
         testHandler.onRingingCall(testCallId, callDisplayName, payload)
+        notificationProvider.captured()
 
         // Then - Verify all intent resolver calls
         verify { mockIntentResolver.searchIncomingCallPendingIntent(testCallId, payload = payload) }
@@ -276,6 +309,77 @@ class StreamDefaultNotificationHandlerTest {
             mockNotificationManager.createNotificationChannel(
                 any<NotificationChannelCompat>(),
             )
+        }
+    }
+
+    @Test
+    fun `Android 17 incoming notification uses separate full screen and content intents`() {
+        mockkStatic("io.getstream.video.android.core.utils.AndroidVersionCodesKt")
+        every { isAndroid17OrHigher() } returns true
+        val contentPendingIntent = mockk<PendingIntent>()
+        val fullScreenPendingIntent = mockk<PendingIntent>()
+        val defaultIntentResolver = mockk<DefaultStreamIntentResolver>(relaxed = true)
+        every {
+            defaultIntentResolver.searchIncomingCallPendingIntent(
+                testCallId,
+                payload = payload,
+            )
+        } returns contentPendingIntent
+        every {
+            defaultIntentResolver.searchIncomingCallFullScreenPendingIntent(
+                testCallId,
+                payload = payload,
+            )
+        } returns fullScreenPendingIntent
+        every {
+            defaultIntentResolver.searchAcceptCallPendingIntent(
+                testCallId,
+                payload = payload,
+            )
+        } returns mockPendingIntent
+        every {
+            defaultIntentResolver.searchRejectCallPendingIntent(
+                testCallId,
+                payload = payload,
+            )
+        } returns mockPendingIntent
+        every {
+            mockInitialInterceptor.onBuildIncomingCallNotification(
+                any(),
+                fullScreenPendingIntent,
+                mockPendingIntent,
+                mockPendingIntent,
+                "John Doe",
+                true,
+                payload,
+            )
+        } answers { firstArg() }
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockApplication,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = defaultIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+        )
+
+        testHandler.getRingingCallNotification(
+            ringingState = RingingState.Incoming(),
+            callId = testCallId,
+            callDisplayName = "John Doe",
+            shouldHaveContentIntent = true,
+            payload = payload,
+        )
+
+        verify {
+            anyConstructed<NotificationCompat.Builder>().setFullScreenIntent(
+                fullScreenPendingIntent,
+                true,
+            )
+        }
+        verify {
+            anyConstructed<NotificationCompat.Builder>().setContentIntent(contentPendingIntent)
         }
     }
 
@@ -333,6 +437,11 @@ class StreamDefaultNotificationHandlerTest {
             )
         }
 
+        verify {
+            mockNotificationManager.cancel(
+                testCallId.getNotificationId(NotificationType.Incoming),
+            )
+        }
         // Verify notification manager is called to show notification
         verify { mockNotificationManager.notify(notificationId, any()) }
     }

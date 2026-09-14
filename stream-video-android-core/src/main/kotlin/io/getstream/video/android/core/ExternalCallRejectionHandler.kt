@@ -23,7 +23,6 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
-import io.getstream.video.android.model.StreamCallId
 
 internal class ExternalCallRejectionHandler() {
     private val logger by taggedLogger("CallRejectionHandler")
@@ -51,7 +50,7 @@ internal class ExternalCallRejectionHandler() {
         logger.d { "[onRejectCall] source:$source, #ringing; callId: ${call.id}, action: ${intent.action}" }
 
         StreamVideo.instance().state.serviceLauncher.removeIncomingCall(
-            StreamCallId.fromCallCid(call.cid),
+            call,
             StreamVideo.instance().state.callConfigRegistry.get(call.type),
         )
         when (source) {
