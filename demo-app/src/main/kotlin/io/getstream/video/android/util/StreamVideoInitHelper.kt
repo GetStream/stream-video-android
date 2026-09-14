@@ -33,6 +33,7 @@ import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
+import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.moderations.ModerationConfig
 import io.getstream.video.android.core.moderations.ModerationWarningConfig
@@ -81,6 +82,8 @@ public enum class InitializedState {
  * @property secret API secret from the local coordinator — used to sign a JWT for [userId].
  * @property userId User ID to connect as.
  * @property token Pre-generated JWT token. If null, one is generated from [secret].
+ * @property sfuId Coordinator edge pin (`?sfu_id=` / `WithPinToSFUID`). When set,
+ * every join / rejoin / migrate asks the coordinator for this SFU.
  */
 data class LocalDevConfig(
     val coordinatorAddress: String,
@@ -88,6 +91,7 @@ data class LocalDevConfig(
     val userId: String,
     val secret: String? = null,
     val token: String? = null,
+    val sfuId: String? = null,
 ) {
     init {
         require(secret != null || token != null) {
@@ -196,6 +200,7 @@ object StreamVideoInitHelper {
                     token = localCfg.resolveToken(),
                     loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
                     localCoordinatorAddress = localCfg.coordinatorAddress,
+                    sfuId = localCfg.sfuId,
                     localTokenProvider = object : TokenProvider {
                         override suspend fun loadToken(): String = localCfg.resolveToken()
                     },
@@ -367,7 +372,7 @@ object StreamVideoInitHelper {
     }
 
     /** Sets up and returns the [StreamVideo] required to connect to the API. */
-    @OptIn(ExperimentalStreamVideoApi::class)
+    @OptIn(ExperimentalStreamVideoApi::class, InternalStreamVideoApi::class)
     private fun initializeStreamVideo(
         context: Context,
         apiKey: ApiKey,
@@ -375,6 +380,7 @@ object StreamVideoInitHelper {
         token: String,
         loggingLevel: LoggingLevel,
         localCoordinatorAddress: String? = null,
+        sfuId: String? = null,
         localTokenProvider: TokenProvider? = null,
     ): StreamVideo {
         val callServiceConfigRegistry = CallServiceConfigRegistry()
@@ -506,6 +512,8 @@ object StreamVideoInitHelper {
             telecomConfig = TelecomConfig(context.packageName),
             connectOnInit = false,
             rejectCallWhenBusy = false,
-        ).build()
+        ).apply {
+            sfuId?.takeIf { it.isNotBlank() }?.let(::forceSfuId)
+        }.build()
     }
 }

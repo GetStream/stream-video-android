@@ -1040,6 +1040,53 @@ public class Call(
         notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
     }
 
+    // Audio bitrate profile bridges. [MicrophoneManager.setAudioBitrateProfile] is the public
+    // entry point and can reach neither the media component nor the session from there.
+
+    internal fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean =
+        media.setHardwareNoiseSuppressorEnabled(enabled)
+
+    internal fun setHardwareAcousticEchoCancelerEnabled(enabled: Boolean): Boolean =
+        media.setHardwareAcousticEchoCancelerEnabled(enabled)
+
+    /** Must not be called from the main thread: the module rebuilds AudioRecord. */
+    internal fun setCaptureAudioSource(audioSource: Int): Boolean =
+        media.setCaptureAudioSource(audioSource)
+
+    /**
+     * Rebuilds the audio source and track so audio-source constraints take effect mid-call. With
+     * no session the source is built lazily from current constraints, so the change already holds.
+     */
+    internal fun rebuildAudioCapturePipeline(): Boolean =
+        session.value?.rebuildAudioCapturePipeline() ?: true
+
+    internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean =
+        session.value?.setAudioMaxBitrate(maxBitrateBps) ?: false
+
+    /** Whether an audio sender exists to take a live profile change. */
+    internal fun hasLiveAudioSender(): Boolean =
+        session.value?.hasLiveAudioSender() ?: false
+
+    internal fun audioMaxBitrate(): Int? = session.value?.audioMaxBitrate()
+
+    /** The audio bitrate the SFU negotiated at join, or null when nothing publishes audio. */
+    internal fun negotiatedAudioBitrate(): Int? = session.value?.negotiatedAudioBitrate()
+
+    /** The bitrate the SFU offers for [profile], or null when it named none. */
+    internal fun audioBitrateFor(profile: stream.video.sfu.models.AudioBitrateProfile): Int? =
+        session.value?.audioBitrateFor(profile)
+
+    /** Whether a noise-cancellation processor is wired in and can be turned on or off. */
+    internal fun isAudioProcessingReachable(): Boolean = media.isAudioProcessingReachable()
+
+    // Absent hardware is not the same as hardware that refused, so these are asked separately.
+
+    internal fun isHardwareNoiseSuppressorSupported(): Boolean =
+        media.isHardwareNoiseSuppressorSupported()
+
+    internal fun isHardwareAcousticEchoCancelerSupported(): Boolean =
+        media.isHardwareAcousticEchoCancelerSupported()
+
     fun toggleAudioProcessing(): Boolean {
         // Reads without building a factory: the gate runs before join, and a factory created
         // there would capture the pre-join audio bitrate profile.

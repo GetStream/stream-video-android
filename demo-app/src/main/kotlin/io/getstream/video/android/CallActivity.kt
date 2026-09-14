@@ -19,6 +19,7 @@ package io.getstream.video.android
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.util.Log
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
@@ -34,10 +35,13 @@ import io.getstream.result.onSuccessSuspend
 import io.getstream.video.android.compose.ui.ComposeStreamCallActivity
 import io.getstream.video.android.compose.ui.StreamCallActivityComposeDelegate
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.call.state.CallAction
+import io.getstream.video.android.core.e2ee.E2EEEventType
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.call.DemoComponentFactory
@@ -45,6 +49,8 @@ import io.getstream.video.android.ui.common.StreamActivityUiDelegate
 import io.getstream.video.android.ui.common.StreamCallActivity
 import io.getstream.video.android.ui.common.StreamCallActivityConfiguration
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
+import io.getstream.video.android.ui.lobby.deriveE2EEKey
+import io.getstream.video.android.util.DemoE2eeKeys
 import io.getstream.video.android.util.FullScreenCircleProgressBar
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.CoroutineScope
@@ -63,6 +69,18 @@ class CallActivity : ComposeStreamCallActivity() {
 
     companion object {
         var USE_CALL_JOIN_INTERCEPTOR = false
+
+        /** Shared E2EE passphrase, forwarded from a deeplink or scanned QR code. */
+        const val EXTRA_E2EE_PASSPHRASE = "e2ee_passphrase"
+
+        /**
+         * The key index every participant agrees on. A frame carries the index it was encrypted
+         * with, so a receiver looking elsewhere fails every decrypt. Kept in step with the lobby
+         * and with the web demo, which both use slot 0.
+         */
+        private const val E2EE_KEY_INDEX = 0
+
+        private const val E2EE_TAG = "CallActivityE2EE"
     }
 
     override val uiDelegate: StreamActivityUiDelegate<StreamCallActivity> = StreamDemoUiDelegate()
@@ -70,6 +88,8 @@ class CallActivity : ComposeStreamCallActivity() {
     var observeRingingJob: Job? = null
     private val previousRingingStates = ConcurrentHashMap.newKeySet<RingingState>()
     override val callJoinInterceptor = DemoCallJoinInterceptor(previousRingingStates)
+    private var e2eeManager: StreamEncryptionManager? = null
+    private var e2eeCid: String? = null
 
     /**
      * This code is required to pass the UI-tests (as it hardcodes the configuration)
@@ -109,6 +129,108 @@ class CallActivity : ComposeStreamCallActivity() {
             }
         }
         super.onPreCreate(savedInstanceState, persistentState)
+    }
+
+    /**
+     * Applies the shared key carried by the invite link before the call is joined.
+     * [Call.setE2EEManager] is rejected once a session exists, so this is the last point at which a
+     * scanned link can still become an encrypted call.
+     */
+    @StreamCallActivityDelicateApi
+    override fun join(
+        call: Call,
+        onSuccess: (suspend (Call) -> Unit)?,
+        onError: (suspend (Exception) -> Unit)?,
+    ) {
+        intent.getStringExtra(EXTRA_E2EE_PASSPHRASE)
+            ?.takeIf { it.isNotBlank() }
+            ?.let { enableE2EE(call, it) }
+        // Lobby already attached a manager and then died (CLEAR_TASK). Adopt it so leave/finish
+        // can dispose it — Call.leave() only detaches, and the 1 Hz PERF_REPORT timer keeps
+        // firing until dispose().
+        if (e2eeManager == null) {
+            DemoE2eeKeys.manager(call.cid)?.let { existing ->
+                e2eeManager = existing
+                e2eeCid = call.cid
+            }
+        }
+        super.join(call, onSuccess, onError)
+    }
+
+    @StreamCallActivityDelicateApi
+    override fun leave(
+        call: Call,
+        callLeaveReason: CallLeaveReason,
+        onSuccess: (suspend (Call) -> Unit)?,
+        onError: (suspend (Exception) -> Unit)?,
+    ) {
+        super.leave(
+            call,
+            callLeaveReason,
+            onSuccess = { left ->
+                releaseE2EE()
+                onSuccess?.invoke(left)
+            },
+            onError,
+        )
+    }
+
+    private fun releaseE2EE() {
+        e2eeManager?.dispose()
+        e2eeManager = null
+        e2eeCid?.let { DemoE2eeKeys.forget(it) }
+        e2eeCid = null
+    }
+
+    private fun enableE2EE(call: Call, passphrase: String) {
+        // join() cannot suspend, but the derivation is 100k PBKDF2 iterations - keep it off main.
+        val key = runCatching {
+            runBlocking(Dispatchers.Default) { deriveE2EEKey(passphrase) }
+        }.getOrElse {
+            Log.e(E2EE_TAG, "Could not derive the E2EE key from the link", it)
+            return
+        }
+        // EncryptionManager's JNI is registered by libjingle_peerconnection_so's JNI_OnLoad. The
+        // lobby gets that for free from its camera preview, but a scanned link joins without ever
+        // building a factory first, so without this create() fails with an UnsatisfiedLinkError.
+        runCatching { System.loadLibrary("jingle_peerconnection_so") }.onFailure {
+            Log.e(E2EE_TAG, "Could not load the WebRTC native library", it)
+            return
+        }
+        val manager = StreamEncryptionManager.create(call.user.id).getOrElse {
+            Log.e(E2EE_TAG, "Could not create the E2EE manager", it)
+            return
+        }
+        manager.setEventListener { event ->
+            val message = "Native E2EE event: $event"
+            when (event.type) {
+                E2EEEventType.DECRYPTION_RESUMED -> Log.i(E2EE_TAG, message)
+                E2EEEventType.KEY_STATE,
+                E2EEEventType.PERF_REPORT,
+                -> Log.d(E2EE_TAG, message)
+                E2EEEventType.DECRYPTION_FAILED,
+                E2EEEventType.DECRYPTION_STALLED,
+                E2EEEventType.ENCRYPTION_FAILED,
+                E2EEEventType.MISSING_KEY,
+                E2EEEventType.UNENCRYPTED_FRAME,
+                E2EEEventType.UNSUPPORTED_VERSION,
+                E2EEEventType.UNKNOWN,
+                -> Log.w(E2EE_TAG, message)
+            }
+        }
+        manager.enablePerformanceReporting(true)
+        manager.setSharedKey(E2EE_KEY_INDEX, key)
+        val attached = call.setE2EEManager(manager)
+        if (attached.isFailure) {
+            Log.e(E2EE_TAG, "Could not attach the E2EE manager", attached.exceptionOrNull())
+            manager.dispose()
+            return
+        }
+        e2eeManager?.dispose()
+        e2eeManager = manager
+        // Kept so the in-call share sheet can put the passphrase back on the invite link.
+        e2eeCid = call.cid
+        DemoE2eeKeys.remember(call.cid, passphrase, manager)
     }
 
     private class StreamDemoUiDelegate : StreamCallActivityComposeDelegate() {
@@ -196,20 +318,21 @@ class CallActivity : ComposeStreamCallActivity() {
         }
 
         private fun StreamCallActivity.goBackToMainScreen() {
-            if (!isFinishing) {
-                val intent = Intent(this, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
-                startActivity(intent)
-                safeFinish()
-            }
+            safeFinish()
         }
     }
 
     override fun finish() {
+        if (isTaskRoot && !isFinishing) {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
+        }
         super.finish()
         observeCallReadyToJoinJob?.cancel()
         observeRingingJob?.cancel()
         previousRingingStates.clear()
+        releaseE2EE()
     }
 }
