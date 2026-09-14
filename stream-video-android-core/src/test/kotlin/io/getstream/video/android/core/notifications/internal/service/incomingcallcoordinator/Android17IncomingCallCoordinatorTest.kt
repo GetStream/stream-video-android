@@ -91,7 +91,7 @@ class Android17IncomingCallCoordinatorTest {
         every { anyConstructed<CallRejectionObserver>().observe() } just runs
         every { anyConstructed<CallServiceEventObserver>().observe(any(), any()) } just runs
         callScope = TestScope(StandardTestDispatcher())
-        every { telecomPermissions.canUseTelecom(context) } returns true
+        every { telecomPermissions.canUseTelecom(any(), context) } returns true
         every { telecomHelper.canUseJetpackTelecom() } returns true
         every {
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
@@ -126,8 +126,10 @@ class Android17IncomingCallCoordinatorTest {
 
     @Test
     fun `falls back to legacy coordinator when Telecom is unavailable`() {
-        every { telecomPermissions.canUseTelecom(context) } returns false
         val request = request()
+        every {
+            telecomPermissions.canUseTelecom(request.callServiceConfiguration, context)
+        } returns false
 
         coordinator.showIncomingCall(request)
 
@@ -138,23 +140,53 @@ class Android17IncomingCallCoordinatorTest {
     @Test
     fun `registers Telecom before creating and posting ringing notification`() {
         val events = mutableListOf<String>()
-        val request = request { owner ->
-            assertEquals(IncomingRingtoneOwner.Notification, owner)
-            events += "notification"
+        lateinit var onRegistered: () -> Unit
+        val request = request {
+            events += "notification-created"
+        }
+        every {
+            callState.updateIncomingRingtoneOwner(IncomingRingtoneOwner.Notification)
+        } answers {
+            events += "ringtone-owner-updated"
+        }
+        every {
+            presenter.showIncomingCallNotification(context, callId, notification)
+        } answers {
+            events += "notification-posted"
+            ShowIncomingCallResult.ONLY_NOTIFICATION
         }
         coEvery {
             repository.registerCall(any(), any(), true, true, any(), any())
         } coAnswers {
-            events += "registered"
-            arg<() -> Unit>(4).invoke()
+            events += "telecom-registration-requested"
+            onRegistered = arg(4)
         }
 
         coordinator.showIncomingCall(request)
         callScope.advanceUntilIdle()
 
-        assertEquals(listOf("registered", "notification"), events)
+        assertEquals(listOf("telecom-registration-requested"), events)
+        verify(exactly = 0) {
+            presenter.showIncomingCallNotification(any(), any(), any())
+        }
+
+        onRegistered()
+        callScope.advanceUntilIdle()
+
+        assertEquals(
+            listOf(
+                "telecom-registration-requested",
+                "ringtone-owner-updated",
+                "notification-created",
+                "notification-posted",
+            ),
+            events,
+        )
         verify { callState.updateServiceRoute(ServiceRoute.TELECOM) }
         verify { callState.jetpackTelecomRepository = repository }
+        verify {
+            callState.updateIncomingRingtoneOwner(IncomingRingtoneOwner.Notification)
+        }
         verify { presenter.showIncomingCallNotification(context, callId, notification) }
         verify { clientState.addRingingCall(call, any()) }
         coVerify { client.connectIfNotAlreadyConnected() }
@@ -177,15 +209,15 @@ class Android17IncomingCallCoordinatorTest {
     }
 
     private fun request(
-        onNotificationRequested: (IncomingRingtoneOwner) -> Unit = {},
+        onNotificationRequested: () -> Unit = {},
     ): IncomingCallRequest = IncomingCallRequest(
         callId = callId,
         callDisplayName = "Caller",
         callServiceConfiguration = CallServiceConfig(enableTelecom = true),
         isVideo = true,
         payload = emptyMap(),
-        notificationProvider = { owner ->
-            onNotificationRequested(owner)
+        notificationProvider = {
+            onNotificationRequested()
             notification
         },
     )

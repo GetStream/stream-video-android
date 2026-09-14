@@ -145,7 +145,9 @@ class ServiceLauncherTest {
     fun `showIncomingCall registers Telecom first on Android 17`() = runTest {
         val call = mockk<Call>(relaxed = true)
         every { isAndroid17OrHigher() } returns true
-        every { anyConstructed<TelecomPermissions>().canUseTelecom(context) } returns true
+        every {
+            anyConstructed<TelecomPermissions>().canUseTelecom(callServiceConfig, context)
+        } returns true
         every { streamVideo.call(any(), any()) } returns call
         every { call.scope } returns TestScope(StandardTestDispatcher(testScheduler))
         every { call.state.jetpackTelecomRepository } returns null

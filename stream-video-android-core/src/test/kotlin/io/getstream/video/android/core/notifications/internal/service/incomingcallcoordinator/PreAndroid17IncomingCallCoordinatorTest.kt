@@ -102,12 +102,18 @@ class PreAndroid17IncomingCallCoordinatorTest {
 
     @Test
     fun `pre Android 17 route requests legacy ringtone and marks CallService ownership`() {
-        var selectedOwner: IncomingRingtoneOwner? = null
+        val events = mutableListOf<String>()
+        every {
+            callState.updateIncomingRingtoneOwner(IncomingRingtoneOwner.Legacy)
+        } answers {
+            events += "legacy-owner-selected"
+        }
 
-        coordinator.showIncomingCall(request { selectedOwner = it })
+        coordinator.showIncomingCall(request { events += "notification-created" })
 
-        assertEquals(IncomingRingtoneOwner.Legacy, selectedOwner)
+        assertEquals(listOf("legacy-owner-selected", "notification-created"), events)
         verify { callState.updateServiceRoute(ServiceRoute.LEGACY_CALL_SERVICE) }
+        verify { callState.updateIncomingRingtoneOwner(IncomingRingtoneOwner.Legacy) }
         verify {
             presenter.showIncomingCall(
                 context,
@@ -144,15 +150,15 @@ class PreAndroid17IncomingCallCoordinatorTest {
     }
 
     private fun request(
-        notificationProvider: (IncomingRingtoneOwner) -> Unit = {},
+        onNotificationRequested: () -> Unit = {},
     ): IncomingCallRequest = IncomingCallRequest(
         callId = callId,
         callDisplayName = "Caller",
         callServiceConfiguration = CallServiceConfig(enableTelecom = true),
         isVideo = true,
         payload = emptyMap(),
-        notificationProvider = { owner ->
-            notificationProvider(owner)
+        notificationProvider = {
+            onNotificationRequested()
             notification
         },
     )

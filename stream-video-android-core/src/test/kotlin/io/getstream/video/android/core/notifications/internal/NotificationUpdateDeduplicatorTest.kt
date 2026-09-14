@@ -64,19 +64,4 @@ class NotificationUpdateDeduplicatorTest {
         )
         verify(exactly = 0) { comparator.areEquivalent(any(), any(), any(), any()) }
     }
-
-    @Test
-    fun `equivalent update below Android 17 is not duplicate`() {
-        assertFalse(
-            deduplicator.isDuplicate(
-                call,
-                RingingState.Incoming(),
-                1,
-                existing,
-                1,
-                updated,
-            ),
-        )
-        verify(exactly = 0) { comparator.areEquivalent(any(), any(), any(), any()) }
-    }
 }

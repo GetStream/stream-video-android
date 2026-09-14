@@ -145,8 +145,8 @@ class TelecomPermissionsTest {
         every {
             ContextCompat.checkSelfPermission(context, Manifest.permission.MANAGE_OWN_CALLS)
         } returns PackageManager.PERMISSION_GRANTED
-
-        assertTrue(telecomPermissions.canUseTelecom(context))
+        val callConfigService = CallServiceConfig(enableTelecom = true)
+        assertTrue(telecomPermissions.canUseTelecom(callConfigService, context))
     }
 
     @Test

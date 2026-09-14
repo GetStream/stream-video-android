@@ -128,6 +128,7 @@ class CallServiceNotificationUpdateObserverTest {
         }
 
         streamVideo = mockk {
+            every { context } returns this@CallServiceNotificationUpdateObserverTest.context
             every { state } returns streamState
             coEvery { onCallNotificationUpdate(call) } returns notification
             every { this@mockk.streamNotificationManager } returns streamNotificationManager
@@ -217,6 +218,28 @@ class CallServiceNotificationUpdateObserverTest {
         }
         verify(exactly = 0) { permissionManager.getServiceType(any(), any()) }
         verify(exactly = 0) { onStartService(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `incoming notification below Android 17 is not deduplicated`() = runTest {
+        testNotificationIdFlow.value = 123
+        atomicNotification.set(notification)
+        ringingStateFlow.value = RingingState.Incoming()
+
+        observer.observe()
+        runCurrent()
+
+        assertNotNull(startArgs)
+        verify(exactly = 0) {
+            notificationUpdateDeduplicator.isDuplicate(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
     }
 
     @Test

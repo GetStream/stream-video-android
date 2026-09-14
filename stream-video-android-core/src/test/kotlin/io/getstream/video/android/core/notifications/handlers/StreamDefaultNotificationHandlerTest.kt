@@ -29,6 +29,7 @@ import io.getstream.android.push.permissions.NotificationPermissionHandler
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.ClientState
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoClient
@@ -197,6 +198,7 @@ class StreamDefaultNotificationHandlerTest {
         every { mockCall.state } returns mockCallState
         every { mockCall.state.createdBy } returns MutableStateFlow(null)
         every { mockCallState.ringingState } returns MutableStateFlow(RingingState.Incoming())
+        every { mockCall.state.incomingRingtoneOwner.value } returns IncomingRingtoneOwner.Legacy
         every { mockCallState.members } returns MutableStateFlow(emptyList())
         every { mockCallState.remoteParticipants } returns MutableStateFlow(emptyList())
         every { mockCallState.atomicNotification } returns java.util.concurrent.atomic.AtomicReference(null)
@@ -435,8 +437,7 @@ class StreamDefaultNotificationHandlerTest {
             )
         }
 
-        // Incoming notification cleanup belongs to its service route.
-        verify(exactly = 0) {
+        verify {
             mockNotificationManager.cancel(
                 testCallId.getNotificationId(NotificationType.Incoming),
             )
