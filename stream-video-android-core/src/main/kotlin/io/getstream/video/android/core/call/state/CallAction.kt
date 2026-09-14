@@ -52,6 +52,16 @@ public data class ToggleHifiAudio(
 ) : CallAction
 
 /**
+ * Action to start or stop sharing the screen.
+ *
+ * Starting a share needs the app's MediaProjection consent intent, so this action is not handled
+ * by the default handler and must be handled by the app.
+ */
+public data class ToggleScreenShare(
+    val isEnabled: Boolean,
+) : CallAction
+
+/**
  * Action to flip the active camera.
  */
 public data object FlipCamera : CallAction

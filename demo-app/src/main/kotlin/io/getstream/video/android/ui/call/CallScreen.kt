@@ -404,8 +404,8 @@ fun CallScreen(
                                     if (isTablet()) {
                                         ScreenShareToggleAction(
                                             active = isScreenSharing,
-                                            onCallAction = {
-                                                if (!isScreenSharing) {
+                                            onCallAction = { action ->
+                                                if (action.isEnabled) {
                                                     scope.launch {
                                                         val mediaProjectionManager =
                                                             context.getSystemService(
