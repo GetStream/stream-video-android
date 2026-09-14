@@ -592,6 +592,7 @@ internal open class CallService : Service() {
         logger.d {
             "[onDestroy], hashcode: ${hashCode()}, call_cid: ${serviceStateController.currentCallId?.cid}"
         }
+        serviceStateController.unregisterToggleCameraBroadcastReceiver(this)
         serviceStateController.soundPlayer?.cleanUpAudioResources()
         debouncer.cancel()
         serviceScope.cancel()
