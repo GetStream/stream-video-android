@@ -18,16 +18,15 @@ package io.getstream.video.android.notification
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.media.session.MediaButtonReceiver
 import io.getstream.video.android.R
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.notifications.handlers.StreamNotificationUpdateInterceptors
-import java.net.URL
 
 class LiveStreamMediaNotificationInterceptor(private val context: Context) : StreamNotificationUpdateInterceptors() {
     private var bitmap: Bitmap? = null
@@ -83,7 +82,6 @@ class LiveStreamMediaNotificationInterceptor(private val context: Context) : Str
     ): MediaMetadataCompat.Builder {
         val bitmap = getStreamLogoBitmap()
         if (bitmap != null) {
-            Log.d("StreamVideoInitHelper", "Loaded image")
             builder.putBitmap(
                 MediaMetadataCompat.METADATA_KEY_ALBUM_ART,
                 bitmap,
@@ -94,13 +92,7 @@ class LiveStreamMediaNotificationInterceptor(private val context: Context) : Str
 
     private fun getStreamLogoBitmap(): Bitmap? {
         if (bitmap == null) {
-            bitmap = try {
-                URL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8dzj-6rSfEfYMOXPSCV3s84Luuqr2c9KzMg&s").openStream()
-                    .use { BitmapFactory.decodeStream(it) }
-            } catch (e: Exception) {
-                // Fallback
-                BitmapFactory.decodeResource(context.resources, R.drawable.stream_calls_logo)
-            }
+            bitmap = ContextCompat.getDrawable(context, R.mipmap.ic_launcher)?.toBitmap()
         }
         return bitmap
     }
