@@ -35,6 +35,7 @@ import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.connection.Publisher
+import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -59,10 +60,17 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -81,6 +89,7 @@ import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import stream.video.sfu.signal.StartNoiseCancellationRequest
 import stream.video.sfu.signal.StopNoiseCancellationRequest
+import stream.video.sfu.signal.UpdateMuteStatesResponse
 import java.io.InterruptedIOException
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -1097,29 +1106,59 @@ class RtcSessionTest2 {
         }
 
     @Test
-    fun `mute sync resumes and flushes local state once the SFU is ready`() = runTest(
+    fun `mute sync resumes and flushes local state once the SFU is ready`() = runBlocking {
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        try {
+            val signalService = mockk<SignalServerService>(relaxed = true)
+            coEvery { signalService.updateMuteStates(any()) } returns UpdateMuteStatesResponse()
+            ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+            val (rtcSession, publisherMock) = muteSyncSession(signalService, scope)
+            rtcSession.publisher.value = publisherMock
+            val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+            coEvery {
+                publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
+            } returns audioTrack
+
+            rtcSession.enterMigration()
+            rtcSession.createAndPublishAudioTrack()
+            assertEquals(true, rtcSession.muteState.value[TrackType.TRACK_TYPE_AUDIO])
+            assertTrue(pendingMuteSyncTracks(rtcSession).contains(TrackType.TRACK_TYPE_AUDIO))
+            coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
+            assertEquals(false, muteSyncEnabled(rtcSession).get())
+
+            RtcSession::class.java.getDeclaredMethod("resumeMuteSync").apply {
+                isAccessible = true
+                invoke(rtcSession)
+            }
+
+            coVerify(timeout = 3_000, exactly = 1) { signalService.updateMuteStates(any()) }
+            assertTrue(pendingMuteSyncTracks(rtcSession).isEmpty())
+            assertEquals(true, muteSyncEnabled(rtcSession).get())
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun `resumeMuteSync does not flush tracks that were never pending`() = runTest(
         testDispatcher,
     ) {
         val signalService = mockk<SignalServerService>(relaxed = true)
-        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
-        val (rtcSession, publisherMock) = muteSyncSession(signalService)
-        rtcSession.publisher.value = publisherMock
-        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
-        coEvery {
-            publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
-        } returns audioTrack
+        val (rtcSession, _) = muteSyncSession(signalService)
 
         rtcSession.enterMigration()
-        rtcSession.createAndPublishAudioTrack()
         testScheduler.advanceUntilIdle()
         coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
-        assertEquals(false, muteSyncEnabled(rtcSession).get())
 
         RtcSession::class.java.getDeclaredMethod("resumeMuteSync").apply {
             isAccessible = true
             invoke(rtcSession)
         }
+        testScheduler.advanceUntilIdle()
 
+        // muteState is pre-seeded with audio/video/screen-share; none of those were
+        // recorded while paused, so resume must not POST UpdateMuteStates.
+        coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
         assertEquals(true, muteSyncEnabled(rtcSession).get())
     }
 
@@ -1146,33 +1185,52 @@ class RtcSessionTest2 {
         return field.get(rtcSession) as AtomicBoolean
     }
 
+    @Suppress("UNCHECKED_CAST")
+    private fun pendingMuteSyncTracks(rtcSession: RtcSession): MutableSet<TrackType> {
+        val field = RtcSession::class.java.getDeclaredField("pendingMuteSyncTracks")
+        field.isAccessible = true
+        return field.get(rtcSession) as MutableSet<TrackType>
+    }
+
     private fun muteSyncSession(
         signalService: SignalServerService,
+        coroutineScope: CoroutineScope = testScope,
     ): Pair<RtcSession, Publisher> {
+        val mockSocket = mockk<SfuSocketConnection>(relaxed = true) {
+            every { state() } returns MutableStateFlow(SfuSocketState.Disconnected.Stopped)
+            every { events() } returns MutableSharedFlow()
+        }
+        val subscriberMock = mockk<Subscriber>(relaxed = true) {
+            every { streams() } returns emptyFlow()
+            every { removedStreams() } returns emptyFlow()
+        }
+        every {
+            mockCall.peerConnectionFactory.makeSubscriber(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+            )
+        } returns subscriberMock
         val mockModule = mockk<SfuConnectionModule>(relaxed = true) {
             every { api } returns signalService
+            every { socketConnection } returns mockSocket
         }
-        val rtcSession = spyk(
-            RtcSession(
-                client = mockStreamVideo,
-                powerManager = mockPowerManager,
-                call = mockCall,
-                sessionManager = CallSessionManager(),
-                sessionId = "session-id",
-                apiKey = "api-key",
-                lifecycle = mockLifecycle,
-                sfuUrl = "https://test-sfu.stream.com",
-                sfuWsUrl = "wss://test-sfu.stream.com",
-                sfuToken = "fake-sfu-token",
-                sfuName = "test-sfu-edge",
-                clientImpl = mockVideoClient,
-                coroutineScope = testScope,
-                rtcSessionScope = testScope,
-                remoteIceServers = emptyList(),
-                sfuConnectionModuleProvider = { mockModule },
-                sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
-            ),
-            recordPrivateCalls = true,
+        val rtcSession = RtcSession(
+            client = mockStreamVideo,
+            powerManager = mockPowerManager,
+            call = mockCall,
+            sessionManager = CallSessionManager(),
+            sessionId = "session-id",
+            apiKey = "api-key",
+            lifecycle = mockLifecycle,
+            sfuUrl = "https://test-sfu.stream.com",
+            sfuWsUrl = "wss://test-sfu.stream.com",
+            sfuToken = "fake-sfu-token",
+            sfuName = "test-sfu-edge",
+            clientImpl = mockVideoClient,
+            coroutineScope = coroutineScope,
+            rtcSessionScope = coroutineScope,
+            remoteIceServers = emptyList(),
+            sfuConnectionModuleProvider = { mockModule },
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
         )
         val publisherMock = mockk<Publisher>(relaxed = true)
         return rtcSession to publisherMock
