@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.call.connection
 
 import android.content.Context
+import android.media.MediaRecorder
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
@@ -41,6 +42,7 @@ import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnection.Observer
 import org.webrtc.PeerConnectionFactory
+import org.webrtc.audio.JavaAudioDeviceModule
 import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.PublishOption
 
@@ -358,6 +360,146 @@ class StreamPeerConnectionFactoryTest {
             "Releasing it would take the shared processor down",
             callFactory.hasAudioProcessingAttached(),
         )
+    }
+
+    // Platform (hardware) noise suppressor — a live-capture control, unlike the builder flag
+
+    private fun voiceFactory() = factoryWithProfile(
+        AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED,
+        null,
+    )
+
+    @Test
+    fun `the noise suppressor cannot be changed before an audio device module exists`() {
+        // Nothing is capturing, so the platform effect does not exist to be changed yet.
+        assertFalse(voiceFactory().setHardwareNoiseSuppressorEnabled(false))
+    }
+
+    @Test
+    fun `setHardwareNoiseSuppressorEnabled reports what the audio device module did`() {
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+        every { adm.setNoiseSuppressorEnabled(false) } returns true
+        val callFactory = voiceFactory()
+        setPrivate(callFactory, "adm", adm)
+
+        assertTrue(callFactory.setHardwareNoiseSuppressorEnabled(false))
+        verify { adm.setNoiseSuppressorEnabled(false) }
+    }
+
+    @Test
+    fun `a device that ignores the noise suppressor is reported as unchanged`() {
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+        every { adm.setNoiseSuppressorEnabled(any()) } returns false
+        val callFactory = voiceFactory()
+        setPrivate(callFactory, "adm", adm)
+
+        assertFalse(
+            "Not every device has a platform noise suppressor to turn off",
+            callFactory.setHardwareNoiseSuppressorEnabled(false),
+        )
+    }
+
+    @Test
+    fun `the requested noise suppressor state is re-applied when capture restarts`() {
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+        every { adm.setNoiseSuppressorEnabled(any()) } returns true
+        val callFactory = voiceFactory()
+        setPrivate(callFactory, "adm", adm)
+
+        callFactory.setHardwareNoiseSuppressorEnabled(false)
+        // A new recording session drops the platform effect and rebuilds it from the *builder*
+        // flag, so without re-applying, the request silently reverts on the next reconnect.
+        callFactory.reapplyHardwareNoiseSuppressor()
+
+        verify(exactly = 2) { adm.setNoiseSuppressorEnabled(false) }
+    }
+
+    @Test
+    fun `the acoustic echo canceller cannot be changed before an audio device module exists`() {
+        assertFalse(voiceFactory().setHardwareAcousticEchoCancelerEnabled(false))
+    }
+
+    @Test
+    fun `setHardwareAcousticEchoCancelerEnabled reports what the audio device module did`() {
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+        every { adm.setAcousticEchoCancelerEnabled(false) } returns true
+        val callFactory = voiceFactory()
+        setPrivate(callFactory, "adm", adm)
+
+        assertTrue(callFactory.setHardwareAcousticEchoCancelerEnabled(false))
+        verify { adm.setAcousticEchoCancelerEnabled(false) }
+    }
+
+    @Test
+    fun `the requested acoustic echo canceller state is re-applied when capture restarts`() {
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+        every { adm.setAcousticEchoCancelerEnabled(any()) } returns true
+        val callFactory = voiceFactory()
+        setPrivate(callFactory, "adm", adm)
+
+        callFactory.setHardwareAcousticEchoCancelerEnabled(false)
+        callFactory.reapplyHardwareAcousticEchoCanceler()
+
+        verify(exactly = 2) { adm.setAcousticEchoCancelerEnabled(false) }
+    }
+
+    @Test
+    fun `a device that ignores the acoustic echo canceller is reported as unchanged`() {
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+        every { adm.setAcousticEchoCancelerEnabled(any()) } returns false
+        val callFactory = voiceFactory()
+        setPrivate(callFactory, "adm", adm)
+
+        assertFalse(callFactory.setHardwareAcousticEchoCancelerEnabled(false))
+    }
+
+    @Test
+    fun `nothing is re-applied when the acoustic echo canceller was never changed`() {
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+        val callFactory = voiceFactory()
+        setPrivate(callFactory, "adm", adm)
+
+        callFactory.reapplyHardwareAcousticEchoCanceler()
+
+        verify(exactly = 0) { adm.setAcousticEchoCancelerEnabled(any()) }
+    }
+
+    @Test
+    fun `setCaptureAudioSource reports what the audio device module did`() {
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+        every { adm.audioSource } returns MediaRecorder.AudioSource.MIC
+        val callFactory = voiceFactory()
+        setPrivate(callFactory, "adm", adm)
+
+        assertTrue(callFactory.setCaptureAudioSource(MediaRecorder.AudioSource.MIC))
+        verify { adm.setAudioSource(MediaRecorder.AudioSource.MIC) }
+    }
+
+    @Test
+    fun `setCaptureAudioSource reports false when the module restores the previous source`() {
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+        every { adm.audioSource } returns MediaRecorder.AudioSource.VOICE_COMMUNICATION
+        val callFactory = voiceFactory()
+        setPrivate(callFactory, "adm", adm)
+
+        assertFalse(callFactory.setCaptureAudioSource(MediaRecorder.AudioSource.MIC))
+    }
+
+    @Test
+    fun `the capture source cannot be changed before an audio device module exists`() {
+        assertFalse(voiceFactory().setCaptureAudioSource(MediaRecorder.AudioSource.MIC))
+    }
+
+    @Test
+    fun `nothing is re-applied when the noise suppressor was never changed`() {
+        val adm = mockk<JavaAudioDeviceModule>(relaxed = true)
+        val callFactory = voiceFactory()
+        setPrivate(callFactory, "adm", adm)
+
+        callFactory.reapplyHardwareNoiseSuppressor()
+
+        // No preference was expressed, so the builder default has to stand untouched.
+        verify(exactly = 0) { adm.setNoiseSuppressorEnabled(any()) }
     }
 
     private fun setPrivate(target: StreamPeerConnectionFactory, name: String, value: Any) {

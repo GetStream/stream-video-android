@@ -45,6 +45,7 @@ internal enum class PeerConnectionTraceKey(val value: String) {
     GO_AWAY("goAway"),
     SFU_ERROR("error"),
     CALL_ENDED("callEnded"),
+    E2EE_SET_MANAGER("e2eeSetManager"),
     ;
 
     /** Log / serialise using the original string value. */

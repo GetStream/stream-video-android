@@ -64,6 +64,16 @@ internal class MoshiVideoParser : VideoParser {
             )
             .add(
                 lenientAdapter(
+                    io.getstream.android.video.generated.models.EncryptionSettingsRequest.Mode.ModeAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(
+                    io.getstream.android.video.generated.models.EncryptionSettingsResponse.Mode.ModeAdapter(),
+                ),
+            )
+            .add(
+                lenientAdapter(
                     io.getstream.android.video.generated.models.NoiseCancellationSettings.Mode.ModeAdapter(),
                 ),
             )

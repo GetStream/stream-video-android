@@ -32,6 +32,8 @@ import io.getstream.video.android.core.call.connection.utils.stringify
 import io.getstream.video.android.core.call.connection.utils.toRtcDegradationPreference
 import io.getstream.video.android.core.call.connection.utils.toVideoDimension
 import io.getstream.video.android.core.call.connection.utils.toVideoLayers
+import io.getstream.video.android.core.e2ee.E2EEManager
+import io.getstream.video.android.core.e2ee.toE2EETrackType
 import io.getstream.video.android.core.model.IceCandidate
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.trace.Tracer
@@ -52,12 +54,14 @@ import org.webrtc.MediaStream
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RtpParameters
+import org.webrtc.RtpSender
 import org.webrtc.RtpTransceiver
 import org.webrtc.RtpTransceiver.RtpTransceiverDirection
 import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SessionDescription
 import stream.video.sfu.event.VideoLayerSetting
 import stream.video.sfu.event.VideoSender
+import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.ErrorCode
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackInfo
@@ -86,6 +90,8 @@ internal class Publisher(
     private val tracer: Tracer,
     private val restartIceJobDelegate: RestartIceJobDelegate =
         RestartIceJobDelegate(coroutineScope),
+    /** Set when the call is end-to-end encrypted; installs an encryptor per outgoing track. */
+    private val e2eeManager: E2EEManager? = null,
 ) : StreamPeerConnection(
     type,
     mediaConstraints,
@@ -343,6 +349,102 @@ internal class Publisher(
         }
     }
 
+    /**
+     * Swaps the track on the live audio sender, without renegotiating.
+     *
+     * `takeOwnership = false` is deliberate: [MediaManagerImpl] owns and disposes the audio track,
+     * and [RtpSender.setTrack] disposes the track it holds only when it owns it, so disposal stays
+     * in one place and the replaced track stays valid until the caller disposes it.
+     *
+     * @return true when a live audio sender was found and accepted the track.
+     */
+    internal fun replaceAudioTrack(newTrack: MediaStreamTrack): Boolean {
+        val senders = safeCallWithDefault(emptyList()) {
+            transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO).mapNotNull { it.sender }
+        }
+        if (senders.isEmpty()) {
+            logger.d { "[replaceAudioTrack] no audio sender to replace the track on" }
+            return false
+        }
+        return senders.any { sender ->
+            safeCallWithDefault(false) { sender.setTrack(newTrack, false) }.also { replaced ->
+                logger.d { "[replaceAudioTrack] replaced: $replaced, track: ${newTrack.id()}" }
+            }
+        }
+    }
+
+    /**
+     * Sets the maximum bitrate on the live audio sender.
+     *
+     * Applied through the sender's [RtpParameters], like the video layers, so it takes effect on
+     * the running encoder with no renegotiation — the audio bitrate is not carried in the SDP on
+     * our side, it rides entirely on the encoding.
+     *
+     * `setParameters` is called for its result rather than through the `parameters` property:
+     * WebRTC validates the encodings and answers with a boolean, and assigning the property throws
+     * that answer away, which would report a rejected update as an applied one.
+     *
+     * @return true when a live audio sender accepted the new parameters.
+     */
+    internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean {
+        val senders = audioSenders()
+        if (senders.isEmpty()) {
+            logger.d { "[setAudioMaxBitrate] no audio sender to apply $maxBitrateBps to" }
+            return false
+        }
+        return senders.any { sender ->
+            safeCallWithDefault(false) {
+                val params = sender.parameters ?: return@safeCallWithDefault false
+                if (params.encodings.isEmpty()) return@safeCallWithDefault false
+                params.encodings.forEach { it.maxBitrateBps = maxBitrateBps }
+                sender.setParameters(params).also { accepted ->
+                    logger.d {
+                        "[setAudioMaxBitrate] maxBitrateBps: $maxBitrateBps, accepted: $accepted"
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Whether an audio sender exists to take a bitrate ceiling. No sender is not a refused stage:
+     * [computeTransceiverEncodings] reads the published profile when the transceiver is added, so
+     * the next publish already has the right ceiling.
+     */
+    internal fun hasLiveAudioSender(): Boolean = audioSenders().isNotEmpty()
+
+    private fun audioSenders(): List<RtpSender> = safeCallWithDefault(emptyList()) {
+        transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO).mapNotNull { it.sender }
+    }
+
+    /**
+     * The bitrate the SFU offers for [profile], or null when it named none. The server sends one
+     * per profile in `PublishOption.audio_bitrate_profiles`, so a mid-call switch does not have to
+     * invent a number — this is what a freshly created audio transceiver would be given.
+     */
+    internal fun audioBitrateFor(profile: AudioBitrateProfile): Int? = safeCallWithDefault(null) {
+        publishOptions.firstOrNull { it.track_type == TrackType.TRACK_TYPE_AUDIO }
+            ?.audio_bitrate_profiles
+            ?.firstOrNull { it.profile == profile }
+            ?.bitrate
+            ?.takeIf { it > 0 }
+    }
+
+    /**
+     * The audio bitrate the SFU negotiated at join for the profile the call joined with, or null
+     * when it publishes no audio — the value to restore when a switch to music is undone.
+     */
+    internal fun negotiatedAudioBitrate(): Int? = safeCallWithDefault(null) {
+        publishOptions.firstOrNull { it.track_type == TrackType.TRACK_TYPE_AUDIO }?.bitrate
+    }
+
+    /** The maximum bitrate currently set on the live audio sender, or null when unknown. */
+    internal fun audioMaxBitrate(): Int? = safeCallWithDefault(null) {
+        transceiverCache.getByTrackType(TrackType.TRACK_TYPE_AUDIO)
+            .mapNotNull { it.sender?.parameters?.encodings?.firstOrNull()?.maxBitrateBps }
+            .firstOrNull()
+    }
+
     @VisibleForTesting
     public fun newTrackFromSource(trackType: TrackType): MediaStreamTrack {
         return when (trackType) {
@@ -412,6 +514,16 @@ internal class Publisher(
                 ),
             )
             applyDegradationPreference(transceiver, publishOption)
+            if (!attachEncryptor(transceiver, publishOption)) {
+                // Caching this transceiver would publish plaintext on a call the app believes is
+                // encrypted, so drop it instead. Stop only — the PeerConnection owns the native
+                // transceiver and disposing here is a use-after-free on network_thread.
+                logger.e {
+                    "Refusing to publish ${publishOption.track_type}: the encryptor could not be attached."
+                }
+                safeCall { transceiver.stop() }
+                return
+            }
             logger.d {
                 "Added ${publishOption.track_type} transceiver. (trackID: ${track.id()}, encodings: ${transceiver.sender?.parameters?.encodings?.joinToString { it.stringify() }})"
             }
@@ -420,6 +532,48 @@ internal class Publisher(
             logger.e(e) { "Failed to add transceiver for ${publishOption.track_type}" }
         }
     }
+
+    /**
+     * Installs the frame encryptor on a freshly added transceiver. Returns false only when the
+     * call is encrypted and the encryptor could not be attached, which the caller must treat as a
+     * publish failure rather than falling through to sending in the clear.
+     */
+    private fun attachEncryptor(
+        transceiver: RtpTransceiver,
+        publishOption: PublishOption,
+    ): Boolean {
+        val manager = e2eeManager ?: return true
+        val sender = transceiver.sender
+        if (sender == null) {
+            logger.e { "No sender on the ${publishOption.track_type} transceiver to encrypt." }
+            return false
+        }
+        return try {
+            val result = manager.encrypt(
+                sender,
+                publishOption.codec?.name?.asE2EECodecHint(),
+                publishOption.track_type.toE2EETrackType(),
+            )
+            result.exceptionOrNull()?.let { error ->
+                logger.e(error) { "Failed to attach the encryptor for ${publishOption.track_type}" }
+            }
+            result.isSuccess
+        } catch (e: Exception) {
+            logger.e(e) { "Failed to attach the encryptor for ${publishOption.track_type}" }
+            false
+        }
+    }
+
+    /**
+     * Normalises a negotiated codec name into the bare lowercase form the encryption layer expects
+     * ("vp9", not "video/VP9"). Publish options carry either spelling.
+     *
+     * Deliberately not filtered against a known-codec list: the encryption layer takes this string
+     * as-is and decides for itself, so a list here would silently drop the hint for anything added
+     * to the codec set later.
+     */
+    private fun String.asE2EECodecHint(): String? =
+        lowercase().substringAfterLast('/').trim().takeIf { it.isNotEmpty() }
 
     fun syncPublishOptions(captureFormat: CaptureFormat?, publishOptions: List<PublishOption>) {
         // enable publishing with new options

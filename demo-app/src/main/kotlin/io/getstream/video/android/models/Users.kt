@@ -91,5 +91,35 @@ public fun User.Companion.builtInUsers(): List<User> {
             role = "user",
             image = "https://ca.slack-edge.com/T02RM6X6B-U09645WUWQ3-a89200afc9fd-512",
         ),
+        User(
+            id = "guilherme",
+            name = "Guilherme Bier",
+            role = "user",
+            image = "https://ca.slack-edge.com/T02RM6X6B-U07F18D6VKN-2302837abc28-512",
+        ),
+        User(
+            id = "alexey_alter_pesotskiy",
+            name = "Alexey Alter-Pesotskiy",
+            role = "user",
+            image = "https://ca.slack-edge.com/T02RM6X6B-U034BHQ5PT2-8a3df0f6d97c-512",
+        ),
+        User(
+            id = "petar_velikov",
+            name = "Petar Velikov",
+            role = "user",
+            image = "https://ca.slack-edge.com/T02RM6X6B-U07LDJZRUTG-a4129fed05b6-512",
+        ),
+        User(
+            id = "gulzar_ahmed",
+            name = "Gulzar Ahmed",
+            role = "user",
+            image = "https://ca.slack-edge.com/T02RM6X6B-U08RFMDG5BK-103e9545f4d9-512",
+        ),
+        User(
+            id = "bruno_ribeiro",
+            name = "Bruno Ribeiro",
+            role = "user",
+            image = "https://ca.slack-edge.com/T02RM6X6B-U06SEEY1Y4X-e93beda8910b-512",
+        ),
     )
 }

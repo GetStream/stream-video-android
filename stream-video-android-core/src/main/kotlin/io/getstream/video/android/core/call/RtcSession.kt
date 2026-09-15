@@ -59,6 +59,7 @@ import io.getstream.video.android.core.call.utils.SessionFatalException
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishOptionsEvent
@@ -584,6 +585,64 @@ public class RtcSession internal constructor(
     }
 
     /**
+     * Moves publishing onto a freshly built audio track, so audio-source constraints that are
+     * fixed at source creation can be changed without rejoining.
+     *
+     * No renegotiation: replacing a sender's track does not change the SDP. When nothing is
+     * published yet the new pair simply becomes current.
+     *
+     * @return true when the pipeline was rebuilt.
+     */
+    internal fun rebuildAudioCapturePipeline(): Boolean =
+        call.mediaManager.replaceAudioSourceAndTrack { newTrack ->
+            val publisher = publisher.value
+            // Nothing published yet — no publisher, or a publisher with no audio sender
+            // (joined muted) — so there is no sender to move and the new pair stands. The
+            // next publishStream reads mediaManager.audioSource, which is now this pair.
+            if (publisher == null || !publisher.hasLiveAudioSender()) {
+                return@replaceAudioSourceAndTrack true
+            }
+
+            publisher.replaceAudioTrack(newTrack).also { replaced ->
+                if (replaced) {
+                    // The local participant's track has to point at what is actually being sent.
+                    setLocalTrack(
+                        TrackType.TRACK_TYPE_AUDIO,
+                        AudioTrack(
+                            streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
+                            audio = newTrack,
+                        ),
+                    )
+                }
+            }
+        }
+
+    /**
+     * Applies a maximum audio bitrate to the live publisher, with no renegotiation.
+     *
+     * @return true when a live audio sender accepted it.
+     */
+    internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean =
+        publisher.value?.setAudioMaxBitrate(maxBitrateBps) ?: false
+
+    /**
+     * Whether an audio sender exists to take a bitrate ceiling. No publisher is the same as
+     * no sender: the next transceiver is built from the published profile.
+     */
+    internal fun hasLiveAudioSender(): Boolean =
+        publisher.value?.hasLiveAudioSender() ?: false
+
+    /** The maximum bitrate on the live audio sender, or null when nothing is publishing audio. */
+    internal fun audioMaxBitrate(): Int? = publisher.value?.audioMaxBitrate()
+
+    /** The audio bitrate the SFU negotiated at join, or null when nothing publishes audio. */
+    internal fun negotiatedAudioBitrate(): Int? = publisher.value?.negotiatedAudioBitrate()
+
+    /** The bitrate the SFU offers for [profile], or null when it named none. */
+    internal fun audioBitrateFor(profile: stream.video.sfu.models.AudioBitrateProfile): Int? =
+        publisher.value?.audioBitrateFor(profile)
+
+    /**
      * Connection and WebRTC.
      */
 
@@ -630,6 +689,38 @@ public class RtcSession internal constructor(
      */
     internal fun isSDKInitialized() = StreamVideo.isInstalled
 
+    /**
+     * Records whether the app attached an encryption manager to this call.
+     *
+     * [Call.setE2EEManager] has to run before [join], so no session and therefore no tracer exists
+     * at the moment the app calls it. Session creation is the first point where that choice can
+     * reach the stats pipeline, and it is also the point that acts on it: the publisher and the
+     * subscriber capture the manager as they are built, just below.
+     *
+     * Only the setup is traced, not the encryption events native reports afterwards: those arrive
+     * per frame on every client, which is far more volume than call stats should carry. Apps observe
+     * them through [StreamEncryptionManager.setEventListener] instead.
+     */
+    private fun traceE2EEConfiguration() {
+        val manager = call.e2eeManager
+        if (manager == null) {
+            sfuTracer.trace(PeerConnectionTraceKey.E2EE_SET_MANAGER.value, "none")
+            return
+        }
+
+        val algorithm = (manager as? StreamEncryptionManager)?.let {
+            // Reads native state, which an app-owned manager may already have disposed.
+            safeCallWithDefault(null) { it.algorithm.name }
+        }
+        sfuTracer.trace(
+            PeerConnectionTraceKey.E2EE_SET_MANAGER.value,
+            buildString {
+                append("manager=${manager.javaClass.simpleName}")
+                algorithm?.let { append(" algorithm=$it") }
+            },
+        )
+    }
+
     init {
         if (!isSDKInitialized()) {
             throw IllegalArgumentException(
@@ -637,6 +728,8 @@ public class RtcSession internal constructor(
             )
         }
         logger.i { "<init> #sfu; #track; no args" }
+
+        traceE2EEConfiguration()
 
         // step 1 setup the peer connections
         // publisher = createPublisher()
@@ -1450,6 +1543,8 @@ public class RtcSession internal constructor(
                 // Empty, handled differently
             },
             onIceCandidateRequest = ::sendIceCandidate,
+            e2eeManager = call.e2eeManager,
+            userIdForSession = { call.state.getParticipantBySessionId(it)?.userId?.value },
         )
         return peerConnection
     }
@@ -1544,6 +1639,7 @@ public class RtcSession internal constructor(
                 // Empty on purpose
             },
             isHifiAudioEnabled = call.state.settings.value?.audio?.hifiAudioEnabled ?: false,
+            e2eeManager = call.e2eeManager,
         )
     }
 

@@ -64,4 +64,12 @@ internal class AudioSwitchDecorator(private val controller: AudioSwitchControlle
         val scope = ensureScope() ?: return
         scope.launch { controller.selectDevice(device) }
     }
+
+    /**
+     * Runs inline rather than on the audio scope, unlike the calls above: setting the mode is a
+     * single cheap call with no device discovery behind it, and the caller is told whether the
+     * platform took it.
+     */
+    fun setCommunicationModeEnabled(enabled: Boolean): Boolean =
+        controller.setCommunicationModeEnabled(enabled)
 }

@@ -32,6 +32,7 @@ import io.getstream.video.android.uiautomator.findObjects
 import io.getstream.video.android.uiautomator.isDisplayed
 import io.getstream.video.android.uiautomator.retryOnStaleObjectException
 import io.getstream.video.android.uiautomator.seconds
+import io.getstream.video.android.uiautomator.wait
 import io.getstream.video.android.uiautomator.waitDisplayed
 import io.getstream.video.android.uiautomator.waitForCount
 import io.getstream.video.android.uiautomator.waitForText
@@ -130,8 +131,10 @@ fun UserRobot.assertBackground(background: Background, isEnabled: Boolean): User
         Background.IMAGE -> SettingsMenu.imageBackgroundEnabledToggle
         Background.BLUR -> SettingsMenu.blurBackgroundEnabledToggle
     }
-    val expectedCount = if (isEnabled) 1 else 0
-    assertEquals(expectedCount, locator.findObjects().size)
+    // The menu items land in the accessibility tree a moment after the sheet opens, so an
+    // instant count right after settings(ENABLE) can read 0 for a toggle that is there.
+    val toggles = if (isEnabled) locator.wait().findObjects() else locator.waitToDisappear().findObjects()
+    assertEquals(if (isEnabled) 1 else 0, toggles.size)
     return this
 }
 
@@ -270,7 +273,12 @@ fun UserRobot.assertSpotlightView(): UserRobot {
 
 fun UserRobot.assertIncomingCall(isDisplayed: Boolean): UserRobot {
     if (isDisplayed) {
-        assertTrue("Accept call button", RingPage.acceptCallButton.waitToAppear().isDisplayed())
+        // Often the first wait after the participant rings, so it carries the whole ring
+        // delivery latency. Same budget as waitForIncomingCall.
+        assertTrue(
+            "Accept call button",
+            RingPage.acceptCallButton.waitToAppear(timeOutMillis = 30.seconds).isDisplayed(),
+        )
         assertTrue("Decline call button", RingPage.declineCallButton.isDisplayed())
         assertTrue("Call label", RingPage.incomingCallLabel.isDisplayed())
         assertTrue("Avatar", RingPage.callParticipantAvatar.isDisplayed())
@@ -292,12 +300,20 @@ fun UserRobot.assertOutgoingCall(audioOnly: Boolean = true, isDisplayed: Boolean
         // muted state right after the screen renders), so poll instead of instant asserts.
         assertTrue("Call label", RingPage.outgoingCallLabel.waitDisplayed())
         assertTrue("Avatar", RingPage.callParticipantAvatar.waitDisplayed())
-        assertTrue("Microphone", RingPage.microphoneEnabledToggle.waitDisplayed())
+        assertTrue(
+            "Microphone",
+            RingPage.microphoneEnabledToggle.waitDisplayed() ||
+                RingPage.microphoneDisabledToggle.waitDisplayed(),
+        )
         if (audioOnly) {
             assertFalse("Camera enabled toggle", RingPage.cameraEnabledToggle.isDisplayed())
             assertFalse("Camera disabled toggle", RingPage.cameraDisabledToggle.isDisplayed())
         } else {
-            assertTrue("Camera", RingPage.cameraEnabledToggle.waitDisplayed())
+            assertTrue(
+                "Camera",
+                RingPage.cameraEnabledToggle.waitDisplayed() ||
+                    RingPage.cameraDisabledToggle.waitDisplayed(),
+            )
         }
     } else {
         assertFalse(
