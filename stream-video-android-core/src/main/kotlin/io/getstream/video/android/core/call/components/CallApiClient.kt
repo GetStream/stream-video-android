@@ -110,7 +110,10 @@ internal class CallApiClient(
         logger.i {
             "[joinRequest] e2ee=$requestE2ee encryptionMode=${state.settings.value?.encryption?.mode}"
         }
-        callAnalytics.joinAnalytics.onJoinRequestStart(joinAnalyticsModel.joinReason)
+        callAnalytics.joinAnalytics.onJoinRequestStart(
+            joinAnalyticsModel.joinReason,
+            joinAnalyticsModel.joinSource,
+        )
         val result = clientImpl.joinCall(
             type, id,
             create = create != null,

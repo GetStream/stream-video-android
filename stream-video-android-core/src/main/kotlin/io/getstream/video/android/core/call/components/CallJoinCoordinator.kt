@@ -39,6 +39,7 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -69,6 +70,8 @@ internal class CallJoinCoordinator(
     private val sessionMonitor: SessionMonitor,
     private val callRegistry: ClientCallRegistry,
     private val hasRequiredPermissions: () -> Boolean,
+    // Reads and clears the source of a ring-driven join; see Call.consumeJoinSource.
+    private val consumeJoinSource: () -> RingJoinSource? = { null },
 ) {
     private companion object {
         const val JOIN_FLIGHT_KEY = "join"
@@ -266,7 +269,7 @@ internal class CallJoinCoordinator(
                 ring,
                 notify,
                 hintHighScaleLivestreamPublisher,
-                JoinAnalyticsModel(retryCount, JoinReason.FirstAttempt),
+                JoinAnalyticsModel(retryCount, JoinReason.FirstAttempt, consumeJoinSource()),
             )
             if (result is Success) {
                 // we initialise the camera, mic and other according to local + backend settings

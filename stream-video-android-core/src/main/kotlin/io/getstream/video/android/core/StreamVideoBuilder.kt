@@ -35,6 +35,7 @@ import io.getstream.video.android.core.notifications.internal.storage.DeviceToke
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
+import io.getstream.video.android.core.ringing.RingStatePollingConfig
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
@@ -99,6 +100,7 @@ import java.net.ConnectException
  * @property audioProcessing The audio processor used for custom modifications to audio data within WebRTC.
  * @property callServiceConfigRegistry The audio processor used for custom modifications to audio data within WebRTC.
  * @property leaveAfterDisconnectSeconds The number of seconds to wait before leaving the call after the connection is disconnected.
+ * @property ringStatePolling How an outgoing ring falls back to reading its state when the websocket stops delivering ring events. Null disables the fallback.
  * @property callUpdatesAfterLeave Whether to update the call state after leaving the call.
  * @property connectOnInit Determines whether the socket should automatically connect as soon as a user is set.
  *          If `false`, the connection is established only when explicitly requested or when core SDK features
@@ -166,6 +168,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val telecomConfig: TelecomConfig? = null,
     private val connectOnInit: Boolean = true,
     private val rejectCallWhenBusy: Boolean = false,
+    private val ringStatePolling: RingStatePollingConfig? = RingStatePollingConfig(),
 ) {
     private val context: Context = context.applicationContext
     private val scope = UserScope(ClientScope())
@@ -314,6 +317,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             loggingLevel = loggingLevel,
             connectionTimeoutInMs = connectionTimeoutInMs,
             leaveAfterDisconnectSeconds = leaveAfterDisconnectSeconds,
+            ringStatePolling = ringStatePolling,
             enableCallUpdatesAfterLeave = callUpdatesAfterLeave,
             enableStatsCollection = enableStatsReporting,
             vibrationConfig = vibrationConfig,

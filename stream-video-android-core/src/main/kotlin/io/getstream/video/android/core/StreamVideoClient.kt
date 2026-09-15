@@ -111,6 +111,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomCon
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.recording.RecordingType
+import io.getstream.video.android.core.ringing.RingStatePollingConfig
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
@@ -191,6 +192,7 @@ internal class StreamVideoClient internal constructor(
     internal val loggingLevel: LoggingLevel = LoggingLevel(),
     internal val connectionTimeoutInMs: Long = 5_000,
     internal val leaveAfterDisconnectSeconds: Long = 30,
+    internal val ringStatePolling: RingStatePollingConfig? = RingStatePollingConfig(),
     internal val appVersion: String? = null,
     internal val enableCallUpdatesAfterLeave: Boolean = false,
     internal val enableStatsCollection: Boolean = true,
