@@ -233,6 +233,41 @@ class RingStatePollerTest {
     }
 
     @Test
+    fun `starting an already running poller is ignored`() = runTest {
+        var reads = 0
+        val poller = poller(fetch = {
+            reads++
+            Result.Success(ringState())
+        })
+
+        poller.start({ sessionId }, { ringTimeout })
+        // A second arm must not add a parallel loop, or every ring event that re-enters the
+        // ringing state would double the read rate.
+        poller.start({ sessionId }, { ringTimeout })
+        advanceTimeBy(600_000)
+
+        // The reads of one loop over a 30s window, not two loops interleaved.
+        assertThat(reads).isEqualTo(3)
+        poller.stop()
+    }
+
+    @Test
+    fun `a ring window of zero falls back to the default rather than never polling`() = runTest {
+        var reads = 0
+        val poller = poller(fetch = {
+            reads++
+            Result.Success(ringState())
+        })
+
+        // 0 means "no auto-drop" in the ring settings, not "a zero length ring".
+        poller.start({ sessionId }, { 0L })
+        advanceTimeBy(600_000)
+
+        assertThat(reads).isEqualTo(3)
+        poller.stop()
+    }
+
+    @Test
     fun `falls back to a default ring window when the ring settings are not known`() = runTest {
         var reads = 0
         val poller = poller(fetch = {
