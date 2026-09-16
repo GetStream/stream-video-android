@@ -36,9 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
@@ -55,7 +52,7 @@ public fun BoxScope.LivestreamPlayerOverlay(
         modifier = Modifier
             .fillMaxWidth()
             .align(Alignment.BottomCenter)
-            .padding(6.dp),
+            .padding(StreamTokens.spacingXs),
     ) {
         LiveBadge(call = call)
 
@@ -81,17 +78,17 @@ private fun BoxScope.LiveBadge(call: Call) {
                     color = VideoTheme.colors.accentPrimary,
                     shape = RoundedCornerShape(StreamTokens.radius4xl),
                 )
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+                .padding(horizontal = StreamTokens.spacingMd, vertical = StreamTokens.spacing2xs),
             text = stringResource(
                 id = io.getstream.video.android.ui.common.R.string.stream_video_live,
             ),
             color = VideoTheme.colors.textOnAccent,
         )
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(StreamTokens.spacingSm))
 
         Image(
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(StreamTokens.iconSizeMd),
             painter = painterResource(
                 id = io.getstream.video.android.compose.R.drawable.stream_design_ic_livestream_fill,
             ),
@@ -101,11 +98,10 @@ private fun BoxScope.LiveBadge(call: Call) {
         )
 
         Text(
-            modifier = Modifier.padding(horizontal = 8.dp),
+            modifier = Modifier.padding(horizontal = StreamTokens.spacingXs),
             text = totalParticipants.toString(),
             color = VideoTheme.colors.textOnAccent,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
+            style = VideoTheme.typography.captionEmphasis,
         )
     }
 }
@@ -120,17 +116,16 @@ private fun BoxScope.LiveDuration(call: Call) {
     ) {
         Box(
             modifier = Modifier
-                .size(8.dp)
+                .size(StreamTokens.size8)
                 .clip(CircleShape)
                 .background(VideoTheme.colors.accentError),
         )
 
         Text(
-            modifier = Modifier.padding(horizontal = 6.dp),
+            modifier = Modifier.padding(horizontal = StreamTokens.spacingXs),
             text = (duration ?: 0).toString(),
             color = VideoTheme.colors.textOnAccent,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
+            style = VideoTheme.typography.captionEmphasis,
         )
     }
 }
@@ -142,9 +137,7 @@ private fun BoxScope.LiveControls(
     onAudioToggle: (Boolean) -> Unit = {},
 ) {
     ToggleSpeakerphoneAction(
-        modifier = Modifier
-            .align(Alignment.CenterEnd)
-            .size(45.dp),
+        modifier = Modifier.align(Alignment.CenterEnd),
         isSpeakerphoneEnabled = isAudioEnabled,
         onCallAction = { callAction ->
             onAudioToggle(callAction.isEnabled)

@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.common.R
@@ -42,7 +41,7 @@ internal fun BoxScope.HostVideoNotAvailableUi(call: Call) {
             text = stringResource(
                 id = R.string.stream_video_livestreaming_host_video_not_available,
             ),
-            fontSize = 18.sp,
+            style = VideoTheme.typography.headingMedium,
             color = VideoTheme.colors.textPrimary,
         )
     }

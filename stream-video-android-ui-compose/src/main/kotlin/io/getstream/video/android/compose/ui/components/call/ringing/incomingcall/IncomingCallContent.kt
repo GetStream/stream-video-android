@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.IncomingCallControlsContentParams
 import io.getstream.video.android.compose.theme.IncomingCallDetailsContentParams
@@ -169,7 +168,7 @@ public fun IncomingCallContent(
                         ),
                     )
                 }
-            Spacer(modifier = Modifier.height(100.dp))
+            Spacer(modifier = Modifier.height(StreamTokens.size80))
         }
 
         controlsContent?.invoke(this) ?: with(VideoTheme.componentFactory) {

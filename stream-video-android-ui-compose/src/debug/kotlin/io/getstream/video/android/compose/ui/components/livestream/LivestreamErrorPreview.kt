@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.livestream
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,24 +25,14 @@ import io.getstream.video.android.mock.previewCall
 
 @Preview
 @Composable
-private fun LivestreamBackstageRootPreview() {
+private fun LivestreamErrorRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        LivestreamBackstagePreview()
+        LivestreamErrorPreview()
     }
 }
 
 @Composable
-internal fun LivestreamBackstagePreview() {
-    Box {
-        LivestreamBackStage(call = previewCall)
-    }
-}
-
-@Suppress("DEPRECATION")
-@Composable
-internal fun LivestreamBackstageDeprecatedPreview() {
-    Box {
-        LivestreamBackStage()
-    }
+internal fun LivestreamErrorPreview() {
+    LivestreamErrorUi(call = previewCall, onRetryJoin = {})
 }

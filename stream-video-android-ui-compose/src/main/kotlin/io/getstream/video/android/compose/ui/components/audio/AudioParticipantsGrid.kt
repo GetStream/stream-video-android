@@ -57,14 +57,14 @@ public fun AudioParticipantsGrid(
     LazyVerticalGrid(
         modifier = modifier,
         columns = GridCells.Adaptive(100.dp),
-        contentPadding = PaddingValues(vertical = 32.dp),
+        contentPadding = PaddingValues(vertical = StreamTokens.spacing2xl),
         verticalArrangement = Arrangement.spacedBy(
             StreamTokens.spacingMd,
         ),
         horizontalArrangement = if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             Arrangement.spacedBy(StreamTokens.spacingMd)
         } else {
-            Arrangement.spacedBy(0.dp)
+            Arrangement.spacedBy(StreamTokens.spacingNone)
         },
     ) {
         items(items = participants, key = { it.sessionId }) { participant ->

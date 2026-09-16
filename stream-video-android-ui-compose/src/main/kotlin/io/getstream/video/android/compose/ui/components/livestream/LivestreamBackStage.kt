@@ -31,11 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.common.R
 import kotlinx.coroutines.delay
@@ -54,10 +52,10 @@ internal fun BoxScope.LivestreamBackStage(call: Call) {
             text = stringResource(
                 id = R.string.stream_video_livestreaming_on_backstage_v2,
             ),
-            fontSize = 18.sp,
+            style = VideoTheme.typography.headingMedium,
             color = VideoTheme.colors.textPrimary,
         )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(StreamTokens.spacingMd))
 
         val startsAt by call.state.startsAt.collectAsStateWithLifecycle()
 
@@ -79,7 +77,7 @@ internal fun BoxScope.LivestreamBackStage() {
         text = stringResource(
             id = R.string.stream_video_livestreaming_on_backstage,
         ),
-        fontSize = 14.sp,
+        style = VideoTheme.typography.captionDefault,
         color = VideoTheme.colors.textPrimary,
     )
 }
@@ -91,10 +89,10 @@ internal fun ParticipantCountUi(call: Call) {
     }.collectAsStateWithLifecycle(null)
 
     waitingCount?.let {
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(StreamTokens.spacingMd))
         Text(
             "$it participants have joined early",
-            fontSize = 16.sp,
+            style = VideoTheme.typography.bodyDefault,
             color = VideoTheme.colors.textSecondary,
         )
     }
@@ -132,8 +130,7 @@ internal fun CountDownTimerUi(targetUtcTime: String) {
     Text(
         modifier = Modifier,
         text = countDownText,
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold,
+        style = VideoTheme.typography.headingMedium,
         color = VideoTheme.colors.textPrimary,
     )
 }

@@ -26,24 +26,16 @@ import io.getstream.video.android.mock.previewCall
 
 @Preview
 @Composable
-private fun LivestreamBackstageRootPreview() {
+private fun HostVideoNotAvailableUiRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        LivestreamBackstagePreview()
+        HostVideoNotAvailableUiPreview()
     }
 }
 
 @Composable
-internal fun LivestreamBackstagePreview() {
+internal fun HostVideoNotAvailableUiPreview() {
     Box {
-        LivestreamBackStage(call = previewCall)
-    }
-}
-
-@Suppress("DEPRECATION")
-@Composable
-internal fun LivestreamBackstageDeprecatedPreview() {
-    Box {
-        LivestreamBackStage()
+        HostVideoNotAvailableUi(call = previewCall)
     }
 }

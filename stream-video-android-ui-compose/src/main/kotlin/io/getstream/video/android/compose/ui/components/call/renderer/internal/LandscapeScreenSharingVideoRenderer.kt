@@ -28,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
@@ -81,7 +80,7 @@ internal fun LandscapeScreenSharingVideoRenderer(
         Box(
             modifier = Modifier
                 .padding(StreamTokens.spacing2xs)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(StreamTokens.radiusXl))
                 .fillMaxWidth()
                 .weight(0.65f)
                 .background(VideoTheme.colors.backgroundCoreElevation1),
