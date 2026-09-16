@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.Manifest
+import android.app.Application
 import android.app.Notification
 import android.content.Context
 import android.content.ContextWrapper
@@ -45,12 +46,15 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
@@ -195,6 +199,25 @@ class CallServiceTest {
         // Then
         assertEquals(testCallId, intent.streamCallId(INTENT_EXTRA_CALL_CID))
         assertNull(intent.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME))
+    }
+
+    @Test
+    fun `onDestroy unregisters toggle camera broadcast receiver`() {
+        callService.attachContext(context)
+        callService.serviceStateController.registerToggleCameraBroadcastReceiver(
+            callService,
+            callService.serviceScope,
+        )
+        val receiver = callService.serviceStateController.state.value.toggleCameraBroadcastReceiver
+        val shadowApplication = shadowOf(context as Application)
+        assertTrue(callService.serviceStateController.state.value.isReceiverRegistered)
+        assertTrue(shadowApplication.registeredReceivers.any { it.broadcastReceiver === receiver })
+
+        callService.onDestroy()
+
+        assertFalse(callService.serviceStateController.state.value.isReceiverRegistered)
+        assertNull(callService.serviceStateController.state.value.toggleCameraBroadcastReceiver)
+        assertFalse(shadowApplication.registeredReceivers.any { it.broadcastReceiver === receiver })
     }
 
     // Test constants consistency
