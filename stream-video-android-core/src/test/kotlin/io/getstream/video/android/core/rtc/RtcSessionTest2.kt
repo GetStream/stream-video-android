@@ -30,6 +30,7 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
@@ -60,17 +61,12 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -78,6 +74,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
@@ -94,6 +91,14 @@ import java.io.InterruptedIOException
 import java.util.concurrent.atomic.AtomicBoolean
 
 class RtcSessionTest2 {
+
+    // RtcSession's constructor launches into Dispatchers.Main for the lifecycle
+    // observer. Without a Main dispatcher that coroutine throws, and because the
+    // failure escapes to the global handler it surfaces inside the *next* test as
+    // UncaughtExceptionsBeforeTest. The rule also routes DispatcherProvider.IO
+    // through the test scheduler.
+    @get:Rule
+    val dispatcherRule = DispatcherRule()
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -1106,37 +1111,37 @@ class RtcSessionTest2 {
         }
 
     @Test
-    fun `mute sync resumes and flushes local state once the SFU is ready`() = runBlocking {
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
-        try {
-            val signalService = mockk<SignalServerService>(relaxed = true)
-            coEvery { signalService.updateMuteStates(any()) } returns UpdateMuteStatesResponse()
-            ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
-            val (rtcSession, publisherMock) = muteSyncSession(signalService, scope)
-            rtcSession.publisher.value = publisherMock
-            val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
-            coEvery {
-                publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
-            } returns audioTrack
+    fun `mute sync resumes and flushes local state once the SFU is ready`() = runTest(
+        testDispatcher,
+    ) {
+        val signalService = mockk<SignalServerService>(relaxed = true)
+        coEvery { signalService.updateMuteStates(any()) } returns UpdateMuteStatesResponse()
+        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+        val (rtcSession, publisherMock) = muteSyncSession(signalService)
+        rtcSession.publisher.value = publisherMock
+        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+        coEvery {
+            publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
+        } returns audioTrack
 
-            rtcSession.enterMigration()
-            rtcSession.createAndPublishAudioTrack()
-            assertEquals(true, rtcSession.muteState.value[TrackType.TRACK_TYPE_AUDIO])
-            assertTrue(pendingMuteSyncTracks(rtcSession).contains(TrackType.TRACK_TYPE_AUDIO))
-            coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
-            assertEquals(false, muteSyncEnabled(rtcSession).get())
+        rtcSession.enterMigration()
+        rtcSession.createAndPublishAudioTrack()
+        testScheduler.advanceUntilIdle()
 
-            RtcSession::class.java.getDeclaredMethod("resumeMuteSync").apply {
-                isAccessible = true
-                invoke(rtcSession)
-            }
+        assertEquals(true, rtcSession.muteState.value[TrackType.TRACK_TYPE_AUDIO])
+        assertTrue(pendingMuteSyncTracks(rtcSession).contains(TrackType.TRACK_TYPE_AUDIO))
+        coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
+        assertEquals(false, muteSyncEnabled(rtcSession).get())
 
-            coVerify(timeout = 3_000, exactly = 1) { signalService.updateMuteStates(any()) }
-            assertTrue(pendingMuteSyncTracks(rtcSession).isEmpty())
-            assertEquals(true, muteSyncEnabled(rtcSession).get())
-        } finally {
-            scope.cancel()
+        RtcSession::class.java.getDeclaredMethod("resumeMuteSync").apply {
+            isAccessible = true
+            invoke(rtcSession)
         }
+        testScheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { signalService.updateMuteStates(any()) }
+        assertTrue(pendingMuteSyncTracks(rtcSession).isEmpty())
+        assertEquals(true, muteSyncEnabled(rtcSession).get())
     }
 
     @Test
@@ -1194,7 +1199,6 @@ class RtcSessionTest2 {
 
     private fun muteSyncSession(
         signalService: SignalServerService,
-        coroutineScope: CoroutineScope = testScope,
     ): Pair<RtcSession, Publisher> {
         val mockSocket = mockk<SfuSocketConnection>(relaxed = true) {
             every { state() } returns MutableStateFlow(SfuSocketState.Disconnected.Stopped)
@@ -1226,8 +1230,8 @@ class RtcSessionTest2 {
             sfuToken = "fake-sfu-token",
             sfuName = "test-sfu-edge",
             clientImpl = mockVideoClient,
-            coroutineScope = coroutineScope,
-            rtcSessionScope = coroutineScope,
+            coroutineScope = testScope,
+            rtcSessionScope = testScope,
             remoteIceServers = emptyList(),
             sfuConnectionModuleProvider = { mockModule },
             sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
