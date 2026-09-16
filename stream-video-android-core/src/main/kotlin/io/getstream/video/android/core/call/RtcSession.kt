@@ -2260,6 +2260,11 @@ public class RtcSession internal constructor(
         iceMonitoringJob?.cancel()
         iceMonitoringJob = null
         muteSyncEnabled.set(false)
+        // Nothing is deferred at the moment we pause, so anything still in the set is
+        // a leftover from a collector that raced the previous [resumeMuteSync] and
+        // posted anyway. Dropping it here keeps the next resume from flushing a track
+        // this pause never deferred.
+        pendingMuteSyncTracks.clear()
         muteStateSyncJobs.cancelAll()
         participantsMonitoringJob?.cancel()
         participantsMonitoringJob = null
