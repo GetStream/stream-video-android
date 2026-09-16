@@ -1458,6 +1458,12 @@ public class CallState(
             if (state is RingingState.Outgoing && !state.acceptedByCallee) {
                 startRingingTimer()
                 startRingStatePolling()
+            } else if (state is RingingState.Outgoing) {
+                // Accepted, join in flight. The ring is not settled until we are in the call:
+                // a join can fail, and disarming here would leave an accepted ring with no
+                // watchdog and no reader, so nothing would ever resolve it. Both keep running
+                // on their original deadlines - re-arming them would hand the ring a second
+                // full window - and the next poll retries the join.
             } else if (state is RingingState.Incoming && !state.acceptedByMe) {
                 startRingingTimer()
             } else {
@@ -1645,10 +1651,27 @@ public class CallState(
                 delay(autoCancelTimeout.toLong())
 
                 // double check that we are still in Outgoing call state and call is not active
-                if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
+                val ringingState = _ringingState.value
+                if (ringingState is RingingState.Outgoing || ringingState is RingingState.Incoming && client.state.activeCall.value == null) {
                     isJoinAndRingInProgress.set(false)
-                    call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
-                    val leaveMessage = if (_ringingState.value is RingingState.Outgoing) "Outgoing call timed out with no answer" else "Incoming call timed out with no answer"
+
+                    // Reaching the deadline on an accepted ring means our own join never
+                    // landed, not that nobody answered. The callee is in the call, and a
+                    // timeout reject from the caller cancels the ring for them, so give up
+                    // locally rather than ending a call somebody is already in.
+                    val acceptedByCallee =
+                        ringingState is RingingState.Outgoing && ringingState.acceptedByCallee
+                    if (acceptedByCallee) {
+                        logger.w { "[startRingingTimer] accepted but never joined, leaving without rejecting" }
+                    } else {
+                        call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
+                    }
+
+                    val leaveMessage = when {
+                        acceptedByCallee -> "Outgoing call was accepted but never joined"
+                        ringingState is RingingState.Outgoing -> "Outgoing call timed out with no answer"
+                        else -> "Incoming call timed out with no answer"
+                    }
                     call.leave(CallLeaveReason.SdkDriven(cause = SdkCause.RING_TIMEOUT, message = leaveMessage))
                 }
             } else {
