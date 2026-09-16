@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.core.notifications.internal.telecom
+package io.getstream.video.android.core
 
-import android.os.Build
-import io.getstream.video.android.core.StreamVideo
+/** Identifies which component owns incoming-call ringing. */
+internal sealed interface IncomingRingtoneOwner {
 
-// TODO pass StreamVideo instance in constructor on v2
-internal class TelecomHelper {
+    /** The incoming-call notification produces the ringtone and vibration. */
+    data object Notification : IncomingRingtoneOwner
 
-    fun canUseJetpackTelecom(): Boolean {
-        val integrationTypeIsJetpack = (StreamVideo.instanceOrNull())?.state?.getTelecomIntegrationType() == TelecomIntegrationType.JETPACK_TELECOM
-        return integrationTypeIsJetpack && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-    }
+    /** The SDK sound and vibration player produces the ringtone and vibration. */
+    data object Legacy : IncomingRingtoneOwner
 }
