@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.test.assertFailsWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RingStatePollerTest {
@@ -230,6 +231,15 @@ class RingStatePollerTest {
         // 30s window: quiet period to 15s, then reads at 15, 20 and 25s, and no further.
         assertThat(reads).isEqualTo(3)
         poller.stop()
+    }
+
+    @Test
+    fun `a timing that would spin the read loop is rejected at construction`() {
+        // Disabling polling is done by passing a null config, never by zeroing a timing, so a
+        // non-positive interval is a mistake rather than an intent to switch it off.
+        assertFailsWith<IllegalArgumentException> { RingStatePollingConfig(intervalMs = 0) }
+        assertFailsWith<IllegalArgumentException> { RingStatePollingConfig(maxDurationMs = 0) }
+        assertFailsWith<IllegalArgumentException> { RingStatePollingConfig(startAfterMs = -1) }
     }
 
     @Test

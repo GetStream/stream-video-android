@@ -259,6 +259,11 @@ internal class CallJoinCoordinator(
         state._connection.value = RealtimeConnection.InProgress
         var retryCount = 0
 
+        // Read once, outside the loop: the source is one-shot, so consuming it per attempt would
+        // leave every retry - and therefore the attempt that actually succeeds - unattributed.
+        // Retries are the flaky-network case, which is exactly the population this measures.
+        val joinSource = consumeJoinSource()
+
         var result: Result<RtcSession>
 
         lifecycle.resetLeaveGuard()
@@ -269,7 +274,7 @@ internal class CallJoinCoordinator(
                 ring,
                 notify,
                 hintHighScaleLivestreamPublisher,
-                JoinAnalyticsModel(retryCount, JoinReason.FirstAttempt, consumeJoinSource()),
+                JoinAnalyticsModel(retryCount, JoinReason.FirstAttempt, joinSource),
             )
             if (result is Success) {
                 // we initialise the camera, mic and other according to local + backend settings

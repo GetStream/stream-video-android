@@ -29,6 +29,19 @@ public data class RingStatePollingConfig(
     val maxDurationMs: Long = DEFAULT_MAX_DURATION_MS,
     val defaultRingWindowMs: Long = DEFAULT_RING_WINDOW_MS,
 ) {
+    init {
+        // A non-positive interval turns the read loop into a spin against a rate limited
+        // endpoint, for as long as the ring lasts. Fail where the value is set, not in the
+        // field. Polling is disabled by passing null for the whole config, never by zeroing a
+        // timing.
+        require(intervalMs > 0) { "intervalMs must be positive, was $intervalMs" }
+        require(startAfterMs >= 0) { "startAfterMs cannot be negative, was $startAfterMs" }
+        require(maxDurationMs > 0) { "maxDurationMs must be positive, was $maxDurationMs" }
+        require(defaultRingWindowMs > 0) {
+            "defaultRingWindowMs must be positive, was $defaultRingWindowMs"
+        }
+    }
+
     public companion object {
         public const val DEFAULT_START_AFTER_MS: Long = 15_000
         public const val DEFAULT_INTERVAL_MS: Long = 5_000

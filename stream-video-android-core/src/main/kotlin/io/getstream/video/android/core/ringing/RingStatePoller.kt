@@ -135,8 +135,16 @@ internal class RingStatePoller(
     private suspend fun poll(callSessionId: String): Boolean {
         when (val result = fetch(callSessionId)) {
             is Result.Success -> {
-                logger.d { "[poll] ${result.value}" }
-                onRingState(result.value)
+                val state = result.value
+                // Counts rather than the response: the payload carries the call cid, the session
+                // id and the participant maps, and this reads every few seconds for every
+                // ringing caller. What a log needs to answer is whether the ring settled.
+                logger.d {
+                    "[poll] accepted=${state.acceptedBy.size} rejected=${state.rejectedBy.size} " +
+                        "missed=${state.missedBy.size} " +
+                        "ended=${state.callEndedAt != null || state.sessionEndedAt != null}"
+                }
+                onRingState(state)
             }
             is Result.Failure -> {
                 val error = result.value
