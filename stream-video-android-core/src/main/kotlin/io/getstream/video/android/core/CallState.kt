@@ -1539,8 +1539,19 @@ public class CallState(
         call.setJoinSource(source)
         autoJoiningCall = scope.launch {
             // errors are handled inside the join function
-            call.join()
+            val joinResult = call.join()
             autoJoiningCall = null
+
+            // Being in the call is what ends the outgoing ringing UI, but the state machine only
+            // reads that fact when something calls it, and joining does not. With a live socket a
+            // coordinator event recomputes it within milliseconds, which is why this has never
+            // shown. Polling runs precisely when no such event is coming, so without this the
+            // caller keeps the ringing screen up while already publishing, until the socket
+            // reconnects. Recomputed after the join rather than when the call is marked active,
+            // so the transition follows a call we are actually in.
+            if (joinResult is Result.Success) {
+                updateRingingState()
+            }
         }
         return true
     }
