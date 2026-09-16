@@ -1319,6 +1319,7 @@ public final class io/getstream/video/android/compose/ui/components/base/StreamB
 }
 
 public final class io/getstream/video/android/compose/ui/components/base/StreamButtonSize : java/lang/Enum {
+	public static final field ExtraLarge Lio/getstream/video/android/compose/ui/components/base/StreamButtonSize;
 	public static final field Large Lio/getstream/video/android/compose/ui/components/base/StreamButtonSize;
 	public static final field Medium Lio/getstream/video/android/compose/ui/components/base/StreamButtonSize;
 	public static final field Small Lio/getstream/video/android/compose/ui/components/base/StreamButtonSize;

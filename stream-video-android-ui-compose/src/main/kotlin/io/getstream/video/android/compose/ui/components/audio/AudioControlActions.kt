@@ -62,7 +62,7 @@ public fun AudioControlActions(
             id = io.getstream.video.android.ui.common.R.string.stream_video_audio_leave,
         ),
         leadingIcon = painterResource(R.drawable.stream_design_ic_leave),
-        style = StreamButtonStyleDefaults.secondarySolid,
+        style = StreamButtonStyleDefaults.primarySolid,
         onClick = {
             onLeaveRoom?.invoke() ?: let {
                 call.leave(

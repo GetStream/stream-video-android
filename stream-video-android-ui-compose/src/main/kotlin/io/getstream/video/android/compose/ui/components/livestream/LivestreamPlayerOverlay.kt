@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.livestream
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -28,11 +27,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -87,22 +88,30 @@ private fun BoxScope.LiveBadge(call: Call) {
 
         Spacer(modifier = Modifier.width(StreamTokens.spacingSm))
 
-        Image(
-            modifier = Modifier.size(StreamTokens.iconSizeMd),
-            painter = painterResource(
-                id = io.getstream.video.android.compose.R.drawable.stream_design_ic_livestream_fill,
-            ),
-            contentDescription = stringResource(
-                id = io.getstream.video.android.ui.common.R.string.stream_video_live,
-            ),
-        )
+        Row(
+            modifier = Modifier
+                .overlayPill()
+                .padding(horizontal = StreamTokens.spacingXs, vertical = StreamTokens.spacing2xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                modifier = Modifier.size(StreamTokens.iconSizeMd),
+                painter = painterResource(
+                    id = io.getstream.video.android.compose.R.drawable.stream_design_ic_livestream_fill,
+                ),
+                contentDescription = stringResource(
+                    id = io.getstream.video.android.ui.common.R.string.stream_video_live,
+                ),
+                tint = VideoTheme.colors.textOnAccent,
+            )
 
-        Text(
-            modifier = Modifier.padding(horizontal = StreamTokens.spacingXs),
-            text = totalParticipants.toString(),
-            color = VideoTheme.colors.textOnAccent,
-            style = VideoTheme.typography.captionEmphasis,
-        )
+            Text(
+                modifier = Modifier.padding(start = StreamTokens.spacing2xs),
+                text = totalParticipants.toString(),
+                color = VideoTheme.colors.textOnAccent,
+                style = VideoTheme.typography.captionEmphasis,
+            )
+        }
     }
 }
 
@@ -111,7 +120,10 @@ private fun BoxScope.LiveDuration(call: Call) {
     val duration by call.state.duration.collectAsStateWithLifecycle()
 
     Row(
-        modifier = Modifier.align(Alignment.Center),
+        modifier = Modifier
+            .align(Alignment.Center)
+            .overlayPill()
+            .padding(horizontal = StreamTokens.spacingXs, vertical = StreamTokens.spacing2xs),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -122,7 +134,7 @@ private fun BoxScope.LiveDuration(call: Call) {
         )
 
         Text(
-            modifier = Modifier.padding(horizontal = StreamTokens.spacingXs),
+            modifier = Modifier.padding(start = StreamTokens.spacing2xs),
             text = (duration ?: 0).toString(),
             color = VideoTheme.colors.textOnAccent,
             style = VideoTheme.typography.captionEmphasis,
@@ -142,5 +154,13 @@ private fun BoxScope.LiveControls(
         onCallAction = { callAction ->
             onAudioToggle(callAction.isEnabled)
         },
+    )
+}
+
+/** The dark translucent background that keeps the overlay readable over any video or fallback screen. */
+private fun Modifier.overlayPill(): Modifier = composed {
+    background(
+        color = VideoTheme.colors.backgroundCoreOverlayDarkStrong,
+        shape = RoundedCornerShape(StreamTokens.radius4xl),
     )
 }

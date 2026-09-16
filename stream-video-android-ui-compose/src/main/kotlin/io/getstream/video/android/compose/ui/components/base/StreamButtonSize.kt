@@ -49,4 +49,11 @@ public enum class StreamButtonSize(
         iconSize = StreamTokens.iconSizeMd,
         labelPadding = StreamTokens.buttonPaddingXWithLabelLg,
     ),
+
+    /** 64dp tall, 20dp icons. The size of the ringing call controls. */
+    ExtraLarge(
+        minimumSize = StreamTokens.size64,
+        iconSize = StreamTokens.iconSizeMd,
+        labelPadding = StreamTokens.buttonPaddingXWithLabelLg,
+    ),
 }

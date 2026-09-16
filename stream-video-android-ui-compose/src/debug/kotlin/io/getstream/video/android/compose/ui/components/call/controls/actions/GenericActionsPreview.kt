@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.call.controls.actions
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
@@ -38,21 +39,23 @@ private fun ToggleActionInProgressRootPreview() {
 @Composable
 internal fun ToggleActionInProgressPreview() {
     val icon = painterResource(R.drawable.stream_design_ic_caption_fill)
-    Row {
+    Column {
         StreamButtonSize.entries.forEach { size ->
-            ToggleAction(
-                isActionActive = true,
-                iconOnOff = Pair(icon, icon),
-                progress = true,
-                size = size,
-            ) {}
-            ToggleAction(
-                isActionActive = false,
-                iconOnOff = Pair(icon, icon),
-                progress = true,
-                size = size,
-            ) {}
-            GenericAction(icon = icon, size = size) {}
+            Row {
+                ToggleAction(
+                    isActionActive = true,
+                    iconOnOff = Pair(icon, icon),
+                    progress = true,
+                    size = size,
+                ) {}
+                ToggleAction(
+                    isActionActive = false,
+                    iconOnOff = Pair(icon, icon),
+                    progress = true,
+                    size = size,
+                ) {}
+                GenericAction(icon = icon, size = size) {}
+            }
         }
     }
 }
