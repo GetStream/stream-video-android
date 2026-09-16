@@ -20,6 +20,7 @@ import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.PowerManager
+import android.os.SystemClock
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.AcceptCallResponse
@@ -87,6 +88,8 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.recording.RecordingType
+import io.getstream.video.android.core.ringing.RingJoinSource
+import io.getstream.video.android.core.ringing.RingStatePoller
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
@@ -97,6 +100,7 @@ import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.model.User
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -115,6 +119,7 @@ import stream.video.sfu.models.ClientCapability
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 
 @Deprecated(
     message = "No longer used internally. The reconnect deadline is now driven by the server's " +
@@ -301,6 +306,58 @@ public class Call(
     )
 
     /**
+     * Set immediately before a ring drives a join, and read once when the join lifecycle opens.
+     *
+     * A local-only value: it never reaches the coordinator with the join request, and reading it
+     * clears it, so a source can only ever be attributed to the join it was set for. A later
+     * reconnect opening its own lifecycle inherits nothing.
+     */
+    private val pendingJoinSource = AtomicReference<RingJoinSource?>(null)
+
+    internal fun setJoinSource(source: RingJoinSource) {
+        pendingJoinSource.set(source)
+    }
+
+    internal fun consumeJoinSource(): RingJoinSource? = pendingJoinSource.getAndSet(null)
+
+    /**
+     * Delegate that reads the ring state when an outgoing ring stops hearing from the websocket.
+     * Driven by [CallState], which owns the ringing lifecycle.
+     */
+    private var _ringStatePoller: RingStatePoller? = null
+
+    /**
+     * Created on first use rather than with the call: only an outgoing ring ever polls, and most
+     * calls never ring at all.
+     */
+    internal val ringStatePoller: RingStatePoller
+        get() = _ringStatePoller ?: RingStatePoller(
+            // A real IO dispatcher rather than the call scope or DispatcherProvider: this is a
+            // background watchdog issuing network reads on a wall-clock schedule, and the ring
+            // window bounding it is wall-clock too. Running it on a scheduler a caller can
+            // replace makes those reads someone else's to drain. Unit tests inject their own
+            // scope and clock instead.
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+            config = clientImpl.ringStatePolling,
+            now = { SystemClock.elapsedRealtime() },
+            fetch = { callSessionId -> apiClient.getRingState(callSessionId) },
+            onRingState = { state.updateFromRingState(it) },
+        ).also { _ringStatePoller = it }
+
+    /** Stops polling if it was ever started, without creating a poller just to stop it. */
+    internal fun stopRingStatePolling() {
+        _ringStatePoller?.stop()
+    }
+
+    /**
+     * Records that a ring event arrived. A no-op before the first poller exists, which is correct:
+     * [RingStatePoller.start] begins its own quiet period.
+     */
+    internal fun recordRingEvent() {
+        _ringStatePoller?.onRingEvent()
+    }
+
+    /**
      * Creates [MediaManagerImpl] for this call. Captures `this` (and the test hook) so
      * [CallMediaManager] never needs a Call reference.
      */
@@ -341,6 +398,9 @@ public class Call(
                 supervisorJob.cancel()
             }
             scope.cancel()
+            // The poller runs on its own scope, so cancelling this one does not reach it. Without
+            // this a read could still land after teardown and act on a call that is going away.
+            stopRingStatePolling()
         },
         state = state,
         callAnalytics = callAnalytics,
@@ -479,6 +539,7 @@ public class Call(
             clientImpl.permissionCheck
                 .checkAndroidPermissionsGroup(clientImpl.context, this@Call).first
         },
+        consumeJoinSource = { consumeJoinSource() },
     )
 
     internal var reconnectDeadlineMillis: Int
