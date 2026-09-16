@@ -1622,7 +1622,17 @@ public class CallState(
     private fun startRingStatePolling() {
         call.ringStatePoller.start(
             callSessionId = { _session.value?.id },
-            ringTimeoutMs = { settings.value?.ring?.autoCancelTimeoutMs?.toLong() },
+            // The caller's own auto-drop ends the ring, so polling is bounded by it and always
+            // resolves first. An app that leaves it unset still bounds the ring by the missed
+            // call timeout, which is then the window to read within.
+            ringTimeoutMs = {
+                settings.value?.ring?.let { ring ->
+                    (
+                        ring.autoCancelTimeoutMs.takeIf { it > 0 }
+                            ?: ring.missedCallTimeoutMs
+                        ).toLong()
+                }
+            },
         )
     }
 

@@ -212,7 +212,7 @@ class RingStatePollerTest {
     }
 
     @Test
-    fun `falls back to the ceiling when the ring window is missing`() = runTest {
+    fun `falls back to a default ring window when the ring settings are not known`() = runTest {
         var reads = 0
         val poller = poller(fetch = {
             reads++
@@ -222,7 +222,8 @@ class RingStatePollerTest {
         poller.start({ sessionId }, { null })
         advanceTimeBy(600_000)
 
-        assertThat(reads).isEqualTo(9)
+        // 30s default, not the 60s ceiling: quiet period to 15s, then reads at 15, 20 and 25s.
+        assertThat(reads).isEqualTo(3)
         poller.stop()
     }
 

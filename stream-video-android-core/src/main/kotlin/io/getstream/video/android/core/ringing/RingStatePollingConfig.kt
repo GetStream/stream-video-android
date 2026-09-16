@@ -27,10 +27,19 @@ public data class RingStatePollingConfig(
     val startAfterMs: Long = DEFAULT_START_AFTER_MS,
     val intervalMs: Long = DEFAULT_INTERVAL_MS,
     val maxDurationMs: Long = DEFAULT_MAX_DURATION_MS,
+    val defaultRingWindowMs: Long = DEFAULT_RING_WINDOW_MS,
 ) {
     public companion object {
         public const val DEFAULT_START_AFTER_MS: Long = 15_000
         public const val DEFAULT_INTERVAL_MS: Long = 5_000
+
+        /**
+         * The ring window assumed when the call's ring settings are not known yet.
+         *
+         * Matches the default `missed_call_timeout_ms`, so a ring whose settings have not
+         * arrived is polled for as long as a default ring lasts rather than for the ceiling.
+         */
+        public const val DEFAULT_RING_WINDOW_MS: Long = 30_000
 
         /**
          * The longest a single ring may be polled for, whatever the call's ring settings say.

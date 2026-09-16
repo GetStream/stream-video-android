@@ -84,9 +84,9 @@ internal class RingStatePoller(
             // The ring window bounds polling so it resolves before the local auto-drop rather
             // than racing it, but that window is the app's own setting and can be minutes. The
             // SDK's own ceiling applies on top, so a ring that runs long cannot turn into an
-            // unbounded read loop against the shard. A missing window falls back to the ceiling
-            // rather than disabling polling, which is safe now that one exists.
-            val ringWindow = ringTimeoutMs()?.takeIf { it > 0 } ?: config.maxDurationMs
+            // unbounded read loop against the shard. A ring whose settings are not known yet
+            // falls back to the length of a default ring rather than to the ceiling.
+            val ringWindow = ringTimeoutMs()?.takeIf { it > 0 } ?: config.defaultRingWindowMs
             val deadline = now() + minOf(ringWindow, config.maxDurationMs)
             var sessionId: String? = null
 
