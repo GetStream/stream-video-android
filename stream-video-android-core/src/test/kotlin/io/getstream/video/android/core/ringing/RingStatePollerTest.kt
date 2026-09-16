@@ -211,6 +211,27 @@ class RingStatePollerTest {
         poller.stop()
     }
 
+    /**
+     * The poller is no longer stopped when the accept is first seen, so that a join which then
+     * fails is retried by the next read. The ring deadline is fixed when polling starts and is
+     * never extended, so staying alive cannot turn into an unbounded read loop.
+     */
+    @Test
+    fun `an accept that keeps being reported does not extend the ring window`() = runTest {
+        var reads = 0
+        val poller = poller(fetch = {
+            reads++
+            Result.Success(ringState())
+        })
+
+        poller.start({ sessionId }, { ringTimeout })
+        advanceTimeBy(600_000)
+
+        // 30s window: quiet period to 15s, then reads at 15, 20 and 25s, and no further.
+        assertThat(reads).isEqualTo(3)
+        poller.stop()
+    }
+
     @Test
     fun `falls back to a default ring window when the ring settings are not known`() = runTest {
         var reads = 0
