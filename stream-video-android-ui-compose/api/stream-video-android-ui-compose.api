@@ -20,7 +20,7 @@ public final class io/getstream/video/android/compose/permission/ComposableSingl
 }
 
 public final class io/getstream/video/android/compose/permission/LaunchPermissionRequestKt {
-	public static final fun LaunchPermissionRequest (Ljava/util/List;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;I)V
+	public static final fun LaunchPermissionRequest (Ljava/util/List;Ljava/util/List;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;I)V
 }
 
 public abstract interface class io/getstream/video/android/compose/permission/LaunchPermissionRequestScope {
