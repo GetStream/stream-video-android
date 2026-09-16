@@ -19,6 +19,7 @@ package io.getstream.video.android.compose.ui
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -160,7 +161,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         call: Call,
         onAllPermissionGranted: () -> Unit,
     ) {
-        LaunchPermissionRequest(getRequiredPermissions(call)) {
+        LaunchPermissionRequest(getRequiredPermissions(call), getOptionalPermissions()) {
             AllPermissionsGranted {
                 onAllPermissionGranted()
             }
@@ -179,7 +180,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
     @Composable
     override fun StreamCallActivity.RootContent(call: Call) {
         if (call.type == CallType.Livestream.name) {
-            LaunchPermissionRequest(getRequiredPermissions(call)) {
+            LaunchPermissionRequest(getRequiredPermissions(call), getOptionalPermissions()) {
                 AllPermissionsGranted {
                     Box {
                         LivestreamPlayer(
@@ -260,7 +261,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                 }
 
                 else -> {
-                    LaunchPermissionRequest(getRequiredPermissions(call)) {
+                    LaunchPermissionRequest(
+                        getRequiredPermissions(call),
+                        getOptionalPermissions(),
+                    ) {
                         AllPermissionsGranted {
                             // All permissions granted
                             RingingCallContent(
@@ -405,6 +409,14 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
             if (call.state.ownCapabilities.value.contains(OwnCapability.SendVideo)) {
                 add(Manifest.permission.CAMERA)
             }
+        }
+    }
+
+    private fun getOptionalPermissions(): List<String> {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            listOf(Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            emptyList()
         }
     }
 

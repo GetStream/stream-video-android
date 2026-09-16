@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.compose.permission
 
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -49,10 +50,11 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 @Composable
 public fun LaunchPermissionRequest(
     permissions: List<String>,
+    optionalPermissions: List<String>,
     content: @Composable LaunchPermissionRequestScope.() -> Unit,
 ) {
     val permissionsState = rememberMultiplePermissionsState(
-        permissions = permissions,
+        permissions = permissions + optionalPermissions,
     )
     // Init scope
     val ensurePermissionScope = LaunchPermissionRequestScopeImpl()
@@ -63,6 +65,19 @@ public fun LaunchPermissionRequest(
         // All permissions are granted, call the "granted" content
         ensurePermissionScope.grantedContent()
     } else {
+        val areOptionalPermissionsDenied = permissionsState.permissions.any {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                optionalPermissions.contains(it.permission) &&
+                    it.status is PermissionStatus.Denied
+            } else {
+                false
+            }
+        }
+        if (areOptionalPermissionsDenied) {
+            ensurePermissionScope.grantedContent()
+            return
+        }
+
         val anyPermissionWasGranted = permissionsState.permissions.any {
             it.status == PermissionStatus.Granted
         }
