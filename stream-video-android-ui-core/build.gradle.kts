@@ -52,4 +52,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime)
 
     implementation(libs.stream.log)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlin.test.junit)
 }
