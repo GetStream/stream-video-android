@@ -46,36 +46,6 @@ public final class io/getstream/video/android/compose/pip/PictureInPictureKt {
 	public static final fun rememberIsInPipMode (Landroidx/compose/runtime/Composer;I)Z
 }
 
-public abstract interface class io/getstream/video/android/compose/state/ui/internal/CallParticipantInfoMode {
-}
-
-public final class io/getstream/video/android/compose/state/ui/participants/ChangeMuteState : io/getstream/video/android/compose/state/ui/participants/ParticipantInfoAction {
-	public static final field $stable I
-	public fun <init> (Z)V
-	public final fun component1 ()Z
-	public final fun copy (Z)Lio/getstream/video/android/compose/state/ui/participants/ChangeMuteState;
-	public static synthetic fun copy$default (Lio/getstream/video/android/compose/state/ui/participants/ChangeMuteState;ZILjava/lang/Object;)Lio/getstream/video/android/compose/state/ui/participants/ChangeMuteState;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public final fun isEnabled ()Z
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/compose/state/ui/participants/InviteUsers : io/getstream/video/android/compose/state/ui/participants/ParticipantInfoAction {
-	public static final field $stable I
-	public fun <init> (Ljava/util/List;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun copy (Ljava/util/List;)Lio/getstream/video/android/compose/state/ui/participants/InviteUsers;
-	public static synthetic fun copy$default (Lio/getstream/video/android/compose/state/ui/participants/InviteUsers;Ljava/util/List;ILjava/lang/Object;)Lio/getstream/video/android/compose/state/ui/participants/InviteUsers;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getUsers ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class io/getstream/video/android/compose/state/ui/participants/ParticipantInfoAction {
-}
-
 public final class io/getstream/video/android/compose/theme/AudioOnlyCallControlsContentParams {
 	public static final field $stable I
 	public fun <init> (ZLkotlin/jvm/functions/Function1;)V
@@ -1991,10 +1961,6 @@ public final class io/getstream/video/android/compose/ui/components/livestream/s
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/compose/ui/components/livestream/state/LivestreamState;
 	public static fun values ()[Lio/getstream/video/android/compose/ui/components/livestream/state/LivestreamState;
-}
-
-public final class io/getstream/video/android/compose/ui/components/participants/CallParticipantsInfoMenuKt {
-	public static final fun CallParticipantsInfoMenu (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/participants/ParticipantAvatarsKt {

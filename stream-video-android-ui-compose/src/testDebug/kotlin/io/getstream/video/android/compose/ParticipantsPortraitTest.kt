@@ -28,10 +28,6 @@ import io.getstream.video.android.compose.ui.components.participants.Participant
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatarsOneMemberPreview
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatarsPreview
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatarsTwoMembersPreview
-import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantListAppBarPreview
-import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsInfoActionsPreview
-import io.getstream.video.android.compose.ui.components.participants.internal.CallParticipantsListPreview
-import io.getstream.video.android.compose.ui.components.participants.internal.InviteUserListPreview
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformationPreview
 import org.junit.Rule
 import org.junit.Test
@@ -80,27 +76,6 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     }
 
     @Test
-    fun `invite user list`() {
-        snapshotWithDarkMode {
-            InviteUserListPreview()
-        }
-    }
-
-    @Test
-    fun `call participants info options`() {
-        snapshotWithDarkMode {
-            CallParticipantsInfoActionsPreview()
-        }
-    }
-
-    @Test
-    fun `call participants info app bar`() {
-        snapshotWithDarkMode {
-            CallParticipantListAppBarPreview()
-        }
-    }
-
-    @Test
     fun `call participant remote`() {
         snapshot {
             CallParticipantRemotePreview()
@@ -139,20 +114,6 @@ internal class ParticipantsPortraitTest : PaparazziComposeTest {
     fun `local video content in dark mode`() {
         snapshot(isInDarkMode = true) {
             LocalVideoContentPreview()
-        }
-    }
-
-    @Test
-    fun `call participants list`() {
-        snapshot {
-            CallParticipantsListPreview()
-        }
-    }
-
-    @Test
-    fun `call participants list in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            CallParticipantsListPreview()
         }
     }
 
