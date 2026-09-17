@@ -25,16 +25,17 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.ZeroCornerSize
@@ -54,14 +55,11 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.ParticipantLabelSoundIndicatorContentParams
@@ -187,12 +185,35 @@ public fun ParticipantVideo(
 
         actionsContent.invoke(this, participantActions, call, participant)
 
-        if (style.isShowingParticipantLabel) {
-            labelContent.invoke(this, participant)
-        }
+        if (style.labelPosition == BottomStart) {
+            // One row keeps the label from running under the indicator on narrow tiles: the
+            // indicator takes its own width first and the label ellipsizes in what is left.
+            Row(
+                modifier = Modifier
+                    .align(BottomStart)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                if (style.isShowingParticipantLabel) {
+                    Box(modifier = Modifier.weight(1f, fill = false)) {
+                        labelContent.invoke(this, participant)
+                    }
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+                if (style.isShowingConnectionQualityIndicator) {
+                    Box { connectionIndicatorContent.invoke(this, connectionQuality) }
+                }
+            }
+        } else {
+            if (style.isShowingParticipantLabel) {
+                labelContent.invoke(this, participant)
+            }
 
-        if (style.isShowingConnectionQualityIndicator) {
-            connectionIndicatorContent.invoke(this, connectionQuality)
+            if (style.isShowingConnectionQualityIndicator) {
+                connectionIndicatorContent.invoke(this, connectionQuality)
+            }
         }
 
         if (style.isShowingReactions) {
@@ -390,10 +411,6 @@ public fun BoxScope.ParticipantLabel(
         }
     },
 ) {
-    var componentWidth by remember { mutableStateOf(0.dp) }
-    componentWidth = 100.dp
-    // get local density from composable
-    val density = LocalDensity.current
     Box(
         modifier = Modifier
             .align(labelPosition)
@@ -407,12 +424,7 @@ public fun BoxScope.ParticipantLabel(
                     bottomEnd = ZeroCornerSize,
                     bottomStart = ZeroCornerSize,
                 ),
-            )
-            .onGloballyPositioned {
-                componentWidth = with(density) {
-                    it.size.width.toDp()
-                }
-            },
+            ),
     ) {
         Row(
             modifier = Modifier.align(Center),
@@ -420,7 +432,7 @@ public fun BoxScope.ParticipantLabel(
         ) {
             Text(
                 modifier = Modifier
-                    .widthIn(max = componentWidth)
+                    .weight(1f, fill = false)
                     .padding(start = StreamTokens.spacingMd)
                     .align(CenterVertically)
                     .testTag("Stream_ParticipantName"),
