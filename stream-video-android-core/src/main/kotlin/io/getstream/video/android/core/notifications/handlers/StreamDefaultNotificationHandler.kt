@@ -61,10 +61,10 @@ import io.getstream.video.android.core.notifications.extractor.DefaultNotificati
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
 import io.getstream.video.android.core.notifications.style.StyleProvider
 import io.getstream.video.android.core.utils.BackgroundRestrictions
-import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.core.utils.isAppInForeground
 import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.model.StreamCallId
+import kotlin.and
 
 /**
  * Default implementation of the [StreamNotificationHandler] interface.
@@ -329,14 +329,9 @@ constructor(
             "[getRingingCallNotification] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
         return if (ringingState is RingingState.Incoming) {
-            val contentPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+            val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
                 callId,
                 payload = payload,
-            )
-            val fullScreenPendingIntent = searchIncomingCallFullScreenPendingIntent(
-                callId,
-                payload,
-                contentPendingIntent,
             )
             val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(
                 callId,
@@ -346,7 +341,6 @@ constructor(
                 callId,
                 payload = payload,
             )
-            var ringtoneOwner: IncomingRingtoneOwner = IncomingRingtoneOwner.Legacy
             val streamVideo = StreamVideo.instanceOrNull()
             streamVideo?.let { streamVideoInstance ->
                 val call = streamVideoInstance.call(callId.type, callId.id)
@@ -358,37 +352,22 @@ constructor(
                     map[IncomingNotificationAction.Reject] = pendingIntent
                 }
                 call.state.incomingNotificationData = IncomingNotificationData(map)
-
-                ringtoneOwner = call.state.incomingRingtoneOwner.value
             }
 
             if (
-                contentPendingIntent != null &&
                 fullScreenPendingIntent != null &&
                 acceptCallPendingIntent != null &&
                 rejectCallPendingIntent != null
             ) {
-                getIncomingCallNotificationInternal(
-                    ringtoneOwner,
-                    ringingState,
+                getIncomingCallNotification(
+                    callId,
                     fullScreenPendingIntent,
-                    contentPendingIntent,
                     acceptCallPendingIntent,
                     rejectCallPendingIntent,
                     callDisplayName,
-                    payload,
                     shouldHaveContentIntent,
-                ) {
-                    initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
-                        this,
-                        fullScreenPendingIntent,
-                        acceptCallPendingIntent,
-                        rejectCallPendingIntent,
-                        callDisplayName,
-                        shouldHaveContentIntent,
-                        payload,
-                    )
-                }
+                    payload,
+                )
             } else {
                 logger.e { "Ringing call notification not shown, one of the intents is null." }
                 null
@@ -419,20 +398,6 @@ constructor(
         }
     }
 
-    private fun searchIncomingCallFullScreenPendingIntent(
-        callId: StreamCallId,
-        payload: Map<String, Any?>,
-        contentPendingIntent: PendingIntent?,
-    ): PendingIntent? =
-        if (isAndroid17OrHigher() && intentResolver is DefaultStreamIntentResolver) {
-            intentResolver.searchIncomingCallFullScreenPendingIntent(
-                callId = callId,
-                payload = payload,
-            )
-        } else {
-            contentPendingIntent
-        }
-
     private inline fun getRingingCallNotificationInternal(
         ringingState: RingingState,
         callId: StreamCallId,
@@ -447,14 +412,9 @@ constructor(
             "[getRingingCallNotificationInternal] callId: ${callId.id}, ringingState: $ringingState, callDisplayName: $callDisplayName, shouldHaveContentIntent: $shouldHaveContentIntent"
         }
         return if (ringingState is RingingState.Incoming) {
-            val contentPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+            val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
                 callId,
                 payload = payload,
-            )
-            val fullScreenPendingIntent = searchIncomingCallFullScreenPendingIntent(
-                callId,
-                payload,
-                contentPendingIntent,
             )
             val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(
                 callId,
@@ -466,16 +426,13 @@ constructor(
             )
 
             if (
-                contentPendingIntent != null &&
                 fullScreenPendingIntent != null &&
                 acceptCallPendingIntent != null &&
                 rejectCallPendingIntent != null
             ) {
                 getIncomingCallNotificationInternal(
-                    ringtoneOwner,
-                    ringingState,
+                    callId,
                     fullScreenPendingIntent,
-                    contentPendingIntent,
                     acceptCallPendingIntent,
                     rejectCallPendingIntent,
                     callDisplayName,
@@ -515,10 +472,8 @@ constructor(
     }
 
     private inline fun getIncomingCallNotificationInternal(
-        ringtoneOwner: IncomingRingtoneOwner,
-        ringingState: RingingState.Incoming,
+        callId: StreamCallId,
         fullScreenPendingIntent: PendingIntent,
-        contentPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
         rejectCallPendingIntent: PendingIntent,
         callerName: String?,
@@ -529,6 +484,13 @@ constructor(
     ): Notification {
         logger.d {
             "[getIncomingCallNotificationInternal] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
+        }
+        var ringtoneOwner: IncomingRingtoneOwner = IncomingRingtoneOwner.Legacy
+        var ringingState: RingingState = RingingState.Incoming()
+        StreamVideo.instanceOrNull()?.let { streamVideoInstance ->
+            val call = streamVideoInstance.call(callId.type, callId.id)
+            ringtoneOwner = call.state.incomingRingtoneOwner.value
+            ringingState = call.state.ringingState.value
         }
         val notificationChannel = incomingCallChannelResolver.resolve(
             ringtoneOwner = ringtoneOwner,
@@ -557,7 +519,12 @@ constructor(
             setCategory(NotificationCompat.CATEGORY_CALL)
             setFullScreenIntent(fullScreenPendingIntent, true)
             if (shouldHaveContentIntent) {
-                setContentIntent(contentPendingIntent)
+                setContentIntent(
+                    intentResolver.searchIncomingCallContentPendingIntent(
+                        callId,
+                        payload = payload,
+                    ),
+                )
             } else {
                 val emptyIntent = PendingIntent.getActivity(
                     application,
@@ -577,6 +544,10 @@ constructor(
      * This is a dead method, it is not invoked from within SDK.
      * It is present here for compatibility. Should be removed in v2
      */
+    @Deprecated(
+        "Use StreamIncomingNotificationWithCallId.getIncomingCallNotification",
+        level = DeprecationLevel.WARNING,
+    )
     override fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
@@ -585,30 +556,7 @@ constructor(
         shouldHaveContentIntent: Boolean,
         payload: Map<String, Any?>,
     ): Notification? {
-        logger.d {
-            "[getIncomingCallNotification] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
-        }
-        return getIncomingCallNotificationInternal(
-            IncomingRingtoneOwner.Legacy,
-            RingingState.Incoming(),
-            fullScreenPendingIntent,
-            fullScreenPendingIntent,
-            acceptCallPendingIntent,
-            rejectCallPendingIntent,
-            callerName,
-            payload,
-            shouldHaveContentIntent,
-        ) {
-            initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
-                this,
-                fullScreenPendingIntent,
-                acceptCallPendingIntent,
-                rejectCallPendingIntent,
-                callerName,
-                shouldHaveContentIntent,
-                payload,
-            )
-        }
+        return null
     }
 
     @Deprecated(
@@ -666,14 +614,13 @@ constructor(
                     else -> notificationChannels.incomingCallChannel
                 }
 
-                val contentPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+                val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
                     callId,
                     payload = emptyMap(),
                 )
-                val fullScreenPendingIntent = searchIncomingCallFullScreenPendingIntent(
+                val contentPendingIntent = intentResolver.searchIncomingCallContentPendingIntent(
                     callId = callId,
                     payload = emptyMap(),
-                    contentPendingIntent = contentPendingIntent,
                 )
 
                 if (fullScreenPendingIntent == null) {
@@ -1013,14 +960,9 @@ constructor(
             existingChannelId = (call.state.atomicNotification.get() as? Notification)
                 ?.let(NotificationCompat::getChannelId),
             intercept = {
-                val contentPendingIntent = intentResolver.searchIncomingCallPendingIntent(
+                val fullScreenPendingIntent = intentResolver.searchIncomingCallPendingIntent(
                     callId,
                     payload = payload,
-                )
-                val fullScreenPendingIntent = searchIncomingCallFullScreenPendingIntent(
-                    callId = callId,
-                    payload = payload,
-                    contentPendingIntent = contentPendingIntent,
                 )
                 val acceptCallPendingIntent = intentResolver.searchAcceptCallPendingIntent(
                     callId,
@@ -1330,7 +1272,7 @@ constructor(
     private inline fun ensureIncomingCallChannelAndBuildNotification(
         channelInfo: StreamNotificationChannelInfo,
         ringtoneOwner: IncomingRingtoneOwner,
-        ringingState: RingingState.Incoming,
+        ringingState: RingingState,
         builder: NotificationCompat.Builder.() -> NotificationCompat.Builder,
     ): Notification {
         val streamVideo = StreamVideo.instanceOrNull() as? StreamVideoClient
@@ -1381,6 +1323,39 @@ constructor(
         val call = StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
         return call?.isVideoEnabled() == true
     }
+
+    override fun getIncomingCallNotification(
+        callId: StreamCallId,
+        fullScreenPendingIntent: PendingIntent,
+        acceptCallPendingIntent: PendingIntent,
+        rejectCallPendingIntent: PendingIntent,
+        callerName: String?,
+        shouldHaveContentIntent: Boolean,
+        payload: Map<String, Any?>,
+    ): Notification? {
+        logger.d {
+            "[getIncomingCallNotification] callerName: $callerName, shouldHaveContentIntent: $shouldHaveContentIntent"
+        }
+        return getIncomingCallNotificationInternal(
+            callId,
+            fullScreenPendingIntent,
+            acceptCallPendingIntent,
+            rejectCallPendingIntent,
+            callerName,
+            payload,
+            shouldHaveContentIntent,
+        ) {
+            initialNotificationBuilderInterceptor.onBuildIncomingCallNotification(
+                this,
+                fullScreenPendingIntent,
+                acceptCallPendingIntent,
+                rejectCallPendingIntent,
+                callerName,
+                shouldHaveContentIntent,
+                payload,
+            )
+        }
+    }
 }
 
 /**
@@ -1392,11 +1367,21 @@ constructor(
  */
 internal fun incomingCallNotificationFlags(
     currentFlags: Int,
-    ringingState: RingingState.Incoming,
-): Int = if (ringingState.acceptedByMe) {
-    val withoutInsistent = currentFlags and Notification.FLAG_INSISTENT.inv()
-    withoutInsistent or Notification.FLAG_ONLY_ALERT_ONCE
-} else {
-    val withoutOnlyAlertOnce = currentFlags and Notification.FLAG_ONLY_ALERT_ONCE.inv()
-    withoutOnlyAlertOnce or Notification.FLAG_INSISTENT
+    ringingState: RingingState,
+): Int {
+    return when (ringingState) {
+        is RingingState.Incoming -> {
+            if (ringingState.acceptedByMe) {
+                val withoutInsistent = currentFlags and Notification.FLAG_INSISTENT.inv()
+                withoutInsistent or Notification.FLAG_ONLY_ALERT_ONCE
+            } else {
+                val withoutOnlyAlertOnce = currentFlags and Notification.FLAG_ONLY_ALERT_ONCE.inv()
+                withoutOnlyAlertOnce or Notification.FLAG_INSISTENT
+            }
+        }
+
+        else -> {
+            currentFlags
+        }
+    }
 }

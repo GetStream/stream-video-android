@@ -171,6 +171,7 @@ public open class DefaultNotificationHandler(
 
             if (fullScreenPendingIntent != null && acceptCallPendingIntent != null && rejectCallPendingIntent != null) {
                 getIncomingCallNotification(
+                    callId,
                     fullScreenPendingIntent,
                     acceptCallPendingIntent,
                     rejectCallPendingIntent,
@@ -336,6 +337,7 @@ public open class DefaultNotificationHandler(
         return notificationDispatcher
     }
 
+    @Deprecated("Use StreamIncomingNotificationWithCallId.getIncomingCallNotification")
     override fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
@@ -955,6 +957,25 @@ public open class DefaultNotificationHandler(
         }
         val call = StreamVideo.instanceOrNull()?.call(callId.type, callId.id)
         return call?.isVideoEnabled() == true
+    }
+
+    override fun getIncomingCallNotification(
+        callId: StreamCallId,
+        fullScreenPendingIntent: PendingIntent,
+        acceptCallPendingIntent: PendingIntent,
+        rejectCallPendingIntent: PendingIntent,
+        callerName: String?,
+        shouldHaveContentIntent: Boolean,
+        payload: Map<String, Any?>,
+    ): Notification? {
+        return getIncomingCallNotification(
+            fullScreenPendingIntent,
+            acceptCallPendingIntent,
+            rejectCallPendingIntent,
+            callerName,
+            shouldHaveContentIntent,
+            payload,
+        )
     }
 
     companion object {

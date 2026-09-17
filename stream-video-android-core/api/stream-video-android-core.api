@@ -13791,6 +13791,7 @@ public class io/getstream/video/android/core/notifications/DefaultNotificationHa
 	public fun getChannelName ()Ljava/lang/String;
 	public final fun getHideRingingNotificationInForeground ()Z
 	public fun getIncomingCallNotification (Landroid/app/PendingIntent;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Ljava/lang/String;ZLjava/util/Map;)Landroid/app/Notification;
+	public fun getIncomingCallNotification (Lio/getstream/video/android/model/StreamCallId;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Ljava/lang/String;ZLjava/util/Map;)Landroid/app/Notification;
 	public final fun getIntentResolver ()Lio/getstream/video/android/core/notifications/DefaultStreamIntentResolver;
 	public fun getLeaveAction (Landroid/app/PendingIntent;)Landroidx/core/app/NotificationCompat$Action;
 	public fun getMediaNotificationConfig ()Lio/getstream/video/android/core/notifications/medianotifications/MediaNotificationConfig;
@@ -13853,6 +13854,7 @@ public final class io/getstream/video/android/core/notifications/DefaultStreamIn
 	public final fun getNotificationIntentBundleResolver ()Lio/getstream/video/android/core/notifications/NotificationIntentBundleResolver;
 	public fun searchAcceptCallPendingIntent (Lio/getstream/video/android/model/StreamCallId;ILjava/util/Map;)Landroid/app/PendingIntent;
 	public fun searchEndCallPendingIntent (Lio/getstream/video/android/model/StreamCallId;Ljava/util/Map;)Landroid/app/PendingIntent;
+	public fun searchIncomingCallContentPendingIntent (Lio/getstream/video/android/model/StreamCallId;ILjava/util/Map;)Landroid/app/PendingIntent;
 	public fun searchIncomingCallPendingIntent (Lio/getstream/video/android/model/StreamCallId;ILjava/util/Map;)Landroid/app/PendingIntent;
 	public fun searchLiveCallPendingIntent (Lio/getstream/video/android/model/StreamCallId;ILjava/util/Map;)Landroid/app/PendingIntent;
 	public fun searchMissedCallPendingIntent (Lio/getstream/video/android/model/StreamCallId;ILjava/util/Map;)Landroid/app/PendingIntent;
@@ -13996,7 +13998,12 @@ public abstract interface class io/getstream/video/android/core/notifications/St
 	public fun searchRejectCallPendingIntent (Lio/getstream/video/android/model/StreamCallId;)Landroid/app/PendingIntent;
 }
 
-public abstract interface class io/getstream/video/android/core/notifications/StreamIntentResolverWithPayload {
+public abstract interface class io/getstream/video/android/core/notifications/StreamIntentResolverWithIncomingContentIntent {
+	public abstract fun searchIncomingCallContentPendingIntent (Lio/getstream/video/android/model/StreamCallId;ILjava/util/Map;)Landroid/app/PendingIntent;
+	public static synthetic fun searchIncomingCallContentPendingIntent$default (Lio/getstream/video/android/core/notifications/StreamIntentResolverWithIncomingContentIntent;Lio/getstream/video/android/model/StreamCallId;ILjava/util/Map;ILjava/lang/Object;)Landroid/app/PendingIntent;
+}
+
+public abstract interface class io/getstream/video/android/core/notifications/StreamIntentResolverWithPayload : io/getstream/video/android/core/notifications/StreamIntentResolverWithIncomingContentIntent {
 	public abstract fun getDefaultPendingIntent (Ljava/util/Map;)Landroid/app/PendingIntent;
 	public abstract fun searchAcceptCallPendingIntent (Lio/getstream/video/android/model/StreamCallId;ILjava/util/Map;)Landroid/app/PendingIntent;
 	public static synthetic fun searchAcceptCallPendingIntent$default (Lio/getstream/video/android/core/notifications/StreamIntentResolverWithPayload;Lio/getstream/video/android/model/StreamCallId;ILjava/util/Map;ILjava/lang/Object;)Landroid/app/PendingIntent;
@@ -14055,6 +14062,7 @@ public class io/getstream/video/android/core/notifications/handlers/StreamDefaul
 	public fun <init> (Landroid/app/Application;Landroidx/core/app/NotificationManagerCompat;Lio/getstream/android/push/permissions/NotificationPermissionHandler;Lio/getstream/video/android/core/notifications/StreamIntentResolver;ZLio/getstream/video/android/core/notifications/handlers/StreamNotificationBuilderInterceptors;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptors;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannels;Landroid/support/v4/media/session/MediaSessionCompat$Callback;Lio/getstream/video/android/core/notifications/handlers/StreamMediaSessionController;Lio/getstream/video/android/core/notifications/dispatchers/NotificationDispatcher;Lkotlin/jvm/functions/Function2;)V
 	public synthetic fun <init> (Landroid/app/Application;Landroidx/core/app/NotificationManagerCompat;Lio/getstream/android/push/permissions/NotificationPermissionHandler;Lio/getstream/video/android/core/notifications/StreamIntentResolver;ZLio/getstream/video/android/core/notifications/handlers/StreamNotificationBuilderInterceptors;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationUpdateInterceptors;Lio/getstream/video/android/core/notifications/handlers/StreamNotificationChannels;Landroid/support/v4/media/session/MediaSessionCompat$Callback;Lio/getstream/video/android/core/notifications/handlers/StreamMediaSessionController;Lio/getstream/video/android/core/notifications/dispatchers/NotificationDispatcher;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun getIncomingCallNotification (Landroid/app/PendingIntent;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Ljava/lang/String;ZLjava/util/Map;)Landroid/app/Notification;
+	public fun getIncomingCallNotification (Lio/getstream/video/android/model/StreamCallId;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Ljava/lang/String;ZLjava/util/Map;)Landroid/app/Notification;
 	public fun getMissedCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/util/Map;)Landroid/app/Notification;
 	protected final fun getNotificationDispatcher ()Lio/getstream/video/android/core/notifications/dispatchers/NotificationDispatcher;
 	public fun getOngoingCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;ZILjava/util/Map;)Landroid/app/Notification;
@@ -14073,6 +14081,10 @@ public class io/getstream/video/android/core/notifications/handlers/StreamDefaul
 	public fun updateIncomingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun updateOngoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun updateOutgoingCallNotification (Lio/getstream/video/android/core/Call;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamIncomingNotificationWithCallId {
+	public abstract fun getIncomingCallNotification (Lio/getstream/video/android/model/StreamCallId;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Ljava/lang/String;ZLjava/util/Map;)Landroid/app/Notification;
 }
 
 public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamMediaSessionController {
@@ -14176,7 +14188,7 @@ public abstract interface class io/getstream/video/android/core/notifications/ha
 	public fun getSettingUpCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 }
 
-public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload {
+public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload : io/getstream/video/android/core/notifications/handlers/StreamIncomingNotificationWithCallId {
 	public abstract fun getIncomingCallNotification (Landroid/app/PendingIntent;Landroid/app/PendingIntent;Landroid/app/PendingIntent;Ljava/lang/String;ZLjava/util/Map;)Landroid/app/Notification;
 	public abstract fun getMissedCallNotification (Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/util/Map;)Landroid/app/Notification;
 	public static synthetic fun getMissedCallNotification$default (Lio/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload;Lio/getstream/video/android/model/StreamCallId;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Landroid/app/Notification;

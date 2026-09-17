@@ -320,13 +320,13 @@ class StreamDefaultNotificationHandlerTest {
         val fullScreenPendingIntent = mockk<PendingIntent>()
         val defaultIntentResolver = mockk<DefaultStreamIntentResolver>(relaxed = true)
         every {
-            defaultIntentResolver.searchIncomingCallPendingIntent(
+            defaultIntentResolver.searchIncomingCallContentPendingIntent(
                 testCallId,
                 payload = payload,
             )
         } returns contentPendingIntent
         every {
-            defaultIntentResolver.searchIncomingCallFullScreenPendingIntent(
+            defaultIntentResolver.searchIncomingCallPendingIntent(
                 testCallId,
                 payload = payload,
             )

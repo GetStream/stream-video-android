@@ -26,6 +26,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.internal.DismissNotificationActivity
+import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.StreamCallId
 
 public class DefaultStreamIntentResolver(
@@ -39,6 +40,11 @@ public class DefaultStreamIntentResolver(
     /**
      * Search for an activity that can receive incoming calls from Stream Server.
      *
+     * Creates the incoming-call full-screen intent without the notification-dismiss trampoline.
+     * Android can launch this intent without user interaction, so launching it must not dismiss a
+     * notification that owns the incoming ringtone.
+     * This is attached as FullScreen Pending Intent which will be rendered as Full screen over lock screen.
+     *
      * @param callId The call id from the incoming call.
      * @param notificationId the notification ID.
      * @param payload The payload from Push Notification
@@ -48,47 +54,27 @@ public class DefaultStreamIntentResolver(
         notificationId: Int,
         payload: Map<String, Any?>,
     ): PendingIntent? {
-        return searchActivityPendingIntent(
-            Intent(NotificationHandler.ACTION_INCOMING_CALL)
+        if (isAndroid17OrHigher()) {
+            val intent = Intent(NotificationHandler.ACTION_INCOMING_CALL)
                 .putExtras(
                     notificationIntentBundleResolver.getIncomingCallBundle(
                         callId,
                         notificationId,
                         payload,
                     ),
-                ),
-            callId,
-            notificationId,
-        )
-    }
-
-    /**
-     * Creates the incoming-call full-screen intent without the notification-dismiss trampoline.
-     * Android can launch this intent without user interaction, so launching it must not dismiss a
-     * notification that owns the incoming ringtone.
-     */
-    internal fun searchIncomingCallFullScreenPendingIntent(
-        callId: StreamCallId,
-        notificationId: Int = callId.getNotificationId(NotificationType.Incoming),
-        payload: Map<String, Any?>,
-    ): PendingIntent? {
-        val intent = Intent(NotificationHandler.ACTION_INCOMING_CALL)
-            .putExtras(
-                notificationIntentBundleResolver.getIncomingCallBundle(
-                    callId,
-                    notificationId,
-                    payload,
-                ),
-            )
-        return searchResolveInfo { context.packageManager.queryIntentActivities(intent, 0) }
-            ?.let { resolveInfo ->
-                PendingIntent.getActivity(
-                    context,
-                    0,
-                    buildComponentIntent(intent, resolveInfo, callId),
-                    DefaultNotificationHandler.PENDING_INTENT_FLAG,
                 )
-            }
+            return searchResolveInfo { context.packageManager.queryIntentActivities(intent, 0) }
+                ?.let { resolveInfo ->
+                    PendingIntent.getActivity(
+                        context,
+                        0,
+                        buildComponentIntent(intent, resolveInfo, callId),
+                        DefaultNotificationHandler.PENDING_INTENT_FLAG,
+                    )
+                }
+        } else {
+            return searchIncomingCallContentPendingIntent(callId, notificationId, payload)
+        }
     }
 
     /**
@@ -397,5 +383,24 @@ public class DefaultStreamIntentResolver(
             )
             putExtra(NotificationHandler.INTENT_EXTRA_CALL_CID, callId)
         }
+    }
+
+    override fun searchIncomingCallContentPendingIntent(
+        callId: StreamCallId,
+        notificationId: Int,
+        payload: Map<String, Any?>,
+    ): PendingIntent? {
+        return searchActivityPendingIntent(
+            Intent(NotificationHandler.ACTION_INCOMING_CALL)
+                .putExtras(
+                    notificationIntentBundleResolver.getIncomingCallBundle(
+                        callId,
+                        notificationId,
+                        payload,
+                    ),
+                ),
+            callId,
+            notificationId,
+        )
     }
 }
