@@ -22,15 +22,15 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          # The version code is the commit count, which is 1 on a shallow clone.
-          fetch-depth: 0
       - uses: GetStream/android-ci-actions/actions/setup-java@cb46e4f44d105a68738bfd2a1cfd156bb768665b
       - name: Resolve build identity
         id: build_identity
         run: |
+          # Minutes since 2020-09-13. Both distribution workflows publish the same package
+          # from a different branch, so the version code has to grow with build time. A
+          # per-branch commit count can go backwards and Android rejects that as a downgrade.
           {
-            echo "version_code=$(git rev-list --count HEAD)"
+            echo "version_code=$(( ($(date -u +%s) - 1600000000) / 60 ))"
             echo "sha=$(git rev-parse --short=7 HEAD)"
           } >> "$GITHUB_OUTPUT"
       - name: Write release notes
