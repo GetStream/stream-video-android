@@ -48,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.log.taggedLogger
@@ -57,6 +56,7 @@ import io.getstream.video.android.compose.permission.LaunchPermissionRequest
 import io.getstream.video.android.compose.theme.DefaultVideoComponentFactory
 import io.getstream.video.android.compose.theme.VideoComponentFactory
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamDialog
@@ -191,7 +191,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                     ) {
                                         CircularProgressIndicator(
                                             modifier = Modifier
-                                                .size(48.dp)
+                                                .size(StreamTokens.size48)
                                                 .align(Alignment.Center),
                                             color = VideoTheme.colors.textPrimary,
                                         )
@@ -219,7 +219,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                                             )
                                             Text(
                                                 color = VideoTheme.colors.textPrimary,
-                                                modifier = Modifier.padding(top = 16.dp),
+                                                modifier = Modifier.padding(top = StreamTokens.spacingMd),
                                                 text = getString(io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network_single_video),
                                             )
                                         }
@@ -230,7 +230,10 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
                         CallAppBar(
                             modifier = Modifier
                                 .align(Alignment.TopCenter)
-                                .padding(end = 16.dp, top = 16.dp),
+                                .padding(
+                                    end = StreamTokens.spacingMd,
+                                    top = StreamTokens.spacingMd,
+                                ),
                             call = call,
                             centerContent = { },
                             onCallAction = {

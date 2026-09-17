@@ -37,9 +37,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.stats.model.RtcAudioSourceStats
 import io.getstream.video.android.core.call.stats.model.RtcCodecStats
@@ -100,7 +100,7 @@ public fun CallDiagnosticsContent(
                         showRemoteOutbound = false,
                     )
                     item {
-                        Spacer(modifier = Modifier.height(128.dp))
+                        Spacer(modifier = Modifier.height(StreamTokens.size128))
                     }
                 }
             }
@@ -137,7 +137,7 @@ private fun LazyListScope.PublisherDiagnosticsContent(
     showRemoteInbound: Boolean,
 ) {
     item {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingMd))
         Text("PUBLISHER", color = Color.Orange, fontWeight = FontWeight.Bold)
     }
     if (stats.isEmpty()) return
@@ -217,7 +217,7 @@ private fun LazyListScope.SubscriberDiagnosticsContent(
     showRemoteOutbound: Boolean,
 ) {
     item {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingMd))
         Text("SUBSCRIBER", color = Color.Orange, fontWeight = FontWeight.Bold)
     }
     if (stats.isEmpty()) return
@@ -301,7 +301,7 @@ private fun AudioSource(
     source: RtcAudioSourceStats?,
 ) {
     source?.apply {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
         Row {
             Text("Audio Source: ", color = Color.Green)
             Text("$trackIdentifier", color = Color.Cyan)
@@ -319,7 +319,7 @@ private fun VideoSource(
     source: RtcVideoSourceStats?,
 ) {
     source?.apply {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
         Row {
             Text("Video Source: ", color = Color.Green)
             Text("$trackIdentifier", color = Color.Cyan)
@@ -338,7 +338,7 @@ private fun AudioOutboundRtp(
     showRemoteInbound: Boolean,
 ) {
     ora.apply {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
         Row {
             Text("Audio Outbound RTP: ", color = Color.Green)
             Text("$mid".uppercase(), color = Color.Cyan)
@@ -376,7 +376,7 @@ private fun VideoOutboundRtp(
     showRemoteInbound: Boolean,
 ) {
     orv.apply {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
         Row {
             Text("Video Outbound RTP: ", color = Color.Green)
             Text("$rid".uppercase(), color = Color.Cyan)
@@ -425,7 +425,7 @@ private fun AudioInboundRtp(
     showRemoteOutbound: Boolean,
 ) {
     ira.apply {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
         Row {
             Text("Audio Inbound RTP: ", color = Color.Green)
             Text("$trackIdentifier", color = Color.Cyan)
@@ -448,7 +448,7 @@ private fun AudioInboundRtp(
 
         rora?.also {
             if (showRemoteOutbound) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
                 Text("packets_sent: ${it.packetsSent}")
                 Text("bytes_sent: ${it.bytesSent}")
                 Text("reports_sent: ${it.reportsSent}")
@@ -469,7 +469,7 @@ private fun VideoInboundRtp(
     showRemoteOutbound: Boolean,
 ) {
     irv.apply {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
         Row {
             Text("Video Inbound RTP: ", color = Color.Green)
             Text("$trackIdentifier", color = Color.Cyan)
@@ -490,7 +490,7 @@ private fun VideoInboundRtp(
         Text("decoder_implementation: $decoderImplementation")
 
         rorv?.also {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
             Text("packets_sent: ${it.packetsSent}")
             Text("bytes_sent: ${it.bytesSent}")
             Text("reports_sent: ${it.reportsSent}")

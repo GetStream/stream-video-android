@@ -34,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
@@ -249,7 +248,7 @@ public fun AudioOnlyCallDetails(
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center) {
         ParticipantAvatars(participants = participants)
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacing2xl))
 
         ParticipantInformation(
             isVideoType = false,

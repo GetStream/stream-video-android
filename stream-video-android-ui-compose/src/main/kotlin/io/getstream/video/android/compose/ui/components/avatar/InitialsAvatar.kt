@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.utils.initials
@@ -69,7 +68,7 @@ internal fun InitialsAvatar(
 }
 
 /**
- * Picks the initials typography for an avatar of this size. Avatars from 80dp up have no matching
+ * Picks the initials typography for an avatar of this size. Avatars from 56dp up have no matching
  * text style in the design tokens, so the initials scale with the avatar instead.
  */
 @Composable
@@ -98,4 +97,4 @@ private const val LARGE_AVATAR_TEXT_RATIO = 0.4f
  * Declared in [Dp] so the cap holds at any font scale. Capping the converted [androidx.compose.ui.unit.TextUnit]
  * instead would let the rendered size grow with the font scale setting, because the conversion divides it out.
  */
-private val LARGE_AVATAR_MAX_TEXT_SIZE = 48.dp
+private val LARGE_AVATAR_MAX_TEXT_SIZE = StreamTokens.size48

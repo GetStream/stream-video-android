@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * Provides default configurations for the Moderation Warning UI.
@@ -46,11 +47,11 @@ internal object ModerationDefaults {
  */
 internal data class ModerationThemeConfig(
     val yOffset: Dp = -100.dp,
-    val horizontalMargin: Dp = 16.dp,
+    val horizontalMargin: Dp = StreamTokens.spacingMd,
     val backgroundColor: Color = Color.White,
     val titleColor: Color = Color.Black,
     val messageColor: Color = Color.Gray,
     val warningStripColor: Color = Color(0xFFFFA500),
-    val warningStripWidth: Dp = 12.dp,
-    val roundedCornerShape: Shape? = RoundedCornerShape(16.dp),
+    val warningStripWidth: Dp = StreamTokens.size12,
+    val roundedCornerShape: Shape? = RoundedCornerShape(StreamTokens.radiusXl),
 )

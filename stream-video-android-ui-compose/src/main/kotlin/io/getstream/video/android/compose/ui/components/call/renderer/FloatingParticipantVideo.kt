@@ -153,7 +153,7 @@ public fun BoxScope.FloatingParticipantVideo(
                         .coerceAtLeast(
                             -calculateHorizontalOffsetBounds(
                                 parentBounds = parentBounds,
-                                paddingValues = PaddingValues(0.dp),
+                                paddingValues = PaddingValues(StreamTokens.spacingNone),
                                 floatingVideoSize = videoSize,
                                 density = density,
                                 offset = paddingOffset * 2,
@@ -168,7 +168,7 @@ public fun BoxScope.FloatingParticipantVideo(
                         .coerceAtMost(
                             calculateVerticalOffsetBounds(
                                 parentBounds = parentBounds,
-                                paddingValues = PaddingValues(0.dp),
+                                paddingValues = PaddingValues(StreamTokens.spacingNone),
                                 floatingVideoSize = videoSize,
                                 density = density,
                                 offset = paddingOffset * 2,

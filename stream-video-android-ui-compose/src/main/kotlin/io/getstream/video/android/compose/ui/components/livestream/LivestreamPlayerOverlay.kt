@@ -33,7 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -158,9 +157,8 @@ private fun BoxScope.LiveControls(
 }
 
 /** The dark translucent background that keeps the overlay readable over any video or fallback screen. */
-private fun Modifier.overlayPill(): Modifier = composed {
-    background(
-        color = VideoTheme.colors.backgroundCoreOverlayDarkStrong,
-        shape = RoundedCornerShape(StreamTokens.radius4xl),
-    )
-}
+@Composable
+private fun Modifier.overlayPill(): Modifier = background(
+    color = VideoTheme.colors.backgroundCoreOverlayDarkStrong,
+    shape = RoundedCornerShape(StreamTokens.radius4xl),
+)
