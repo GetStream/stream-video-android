@@ -35,6 +35,13 @@ plugins {
     id(libs.plugins.baseline.profile.get().pluginId)
 }
 
+// CI passes these so that every dogfooding build is a distinct release in Firebase App
+// Distribution. Locally they are absent and the build keeps the previous fixed values.
+val demoAppVersionCode: Int = providers.gradleProperty("demoAppVersionCode")
+    .map(String::toInt)
+    .getOrElse(1)
+val demoAppBuildSha: String? = providers.gradleProperty("demoAppBuildSha").orNull
+
 android {
     namespace = "io.getstream.video.android"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -43,8 +50,10 @@ android {
         applicationId = "io.getstream.video.android"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = rootProject.version.toString()
+        versionCode = demoAppVersionCode
+        versionName = demoAppBuildSha
+            ?.let { "${rootProject.version}-$it" }
+            ?: rootProject.version.toString()
         testInstrumentationRunner = "io.qameta.allure.android.runners.AllureAndroidJUnitRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
         missingDimensionStrategy(FlavorDimension.contentType.name, VideoDemoFlavor.development.name)
@@ -193,12 +202,16 @@ androidComponents {
                     }
             }
 
-            applicationVariant.outputs.forEach {
-                it.versionName.set(
-                    it.versionCode.map { playVersionCode ->
-                        "${rootProject.version} ($playVersionCode)"
-                    },
-                )
+            // Play assigns the version code itself, so surface the resolved one. Builds that
+            // carry a commit sha are already identifiable and keep the name set above.
+            if (demoAppBuildSha == null) {
+                applicationVariant.outputs.forEach {
+                    it.versionName.set(
+                        it.versionCode.map { playVersionCode ->
+                            "${rootProject.version} ($playVersionCode)"
+                        },
+                    )
+                }
             }
 
             if (applicationVariant.name == "developmentDebug" || applicationVariant.name == "productionDebug") {
