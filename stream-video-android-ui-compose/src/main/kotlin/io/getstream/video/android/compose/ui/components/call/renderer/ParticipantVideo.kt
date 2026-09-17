@@ -25,25 +25,27 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -185,35 +187,21 @@ public fun ParticipantVideo(
 
         actionsContent.invoke(this, participantActions, call, participant)
 
-        if (style.labelPosition == BottomStart) {
-            // One row keeps the label from running under the indicator on narrow tiles: the
-            // indicator takes its own width first and the label ellipsizes in what is left.
-            Row(
-                modifier = Modifier
-                    .align(BottomStart)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Bottom,
-            ) {
-                if (style.isShowingParticipantLabel) {
-                    Box(modifier = Modifier.weight(1f, fill = false)) {
-                        labelContent.invoke(this, participant)
-                    }
-                } else {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-                if (style.isShowingConnectionQualityIndicator) {
-                    Box { connectionIndicatorContent.invoke(this, connectionQuality) }
-                }
+        if (style.isShowingParticipantLabel) {
+            // The default label keeps this width free at its end so it never runs under the
+            // connection quality indicator; custom label content may ignore it.
+            val endReserve = if (style.isShowingConnectionQualityIndicator) {
+                StreamTokens.size32
+            } else {
+                StreamTokens.spacingNone
             }
-        } else {
-            if (style.isShowingParticipantLabel) {
+            CompositionLocalProvider(LocalParticipantLabelEndReserve provides endReserve) {
                 labelContent.invoke(this, participant)
             }
+        }
 
-            if (style.isShowingConnectionQualityIndicator) {
-                connectionIndicatorContent.invoke(this, connectionQuality)
-            }
+        if (style.isShowingConnectionQualityIndicator) {
+            connectionIndicatorContent.invoke(this, connectionQuality)
         }
 
         if (style.isShowingReactions) {
@@ -411,71 +399,74 @@ public fun BoxScope.ParticipantLabel(
         }
     },
 ) {
-    Box(
-        modifier = Modifier
-            .align(labelPosition)
-            .height(StreamTokens.size32)
-            .wrapContentWidth()
-            .background(
-                VideoTheme.colors.backgroundCoreOverlayDarkStrong,
-                shape = RoundedCornerShape(
-                    topStart = ZeroCornerSize,
-                    topEnd = StreamTokens.radiusXl,
-                    bottomEnd = ZeroCornerSize,
-                    bottomStart = ZeroCornerSize,
+    val endReserve = LocalParticipantLabelEndReserve.current
+    BoxWithConstraints(modifier = Modifier.align(labelPosition)) {
+        Box(
+            modifier = Modifier
+                .widthIn(max = (maxWidth - endReserve).coerceAtLeast(StreamTokens.spacingNone))
+                .height(StreamTokens.size32)
+                .wrapContentWidth()
+                .background(
+                    VideoTheme.colors.backgroundCoreOverlayDarkStrong,
+                    shape = RoundedCornerShape(
+                        topStart = ZeroCornerSize,
+                        topEnd = StreamTokens.radiusXl,
+                        bottomEnd = ZeroCornerSize,
+                        bottomStart = ZeroCornerSize,
+                    ),
                 ),
-            ),
-    ) {
-        Row(
-            modifier = Modifier.align(Center),
-            verticalAlignment = CenterVertically,
         ) {
-            Text(
-                modifier = Modifier
-                    .weight(1f, fill = false)
-                    .padding(start = StreamTokens.spacingMd)
-                    .align(CenterVertically)
-                    .testTag("Stream_ParticipantName"),
-                text = nameLabel,
-                style = VideoTheme.typography.captionDefault,
-                color = VideoTheme.colors.textOnAccent,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(
+                modifier = Modifier.align(Center),
+                verticalAlignment = CenterVertically,
+            ) {
+                Text(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .padding(start = StreamTokens.spacingMd)
+                        .align(CenterVertically)
+                        .testTag("Stream_ParticipantName"),
+                    text = nameLabel,
+                    style = VideoTheme.typography.captionDefault,
+                    color = VideoTheme.colors.textOnAccent,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
 
-            if (isPinned) {
-                Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
-                GenericIndicator {
-                    Icon(
+                if (isPinned) {
+                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+                    GenericIndicator {
+                        Icon(
 
-                        modifier = Modifier
-                            .padding(horizontal = StreamTokens.spacing2xs)
-                            .size(StreamTokens.size16),
-                        painter = painterResource(
-                            io.getstream.video.android.compose.R.drawable.stream_design_ic_pin_fill,
-                        ),
-                        contentDescription = "Pin",
-                        tint = VideoTheme.colors.textOnAccent,
-                    )
+                            modifier = Modifier
+                                .padding(horizontal = StreamTokens.spacing2xs)
+                                .size(StreamTokens.size16),
+                            painter = painterResource(
+                                io.getstream.video.android.compose.R.drawable.stream_design_ic_pin_fill,
+                            ),
+                            contentDescription = "Pin",
+                            tint = VideoTheme.colors.textOnAccent,
+                        )
+                    }
                 }
-            }
 
-            if (isPaused) {
-                Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
-                GenericIndicator {
-                    Icon(
-                        modifier = Modifier
-                            .padding(horizontal = StreamTokens.spacing2xs)
-                            .size(StreamTokens.size16),
-                        painter = painterResource(
-                            io.getstream.video.android.compose.R.drawable.stream_design_ic_exclamation_triangle_fill,
-                        ),
-                        contentDescription = "Pause",
-                        tint = VideoTheme.colors.textOnAccent,
-                    )
+                if (isPaused) {
+                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+                    GenericIndicator {
+                        Icon(
+                            modifier = Modifier
+                                .padding(horizontal = StreamTokens.spacing2xs)
+                                .size(StreamTokens.size16),
+                            painter = painterResource(
+                                io.getstream.video.android.compose.R.drawable.stream_design_ic_exclamation_triangle_fill,
+                            ),
+                            contentDescription = "Pause",
+                            tint = VideoTheme.colors.textOnAccent,
+                        )
+                    }
                 }
+                soundIndicatorContent.invoke(this)
             }
-            soundIndicatorContent.invoke(this)
         }
     }
 }
@@ -615,3 +606,9 @@ private fun updateParticipantVisibility(
         visibilityOnScreenState,
     )
 }
+
+/**
+ * The width [ParticipantLabel] keeps free at the end of its parent so it does not run under the
+ * connection quality indicator. [ParticipantVideo] provides it while the indicator is shown.
+ */
+internal val LocalParticipantLabelEndReserve = compositionLocalOf { StreamTokens.spacingNone }

@@ -1662,10 +1662,10 @@ public final class io/getstream/video/android/compose/ui/components/call/rendere
 public final class io/getstream/video/android/compose/ui/components/call/renderer/ComposableSingletons$ParticipantVideoKt {
 	public static final field INSTANCE Lio/getstream/video/android/compose/ui/components/call/renderer/ComposableSingletons$ParticipantVideoKt;
 	public fun <init> ()V
+	public final fun getLambda$-1480635460$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-1603663371$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function4;
 	public final fun getLambda$-2058293026$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function6;
-	public final fun getLambda$-796116762$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-80498385$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1578423941$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1959507997$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function4;
 	public final fun getLambda$567328724$stream_video_android_ui_compose_release ()Lkotlin/jvm/functions/Function6;
 }
