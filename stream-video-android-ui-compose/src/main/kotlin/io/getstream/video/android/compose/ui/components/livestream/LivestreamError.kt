@@ -30,9 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.core.Call
@@ -48,7 +47,7 @@ internal fun LivestreamErrorUi(call: Call, onRetryJoin: () -> Unit) {
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(16.dp),
+                .padding(StreamTokens.spacingMd),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
@@ -56,11 +55,11 @@ internal fun LivestreamErrorUi(call: Call, onRetryJoin: () -> Unit) {
                 text = stringResource(
                     id = R.string.stream_video_livestreaming_error_joining,
                 ),
-                fontSize = 18.sp,
+                style = VideoTheme.typography.headingMedium,
                 color = VideoTheme.colors.textPrimary,
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(StreamTokens.spacingSm))
             StreamTextButton(
                 onClick = onRetryJoin,
                 text = "Retry",

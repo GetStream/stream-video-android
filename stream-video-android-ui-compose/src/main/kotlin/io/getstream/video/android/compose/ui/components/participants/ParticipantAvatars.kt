@@ -35,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import io.getstream.video.android.compose.theme.UserAvatarParams
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
@@ -71,12 +70,12 @@ public fun ParticipantAvatars(
                     UserAvatarParams(
                         userImage = participant.user.image,
                         userName = participant.user.userNameOrId,
-                        modifier = Modifier.size(100.dp),
+                        modifier = Modifier.size(StreamTokens.size80),
                     ),
                 )
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(StreamTokens.spacingLg)) {
                         items(participants.take(2)) { participant ->
                             VideoTheme.componentFactory.UserAvatar(
                                 UserAvatarParams(
@@ -137,7 +136,7 @@ public fun ParticipantAvatars(
                         userImage = user.imageUrl,
                         userName = user.name ?: user.id,
                         modifier = Modifier
-                            .size(100.dp * 2)
+                            .size(StreamTokens.size208)
                             .testTag("Stream_ParticipantAvatar"),
                     ),
                 )
@@ -149,7 +148,7 @@ public fun ParticipantAvatars(
                             userImage = firstThree[0].imageUrl,
                             userName = firstThree[0].userNameOrId,
                             modifier = Modifier
-                                .size(100.dp)
+                                .size(StreamTokens.size80)
                                 .testTag("Stream_ParticipantAvatar"),
                         ),
                     )
@@ -159,7 +158,7 @@ public fun ParticipantAvatars(
                             userImage = firstThree[1].imageUrl,
                             userName = firstThree[1].userNameOrId,
                             modifier = Modifier
-                                .size(100.dp)
+                                .size(StreamTokens.size80)
                                 .testTag("Stream_ParticipantAvatar"),
                         ),
                     )
@@ -172,8 +171,8 @@ public fun ParticipantAvatars(
                             userImage = firstThree[0].imageUrl,
                             userName = firstThree[0].userNameOrId,
                             modifier = Modifier
-                                .size(160.dp)
-                                .padding(16.dp)
+                                .size(StreamTokens.size144)
+                                .padding(StreamTokens.spacingMd)
                                 .testTag("Stream_ParticipantAvatar"),
                         ),
                     )
@@ -183,7 +182,7 @@ public fun ParticipantAvatars(
                                 userImage = firstThree[1].imageUrl,
                                 userName = firstThree[1].userNameOrId,
                                 modifier = Modifier
-                                    .size(100.dp)
+                                    .size(StreamTokens.size80)
                                     .testTag("Stream_ParticipantAvatar"),
                             ),
                         )
@@ -193,7 +192,7 @@ public fun ParticipantAvatars(
                                 userImage = firstThree[2].imageUrl,
                                 userName = firstThree[2].userNameOrId,
                                 modifier = Modifier
-                                    .size(100.dp)
+                                    .size(StreamTokens.size80)
                                     .testTag("Stream_ParticipantAvatar"),
                             ),
                         )

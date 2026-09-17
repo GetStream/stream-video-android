@@ -34,7 +34,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.log.StreamLog
 import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
@@ -43,6 +42,7 @@ import io.getstream.video.android.compose.permission.rememberMicrophonePermissio
 import io.getstream.video.android.compose.pip.enterPictureInPicture
 import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
@@ -154,7 +154,7 @@ public fun AudioRoomContent(
         Scaffold(
             modifier = modifier
                 .background(VideoTheme.colors.backgroundCoreApp)
-                .padding(32.dp),
+                .padding(StreamTokens.spacing2xl),
             contentColor = VideoTheme.colors.textPrimary,
             topBar = {
                 if (isShowingAppBar) {

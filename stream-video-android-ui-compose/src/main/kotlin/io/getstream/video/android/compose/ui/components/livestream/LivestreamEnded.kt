@@ -37,11 +37,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.getstream.android.video.generated.models.CallRecording
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.common.R
 
@@ -55,10 +55,10 @@ internal fun BoxScope.LivestreamEndedUi(call: Call) {
             stringResource(
                 id = R.string.stream_video_livestreaming_ended,
             ),
-            fontSize = 18.sp,
+            style = VideoTheme.typography.headingMedium,
             color = VideoTheme.colors.textPrimary,
         )
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingLg))
         LivestreamRecordingsUi(call)
     }
 }
@@ -68,7 +68,9 @@ internal fun LivestreamRecordingsUi(call: Call) {
     var recordings by remember { mutableStateOf(emptyList<CallRecording>()) }
     val context = LocalContext.current
 
+    val isInspectionMode = LocalInspectionMode.current
     LaunchedEffect(Unit) {
+        if (isInspectionMode) return@LaunchedEffect
         call.listRecordings()
             .onSuccess { recordings = it.recordings }
             .onError { recordings = emptyList<CallRecording>() }
@@ -78,16 +80,16 @@ internal fun LivestreamRecordingsUi(call: Call) {
 
     if (recordingListItems.isNotEmpty()) {
         // Do nothing
-        Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+        Column(modifier = Modifier.padding(horizontal = StreamTokens.spacingSm)) {
             Text(
                 stringResource(
                     id = R.string.stream_video_livestreaming_watch_recording,
                 ),
-                fontSize = 16.sp,
+                style = VideoTheme.typography.bodyDefault,
                 color = VideoTheme.colors.textPrimary,
             )
             recordingListItems.forEach {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
                 Text(
                     modifier = Modifier
                         .clickable {
@@ -97,7 +99,7 @@ internal fun LivestreamRecordingsUi(call: Call) {
                         }
                         .align(Alignment.CenterHorizontally),
                     text = it.url,
-                    fontSize = 14.sp,
+                    style = VideoTheme.typography.captionDefault,
                     color = VideoTheme.colors.textSecondary,
                 )
             }

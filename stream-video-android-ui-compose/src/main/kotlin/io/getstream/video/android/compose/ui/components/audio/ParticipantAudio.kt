@@ -39,11 +39,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.UserAvatarParams
@@ -109,13 +106,12 @@ public fun ParticipantAudio(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingXs))
 
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = nameOrId,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
+            style = VideoTheme.typography.captionEmphasis,
             color = VideoTheme.colors.textPrimary,
             textAlign = TextAlign.Center,
             overflow = TextOverflow.Ellipsis,
@@ -135,7 +131,7 @@ public fun ParticipantAudio(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = roles.firstOrNull().orEmpty(),
-                fontSize = 11.sp,
+                style = VideoTheme.typography.metadataDefault,
                 color = VideoTheme.colors.textPrimary,
                 textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,

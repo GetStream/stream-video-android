@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.participants.ParticipantAvatars
 import io.getstream.video.android.compose.ui.components.participants.internal.ParticipantInformation
 import io.getstream.video.android.core.MemberState
@@ -44,7 +44,7 @@ public fun OutgoingCallDetails(
     Column(modifier = modifier.fillMaxWidth()) {
         ParticipantAvatars(members = participants)
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacing2xl))
 
         ParticipantInformation(
             isVideoType = isVideoType,

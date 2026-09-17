@@ -41,7 +41,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.lifecycleScope
 import io.getstream.android.video.generated.models.OwnCapability
@@ -238,7 +237,7 @@ internal fun BoxScope.ParticipantActionsDialogContent(
                 shape = RoundedCornerShape(StreamTokens.radiusLg),
             )
             .align(Center)
-            .width(220.dp),
+            .width(StreamTokens.size208),
     ) {
         actions.forEach {
             if (it.condition(call, participant)) {

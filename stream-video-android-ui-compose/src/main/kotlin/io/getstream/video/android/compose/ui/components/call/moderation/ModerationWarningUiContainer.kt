@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,11 +49,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.moderation.ModerationDefaults
 import io.getstream.video.android.ui.moderation.ModerationThemeConfig
@@ -153,12 +152,7 @@ internal fun ModerationWarningUiContent(
             .fillMaxWidth()
             .background(
                 moderationThemeConfig.backgroundColor,
-                shape = RoundedCornerShape(
-                    topStart = 8.dp,
-                    bottomStart = 8.dp,
-                    topEnd = 8.dp,
-                    bottomEnd = 8.dp,
-                ),
+                shape = RoundedCornerShape(StreamTokens.radiusMd),
             ),
         contentAlignment = Alignment.TopStart,
     ) {
@@ -172,21 +166,25 @@ internal fun ModerationWarningUiContent(
                     .fillMaxHeight()
                     .background(
                         moderationThemeConfig.warningStripColor,
-                        shape = RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp),
+                        shape = RoundedCornerShape(
+                            topStart = StreamTokens.radiusXl,
+                            topEnd = ZeroCornerSize,
+                            bottomEnd = ZeroCornerSize,
+                            bottomStart = StreamTokens.radiusXl,
+                        ),
                     ),
             )
 
-            Column(Modifier.padding(vertical = 12.dp, horizontal = 12.dp)) {
+            Column(Modifier.padding(StreamTokens.spacingSm)) {
                 Text(
                     text = moderationText.title,
-                    fontWeight = FontWeight.Bold,
                     color = moderationThemeConfig.titleColor,
-                    fontSize = 16.sp,
+                    style = VideoTheme.typography.headingSmall,
                 )
                 Text(
                     text = moderationText.message,
                     color = moderationThemeConfig.messageColor,
-                    fontSize = 16.sp,
+                    style = VideoTheme.typography.bodyDefault,
                 )
             }
         }

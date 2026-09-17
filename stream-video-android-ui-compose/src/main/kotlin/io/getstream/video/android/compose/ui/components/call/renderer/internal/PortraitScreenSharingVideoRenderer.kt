@@ -37,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
@@ -148,7 +147,7 @@ private fun BoxWithConstraintsScope.ScreenSharingContent(
     ) {
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(StreamTokens.radiusXl))
                 .background(VideoTheme.colors.backgroundCoreElevation1)
                 .fillMaxWidth()
                 .height(itemHeight),

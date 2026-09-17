@@ -27,6 +27,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -41,8 +42,10 @@ import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,14 +57,11 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.ParticipantLabelSoundIndicatorContentParams
@@ -188,7 +188,16 @@ public fun ParticipantVideo(
         actionsContent.invoke(this, participantActions, call, participant)
 
         if (style.isShowingParticipantLabel) {
-            labelContent.invoke(this, participant)
+            // The default label keeps this width free at its end so it never runs under the
+            // connection quality indicator; custom label content may ignore it.
+            val endReserve = if (style.isShowingConnectionQualityIndicator) {
+                StreamTokens.size32
+            } else {
+                StreamTokens.spacingNone
+            }
+            CompositionLocalProvider(LocalParticipantLabelEndReserve provides endReserve) {
+                labelContent.invoke(this, participant)
+            }
         }
 
         if (style.isShowingConnectionQualityIndicator) {
@@ -390,80 +399,74 @@ public fun BoxScope.ParticipantLabel(
         }
     },
 ) {
-    var componentWidth by remember { mutableStateOf(0.dp) }
-    componentWidth = 100.dp
-    // get local density from composable
-    val density = LocalDensity.current
-    Box(
-        modifier = Modifier
-            .align(labelPosition)
-            .height(StreamTokens.size32)
-            .wrapContentWidth()
-            .background(
-                VideoTheme.colors.backgroundCoreOverlayDarkStrong,
-                shape = RoundedCornerShape(
-                    topStart = ZeroCornerSize,
-                    topEnd = StreamTokens.radiusXl,
-                    bottomEnd = ZeroCornerSize,
-                    bottomStart = ZeroCornerSize,
+    val endReserve = LocalParticipantLabelEndReserve.current
+    BoxWithConstraints(modifier = Modifier.align(labelPosition)) {
+        Box(
+            modifier = Modifier
+                .widthIn(max = (maxWidth - endReserve).coerceAtLeast(StreamTokens.spacingNone))
+                .height(StreamTokens.size32)
+                .wrapContentWidth()
+                .background(
+                    VideoTheme.colors.backgroundCoreOverlayDarkStrong,
+                    shape = RoundedCornerShape(
+                        topStart = ZeroCornerSize,
+                        topEnd = StreamTokens.radiusXl,
+                        bottomEnd = ZeroCornerSize,
+                        bottomStart = ZeroCornerSize,
+                    ),
                 ),
-            )
-            .onGloballyPositioned {
-                componentWidth = with(density) {
-                    it.size.width.toDp()
-                }
-            },
-    ) {
-        Row(
-            modifier = Modifier.align(Center),
-            verticalAlignment = CenterVertically,
         ) {
-            Text(
-                modifier = Modifier
-                    .widthIn(max = componentWidth)
-                    .padding(start = StreamTokens.spacingMd)
-                    .align(CenterVertically)
-                    .testTag("Stream_ParticipantName"),
-                text = nameLabel,
-                style = VideoTheme.typography.captionDefault,
-                color = VideoTheme.colors.textOnAccent,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(
+                modifier = Modifier.align(Center),
+                verticalAlignment = CenterVertically,
+            ) {
+                Text(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .padding(start = StreamTokens.spacingMd)
+                        .align(CenterVertically)
+                        .testTag("Stream_ParticipantName"),
+                    text = nameLabel,
+                    style = VideoTheme.typography.captionDefault,
+                    color = VideoTheme.colors.textOnAccent,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
 
-            if (isPinned) {
-                Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
-                GenericIndicator {
-                    Icon(
+                if (isPinned) {
+                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+                    GenericIndicator {
+                        Icon(
 
-                        modifier = Modifier
-                            .padding(horizontal = StreamTokens.spacing2xs)
-                            .size(StreamTokens.size16),
-                        painter = painterResource(
-                            io.getstream.video.android.compose.R.drawable.stream_design_ic_pin_fill,
-                        ),
-                        contentDescription = "Pin",
-                        tint = VideoTheme.colors.textOnAccent,
-                    )
+                            modifier = Modifier
+                                .padding(horizontal = StreamTokens.spacing2xs)
+                                .size(StreamTokens.size16),
+                            painter = painterResource(
+                                io.getstream.video.android.compose.R.drawable.stream_design_ic_pin_fill,
+                            ),
+                            contentDescription = "Pin",
+                            tint = VideoTheme.colors.textOnAccent,
+                        )
+                    }
                 }
-            }
 
-            if (isPaused) {
-                Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
-                GenericIndicator {
-                    Icon(
-                        modifier = Modifier
-                            .padding(horizontal = StreamTokens.spacing2xs)
-                            .size(StreamTokens.size16),
-                        painter = painterResource(
-                            io.getstream.video.android.compose.R.drawable.stream_design_ic_exclamation_triangle_fill,
-                        ),
-                        contentDescription = "Pause",
-                        tint = VideoTheme.colors.textOnAccent,
-                    )
+                if (isPaused) {
+                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+                    GenericIndicator {
+                        Icon(
+                            modifier = Modifier
+                                .padding(horizontal = StreamTokens.spacing2xs)
+                                .size(StreamTokens.size16),
+                            painter = painterResource(
+                                io.getstream.video.android.compose.R.drawable.stream_design_ic_exclamation_triangle_fill,
+                            ),
+                            contentDescription = "Pause",
+                            tint = VideoTheme.colors.textOnAccent,
+                        )
+                    }
                 }
+                soundIndicatorContent.invoke(this)
             }
-            soundIndicatorContent.invoke(this)
         }
     }
 }
@@ -603,3 +606,9 @@ private fun updateParticipantVisibility(
         visibilityOnScreenState,
     )
 }
+
+/**
+ * The width [ParticipantLabel] keeps free at the end of its parent so it does not run under the
+ * connection quality indicator. [ParticipantVideo] provides it while the indicator is shown.
+ */
+internal val LocalParticipantLabelEndReserve = compositionLocalOf { StreamTokens.spacingNone }

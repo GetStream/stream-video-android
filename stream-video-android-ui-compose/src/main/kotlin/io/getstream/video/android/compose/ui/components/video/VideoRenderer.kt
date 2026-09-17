@@ -46,8 +46,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.log.StreamLog
@@ -278,7 +276,7 @@ internal fun DefaultMediaTrackFallbackContent(
         contentAlignment = Alignment.Center,
     ) {
         CircularProgressIndicator(
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(StreamTokens.size48),
             color = VideoTheme.colors.textPrimary,
         )
     }
@@ -291,7 +289,7 @@ internal fun DefaultBadNetworkFallbackContent(
 ) {
     Row(
         modifier = modifier
-            .padding(16.dp)
+            .padding(StreamTokens.spacingMd)
             .background(
                 color = VideoTheme.colors.backgroundCoreOverlayDarkStrong,
                 shape = RoundedCornerShape(StreamTokens.radiusXl),
@@ -302,7 +300,7 @@ internal fun DefaultBadNetworkFallbackContent(
     ) {
         Icon(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(StreamTokens.spacingSm)
                 .align(CenterVertically),
             painter = painterResource(
                 io.getstream.video.android.compose.R.drawable.stream_design_ic_exclamation_triangle_fill,
@@ -311,14 +309,14 @@ internal fun DefaultBadNetworkFallbackContent(
             tint = VideoTheme.colors.textOnAccent,
         )
         Text(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(StreamTokens.spacingSm),
             text = stringResource(
                 id = io.getstream.video.android.ui.common.R.string.stream_video_call_bad_network,
                 call.sessionId,
             ),
             color = VideoTheme.colors.textOnAccent,
             textAlign = TextAlign.Center,
-            fontSize = 14.sp,
+            style = VideoTheme.typography.captionDefault,
         )
     }
 }
