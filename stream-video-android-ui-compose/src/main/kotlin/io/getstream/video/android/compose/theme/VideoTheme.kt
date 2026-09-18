@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import io.getstream.video.android.compose.theme.design.StreamDesign
-import io.getstream.video.android.compose.ui.components.base.styling.CompositeStyleProvider
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.header.VersionPrefixHeader
 
@@ -48,12 +47,6 @@ private val LocalColors = compositionLocalOf<StreamDesign.Colors> {
 private val LocalTypography = compositionLocalOf<StreamDesign.Typography> {
     error(
         "No typography provided! Make sure to wrap all usages of Stream components in a VideoTheme.",
-    )
-}
-
-private val LocalStyles = compositionLocalOf<CompositeStyleProvider> {
-    error(
-        "No styles provided! Make sure to wrap all usages of Stream components in a VideoTheme.",
     )
 }
 
@@ -87,7 +80,6 @@ public val LocalVideoUiConfig: ProvidableCompositionLocal<VideoUiConfig> =
  * @param config Central behavioral configuration for the Video SDK. See [VideoUiConfig].
  * @param colors The semantic color tokens. See [StreamDesign.Colors].
  * @param typography The text styles. See [StreamDesign.Typography].
- * @param styles The component style providers.
  * @param componentFactory Provide to customize the components used throughout the UI.
  * @param content The content shown within the theme wrapper.
  */
@@ -102,7 +94,6 @@ public fun VideoTheme(
         StreamDesign.Colors.default()
     },
     typography: StreamDesign.Typography = StreamDesign.Typography.default(),
-    styles: CompositeStyleProvider = CompositeStyleProvider(),
     componentFactory: VideoComponentFactory = DefaultVideoComponentFactory,
     content: @Composable () -> Unit,
 ) {
@@ -115,7 +106,6 @@ public fun VideoTheme(
         LocalTypography provides typography,
         LocalContentColor provides colors.textPrimary,
         LocalRippleConfiguration provides streamRippleConfiguration(colors, lightTheme = !isInDarkMode),
-        LocalStyles provides styles,
         LocalComponentFactory provides componentFactory,
     ) {
         Box(
@@ -149,13 +139,6 @@ public interface StreamTheme {
     public val typography: StreamDesign.Typography
         @Composable @ReadOnlyComposable
         get() = LocalTypography.current
-
-    /**
-     * Retrieves the current [CompositeStyleProvider] at the call site's position in the hierarchy.
-     */
-    public val styles: CompositeStyleProvider
-        @Composable @ReadOnlyComposable
-        get() = LocalStyles.current
 
     /**
      * Retrieves the current [VideoComponentFactory] at the call site's position in the hierarchy.
