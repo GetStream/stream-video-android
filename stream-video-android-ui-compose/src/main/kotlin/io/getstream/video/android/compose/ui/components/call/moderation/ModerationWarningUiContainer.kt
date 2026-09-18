@@ -159,7 +159,7 @@ internal fun ModerationWarningUiContent(
         Row(
             modifier = Modifier.height(IntrinsicSize.Min),
         ) {
-            // Orange column on the left
+            // Warning strip on the left
             Box(
                 modifier = Modifier
                     .width(moderationThemeConfig.warningStripWidth)
