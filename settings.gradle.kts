@@ -4,6 +4,7 @@ import com.github.burrunan.s3cache.AwsS3BuildCache
 
 pluginManagement {
     includeBuild("build-logic")
+    includeBuild("audio-switch-patch-plugin")
     repositories {
         gradlePluginPortal()
         google()

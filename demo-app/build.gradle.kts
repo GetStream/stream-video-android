@@ -26,6 +26,7 @@ import java.util.Properties
 plugins {
     id("io.getstream.video.android.application.compose")
     id("io.getstream.video.android.demoflavor")
+    id("io.getstream.audioswitch-patch")
     id("com.google.gms.google-services")
     id(libs.plugins.firebase.crashlytics.get().pluginId)
     id(libs.plugins.kotlin.serialization.get().pluginId)

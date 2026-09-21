@@ -1,0 +1,9 @@
+This product contains a modified portion of Twilio AudioSwitch 1.2.0.
+
+AudioSwitch is Copyright 2019 Twilio, Inc. and is licensed under the
+Apache License, Version 2.0. The modification replaces the mutable audio
+device list with a thread-safe CopyOnWriteArrayList and returns snapshots
+from the public availableAudioDevices property.
+
+Upstream project: https://github.com/twilio/audioswitch
+License: https://www.apache.org/licenses/LICENSE-2.0

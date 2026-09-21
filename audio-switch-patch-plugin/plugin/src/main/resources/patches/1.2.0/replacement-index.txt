@@ -1,0 +1,10 @@
+com/twilio/audioswitch/AudioSwitch.class
+com/twilio/audioswitch/AudioSwitch$AudioDeviceState.class
+com/twilio/audioswitch/AudioSwitch$Companion.class
+com/twilio/audioswitch/AudioSwitch$Companion$defaultPreferredDeviceList$2.class
+com/twilio/audioswitch/AudioSwitch$DefaultPermissionsCheckStrategy.class
+com/twilio/audioswitch/AudioSwitch$State.class
+com/twilio/audioswitch/AudioSwitch$WhenMappings.class
+com/twilio/audioswitch/AudioSwitch$bluetoothDeviceConnectionListener$1.class
+com/twilio/audioswitch/AudioSwitch$hasNoDuplicates$$inlined$groupingBy$1.class
+com/twilio/audioswitch/AudioSwitch$wiredDeviceConnectionListener$1.class
