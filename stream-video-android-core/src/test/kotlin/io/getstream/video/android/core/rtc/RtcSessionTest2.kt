@@ -1111,7 +1111,7 @@ class RtcSessionTest2 {
         }
 
     @Test
-    fun `mute sync resumes and flushes local state once the SFU is ready`() = runTest(
+    fun `mute sync resumes without replaying the tracks it skipped`() = runTest(
         testDispatcher,
     ) {
         val signalService = mockk<SignalServerService>(relaxed = true)
@@ -1129,9 +1129,8 @@ class RtcSessionTest2 {
         testScheduler.advanceUntilIdle()
 
         assertEquals(true, rtcSession.muteState.value[TrackType.TRACK_TYPE_AUDIO])
-        assertTrue(pendingMuteSyncTracks(rtcSession).contains(TrackType.TRACK_TYPE_AUDIO))
-        coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
         assertEquals(false, muteSyncEnabled(rtcSession).get())
+        coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
 
         RtcSession::class.java.getDeclaredMethod("resumeMuteSync").apply {
             isAccessible = true
@@ -1139,32 +1138,16 @@ class RtcSessionTest2 {
         }
         testScheduler.advanceUntilIdle()
 
+        // Resume only re-opens the gate. listenToMediaChanges' collectLatest replay is what
+        // re-signals each track, so resuming must not POST on its own — a flush here races
+        // that replay and gets cancelled mid-request.
+        assertEquals(true, muteSyncEnabled(rtcSession).get())
+        coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
+
+        // The gate really is open: the next change reaches the SFU.
+        rtcSession.createAndPublishAudioTrack()
+        testScheduler.advanceUntilIdle()
         coVerify(exactly = 1) { signalService.updateMuteStates(any()) }
-        assertTrue(pendingMuteSyncTracks(rtcSession).isEmpty())
-        assertEquals(true, muteSyncEnabled(rtcSession).get())
-    }
-
-    @Test
-    fun `resumeMuteSync does not flush tracks that were never pending`() = runTest(
-        testDispatcher,
-    ) {
-        val signalService = mockk<SignalServerService>(relaxed = true)
-        val (rtcSession, _) = muteSyncSession(signalService)
-
-        rtcSession.enterMigration()
-        testScheduler.advanceUntilIdle()
-        coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
-
-        RtcSession::class.java.getDeclaredMethod("resumeMuteSync").apply {
-            isAccessible = true
-            invoke(rtcSession)
-        }
-        testScheduler.advanceUntilIdle()
-
-        // muteState is pre-seeded with audio/video/screen-share; none of those were
-        // recorded while paused, so resume must not POST UpdateMuteStates.
-        coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
-        assertEquals(true, muteSyncEnabled(rtcSession).get())
     }
 
     @Test
@@ -1188,13 +1171,6 @@ class RtcSessionTest2 {
         val field = RtcSession::class.java.getDeclaredField("muteSyncEnabled")
         field.isAccessible = true
         return field.get(rtcSession) as AtomicBoolean
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun pendingMuteSyncTracks(rtcSession: RtcSession): MutableSet<TrackType> {
-        val field = RtcSession::class.java.getDeclaredField("pendingMuteSyncTracks")
-        field.isAccessible = true
-        return field.get(rtcSession) as MutableSet<TrackType>
     }
 
     private fun muteSyncSession(
