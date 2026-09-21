@@ -40,7 +40,6 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.models.ServiceRoute
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceEventObserver
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceRingingStateObserver
-import io.getstream.video.android.core.utils.isPreAndroid17
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
@@ -250,9 +249,7 @@ class CallServiceTest {
     }
 
     @Test
-    fun `Android 17 Telecom route does not install CallService observers`() {
-        mockkStatic("io.getstream.video.android.core.utils.AndroidVersionCodesKt")
-        every { isPreAndroid17() } returns false
+    fun `Telecom route does not install CallService observers`() {
         mockkConstructor(CallServiceRingingStateObserver::class)
         mockkConstructor(CallServiceEventObserver::class)
         every { anyConstructed<CallServiceRingingStateObserver>().observe(any()) } just runs
@@ -271,9 +268,7 @@ class CallServiceTest {
     }
 
     @Test
-    fun `Android 17 legacy route installs CallService observers`() {
-        mockkStatic("io.getstream.video.android.core.utils.AndroidVersionCodesKt")
-        every { isPreAndroid17() } returns false
+    fun `legacy route installs CallService observers`() {
         mockkConstructor(CallServiceRingingStateObserver::class)
         mockkConstructor(CallServiceEventObserver::class)
         every { anyConstructed<CallServiceRingingStateObserver>().observe(any()) } just runs
@@ -292,9 +287,7 @@ class CallServiceTest {
     }
 
     @Test
-    fun `Android 17 undecided route installs CallService observers`() {
-        mockkStatic("io.getstream.video.android.core.utils.AndroidVersionCodesKt")
-        every { isPreAndroid17() } returns false
+    fun `undecided route installs CallService observers`() {
         mockkConstructor(CallServiceRingingStateObserver::class)
         mockkConstructor(CallServiceEventObserver::class)
         every { anyConstructed<CallServiceRingingStateObserver>().observe(any()) } just runs
