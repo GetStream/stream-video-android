@@ -64,7 +64,6 @@ internal object NoOpNotificationHandler : NotificationHandler {
         /* NoOp */
     }
 
-    @Deprecated("Use StreamIncomingNotificationWithCallId.getIncomingCallNotification")
     override fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
@@ -173,17 +172,5 @@ internal object NoOpNotificationHandler : NotificationHandler {
             MediaNotificationVisuals(android.R.drawable.ic_media_play, null),
             null,
         )
-    }
-
-    override fun getIncomingCallNotification(
-        callId: StreamCallId,
-        fullScreenPendingIntent: PendingIntent,
-        acceptCallPendingIntent: PendingIntent,
-        rejectCallPendingIntent: PendingIntent,
-        callerName: String?,
-        shouldHaveContentIntent: Boolean,
-        payload: Map<String, Any?>,
-    ): Notification? {
-        return null
     }
 }

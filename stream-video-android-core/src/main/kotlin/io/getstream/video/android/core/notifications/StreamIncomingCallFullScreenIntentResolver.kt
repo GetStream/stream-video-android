@@ -19,8 +19,15 @@ package io.getstream.video.android.core.notifications
 import android.app.PendingIntent
 import io.getstream.video.android.model.StreamCallId
 
-interface StreamIntentResolverWithIncomingContentIntent {
-    fun searchIncomingCallContentPendingIntent(
+/**
+ * Optionally provides a separate full-screen intent for an incoming call.
+ *
+ * When a resolver does not implement this interface, the SDK uses
+ * [StreamIntentResolverWithPayload.searchIncomingCallPendingIntent] for both the notification's
+ * content and full-screen intents.
+ */
+public interface StreamIncomingCallFullScreenIntentResolver {
+    public fun searchIncomingCallFullScreenPendingIntent(
         callId: StreamCallId,
         notificationId: Int = callId.getNotificationId(NotificationType.Incoming),
         payload: Map<String, Any?>,

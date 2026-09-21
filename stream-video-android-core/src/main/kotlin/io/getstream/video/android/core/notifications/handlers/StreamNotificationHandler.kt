@@ -24,6 +24,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.model.StreamCallId
 
@@ -118,9 +119,16 @@ interface StreamNotificationHandlerWithPayload {
     fun onLiveCall(callId: StreamCallId, callDisplayName: String, payload: Map<String, Any?>)
 }
 
-interface StreamNotificationProviderWithPayload : StreamIncomingNotificationWithCallId {
+interface StreamNotificationProviderWithPayload {
     /**
      * Customize the notification when you receive a push notification for ringing call with type [RingingState.Incoming]
+     *
+     * This method is invoked only when the incoming ringtone owner is
+     * [IncomingRingtoneOwner.Legacy]. When the incoming ringtone owner is
+     * [IncomingRingtoneOwner.Notification],
+     * [StreamDefaultNotificationHandler.getNotificationOwnedIncomingCallNotification] is invoked
+     * instead.
+     *
      * @param fullScreenPendingIntent A high-priority intent that launches an activity in full-screen mode, bypassing the lock screen.
      * @param acceptCallPendingIntent The intent triggered when accepting the call from the notification.
      * @param rejectCallPendingIntent The intent triggered when rejecting the call from the notification.
@@ -128,7 +136,6 @@ interface StreamNotificationProviderWithPayload : StreamIncomingNotificationWith
      * @param shouldHaveContentIntent If true, clicking the notification triggers [fullScreenPendingIntent].
      * @return A [Notification] object customized for the incoming call.
      */
-    @Deprecated("Use StreamIncomingNotificationWithCallId.getIncomingCallNotification")
     fun getIncomingCallNotification(
         fullScreenPendingIntent: PendingIntent,
         acceptCallPendingIntent: PendingIntent,
@@ -180,18 +187,6 @@ interface StreamNotificationProviderWithPayload : StreamIncomingNotificationWith
     fun getMissedCallNotification(
         callId: StreamCallId,
         callDisplayName: String? = null,
-        payload: Map<String, Any?>,
-    ): Notification?
-}
-
-interface StreamIncomingNotificationWithCallId {
-    fun getIncomingCallNotification(
-        callId: StreamCallId,
-        fullScreenPendingIntent: PendingIntent,
-        acceptCallPendingIntent: PendingIntent,
-        rejectCallPendingIntent: PendingIntent,
-        callerName: String?,
-        shouldHaveContentIntent: Boolean,
         payload: Map<String, Any?>,
     ): Notification?
 }

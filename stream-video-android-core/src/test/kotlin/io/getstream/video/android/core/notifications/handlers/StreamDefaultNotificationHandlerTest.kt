@@ -22,6 +22,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -61,8 +62,10 @@ import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
 
@@ -316,17 +319,34 @@ class StreamDefaultNotificationHandlerTest {
     fun `Android 17 incoming notification uses separate full screen and content intents`() {
         mockkStatic("io.getstream.video.android.core.utils.AndroidVersionCodesKt")
         every { isAndroid17OrHigher() } returns true
+        val streamVideo = mockk<StreamVideoClient>(relaxed = true)
+        every { StreamVideo.instanceOrNull() } returns streamVideo
+        every { streamVideo.call(testCallId.type, testCallId.id) } returns mockCall
+        every {
+            mockCall.state.incomingRingtoneOwner.value
+        } returns IncomingRingtoneOwner.Notification
+        val audioAttributesBuilder = mockk<AudioAttributes.Builder>(relaxed = true)
+        mockkConstructor(AudioAttributes.Builder::class)
+        every {
+            anyConstructed<AudioAttributes.Builder>().setUsage(any())
+        } returns audioAttributesBuilder
+        every {
+            audioAttributesBuilder.setContentType(any())
+        } returns audioAttributesBuilder
+        every {
+            audioAttributesBuilder.build()
+        } returns mockk(relaxed = true)
         val contentPendingIntent = mockk<PendingIntent>()
         val fullScreenPendingIntent = mockk<PendingIntent>()
         val defaultIntentResolver = mockk<DefaultStreamIntentResolver>(relaxed = true)
         every {
-            defaultIntentResolver.searchIncomingCallContentPendingIntent(
+            defaultIntentResolver.searchIncomingCallPendingIntent(
                 testCallId,
                 payload = payload,
             )
         } returns contentPendingIntent
         every {
-            defaultIntentResolver.searchIncomingCallPendingIntent(
+            defaultIntentResolver.searchIncomingCallFullScreenPendingIntent(
                 testCallId,
                 payload = payload,
             )
@@ -381,6 +401,225 @@ class StreamDefaultNotificationHandlerTest {
         verify {
             anyConstructed<NotificationCompat.Builder>().setContentIntent(contentPendingIntent)
         }
+    }
+
+    @Test
+    fun `incoming notification falls back to content intent when full screen intent is unavailable`() {
+        val streamVideo = mockk<StreamVideoClient>(relaxed = true)
+        every { StreamVideo.instanceOrNull() } returns streamVideo
+        every { streamVideo.call(testCallId.type, testCallId.id) } returns mockCall
+        every {
+            mockCall.state.incomingRingtoneOwner.value
+        } returns IncomingRingtoneOwner.Notification
+        val audioAttributesBuilder = mockk<AudioAttributes.Builder>(relaxed = true)
+        mockkConstructor(AudioAttributes.Builder::class)
+        every {
+            anyConstructed<AudioAttributes.Builder>().setUsage(any())
+        } returns audioAttributesBuilder
+        every {
+            audioAttributesBuilder.setContentType(any())
+        } returns audioAttributesBuilder
+        every {
+            audioAttributesBuilder.build()
+        } returns mockk(relaxed = true)
+        val contentPendingIntent = mockk<PendingIntent>()
+        val defaultIntentResolver = mockk<DefaultStreamIntentResolver>(relaxed = true)
+        every {
+            defaultIntentResolver.searchIncomingCallPendingIntent(
+                testCallId,
+                payload = payload,
+            )
+        } returns contentPendingIntent
+        every {
+            defaultIntentResolver.searchIncomingCallFullScreenPendingIntent(
+                testCallId,
+                payload = payload,
+            )
+        } returns null
+        every {
+            defaultIntentResolver.searchAcceptCallPendingIntent(
+                testCallId,
+                payload = payload,
+            )
+        } returns mockPendingIntent
+        every {
+            defaultIntentResolver.searchRejectCallPendingIntent(
+                testCallId,
+                payload = payload,
+            )
+        } returns mockPendingIntent
+        every {
+            mockInitialInterceptor.onBuildIncomingCallNotification(
+                any(),
+                contentPendingIntent,
+                mockPendingIntent,
+                mockPendingIntent,
+                "John Doe",
+                true,
+                payload,
+            )
+        } answers { firstArg() }
+        testHandler = StreamDefaultNotificationHandler(
+            application = mockApplication,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = defaultIntentResolver,
+            hideRingingNotificationInForeground = false,
+            initialNotificationBuilderInterceptor = mockInitialInterceptor,
+            updateNotificationBuilderInterceptor = mockUpdateInterceptor,
+        )
+
+        testHandler.getRingingCallNotification(
+            ringingState = RingingState.Incoming(),
+            callId = testCallId,
+            callDisplayName = "John Doe",
+            shouldHaveContentIntent = true,
+            payload = payload,
+        )
+
+        verify {
+            anyConstructed<NotificationCompat.Builder>().setFullScreenIntent(
+                contentPendingIntent,
+                true,
+            )
+        }
+        verify {
+            anyConstructed<NotificationCompat.Builder>().setContentIntent(contentPendingIntent)
+        }
+    }
+
+    @Test
+    fun `legacy ringtone owner invokes only legacy incoming notification overload`() {
+        val streamVideo = mockk<StreamVideoClient>(relaxed = true)
+        every { StreamVideo.instanceOrNull() } returns streamVideo
+        every { streamVideo.call(testCallId.type, testCallId.id) } returns mockCall
+        every {
+            mockCall.state.incomingRingtoneOwner.value
+        } returns IncomingRingtoneOwner.Legacy
+        every {
+            mockIntentResolver.searchIncomingCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchAcceptCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchRejectCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
+        val expectedNotification = mockk<Notification>()
+        var legacyOverloadCalls = 0
+        var notificationOwnedOverloadCalls = 0
+        testHandler = object : StreamDefaultNotificationHandler(
+            application = mockApplication,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+        ) {
+            override fun getIncomingCallNotification(
+                fullScreenPendingIntent: PendingIntent,
+                acceptCallPendingIntent: PendingIntent,
+                rejectCallPendingIntent: PendingIntent,
+                callerName: String?,
+                shouldHaveContentIntent: Boolean,
+                payload: Map<String, Any?>,
+            ): Notification {
+                legacyOverloadCalls++
+                return expectedNotification
+            }
+
+            override fun getNotificationOwnedIncomingCallNotification(
+                streamCallId: StreamCallId,
+                ringingState: RingingState.Incoming,
+                fullScreenPendingIntent: PendingIntent,
+                contentPendingIntent: PendingIntent,
+                acceptCallPendingIntent: PendingIntent,
+                rejectCallPendingIntent: PendingIntent,
+                callerName: String?,
+                shouldHaveContentIntent: Boolean,
+                payload: Map<String, Any?>,
+            ): Notification {
+                notificationOwnedOverloadCalls++
+                return expectedNotification
+            }
+        }
+
+        val result = testHandler.getRingingCallNotification(
+            ringingState = RingingState.Incoming(),
+            callId = testCallId,
+            callDisplayName = "John Doe",
+            shouldHaveContentIntent = true,
+            payload = payload,
+        )
+
+        assertSame(expectedNotification, result)
+        assertEquals(1, legacyOverloadCalls)
+        assertEquals(0, notificationOwnedOverloadCalls)
+    }
+
+    @Test
+    fun `notification ringtone owner invokes only notification owned incoming notification overload`() {
+        val streamVideo = mockk<StreamVideoClient>(relaxed = true)
+        every { StreamVideo.instanceOrNull() } returns streamVideo
+        every { streamVideo.call(testCallId.type, testCallId.id) } returns mockCall
+        every {
+            mockCall.state.incomingRingtoneOwner.value
+        } returns IncomingRingtoneOwner.Notification
+        every {
+            mockIntentResolver.searchIncomingCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchAcceptCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
+        every {
+            mockIntentResolver.searchRejectCallPendingIntent(testCallId, payload = payload)
+        } returns mockPendingIntent
+        val expectedNotification = mockk<Notification>()
+        var legacyOverloadCalls = 0
+        var notificationOwnedOverloadCalls = 0
+        testHandler = object : StreamDefaultNotificationHandler(
+            application = mockApplication,
+            notificationManager = mockNotificationManager,
+            notificationPermissionHandler = mockNotificationPermissionHandler,
+            intentResolver = mockIntentResolver,
+        ) {
+            override fun getIncomingCallNotification(
+                fullScreenPendingIntent: PendingIntent,
+                acceptCallPendingIntent: PendingIntent,
+                rejectCallPendingIntent: PendingIntent,
+                callerName: String?,
+                shouldHaveContentIntent: Boolean,
+                payload: Map<String, Any?>,
+            ): Notification {
+                legacyOverloadCalls++
+                return expectedNotification
+            }
+
+            override fun getNotificationOwnedIncomingCallNotification(
+                streamCallId: StreamCallId,
+                ringingState: RingingState.Incoming,
+                fullScreenPendingIntent: PendingIntent,
+                contentPendingIntent: PendingIntent,
+                acceptCallPendingIntent: PendingIntent,
+                rejectCallPendingIntent: PendingIntent,
+                callerName: String?,
+                shouldHaveContentIntent: Boolean,
+                payload: Map<String, Any?>,
+            ): Notification {
+                notificationOwnedOverloadCalls++
+                return expectedNotification
+            }
+        }
+
+        val result = testHandler.getRingingCallNotification(
+            ringingState = RingingState.Incoming(),
+            callId = testCallId,
+            callDisplayName = "John Doe",
+            shouldHaveContentIntent = true,
+            payload = payload,
+        )
+
+        assertSame(expectedNotification, result)
+        assertEquals(0, legacyOverloadCalls)
+        assertEquals(1, notificationOwnedOverloadCalls)
     }
 
     @Test

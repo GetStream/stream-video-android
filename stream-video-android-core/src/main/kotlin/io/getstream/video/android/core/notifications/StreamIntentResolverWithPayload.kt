@@ -21,7 +21,7 @@ import io.getstream.video.android.core.notifications.NotificationHandler.Compani
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
 import io.getstream.video.android.model.StreamCallId
 
-interface StreamIntentResolverWithPayload : StreamIntentResolverWithIncomingContentIntent {
+interface StreamIntentResolverWithPayload {
     /**
      * Search for an activity that can receive incoming calls from Stream Server.
      *
