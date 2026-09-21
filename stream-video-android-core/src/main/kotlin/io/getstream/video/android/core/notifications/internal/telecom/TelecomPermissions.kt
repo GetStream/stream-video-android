@@ -62,23 +62,58 @@ class TelecomPermissions {
         return getRequiredPermissionsList(telecomIntegrationType).toTypedArray()
     }
 
-    private fun hasPermissions(context: Context): Boolean {
-        return getRequiredPermissionsArray().all {
-            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+    private fun getMissingPermissions(context: Context): List<String> =
+        getRequiredPermissionsArray().filter {
+            ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
         }
-    }
 
     private fun optedForTelecom() = (StreamVideo.instanceOrNull() as? StreamVideoClient)?.telecomConfig != null
 
     fun canUseTelecom(callServiceConfig: CallServiceConfig, context: Context): Boolean {
-        return callServiceConfig.enableTelecom && optedForTelecom() && supportsTelecom(context) && hasPermissions(context)
+        if (!callServiceConfig.enableTelecom) {
+            logger.d { "[canUseTelecom] Telecom is disabled by CallServiceConfig." }
+            return false
+        }
+
+        if (!optedForTelecom()) {
+            logger.d { "[canUseTelecom] StreamVideo was not configured with telecomConfig." }
+            return false
+        }
+
+        if (!supportsTelecom(context)) {
+            return false
+        }
+
+        val missingPermissions = getMissingPermissions(context)
+        if (missingPermissions.isNotEmpty()) {
+            logger.d {
+                "[canUseTelecom] Missing required permissions: ${missingPermissions.joinToString()}"
+            }
+            return false
+        }
+
+        return true
     }
 
     fun supportsTelecom(context: Context): Boolean {
         val pm = context.packageManager
-        val hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)
-        val hasDefaultDialer = getSafeTelecomManager(context)?.defaultDialerPackage?.isNotEmpty() == true
-        return hasTelephony && hasDefaultDialer
+        if (!pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+            logger.d { "[canUseTelecom] Device does not support telephony." }
+            return false
+        }
+
+        val telecomManager = getSafeTelecomManager(context)
+        if (telecomManager == null) {
+            logger.d { "[canUseTelecom] TelecomManager is unavailable." }
+            return false
+        }
+
+        if (telecomManager.defaultDialerPackage.isNullOrEmpty()) {
+            logger.d { "[canUseTelecom] No default dialer is configured." }
+            return false
+        }
+
+        return true
     }
 
     private fun getSafeTelecomManager(context: Context): TelecomManager? {

@@ -69,11 +69,21 @@ internal class Android17IncomingCallCoordinator(
 
     @SuppressLint("MissingPermission", "NewApi")
     override fun showIncomingCall(request: IncomingCallRequest) {
-        if (!telecomPermissions.canUseTelecom(request.callServiceConfiguration, context) ||
-            !telecomHelper.canUseJetpackTelecom() ||
-            !hasNotificationPermission()
-        ) {
-            fallbackToCallService(request)
+        if (!telecomPermissions.canUseTelecom(request.callServiceConfiguration, context)) {
+            fallbackToCallService(
+                request,
+                "Telecom configuration, platform, or permission requirements are not met.",
+            )
+            return
+        }
+
+        if (!telecomHelper.canUseJetpackTelecom()) {
+            fallbackToCallService(request, "Jetpack Telecom integration is not selected.")
+            return
+        }
+
+        if (!hasNotificationPermission()) {
+            fallbackToCallService(request, "POST_NOTIFICATIONS permission is not granted.")
             return
         }
 
@@ -110,7 +120,7 @@ internal class Android17IncomingCallCoordinator(
                 },
                 onException = { error ->
                     logger.e(error) { "[showIncomingCall] Telecom registration failed" }
-                    fallbackToCallService(request)
+                    fallbackToCallService(request, "Telecom call registration failed.")
                 },
             )
         }
@@ -126,8 +136,8 @@ internal class Android17IncomingCallCoordinator(
         telecomCallController.leaveCall(call)
     }
 
-    private fun fallbackToCallService(request: IncomingCallRequest) {
-        logger.w { "[showIncomingCall] Telecom unavailable; falling back to CallService" }
+    private fun fallbackToCallService(request: IncomingCallRequest, reason: String) {
+        logger.w { "[showIncomingCall] Cannot use Telecom: $reason Falling back to CallService." }
         fallbackCoordinator.showIncomingCall(request)
     }
 

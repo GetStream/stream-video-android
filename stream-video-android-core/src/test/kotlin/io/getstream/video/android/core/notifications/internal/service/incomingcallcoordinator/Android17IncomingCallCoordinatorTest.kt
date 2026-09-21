@@ -126,15 +126,55 @@ class Android17IncomingCallCoordinatorTest {
 
     @Test
     fun `falls back to legacy coordinator when Telecom is unavailable`() {
-        val request = request()
+        var notificationRequested = false
+        val request = request { notificationRequested = true }
         every {
             telecomPermissions.canUseTelecom(request.callServiceConfiguration, context)
         } returns false
 
         coordinator.showIncomingCall(request)
 
-        verify { fallbackCoordinator.showIncomingCall(request) }
+        verify(exactly = 1) { fallbackCoordinator.showIncomingCall(request) }
+        verify(exactly = 0) { telecomHelper.canUseJetpackTelecom() }
+        verify(exactly = 0) {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+        }
+        verify(exactly = 0) { repositoryProvider.get(any()) }
         coVerify(exactly = 0) { repository.registerCall(any(), any(), any(), any(), any(), any()) }
+        assertEquals(false, notificationRequested)
+    }
+
+    @Test
+    fun `falls back to legacy coordinator when Jetpack Telecom is unavailable`() {
+        var notificationRequested = false
+        val request = request { notificationRequested = true }
+        every { telecomHelper.canUseJetpackTelecom() } returns false
+
+        coordinator.showIncomingCall(request)
+
+        verify(exactly = 1) { fallbackCoordinator.showIncomingCall(request) }
+        verify(exactly = 0) {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+        }
+        verify(exactly = 0) { repositoryProvider.get(any()) }
+        coVerify(exactly = 0) { repository.registerCall(any(), any(), any(), any(), any(), any()) }
+        assertEquals(false, notificationRequested)
+    }
+
+    @Test
+    fun `falls back to legacy coordinator when notification permission is denied`() {
+        var notificationRequested = false
+        val request = request { notificationRequested = true }
+        every {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+        } returns PackageManager.PERMISSION_DENIED
+
+        coordinator.showIncomingCall(request)
+
+        verify(exactly = 1) { fallbackCoordinator.showIncomingCall(request) }
+        verify(exactly = 0) { repositoryProvider.get(any()) }
+        coVerify(exactly = 0) { repository.registerCall(any(), any(), any(), any(), any(), any()) }
+        assertEquals(false, notificationRequested)
     }
 
     @Test
@@ -194,7 +234,8 @@ class Android17IncomingCallCoordinatorTest {
 
     @Test
     fun `Telecom registration failure falls back to CallService`() {
-        val request = request()
+        var notificationRequested = false
+        val request = request { notificationRequested = true }
         val failure = IllegalStateException("registration failed")
         coEvery {
             repository.registerCall(any(), any(), any(), any(), any(), any())
@@ -205,7 +246,11 @@ class Android17IncomingCallCoordinatorTest {
         coordinator.showIncomingCall(request)
         callScope.advanceUntilIdle()
 
-        verify { fallbackCoordinator.showIncomingCall(request) }
+        verify(exactly = 1) { fallbackCoordinator.showIncomingCall(request) }
+        verify(exactly = 0) {
+            presenter.showIncomingCallNotification(any(), any(), any())
+        }
+        assertEquals(false, notificationRequested)
     }
 
     private fun request(
