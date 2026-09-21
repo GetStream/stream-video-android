@@ -17,6 +17,7 @@
 
 plugins {
     id("io.getstream.video.android.application.compose")
+    id("io.getstream.audioswitch-patch")
 }
 
 android {
