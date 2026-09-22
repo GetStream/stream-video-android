@@ -37,10 +37,16 @@ plugins {
 
 // CI passes these so that every dogfooding build is a distinct release in Firebase App
 // Distribution. Locally they are absent and the build keeps the previous fixed values.
+// A property passed with no value reads back as an empty string, so treat that as absent
+// rather than letting it fail the build or produce a dangling version name.
 val demoAppVersionCode: Int = providers.gradleProperty("demoAppVersionCode")
-    .map(String::toInt)
-    .getOrElse(1)
-val demoAppBuildSha: String? = providers.gradleProperty("demoAppBuildSha").orNull
+    .orNull
+    ?.takeIf(String::isNotBlank)
+    ?.toInt()
+    ?: 1
+val demoAppBuildSha: String? = providers.gradleProperty("demoAppBuildSha")
+    .orNull
+    ?.takeIf(String::isNotBlank)
 
 android {
     namespace = "io.getstream.video.android"
