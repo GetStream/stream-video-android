@@ -859,7 +859,7 @@ public class CallState(
             }
 
             is CallAcceptedEvent -> {
-                call.recordRingEvent()
+                call.recordRingParticipantStatusUpdate()
                 val newAcceptedBy = _acceptedBy.value.toMutableSet()
                 newAcceptedBy.add(event.user.id)
                 _acceptedBy.value = newAcceptedBy.toSet()
@@ -891,12 +891,12 @@ public class CallState(
             }
 
             is CallMissedEvent -> {
-                call.recordRingEvent()
+                call.recordRingParticipantStatusUpdate()
                 _createdBy.value = event.call.createdBy.toUser()
             }
 
             is CallRejectedEvent -> {
-                call.recordRingEvent()
+                call.recordRingParticipantStatusUpdate()
                 _createdBy.value = event.call.createdBy.toUser()
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)

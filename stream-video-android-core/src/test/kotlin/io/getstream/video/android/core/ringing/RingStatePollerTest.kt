@@ -104,7 +104,7 @@ class RingStatePollerTest {
 
         // A rejection from one callee does not settle a group ring, so the poller stays armed —
         // but the socket just proved it is alive, so the wait starts over.
-        poller.onRingEvent()
+        poller.onRingParticipantStatusUpdate()
         advanceTimeBy(10_000)
         assertThat(reads).isEqualTo(0)
 
@@ -238,7 +238,9 @@ class RingStatePollerTest {
         // Disabling polling is done by passing a null config, never by zeroing a timing, so a
         // non-positive interval is a mistake rather than an intent to switch it off.
         assertFailsWith<IllegalArgumentException> { RingStatePollingConfig(intervalMs = 0) }
-        assertFailsWith<IllegalArgumentException> { RingStatePollingConfig(maxDurationMs = 0) }
+        assertFailsWith<IllegalArgumentException> {
+            RingStatePollingConfig(defaultRingWindowMs = 0)
+        }
         assertFailsWith<IllegalArgumentException> { RingStatePollingConfig(startAfterMs = -1) }
     }
 

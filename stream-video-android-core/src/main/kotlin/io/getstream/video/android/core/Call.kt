@@ -332,12 +332,12 @@ public class Call(
      */
     internal val ringStatePoller: RingStatePoller
         get() = _ringStatePoller ?: RingStatePoller(
-            // A real IO dispatcher rather than the call scope or DispatcherProvider: this is a
-            // background watchdog issuing network reads on a wall-clock schedule, and the ring
-            // window bounding it is wall-clock too. Running it on a scheduler a caller can
-            // replace makes those reads someone else's to drain. Unit tests inject their own
-            // scope and clock instead.
-            scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+            // The call's job, so polling dies with the call it belongs to, but a real IO
+            // dispatcher rather than the call scope's own: this is a wall-clock watchdog bounded
+            // by a wall-clock ring window, and DispatcherProvider.IO is replaceable, so on a test
+            // scheduler its delays collapse and its network reads become someone else's to
+            // drain. Only the dispatcher is overridden; cancellation still follows the call.
+            scope = CoroutineScope(scope.coroutineContext + Dispatchers.IO),
             config = clientImpl.ringStatePolling,
             now = { SystemClock.elapsedRealtime() },
             fetch = { callSessionId -> apiClient.getRingState(callSessionId) },
@@ -353,8 +353,8 @@ public class Call(
      * Records that a ring event arrived. A no-op before the first poller exists, which is correct:
      * [RingStatePoller.start] begins its own quiet period.
      */
-    internal fun recordRingEvent() {
-        _ringStatePoller?.onRingEvent()
+    internal fun recordRingParticipantStatusUpdate() {
+        _ringStatePoller?.onRingParticipantStatusUpdate()
     }
 
     /**
@@ -398,8 +398,9 @@ public class Call(
                 supervisorJob.cancel()
             }
             scope.cancel()
-            // The poller runs on its own scope, so cancelling this one does not reach it. Without
-            // this a read could still land after teardown and act on a call that is going away.
+            // Cancelling the scope already reaches the poller, which runs on the call's job.
+            // Stopping it explicitly also clears the job reference, so a call torn down and
+            // re-armed does not see a cancelled job as a running one.
             stopRingStatePolling()
         },
         state = state,

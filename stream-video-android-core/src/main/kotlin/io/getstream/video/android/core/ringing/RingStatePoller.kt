@@ -35,8 +35,21 @@ import kotlinx.coroutines.launch
  * source the caller stays on a ringing screen while the callee is already in the call.
  *
  * The poller is caller-side only and deliberately quiet: it starts only after a ring has gone
- * [RingStatePollingConfig.startAfterMs] without any ring event, and stops at the ring deadline, so
- * a ring that resolves normally never issues a request.
+ * [RingStatePollingConfig.startAfterMs] without a participant's ring status changing, and stops at
+ * the ring deadline, so a ring that resolves normally never issues a request.
+ *
+ * Reads are scheduled at a fixed delay, not a fixed rate:
+ *
+ * 1. polling waits until no participant's ring status has changed for
+ *    [RingStatePollingConfig.startAfterMs];
+ * 2. it then issues the first read;
+ * 3. once a read and the state it produces have been applied, it waits
+ *    [RingStatePollingConfig.intervalMs] before the next one;
+ * 4. a status update arriving while it waits restarts the wait from step 1.
+ *
+ * The time a read takes is therefore not absorbed by the interval: with a five second interval and
+ * a two second read, consecutive reads start about seven seconds apart. That is the intended
+ * trade - a slow endpoint gets asked less often, not more.
  *
  * @param scope the scope the poll loop runs in; cancelling it stops polling.
  * @param config timings, or null to disable polling entirely.
@@ -56,13 +69,18 @@ internal class RingStatePoller(
     private var job: Job? = null
 
     /**
-     * The last time a ring event proved the socket was still delivering. Polling waits for
-     * [RingStatePollingConfig.startAfterMs] of quiet measured from here, so an event pushes the
-     * first read further out rather than cancelling the poller: in a group ring a single rejection
-     * does not settle the outcome, and the ring may still go silent afterwards.
+     * When the current grace period began: the ring starting, or the last time a participant's
+     * ring status proved the socket was still delivering.
+     *
+     * Polling waits for [RingStatePollingConfig.startAfterMs] measured from here, so an update
+     * pushes the first read further out rather than cancelling the poller: in a group ring a
+     * single rejection does not settle the outcome, and the ring may still go silent afterwards.
+     *
+     * This is a local observation time, not an event timestamp, and it is set when polling is
+     * armed even though nothing has been observed yet.
      */
     @Volatile
-    private var lastRingEventAt: Long = 0
+    private var pollingGracePeriodStartedAtMs: Long = 0
 
     /**
      * Begins watching a ring.
@@ -78,7 +96,7 @@ internal class RingStatePoller(
         if (config == null) return
         if (job?.isActive == true) return
 
-        lastRingEventAt = now()
+        pollingGracePeriodStartedAtMs = now()
 
         job = scope.launch {
             // The ring window bounds polling so it resolves before the local auto-drop rather
@@ -87,12 +105,12 @@ internal class RingStatePoller(
             // unbounded read loop against the shard. A ring whose settings are not known yet
             // falls back to the length of a default ring rather than to the ceiling.
             val ringWindow = ringTimeoutMs()?.takeIf { it > 0 } ?: config.defaultRingWindowMs
-            val deadline = now() + minOf(ringWindow, config.maxDurationMs)
+            val deadline = now() + minOf(ringWindow, RingStatePollingConfig.MAX_DURATION_MS)
             var sessionId: String? = null
 
             logger.d { "[start] deadline in ${deadline - now()}ms" }
             while (isActive) {
-                val quietFor = now() - lastRingEventAt
+                val quietFor = now() - pollingGracePeriodStartedAtMs
                 val waitFor = if (quietFor >= config.startAfterMs) {
                     config.intervalMs
                 } else {
@@ -107,7 +125,7 @@ internal class RingStatePoller(
                 delay(waitFor)
 
                 // A ring event during the wait restarts the quiet period instead of polling now.
-                if (now() - lastRingEventAt < config.startAfterMs) continue
+                if (now() - pollingGracePeriodStartedAtMs < config.startAfterMs) continue
 
                 sessionId = sessionId ?: callSessionId()?.takeIf { it.isNotEmpty() }
                 if (sessionId == null) {
@@ -121,8 +139,8 @@ internal class RingStatePoller(
     }
 
     /** Records that a ring event arrived, restarting the quiet period. */
-    fun onRingEvent() {
-        lastRingEventAt = now()
+    fun onRingParticipantStatusUpdate() {
+        pollingGracePeriodStartedAtMs = now()
     }
 
     /** Stops polling. Safe to call when not started. */

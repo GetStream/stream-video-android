@@ -19,24 +19,28 @@ package io.getstream.video.android.core.ringing
 /**
  * When the caller falls back to reading the ring state instead of waiting for it.
  *
- * @param startAfterMs how long a ring must go without any ring event before polling begins. Kept
- * well above the coordinator's websocket ping interval so a merely slow answer does not poll.
- * @param intervalMs the gap between reads once polling has begun.
+ * Polling is switched off by passing a null config, never by zeroing a timing: every value here
+ * must be usable, and a non-positive one is rejected rather than quietly disabling the fallback.
+ *
+ * @param startAfterMs how long a ring must go without a participant's ring status changing before
+ * polling begins. Kept well above the coordinator's websocket ping interval so a merely slow
+ * answer does not poll.
+ * @param intervalMs the gap between reads once polling has begun. Measured from the end of one
+ * read to the start of the next, so a slow read widens the gap rather than being absorbed by it.
+ * @param defaultRingWindowMs how long a ring is assumed to last when its settings have not
+ * arrived yet. The window is normally taken from the call's own ring settings; this stands in
+ * only until those are known.
  */
 public data class RingStatePollingConfig(
     val startAfterMs: Long = DEFAULT_START_AFTER_MS,
     val intervalMs: Long = DEFAULT_INTERVAL_MS,
-    val maxDurationMs: Long = DEFAULT_MAX_DURATION_MS,
     val defaultRingWindowMs: Long = DEFAULT_RING_WINDOW_MS,
 ) {
     init {
         // A non-positive interval turns the read loop into a spin against a rate limited
-        // endpoint, for as long as the ring lasts. Fail where the value is set, not in the
-        // field. Polling is disabled by passing null for the whole config, never by zeroing a
-        // timing.
+        // endpoint, for as long as the ring lasts. Fail where the value is set, not in the field.
         require(intervalMs > 0) { "intervalMs must be positive, was $intervalMs" }
         require(startAfterMs >= 0) { "startAfterMs cannot be negative, was $startAfterMs" }
-        require(maxDurationMs > 0) { "maxDurationMs must be positive, was $maxDurationMs" }
         require(defaultRingWindowMs > 0) {
             "defaultRingWindowMs must be positive, was $defaultRingWindowMs"
         }
@@ -60,9 +64,10 @@ public data class RingStatePollingConfig(
          * The polling window is otherwise the app's own `auto_cancel_timeout_ms`, which the app
          * chooses and can set to minutes. One read every [intervalMs] for that whole window,
          * multiplied by every ringing caller, is real load on a shard — and the endpoint is rate
-         * limited per app, so it would be the customer's own allowance being spent. The ceiling
-         * belongs to the SDK rather than to configuration we do not control.
+         * limited per app, so it would be the customer's own allowance being spent.
+         *
+         * Deliberately not configurable: a ceiling an app can raise is a default, not a ceiling.
          */
-        public const val DEFAULT_MAX_DURATION_MS: Long = 60_000
+        internal const val MAX_DURATION_MS: Long = 60_000
     }
 }
