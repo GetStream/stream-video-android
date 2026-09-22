@@ -24,6 +24,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.model.StreamCallId
 
@@ -121,6 +122,13 @@ interface StreamNotificationHandlerWithPayload {
 interface StreamNotificationProviderWithPayload {
     /**
      * Customize the notification when you receive a push notification for ringing call with type [RingingState.Incoming]
+     *
+     * This method is invoked only when the incoming ringtone owner is
+     * [IncomingRingtoneOwner.Legacy]. When the incoming ringtone owner is
+     * [IncomingRingtoneOwner.Notification],
+     * [StreamDefaultNotificationHandler.getNotificationOwnedIncomingCallNotification] is invoked
+     * instead.
+     *
      * @param fullScreenPendingIntent A high-priority intent that launches an activity in full-screen mode, bypassing the lock screen.
      * @param acceptCallPendingIntent The intent triggered when accepting the call from the notification.
      * @param rejectCallPendingIntent The intent triggered when rejecting the call from the notification.
@@ -182,7 +190,6 @@ interface StreamNotificationProviderWithPayload {
         payload: Map<String, Any?>,
     ): Notification?
 }
-
 interface StreamSettingUpCallNotificationProvider {
     fun getSettingUpCallNotification(trigger: String, callId: StreamCallId): Notification?
 }
@@ -232,7 +239,9 @@ interface StreamNotificationUpdatesProvider {
     ): Notification?
 }
 
-interface StreamNotificationProvider : StreamNotificationProviderWithPayload, StreamSettingUpCallNotificationProvider {
+interface StreamNotificationProvider :
+    StreamNotificationProviderWithPayload,
+    StreamSettingUpCallNotificationProvider {
 
     /**
      * Customize the notification when you receive a push notification for ringing call with type [RingingState.Incoming]
@@ -246,7 +255,7 @@ interface StreamNotificationProvider : StreamNotificationProviderWithPayload, St
     @Deprecated(
         "Use the one with payload: Map<String, Any?>",
         replaceWith = ReplaceWith(
-            "getIncomingCallNotification(fullScreenPendingIntent,acceptCallPendingIntent,rejectCallPendingIntent,callerName,shouldHaveContentIntent,emptyMap()",
+            "getIncomingCallNotification(fullScreenPendingIntent,acceptCallPendingIntent,rejectCallPendingIntent,callerName,shouldHaveContentIntent,emptyMap())",
         ),
         level = DeprecationLevel.WARNING,
     )

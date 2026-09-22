@@ -19,6 +19,7 @@ package io.getstream.video.android.core.notifications.internal.telecom
 import android.os.Build
 import io.getstream.video.android.core.StreamVideo
 
+// TODO pass StreamVideo instance in constructor on v2
 internal class TelecomHelper {
 
     fun canUseJetpackTelecom(): Boolean {
