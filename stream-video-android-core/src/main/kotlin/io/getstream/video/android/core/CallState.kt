@@ -60,6 +60,7 @@ import io.getstream.android.video.generated.models.CustomVideoEvent
 import io.getstream.android.video.generated.models.EgressHLSResponse
 import io.getstream.android.video.generated.models.EgressResponse
 import io.getstream.android.video.generated.models.GetCallResponse
+import io.getstream.android.video.generated.models.GetCallRingStateResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.HealthCheckEvent
@@ -121,6 +122,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.jetpack.Te
 import io.getstream.video.android.core.permission.PermissionRequest
 import io.getstream.video.android.core.pinning.PinEntry
 import io.getstream.video.android.core.pinning.PinManager
+import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.sorting.SortPreset
@@ -865,24 +867,16 @@ public class CallState(
             }
 
             is CallAcceptedEvent -> {
+                call.recordRingParticipantStatusUpdate()
                 val newAcceptedBy = _acceptedBy.value.toMutableSet()
                 newAcceptedBy.add(event.user.id)
                 _acceptedBy.value = newAcceptedBy.toSet()
                 updateRingingState()
 
-                // auto-join the call if it's an outgoing call and someone has accepted
-                // do not auto-join if it's already accepted by us
                 val callRingState = _ringingState.value
-                if (callRingState is RingingState.Outgoing && callRingState.acceptedByCallee && _acceptedBy.value.findLast {
-                        it == client.userId
-                    } == null && client.state.activeCall.value == null && autoJoiningCall == null
+                if (!joinAcceptedOutgoingCall(RingJoinSource.WebSocket) &&
+                    callRingState is RingingState.Incoming && event.user.id == client.userId
                 ) {
-                    autoJoiningCall = scope.launch {
-                        // errors are handled inside the join function
-                        call.join()
-                        autoJoiningCall = null
-                    }
-                } else if (callRingState is RingingState.Incoming && event.user.id == client.userId) {
                     // Call accepted by me + this device is Incoming => I accepted on another device
                     // Then leave the call on this device
                     if (!acceptedOnThisDevice) {
@@ -905,10 +899,12 @@ public class CallState(
             }
 
             is CallMissedEvent -> {
+                call.recordRingParticipantStatusUpdate()
                 _createdBy.value = event.call.createdBy.toUser()
             }
 
             is CallRejectedEvent -> {
+                call.recordRingParticipantStatusUpdate()
                 _createdBy.value = event.call.createdBy.toUser()
                 val new = _rejectedBy.value.toMutableSet()
                 new.add(event.user.id)
@@ -1469,10 +1465,18 @@ public class CallState(
             // handle the auto-cancel for outgoing ringing calls
             if (state is RingingState.Outgoing && !state.acceptedByCallee) {
                 startRingingTimer()
+                startRingStatePolling()
+            } else if (state is RingingState.Outgoing) {
+                // Accepted, join in flight. The ring is not settled until we are in the call:
+                // a join can fail, and disarming here would leave an accepted ring with no
+                // watchdog and no reader, so nothing would ever resolve it. Both keep running
+                // on their original deadlines - re-arming them would hand the ring a second
+                // full window - and the next poll retries the join.
             } else if (state is RingingState.Incoming && !state.acceptedByMe) {
                 startRingingTimer()
             } else {
                 cancelTimeout()
+                call.stopRingStatePolling()
             }
 
             // stop the call ringing timer if it's running
@@ -1497,6 +1501,73 @@ public class CallState(
             activeStateGate.cleanup()
         }
         previousRingingStates.add(state)
+    }
+
+    /**
+     * Applies a polled ring state, reaching the same outcome a dropped ring event would have.
+     *
+     * The maps are merged rather than assigned: a poll must never narrow what we already know, and
+     * accepting one map while replacing another is how rejections get lost (see AND-1413).
+     */
+    internal fun updateFromRingState(ringState: GetCallRingStateResponse) {
+        // Checked before the accept maps: a ring that was accepted and then ended must not be
+        // joined, and updateRingingState reads _endedAt to reach that conclusion.
+        val endedAt = ringState.callEndedAt ?: ringState.sessionEndedAt
+        if (endedAt != null && _endedAt.value == null) {
+            _endedAt.value = endedAt
+        }
+
+        if (ringState.acceptedBy.isNotEmpty()) {
+            _acceptedBy.value = _acceptedBy.value + ringState.acceptedBy.keys
+        }
+        if (ringState.rejectedBy.isNotEmpty()) {
+            _rejectedBy.value = _rejectedBy.value + ringState.rejectedBy.keys
+        }
+
+        updateRingingState()
+        joinAcceptedOutgoingCall(RingJoinSource.PollApi)
+    }
+
+    /**
+     * Joins an outgoing call that a callee has accepted, if that is what the current state says.
+     *
+     * Shared by the `call.accepted` handler and the ring-state poller: one arrives at the outcome
+     * from a websocket event and the other from a polled read, and both must act on it identically.
+     * It reads only state, never an event payload, so the decision cannot drift between them.
+     *
+     * Acting twice is prevented by [autoJoiningCall] and the active-call check rather than by
+     * de-duplicating the trigger, so a polled accept arriving alongside a live one is harmless.
+     *
+     * @return true when a join was started by this call.
+     */
+    internal fun joinAcceptedOutgoingCall(source: RingJoinSource): Boolean {
+        val ringingState = _ringingState.value
+        val shouldJoin = ringingState is RingingState.Outgoing &&
+            ringingState.acceptedByCallee &&
+            _acceptedBy.value.none { it == client.userId } &&
+            client.state.activeCall.value == null &&
+            autoJoiningCall == null
+
+        if (!shouldJoin) return false
+
+        call.setJoinSource(source)
+        autoJoiningCall = scope.launch {
+            // errors are handled inside the join function
+            val joinResult = call.join()
+            autoJoiningCall = null
+
+            // Being in the call is what ends the outgoing ringing UI, but the state machine only
+            // reads that fact when something calls it, and joining does not. With a live socket a
+            // coordinator event recomputes it within milliseconds, which is why this has never
+            // shown. Polling runs precisely when no such event is coming, so without this the
+            // caller keeps the ringing screen up while already publishing, until the socket
+            // reconnects. Recomputed after the join rather than when the call is marked active,
+            // so the transition follows a call we are actually in.
+            if (joinResult is Result.Success) {
+                updateRingingState()
+            }
+        }
+        return true
     }
 
     @InternalStreamVideoApi
@@ -1553,6 +1624,32 @@ public class CallState(
         }
     }
 
+    /**
+     * Arms ring-state polling for an outgoing ring, bounded by the same timeout that drives the
+     * local auto-drop so a poll can never resolve a ring the timer has already given up on.
+     *
+     * Both values are passed as reads rather than values: an outgoing ring reaches this point
+     * before the ring response has necessarily populated the session, and settings may land just
+     * as late. The poller latches the first session id it sees and keeps it, so a call that later
+     * ends — clearing its current session — is still readable.
+     */
+    private fun startRingStatePolling() {
+        call.ringStatePoller.start(
+            callSessionId = { _session.value?.id },
+            // The caller's own auto-drop ends the ring, so polling is bounded by it and always
+            // resolves first. An app that leaves it unset still bounds the ring by the missed
+            // call timeout, which is then the window to read within.
+            ringTimeoutMs = {
+                settings.value?.ring?.let { ring ->
+                    (
+                        ring.autoCancelTimeoutMs.takeIf { it > 0 }
+                            ?: ring.missedCallTimeoutMs
+                        ).toLong()
+                }
+            },
+        )
+    }
+
     private fun startRingingTimer() {
         ringingTimerJob?.cancel()
         ringingTimerJob = UserScope(ClientScope()).launch {
@@ -1562,10 +1659,27 @@ public class CallState(
                 delay(autoCancelTimeout.toLong())
 
                 // double check that we are still in Outgoing call state and call is not active
-                if (_ringingState.value is RingingState.Outgoing || _ringingState.value is RingingState.Incoming && client.state.activeCall.value == null) {
+                val ringingState = _ringingState.value
+                if (ringingState is RingingState.Outgoing || ringingState is RingingState.Incoming && client.state.activeCall.value == null) {
                     isJoinAndRingInProgress.set(false)
-                    call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
-                    val leaveMessage = if (_ringingState.value is RingingState.Outgoing) "Outgoing call timed out with no answer" else "Incoming call timed out with no answer"
+
+                    // Reaching the deadline on an accepted ring means our own join never
+                    // landed, not that nobody answered. The callee is in the call, and a
+                    // timeout reject from the caller cancels the ring for them, so give up
+                    // locally rather than ending a call somebody is already in.
+                    val acceptedByCallee =
+                        ringingState is RingingState.Outgoing && ringingState.acceptedByCallee
+                    if (acceptedByCallee) {
+                        logger.w { "[startRingingTimer] accepted but never joined, leaving without rejecting" }
+                    } else {
+                        call.reject(reason = RejectReason.Custom(alias = REJECT_REASON_TIMEOUT))
+                    }
+
+                    val leaveMessage = when {
+                        acceptedByCallee -> "Outgoing call was accepted but never joined"
+                        ringingState is RingingState.Outgoing -> "Outgoing call timed out with no answer"
+                        else -> "Incoming call timed out with no answer"
+                    }
                     call.leave(CallLeaveReason.SdkDriven(cause = SdkCause.RING_TIMEOUT, message = leaveMessage))
                 }
             } else {

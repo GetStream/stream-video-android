@@ -16,7 +16,13 @@
 
 package io.getstream.video.android.core.analytics.call.observer.model
 
-internal data class JoinAnalyticsModel(val retryAttempt: Int, val joinReason: JoinReason? = null)
+import io.getstream.video.android.core.ringing.RingJoinSource
+
+internal data class JoinAnalyticsModel(
+    val retryAttempt: Int,
+    val joinReason: JoinReason? = null,
+    val joinSource: RingJoinSource? = null,
+)
 internal sealed class JoinReason {
 
     abstract val message: String
