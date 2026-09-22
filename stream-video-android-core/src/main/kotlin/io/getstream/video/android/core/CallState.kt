@@ -116,6 +116,7 @@ import io.getstream.video.android.core.moderations.ModerationManager
 import io.getstream.video.android.core.notifications.IncomingNotificationData
 import io.getstream.video.android.core.notifications.NotificationType
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
+import io.getstream.video.android.core.notifications.internal.service.models.ServiceRoute
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.permission.PermissionRequest
@@ -837,6 +838,13 @@ public class CallState(
      */
     @Volatile
     internal var callJoinInterceptorProvider: (() -> CallJoinInterceptor?)? = null
+
+    internal val incomingRingtoneOwner = MutableStateFlow<IncomingRingtoneOwner>(
+        IncomingRingtoneOwner.Legacy,
+    )
+
+    private val _serviceRoute = MutableStateFlow(ServiceRoute.UNDECIDED)
+    internal val serviceRoute: StateFlow<ServiceRoute> = _serviceRoute.asStateFlow()
 
     fun handleEvent(event: VideoEvent) {
         logger.d { "[handleEvent] ${event::class.java.name.split(".").last()}" }
@@ -2020,6 +2028,10 @@ public class CallState(
         this.atomicNotification.set(notification)
     }
 
+    internal fun updateIncomingRingtoneOwner(incomingRingtoneOwner: IncomingRingtoneOwner) {
+        this.incomingRingtoneOwner.value = incomingRingtoneOwner
+    }
+
     @InternalStreamVideoApi
     fun setOwnCapabilities(ownCapability: List<OwnCapability>) {
         this._ownCapabilities.value = ownCapability
@@ -2052,6 +2064,10 @@ public class CallState(
         previousRingingStates.clear()
         activeStateGate.cleanup()
         cancelTimeout()
+    }
+
+    internal fun updateServiceRoute(route: ServiceRoute) {
+        _serviceRoute.value = route
     }
 }
 

@@ -20,6 +20,7 @@ import android.content.Context
 import android.media.AudioManager
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.RejectReason
@@ -65,21 +66,23 @@ internal class CallServiceRingingStateObserver(
      * Handles incoming call state - plays ringtone and vibrates.
      */
     private fun handleIncomingState(state: RingingState.Incoming) {
-        if (!state.acceptedByMe) {
-            // Start vibration if allowed
-            if (shouldVibrate()) {
-                val pattern = streamVideo.vibrationConfig.vibratePattern
-                soundPlayer?.vibrate(pattern)
-            }
+        if (call.state.incomingRingtoneOwner.value == IncomingRingtoneOwner.Legacy) {
+            if (!state.acceptedByMe) {
+                // Start vibration if allowed
+                if (shouldVibrate()) {
+                    val pattern = streamVideo.vibrationConfig.vibratePattern
+                    soundPlayer?.vibrate(pattern)
+                }
 
-            // Play incoming call sound
-            soundPlayer?.playCallSound(
-                streamVideo.sounds.ringingConfig.incomingCallSoundUri,
-                streamVideo.sounds.mutedRingingConfig?.playIncomingSoundIfMuted ?: false,
-            )
-        } else {
-            // Call accepted - stop sounds immediately for better responsiveness
-            soundPlayer?.stopCallSound()
+                // Play incoming call sound
+                soundPlayer?.playCallSound(
+                    streamVideo.sounds.ringingConfig.incomingCallSoundUri,
+                    streamVideo.sounds.mutedRingingConfig?.playIncomingSoundIfMuted ?: false,
+                )
+            } else {
+                // Call accepted - stop sounds immediately for better responsiveness
+                soundPlayer?.stopCallSound()
+            }
         }
     }
 
