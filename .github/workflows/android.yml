@@ -21,7 +21,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@8b36d37dd137d47244206d64899c5f8f7c874c3c
+    uses: GetStream/stream-build-conventions-android/.github/workflows/android-ci.yml@68c8917934383ebba59a263c1050531033fd9f75
     secrets:
       BUILD_CACHE_AWS_REGION: ${{ secrets.BUILD_CACHE_AWS_REGION }}
       BUILD_CACHE_AWS_BUCKET: ${{ secrets.BUILD_CACHE_AWS_BUCKET }}
