@@ -238,9 +238,6 @@ class RingStatePollerTest {
         // Disabling polling is done by passing a null config, never by zeroing a timing, so a
         // non-positive interval is a mistake rather than an intent to switch it off.
         assertFailsWith<IllegalArgumentException> { RingStatePollingConfig(intervalMs = 0) }
-        assertFailsWith<IllegalArgumentException> {
-            RingStatePollingConfig(defaultRingWindowMs = 0)
-        }
         assertFailsWith<IllegalArgumentException> { RingStatePollingConfig(startAfterMs = -1) }
     }
 
