@@ -35,6 +35,7 @@ import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionR
 import io.getstream.video.android.core.analytics.reporting.model.PostCallFlightSession
 import io.getstream.video.android.core.analytics.reporting.model.StageId
 import io.getstream.video.android.core.header.HeadersUtil
+import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -152,6 +153,7 @@ internal class ClientEventReporter(
         callType: String,
         joinStageAttemptId: String,
         joinReason: JoinReason,
+        joinSource: RingJoinSource? = null,
     ): String {
         val stageId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
@@ -163,6 +165,7 @@ internal class ClientEventReporter(
             startedAtMs = now,
             joinStageAttemptIdSnapshot = joinStageAttemptId,
             joinReason = joinReason,
+            joinSource = joinSource,
         )
         sender.send(
             clientEventFactory.buildRequest(
@@ -173,6 +176,7 @@ internal class ClientEventReporter(
                 stageId = stageId,
                 joinStageAttemptId = joinStageAttemptId,
                 joinReason = joinReason,
+                joinSource = joinSource,
             ),
         )
         return stageId
@@ -200,7 +204,7 @@ internal class ClientEventReporter(
             callSessionId = callSessionId,
             joinStageAttemptId = session.joinStageAttemptIdSnapshot,
             joinReason = session.joinReason,
-
+            joinSource = session.joinSource,
         )
     }
 

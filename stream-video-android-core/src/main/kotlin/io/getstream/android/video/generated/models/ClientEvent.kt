@@ -96,6 +96,9 @@ data class ClientEvent (
     @Json(name = "sfu_id")
     val sfuId: kotlin.String? = null,
 
+    @Json(name = "source")
+    val source: kotlin.String? = null,
+
     @Json(name = "stage")
     val stage: kotlin.String? = null,
 
@@ -137,6 +140,7 @@ data class ClientEvent (
             appendIfNotNull("userSessionId", userSessionId)
             appendIfNotNull("joinAttemptId", joinAttemptId)
             appendIfNotNull("joinReason", joinReason)
+            appendIfNotNull("source", source)
             appendIfNotNull("coordinatorConnectId", coordinatorConnectId)
 
             appendIfNotNull("userId", userId)
