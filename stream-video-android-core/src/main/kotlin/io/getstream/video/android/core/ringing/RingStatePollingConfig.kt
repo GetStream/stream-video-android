@@ -27,23 +27,16 @@ package io.getstream.video.android.core.ringing
  * answer does not poll.
  * @param intervalMs the gap between reads once polling has begun. Measured from the end of one
  * read to the start of the next, so a slow read widens the gap rather than being absorbed by it.
- * @param defaultRingWindowMs how long a ring is assumed to last when its settings have not
- * arrived yet. The window is normally taken from the call's own ring settings; this stands in
- * only until those are known.
  */
 public data class RingStatePollingConfig(
     val startAfterMs: Long = DEFAULT_START_AFTER_MS,
     val intervalMs: Long = DEFAULT_INTERVAL_MS,
-    val defaultRingWindowMs: Long = DEFAULT_RING_WINDOW_MS,
 ) {
     init {
         // A non-positive interval turns the read loop into a spin against a rate limited
         // endpoint, for as long as the ring lasts. Fail where the value is set, not in the field.
         require(intervalMs > 0) { "intervalMs must be positive, was $intervalMs" }
         require(startAfterMs >= 0) { "startAfterMs cannot be negative, was $startAfterMs" }
-        require(defaultRingWindowMs > 0) {
-            "defaultRingWindowMs must be positive, was $defaultRingWindowMs"
-        }
     }
 
     public companion object {
@@ -55,8 +48,11 @@ public data class RingStatePollingConfig(
          *
          * Matches the default `missed_call_timeout_ms`, so a ring whose settings have not
          * arrived is polled for as long as a default ring lasts rather than for the ceiling.
+         *
+         * Not configurable: it only applies before a call's ring settings arrive, which is a
+         * state an integrator can neither observe nor reason about.
          */
-        public const val DEFAULT_RING_WINDOW_MS: Long = 30_000
+        internal const val DEFAULT_RING_WINDOW_MS: Long = 30_000
 
         /**
          * The longest a single ring may be polled for, whatever the call's ring settings say.
