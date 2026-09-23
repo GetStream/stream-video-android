@@ -97,7 +97,7 @@ private fun OutgoingCallControls(
             modifier = Modifier
                 .testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
             isMicrophoneEnabled = isMicrophoneEnabled,
-            size = StreamButtonSize.Large,
+            size = StreamButtonSize.ExtraLarge,
             onCallAction = onCallAction,
         )
 
@@ -106,7 +106,7 @@ private fun OutgoingCallControls(
                 "Stream_SpeakerToggle_Enabled_$isSpeakerEnabled",
             ),
             isSpeakerphoneEnabled = isSpeakerEnabled,
-            size = StreamButtonSize.Large,
+            size = StreamButtonSize.ExtraLarge,
             onCallAction = onCallAction,
         )
 
@@ -115,7 +115,7 @@ private fun OutgoingCallControls(
                 modifier = Modifier
                     .testTag("Stream_CameraToggle_Enabled_$isCameraEnabled"),
                 isCameraEnabled = isCameraEnabled,
-                size = StreamButtonSize.Large,
+                size = StreamButtonSize.ExtraLarge,
                 onCallAction = onCallAction,
             )
         }
@@ -123,7 +123,7 @@ private fun OutgoingCallControls(
         CancelCallAction(
             modifier = Modifier.testTag("Stream_DeclineCallButton"),
             onCallAction = onCallAction,
-            size = StreamButtonSize.Large,
+            size = StreamButtonSize.ExtraLarge,
         )
     }
 }

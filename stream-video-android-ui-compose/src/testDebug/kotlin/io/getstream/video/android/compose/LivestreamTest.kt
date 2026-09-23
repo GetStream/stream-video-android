@@ -21,6 +21,9 @@ import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_2_LANDSCAPE_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
+import io.getstream.video.android.compose.ui.components.livestream.HostVideoNotAvailableUiPreview
+import io.getstream.video.android.compose.ui.components.livestream.LivestreamEndedPreview
+import io.getstream.video.android.compose.ui.components.livestream.LivestreamErrorPreview
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayerOverlayPreview
 import io.getstream.video.android.compose.ui.components.livestream.LivestreamPlayerPreview
 import org.junit.Rule
@@ -53,6 +56,41 @@ internal class LivestreamTest : PaparazziComposeTest {
     fun `livestream player in dark mode`() {
         snapshot(isInDarkMode = true) {
             LivestreamPlayerPreview()
+        }
+    }
+
+    @Test
+    fun `livestream ended`() {
+        snapshotWithDarkMode {
+            LivestreamEndedPreview()
+        }
+    }
+
+    @Test
+    fun `livestream error`() {
+        snapshot {
+            LivestreamErrorPreview()
+        }
+    }
+
+    @Test
+    fun `livestream error in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            LivestreamErrorPreview()
+        }
+    }
+
+    @Test
+    fun `livestream host video not available`() {
+        snapshot {
+            HostVideoNotAvailableUiPreview()
+        }
+    }
+
+    @Test
+    fun `livestream host video not available in dark mode`() {
+        snapshot(isInDarkMode = true) {
+            HostVideoNotAvailableUiPreview()
         }
     }
 }

@@ -24,10 +24,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * Represents the default AppBar that's shown in the audio room.
@@ -43,17 +41,16 @@ public fun AudioAppBar(
     Column(modifier.background(VideoTheme.colors.backgroundCoreElevation1)) {
         Text(
             text = title,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
+            style = VideoTheme.typography.headingLarge,
             color = VideoTheme.colors.textPrimary,
         )
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(StreamTokens.spacingLg))
 
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(1.dp)
+                .height(StreamTokens.strokeW100)
                 .background(VideoTheme.colors.textPrimary),
         )
     }

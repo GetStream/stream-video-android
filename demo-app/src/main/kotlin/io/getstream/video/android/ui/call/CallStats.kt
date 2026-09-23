@@ -305,7 +305,7 @@ fun StatIndicator(modifier: Modifier = Modifier, indicatorColor: Color, indicato
             textAlign = TextAlign.Center,
             text = indicatorText,
             style = VideoTheme.typography.metadataEmphasis,
-            color = indicatorColor,
+            color = VideoTheme.colors.textPrimary,
         )
     }
 }

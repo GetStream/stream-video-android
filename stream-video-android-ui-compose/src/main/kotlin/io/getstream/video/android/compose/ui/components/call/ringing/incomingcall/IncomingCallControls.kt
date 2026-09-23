@@ -54,15 +54,14 @@ public fun IncomingCallControls(
         DeclineCallAction(
             modifier = Modifier.testTag("Stream_DeclineCallButton"),
             onCallAction = onCallAction,
-            size = StreamButtonSize.Large,
-
+            size = StreamButtonSize.ExtraLarge,
         )
 
         if (isMicrophoneEnabled != null) {
             ToggleMicrophoneAction(
                 modifier = Modifier.testTag("Stream_MicrophoneToggle_Enabled_$isMicrophoneEnabled"),
                 isMicrophoneEnabled = isMicrophoneEnabled,
-                size = StreamButtonSize.Large,
+                size = StreamButtonSize.ExtraLarge,
                 onCallAction = onCallAction,
             )
         }
@@ -71,7 +70,7 @@ public fun IncomingCallControls(
             ToggleCameraAction(
                 modifier = Modifier.testTag("Stream_CameraToggle_Enabled_$isCameraEnabled"),
                 isCameraEnabled = isCameraEnabled,
-                size = StreamButtonSize.Large,
+                size = StreamButtonSize.ExtraLarge,
                 onCallAction = onCallAction,
             )
         }
@@ -79,7 +78,7 @@ public fun IncomingCallControls(
         AcceptCallAction(
             modifier = Modifier.testTag("Stream_AcceptCallButton"),
             onCallAction = onCallAction,
-            size = StreamButtonSize.Large,
+            size = StreamButtonSize.ExtraLarge,
         )
     }
 }

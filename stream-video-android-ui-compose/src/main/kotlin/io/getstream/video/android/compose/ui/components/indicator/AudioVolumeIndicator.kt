@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.video.android.compose.theme.indicatorMicrophoneLevelBarActive
 
 /**
  * Used to indicate the active sound levels of a given participant.
@@ -42,7 +43,7 @@ import io.getstream.video.android.compose.theme.design.StreamTokens
 public fun AudioVolumeIndicator(
     modifier: Modifier = Modifier,
     audioLevels: Float,
-    color: Color = VideoTheme.colors.accentPrimary,
+    color: Color = VideoTheme.colors.indicatorMicrophoneLevelBarActive,
 ) {
     val defaultBarHeight = 0.1f
     Row(

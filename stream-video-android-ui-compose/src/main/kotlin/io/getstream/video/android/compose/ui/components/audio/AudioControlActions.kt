@@ -18,7 +18,6 @@ package io.getstream.video.android.compose.ui.components.audio
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,7 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
@@ -64,7 +62,7 @@ public fun AudioControlActions(
             id = io.getstream.video.android.ui.common.R.string.stream_video_audio_leave,
         ),
         leadingIcon = painterResource(R.drawable.stream_design_ic_leave),
-        style = StreamButtonStyleDefaults.secondarySolid,
+        style = StreamButtonStyleDefaults.primarySolid,
         onClick = {
             onLeaveRoom?.invoke() ?: let {
                 call.leave(
@@ -78,9 +76,7 @@ public fun AudioControlActions(
     )
 
     ToggleMicrophoneAction(
-        modifier = Modifier
-            .align(Alignment.CenterEnd)
-            .size(45.dp),
+        modifier = Modifier.align(Alignment.CenterEnd),
         isMicrophoneEnabled = isMicrophoneEnabled,
         onCallAction = { callAction -> call.microphone.setEnabled(callAction.isEnabled) },
     )

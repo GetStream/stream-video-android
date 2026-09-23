@@ -68,6 +68,7 @@ public object StreamDesign {
      * @param backgroundCoreElevation1 Slightly raised surfaces. Used for content containers that sit directly on the base layer, such as the message list and channel list.
      * @param backgroundCoreElevation2 Floating and modal surfaces. Used for popovers, dropdowns, dialogs, and any element that interrupts the content flow.
      * @param backgroundCoreElevation3 Used for badge counts that float above other UI elements.
+     * @param backgroundCoreOnElevation Background for controls placed on an elevated surface. Matches the surface in light mode and lifts in dark mode so the control keeps its edge.
      * @param backgroundCoreSurfaceDefault Background for sectioned content areas. Used for grouped containers, and distinct content regions.
      * @param backgroundCoreSurfaceSubtle A slightly receded background. Used for secondary containers or to create soft visual separation.
      * @param backgroundCoreSurfaceCard Background for contained, card-style elements. Matches the surface in light mode but lifts slightly in dark mode to maintain visual separation.
@@ -100,6 +101,7 @@ public object StreamDesign {
      * @param borderCoreStrong An emphatic border for elements that need clear definition. Used for focused containers and prominent dividers.
      * @param borderCoreOnAccent Border on accent-colored surfaces. Stays white in both modes since the accent background doesn't invert.
      * @param borderCoreOnSurface Border for elements sitting on elevated surfaces. Uses a stronger value than default to maintain visible separation when the background is darker.
+     * @param borderCoreOnElevation Border for controls placed on an elevated surface. Stronger in dark mode, where the lifted surface would otherwise close the contrast gap.
      * @param borderCoreOpacitySubtle A very light transparent border. Used as a frame treatment on images and media attachments.
      * @param borderCoreOpacityStrong A stronger transparent border for elements on colored or dark backgrounds. Used for waveform bars and similar treatments.
      * @param borderCoreOnInverse Border on inverse-colored surfaces. Stays legible when the background flips between light and dark mode.
@@ -133,6 +135,7 @@ public object StreamDesign {
         public val backgroundCoreElevation1: Color,
         public val backgroundCoreElevation2: Color,
         public val backgroundCoreElevation3: Color,
+        public val backgroundCoreOnElevation: Color,
         public val backgroundCoreSurfaceDefault: Color,
         public val backgroundCoreSurfaceSubtle: Color,
         public val backgroundCoreSurfaceCard: Color,
@@ -165,6 +168,7 @@ public object StreamDesign {
         public val borderCoreStrong: Color,
         public val borderCoreOnAccent: Color,
         public val borderCoreOnSurface: Color,
+        public val borderCoreOnElevation: Color,
         public val borderCoreOpacitySubtle: Color,
         public val borderCoreOpacityStrong: Color,
         public val borderCoreOnInverse: Color,
@@ -397,7 +401,7 @@ public object StreamDesign {
                 chrome = chrome,
                 accentPrimary = brand.s500,
                 accentSuccess = StreamPrimitiveColors.green400,
-                accentWarning = StreamPrimitiveColors.yellow400,
+                accentWarning = StreamPrimitiveColors.yellow200,
                 accentError = StreamPrimitiveColors.red500,
                 accentNeutral = chrome.s500,
                 textPrimary = chrome.s900,
@@ -412,6 +416,7 @@ public object StreamDesign {
                 backgroundCoreElevation1 = chrome.s0,
                 backgroundCoreElevation2 = chrome.s0,
                 backgroundCoreElevation3 = chrome.s0,
+                backgroundCoreOnElevation = chrome.s100,
                 backgroundCoreSurfaceDefault = chrome.s100,
                 backgroundCoreSurfaceSubtle = chrome.s50,
                 backgroundCoreSurfaceCard = chrome.s50,
@@ -435,7 +440,7 @@ public object StreamDesign {
                 borderUtilityFocused = brand.s150,
                 borderUtilityActive = brand.s500,
                 borderUtilitySuccess = StreamPrimitiveColors.green400,
-                borderUtilityWarning = StreamPrimitiveColors.yellow400,
+                borderUtilityWarning = StreamPrimitiveColors.yellow200,
                 borderUtilityError = StreamPrimitiveColors.red500,
                 borderUtilityDisabled = chrome.s100,
                 borderUtilityDisabledOnSurface = chrome.s150,
@@ -444,6 +449,7 @@ public object StreamDesign {
                 borderCoreStrong = chrome.s300,
                 borderCoreOnAccent = chrome.s0,
                 borderCoreOnSurface = chrome.s300,
+                borderCoreOnElevation = chrome.s150,
                 borderCoreOpacitySubtle = Color(0x1A1A1B25),
                 borderCoreOpacityStrong = Color(0x401A1B25),
                 borderCoreOnInverse = chrome.s0,
@@ -471,7 +477,7 @@ public object StreamDesign {
                 chrome = chrome,
                 accentPrimary = brand.s400,
                 accentSuccess = StreamPrimitiveColors.green300,
-                accentWarning = StreamPrimitiveColors.yellow300,
+                accentWarning = StreamPrimitiveColors.yellow150,
                 accentError = StreamPrimitiveColors.red400,
                 accentNeutral = chrome.s500,
                 textPrimary = chrome.s900,
@@ -486,6 +492,7 @@ public object StreamDesign {
                 backgroundCoreElevation1 = chrome.s50,
                 backgroundCoreElevation2 = chrome.s100,
                 backgroundCoreElevation3 = chrome.s200,
+                backgroundCoreOnElevation = chrome.s150,
                 backgroundCoreSurfaceDefault = chrome.s100,
                 backgroundCoreSurfaceSubtle = chrome.s50,
                 backgroundCoreSurfaceCard = chrome.s100,
@@ -509,7 +516,7 @@ public object StreamDesign {
                 borderUtilityFocused = brand.s150,
                 borderUtilityActive = brand.s400,
                 borderUtilitySuccess = StreamPrimitiveColors.green300,
-                borderUtilityWarning = StreamPrimitiveColors.yellow300,
+                borderUtilityWarning = StreamPrimitiveColors.yellow150,
                 borderUtilityError = StreamPrimitiveColors.red400,
                 borderUtilityDisabled = chrome.s100,
                 borderUtilityDisabledOnSurface = chrome.s150,
@@ -518,6 +525,7 @@ public object StreamDesign {
                 borderCoreStrong = chrome.s300,
                 borderCoreOnAccent = chrome.s1000,
                 borderCoreOnSurface = chrome.s300,
+                borderCoreOnElevation = chrome.s300,
                 borderCoreOpacitySubtle = Color(0x33FFFFFF),
                 borderCoreOpacityStrong = Color(0x40FFFFFF),
                 borderCoreOnInverse = chrome.s0,

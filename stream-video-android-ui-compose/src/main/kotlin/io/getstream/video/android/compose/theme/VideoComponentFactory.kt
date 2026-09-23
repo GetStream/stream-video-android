@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
@@ -381,7 +380,7 @@ public interface VideoComponentFactory {
         ParticipantActions(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .padding(8.dp)
+                .padding(StreamTokens.spacingXs)
                 .testTag("Stream_ParticipantActionsIcon"),
             actions = params.actions,
             call = params.call,

@@ -16,58 +16,34 @@
 
 package io.getstream.video.android.compose.ui.components.livestream
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.ui.common.R
+import io.getstream.video.android.mock.StreamPreviewDataUtils
+import io.getstream.video.android.mock.previewCall
 
-@Preview(
-    name = "Portrait Preview",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_TYPE_NORMAL,
-    device = "spec:width=411dp,height=891dp,dpi=420",
-)
+@Preview
 @Composable
-private fun LivestreamBackstagePortraitPreviewRoot() {
+private fun LivestreamBackstageRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
-        LivestreamBackstagePortraitPreview()
+        LivestreamBackstagePreview()
     }
 }
 
 @Composable
-internal fun LivestreamBackstagePortraitPreview() {
+internal fun LivestreamBackstagePreview() {
     Box {
-        Column(
-            modifier = Modifier.align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = stringResource(
-                    id = R.string.stream_video_livestreaming_on_backstage,
-                ),
-                fontSize = 14.sp,
-                color = VideoTheme.colors.textPrimary,
-            )
-            Text(
-                modifier = Modifier,
-                text = "2:00",
-                fontSize = 16.sp,
-                color = VideoTheme.colors.textPrimary,
-            )
-            Text(
-                modifier = Modifier,
-                text = "2 participants have joined the call",
-                fontSize = 12.sp,
-                color = VideoTheme.colors.textSecondary,
-            )
-        }
+        LivestreamBackStage(call = previewCall)
+    }
+}
+
+@Suppress("DEPRECATION")
+@Composable
+internal fun LivestreamBackstageDeprecatedPreview() {
+    Box {
+        LivestreamBackStage()
     }
 }
