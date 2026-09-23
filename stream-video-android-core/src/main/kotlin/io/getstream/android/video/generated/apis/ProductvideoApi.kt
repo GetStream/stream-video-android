@@ -442,7 +442,18 @@ interface ProductvideoApi {
         @Path("type") type: kotlin.String,
         @Path("id") id: kotlin.String
     ): io.getstream.android.video.generated.models.RingCallResponse
-    
+
+    /**
+     * Get Call Ring State
+     * Returns who accepted, rejected, or missed the ring for a call session. Safe to poll: it performs no writes and emits no events. Use it to reconcile after a dropped call.accepted, call.rejected, or call.missed websocket event. call_session_id identifies the session, so the state stays readable after the call has ended.
+     */
+    @GET("/video/call/{type}/{id}/ring_state")
+    suspend fun getCallRingState(
+        @Path("type") type: kotlin.String,
+        @Path("id") id: kotlin.String,
+        @Query("call_session_id") callSessionId: kotlin.String
+    ): io.getstream.android.video.generated.models.GetCallRingStateResponse
+
     /**
      * Start RTMP broadcasts
      * Starts RTMP broadcasts for the provided RTMP destinations

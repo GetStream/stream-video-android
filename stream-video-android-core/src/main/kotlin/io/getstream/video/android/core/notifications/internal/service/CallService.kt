@@ -40,6 +40,7 @@ import io.getstream.video.android.core.notifications.internal.service.controller
 import io.getstream.video.android.core.notifications.internal.service.managers.CallServiceLifecycleManager
 import io.getstream.video.android.core.notifications.internal.service.managers.CallServiceNotificationManager
 import io.getstream.video.android.core.notifications.internal.service.models.CallIntentParams
+import io.getstream.video.android.core.notifications.internal.service.models.ServiceRoute
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceEventObserver
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceNotificationUpdateObserver
 import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceRingingStateObserver
@@ -535,6 +536,8 @@ internal open class CallService : Service() {
     }
 
     private fun observeCall(call: Call, streamVideo: StreamVideoClient) {
+        if (call.state.serviceRoute.value == ServiceRoute.TELECOM) return
+
         CallServiceRingingStateObserver(
             call,
             serviceStateController.soundPlayer,
@@ -570,7 +573,7 @@ internal open class CallService : Service() {
                     foregroundServiceType,
                 )
             }
-                .observe(baseContext)
+                .observe()
         }
     }
 

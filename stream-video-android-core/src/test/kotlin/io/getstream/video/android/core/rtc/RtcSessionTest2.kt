@@ -30,11 +30,13 @@ import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.connection.Publisher
+import io.getstream.video.android.core.call.connection.Subscriber
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.ICETrickleEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
@@ -61,7 +63,9 @@ import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -70,6 +74,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.webrtc.PeerConnection
 import org.webrtc.SessionDescription
@@ -81,9 +86,19 @@ import stream.video.sfu.models.VideoDimension
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import stream.video.sfu.signal.StartNoiseCancellationRequest
 import stream.video.sfu.signal.StopNoiseCancellationRequest
+import stream.video.sfu.signal.UpdateMuteStatesResponse
 import java.io.InterruptedIOException
+import java.util.concurrent.atomic.AtomicBoolean
 
 class RtcSessionTest2 {
+
+    // RtcSession's constructor launches into Dispatchers.Main for the lifecycle
+    // observer. Without a Main dispatcher that coroutine throws, and because the
+    // failure escapes to the global handler it surfaces inside the *next* test as
+    // UncaughtExceptionsBeforeTest. The rule also routes DispatcherProvider.IO
+    // through the test scheduler.
+    @get:Rule
+    val dispatcherRule = DispatcherRule()
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -1076,6 +1091,83 @@ class RtcSessionTest2 {
     }
 
     @Test
+    fun `mute collectors during migration keep local state and do not call the old SFU`() =
+        runTest(testDispatcher) {
+            val signalService = mockk<SignalServerService>(relaxed = true)
+            ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+            val (rtcSession, publisherMock) = muteSyncSession(signalService)
+            rtcSession.publisher.value = publisherMock
+            val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+            coEvery {
+                publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
+            } returns audioTrack
+
+            rtcSession.enterMigration()
+            rtcSession.createAndPublishAudioTrack()
+            testScheduler.advanceUntilIdle()
+
+            assertEquals(true, rtcSession.muteState.value[TrackType.TRACK_TYPE_AUDIO])
+            coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
+        }
+
+    @Test
+    fun `mute sync resumes and flushes local state once the SFU is ready`() = runTest(
+        testDispatcher,
+    ) {
+        val signalService = mockk<SignalServerService>(relaxed = true)
+        coEvery { signalService.updateMuteStates(any()) } returns UpdateMuteStatesResponse()
+        ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
+        val (rtcSession, publisherMock) = muteSyncSession(signalService)
+        rtcSession.publisher.value = publisherMock
+        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+        coEvery {
+            publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
+        } returns audioTrack
+
+        rtcSession.enterMigration()
+        rtcSession.createAndPublishAudioTrack()
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(true, rtcSession.muteState.value[TrackType.TRACK_TYPE_AUDIO])
+        assertTrue(pendingMuteSyncTracks(rtcSession).contains(TrackType.TRACK_TYPE_AUDIO))
+        coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
+        assertEquals(false, muteSyncEnabled(rtcSession).get())
+
+        RtcSession::class.java.getDeclaredMethod("resumeMuteSync").apply {
+            isAccessible = true
+            invoke(rtcSession)
+        }
+        testScheduler.advanceUntilIdle()
+
+        coVerify(exactly = 1) { signalService.updateMuteStates(any()) }
+        assertTrue(pendingMuteSyncTracks(rtcSession).isEmpty())
+        assertEquals(true, muteSyncEnabled(rtcSession).get())
+    }
+
+    @Test
+    fun `resumeMuteSync does not flush tracks that were never pending`() = runTest(
+        testDispatcher,
+    ) {
+        val signalService = mockk<SignalServerService>(relaxed = true)
+        val (rtcSession, _) = muteSyncSession(signalService)
+
+        rtcSession.enterMigration()
+        testScheduler.advanceUntilIdle()
+        coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
+
+        RtcSession::class.java.getDeclaredMethod("resumeMuteSync").apply {
+            isAccessible = true
+            invoke(rtcSession)
+        }
+        testScheduler.advanceUntilIdle()
+
+        // muteState is pre-seeded with audio/video/screen-share; none of those were
+        // recorded while paused, so resume must not POST UpdateMuteStates.
+        coVerify(exactly = 0) { signalService.updateMuteStates(any()) }
+        assertEquals(true, muteSyncEnabled(rtcSession).get())
+    }
+
+    @Test
     fun `stopNoiseCancellation sends the request to the SFU with the session id`() = runTest {
         // Given
         val signalService = mockk<SignalServerService>(relaxed = true)
@@ -1090,6 +1182,62 @@ class RtcSessionTest2 {
                 StopNoiseCancellationRequest(session_id = "session-id"),
             )
         }
+    }
+
+    private fun muteSyncEnabled(rtcSession: RtcSession): AtomicBoolean {
+        val field = RtcSession::class.java.getDeclaredField("muteSyncEnabled")
+        field.isAccessible = true
+        return field.get(rtcSession) as AtomicBoolean
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun pendingMuteSyncTracks(rtcSession: RtcSession): MutableSet<TrackType> {
+        val field = RtcSession::class.java.getDeclaredField("pendingMuteSyncTracks")
+        field.isAccessible = true
+        return field.get(rtcSession) as MutableSet<TrackType>
+    }
+
+    private fun muteSyncSession(
+        signalService: SignalServerService,
+    ): Pair<RtcSession, Publisher> {
+        val mockSocket = mockk<SfuSocketConnection>(relaxed = true) {
+            every { state() } returns MutableStateFlow(SfuSocketState.Disconnected.Stopped)
+            every { events() } returns MutableSharedFlow()
+        }
+        val subscriberMock = mockk<Subscriber>(relaxed = true) {
+            every { streams() } returns emptyFlow()
+            every { removedStreams() } returns emptyFlow()
+        }
+        every {
+            mockCall.peerConnectionFactory.makeSubscriber(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+            )
+        } returns subscriberMock
+        val mockModule = mockk<SfuConnectionModule>(relaxed = true) {
+            every { api } returns signalService
+            every { socketConnection } returns mockSocket
+        }
+        val rtcSession = RtcSession(
+            client = mockStreamVideo,
+            powerManager = mockPowerManager,
+            call = mockCall,
+            sessionManager = CallSessionManager(),
+            sessionId = "session-id",
+            apiKey = "api-key",
+            lifecycle = mockLifecycle,
+            sfuUrl = "https://test-sfu.stream.com",
+            sfuWsUrl = "wss://test-sfu.stream.com",
+            sfuToken = "fake-sfu-token",
+            sfuName = "test-sfu-edge",
+            clientImpl = mockVideoClient,
+            coroutineScope = testScope,
+            rtcSessionScope = testScope,
+            remoteIceServers = emptyList(),
+            sfuConnectionModuleProvider = { mockModule },
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+        )
+        val publisherMock = mockk<Publisher>(relaxed = true)
+        return rtcSession to publisherMock
     }
 
     private fun noiseCancellationSession(
