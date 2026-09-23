@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
-import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.core.call.state.CancelCall
 
 /**
@@ -52,7 +51,7 @@ public fun CancelCallAction(
         io.getstream.video.android.ui.common.R.string.stream_video_call_controls_cancel_call,
     ),
     enabled = enabled,
-    style = style ?: StreamButtonStyleDefaults.destructiveSolid,
+    style = style ?: declineCallStyle(),
     size = size,
     onAction = { onCallAction(CancelCall) },
 )

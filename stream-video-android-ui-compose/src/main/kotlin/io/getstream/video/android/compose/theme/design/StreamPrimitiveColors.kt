@@ -61,6 +61,8 @@ internal object StreamPrimitiveColors {
     val slate800 = Color(0xFF30313D)
     val slate900 = Color(0xFF1A1B25)
     val yellow50 = Color(0xFFFEF9DA)
+    val yellow150 = Color(0xFFFCD579)
+    val yellow200 = Color(0xFFF6BF57)
     val yellow300 = Color(0xFFFA922B)
     val yellow400 = Color(0xFFF26D10)
     val yellow800 = Color(0xFF5F1A05)

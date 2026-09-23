@@ -22,9 +22,11 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.theme.controlDeclineCallButtonBg
+import io.getstream.video.android.compose.theme.controlDeclineCallButtonText
 import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyle
-import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.core.call.state.DeclineCall
 
 /**
@@ -52,7 +54,21 @@ public fun DeclineCallAction(
         io.getstream.video.android.ui.common.R.string.stream_video_call_controls_decline_call,
     ),
     enabled = enabled,
-    style = style ?: StreamButtonStyleDefaults.destructiveSolid,
+    style = style ?: declineCallStyle(),
     size = size,
     onAction = { onCallAction(DeclineCall) },
 )
+
+/** The default colors of [DeclineCallAction] and [CancelCallAction]. */
+@Composable
+internal fun declineCallStyle(): StreamButtonStyle {
+    val colors = VideoTheme.colors
+    return StreamButtonStyle(
+        containerColor = colors.controlDeclineCallButtonBg,
+        contentColor = colors.controlDeclineCallButtonText,
+        borderColor = null,
+        disabledContainerColor = colors.backgroundUtilityDisabled,
+        disabledContentColor = colors.textDisabled,
+        disabledBorderColor = null,
+    )
+}
