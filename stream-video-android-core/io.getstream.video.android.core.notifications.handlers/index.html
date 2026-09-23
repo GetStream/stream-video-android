@@ -38,7 +38,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.33.0
+        <div class="library-version" id="library-version">1.34.0
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -119,7 +119,7 @@
         )<span class="token punctuation">, </span></span><span class="parameter ">mediaSessionCallback<span class="token operator">: </span><span data-unresolved-link="android.support.v4.media.session/MediaSessionCompat.Callback///PointingToDeclaration/">MediaSessionCompat.Callback</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">notificationChannels<span class="token operator">: </span><a href="-stream-notification-channels/index.html">StreamNotificationChannels</a><span class="token operator"> = </span>StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_notification_channel_id,
+            defaultIncomingCallChannelIdRes(IncomingRingtoneOwner.Legacy),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
@@ -154,7 +154,7 @@
         ),
         incomingCallLowImportanceChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_low_priority_notification_channel_id,
+            defaultIncomingCallLowImportanceChannelIdRes(IncomingRingtoneOwner.Legacy),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_low_priority_notification_channel_description,
             NotificationManager.IMPORTANCE_DEFAULT,
@@ -197,7 +197,7 @@
     )<span class="token punctuation">, </span></span><span class="parameter ">intentResolver<span class="token operator">: </span><a href="../io.getstream.video.android.core.notifications/-stream-intent-resolver/index.html">StreamIntentResolver</a><span class="token operator"> = </span>DefaultStreamIntentResolver(application, DefaultNotificationIntentBundleResolver())<span class="token punctuation">, </span></span><span class="parameter ">hideRingingNotificationInForeground<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span>(StreamVideo.instanceOrNull() as? StreamVideoClient)?.streamNotificationManager?.notificationConfig?.hideRingingNotificationInForeground == true<span class="token punctuation">, </span></span><span class="parameter ">initialNotificationBuilderInterceptor<span class="token operator">: </span><a href="-stream-notification-builder-interceptors/index.html">StreamNotificationBuilderInterceptors</a><span class="token operator"> = </span>StreamNotificationBuilderInterceptors()<span class="token punctuation">, </span></span><span class="parameter ">updateNotificationBuilderInterceptor<span class="token operator">: </span><a href="-stream-notification-update-interceptors/index.html">StreamNotificationUpdateInterceptors</a><span class="token operator"> = </span>StreamNotificationUpdateInterceptors()<span class="token punctuation">, </span></span><span class="parameter ">notificationChannels<span class="token operator">: </span><a href="-stream-notification-channels/index.html">StreamNotificationChannels</a><span class="token operator"> = </span>StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_notification_channel_id,
+            defaultIncomingCallChannelIdRes(IncomingRingtoneOwner.Legacy),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
@@ -232,7 +232,7 @@
         ),
         incomingCallLowImportanceChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_low_priority_notification_channel_id,
+            defaultIncomingCallLowImportanceChannelIdRes(IncomingRingtoneOwner.Legacy),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_low_priority_notification_channel_description,
             NotificationManager.IMPORTANCE_DEFAULT,

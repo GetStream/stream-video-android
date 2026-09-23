@@ -44,6 +44,7 @@ io.getstream.video.android.core.permission
 io.getstream.video.android.core.permission.android
 io.getstream.video.android.core.pip
 io.getstream.video.android.core.recording
+io.getstream.video.android.core.ringing
 io.getstream.video.android.core.socket
 io.getstream.video.android.core.socket.common
 io.getstream.video.android.core.socket.common.fsm

@@ -38,7 +38,7 @@
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
         <div class="navigation-controls--break ui-kit_mobile-only"></div>
-        <div class="library-version" id="library-version">1.33.0
+        <div class="library-version" id="library-version">1.34.0
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
@@ -104,7 +104,7 @@
         )<span class="token punctuation">, </span></span><span class="parameter ">mediaSessionCallback<span class="token operator">: </span><span data-unresolved-link="android.support.v4.media.session/MediaSessionCompat.Callback///PointingToDeclaration/">MediaSessionCompat.Callback</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">notificationChannels<span class="token operator">: </span><a href="../-stream-notification-channels/index.html">StreamNotificationChannels</a><span class="token operator"> = </span>StreamNotificationChannels(
         incomingCallChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_notification_channel_id,
+            defaultIncomingCallChannelIdRes(IncomingRingtoneOwner.Legacy),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_notification_channel_description,
             NotificationManager.IMPORTANCE_HIGH,
@@ -139,7 +139,7 @@
         ),
         incomingCallLowImportanceChannel = createChannelInfoFromResIds(
             application.applicationContext,
-            R.string.stream_video_incoming_call_low_priority_notification_channel_id,
+            defaultIncomingCallLowImportanceChannelIdRes(IncomingRingtoneOwner.Legacy),
             R.string.stream_video_incoming_call_notification_channel_title,
             R.string.stream_video_incoming_call_low_priority_notification_channel_description,
             NotificationManager.IMPORTANCE_DEFAULT,
