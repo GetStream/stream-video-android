@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")
+
 package io.getstream.video.android.compose.state.ui.participants
 
 import androidx.compose.runtime.Stable
@@ -22,6 +24,10 @@ import io.getstream.video.android.model.User
 /**
  * Actions which can be taken in the participants info UI in a call.
  */
+@Deprecated(
+    message = "The SDK has no UI that emits this action and it will be removed in v2.",
+    level = DeprecationLevel.WARNING,
+)
 @Stable
 public sealed interface ParticipantInfoAction
 
@@ -30,6 +36,10 @@ public sealed interface ParticipantInfoAction
  *
  * @param isEnabled If the microphone is enabled or not.
  */
+@Deprecated(
+    message = "The SDK has no UI that emits this action and it will be removed in v2.",
+    level = DeprecationLevel.WARNING,
+)
 @Stable
 public data class ChangeMuteState(
     val isEnabled: Boolean,
@@ -40,5 +50,9 @@ public data class ChangeMuteState(
  *
  * @param users The users to invite.
  */
+@Deprecated(
+    message = "The SDK has no UI that emits this action and it will be removed in v2.",
+    level = DeprecationLevel.WARNING,
+)
 @Stable
 public data class InviteUsers(val users: List<User>) : ParticipantInfoAction
