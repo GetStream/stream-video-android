@@ -20,6 +20,24 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: GetStream/android-ci-actions/actions/setup-java@cb46e4f44d105a68738bfd2a1cfd156bb768665b
+      - name: Resolve build identity
+        id: build_identity
+        run: |
+          # Minutes since 2020-09-13. Both distribution workflows publish the same package
+          # from a different branch, so the version code has to grow with build time. A
+          # per-branch commit count can go backwards and Android rejects that as a downgrade.
+          {
+            echo "version_code=$(( ($(date -u +%s) - 1600000000) / 60 ))"
+            echo "sha=$(git rev-parse --short=7 HEAD)"
+          } >> "$GITHUB_OUTPUT"
+      - name: Write release notes
+        run: |
+          {
+            git log -1 --pretty=%s
+            echo
+            echo "Commit: ${{ github.sha }}"
+            echo "Build: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > release-notes.txt
       - name: Prepare environment
         env:
           ENV_PROPERTIES: ${{ secrets.ENV_PROPERTIES }}
@@ -33,7 +51,11 @@ jobs:
           gpg -d --passphrase "${{ env.PASSPHRASE }}" --batch .sign/keystore.properties.asc > .sign/keystore.properties
           echo "${{ env.ENV_PROPERTIES }}" > .env.properties
       - name: Assemble
-        run: bash ./gradlew :demo-app:assembleDevelopmentRelease --stacktrace
+        run: |
+          bash ./gradlew :demo-app:assembleDevelopmentRelease \
+            -PdemoAppVersionCode=${{ steps.build_identity.outputs.version_code }} \
+            -PdemoAppBuildSha=${{ steps.build_identity.outputs.sha }} \
+            --stacktrace
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
@@ -46,3 +68,4 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: stream-testers
           file: demo-app/build/outputs/apk/development/release/demo-app-development-release.apk
+          releaseNotesFile: release-notes.txt
