@@ -1,9 +1,11 @@
 [versions]
 # Android SDK versions
-compileSdk = "36"
-targetSdk = "36"
+compileSdk = "35"
+targetSdk = "35"
 minSdk = "24"
-paparazziCompileSdk = "35"
+# demo-app is published to the Play Store, which requires API 36. The SDK modules stay on 35.
+demoAppCompileSdk = "36"
+demoAppTargetSdk = "36"
 
 allureKotlin = "2.4.0"
 androidGradlePlugin = "8.9.1"
