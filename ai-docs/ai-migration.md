@@ -752,7 +752,6 @@ v1 drew the initials with `titleM` and shrank them when they did not fit. v2 pic
     "brandGreen": "accentSuccess",
     "brandYellow": "accentWarning",
     "brandRed": "accentError",
-    "basePrimary": "textPrimary",
     "baseSecondary": "textSecondary",
     "baseTertiary": "textTertiary",
     "baseQuaternary": "textTertiary",
@@ -767,12 +766,15 @@ v1 drew the initials with `titleM` and shrank them when they did not fit. v2 pic
     "alertCaution": "accentWarning",
     "alertWarning": "accentError"
   },
+  "colorContextDependent": {
+    "basePrimary": { "default": "textPrimary", "overVideoOrDarkOverlay": "textOnAccent" },
+    "baseQuinary": { "text": "textTertiary", "border": "borderCoreDefault" }
+  },
   "colorClosestMatches": {
     "brandPrimaryLt": "brand.s400",
     "brandPrimaryDk": "brand.s700",
     "brandSecondary": "backgroundCoreSurfaceDefault",
     "brandSecondaryTransparent": "backgroundUtilityDisabled",
-    "baseQuinary": "textTertiary",
     "buttonPrimaryDefault": "backgroundCoreSurfaceDefault",
     "buttonPrimaryDisabled": "backgroundUtilityDisabled",
     "buttonBrandDisabled": "backgroundUtilityDisabled",
@@ -1017,8 +1019,8 @@ rg "StreamColors\b|StreamDimens\b|StreamTypography\b|StreamShapes\b|StreamRipple
 rg "VideoTheme\.(dimens|shapes|styles|reactionMapper|rippleConfiguration)\b" --type kotlin
 rg "components\.base\.styling\." --type kotlin
 rg "StreamFixedSizeButtonStyle|CompositeStyleProvider|ButtonStyles\b|StyleSize\b" --type kotlin
-rg "StreamDialogPositiveNegative|StreamOutlinedTextField|GenericStreamButton|StreamDrawableButton|StreamToggleButton" --type kotlin
-rg "CallParticipantsInfoMenu|CallParticipantInfoMode|ParticipantInfoAction\b" --type kotlin
+rg "StreamDialogPositiveNegative|StreamOutlinedTextField|GenericStreamButton|StreamDrawableButton|StreamToggleButton|StreamIconToggleButton|StreamDrawableToggleButton|GenericToggleButton" --type kotlin
+rg "CallParticipantsInfoMenu|CallParticipantInfoMode|ParticipantInfoAction\b|InviteUsers\b|ChangeMuteState\b" --type kotlin
 rg "stream_video_ic_(close|join_call|leave|live|message|options|play|reaction|screensharing|selected)\b" --type kotlin --type xml
 rg "textOffset\s*=" --type kotlin
 ```
