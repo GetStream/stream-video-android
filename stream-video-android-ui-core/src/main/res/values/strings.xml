@@ -18,14 +18,10 @@
     <string name="stream_video_default_app_bar_title"> </string>
     <string name="stream_video_back_button_content_description">Back</string>
 
-    <string name="stream_video_call_participants_menu_content_description">Participants</string>
-
     <string name="stream_video_call_controls_leave_call">Leave call</string>
     <string name="stream_video_call_controls_cancel_call">Cancel call</string>
     <string name="stream_video_call_controls_accept_call">Accept call</string>
-    <string name="stream_video_call_controls_chat_dialog">Chat Dialog</string>
     <string name="stream_video_call_controls_settings">Settings</string>
-    <string name="stream_video_call_controls_reaction">Reaction</string>
     <string name="stream_video_call_controls_flip_camera">Flip camera</string>
     <string name="stream_video_call_controls_toggle_microphone">Toggle microphone</string>
     <string name="stream_video_call_controls_toggle_camera">Toggle camera</string>
@@ -36,21 +32,9 @@
     <string name="stream_video_call_controls_toggle_screen_share">Toggle screen sharing</string>
     <string name="stream_video_microphone_indicator_on">Microphone on</string>
     <string name="stream_video_microphone_indicator_off">Microphone off</string>
-    <string name="stream_video_call_participants_info_options_invite">Invite</string>
-    <string name="stream_video_call_participants_info_options_unmute">Unmute Me</string>
-    <string name="stream_video_call_participants_info_options_mute">Mute Me</string>
-    <string name="stream_video_call_participants_info_add_participants">Add Participants</string>
-    <string name="stream_video_call_participants_info_invite">Invite</string>
-    <string name="stream_video_invite_users_title">Invite Participants</string>
-    <string name="stream_video_invite_users_message">Are you sure you want to add %1$d new people to the conversation?</string>
-    <string name="stream_video_invite_users_cancel">Cancel</string>
-    <string name="stream_video_invite_users_accept">Invite</string>
-    <string name="stream_video_change_orientation">Change orientation</string>
-    <string name="stream_video_toggle_fullscreen">Toggle fullscreen mode</string>
     <string name="stream_video_call_remote_participants_empty">No remote participants</string>
     <string name="stream_video_call_participants_conjunction">and</string>
     <string name="stream_video_call_participants_trailing">more</string>
-    <string name="stream_video_call_rendering_failed">This track failed to be loaded in the session (%s)</string>
     <string name="stream_video_call_bad_network">Some videos are paused until the network connection improves!</string>
     <string name="stream_video_call_bad_network_single_video">Video is paused until the network connection improves!</string>
     <string name="stream_video_call_reconnecting">Reconnecting..</string>
@@ -70,14 +54,6 @@
     <string name="stream_video_call_status_outgoing">Calling…</string>
 
     <string name="stream_video_permissions_title">Permissions required to launch the app</string>
-    <string name="stream_video_permissions_message">Open settings to allow camera and microphone permissions.</string>
-    <string name="stream_video_permissions_settings">Launch settings</string>
-    <string name="stream_video_permissions_cancel">Cancel</string>
-
-    <plurals name="stream_video_call_participants_info_number_of_participants">
-        <item quantity="one">Participant (%d)</item>
-        <item quantity="other">Participants (%d)</item>
-    </plurals>
 
     <string name="stream_video_call_notification_action_accept">Accept</string>
     <string name="stream_video_call_notification_action_reject">Reject</string>
