@@ -37,12 +37,12 @@ plugins {
 
 android {
     namespace = "io.getstream.video.android"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    compileSdk = libs.versions.demoAppCompileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "io.getstream.video.android"
         minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        targetSdk = libs.versions.demoAppTargetSdk.get().toInt()
         versionCode = 1
         versionName = rootProject.version.toString()
         testInstrumentationRunner = "io.qameta.allure.android.runners.AllureAndroidJUnitRunner"
