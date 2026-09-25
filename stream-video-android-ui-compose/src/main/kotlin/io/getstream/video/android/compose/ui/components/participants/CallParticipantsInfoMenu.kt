@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("DEPRECATION")
+
 package io.getstream.video.android.compose.ui.components.participants
 
 import androidx.activity.compose.BackHandler
@@ -49,6 +51,11 @@ import io.getstream.video.android.core.call.state.ToggleMicrophone
  * @param modifier Modifier for styling.
  * @param onDismiss Handler when the user dismisses the UI through various actions.
  */
+@Deprecated(
+    message = "The SDK no longer opens this menu and it will be removed in v2. " +
+        "Build a participants list on top of call.state.participants instead.",
+    level = DeprecationLevel.WARNING,
+)
 @Composable
 public fun CallParticipantsInfoMenu(
     call: Call,
