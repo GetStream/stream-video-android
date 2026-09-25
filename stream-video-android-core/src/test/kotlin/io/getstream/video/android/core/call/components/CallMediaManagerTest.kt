@@ -23,11 +23,16 @@ import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
+import io.getstream.video.android.core.MicrophoneManager
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.call.utils.PreJoinMicrophoneRecorder
 import io.getstream.webrtc.ManagedAudioProcessingFactory
 import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
+import io.mockk.clearMocks
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -56,6 +61,10 @@ class CallMediaManagerTest {
     private lateinit var state: CallState
     private lateinit var sessionManager: CallSessionManager
     private lateinit var mediaManager: MediaManagerImpl
+    private lateinit var microphone: MicrophoneManager
+    private lateinit var microphoneEnabled: MutableStateFlow<Boolean>
+    private lateinit var session: MutableStateFlow<RtcSession?>
+    private lateinit var preJoinMicrophoneRecorder: PreJoinMicrophoneRecorder
 
     @Before
     fun setup() {
@@ -63,7 +72,13 @@ class CallMediaManagerTest {
         state = mockk(relaxed = true)
         sessionManager = mockk(relaxed = true)
         mediaManager = mockk(relaxed = true)
-        every { sessionManager.session } returns MutableStateFlow(null)
+        microphone = mockk(relaxed = true)
+        preJoinMicrophoneRecorder = mockk(relaxed = true)
+        microphoneEnabled = MutableStateFlow(false)
+        session = MutableStateFlow(null)
+        every { microphone.isEnabled } returns microphoneEnabled
+        every { mediaManager.microphone } returns microphone
+        every { sessionManager.session } returns session
     }
 
     private fun manager() = CallMediaManager(
@@ -75,7 +90,14 @@ class CallMediaManagerTest {
         sessionManager = sessionManager,
         eglBase = { mockk(relaxed = true) },
         mediaManagerFactory = MediaManagerFactory { _, _ -> mediaManager },
+        preJoinMicrophoneRecorderFactory = { preJoinMicrophoneRecorder },
     )
+
+    /**
+     * The pre-join recorder is only observed once the media manager exists, so touching it is
+     * what a lobby reading the microphone state does.
+     */
+    private fun managerObservingMicrophone() = manager().also { it.mediaManager }
 
     @Test
     fun `startScreenSharing enables screen share when the capability is granted`() {
@@ -270,5 +292,62 @@ class CallMediaManagerTest {
         manager.peerConnectionFactory
 
         verify { processor.isEnabled = true }
+    }
+
+    @Test
+    fun `the pre-join recorder runs while the microphone is on and no session exists`() = runTest(
+        testDispatcher,
+    ) {
+        managerObservingMicrophone()
+
+        microphoneEnabled.value = true
+        advanceUntilIdle()
+
+        verify { preJoinMicrophoneRecorder.start() }
+    }
+
+    @Test
+    fun `the pre-join recorder does not run while the microphone is off`() = runTest(
+        testDispatcher,
+    ) {
+        managerObservingMicrophone()
+
+        advanceUntilIdle()
+
+        verify(exactly = 0) { preJoinMicrophoneRecorder.start() }
+    }
+
+    @Test
+    fun `installing a session hands the level over to the samples callback`() = runTest(
+        testDispatcher,
+    ) {
+        managerObservingMicrophone()
+        microphoneEnabled.value = true
+        advanceUntilIdle()
+
+        session.value = mockk(relaxed = true)
+        advanceUntilIdle()
+
+        coVerify { preJoinMicrophoneRecorder.stop() }
+    }
+
+    @Test
+    fun `disabling the microphone stops the pre-join recorder`() = runTest(testDispatcher) {
+        managerObservingMicrophone()
+        microphoneEnabled.value = true
+        advanceUntilIdle()
+        clearMocks(preJoinMicrophoneRecorder)
+
+        microphoneEnabled.value = false
+        advanceUntilIdle()
+
+        coVerify { preJoinMicrophoneRecorder.stop() }
+    }
+
+    @Test
+    fun `cleanup releases the microphone`() {
+        managerObservingMicrophone().cleanup()
+
+        verify { preJoinMicrophoneRecorder.stopWithoutWaiting() }
     }
 }

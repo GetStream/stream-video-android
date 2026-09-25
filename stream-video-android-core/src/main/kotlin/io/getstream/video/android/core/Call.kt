@@ -415,7 +415,8 @@ public class Call(
      * and will then gradually over 250ms return back to 0 or next measured value. This value
      * can be used directly in your UI for displaying a volume/speaking indicator for the local
      * participant.
-     * Note: Doesn't return any values until the session is established!
+     * The microphone is also read before the call is joined, so a lobby screen can show the level
+     * as soon as the microphone is enabled and the RECORD_AUDIO permission is granted.
      */
     val localMicrophoneAudioLevel: StateFlow<Float> get() = media.localMicrophoneAudioLevel
 
