@@ -37,7 +37,7 @@ Execute the sections in order. Each section assumes the previous one is done.
 - v2 latest: check Maven Central for the latest `2.x` release
 - v2 branch: `develop-v2`. v1 branch: `develop`
 - The Compose module (`stream-video-android-ui-compose`) is the only UI module with API changes. The XML module (`stream-video-android-ui-xml`) API did not change
-- New theme package: `io.getstream.video.android.compose.theme.design` (`StreamDesign`, `StreamTokens`, `StreamPrimitiveColors`)
+- Theme package: `io.getstream.android.core.ui.design` (`StreamDesign`, `StreamTokens`, `StreamPrimitiveColors`). These classes come from the `io.getstream:stream-android-core-ui` artifact, which `stream-video-android-ui-compose` exposes as an `api` dependency, so no extra dependency is needed
 - New base components package: `io.getstream.video.android.compose.ui.components.base` (`StreamButton`, `StreamTextButton`, `StreamIconButton`, `StreamButtonStyle`, `StreamButtonStyleDefaults`, `StreamButtonSize`, `StreamDialog`, `StreamTextField`)
 - `VideoComponentFactory` is NOT new in v2. It shipped in v1.32.0. v2 adds one method to it (§3.5)
 
@@ -204,6 +204,8 @@ val dark = StreamDesign.Colors.defaultDark(brand = brand.inverted())
 
 `StreamDesign.Colors` is a data class, so single colors can also be changed with `copy(...)`. The full rename table is in §4.1.
 
+Use the semantic tokens this guide maps to (`accent*`, `text*`, `background*`, `border*`, `avatar*`). The component-level colors on `StreamDesign.Colors` (`button*`, `badge*`, `control*`, `input*` and others) are marked `@StreamInternalApi`. Do NOT opt in to `StreamInternalApi` to use them.
+
 #### Typography
 
 ```kotlin
@@ -222,7 +224,7 @@ Delete all references to:
 
 - `StreamColors` → `StreamDesign.Colors`
 - `StreamTypography` → `StreamDesign.Typography`
-- `StreamDimens` → `StreamTokens` (public object, `io.getstream.video.android.compose.theme.design`)
+- `StreamDimens` → `StreamTokens` (public object, `io.getstream.android.core.ui.design`)
 - `StreamShapes` → `RoundedCornerShape(StreamTokens.radius*)` or `CircleShape`
 - `StreamRippleConfiguration` → no replacement
 
@@ -357,7 +359,7 @@ VideoTheme(componentFactory = MyFactory) { ... }
 | `titleL` (93sp, W500) | `headingLarge` (20sp, W600) | Used by the SDK. No v2 style is this large, use `headingLarge.copy(fontSize = ...)` to keep the size |
 | `titleM` (48sp, W500) | `headingLarge` | Used by the SDK |
 | `titleS` (24sp, W500) | `headingLarge` | Used by the SDK |
-| `titleXs` (13sp, W600) | `headingExtraSmall` (12sp, W600) | Used by the SDK |
+| `titleXs` (13sp, W600) | `headingExtraSmall` (14sp, W600) | Used by the SDK |
 | `subtitleL` (24sp, W500) | `headingLarge` | Closest match |
 | `subtitleM` (20sp, W500) | `headingSmall` (16sp, W600) | Used by the SDK |
 | `subtitleS` (16sp, W500) | `bodyDefault` (16sp, W400) | Used by the SDK |
@@ -369,11 +371,11 @@ VideoTheme(componentFactory = MyFactory) { ... }
 | `labelS` (13sp, W500) | `captionEmphasis` (14sp, W600) | Used by the SDK |
 | `labelXS` (13sp, W500) | `metadataEmphasis` (12sp, W600) | Used by the SDK |
 
-Other v2 styles: `headingMedium` (18sp, W600), `metadataDefault` (12sp, W400), `numericSmall`, `numericMedium`, `numericLarge`, `numericExtraLarge` (bold, 8sp to 14sp, for counters and badges).
+Other v2 styles: `headingMedium` (18sp, W600), `metadataDefault` (12sp, W400), `numericSmall`, `numericMedium`, `numericLarge`, `numericExtraLarge` (bold, 8sp to 14sp, for counters and badges), and the link styles `bodyLink`, `bodyLinkEmphasis`, `captionLink`, `captionLinkEmphasis`, `metadataLink`, `metadataLinkEmphasis`.
 
 ### §4.3 Dimens (`VideoTheme.dimens.*` → `StreamTokens.*`)
 
-`StreamTokens` is a public object in `io.getstream.video.android.compose.theme.design`. Mapped by value.
+`StreamTokens` is a public object in `io.getstream.android.core.ui.design`. Mapped by value.
 
 | v1 (value) | v2 |
 |---|---|
@@ -386,10 +388,10 @@ Other v2 styles: `headingMedium` (18sp, W600), `metadataDefault` (12sp, W400), `
 | `genericS` (8dp) | `size8` |
 | `genericXs` (4dp) | `size4` |
 | `genericXXs` (2dp) | `size2` |
-| `roundnessXl` (32dp) | `radius4xl` (`CornerSize`) |
-| `roundnessL` (24dp) | `radius3xl` (`CornerSize`) |
-| `roundnessM` (16dp) | `radiusXl` (`CornerSize`) |
-| `roundnessS` (8dp) | `radiusMd` (`CornerSize`) |
+| `roundnessXl` (32dp) | `radius4xl` |
+| `roundnessL` (24dp) | `radius3xl` |
+| `roundnessM` (16dp) | `radiusXl` |
+| `roundnessS` (8dp) | `radiusMd` |
 | `spacingXl` (32dp) | `spacing2xl` |
 | `spacingL` (24dp) | `spacingXl` |
 | `spacingM` (16dp) | `spacingMd` |
@@ -415,7 +417,7 @@ Other v2 styles: `headingMedium` (18sp, W600), `metadataDefault` (12sp, W400), `
 
 > **Name trap:** the spacing names shifted. v1 `spacingL` is 24dp, v2 `spacingXl` is 24dp. v1 `spacingS` is 8dp, v2 `spacingXs` is 8dp. Map by value, never by name.
 
-`radius*` tokens are `CornerSize`, not `Dp`. Use them as `RoundedCornerShape(StreamTokens.radiusXl)`.
+All `StreamTokens` values are `Dp` (or `TextUnit` for font sizes), including the `radius*` tokens. Use a radius as `RoundedCornerShape(StreamTokens.radiusXl)`, or wrap it as `CornerSize(StreamTokens.radiusXl)` where a `CornerSize` is expected.
 
 ### §4.4 Shapes (`VideoTheme.shapes.*`)
 
@@ -518,7 +520,7 @@ StreamDialog(
 | v1 | v2 |
 |---|---|
 | `StreamBadgeBox(..., style: BadgeStyle, content)` | `StreamBadgeBox(..., content)`. The `style` parameter is removed |
-| `GenericContainer(..., roundness: Dp = VideoTheme.dimens.roundnessL, ...)` | `GenericContainer(..., roundness: CornerSize = StreamTokens.radius3xl, ...)` |
+| `GenericContainer(..., roundness: Dp = VideoTheme.dimens.roundnessL, ...)` | `GenericContainer(..., roundness: CornerSize = CornerSize(StreamTokens.radius3xl), ...)`. Wrap a token or `Dp` in `CornerSize(...)` |
 
 ### §5.2 Call action composables
 
@@ -706,9 +708,9 @@ v1 drew the initials with `titleM` and shrank them when they did not fit. v2 pic
 {
   "scope": "compose-ui",
   "classRenames": {
-    "io.getstream.video.android.compose.theme.StreamColors": "io.getstream.video.android.compose.theme.design.StreamDesign.Colors",
-    "io.getstream.video.android.compose.theme.StreamTypography": "io.getstream.video.android.compose.theme.design.StreamDesign.Typography",
-    "io.getstream.video.android.compose.theme.StreamDimens": "io.getstream.video.android.compose.theme.design.StreamTokens",
+    "io.getstream.video.android.compose.theme.StreamColors": "io.getstream.android.core.ui.design.StreamDesign.Colors",
+    "io.getstream.video.android.compose.theme.StreamTypography": "io.getstream.android.core.ui.design.StreamDesign.Typography",
+    "io.getstream.video.android.compose.theme.StreamDimens": "io.getstream.android.core.ui.design.StreamTokens",
     "io.getstream.video.android.compose.theme.StreamShapes": null,
     "io.getstream.video.android.compose.theme.StreamRippleConfiguration": null,
     "io.getstream.video.android.compose.ui.components.base.styling.CompositeStyleProvider": null,
@@ -982,13 +984,19 @@ stream-video-android-ui-compose/api/stream-video-android-ui-compose.api
 stream-video-android-core/api/stream-video-android-core.api
 ```
 
+### Design tokens (in the `GetStream/stream-core-android` repository)
+
+```
+stream-android-core-ui/api/stream-android-core-ui.api
+stream-android-core-ui/src/main/java/io/getstream/android/core/ui/design/StreamDesign.kt
+stream-android-core-ui/src/main/java/io/getstream/android/core/ui/design/StreamTokens.kt
+```
+
 ### Key v2 classes
 
 ```
 stream-video-android-ui-compose/src/main/kotlin/io/getstream/video/android/compose/theme/VideoTheme.kt
 stream-video-android-ui-compose/src/main/kotlin/io/getstream/video/android/compose/theme/VideoUiConfig.kt
-stream-video-android-ui-compose/src/main/kotlin/io/getstream/video/android/compose/theme/design/StreamDesign.kt
-stream-video-android-ui-compose/src/main/kotlin/io/getstream/video/android/compose/theme/design/StreamTokens.kt
 stream-video-android-ui-compose/src/main/kotlin/io/getstream/video/android/compose/theme/VideoComponentFactory.kt
 stream-video-android-ui-compose/src/main/kotlin/io/getstream/video/android/compose/ui/components/base/StreamButton.kt
 stream-video-android-ui-compose/src/main/kotlin/io/getstream/video/android/compose/ui/components/base/StreamButtonStyle.kt
