@@ -91,7 +91,7 @@ done
 PROJECT_ROOT="$(dirname "$(realpath "$0")")/"
 BUILD_DIR="$PROJECT_ROOT/build"
 CLONE_DIR="$BUILD_DIR/openapi-generator-repo"
-PROGRAM_PATH="$CLONE_DIR/cmd/chat-manager"
+PROGRAM_PATH="$CLONE_DIR/tools/openapi"
 SPEC_FILE="$CLONE_DIR/releases/video-openapi-clientside.yaml"
 OUTPUT_DIR="$CLONE_DIR/output"
 SOURCE_PATH=CLONE_DIR
@@ -175,9 +175,9 @@ fi
 
 # Step 4: Run the Go program with OpenAPI arguments
 echo "⚙️ Running OpenAPI Spec Generation..."
-make openapi
+make -C tools/openapi build
 
-./build/chat-manager openapi generate-spec \
+./build/openapi generate-spec \
   -products video \
   -version v1 \
   -clientside \
@@ -193,7 +193,7 @@ make openapi
 # optional collections to null so unset fields are omitted from request
 # bodies. Drop the opt at the next major.
 echo "⚙️ Running OpenAPI Client Generation..."
-./build/chat-manager openapi generate-client \
+./build/openapi generate-client \
   --language kotlin \
   --spec "$OUTPUT_SPEC_PATH.yaml" \
   --opt api-service-class-name="$API_SERVICE_CLASS_NAME" \
