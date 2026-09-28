@@ -175,9 +175,7 @@ internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
  * @param lifecycle The lifecycle used to observe changes in the process
  */
 // Upper bound for the StreamClient disconnect during cleanup(), so a disconnect that never
-// completes cannot keep the detached teardown coroutine, and with it this client, alive
-// forever. Generous compared to the internal 5 second main-looper latch it may legitimately
-// wait on when cleanup() runs off the main thread.
+// completes cannot keep the detached teardown coroutine, and with it this client, alive forever.
 private const val CLEANUP_DISCONNECT_TIMEOUT_MS = 10_000L
 
 internal class StreamVideoClient internal constructor(
@@ -287,13 +285,11 @@ internal class StreamVideoClient internal constructor(
         // cancel the StreamClient subscription before tearing down the socket
         streamClientSubscription?.cancel()
         streamClientSubscription = null
-        // Disconnect the StreamClient socket, then cancel the scope. Two constraints shape this:
-        // the StreamClient runs its internals (the disconnect included) on this same `scope`, so
-        // the scope must stay alive until the disconnect has finished; and the disconnect must
-        // not run inside runBlocking on the main thread, because it stops its lifecycle monitor
-        // by posting to the main looper and blocking on it with a 5 second safety timeout, which
-        // self-deadlocks until that timeout fires and freezes the UI for the whole wait. The
-        // suspend call is bridged because cleanup() is non-suspending public API.
+        // Disconnect the StreamClient socket, then cancel the scope. The StreamClient runs its
+        // internals (the disconnect included) on this same `scope`, so the scope must stay alive
+        // until the disconnect has finished. On the main thread the disconnect runs on a detached
+        // IO coroutine, so the socket teardown never blocks the UI. The suspend call is bridged
+        // because cleanup() is non-suspending public API.
         val disconnectStreamClientThenCancelScope: suspend () -> Unit = {
             runCatching {
                 withTimeoutOrNull(cleanupDisconnectTimeoutMs) {

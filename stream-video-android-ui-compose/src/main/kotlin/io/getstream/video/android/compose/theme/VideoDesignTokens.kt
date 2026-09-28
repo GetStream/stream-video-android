@@ -17,8 +17,7 @@
 package io.getstream.video.android.compose.theme
 
 import androidx.compose.ui.graphics.Color
-import io.getstream.video.android.compose.theme.design.StreamDesign
-import io.getstream.video.android.compose.theme.design.StreamPrimitiveColors
+import io.getstream.android.core.ui.design.StreamDesign
 
 // Video-only semantic tokens. They derive from the shared [StreamDesign.Colors] and stay in this
 // package so the shared layer in `theme.design` can move to a common module unchanged.
@@ -45,13 +44,6 @@ internal val StreamDesign.Colors.controlDeclineCallButtonText: Color
  */
 internal val StreamDesign.Colors.controlCallControlErrorBadgeBg: Color
     get() = accentWarning
-
-/**
- * Text on the call control error badge. Pinned to black because the yellow background does not
- * invert between modes, so a mode-aware text token would turn near-white on yellow in dark mode.
- */
-internal val StreamDesign.Colors.controlCallControlErrorBadgeText: Color
-    get() = StreamPrimitiveColors.baseBlack
 
 /** Connection quality indicator at its strongest level. */
 internal val StreamDesign.Colors.indicatorConnectionQualityGreat: Color

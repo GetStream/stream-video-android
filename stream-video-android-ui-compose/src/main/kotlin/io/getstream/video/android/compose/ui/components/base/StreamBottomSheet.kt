@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,8 +38,8 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * A modal bottom sheet with rounded top corners, a drag handle and an optional centered title.
@@ -145,6 +144,6 @@ private fun rememberStreamSheetState(): SheetState {
 private val SheetShape = RoundedCornerShape(
     topStart = StreamTokens.radius4xl,
     topEnd = StreamTokens.radius4xl,
-    bottomStart = CornerSize(0),
-    bottomEnd = CornerSize(0),
+    bottomStart = StreamTokens.radiusNone,
+    bottomEnd = StreamTokens.radiusNone,
 )

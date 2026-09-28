@@ -38,7 +38,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -64,6 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.ParticipantLabelSoundIndicatorContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoActionsContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoConnectionIndicatorContentParams
@@ -71,7 +71,6 @@ import io.getstream.video.android.compose.theme.ParticipantVideoFallbackContentP
 import io.getstream.video.android.compose.theme.ParticipantVideoLabelContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoReactionContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.theme.indicatorSoundIndicatorSpeaking
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.compose.ui.components.call.pinning.ParticipantAction
@@ -409,10 +408,10 @@ public fun BoxScope.ParticipantLabel(
                 .background(
                     VideoTheme.colors.backgroundCoreOverlayDarkStrong,
                     shape = RoundedCornerShape(
-                        topStart = ZeroCornerSize,
+                        topStart = StreamTokens.radiusNone,
                         topEnd = StreamTokens.radiusXl,
-                        bottomEnd = ZeroCornerSize,
-                        bottomStart = ZeroCornerSize,
+                        bottomEnd = StreamTokens.radiusNone,
+                        bottomStart = StreamTokens.radiusNone,
                     ),
                 ),
         ) {

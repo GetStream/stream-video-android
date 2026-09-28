@@ -25,14 +25,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import io.getstream.android.core.annotations.StreamInternalApi
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 
 @Composable
+@OptIn(StreamInternalApi::class)
 public fun GenericContainer(
     modifier: Modifier = Modifier,
     background: Color = VideoTheme.colors.buttonSecondaryBg,
-    roundness: CornerSize = StreamTokens.radius3xl,
+    roundness: CornerSize = CornerSize(StreamTokens.radius3xl),
     content: @Composable BoxScope.() -> Unit,
 ): Unit = Box(
     modifier = modifier

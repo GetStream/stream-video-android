@@ -46,9 +46,10 @@ import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import io.getstream.android.core.annotations.StreamInternalApi
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * A single or multi line text input with an outlined field and an optional error message below it.
@@ -70,6 +71,7 @@ import io.getstream.video.android.compose.theme.design.StreamTokens
  * @param interactionSource The interaction source that reports the focus state of the field.
  */
 @Composable
+@OptIn(StreamInternalApi::class)
 public fun StreamTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,

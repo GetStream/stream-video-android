@@ -29,8 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.call.renderer.DefaultParticipantVideoRenderer
 import io.getstream.video.android.compose.ui.components.call.renderer.DefaultScreenSharingFallbackContent
 import io.getstream.video.android.compose.ui.components.call.renderer.ScreenSharingVideoRendererStyle

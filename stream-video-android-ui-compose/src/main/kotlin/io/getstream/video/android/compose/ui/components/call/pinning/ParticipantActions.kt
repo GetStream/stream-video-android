@@ -43,10 +43,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.lifecycleScope
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamListItem
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
 import io.getstream.video.android.core.Call

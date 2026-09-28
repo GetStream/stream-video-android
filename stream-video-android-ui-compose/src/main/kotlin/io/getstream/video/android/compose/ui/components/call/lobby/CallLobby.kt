@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
@@ -52,7 +53,6 @@ import io.getstream.video.android.compose.theme.CallLobbyOnRenderedContentParams
 import io.getstream.video.android.compose.theme.CallLobbyParticipantLabelContentParams
 import io.getstream.video.android.compose.theme.UserAvatarParams
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantLabel
 import io.getstream.video.android.compose.ui.components.indicator.MicrophoneIndicator

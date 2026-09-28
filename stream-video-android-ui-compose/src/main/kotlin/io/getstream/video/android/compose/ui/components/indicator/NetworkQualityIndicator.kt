@@ -23,13 +23,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.theme.indicatorConnectionQualityFair
 import io.getstream.video.android.compose.theme.indicatorConnectionQualityGreat
 import io.getstream.video.android.compose.theme.indicatorConnectionQualityPoor
@@ -51,9 +50,9 @@ public fun NetworkQualityIndicator(
     GenericIndicator(
         shape = RoundedCornerShape(
             topStart = StreamTokens.radiusXl,
-            topEnd = ZeroCornerSize,
-            bottomEnd = ZeroCornerSize,
-            bottomStart = ZeroCornerSize,
+            topEnd = StreamTokens.radiusNone,
+            bottomEnd = StreamTokens.radiusNone,
+            bottomStart = StreamTokens.radiusNone,
         ),
         modifier = modifier,
     ) {
