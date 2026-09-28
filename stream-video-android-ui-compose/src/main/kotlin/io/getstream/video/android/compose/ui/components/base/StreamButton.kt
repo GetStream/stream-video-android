@@ -42,8 +42,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * A pill shaped button that hosts any content.

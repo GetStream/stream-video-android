@@ -50,9 +50,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.ParticipantVideoParams
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.LocalAvatarPreviewProvider
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState

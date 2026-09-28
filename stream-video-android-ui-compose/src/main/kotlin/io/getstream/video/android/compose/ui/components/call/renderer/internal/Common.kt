@@ -33,7 +33,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.core.Call
 import kotlinx.coroutines.flow.Flow
 

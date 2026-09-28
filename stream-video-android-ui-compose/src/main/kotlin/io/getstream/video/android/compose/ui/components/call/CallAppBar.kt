@@ -41,11 +41,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.CallAppBarCenterContentParams
 import io.getstream.video.android.compose.theme.CallAppBarLeadingContentParams
 import io.getstream.video.android.compose.theme.CallAppBarTrailingContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.GenericContainer
 import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults

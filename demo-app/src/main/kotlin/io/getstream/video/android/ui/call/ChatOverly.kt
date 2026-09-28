@@ -32,9 +32,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 
 @Composable
 fun ChatOverly(

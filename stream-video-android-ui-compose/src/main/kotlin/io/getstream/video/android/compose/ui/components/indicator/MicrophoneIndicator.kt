@@ -24,9 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * Used to indicate the microphone state of a given participant.

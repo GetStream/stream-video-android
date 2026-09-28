@@ -35,9 +35,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.UserAvatarParams
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.userNameOrId

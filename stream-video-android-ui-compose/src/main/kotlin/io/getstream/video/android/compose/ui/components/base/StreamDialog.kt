@@ -34,8 +34,8 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * A modal dialog with a centered title, an optional icon and message, and a stacked action area.

@@ -75,13 +75,13 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
 import io.getstream.chat.android.ui.common.state.messages.list.MessageItemState
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamBadgeBox
 import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults

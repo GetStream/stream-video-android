@@ -33,7 +33,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import io.getstream.video.android.compose.theme.design.StreamDesign
+import io.getstream.android.core.ui.design.StreamDesign
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.header.VersionPrefixHeader
 

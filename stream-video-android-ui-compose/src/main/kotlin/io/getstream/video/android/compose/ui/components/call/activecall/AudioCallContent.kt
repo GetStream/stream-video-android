@@ -35,13 +35,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.AudioOnlyCallControlsContentParams
 import io.getstream.video.android.compose.theme.AudioOnlyCallDetailsContentParams
 import io.getstream.video.android.compose.theme.AudioOnlyCallHeaderContentParams
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.DefaultPermissionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.actions.DefaultOnCallActionHandler

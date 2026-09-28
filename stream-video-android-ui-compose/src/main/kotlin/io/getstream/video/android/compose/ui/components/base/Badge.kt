@@ -28,8 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import io.getstream.android.core.annotations.StreamInternalApi
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * Overlays a count badge on the top end corner of [content].
@@ -55,6 +56,7 @@ public fun StreamBadgeBox(
 }
 
 @Composable
+@OptIn(StreamInternalApi::class)
 private fun Badge(text: String?, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
