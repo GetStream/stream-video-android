@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
@@ -46,6 +47,7 @@ import androidx.lifecycle.lifecycleScope
 import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.compose.R
+import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.base.StreamListItem
 import io.getstream.video.android.compose.ui.components.indicator.GenericIndicator
@@ -163,10 +165,10 @@ internal fun BoxScope.ParticipantActionsWithoutState(
 ) {
     val buttonPosition = remember { mutableStateOf(Offset.Zero) }
     val buttonSize = remember { mutableStateOf(IntSize.Zero) }
-    if (actions.any {
-            it.condition.invoke(call, participant)
-        }
-    ) {
+    val menuGap = with(LocalDensity.current) { StreamTokens.spacingXs.roundToPx() }
+    // A Picture-in-Picture window does not pass touches to the app, so the button could not be used.
+    val isInPictureInPicture = rememberIsInPipMode()
+    if (!isInPictureInPicture && actions.any { it.condition.invoke(call, participant) }) {
         GenericIndicator(
             backgroundColor = VideoTheme.colors.backgroundCoreApp,
             shape = CircleShape,
@@ -188,7 +190,7 @@ internal fun BoxScope.ParticipantActionsWithoutState(
             ParticipantActionsDialog(
                 offset = IntOffset(
                     x = buttonPosition.value.x.toInt(),
-                    y = (buttonPosition.value.y + buttonSize.value.height).toInt(),
+                    y = (buttonPosition.value.y + buttonSize.value.height).toInt() + menuGap,
                 ),
                 call = call,
                 participant = participant,

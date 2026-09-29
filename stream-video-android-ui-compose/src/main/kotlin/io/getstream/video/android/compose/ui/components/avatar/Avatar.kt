@@ -41,6 +41,7 @@ import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.placeholder.placeholder.PlaceholderPlugin
 import io.getstream.android.core.ui.design.StreamTokens
+import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
 
 /**
@@ -97,6 +98,8 @@ internal fun Avatar(
         modifier
     }
 
+    // The fade-in never finishes drawing in a Picture-in-Picture window and leaves the avatar empty.
+    val isInPictureInPicture = rememberIsInPipMode()
     CoilImage(
         modifier = clickableModifier.avatarBorder(shape).clip(shape),
         imageModel = { imageUrl },
@@ -107,7 +110,9 @@ internal fun Avatar(
         ),
         previewPlaceholder = painterResource(id = previewModePlaceholder),
         component = rememberImageComponent {
-            +CrossfadePlugin()
+            if (!isInPictureInPicture) {
+                +CrossfadePlugin()
+            }
             loadingPlaceholder?.let {
                 +PlaceholderPlugin.Loading(painterResource(id = it))
             }

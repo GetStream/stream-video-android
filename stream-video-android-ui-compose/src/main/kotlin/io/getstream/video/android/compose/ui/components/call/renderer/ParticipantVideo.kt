@@ -55,6 +55,7 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
@@ -64,6 +65,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.android.core.ui.design.StreamTokens
+import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.ParticipantLabelSoundIndicatorContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoActionsContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoConnectionIndicatorContentParams
@@ -152,7 +154,12 @@ public fun ParticipantVideo(
         }
     }
 
-    val containerShape = RoundedCornerShape(StreamTokens.radiusXl)
+    // The system clips a Picture-in-Picture window with its own corner radius, which differs per device.
+    val containerShape = if (rememberIsInPipMode()) {
+        RectangleShape
+    } else {
+        RoundedCornerShape(StreamTokens.radiusXl)
+    }
     val containerModifier = if (style.isFocused && participants.size > 1) {
         modifier.border(
             border = if (style.isScreenSharing) {

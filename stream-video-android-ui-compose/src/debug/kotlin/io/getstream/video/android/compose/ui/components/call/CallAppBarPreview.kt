@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.call.controls.actions.FlipCameraAction
 import io.getstream.video.android.mock.StreamPreviewDataUtils
 import io.getstream.video.android.mock.previewCall
 
@@ -35,4 +36,24 @@ private fun CallAppBarRootPreview() {
 @Composable
 internal fun CallAppBarPreview() {
     CallAppBar(call = previewCall)
+}
+
+@Preview
+@Composable
+private fun CallAppBarUnevenSlotsRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallAppBarUnevenSlotsPreview()
+    }
+}
+
+@Composable
+internal fun CallAppBarUnevenSlotsPreview() {
+    CallAppBar(
+        call = previewCall,
+        leadingContent = {
+            DefaultCallAppBarLeadingContent(onBackButtonClicked = {})
+            FlipCameraAction(onCallAction = {})
+        },
+    )
 }

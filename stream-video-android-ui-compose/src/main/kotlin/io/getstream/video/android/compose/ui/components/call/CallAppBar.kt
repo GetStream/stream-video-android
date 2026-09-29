@@ -59,7 +59,8 @@ import io.getstream.video.android.ui.common.R
  * Represents the default AppBar that's shown in calls. Exposes handlers for the two default slot
  * component implementations (leading and trailing).
  *
- * Exposes slots required to customize the look and feel.
+ * Exposes slots required to customize the look and feel. The center content is centered to the
+ * bar, and the leading and trailing content each get half of the remaining width.
  *
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
@@ -111,11 +112,22 @@ public fun CallAppBar(
             .fillMaxWidth()
             .height(StreamTokens.size48),
         verticalAlignment = CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        leadingContent?.invoke(this)
+        // Equal weights keep the center content centered to the bar, whatever the side slots hold.
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = CenterVertically,
+        ) {
+            leadingContent?.invoke(this)
+        }
         centerContent?.invoke(this)
-        trailingContent?.invoke(this)
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = CenterVertically,
+            horizontalArrangement = Arrangement.End,
+        ) {
+            trailingContent?.invoke(this)
+        }
     }
 }
 
