@@ -85,5 +85,8 @@ data class CallSettingsResponse (
     val video: io.getstream.android.video.generated.models.VideoSettingsResponse,
 
     @Json(name = "ingress")
-    val ingress: io.getstream.android.video.generated.models.IngressSettingsResponse? = null
+    val ingress: io.getstream.android.video.generated.models.IngressSettingsResponse? = null,
+
+    @Json(name = "encryption")
+    val encryption: io.getstream.android.video.generated.models.EncryptionSettingsResponse? = null
 )

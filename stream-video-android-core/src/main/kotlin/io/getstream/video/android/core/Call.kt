@@ -20,6 +20,7 @@ import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.PowerManager
+import android.os.SystemClock
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Stable
 import io.getstream.android.video.generated.models.AcceptCallResponse
@@ -76,6 +77,8 @@ import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
+import io.getstream.video.android.core.e2ee.E2EEManager
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.PreferredVideoResolution
@@ -85,9 +88,12 @@ import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.core.recording.RecordingType
+import io.getstream.video.android.core.ringing.RingJoinSource
+import io.getstream.video.android.core.ringing.RingStatePoller
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.utils.SerialProcessor
 import io.getstream.video.android.core.utils.debugOnly
 import io.getstream.video.android.core.utils.safeCallWithDefault
@@ -96,6 +102,7 @@ import io.getstream.webrtc.EglBase
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -112,6 +119,7 @@ import stream.video.sfu.models.ClientCapability
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 
 @Deprecated(
     message = "No longer used internally. The reconnect deadline is now driven by the server's " +
@@ -294,7 +302,60 @@ public class Call(
         callRegistry = callRegistry,
         callAnalytics = callAnalytics,
         sessionManager = sessionManager,
+        e2eeRequested = { e2eeManager != null },
     )
+
+    /**
+     * Set immediately before a ring drives a join, and read once when the join lifecycle opens.
+     *
+     * A local-only value: it never reaches the coordinator with the join request, and reading it
+     * clears it, so a source can only ever be attributed to the join it was set for. A later
+     * reconnect opening its own lifecycle inherits nothing.
+     */
+    private val pendingJoinSource = AtomicReference<RingJoinSource?>(null)
+
+    internal fun setJoinSource(source: RingJoinSource) {
+        pendingJoinSource.set(source)
+    }
+
+    internal fun consumeJoinSource(): RingJoinSource? = pendingJoinSource.getAndSet(null)
+
+    /**
+     * Delegate that reads the ring state when an outgoing ring stops hearing from the websocket.
+     * Driven by [CallState], which owns the ringing lifecycle.
+     */
+    private var _ringStatePoller: RingStatePoller? = null
+
+    /**
+     * Created on first use rather than with the call: only an outgoing ring ever polls, and most
+     * calls never ring at all.
+     */
+    internal val ringStatePoller: RingStatePoller
+        get() = _ringStatePoller ?: RingStatePoller(
+            // The call's job, so polling dies with the call it belongs to, but a real IO
+            // dispatcher rather than the call scope's own: this is a wall-clock watchdog bounded
+            // by a wall-clock ring window, and DispatcherProvider.IO is replaceable, so on a test
+            // scheduler its delays collapse and its network reads become someone else's to
+            // drain. Only the dispatcher is overridden; cancellation still follows the call.
+            scope = CoroutineScope(scope.coroutineContext + Dispatchers.IO),
+            config = clientImpl.ringStatePolling,
+            now = { SystemClock.elapsedRealtime() },
+            fetch = { callSessionId -> apiClient.getRingState(callSessionId) },
+            onRingState = { state.updateFromRingState(it) },
+        ).also { _ringStatePoller = it }
+
+    /** Stops polling if it was ever started, without creating a poller just to stop it. */
+    internal fun stopRingStatePolling() {
+        _ringStatePoller?.stop()
+    }
+
+    /**
+     * Records that a ring event arrived. A no-op before the first poller exists, which is correct:
+     * [RingStatePoller.start] begins its own quiet period.
+     */
+    internal fun recordRingParticipantStatusUpdate() {
+        _ringStatePoller?.onRingParticipantStatusUpdate()
+    }
 
     /**
      * Creates [MediaManagerImpl] for this call. Captures `this` (and the test hook) so
@@ -337,6 +398,10 @@ public class Call(
                 supervisorJob.cancel()
             }
             scope.cancel()
+            // Cancelling the scope already reaches the poller, which runs on the call's job.
+            // Stopping it explicitly also clears the job reference, so a call torn down and
+            // re-armed does not see a cancelled job as a running one.
+            stopRingStatePolling()
         },
         state = state,
         callAnalytics = callAnalytics,
@@ -475,6 +540,7 @@ public class Call(
             clientImpl.permissionCheck
                 .checkAndroidPermissionsGroup(clientImpl.context, this@Call).first
         },
+        consumeJoinSource = { consumeJoinSource() },
     )
 
     internal var reconnectDeadlineMillis: Int
@@ -591,6 +657,83 @@ public class Call(
         callJoinInterceptor,
     )
 
+    // region End-to-end encryption
+
+    @Volatile
+    private var _e2eeManager: E2EEManager? = null
+
+    /** Read by [RtcSession] when it builds the publisher and the subscriber. */
+    internal val e2eeManager: E2EEManager? get() = _e2eeManager
+
+    /**
+     * Attaches an end-to-end encryption manager, so that media published from and received by this
+     * call is encrypted before it reaches Stream's infrastructure.
+     *
+     * Must be called before [join]. The publisher and subscriber capture the manager when they are
+     * built, and the join request tells the coordinator whether this call is encrypted — a
+     * mismatch there is rejected server side. The manager survives rejoins and migrations, so it
+     * only needs to be set once.
+     *
+     * Pass [StreamEncryptionManager] for Stream's default AES-GCM implementation, or your own
+     * [E2EEManager] to keep the SDK out of your encryption entirely:
+     *
+     * ```
+     * StreamEncryptionManager.create(myUserId).onSuccess { e2ee ->
+     *     e2ee.setSharedKey(keyIndex = 0, key = myKeyBytes)
+     *     call.setE2EEManager(e2ee)
+     *     call.join()
+     * }
+     * ```
+     *
+     * Keys stay on the manager, deliberately: keep your reference to it to add, remove and rotate
+     * keys, during the call as well as before it. Generating and distributing key material has to
+     * stay outside Stream's infrastructure, so the SDK never holds or transports it.
+     *
+     * You own the manager's lifecycle too — the SDK does not dispose it, since the same instance is
+     * normally reused across rejoins and often across calls.
+     *
+     * Note that an encrypted call cannot be recorded, transcribed, closed-captioned, thumbnailed
+     * or broadcast over HLS: none of that content is readable by Stream, so the coordinator
+     * rejects those requests.
+     *
+     * @param manager The manager to use, or `null` to join unencrypted.
+     * @return Success when the manager was updated, or a failure if the call has already joined.
+     */
+    public fun setE2EEManager(manager: E2EEManager?): kotlin.Result<Unit> {
+        session.value?.let { activeSession ->
+            // Too late to encrypt this call, and the app may not check the result. Record it, since
+            // the SFU otherwise just sees a call that stayed unencrypted for no stated reason.
+            activeSession.sfuTracer.trace(
+                PeerConnectionTraceKey.E2EE_SET_MANAGER.value,
+                "rejected: call already joined",
+            )
+            return kotlin.Result.failure(
+                IllegalStateException(
+                    "setE2EEManager must be called before join(). The publisher and subscriber " +
+                        "capture the manager when the session is created, and the coordinator " +
+                        "validates the call's encryption mode against the join request.",
+                ),
+            )
+        }
+        _e2eeManager = manager
+        state.setE2eeEnabled(manager != null)
+        logger.i { "[setE2EEManager] manager: ${manager?.javaClass?.simpleName ?: "none"}" }
+        return kotlin.Result.success(Unit)
+    }
+
+    /**
+     * Drops only this call's reference to the app-owned manager. The active RTC session captured
+     * its own reference when it was created, so terminal teardown can finish safely. The app
+     * remains responsible for disposing the manager once it no longer uses it.
+     */
+    private fun detachE2EEManager() {
+        _e2eeManager = null
+        state.setE2eeEnabled(false)
+        logger.i { "[detachE2EEManager] detached app-owned manager" }
+    }
+
+    // endregion
+
     internal suspend fun collectStats(): CallStatsReport = statsReporter.collectStats()
 
     // region Reconnection — unified loop
@@ -614,9 +757,15 @@ public class Call(
     // endregion
 
     @InternalStreamVideoApi
-    fun leave(reason: CallLeaveReason) = lifecycle.leave(reason)
+    fun leave(reason: CallLeaveReason) {
+        detachE2EEManager()
+        lifecycle.leave(reason)
+    }
 
-    fun leave(reason: String = "user") = lifecycle.leave(reason)
+    fun leave(reason: String = "user") {
+        detachE2EEManager()
+        lifecycle.leave(reason)
+    }
 
     /** ends the call for yourself as well as other users */
     suspend fun end(): Result<Unit> = lifecycle.end()
@@ -852,9 +1001,17 @@ public class Call(
         notify,
         hintHighScaleLivestreamPublisher,
         joinAnalyticsModel,
-    )
+        e2ee = e2eeManager != null,
+    ).also {
+        logger.i {
+            "[joinRequest] e2ee=${e2eeManager != null} " +
+                "encryptionMode=${state.settings.value?.encryption?.mode}"
+        }
+    }
 
-    fun cleanup() = lifecycle.cleanup()
+    fun cleanup() {
+        lifecycle.cleanup()
+    }
 
     suspend fun ring(): Result<GetCallResponse> = apiClient.ring()
 
@@ -944,6 +1101,53 @@ public class Call(
         publishAudioProcessingState()
         notifyNoiseCancellationState(media.isAudioProcessingEnabledIfCreated())
     }
+
+    // Audio bitrate profile bridges. [MicrophoneManager.setAudioBitrateProfile] is the public
+    // entry point and can reach neither the media component nor the session from there.
+
+    internal fun setHardwareNoiseSuppressorEnabled(enabled: Boolean): Boolean =
+        media.setHardwareNoiseSuppressorEnabled(enabled)
+
+    internal fun setHardwareAcousticEchoCancelerEnabled(enabled: Boolean): Boolean =
+        media.setHardwareAcousticEchoCancelerEnabled(enabled)
+
+    /** Must not be called from the main thread: the module rebuilds AudioRecord. */
+    internal fun setCaptureAudioSource(audioSource: Int): Boolean =
+        media.setCaptureAudioSource(audioSource)
+
+    /**
+     * Rebuilds the audio source and track so audio-source constraints take effect mid-call. With
+     * no session the source is built lazily from current constraints, so the change already holds.
+     */
+    internal fun rebuildAudioCapturePipeline(): Boolean =
+        session.value?.rebuildAudioCapturePipeline() ?: true
+
+    internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean =
+        session.value?.setAudioMaxBitrate(maxBitrateBps) ?: false
+
+    /** Whether an audio sender exists to take a live profile change. */
+    internal fun hasLiveAudioSender(): Boolean =
+        session.value?.hasLiveAudioSender() ?: false
+
+    internal fun audioMaxBitrate(): Int? = session.value?.audioMaxBitrate()
+
+    /** The audio bitrate the SFU negotiated at join, or null when nothing publishes audio. */
+    internal fun negotiatedAudioBitrate(): Int? = session.value?.negotiatedAudioBitrate()
+
+    /** The bitrate the SFU offers for [profile], or null when it named none. */
+    internal fun audioBitrateFor(profile: stream.video.sfu.models.AudioBitrateProfile): Int? =
+        session.value?.audioBitrateFor(profile)
+
+    /** Whether a noise-cancellation processor is wired in and can be turned on or off. */
+    internal fun isAudioProcessingReachable(): Boolean = media.isAudioProcessingReachable()
+
+    // Absent hardware is not the same as hardware that refused, so these are asked separately.
+
+    internal fun isHardwareNoiseSuppressorSupported(): Boolean =
+        media.isHardwareNoiseSuppressorSupported()
+
+    internal fun isHardwareAcousticEchoCancelerSupported(): Boolean =
+        media.isHardwareAcousticEchoCancelerSupported()
 
     fun toggleAudioProcessing(): Boolean {
         // Reads without building a factory: the gate runs before join, and a factory created

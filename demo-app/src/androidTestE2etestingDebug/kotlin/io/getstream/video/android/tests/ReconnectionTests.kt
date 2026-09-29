@@ -114,13 +114,14 @@ class ReconnectionTests : StreamTestCase() {
         }
         step("AND participant joins the call") {
             // The recording window counts from the participant's start request, and the
-            // composite recorder alone can take 20-30s to start. The window has to outlive
-            // the drop, the reconnect and the final polling assert on a slow CI emulator,
-            // otherwise the participant stops the recording on schedule before the assert
-            // and the test fails on a recording that legitimately ended.
+            // composite recorder alone can take up to the 60s acceptCallRecording waits for.
+            // The window has to outlive that, the drop, the reconnect and the final polling
+            // assert on a slow CI emulator, otherwise the participant stops the recording on
+            // schedule before the assert and the test fails on a recording that
+            // legitimately ended.
             participantRobot
                 .setUserCount(participants)
-                .setCallRecordingDuration(90)
+                .setCallRecordingDuration(120)
                 .joinCall(callId, actions = arrayOf(Actions.RECORD_CALL))
         }
         step("AND participant starts recording a call") {

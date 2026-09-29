@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.analytics.reporting.model
 
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
+import io.getstream.video.android.core.ringing.RingJoinSource
 
 internal typealias StageId = String
 internal typealias CallId = String
@@ -34,6 +35,7 @@ internal data class PostCallFlightSession(
     override val startedAtMs: Long,
     val joinStageAttemptIdSnapshot: String,
     val joinReason: JoinReason,
+    val joinSource: RingJoinSource? = null,
     val sfuId: String? = null,
     val callSessionId: String? = null,
     val userSessionId: String? = null,

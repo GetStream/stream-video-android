@@ -39,6 +39,7 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.model.toIceServer
+import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -69,6 +70,8 @@ internal class CallJoinCoordinator(
     private val sessionMonitor: SessionMonitor,
     private val callRegistry: ClientCallRegistry,
     private val hasRequiredPermissions: () -> Boolean,
+    // Reads and clears the source of a ring-driven join; see Call.consumeJoinSource.
+    private val consumeJoinSource: () -> RingJoinSource? = { null },
 ) {
     private companion object {
         const val JOIN_FLIGHT_KEY = "join"
@@ -256,6 +259,11 @@ internal class CallJoinCoordinator(
         state._connection.value = RealtimeConnection.InProgress
         var retryCount = 0
 
+        // Read once, outside the loop: the source is one-shot, so consuming it per attempt would
+        // leave every retry - and therefore the attempt that actually succeeds - unattributed.
+        // Retries are the flaky-network case, which is exactly the population this measures.
+        val joinSource = consumeJoinSource()
+
         var result: Result<RtcSession>
 
         lifecycle.resetLeaveGuard()
@@ -266,7 +274,7 @@ internal class CallJoinCoordinator(
                 ring,
                 notify,
                 hintHighScaleLivestreamPublisher,
-                JoinAnalyticsModel(retryCount, JoinReason.FirstAttempt),
+                JoinAnalyticsModel(retryCount, JoinReason.FirstAttempt, joinSource),
             )
             if (result is Success) {
                 // we initialise the camera, mic and other according to local + backend settings
@@ -413,6 +421,9 @@ internal class CallJoinCoordinator(
                 notify = notify,
                 hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
                 joinAnalyticsModel = joinAnalyticsModel,
+                // The coordinator rejects a join whose flag disagrees with the call. This is
+                // the first join; rejoin / migrate omit it and CallApiClient reads the manager.
+                e2ee = state.e2eeEnabled.value,
             )
 
         if (result !is Success) {

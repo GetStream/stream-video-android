@@ -59,6 +59,9 @@ internal class AudioSwitchController(
         streamAudioSwitch?.selectDevice(audioDevice)
     }
 
+    fun setCommunicationModeEnabled(enabled: Boolean): Boolean =
+        streamAudioSwitch?.setCommunicationModeEnabled(enabled) ?: false
+
     companion object {
         private const val TAG = "StreamAudioSwitchController"
     }

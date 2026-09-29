@@ -35,6 +35,7 @@ import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.flatMapSuspend
 import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.core.notifications.DefaultNotificationUpdateComparator
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.handlers.CompatibilityStreamNotificationHandler
@@ -53,6 +54,9 @@ internal class StreamNotificationManager private constructor(
     internal val deviceTokenStorage: DeviceTokenStorage,
     private val notificationPermissionManager: NotificationPermissionManager?,
 ) : NotificationHandler by notificationConfig.notificationHandler {
+
+    internal val notificationUpdateDeduplicator: NotificationUpdateDeduplicator =
+        NotificationUpdateDeduplicator(DefaultNotificationUpdateComparator)
 
     suspend fun registerPushDevice() {
         logger.d { "[registerPushDevice] no args" }

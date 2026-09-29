@@ -35,6 +35,8 @@ object Serializer {
         .add(io.getstream.android.video.generated.models.CallRecordingStartedEvent.RecordingType.RecordingTypeAdapter())
         .add(io.getstream.android.video.generated.models.CallRecordingStoppedEvent.RecordingType.RecordingTypeAdapter())
         .add(io.getstream.android.video.generated.models.CreateDeviceRequest.PushProvider.PushProviderAdapter())
+        .add(io.getstream.android.video.generated.models.EncryptionSettingsRequest.Mode.ModeAdapter())
+        .add(io.getstream.android.video.generated.models.EncryptionSettingsResponse.Mode.ModeAdapter())
         .add(io.getstream.android.video.generated.models.FrameRecordingSettingsRequest.Mode.ModeAdapter())
         .add(io.getstream.android.video.generated.models.FrameRecordingSettingsRequest.Quality.QualityAdapter())
         .add(io.getstream.android.video.generated.models.FrameRecordingSettingsResponse.Mode.ModeAdapter())

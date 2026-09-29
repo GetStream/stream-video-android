@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.Balance
 import androidx.compose.material.icons.filled.Crop
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.SpatialAudioOff
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
 import io.getstream.video.android.core.audio.StreamAudioDevice
@@ -76,6 +77,8 @@ fun defaultStreamMenu(
     onToggleAudioUsage: () -> Unit = {},
     selectedRecordingTypes: Set<RecordingType> = emptySet(),
     onSelectRecordingType: (RecordingType) -> Unit = {},
+    isMusicAudioProfile: Boolean = false,
+    onToggleAudioProfile: () -> Unit = {},
 ) = buildList<MenuItem> {
     if (noiseCancellationFeatureEnabled) {
         add(
@@ -155,6 +158,8 @@ fun defaultStreamMenu(
                     onToggleAudioUsage,
                     selectedRecordingTypes,
                     onSelectRecordingType,
+                    isMusicAudioProfile,
+                    onToggleAudioProfile,
                 ),
             ),
         )
@@ -339,7 +344,15 @@ fun debugSubmenu(
     onToggleAudioUsage: () -> Unit,
     selectedRecordingTypes: Set<RecordingType>,
     onSelectRecordingType: (RecordingType) -> Unit,
+    isMusicAudioProfile: Boolean = false,
+    onToggleAudioProfile: () -> Unit = {},
 ) = listOf(
+    ActionMenuItem(
+        title = if (isMusicAudioProfile) "Music mode: On" else "Music mode: Off",
+        icon = menuIcon(Icons.Default.MusicNote),
+        highlight = isMusicAudioProfile,
+        action = onToggleAudioProfile,
+    ),
     DynamicSubMenuItem(
         title = "List Transcriptions",
         icon = menuIcon(ComposeR.drawable.stream_design_ic_spreadsheet),
