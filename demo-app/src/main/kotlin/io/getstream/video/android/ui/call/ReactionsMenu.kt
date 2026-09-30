@@ -24,8 +24,8 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamButtonSize
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamTextButton
@@ -120,25 +121,26 @@ private fun ReactionItem(
     onEmojiSelected: (emoji: String) -> Unit,
 ) {
     val mappedEmoji = reactionMapper.map(reaction.emojiCode)
-    val text = if (showText) {
-        "$mappedEmoji ${reaction.displayText}"
+    val onClick = { onEmojiSelected(reaction.emojiCode) }
+    if (showText) {
+        StreamTextButton(
+            modifier = Modifier.fillMaxWidth(),
+            style = StreamButtonStyleDefaults.secondaryOutline,
+            size = StreamButtonSize.Small,
+            text = "$mappedEmoji ${reaction.displayText}",
+            onClick = onClick,
+        )
     } else {
-        mappedEmoji
+        // A plain StreamButton: the label padding of StreamTextButton leaves no room for the emoji.
+        StreamButton(
+            modifier = Modifier.requiredSize(StreamTokens.size48),
+            style = StreamButtonStyleDefaults.secondaryOutline,
+            size = StreamButtonSize.Small,
+            onClick = onClick,
+        ) {
+            Text(text = mappedEmoji)
+        }
     }
-    val modifier = if (showText) {
-        Modifier.fillMaxWidth()
-    } else {
-        Modifier
-            .requiredWidth(StreamTokens.size48)
-            .requiredHeight(StreamTokens.size48)
-    }
-    StreamTextButton(
-        modifier = modifier,
-        style = StreamButtonStyleDefaults.secondaryOutline,
-        size = StreamButtonSize.Small,
-        text = text,
-        onClick = { onEmojiSelected(reaction.emojiCode) },
-    )
 }
 
 private fun sendReaction(scope: CoroutineScope, call: Call, emoji: String, onDismiss: () -> Unit) {

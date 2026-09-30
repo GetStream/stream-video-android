@@ -18,7 +18,6 @@ package io.getstream.video.android.compose.ui.components.call
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -35,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -54,12 +54,14 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.ui.common.R
+import kotlin.math.max
 
 /**
  * Represents the default AppBar that's shown in calls. Exposes handlers for the two default slot
  * component implementations (leading and trailing).
  *
- * Exposes slots required to customize the look and feel.
+ * Exposes slots required to customize the look and feel. The leading and trailing content keep
+ * their size, and the center content is centered to the bar in the space left between them.
  *
  * @param call The call that contains all the participants state and tracks.
  * @param modifier Modifier for styling.
@@ -106,16 +108,39 @@ public fun CallAppBar(
         }
     },
 ) {
-    Row(
+    Layout(
+        contents = listOf(
+            { Row(verticalAlignment = CenterVertically) { leadingContent?.invoke(this) } },
+            { Row(verticalAlignment = CenterVertically) { centerContent?.invoke(this) } },
+            { Row(verticalAlignment = CenterVertically) { trailingContent?.invoke(this) } },
+        ),
         modifier = modifier
             .fillMaxWidth()
             .height(StreamTokens.size48),
-        verticalAlignment = CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        leadingContent?.invoke(this)
-        centerContent?.invoke(this)
-        trailingContent?.invoke(this)
+    ) { (leading, center, trailing), constraints ->
+        val width = constraints.maxWidth
+        val height = constraints.maxHeight
+        val slotConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+        val leadingPlaceable = leading.single().measure(slotConstraints)
+        val trailingPlaceable = trailing.single().measure(
+            slotConstraints.copy(maxWidth = width - leadingPlaceable.width),
+        )
+        // The side slots keep their size, and the center gets the space that keeps it centered to the bar.
+        val sideWidth = max(leadingPlaceable.width, trailingPlaceable.width)
+        val centerPlaceable = center.single().measure(
+            slotConstraints.copy(maxWidth = (width - 2 * sideWidth).coerceAtLeast(0)),
+        )
+        layout(width, height) {
+            leadingPlaceable.placeRelative(0, (height - leadingPlaceable.height) / 2)
+            centerPlaceable.placeRelative(
+                (width - centerPlaceable.width) / 2,
+                (height - centerPlaceable.height) / 2,
+            )
+            trailingPlaceable.placeRelative(
+                width - trailingPlaceable.width,
+                (height - trailingPlaceable.height) / 2,
+            )
+        }
     }
 }
 

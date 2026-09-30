@@ -18,15 +18,19 @@ package io.getstream.video.android.ui.menu.base
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,12 +44,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
+import io.getstream.video.android.compose.ui.components.base.StreamButton
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
-import io.getstream.video.android.compose.ui.components.base.StreamTextButton
 import io.getstream.video.android.ui.closedcaptions.ClosedCaptionUiState
 import io.getstream.video.android.ui.menu.AudioUsageVoiceCommunicationUiState
 import io.getstream.video.android.ui.menu.TranscriptionAvailableUiState
@@ -237,7 +242,7 @@ private fun LazyListScope.menuItems(
     items(items.size) { index ->
         val item = items[index]
         val highlight = item.highlight
-        StreamTextButton(
+        StreamButton(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
                 val actionItem = item as? ActionMenuItem
@@ -247,10 +252,29 @@ private fun LazyListScope.menuItems(
                     onNewSubmenu(it)
                 }
             },
-            text = item.title,
-            leadingIcon = item.icon.painter(),
-            style = if (highlight) StreamButtonStyleDefaults.primaryGhost else StreamButtonStyleDefaults.secondaryGhost,
-        )
+            style = StreamButtonStyleDefaults.secondaryGhost,
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = StreamTokens.spacingMd),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(StreamTokens.spacingSm),
+            ) {
+                Icon(
+                    painter = item.icon.painter(),
+                    contentDescription = null,
+                    modifier = Modifier.size(StreamTokens.iconSizeMd),
+                    tint = if (highlight) VideoTheme.colors.accentPrimary else LocalContentColor.current,
+                )
+                Text(
+                    text = item.title,
+                    style = VideoTheme.typography.bodyDefault,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
     }
 }
 

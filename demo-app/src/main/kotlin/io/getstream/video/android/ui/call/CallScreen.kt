@@ -400,7 +400,7 @@ fun CallScreen(
                                             isShowingSettingMenu = !isShowingSettingMenu
                                         },
                                     )
-                                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+                                    Spacer(modifier = Modifier.size(StreamTokens.spacingXs))
                                     if (isTablet()) {
                                         ScreenShareToggleAction(
                                             active = isScreenSharing,
@@ -421,7 +421,7 @@ fun CallScreen(
                                             },
                                         )
                                         Spacer(
-                                            modifier = Modifier.size(StreamTokens.spacingMd),
+                                            modifier = Modifier.size(StreamTokens.spacingXs),
                                         )
                                     }
                                     ToggleCameraAction(
@@ -432,7 +432,7 @@ fun CallScreen(
                                         isCameraEnabled = isCameraEnabled,
                                         onCallAction = { call.camera.setEnabled(it.isEnabled) },
                                     )
-                                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+                                    Spacer(modifier = Modifier.size(StreamTokens.spacingXs))
                                     ToggleMicrophoneAction(
                                         modifier = Modifier
                                             .testTag(
@@ -445,7 +445,7 @@ fun CallScreen(
                                             )
                                         },
                                     )
-                                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+                                    Spacer(modifier = Modifier.size(StreamTokens.spacingXs))
                                 }
                                 Row {
                                     StreamBadgeBox(
@@ -459,7 +459,7 @@ fun CallScreen(
                                             showParticipants = !showParticipants
                                         }
                                     }
-                                    Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+                                    Spacer(modifier = Modifier.size(StreamTokens.spacingXs))
                                     ChatDialogAction(
                                         modifier = Modifier.testTag("Stream_ChatButton"),
                                         messageCount = unreadCount,

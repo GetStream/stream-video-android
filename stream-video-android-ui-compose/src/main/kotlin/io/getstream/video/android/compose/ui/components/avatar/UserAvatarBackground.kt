@@ -18,6 +18,7 @@ package io.getstream.video.android.compose.ui.components.avatar
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -39,7 +40,8 @@ import io.getstream.video.android.model.User
  * @param userImage The URL of the image to be displayed. Usually [User.image].
  * @param userName The name to be used for the initials fallback. Usually [User.name].
  * @param shape The shape of the avatar. `CircleShape` by default.
- * @param avatarSize The size of the avatar.
+ * @param avatarSize The size of the avatar. In a container smaller than twice this size, the avatar
+ * shrinks to half of the container's shorter side.
  * @param imageScale The scale rule used for the image. `Crop` by default.
  * @param imageDescription The image content description for accessibility. `Null` by default.
  * @param imageRequestSize The image size to be requested. Original size by default.
@@ -63,10 +65,10 @@ public fun UserAvatarBackground(
     @DrawableRes previewModePlaceholder: Int = LocalAvatarPreviewProvider.getLocalAvatarPreviewPlaceholder(),
     textStyle: TextStyle? = null,
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
-                .size(avatarSize)
+                .size(minOf(avatarSize, minOf(maxWidth, maxHeight) / 2))
                 .align(Alignment.Center),
         ) {
             UserAvatar(
