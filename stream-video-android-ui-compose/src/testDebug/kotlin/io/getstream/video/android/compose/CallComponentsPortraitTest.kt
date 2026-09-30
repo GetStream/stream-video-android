@@ -20,6 +20,7 @@ import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
+import io.getstream.video.android.compose.ui.components.call.CallAppBarLongTitlePreview
 import io.getstream.video.android.compose.ui.components.call.CallAppBarPreview
 import io.getstream.video.android.compose.ui.components.call.CallAppBarUnevenSlotsPreview
 import org.junit.Rule
@@ -44,6 +45,13 @@ internal class CallComponentsPortraitTest : PaparazziComposeTest {
     fun `call app bar with uneven slots`() {
         snapshotWithDarkMode {
             CallAppBarUnevenSlotsPreview()
+        }
+    }
+
+    @Test
+    fun `call app bar with long title`() {
+        snapshotWithDarkMode {
+            CallAppBarLongTitlePreview()
         }
     }
 }

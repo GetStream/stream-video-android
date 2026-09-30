@@ -57,3 +57,26 @@ internal fun CallAppBarUnevenSlotsPreview() {
         },
     )
 }
+
+@Preview
+@Composable
+private fun CallAppBarLongTitleRootPreview() {
+    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
+    VideoTheme {
+        CallAppBarLongTitlePreview()
+    }
+}
+
+@Composable
+internal fun CallAppBarLongTitlePreview() {
+    CallAppBar(
+        call = previewCall,
+        centerContent = {
+            CalLCenterContent(
+                text = "Weekly design review with the whole video team",
+                isRecording = false,
+                isReconnecting = false,
+            )
+        },
+    )
+}
