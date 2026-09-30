@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.notifications.internal.service
 
 import android.Manifest
+import android.app.Application
 import android.app.Notification
 import android.content.Context
 import android.content.ContextWrapper
@@ -25,6 +26,8 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.core.content.ContextCompat
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
@@ -34,23 +37,35 @@ import io.getstream.video.android.core.notifications.internal.service.CallServic
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_ONGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_OUTGOING_CALL
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_REMOVE_INCOMING_CALL
+import io.getstream.video.android.core.notifications.internal.service.models.ServiceRoute
+import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceEventObserver
+import io.getstream.video.android.core.notifications.internal.service.observers.CallServiceRingingStateObserver
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallDisplayName
 import io.getstream.video.android.model.streamCallId
 import io.mockk.MockKAnnotations
-import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
+import io.mockk.runs
+import io.mockk.unmockkAll
+import io.mockk.verify
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
@@ -83,8 +98,8 @@ class CallServiceTest {
 
     @After
     fun tearDown() {
-        unmockkStatic(ContextCompat::class)
-        clearAllMocks()
+        callService.serviceScope.cancel()
+        unmockkAll()
     }
 
     // Test companion object constants
@@ -197,6 +212,25 @@ class CallServiceTest {
         assertNull(intent.streamCallDisplayName(INTENT_EXTRA_CALL_DISPLAY_NAME))
     }
 
+    @Test
+    fun `onDestroy unregisters toggle camera broadcast receiver`() {
+        callService.attachContext(context)
+        callService.serviceStateController.registerToggleCameraBroadcastReceiver(
+            callService,
+            callService.serviceScope,
+        )
+        val receiver = callService.serviceStateController.state.value.toggleCameraBroadcastReceiver
+        val shadowApplication = shadowOf(context as Application)
+        assertTrue(callService.serviceStateController.state.value.isReceiverRegistered)
+        assertTrue(shadowApplication.registeredReceivers.any { it.broadcastReceiver === receiver })
+
+        callService.onDestroy()
+
+        assertFalse(callService.serviceStateController.state.value.isReceiverRegistered)
+        assertNull(callService.serviceStateController.state.value.toggleCameraBroadcastReceiver)
+        assertFalse(shadowApplication.registeredReceivers.any { it.broadcastReceiver === receiver })
+    }
+
     // Test constants consistency
     @Test
     fun `notification ID constants are consistent`() {
@@ -213,6 +247,72 @@ class CallServiceTest {
             INTENT_EXTRA_CALL_DISPLAY_NAME,
         )
     }
+
+    @Test
+    fun `Telecom route does not install CallService observers`() {
+        mockkConstructor(CallServiceRingingStateObserver::class)
+        mockkConstructor(CallServiceEventObserver::class)
+        every { anyConstructed<CallServiceRingingStateObserver>().observe(any()) } just runs
+        every { anyConstructed<CallServiceEventObserver>().observe(any(), any()) } just runs
+        val call = mockCall(ServiceRoute.TELECOM)
+        every { mockStreamVideoClient.enableCallNotificationUpdates } returns false
+
+        callService.observeCallForTest(call, mockStreamVideoClient)
+
+        verify(exactly = 0) {
+            anyConstructed<CallServiceRingingStateObserver>().observe(any())
+        }
+        verify(exactly = 0) {
+            anyConstructed<CallServiceEventObserver>().observe(any(), any())
+        }
+    }
+
+    @Test
+    fun `legacy route installs CallService observers`() {
+        mockkConstructor(CallServiceRingingStateObserver::class)
+        mockkConstructor(CallServiceEventObserver::class)
+        every { anyConstructed<CallServiceRingingStateObserver>().observe(any()) } just runs
+        every { anyConstructed<CallServiceEventObserver>().observe(any(), any()) } just runs
+        val call = mockCall(ServiceRoute.LEGACY_CALL_SERVICE)
+        every { mockStreamVideoClient.enableCallNotificationUpdates } returns false
+
+        callService.observeCallForTest(call, mockStreamVideoClient)
+
+        verify(exactly = 1) {
+            anyConstructed<CallServiceRingingStateObserver>().observe(any())
+        }
+        verify(exactly = 1) {
+            anyConstructed<CallServiceEventObserver>().observe(any(), any())
+        }
+    }
+
+    @Test
+    fun `undecided route installs CallService observers`() {
+        mockkConstructor(CallServiceRingingStateObserver::class)
+        mockkConstructor(CallServiceEventObserver::class)
+        every { anyConstructed<CallServiceRingingStateObserver>().observe(any()) } just runs
+        every { anyConstructed<CallServiceEventObserver>().observe(any(), any()) } just runs
+        val call = mockCall(ServiceRoute.UNDECIDED)
+        every { mockStreamVideoClient.enableCallNotificationUpdates } returns false
+
+        callService.observeCallForTest(call, mockStreamVideoClient)
+
+        verify(exactly = 1) {
+            anyConstructed<CallServiceRingingStateObserver>().observe(any())
+        }
+        verify(exactly = 1) {
+            anyConstructed<CallServiceEventObserver>().observe(any(), any())
+        }
+    }
+
+    private fun mockCall(route: ServiceRoute): Call {
+        val callState = mockk<CallState>(relaxed = true) {
+            every { serviceRoute } returns MutableStateFlow(route)
+        }
+        return mockk(relaxed = true) {
+            every { state } returns callState
+        }
+    }
 }
 
 internal fun CallService.attachContext(context: Context) {
@@ -222,4 +322,14 @@ internal fun CallService.attachContext(context: Context) {
     )
     method.isAccessible = true
     method.invoke(this, context)
+}
+
+private fun CallService.observeCallForTest(call: Call, client: StreamVideoClient) {
+    val method = CallService::class.java.getDeclaredMethod(
+        "observeCall",
+        Call::class.java,
+        StreamVideoClient::class.java,
+    )
+    method.isAccessible = true
+    method.invoke(this, call, client)
 }

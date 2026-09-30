@@ -32,7 +32,7 @@ public class DefaultStreamIntentResolver(
     val context: Context,
     val notificationIntentBundleResolver:
     NotificationIntentBundleResolver,
-) : StreamIntentResolver {
+) : StreamIntentResolver, StreamIncomingCallFullScreenIntentResolver {
 
     private val logger by taggedLogger("IntentResolver")
 
@@ -368,5 +368,29 @@ public class DefaultStreamIntentResolver(
             )
             putExtra(NotificationHandler.INTENT_EXTRA_CALL_CID, callId)
         }
+    }
+
+    override fun searchIncomingCallFullScreenPendingIntent(
+        callId: StreamCallId,
+        notificationId: Int,
+        payload: Map<String, Any?>,
+    ): PendingIntent? {
+        val intent = Intent(NotificationHandler.ACTION_INCOMING_CALL)
+            .putExtras(
+                notificationIntentBundleResolver.getIncomingCallBundle(
+                    callId,
+                    notificationId,
+                    payload,
+                ),
+            )
+        return searchResolveInfo { context.packageManager.queryIntentActivities(intent, 0) }
+            ?.let { resolveInfo ->
+                PendingIntent.getActivity(
+                    context,
+                    0,
+                    buildComponentIntent(intent, resolveInfo, callId),
+                    DefaultNotificationHandler.PENDING_INTENT_FLAG,
+                )
+            }
     }
 }

@@ -271,4 +271,68 @@ class CallMediaManagerTest {
 
         verify { processor.isEnabled = true }
     }
+
+    @Test
+    fun `setting the hardware noise suppressor applies it to the existing factory`() {
+        val factory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+        every { factory.setHardwareNoiseSuppressorEnabled(false) } returns true
+        val manager = manager()
+        manager.peerConnectionFactory = factory
+
+        assertThat(manager.setHardwareNoiseSuppressorEnabled(false)).isTrue()
+
+        verify { factory.setHardwareNoiseSuppressorEnabled(false) }
+    }
+
+    @Test
+    fun `setting the hardware acoustic echo canceller applies it to the existing factory`() {
+        val factory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+        every { factory.setHardwareAcousticEchoCancelerEnabled(false) } returns true
+        val manager = manager()
+        manager.peerConnectionFactory = factory
+
+        assertThat(manager.setHardwareAcousticEchoCancelerEnabled(false)).isTrue()
+
+        verify { factory.setHardwareAcousticEchoCancelerEnabled(false) }
+    }
+
+    @Test
+    fun `setting the capture audio source applies it to the existing factory`() {
+        val factory = mockk<StreamPeerConnectionFactory>(relaxed = true)
+        every { factory.setCaptureAudioSource(any()) } returns true
+        val manager = manager()
+        manager.peerConnectionFactory = factory
+
+        assertThat(manager.setCaptureAudioSource(1)).isTrue()
+
+        verify { factory.setCaptureAudioSource(1) }
+    }
+
+    @Test
+    fun `setting the capture audio source does not build a factory for a call without one`() {
+        val manager = manager()
+
+        assertThat(manager.setCaptureAudioSource(1)).isFalse()
+    }
+
+    @Test
+    fun `setting the hardware noise suppressor does not build a factory for a call without one`() {
+        val manager = manager()
+
+        // Recorded for whichever factory is built later. Building one here would capture the
+        // pre-join audio bitrate profile, which is what ensureFactoryMatchesAudioProfile exists
+        // to prevent.
+        assertThat(manager.setHardwareNoiseSuppressorEnabled(false)).isFalse()
+
+        manager.recreatePeerConnectionFactory()
+    }
+
+    @Test
+    fun `setting the hardware acoustic echo canceller does not build a factory for a call without one`() {
+        val manager = manager()
+
+        assertThat(manager.setHardwareAcousticEchoCancelerEnabled(false)).isFalse()
+
+        manager.recreatePeerConnectionFactory()
+    }
 }

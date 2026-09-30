@@ -467,15 +467,42 @@ internal class StreamAudioSwitch(
         }
     }
 
+    /**
+     * False asks for [AudioManager.MODE_NORMAL] so a music profile can leave the vendor VoIP
+     * capture chain. Remembered because [start] sets the mode again.
+     */
+    private var communicationModeEnabled: Boolean = true
+
+    /**
+     * Chooses between [AudioManager.MODE_IN_COMMUNICATION] and [AudioManager.MODE_NORMAL].
+     *
+     * @return true when the mode was applied.
+     */
+    public fun setCommunicationModeEnabled(enabled: Boolean): Boolean {
+        communicationModeEnabled = enabled
+        return applyRequestedAudioMode()
+    }
+
     private fun setAudioModeInCommunication() {
-        try {
+        applyRequestedAudioMode()
+    }
+
+    private fun applyRequestedAudioMode(): Boolean {
+        return try {
             if (previousAudioMode == null) {
                 previousAudioMode = audioManager.mode
             }
-            audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
-            logger.d { "[setAudioModeInCommunication] mode=${audioManager.mode}" }
+            val mode = if (communicationModeEnabled) {
+                AudioManager.MODE_IN_COMMUNICATION
+            } else {
+                AudioManager.MODE_NORMAL
+            }
+            audioManager.mode = mode
+            logger.d { "[applyRequestedAudioMode] mode=${audioManager.mode}" }
+            true
         } catch (e: Exception) {
-            logger.e(e) { "[setAudioModeInCommunication] Error setting audio mode: ${e.message}" }
+            logger.e(e) { "[applyRequestedAudioMode] Error setting audio mode: ${e.message}" }
+            false
         }
     }
 

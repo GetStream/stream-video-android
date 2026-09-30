@@ -44,6 +44,7 @@ class PeerConnectionTraceKeyTest {
             PeerConnectionTraceKey.GO_AWAY to "goAway",
             PeerConnectionTraceKey.SFU_ERROR to "error",
             PeerConnectionTraceKey.CALL_ENDED to "callEnded",
+            PeerConnectionTraceKey.E2EE_SET_MANAGER to "e2eeSetManager",
         )
         for ((key, value) in expected) {
             assertEquals(value, key.value)

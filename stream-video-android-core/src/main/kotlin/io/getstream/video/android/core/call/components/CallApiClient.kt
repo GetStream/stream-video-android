@@ -20,6 +20,7 @@ import io.getstream.android.video.generated.models.AcceptCallResponse
 import io.getstream.android.video.generated.models.BlockUserResponse
 import io.getstream.android.video.generated.models.CallSettingsRequest
 import io.getstream.android.video.generated.models.GetCallResponse
+import io.getstream.android.video.generated.models.GetCallRingStateResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveResponse
 import io.getstream.android.video.generated.models.JoinCallResponse
@@ -80,6 +81,9 @@ internal class CallApiClient(
     private val callRegistry: ClientCallRegistry,
     private val callAnalytics: CallAnalytics,
     private val sessionManager: CallSessionManager,
+    // Used when a caller omits [e2ee] — rejoin and migrate. First join passes the flag
+    // itself. The manager lives on Call and is attached after this client is built.
+    private val e2eeRequested: () -> Boolean = { false },
 ) {
     private val logger by taggedLogger("Call:ApiClient:$type:$id")
 
@@ -96,10 +100,20 @@ internal class CallApiClient(
         notify: Boolean = false,
         hintHighScaleLivestreamPublisher: Boolean? = null,
         joinAnalyticsModel: JoinAnalyticsModel,
+        e2ee: Boolean? = null,
     ): Result<JoinCallResponse> {
         val migratingFromList =
             migratingFromList ?: sessionManager.failedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
-        callAnalytics.joinAnalytics.onJoinRequestStart(joinAnalyticsModel.joinReason)
+        // First join passes [e2ee] so the request matches what the session will encrypt.
+        // Rejoin / migrate omit it and we reuse the manager that survived the reconnect.
+        val requestE2ee = e2ee ?: e2eeRequested()
+        logger.i {
+            "[joinRequest] e2ee=$requestE2ee encryptionMode=${state.settings.value?.encryption?.mode}"
+        }
+        callAnalytics.joinAnalytics.onJoinRequestStart(
+            joinAnalyticsModel.joinReason,
+            joinAnalyticsModel.joinSource,
+        )
         val result = clientImpl.joinCall(
             type, id,
             create = create != null,
@@ -114,6 +128,7 @@ internal class CallApiClient(
             migratingFrom = migratingFrom,
             migratingFromList = migratingFromList,
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
+            e2ee = requestE2ee,
         )
         result.onSuccess {
             callAnalytics.joinAnalytics.onJoinRequestSuccess(
@@ -209,6 +224,19 @@ internal class CallApiClient(
 
     suspend fun unpinForEveryone(sessionId: String, userId: String): Result<UnpinResponse> {
         return clientImpl.unpinForEveryone(type, id, sessionId, userId)
+    }
+
+    /**
+     * Reads who accepted, rejected or missed the ring for a call session, so a caller can
+     * reconcile after a dropped `call.accepted`, `call.rejected` or `call.missed` event.
+     *
+     * @param callSessionId the session to read, taken from the `session_id` of the ring event
+     * being reconciled. It is required rather than inferred: ending a call clears the call's
+     * current session, so a session read live at this point would return empty state for
+     * exactly the case this call exists to answer.
+     */
+    suspend fun getRingState(callSessionId: String): Result<GetCallRingStateResponse> {
+        return clientImpl.getCallRingState(type, id, callSessionId)
     }
 
     suspend fun sendReaction(

@@ -59,6 +59,7 @@ import io.getstream.video.android.core.call.utils.SessionFatalException
 import io.getstream.video.android.core.call.utils.TrackOverridesHandler
 import io.getstream.video.android.core.call.utils.stringify
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
+import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.core.errors.VideoErrorCode
 import io.getstream.video.android.core.events.CallEndedSfuEvent
 import io.getstream.video.android.core.events.ChangePublishOptionsEvent
@@ -126,6 +127,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -172,6 +174,8 @@ import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.io.InterruptedIOException
 import java.net.SocketTimeoutException
 import java.util.Collections
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 /**
  * Keeps track of which track is being rendered at what resolution.
@@ -326,7 +330,22 @@ public class RtcSession internal constructor(
         )
     },
 ) {
-    private var muteStateSyncJob: Job? = null
+    private val muteStateSyncJobs = TrackKeyedJobs()
+
+    /**
+     * When false, [setMuteState] still records the latest desired mute bits locally but does
+     * not POST [UpdateMuteStatesRequest] — used while this session's SFU is being torn down
+     * for reconnect/migration so a media collector cannot target the old connection.
+     */
+    private val muteSyncEnabled = AtomicBoolean(true)
+
+    /**
+     * Tracks whose SFU sync was skipped while [muteSyncEnabled] was false. [resumeMuteSync]
+     * flushes only these so we do not POST for unpublished tracks (the map is pre-seeded
+     * with audio/video/screen-share) or race [listenToMediaChanges] collectLatest replay.
+     */
+    private val pendingMuteSyncTracks: MutableSet<TrackType> =
+        ConcurrentHashMap.newKeySet()
     private val oneBasedSessionCounter = sessionCounter + 1
 
     /**
@@ -566,6 +585,64 @@ public class RtcSession internal constructor(
     }
 
     /**
+     * Moves publishing onto a freshly built audio track, so audio-source constraints that are
+     * fixed at source creation can be changed without rejoining.
+     *
+     * No renegotiation: replacing a sender's track does not change the SDP. When nothing is
+     * published yet the new pair simply becomes current.
+     *
+     * @return true when the pipeline was rebuilt.
+     */
+    internal fun rebuildAudioCapturePipeline(): Boolean =
+        call.mediaManager.replaceAudioSourceAndTrack { newTrack ->
+            val publisher = publisher.value
+            // Nothing published yet — no publisher, or a publisher with no audio sender
+            // (joined muted) — so there is no sender to move and the new pair stands. The
+            // next publishStream reads mediaManager.audioSource, which is now this pair.
+            if (publisher == null || !publisher.hasLiveAudioSender()) {
+                return@replaceAudioSourceAndTrack true
+            }
+
+            publisher.replaceAudioTrack(newTrack).also { replaced ->
+                if (replaced) {
+                    // The local participant's track has to point at what is actually being sent.
+                    setLocalTrack(
+                        TrackType.TRACK_TYPE_AUDIO,
+                        AudioTrack(
+                            streamId = buildTrackId(TrackType.TRACK_TYPE_AUDIO),
+                            audio = newTrack,
+                        ),
+                    )
+                }
+            }
+        }
+
+    /**
+     * Applies a maximum audio bitrate to the live publisher, with no renegotiation.
+     *
+     * @return true when a live audio sender accepted it.
+     */
+    internal fun setAudioMaxBitrate(maxBitrateBps: Int): Boolean =
+        publisher.value?.setAudioMaxBitrate(maxBitrateBps) ?: false
+
+    /**
+     * Whether an audio sender exists to take a bitrate ceiling. No publisher is the same as
+     * no sender: the next transceiver is built from the published profile.
+     */
+    internal fun hasLiveAudioSender(): Boolean =
+        publisher.value?.hasLiveAudioSender() ?: false
+
+    /** The maximum bitrate on the live audio sender, or null when nothing is publishing audio. */
+    internal fun audioMaxBitrate(): Int? = publisher.value?.audioMaxBitrate()
+
+    /** The audio bitrate the SFU negotiated at join, or null when nothing publishes audio. */
+    internal fun negotiatedAudioBitrate(): Int? = publisher.value?.negotiatedAudioBitrate()
+
+    /** The bitrate the SFU offers for [profile], or null when it named none. */
+    internal fun audioBitrateFor(profile: stream.video.sfu.models.AudioBitrateProfile): Int? =
+        publisher.value?.audioBitrateFor(profile)
+
+    /**
      * Connection and WebRTC.
      */
 
@@ -612,6 +689,38 @@ public class RtcSession internal constructor(
      */
     internal fun isSDKInitialized() = StreamVideo.isInstalled
 
+    /**
+     * Records whether the app attached an encryption manager to this call.
+     *
+     * [Call.setE2EEManager] has to run before [join], so no session and therefore no tracer exists
+     * at the moment the app calls it. Session creation is the first point where that choice can
+     * reach the stats pipeline, and it is also the point that acts on it: the publisher and the
+     * subscriber capture the manager as they are built, just below.
+     *
+     * Only the setup is traced, not the encryption events native reports afterwards: those arrive
+     * per frame on every client, which is far more volume than call stats should carry. Apps observe
+     * them through [StreamEncryptionManager.setEventListener] instead.
+     */
+    private fun traceE2EEConfiguration() {
+        val manager = call.e2eeManager
+        if (manager == null) {
+            sfuTracer.trace(PeerConnectionTraceKey.E2EE_SET_MANAGER.value, "none")
+            return
+        }
+
+        val algorithm = (manager as? StreamEncryptionManager)?.let {
+            // Reads native state, which an app-owned manager may already have disposed.
+            safeCallWithDefault(null) { it.algorithm.name }
+        }
+        sfuTracer.trace(
+            PeerConnectionTraceKey.E2EE_SET_MANAGER.value,
+            buildString {
+                append("manager=${manager.javaClass.simpleName}")
+                algorithm?.let { append(" algorithm=$it") }
+            },
+        )
+    }
+
     init {
         if (!isSDKInitialized()) {
             throw IllegalArgumentException(
@@ -619,6 +728,8 @@ public class RtcSession internal constructor(
             )
         }
         logger.i { "<init> #sfu; #track; no args" }
+
+        traceE2EEConfiguration()
 
         // step 1 setup the peer connections
         // publisher = createPublisher()
@@ -1195,6 +1306,7 @@ public class RtcSession internal constructor(
 
     private suspend fun connectRtc() {
         logger.d { "[connectRtc] #sfu; #track; no args" }
+        resumeMuteSync()
         // step 6 - onNegotiationNeeded will trigger and complete the setup using SetPublisherRequest
         publisher.value?.let {
             listenToMediaChanges()
@@ -1289,6 +1401,9 @@ public class RtcSession internal constructor(
         }
 
         mediaScope.cancel()
+        muteSyncEnabled.set(false)
+        pendingMuteSyncTracks.clear()
+        muteStateSyncJobs.cancelAll()
 
         // cleanup all non-local tracks
         supervisorJob.cancel()
@@ -1327,23 +1442,45 @@ public class RtcSession internal constructor(
      * matches the web SDK, which only signals the track(s) that actually changed. On SFU
      * (re)connect/migration each enabled track is re-signalled individually via
      * [listenToMediaChanges], so the full state is still restored.
+     *
+     * Sync jobs are keyed by [trackType]. Cancelling a shared job used to drop an in-flight
+     * audio unmute when video (or screen-share) published a moment later — reconnect restarts
+     * [listenToMediaChanges] and fires those collectors together.
+     *
+     * The local mute map is updated with [MutableStateFlow.update] so concurrent collectors
+     * cannot lose another track's bit via a stale read–copy–write.
+     *
+     * During reconnect/migration, [cancelActiveWork] pauses SFU sync so collectors can keep
+     * recording the latest desired bits without posting to a stale connection. Tracks that
+     * would have posted are recorded in [pendingMuteSyncTracks]. Sync resumes from
+     * [connectRtc] once the active SFU is ready and flushes only those pending tracks —
+     * not the whole pre-seeded map — so unpublished tracks stay silent and
+     * [listenToMediaChanges] collectLatest replay does not cancel a redundant flush.
      */
     private fun setMuteState(isEnabled: Boolean, trackType: TrackType) {
         logger.d { "[setPublishState] #sfu; $trackType isEnabled: $isEnabled" }
 
-        // update the local copy
-        val copy = muteState.value.toMutableMap()
-        copy[trackType] = isEnabled
-        val new = copy.toMap()
-        muteState.value = new
+        muteState.update { it + (trackType to isEnabled) }
+        syncMuteStateToSfu(trackType, isEnabled)
+    }
+
+    private fun syncMuteStateToSfu(trackType: TrackType, isEnabled: Boolean) {
+        if (!muteSyncEnabled.get()) {
+            pendingMuteSyncTracks.add(trackType)
+            // Resume may have flipped the flag between the check and the add. Fall through
+            // and post; same-track launch coalesces with any flush already in flight.
+            if (!muteSyncEnabled.get()) {
+                logger.d {
+                    "[syncMuteStateToSfu] pending until SFU is ready; $trackType isEnabled: $isEnabled"
+                }
+                return
+            }
+        }
 
         val currentSfu = sfuUrl
-        // prevent running multiple of these at the same time
-        // if there's already a job active. cancel it
-        muteStateSyncJob?.cancel()
-        // start a new job
-        // this code is a bit more complicated due to the retry behaviour
-        muteStateSyncJob = coroutineScope.launch {
+        // Coalesce retries for this track only. Other tracks keep their in-flight RPCs.
+        muteStateSyncJobs.launch(coroutineScope, trackType) {
+            if (!muteSyncEnabled.get()) return@launch
             flow {
                 val request = UpdateMuteStatesRequest(
                     session_id = sessionId,
@@ -1358,7 +1495,8 @@ public class RtcSession internal constructor(
                 emit(response)
             }.flowOn(DispatcherProvider.IO).retryWhen { cause, attempt ->
                 if (cause is SessionFatalException) return@retryWhen false
-                val sameValue = new == muteState.value
+                if (!muteSyncEnabled.get()) return@retryWhen false
+                val sameValue = muteState.value[trackType] == isEnabled
                 val sameSfu = currentSfu == sfuUrl
                 val isPermanent = isPermanentError(cause)
                 val willRetry = !isPermanent && sameValue && sameSfu && attempt < 30
@@ -1369,6 +1507,17 @@ public class RtcSession internal constructor(
                 delay(delayInMs)
                 willRetry
             }.collect()
+        }
+    }
+
+    private fun resumeMuteSync() {
+        if (!muteSyncEnabled.compareAndSet(false, true)) return
+        val tracksToFlush = pendingMuteSyncTracks.toSet()
+        pendingMuteSyncTracks.clear()
+        logger.d { "[resumeMuteSync] flushing pending mute state for $tracksToFlush" }
+        tracksToFlush.forEach { trackType ->
+            val isEnabled = muteState.value[trackType] ?: return@forEach
+            syncMuteStateToSfu(trackType, isEnabled)
         }
     }
 
@@ -1394,6 +1543,8 @@ public class RtcSession internal constructor(
                 // Empty, handled differently
             },
             onIceCandidateRequest = ::sendIceCandidate,
+            e2eeManager = call.e2eeManager,
+            userIdForSession = { call.state.getParticipantBySessionId(it)?.userId?.value },
         )
         return peerConnection
     }
@@ -1488,6 +1639,7 @@ public class RtcSession internal constructor(
                 // Empty on purpose
             },
             isHifiAudioEnabled = call.state.settings.value?.audio?.hifiAudioEnabled ?: false,
+            e2eeManager = call.e2eeManager,
         )
     }
 
@@ -2107,8 +2259,13 @@ public class RtcSession internal constructor(
         if (cancelEventJob) eventJob?.cancel()
         iceMonitoringJob?.cancel()
         iceMonitoringJob = null
-        muteStateSyncJob?.cancel()
-        muteStateSyncJob = null
+        muteSyncEnabled.set(false)
+        // Nothing is deferred at the moment we pause, so anything still in the set is
+        // a leftover from a collector that raced the previous [resumeMuteSync] and
+        // posted anyway. Dropping it here keeps the next resume from flushing a track
+        // this pause never deferred.
+        pendingMuteSyncTracks.clear()
+        muteStateSyncJobs.cancelAll()
         participantsMonitoringJob?.cancel()
         participantsMonitoringJob = null
         serialProcessor.stop()

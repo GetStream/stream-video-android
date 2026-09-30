@@ -57,6 +57,7 @@ internal class CoordinatorConnectionModule(
     override val apiKey: ApiKey,
     override val lifecycle: Lifecycle,
     override val tracer: Tracer = Tracer("coordinator"),
+    pinnedSfuId: String? = null,
 ) : ConnectionModuleDeclaration<ProductvideoApi, Unit, OkHttpClient, UserToken> {
     // Internals
     private val authInterceptor = CoordinatorAuthInterceptor(apiKey, tokenRepository)
@@ -77,6 +78,11 @@ internal class CoordinatorConnectionModule(
         OkHttpClient.Builder().addInterceptor(
             HeadersInterceptor(HeadersUtil()),
         )
+            .apply {
+                if (!pinnedSfuId.isNullOrBlank()) {
+                    addInterceptor(CoordinatorSfuPinInterceptor(pinnedSfuId))
+                }
+            }
             .addInterceptor(authInterceptor).addInterceptor(
                 HttpLoggingInterceptor {
                     streamLog(tag = "Video:Http") { it }
