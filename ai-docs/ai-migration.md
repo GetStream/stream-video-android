@@ -36,7 +36,7 @@ Execute the sections in order. Each section assumes the previous one is done.
 - v1 latest: check Maven Central for the latest `1.x` release of `io.getstream:stream-video-android-ui-compose`
 - v2 latest: check Maven Central for the latest `2.x` release
 - v2 branch: `develop-v2`. v1 branch: `develop`
-- The Compose module (`stream-video-android-ui-compose`) is the only UI module with API changes. The XML module (`stream-video-android-ui-xml`) API did not change
+- The design refresh changes only the Compose module (`stream-video-android-ui-compose`). The XML module (`stream-video-android-ui-xml`) also changes its API in v2 (for example `renderState(StreamConnectionState)` and the `io.getstream.webrtc.SurfaceViewRenderer` package), but those changes come from the non-UI part of v2 and are out of scope (see Scope above)
 - Theme package: `io.getstream.android.core.ui.design` (`StreamDesign`, `StreamTokens`, `StreamPrimitiveColors`). These classes come from the `io.getstream:stream-android-core-ui` artifact, which `stream-video-android-ui-compose` exposes as an `api` dependency, so no extra dependency is needed
 - New base components package: `io.getstream.video.android.compose.ui.components.base` (`StreamButton`, `StreamTextButton`, `StreamIconButton`, `StreamButtonStyle`, `StreamButtonStyleDefaults`, `StreamButtonSize`, `StreamDialog`, `StreamTextField`)
 - `VideoComponentFactory` is NOT new in v2. It shipped in v1.32.0. v2 adds one method to it (§3.5)
@@ -182,7 +182,15 @@ val dark = StreamDesign.Colors.defaultDark()
 VideoTheme(colors = if (isSystemInDarkTheme()) dark else light) { ... }
 ```
 
-To change the brand color, pass a custom `brand` scale. The accent, link and other brand-derived colors follow the scale.
+To change the brand color, pass a custom `brand` scale. The accent, link and other brand-derived colors follow the scale. Generate the scale from one color, and use `inverted()` for the dark palette:
+
+```kotlin
+val brand = StreamDesign.ColorScale.from(Color(0xFF9C27B0))
+val light = StreamDesign.Colors.default(brand = brand)
+val dark = StreamDesign.Colors.defaultDark(brand = brand.inverted())
+```
+
+For exact branding, pass all 11 stops instead:
 
 ```kotlin
 val brand = StreamDesign.ColorScale(
@@ -249,25 +257,35 @@ Removed types: `CompositeStyleProvider`, `StreamStyle`, `StyleSize`, `StyleState
 
 **Button style presets:**
 
-| v1 (`VideoTheme.styles.buttonStyles.*`) | v2 (`StreamButtonStyleDefaults.*`) |
+| v1 (`VideoTheme.styles.buttonStyles.*`) and its colors | v2 (`StreamButtonStyleDefaults.*`) |
 |---|---|
-| `primaryButtonStyle()` | `primarySolid` |
-| `secondaryButtonStyle()` | `secondarySolid` |
-| `tertiaryButtonStyle()` | `secondaryGhost` (closest match) |
-| `alertButtonStyle()` | `destructiveSolid` |
-| `toggleButtonStyleOn()` | `secondarySolid` |
-| `toggleButtonStyleOff()` | `destructiveSolid` |
-| `primaryIconButtonStyle()` | `primarySolid` |
-| `secondaryIconButtonStyle()` | `secondarySolid` |
-| `tertiaryIconButtonStyle()` | `secondaryGhost` (closest match) |
-| `onlyIconIconButtonStyle()` | `secondaryGhost` (closest match) |
-| `alertIconButtonStyle()` | `destructiveSolid` |
-| `primaryDrawableButtonStyle()` | `primarySolid` |
-| `drawableToggleButtonStyleOn()` / `Off()` | `secondarySolid` / `destructiveSolid` |
+| `primaryButtonStyle()`: grey `buttonPrimaryDefault` | `secondarySolid` |
+| `secondaryButtonStyle()`: blue `buttonBrandDefault` | `primarySolid` |
+| `tertiaryButtonStyle()`: `baseSheetPrimary` with a `baseSenary` border | `secondaryOutline` (closest match) |
+| `alertButtonStyle()`: red `buttonAlertDefault` | `destructiveSolid` |
+| `toggleButtonStyleOn()`: grey `buttonPrimaryDefault` | `secondarySolid` |
+| `toggleButtonStyleOff()`: near-black `baseSheetPrimary` | no preset, see below |
+| `primaryIconButtonStyle()`: same colors as `primaryButtonStyle()` | `secondarySolid` |
+| `secondaryIconButtonStyle()`: same colors as `secondaryButtonStyle()` | `primarySolid` |
+| `tertiaryIconButtonStyle()`: same colors as `tertiaryButtonStyle()` | `secondaryOutline` (closest match) |
+| `onlyIconIconButtonStyle()`: `baseSheetPrimary`, no border | `secondaryGhost` (closest match) |
+| `alertIconButtonStyle()`: same colors as `alertButtonStyle()` | `destructiveSolid` |
+| `primaryDrawableButtonStyle()`: Material `ButtonDefaults.buttonColors()` | `primarySolid` (closest match) |
+| `drawableToggleButtonStyleOn()` / `Off()` | `secondarySolid` / no preset, see below |
+
+> **Name trap:** v1 "primary" was the grey button and v1 "secondary" was the blue one. v2 is the other way around. Map by color, never by name.
+
+No preset matches the v1 toggle-off styles. The v2 SDK draws the off state of its toggles with `destructiveSolid` (red). To keep the v1 near-black look, create a `StreamButtonStyle` with `containerColor = VideoTheme.colors.backgroundCoreApp`.
 
 The other presets are `primaryOutline`, `primaryGhost`, `secondaryOutline`, `destructiveOutline` and `destructiveGhost`.
 
-The size of a v1 style (`StyleSize`) is now a separate parameter: `size: StreamButtonSize` (`Small` 32dp, `Medium` 40dp, `Large` 48dp, `ExtraLarge` 64dp).
+The size of a v1 style (`StyleSize`) is now a separate parameter: `size: StreamButtonSize` (`Small` 32dp, `Medium` 40dp, `Large` 48dp, `ExtraLarge` 64dp). Map the sizes by value, not by name:
+
+| v1 `StyleSize` (button height) | v2 `StreamButtonSize` |
+|---|---|
+| `XS`, `S` (24dp) | `Small` (32dp, v2 has no 24dp size) |
+| `M` (32dp) | `Small` |
+| `L`, `XL`, `XXL` (44dp) | `Large` (48dp) |
 
 A custom style is a plain data class:
 
@@ -313,7 +331,7 @@ VideoTheme(componentFactory = MyFactory) { ... }
 |---|---|---|
 | `brandPrimary` | `accentPrimary` | Used by the SDK |
 | `brandPrimaryLt` | `brand.s400` | Closest match |
-| `brandPrimaryDk` | `brand.s700` | Closest match |
+| `brandPrimaryDk` | `brand.s700` (light palette), `brand.s150` (dark palette) | Closest match. The dark scale is inverted, so `brand.s700` is a pale blue in dark mode |
 | `brandSecondary` | `backgroundCoreSurfaceDefault` | Closest match |
 | `brandSecondaryTransparent` | `backgroundUtilityDisabled` | Closest match |
 | `brandCyan` | none | Use your own `Color` |
@@ -328,7 +346,7 @@ VideoTheme(componentFactory = MyFactory) { ... }
 | `baseSecondary` | `textSecondary` | Used by the SDK |
 | `baseTertiary` | `textTertiary` | Used by the SDK |
 | `baseQuaternary` | `textTertiary` | Used by the SDK |
-| `baseQuinary` | `textTertiary` (text), `borderCoreDefault` (borders) | Used by the SDK for a border |
+| `baseQuinary` | `textTertiary` (text), `borderCoreDefault` (borders) | Closest match |
 | `baseSenary` | `borderCoreDefault` | Used by the SDK |
 | `baseSheetPrimary` | `backgroundCoreApp` | Used by the SDK |
 | `baseSheetSecondary` | `backgroundCoreElevation1` | Used by the SDK |
@@ -337,19 +355,19 @@ VideoTheme(componentFactory = MyFactory) { ... }
 | `buttonPrimaryDefault` | `backgroundCoreSurfaceDefault` | Or use `StreamButtonStyleDefaults.secondarySolid` |
 | `buttonPrimaryPressed` | none | Pressed state is a ripple. Use a `StreamButtonStyle` |
 | `buttonPrimaryDisabled` | `backgroundUtilityDisabled` | Closest match |
-| `buttonBrandDefault` | `accentPrimary` | Used by the SDK. Or use `StreamButtonStyleDefaults.primarySolid` |
+| `buttonBrandDefault` | `accentPrimary` | Closest match. Or use `StreamButtonStyleDefaults.primarySolid` |
 | `buttonBrandPressed` | none | Pressed state is a ripple |
 | `buttonBrandDisabled` | `backgroundUtilityDisabled` | Closest match |
 | `buttonAlertDefault` | `accentError` | Or use `StreamButtonStyleDefaults.destructiveSolid` |
 | `buttonAlertPressed` | none | Pressed state is a ripple |
 | `buttonAlertDisabled` | `backgroundUtilityDisabled` | Closest match |
-| `iconDefault` | `textPrimary` | Used by the SDK |
+| `iconDefault` | `textPrimary` | Closest match |
 | `iconPressed` | `textSecondary` | Closest match |
 | `iconActive` | `accentPrimary` | Closest match |
 | `iconAlert` | `accentError` | Closest match |
 | `iconDisabled` | `textDisabled` | Closest match |
 | `alertSuccess` | `accentSuccess` | Used by the SDK |
-| `alertCaution` | `accentWarning` | Used by the SDK |
+| `alertCaution` | `accentWarning` | Closest match |
 | `alertWarning` | `accentError` | Used by the SDK. **Name trap:** v1 "warning" was red. Do NOT map it to `accentWarning` |
 
 ### §4.2 Typography (`VideoTheme.typography.*`)
@@ -361,12 +379,12 @@ VideoTheme(componentFactory = MyFactory) { ... }
 | `titleS` (24sp, W500) | `headingLarge` | Used by the SDK |
 | `titleXs` (13sp, W600) | `headingExtraSmall` (14sp, W600) | Used by the SDK |
 | `subtitleL` (24sp, W500) | `headingLarge` | Closest match |
-| `subtitleM` (20sp, W500) | `headingSmall` (16sp, W600) | Used by the SDK |
-| `subtitleS` (16sp, W500) | `bodyDefault` (16sp, W400) | Used by the SDK |
+| `subtitleM` (20sp, W500) | `headingSmall` (16sp, W600) | Closest match |
+| `subtitleS` (16sp, W500) | `bodyDefault` (16sp, W400) | Closest match |
 | `bodyL` (20sp, W400) | `bodyDefault` | Used by the SDK |
 | `bodyM` (16sp, W400) | `bodyDefault` | Used by the SDK |
 | `bodyS` (13sp, W400) | `captionDefault` (14sp, W400) | Used by the SDK |
-| `labelL` (20sp, W600) | `headingLarge` | Used by the SDK |
+| `labelL` (20sp, W600) | `headingLarge` | Closest match |
 | `labelM` (16sp, W600) | `bodyEmphasis` (16sp, W600) | Used by the SDK |
 | `labelS` (13sp, W500) | `captionEmphasis` (14sp, W600) | Used by the SDK |
 | `labelXS` (13sp, W500) | `metadataEmphasis` (12sp, W600) | Used by the SDK |
@@ -447,7 +465,7 @@ All `StreamTokens` values are `Dp` (or `TextUnit` for font sizes), including the
 StreamButton(
     text = "Join",
     icon = Icons.Default.Call,
-    style = VideoTheme.styles.buttonStyles.primaryButtonStyle(),
+    style = VideoTheme.styles.buttonStyles.secondaryButtonStyle(),
     onClick = { ... },
 )
 
@@ -475,9 +493,9 @@ StreamButton(onClick = { ... }) { Text("Custom") }
 |---|---|
 | `StreamButton(text, icon: ImageVector, style, showProgress, ...)` | `StreamTextButton` or `StreamButton(onClick, content)` |
 | `StreamIconButton(icon: ImageVector, style: StreamFixedSizeButtonStyle, ...)` | `StreamIconButton(onClick, icon: Painter, contentDescription, ...)` |
-| `GenericStreamButton` | `StreamButton` |
+| `GenericStreamButton` | `StreamButton`. Its content is no longer a `RowScope`: wrap an icon and a text in a `Row`, or they draw on top of each other |
 | `StreamToggleButton`, `StreamIconToggleButton`, `GenericToggleButton` | `ToggleAction` (§5.2), or pick the style from your own state |
-| `StreamDrawableButton`, `StreamDrawableToggleButton` | `StreamIconButton` with `painterResource(...)` |
+| `StreamDrawableButton`, `StreamDrawableToggleButton` | `StreamIconButton` with `painterResource(...)`. The `@DrawableRes Int` becomes a `Painter` |
 
 The v1 `showProgress`, `textOverflow` and `textMaxLines` parameters have no v2 replacement.
 
@@ -489,7 +507,7 @@ StreamDialogPositiveNegative(
     title = "Leave call?",
     contentText = "You will leave the call.",
     positiveButton = Triple("Leave", ButtonStyles.alertButtonStyle(), { leave() }),
-    negativeButton = Triple("Cancel", ButtonStyles.secondaryButtonStyle(), { dismiss() }),
+    negativeButton = Triple("Cancel", ButtonStyles.tertiaryButtonStyle(), { dismiss() }),
     onDismiss = { dismiss() },
 )
 
@@ -506,14 +524,28 @@ StreamDialog(
 
 `StreamDialog(style: DialogStyle, dialogProperties, content: BoxScope.() -> Unit)` is removed. v2 `StreamDialog` requires a `title`, has `dismissOnBackPress` and `dismissOnClickOutside` instead of `DialogProperties`, and its content is `ColumnScope`.
 
+`StreamDialogPositiveNegative` → `StreamDialog` is not a rename:
+
+| v1 `StreamDialogPositiveNegative` | v2 `StreamDialog` |
+|---|---|
+| `onDismiss` | `onDismissRequest` |
+| `title: String?` | `title: String` (required) |
+| `contentText` | `message` |
+| `icon: ImageVector?` | `icon: Painter?` |
+| `positiveButton`, `negativeButton` (`Triple`) | `StreamTextButton`s in the content |
+| `content` | the content lambda (`ColumnScope`) |
+| `style`, `dialogProperties` | removed |
+
 **Text field:**
 
 | v1 | v2 |
 |---|---|
 | `StreamTextField(modifier, value, onValueChange, ..., style, placeholder, error: Boolean, icon: ImageVector?, ...)` | `StreamTextField(value, onValueChange, modifier, ..., placeholder, errorText: String?, leadingIcon: Painter?, trailingIcon: Painter?, ...)` |
-| `StreamOutlinedTextField(...)` | `StreamTextField(...)` |
+| `StreamOutlinedTextField(...)` | `StreamTextField(...)`, see below |
 
 `value` and `onValueChange` are now the first parameters. An error is shown when `errorText` is not null.
+
+`StreamOutlinedTextField` → `StreamTextField` is not a rename either: `placeholder` changes from a composable slot to a `String`, `leadingIcon` and `trailingIcon` change from composable slots to `Painter`, `isError: Boolean` becomes `errorText: String?`, and `singleLine` is removed (a field is single line when `maxLines` and `minLines` are both 1).
 
 **Other base components:**
 
@@ -625,7 +657,10 @@ To change an SDK icon, override the `stream_design_ic_*` drawable with the same 
 |---|---|
 | `Icons.Default.Mic` / `MicOff` | `stream_design_ic_voice_fill` / `stream_design_ic_voice_off_fill` |
 | `Icons.Default.Videocam` / `VideocamOff` | `stream_design_ic_video_fill` / `stream_design_ic_video_off_fill` |
-| `Icons.Default.Call` | `stream_design_ic_phone_fill` |
+| `Icons.Default.Call` in `AcceptCallAction` | `stream_design_ic_phone_fill` |
+| `Icons.Default.Call` in `DeclineCallAction` and `CancelCallAction` | `stream_design_ic_phone_down_fill` |
+| `Icons.AutoMirrored.Filled.VolumeUp` / `Icons.Default.VolumeOff` | `stream_design_ic_audio` / `stream_design_ic_mute` |
+| `Icons.Default.MusicNote` / `MusicOff` | `stream_video_ic_music_note` / `stream_video_ic_music_off` (in `io.getstream.video.android.ui.common.R`) |
 | `Icons.Default.CallEnd` | `stream_design_ic_phone_down_fill` |
 | `Icons.Default.FlipCameraIos` | `stream_design_ic_camera_flip_fill` |
 | `Icons.Default.ClosedCaption` / `ClosedCaptionOff` | `stream_design_ic_caption_fill` |
@@ -687,6 +722,8 @@ If your `Text(style = VideoTheme.typography.x)` relied on the style color, pass 
 
 A custom `onCallAction` handler that reacted to `CancelCall` from the chat button, or to `ClosedCaptionsAction` from the screen share button, must switch to the new events. The default handler does not handle `ToggleScreenShare`: starting a screen share needs the app's `MediaProjection` consent intent, so the app must handle it.
 
+`CallAction` is a `sealed interface`. An exhaustive `when (action)` without an `else` branch fails to compile until it handles `ToggleScreenShare` (and `ChatDialog`, if it was missing).
+
 ### §7.5 Avatar initials size
 
 v1 drew the initials with `titleM` and shrank them when they did not fit. v2 picks the style from the avatar size: `metadataEmphasis` under 24dp, `captionEmphasis` under 40dp, `bodyEmphasis` under 48dp, `headingMedium` under 56dp. From 56dp up, the initials are 40% of the avatar size, capped at 48dp. Pass `textStyle` to `UserAvatar` to keep a fixed style.
@@ -717,7 +754,7 @@ v1 drew the initials with `titleM` and shrank them when they did not fit. v2 pic
     "io.getstream.video.android.compose.ui.components.base.styling.StreamButtonStyle": "io.getstream.video.android.compose.ui.components.base.StreamButtonStyle",
     "io.getstream.video.android.compose.ui.components.base.styling.StreamFixedSizeButtonStyle": "io.getstream.video.android.compose.ui.components.base.StreamButtonStyle",
     "io.getstream.video.android.compose.ui.components.base.styling.ButtonStyles": "io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults",
-    "io.getstream.video.android.compose.ui.components.base.styling.StyleSize": "io.getstream.video.android.compose.ui.components.base.StreamButtonSize",
+    "io.getstream.video.android.compose.ui.components.base.styling.StyleSize": null,
     "io.getstream.video.android.compose.ui.components.participants.CallParticipantsInfoMenu": null,
     "io.getstream.video.android.compose.state.ui.internal.CallParticipantInfoMode": null,
     "io.getstream.video.android.compose.state.ui.participants.ParticipantInfoAction": null,
@@ -725,14 +762,38 @@ v1 drew the initials with `titleM` and shrank them when they did not fit. v2 pic
     "io.getstream.video.android.compose.state.ui.participants.ChangeMuteState": null
   },
   "functionRenames": {
-    "StreamDialogPositiveNegative": "StreamDialog",
-    "StreamOutlinedTextField": "StreamTextField",
-    "GenericStreamButton": "StreamButton",
-    "StreamDrawableButton": "StreamIconButton",
+    "StreamDialogPositiveNegative": null,
+    "StreamOutlinedTextField": null,
+    "GenericStreamButton": null,
+    "StreamDrawableButton": null,
     "StreamToggleButton": null,
     "StreamIconToggleButton": null,
     "StreamDrawableToggleButton": null,
     "GenericToggleButton": null
+  },
+  "styleSizeToStreamButtonSize": {
+    "StyleSize.XS": "StreamButtonSize.Small",
+    "StyleSize.S": "StreamButtonSize.Small",
+    "StyleSize.M": "StreamButtonSize.Small",
+    "StyleSize.L": "StreamButtonSize.Large",
+    "StyleSize.XL": "StreamButtonSize.Large",
+    "StyleSize.XXL": "StreamButtonSize.Large"
+  },
+  "buttonStylePresets": {
+    "primaryButtonStyle": "secondarySolid",
+    "secondaryButtonStyle": "primarySolid",
+    "tertiaryButtonStyle": "secondaryOutline",
+    "alertButtonStyle": "destructiveSolid",
+    "toggleButtonStyleOn": "secondarySolid",
+    "toggleButtonStyleOff": null,
+    "primaryIconButtonStyle": "secondarySolid",
+    "secondaryIconButtonStyle": "primarySolid",
+    "tertiaryIconButtonStyle": "secondaryOutline",
+    "onlyIconIconButtonStyle": "secondaryGhost",
+    "alertIconButtonStyle": "destructiveSolid",
+    "primaryDrawableButtonStyle": "primarySolid",
+    "drawableToggleButtonStyleOn": "secondarySolid",
+    "drawableToggleButtonStyleOff": null
   },
   "videoThemeParamRenames": {
     "reactionMapper": "config.reactionMapper",
@@ -762,19 +823,19 @@ v1 drew the initials with `titleM` and shrank them when they did not fit. v2 pic
     "baseSheetSecondary": "backgroundCoreElevation1",
     "baseSheetTertiary": "backgroundCoreSurfaceDefault",
     "baseSheetQuarternary": "backgroundCoreOverlayDarkStrong",
-    "buttonBrandDefault": "accentPrimary",
-    "iconDefault": "textPrimary",
     "alertSuccess": "accentSuccess",
-    "alertCaution": "accentWarning",
     "alertWarning": "accentError"
   },
   "colorContextDependent": {
     "basePrimary": { "default": "textPrimary", "overVideoOrDarkOverlay": "textOnAccent" },
-    "baseQuinary": { "text": "textTertiary", "border": "borderCoreDefault" }
+    "baseQuinary": { "text": "textTertiary", "border": "borderCoreDefault" },
+    "brandPrimaryDk": { "light": "brand.s700", "dark": "brand.s150" }
   },
   "colorClosestMatches": {
     "brandPrimaryLt": "brand.s400",
-    "brandPrimaryDk": "brand.s700",
+    "buttonBrandDefault": "accentPrimary",
+    "iconDefault": "textPrimary",
+    "alertCaution": "accentWarning",
     "brandSecondary": "backgroundCoreSurfaceDefault",
     "brandSecondaryTransparent": "backgroundUtilityDisabled",
     "buttonPrimaryDefault": "backgroundCoreSurfaceDefault",
