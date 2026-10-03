@@ -49,6 +49,7 @@ streamProject {
     coverage {
         includedModules = setOf(
             "stream-video-android-core",
+            "stream-video-android-ui-core",
             "stream-video-android-ui-compose",
         )
         sonarExclusions = listOf(
