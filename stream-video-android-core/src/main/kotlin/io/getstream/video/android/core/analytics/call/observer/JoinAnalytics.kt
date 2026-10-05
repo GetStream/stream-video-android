@@ -20,6 +20,7 @@ import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyti
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
+import io.getstream.video.android.core.ringing.RingJoinSource
 import java.util.UUID
 
 internal class JoinAnalytics(
@@ -50,8 +51,9 @@ internal class JoinAnalytics(
      * Records the start of a Coordinator join API request.
      *
      * @param joinReason The reason for starting the join request, such as an initial join or rejoin.
+     * @param joinSource Which route pulled the caller in, when the join was driven by a ring.
      */
-    fun onJoinRequestStart(joinReason: JoinReason?) {
+    fun onJoinRequestStart(joinReason: JoinReason?, joinSource: RingJoinSource? = null) {
         if (joinReason != JoinReason.FirstAttempt) {
             val stageAttemptId = UUID.randomUUID().toString()
             joinAnalyticsStateHolder.updateJoinStageAttemptId(stageAttemptId)
@@ -65,6 +67,7 @@ internal class JoinAnalytics(
                     joinStageAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
                         ?: "unknown",
                     joinReason = joinReason ?: JoinReason.Unknown,
+                    joinSource = joinSource,
                 )
                 joinAnalyticsStateHolder.updateStageId(stageId)
                 joinAnalyticsStateHolder.updateStage(Stage.IN_PROGRESS)

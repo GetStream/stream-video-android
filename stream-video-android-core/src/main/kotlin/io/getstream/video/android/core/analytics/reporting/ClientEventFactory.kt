@@ -25,6 +25,7 @@ import io.getstream.video.android.core.analytics.reporting.model.EventOutcome
 import io.getstream.video.android.core.analytics.reporting.model.EventStage
 import io.getstream.video.android.core.analytics.reporting.model.EventType
 import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionRole
+import io.getstream.video.android.core.ringing.RingJoinSource
 import org.threeten.bp.OffsetDateTime
 import org.threeten.bp.ZoneOffset
 import org.webrtc.PeerConnection
@@ -42,6 +43,7 @@ internal class ClientEventFactory(
         eventType: EventType,
         stageId: String? = null,
         joinReason: JoinReason? = null,
+        joinSource: RingJoinSource? = null,
         joinStageAttemptId: String? = null,
         elapsedTime: Long? = null,
         outcome: EventOutcome? = null,
@@ -88,6 +90,7 @@ internal class ClientEventFactory(
         trackId = trackId,
         coordinatorConnectId = coordinatorAnalyticsStateHolder.coordinatorConnectId.value,
         joinReason = joinReason?.message,
+        source = joinSource?.value,
     )
 
     fun getPermissionStatusText(allowed: Boolean?): String? {

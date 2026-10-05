@@ -1,9 +1,7 @@
 name: Publish Snapshot builds
 
+# Snapshots are published manually only.
 on:
-  push:
-    branches:
-      - develop
   workflow_dispatch:
 
 # 👇 This line ensures only one snapshot publish runs at a time.
@@ -15,7 +13,7 @@ jobs:
   release:
     permissions:
       contents: write
-    uses: GetStream/stream-build-conventions-android/.github/workflows/release.yml@v0.14.0
+    uses: GetStream/stream-build-conventions-android/.github/workflows/release.yml@v0.14.1
     with:
       bump: patch
       snapshot: true

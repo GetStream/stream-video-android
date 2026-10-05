@@ -19,14 +19,20 @@ package io.getstream.video.android.compose.state.ui.internal
 /**
  * Represents the mode of the CallParticipantsInfo menu.
  */
+@Deprecated(
+    message = "Only the deprecated CallParticipantsInfoMenu uses this mode. It will be removed in v2.",
+    level = DeprecationLevel.WARNING,
+)
 public sealed interface CallParticipantInfoMode
 
 /**
  * Shown when the user is observing the active list of participants.
  */
+@Suppress("DEPRECATION")
 internal object ParticipantListMode : CallParticipantInfoMode
 
 /**
  * Shown when the user is in the process of inviting people to an active call.
  */
+@Suppress("DEPRECATION")
 internal object ParticipantInvitesMode : CallParticipantInfoMode
