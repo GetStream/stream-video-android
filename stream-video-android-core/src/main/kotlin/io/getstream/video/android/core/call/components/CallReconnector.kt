@@ -75,7 +75,6 @@ internal class CallReconnector(
     private val apiClient: CallApiClient,
     private val state: CallState,
     private val callAnalytics: CallAnalytics,
-    private val statsReporter: CallStatsReporter,
     // Lazy provider: the session monitor is built from the connectivity monitor, which takes
     // this component, so it can only be resolved after construction.
     private val sessionMonitor: () -> SessionMonitor,
@@ -331,8 +330,7 @@ internal class CallReconnector(
         val currentSession = sessionManager.session.value
             ?: return ReconnectOutcome.PreconditionNotMet("No active session for fast reconnect")
 
-        val stats = statsReporter.collectStats()
-        currentSession.sendCallStats(stats)
+        currentSession.sendCallStats()
 
         currentSession.prepareReconnect()
         state._connection.value = RealtimeConnection.Reconnecting
@@ -466,8 +464,7 @@ internal class CallReconnector(
             reconnect_attempt = sessionManager.nonFastReconnectAttempts,
         )
 
-        val stats = statsReporter.collectStats()
-        oldSession.sendCallStats(stats)
+        oldSession.sendCallStats()
         oldSession.enterMigration()
 
         val newSession = sessionFactory.create(

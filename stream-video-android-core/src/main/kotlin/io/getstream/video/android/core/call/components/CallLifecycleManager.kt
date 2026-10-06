@@ -114,8 +114,7 @@ internal class CallLifecycleManager(
             callAnalytics.onCallLeave(sessionManager.session, reason)
             safeCall {
                 sessionManager.session.value?.sfuTracer?.trace("leave-call", leaveReason)
-                val stats = statsReporter.collectStats()
-                sessionManager.session.value?.sendCallStats(stats)
+                sessionManager.session.value?.sendCallStats()
             }
             // Must complete before cleanup() cancels the session's supervisor job.
             safeCall { sessionManager.session.value?.sendLeaveEvent(leaveReason) }
