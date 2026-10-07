@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.android.core.ui.design.StreamTokens
 
 /**
  * Provides default configurations for the Moderation Warning UI.

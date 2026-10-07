@@ -64,8 +64,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
@@ -173,6 +173,13 @@ fun CallStats(call: Call) {
             val publisherCodecLabel = if (publisherVideoCodec.isNotEmpty()) "($publisherVideoCodec)" else ""
             val subscriberVideoCodec by call.state.stats.subscriber.videoCodec.collectAsStateWithLifecycle()
             val subscriberCodecLabel = if (subscriberVideoCodec.isNotEmpty()) "($subscriberVideoCodec)" else ""
+            val publisherAudioBitrate by call.state.stats.publisher.audioBitrateKbps
+                .collectAsStateWithLifecycle()
+            val subscriberAudioBitrate by call.state.stats.subscriber.audioBitrateKbps
+                .collectAsStateWithLifecycle()
+            val audioCodec by call.state.stats.publisher.audioCodec.collectAsStateWithLifecycle()
+            val audioTargetBitrate by call.state.stats.publisher.audioTargetBitrateKbps
+                .collectAsStateWithLifecycle()
 
             LatencyOrJitter(title = "Latency", value = latency)
             Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
@@ -191,9 +198,19 @@ fun CallStats(call: Call) {
                 value = subscriberResolution,
             )
             Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
-            StatItem(title = "Publish bitrate", value = "$publisherBitrate Kbps")
+            // These two are the connection's bandwidth estimate, not a transmitted rate — named
+            // accordingly so they stop being read as "what we are sending".
+            StatItem(title = "Available outgoing bitrate", value = "$publisherBitrate Kbps")
             Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
-            StatItem(title = "Receiving bitrate", value = "$subscriberBitrate Kbps")
+            StatItem(title = "Available incoming bitrate", value = "$subscriberBitrate Kbps")
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+            StatItem(title = "Audio target", value = "%.0f Kbps".format(audioTargetBitrate))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+            StatItem(title = "Audio sent", value = "%.1f Kbps".format(publisherAudioBitrate))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+            StatItem(title = "Audio received", value = "%.1f Kbps".format(subscriberAudioBitrate))
+            Spacer(modifier = Modifier.size(StreamTokens.spacingMd))
+            StatItem(title = "Audio codec", value = audioCodec)
         }
     }
 }

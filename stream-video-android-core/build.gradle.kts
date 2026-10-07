@@ -37,6 +37,13 @@ wire {
 
 generateRPCServices {}
 
+// Robolectric loads a large android-all-instrumented jar into the forked test worker, which
+// defaults to a 512 MB heap. The whole suite shares one worker, so as it grew that load started
+// failing with OutOfMemoryError in whichever Robolectric class happened to run first.
+tasks.withType<Test>().configureEach {
+    maxHeapSize = "4g"
+}
+
 apiValidation {
     /**
      * Classes (fully qualified) that are excluded from public API dumps even if they
@@ -86,11 +93,14 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
-            all { test ->
-                // Forked test-executor JVMs do not inherit org.gradle.jvmargs and default to
-                // 512m, which the suite (MockK inline instrumentation + Robolectric + mock
-                // web servers) exceeds.
-                test.maxHeapSize = "2g"
+            all {
+                // Robolectric builds a full Android sandbox per SDK level named in @Config, and
+                // this module's suite spans six of them in one JVM — nothing sets forkEvery here,
+                // so they accumulate. On CI that runs out of heap while loading an android-all
+                // jar, and which class reports it depends on execution order, which is why the
+                // telecom and notification tests kept getting blamed. The Xmx in
+                // gradle.properties is the daemon's, not the test JVM's, so it never applied.
+                it.maxHeapSize = "2g"
             }
         }
 

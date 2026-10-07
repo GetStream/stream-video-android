@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,8 +41,9 @@ import com.skydoves.landscapist.animation.crossfade.CrossfadePlugin
 import com.skydoves.landscapist.coil.CoilImage
 import com.skydoves.landscapist.components.rememberImageComponent
 import com.skydoves.landscapist.placeholder.placeholder.PlaceholderPlugin
+import io.getstream.android.core.ui.design.StreamTokens
+import io.getstream.video.android.compose.pip.rememberIsInPipMode
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * Loads the [imageUrl] into a clipped image with a subtle border, and falls back to an
@@ -97,6 +99,8 @@ internal fun Avatar(
         modifier
     }
 
+    // The fade-in never finishes drawing in a Picture-in-Picture window and leaves the avatar empty.
+    val isInPictureInPicture = rememberIsInPipMode()
     CoilImage(
         modifier = clickableModifier.avatarBorder(shape).clip(shape),
         imageModel = { imageUrl },
@@ -106,10 +110,15 @@ internal fun Avatar(
             requestSize = imageRequestSize,
         ),
         previewPlaceholder = painterResource(id = previewModePlaceholder),
-        component = rememberImageComponent {
-            +CrossfadePlugin()
-            loadingPlaceholder?.let {
-                +PlaceholderPlugin.Loading(painterResource(id = it))
+        // rememberImageComponent keeps its first instance, so the key rebuilds it when the mode changes.
+        component = key(isInPictureInPicture) {
+            rememberImageComponent {
+                if (!isInPictureInPicture) {
+                    +CrossfadePlugin()
+                }
+                loadingPlaceholder?.let {
+                    +PlaceholderPlugin.Loading(painterResource(id = it))
+                }
             }
         },
         failure = {

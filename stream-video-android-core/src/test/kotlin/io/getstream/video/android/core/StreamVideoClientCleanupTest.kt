@@ -109,9 +109,8 @@ class StreamVideoClientCleanupTest {
     )
 
     // Regression for AND-1466: cleanup() used to bridge streamClient.disconnect() with
-    // runBlocking even on the main thread. StreamClient.disconnect() stops its lifecycle
-    // monitor by posting to the main looper and blocking on it with a 5 second safety
-    // timeout, so a logout from the main thread froze the UI for those 5 seconds.
+    // runBlocking even on the main thread, so a logout from the main thread blocked the UI for
+    // as long as the disconnect took.
     @Test
     fun `cleanup on the main thread returns without waiting for the disconnect`() {
         val streamClient = mockk<StreamClient>(relaxed = true)

@@ -19,7 +19,7 @@ package io.getstream.video.android.compose.theme
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.RippleConfiguration
 import androidx.compose.material.ripple.RippleAlpha
-import io.getstream.video.android.compose.theme.design.StreamDesign
+import io.getstream.android.core.ui.design.StreamDesign
 
 /**
  * The ripple derived from the theme colors, so pressed states follow the palette.

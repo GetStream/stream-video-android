@@ -3,6 +3,9 @@
 compileSdk = "35"
 targetSdk = "35"
 minSdk = "24"
+# demo-app is published to the Play Store, which requires API 36. The SDK modules stay on 35.
+demoAppCompileSdk = "36"
+demoAppTargetSdk = "36"
 
 allureKotlin = "2.4.0"
 androidGradlePlugin = "8.10.1"
@@ -49,11 +52,11 @@ tink = "1.9.0"
 turbine = "0.13.0"
 itu = "1.7.3"
 
-streamWebRTC = "137.1.1"
-streamNoiseCancellation = "2.0.0"
+streamWebRTC = "145.19.0-SNAPSHOT"
+streamNoiseCancellation = "3.0.0"
 streamResult = "1.3.0"
 streamChat = "6.10.0"
-streamCore = "5.0.1"
+streamCore = "5.1.1"
 streamLog = "1.3.4"
 streamPush = "1.3.4"
 streamRenderscript = "0.0.1"
@@ -162,6 +165,7 @@ stream-result-call = { group = "io.getstream", name = "stream-result-call", vers
 stream-renderscript = { group = "io.getstream", name = "stream-video-renderscript-android", version.ref = "streamRenderscript" }
 
 stream-android-core = { group = "io.getstream", name = "stream-android-core", version.ref = "streamCore" }
+stream-android-core-ui = { group = "io.getstream", name = "stream-android-core-ui", version.ref = "streamCore" }
 stream-log = { group = "io.getstream", name = "stream-log", version.ref = "streamLog" }
 stream-push = { group = "io.getstream", name = "stream-android-push", version.ref = "streamPush" }
 stream-push-delegate = { group = "io.getstream", name = "stream-android-push-delegate", version.ref = "streamPush" }

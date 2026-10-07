@@ -51,8 +51,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
 import io.getstream.video.android.compose.ui.components.video.VideoScalingType
@@ -72,6 +72,7 @@ import io.getstream.video.android.ui.menu.base.menuIcon
 import io.getstream.video.android.ui.menu.transcriptions.TranscriptionUiStateManager
 import io.getstream.video.android.util.filters.SampleAudioFilter
 import kotlinx.coroutines.launch
+import stream.video.sfu.models.AudioBitrateProfile
 import java.nio.ByteBuffer
 import io.getstream.video.android.compose.R as ComposeR
 
@@ -111,6 +112,36 @@ internal fun SettingsMenu(
             AudioUsageVoiceCommunicationUiState -> AudioAttributes.USAGE_MEDIA
         }
         call.speaker.setAudioUsage(newAudioUsage)
+    }
+
+    val audioBitrateProfile by call.microphone.audioBitrateProfile.collectAsStateWithLifecycle()
+    val isMusicAudioProfile =
+        audioBitrateProfile == AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+
+    val onToggleAudioProfile: () -> Unit = {
+        val next = if (isMusicAudioProfile) {
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_VOICE_STANDARD_UNSPECIFIED
+        } else {
+            AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY
+        }
+        val turningOn = !isMusicAudioProfile
+        scope.launch {
+            call.microphone.setAudioBitrateProfile(next)
+                .onSuccess {
+                    Toast.makeText(
+                        context,
+                        if (turningOn) "Music mode on" else "Music mode off",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+                .onFailure {
+                    Toast.makeText(
+                        context,
+                        "Music mode not changed: ${it.message}",
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+        }
     }
 
     val onToggleAudioFilterClick: () -> Unit = {
@@ -391,6 +422,8 @@ internal fun SettingsMenu(
                 onToggleAudioUsage = onToggleAudioUsage,
                 selectedRecordingTypes = enabledRecordingTypes,
                 onSelectRecordingType = onSelectRecordingType,
+                isMusicAudioProfile = isMusicAudioProfile,
+                onToggleAudioProfile = onToggleAudioProfile,
             ),
         )
     }

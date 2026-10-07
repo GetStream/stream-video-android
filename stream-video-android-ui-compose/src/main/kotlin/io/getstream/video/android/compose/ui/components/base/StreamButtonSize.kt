@@ -17,7 +17,7 @@
 package io.getstream.video.android.compose.ui.components.base
 
 import androidx.compose.ui.unit.Dp
-import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.android.core.ui.design.StreamTokens
 
 /**
  * The size of a [StreamButton].

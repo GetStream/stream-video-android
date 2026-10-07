@@ -37,6 +37,7 @@ import io.getstream.android.video.generated.models.CollectUserFeedbackRequest
 import io.getstream.android.video.generated.models.CreateGuestRequest
 import io.getstream.android.video.generated.models.CreateGuestResponse
 import io.getstream.android.video.generated.models.GetCallResponse
+import io.getstream.android.video.generated.models.GetCallRingStateResponse
 import io.getstream.android.video.generated.models.GetOrCreateCallRequest
 import io.getstream.android.video.generated.models.GetOrCreateCallResponse
 import io.getstream.android.video.generated.models.GoLiveRequest
@@ -116,6 +117,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomCon
 import io.getstream.video.android.core.permission.android.DefaultStreamPermissionCheck
 import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.recording.RecordingType
+import io.getstream.video.android.core.ringing.RingStatePollingConfig
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
@@ -175,9 +177,7 @@ internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
  * @param lifecycle The lifecycle used to observe changes in the process
  */
 // Upper bound for the StreamClient disconnect during cleanup(), so a disconnect that never
-// completes cannot keep the detached teardown coroutine, and with it this client, alive
-// forever. Generous compared to the internal 5 second main-looper latch it may legitimately
-// wait on when cleanup() runs off the main thread.
+// completes cannot keep the detached teardown coroutine, and with it this client, alive forever.
 private const val CLEANUP_DISCONNECT_TIMEOUT_MS = 10_000L
 
 internal class StreamVideoClient internal constructor(
@@ -204,6 +204,7 @@ internal class StreamVideoClient internal constructor(
     internal val loggingLevel: LoggingLevel = LoggingLevel(),
     internal val connectionTimeoutInMs: Long = 5_000,
     internal val leaveAfterDisconnectSeconds: Long = 30,
+    internal val ringStatePolling: RingStatePollingConfig? = RingStatePollingConfig(),
     internal val appVersion: String? = null,
     internal val enableCallUpdatesAfterLeave: Boolean = false,
     internal val enableStatsCollection: Boolean = true,
@@ -287,13 +288,11 @@ internal class StreamVideoClient internal constructor(
         // cancel the StreamClient subscription before tearing down the socket
         streamClientSubscription?.cancel()
         streamClientSubscription = null
-        // Disconnect the StreamClient socket, then cancel the scope. Two constraints shape this:
-        // the StreamClient runs its internals (the disconnect included) on this same `scope`, so
-        // the scope must stay alive until the disconnect has finished; and the disconnect must
-        // not run inside runBlocking on the main thread, because it stops its lifecycle monitor
-        // by posting to the main looper and blocking on it with a 5 second safety timeout, which
-        // self-deadlocks until that timeout fires and freezes the UI for the whole wait. The
-        // suspend call is bridged because cleanup() is non-suspending public API.
+        // Disconnect the StreamClient socket, then cancel the scope. The StreamClient runs its
+        // internals (the disconnect included) on this same `scope`, so the scope must stay alive
+        // until the disconnect has finished. On the main thread the disconnect runs on a detached
+        // IO coroutine, so the socket teardown never blocks the UI. The suspend call is bridged
+        // because cleanup() is non-suspending public API.
         val disconnectStreamClientThenCancelScope: suspend () -> Unit = {
             runCatching {
                 withTimeoutOrNull(cleanupDisconnectTimeoutMs) {
@@ -897,9 +896,11 @@ internal class StreamVideoClient internal constructor(
         migratingFrom: String? = null,
         migratingFromList: List<String>? = null,
         hintHighScaleLivestreamPublisher: Boolean? = null,
+        e2ee: Boolean? = null,
     ): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest(
             create = create,
+            e2ee = e2ee,
             data = CallRequest(
                 members = members,
                 custom = custom,
@@ -1197,6 +1198,16 @@ internal class StreamVideoClient internal constructor(
     ): Result<ListRecordingsResponse> {
         return apiCall {
             coordinatorConnectionModule.api.listRecordings(type, id)
+        }
+    }
+
+    suspend fun getCallRingState(
+        callType: String,
+        id: String,
+        callSessionId: String,
+    ): Result<GetCallRingStateResponse> {
+        return apiCall {
+            coordinatorConnectionModule.api.getCallRingState(callType, id, callSessionId)
         }
     }
 

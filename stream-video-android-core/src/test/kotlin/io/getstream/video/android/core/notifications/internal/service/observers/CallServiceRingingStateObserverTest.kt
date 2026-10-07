@@ -20,6 +20,7 @@ import android.content.Context
 import android.media.AudioManager
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
+import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.model.RejectReason
@@ -28,6 +29,7 @@ import io.getstream.video.android.core.sounds.MutedRingingConfig
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.RingingConfig
 import io.getstream.video.android.core.sounds.Sounds
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -62,6 +64,8 @@ class CallServiceRingingStateObserverTest {
 
     private val ringingStateFlow =
         MutableStateFlow<RingingState>(RingingState.Idle)
+    private val incomingRingtoneOwnerFlow =
+        MutableStateFlow<IncomingRingtoneOwner>(IncomingRingtoneOwner.Legacy)
 
     private val onStopServiceInvoked = mutableListOf<Unit>()
 
@@ -74,6 +78,7 @@ class CallServiceRingingStateObserverTest {
 
         callState = mockk {
             every { this@mockk.ringingState } returns ringingStateFlow
+            every { this@mockk.incomingRingtoneOwner } returns incomingRingtoneOwnerFlow
         }
 
         call = mockk {
@@ -122,28 +127,41 @@ class CallServiceRingingStateObserverTest {
     }
 
     @Test
-    fun `incoming not accepted plays sound and vibrates`() = runTest {
+    fun `legacy incoming call not accepted plays sound and vibrates`() = runTest {
         observer.observe { onStopServiceInvoked.add(Unit) }
-        advanceUntilIdle()
 
         ringingStateFlow.value = RingingState.Incoming(acceptedByMe = false)
         advanceUntilIdle()
-        advanceTimeBy(100L)
-        verify {
+
+        verify(exactly = 1) {
             soundPlayer.vibrate(any())
             soundPlayer.playCallSound(any(), true)
         }
     }
 
     @Test
-    fun `incoming accepted stops sound`() = runTest {
+    fun `notification owned incoming call does not play service ringtone`() = runTest {
+        incomingRingtoneOwnerFlow.value = IncomingRingtoneOwner.Notification
+
         observer.observe { }
+
+        ringingStateFlow.value = RingingState.Incoming(acceptedByMe = false)
         advanceUntilIdle()
+
+        verify(exactly = 0) {
+            soundPlayer.vibrate(any())
+            soundPlayer.playCallSound(any(), any())
+        }
+    }
+
+    @Test
+    fun `legacy incoming call accepted stops sound`() = runTest {
+        observer.observe { }
 
         ringingStateFlow.value = RingingState.Incoming(acceptedByMe = true)
         advanceUntilIdle()
-        advanceTimeBy(100L)
-        verify { soundPlayer.stopCallSound() }
+
+        verify(exactly = 1) { soundPlayer.stopCallSound() }
     }
 
     @Test
@@ -168,6 +186,43 @@ class CallServiceRingingStateObserverTest {
         advanceUntilIdle()
 
         verify { soundPlayer.stopCallSound() }
+    }
+
+    @Test
+    fun `repeated identical outgoing states do not restart the outgoing sound`() = runTest {
+        observer.observe { }
+        advanceUntilIdle()
+
+        // Every call state recomputation resolves to the same outgoing state. Restarting the
+        // ringtone on each one makes the caller hear it from the beginning over and over.
+        repeat(3) {
+            ringingStateFlow.value = RingingState.Outgoing(acceptedByCallee = false)
+            advanceUntilIdle()
+        }
+
+        verify(exactly = 1) { soundPlayer.playCallSound(any(), true) }
+    }
+
+    @Test
+    fun `outgoing acceptance still handled after repeated identical states`() = runTest {
+        observer.observe { }
+        advanceUntilIdle()
+
+        repeat(3) {
+            ringingStateFlow.value = RingingState.Outgoing(acceptedByCallee = false)
+            advanceUntilIdle()
+        }
+        verify(exactly = 1) { soundPlayer.playCallSound(any(), true) }
+
+        // The initial Idle emission already stopped the sound, so drop the recorded calls before
+        // asserting that the acceptance itself is what stops it.
+        clearMocks(soundPlayer, answers = false)
+
+        ringingStateFlow.value = RingingState.Outgoing(acceptedByCallee = true)
+        advanceUntilIdle()
+
+        verify { soundPlayer.stopCallSound() }
+        verify(exactly = 0) { soundPlayer.playCallSound(any(), any()) }
     }
 
     @Test

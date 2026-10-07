@@ -57,13 +57,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.BuildConfig
 import io.getstream.video.android.CallActivity
 import io.getstream.video.android.R
 import io.getstream.video.android.compose.permission.VideoPermissionsState
 import io.getstream.video.android.compose.permission.rememberCallPermissionsState
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.avatar.UserAvatar
 import io.getstream.video.android.compose.ui.components.base.StreamButtonStyleDefaults
 import io.getstream.video.android.compose.ui.components.base.StreamIconButton
@@ -163,7 +163,13 @@ private fun CallLobbyHeader(
         callLobbyViewModel = callLobbyViewModel,
     )
 
-    CallLobbyHeaderContent(user, onBack)
+    CallLobbyHeaderContent(
+        user = user,
+        call = callLobbyViewModel.call,
+        onEnableE2EE = callLobbyViewModel::enableE2EE,
+        onDisableE2EE = callLobbyViewModel::disableE2EE,
+        onBack = onBack,
+    )
 
     LaunchedEffect(key1 = isLoggedOut) {
         if (isLoggedOut) {
@@ -175,6 +181,9 @@ private fun CallLobbyHeader(
 @Composable
 private fun CallLobbyHeaderContent(
     user: State<User?>,
+    call: Call,
+    onEnableE2EE: suspend (String) -> Result<Unit>,
+    onDisableE2EE: () -> Result<Unit>,
     onBack: () -> Unit,
 ) {
     Row(
@@ -202,6 +211,11 @@ private fun CallLobbyHeaderContent(
             color = VideoTheme.colors.textPrimary,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
+        )
+        E2EELobbyButton(
+            call = call,
+            onEnable = onEnableE2EE,
+            onDisable = onDisableE2EE,
         )
         StreamIconButton(
             modifier = Modifier.testTag("Stream_LobbyCloseButton"),
@@ -559,6 +573,9 @@ private fun CallLobbyHeaderPreview() {
             user = remember {
                 mutableStateOf(previewUsers[0])
             },
+            call = previewCall,
+            onEnableE2EE = { Result.success(Unit) },
+            onDisableE2EE = { Result.success(Unit) },
         ) {
         }
     }

@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -35,8 +34,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.ui.common.R
 
@@ -48,10 +47,10 @@ internal fun ScreenShareTooltip(
     val userNameOrId by sharingParticipant.userNameOrId.collectAsStateWithLifecycle()
 
     val shape = RoundedCornerShape(
-        topStart = ZeroCornerSize,
-        topEnd = ZeroCornerSize,
+        topStart = StreamTokens.radiusNone,
+        topEnd = StreamTokens.radiusNone,
         bottomEnd = StreamTokens.radiusMd,
-        bottomStart = ZeroCornerSize,
+        bottomStart = StreamTokens.radiusNone,
     )
 
     Row(

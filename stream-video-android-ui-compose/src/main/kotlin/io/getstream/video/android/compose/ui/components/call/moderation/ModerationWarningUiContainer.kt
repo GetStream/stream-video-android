@@ -37,7 +37,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,9 +48,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.ui.moderation.ModerationDefaults
 import io.getstream.video.android.ui.moderation.ModerationThemeConfig
@@ -168,8 +167,8 @@ internal fun ModerationWarningUiContent(
                         moderationThemeConfig.warningStripColor,
                         shape = RoundedCornerShape(
                             topStart = StreamTokens.radiusXl,
-                            topEnd = ZeroCornerSize,
-                            bottomEnd = ZeroCornerSize,
+                            topEnd = StreamTokens.radiusNone,
+                            bottomEnd = StreamTokens.radiusNone,
                             bottomStart = StreamTokens.radiusXl,
                         ),
                     ),

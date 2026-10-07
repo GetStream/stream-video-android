@@ -23,8 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import io.getstream.android.core.annotations.StreamInternalApi
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 
 /**
  * A small dot that marks a user as online, drawn over an avatar.
@@ -32,6 +33,7 @@ import io.getstream.video.android.compose.theme.design.StreamTokens
  * @param modifier The modifier applied to the indicator.
  */
 @Composable
+@OptIn(StreamInternalApi::class)
 public fun OnlineIndicator(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier

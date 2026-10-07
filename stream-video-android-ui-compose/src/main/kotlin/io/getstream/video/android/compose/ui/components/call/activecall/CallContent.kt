@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.getstream.android.core.ui.design.StreamTokens
 import io.getstream.android.video.generated.models.CallModerationBlurEvent
 import io.getstream.android.video.generated.models.CallModerationWarningEvent
 import io.getstream.log.StreamLog
@@ -67,7 +68,6 @@ import io.getstream.video.android.compose.theme.CallContentVideoOverlayContentPa
 import io.getstream.video.android.compose.theme.ControlActionsParams
 import io.getstream.video.android.compose.theme.ParticipantVideoParams
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.compose.theme.design.StreamTokens
 import io.getstream.video.android.compose.ui.components.call.CallAppBar
 import io.getstream.video.android.compose.ui.components.call.activecall.internal.DefaultPermissionHandler
 import io.getstream.video.android.compose.ui.components.call.controls.ControlActions

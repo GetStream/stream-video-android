@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
+import io.getstream.android.core.annotations.StreamInternalApi
 import io.getstream.video.android.compose.theme.VideoTheme
 
 /**
@@ -62,6 +63,7 @@ internal fun StreamButtonStyle.borderColor(enabled: Boolean): Color? =
  *
  * Each intent (primary, secondary, destructive) comes in a solid, an outline and a ghost variant.
  */
+@OptIn(StreamInternalApi::class)
 public object StreamButtonStyleDefaults {
 
     /** Filled button with the brand color. The default call to action. */

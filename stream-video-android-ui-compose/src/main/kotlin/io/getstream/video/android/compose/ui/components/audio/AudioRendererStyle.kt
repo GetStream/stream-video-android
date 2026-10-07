@@ -19,8 +19,8 @@ package io.getstream.video.android.compose.ui.components.audio
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
-import io.getstream.video.android.compose.theme.design.StreamPrimitiveColors
-import io.getstream.video.android.compose.theme.design.StreamTokens
+import io.getstream.android.core.ui.design.StreamDesign
+import io.getstream.android.core.ui.design.StreamTokens
 
 /**
  * Represents audio room render styles.
@@ -79,7 +79,7 @@ public data class RegularAudioRendererStyle(
     override val isShowingSpeakingBorder: Boolean = true,
     override val speakingBorder: BorderStroke = BorderStroke(
         StreamTokens.strokeW200,
-        StreamPrimitiveColors.blue500,
+        StreamDesign.ColorScale.defaultLight().s500,
     ),
     override val isShowingMicrophoneAvailability: Boolean = true,
     override val microphoneLabelPosition: Alignment = Alignment.BottomEnd,
