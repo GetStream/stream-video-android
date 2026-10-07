@@ -9,6 +9,7 @@ pluginManagement {
         google()
         mavenCentral()
         mavenLocal()
+        maven("https://stream-io-repo.com")
     }
 }
 dependencyResolutionManagement {
@@ -17,6 +18,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven(url = "https://plugins.gradle.org/m2/")
+        maven("https://stream-io-repo.com")
     }
 }
 
