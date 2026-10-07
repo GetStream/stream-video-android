@@ -20,6 +20,7 @@ dependencyResolutionManagement {
         maven(url = "https://central.sonatype.com/repository/maven-snapshots/") {
             mavenContent { snapshotsOnly() }
         }
+        maven("https://stream-io-repo.com")
     }
 }
 
