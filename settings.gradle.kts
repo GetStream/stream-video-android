@@ -9,6 +9,7 @@ pluginManagement {
         google()
         mavenCentral()
         mavenLocal()
+        maven("https://stream-io-repo.com")
     }
 }
 dependencyResolutionManagement {
