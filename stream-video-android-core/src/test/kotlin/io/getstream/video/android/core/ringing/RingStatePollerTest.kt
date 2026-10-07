@@ -67,7 +67,7 @@ class RingStatePollerTest {
         })
 
         poller.start({ sessionId }, { ringTimeout })
-        advanceTimeBy(14_999)
+        advanceTimeBy(8_999)
 
         assertThat(reads).isEqualTo(0)
         poller.stop()
@@ -82,7 +82,7 @@ class RingStatePollerTest {
         })
 
         poller.start({ sessionId }, { ringTimeout })
-        advanceTimeBy(15_001)
+        advanceTimeBy(9_001)
         assertThat(reads).isEqualTo(1)
 
         advanceTimeBy(5_000)
@@ -100,15 +100,15 @@ class RingStatePollerTest {
         })
 
         poller.start({ sessionId }, { ringTimeout })
-        advanceTimeBy(10_000)
+        advanceTimeBy(5_000)
 
         // A rejection from one callee does not settle a group ring, so the poller stays armed —
         // but the socket just proved it is alive, so the wait starts over.
         poller.onRingParticipantStatusUpdate()
-        advanceTimeBy(10_000)
+        advanceTimeBy(5_000)
         assertThat(reads).isEqualTo(0)
 
-        advanceTimeBy(5_001)
+        advanceTimeBy(4_001)
         assertThat(reads).isEqualTo(1)
 
         poller.stop()
@@ -125,9 +125,9 @@ class RingStatePollerTest {
         poller.start({ sessionId }, { ringTimeout })
         advanceTimeBy(60_000)
 
-        // 15s quiet period, then reads at 20/25/30s — the read that would land past the
+        // 9s quiet period, then reads at 9/14/19/24/29s — the read that would land past the
         // deadline is not issued.
-        assertThat(reads).isEqualTo(3)
+        assertThat(reads).isEqualTo(5)
         poller.stop()
     }
 
@@ -144,7 +144,7 @@ class RingStatePollerTest {
         poller.start({ sessionId }, { ringTimeout })
         advanceTimeBy(25_001)
 
-        assertThat(reads).isEqualTo(3)
+        assertThat(reads).isEqualTo(4)
         poller.stop()
     }
 
@@ -157,7 +157,7 @@ class RingStatePollerTest {
         })
 
         poller.start({ sessionId }, { ringTimeout })
-        advanceTimeBy(15_001)
+        advanceTimeBy(9_001)
         assertThat(reads).isEqualTo(1)
 
         poller.stop()
@@ -207,8 +207,8 @@ class RingStatePollerTest {
         poller.start({ sessionId }, { 600_000L })
         advanceTimeBy(600_000)
 
-        // 60s ceiling: quiet period to 15s, then reads at 20..55s.
-        assertThat(reads).isEqualTo(9)
+        // 60s ceiling: quiet period to 9s, then reads at 9..59s.
+        assertThat(reads).isEqualTo(11)
         poller.stop()
     }
 
@@ -228,8 +228,8 @@ class RingStatePollerTest {
         poller.start({ sessionId }, { ringTimeout })
         advanceTimeBy(600_000)
 
-        // 30s window: quiet period to 15s, then reads at 15, 20 and 25s, and no further.
-        assertThat(reads).isEqualTo(3)
+        // 30s window: quiet period to 9s, then reads at 9, 14, 19, 24 and 29s, and no further.
+        assertThat(reads).isEqualTo(5)
         poller.stop()
     }
 
@@ -256,7 +256,7 @@ class RingStatePollerTest {
         advanceTimeBy(600_000)
 
         // The reads of one loop over a 30s window, not two loops interleaved.
-        assertThat(reads).isEqualTo(3)
+        assertThat(reads).isEqualTo(5)
         poller.stop()
     }
 
@@ -272,7 +272,7 @@ class RingStatePollerTest {
         poller.start({ sessionId }, { 0L })
         advanceTimeBy(600_000)
 
-        assertThat(reads).isEqualTo(3)
+        assertThat(reads).isEqualTo(5)
         poller.stop()
     }
 
@@ -287,8 +287,8 @@ class RingStatePollerTest {
         poller.start({ sessionId }, { null })
         advanceTimeBy(600_000)
 
-        // 30s default, not the 60s ceiling: quiet period to 15s, then reads at 15, 20 and 25s.
-        assertThat(reads).isEqualTo(3)
+        // 30s default, not the 60s ceiling: quiet period to 9s, then reads at 9 through 29s.
+        assertThat(reads).isEqualTo(5)
         poller.stop()
     }
 
@@ -325,8 +325,8 @@ class RingStatePollerTest {
             },
         )
 
-        // A longer window than the default: this exercises three polls, which does not fit in one
-        // 30s ring.
+        // A longer window than the default, so the reads this walks through are not also being
+        // bounded by the ring deadline.
         poller.start({ current }, { 60_000L })
         advanceTimeBy(20_001)
         assertThat(seen).isEmpty()
@@ -350,7 +350,7 @@ class RingStatePollerTest {
         poller.start({ sessionId }, { ringTimeout })
         advanceTimeBy(20_001)
 
-        assertThat(seen).hasSize(2)
+        assertThat(seen).hasSize(3)
         assertThat(seen.first().sessionId).isEqualTo(sessionId)
         poller.stop()
     }
