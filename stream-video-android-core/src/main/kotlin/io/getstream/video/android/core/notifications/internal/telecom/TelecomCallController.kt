@@ -19,6 +19,7 @@ package io.getstream.video.android.core.notifications.internal.telecom
 import android.content.Context
 import android.telecom.DisconnectCause
 import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.InteractionSource
@@ -29,6 +30,7 @@ import io.getstream.video.android.core.notifications.internal.telecom.jetpack.Te
  * Valid disconnected cause: [DisconnectCause.LOCAL, DisconnectCause.REMOTE, DisconnectCause.MISSED, or DisconnectCause.REJECTED]
  */
 class TelecomCallController(val context: Context) {
+    val logger by taggedLogger("TelecomCallController")
     private val telecomPermissions = TelecomPermissions()
     private val telecomHelper = TelecomHelper()
 
@@ -65,6 +67,9 @@ class TelecomCallController(val context: Context) {
             if (telecomHelper.canUseJetpackTelecom()) {
                 val telecomCall =
                     call.state.jetpackTelecomRepository?.currentCall?.value
+                if (telecomCall == null) {
+                    logger.w { "[performAction] unable to perform action as currentCall is null" }
+                }
                 telecomCall?.let {
                     block(telecomCall)
                 }
