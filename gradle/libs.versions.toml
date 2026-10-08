@@ -53,11 +53,11 @@ turbine = "0.13.0"
 itu = "1.7.3"
 
 streamWebRTC = "145.19.0"
-streamNoiseCancellation = "3.0.0"
+streamNoiseCancellation = "3.0.1"
 streamResult = "1.3.0"
 streamChat = "6.10.0"
 streamLog = "1.3.4"
-streamPush = "1.3.4"
+streamPush = "1.3.5"
 streamRenderscript = "0.0.1"
 
 androidxTestRunner = "1.6.2"
