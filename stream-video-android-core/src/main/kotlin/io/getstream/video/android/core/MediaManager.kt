@@ -71,9 +71,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Capturer
@@ -92,6 +95,7 @@ import java.nio.ByteBuffer
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resumeWithException
+import kotlin.time.Duration.Companion.seconds
 
 sealed class DeviceStatus {
     data object NotSelected : DeviceStatus()
@@ -556,12 +560,17 @@ class MicrophoneManager(
     val audioUsage: Int,
     val audioUsageProvider: (() -> Int),
 ) {
+    private companion object {
+        val TELECOM_ENDPOINT_WAIT_TIMEOUT = 2.seconds
+    }
+
     // Internal data
     private val logger by taggedLogger("Media:MicrophoneManager")
 
     private lateinit var audioHandler: AudioSwitchDecorator
 
     private var setupCompleted = AtomicBoolean(false)
+    private var pendingTelecomEndpointSwitch: Job? = null
     internal var audioManager: AudioManager? = null
     internal var priorStatus: DeviceStatus? = null
 
@@ -743,8 +752,11 @@ class MicrophoneManager(
      */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun switchTelecomEndpointForDevice(device: StreamAudioDevice?) {
-        val telecomCall = mediaManager.call.state.jetpackTelecomRepository
-            ?.currentCall?.value as? TelecomCall.Registered ?: return
+        pendingTelecomEndpointSwitch?.cancel()
+        pendingTelecomEndpointSwitch = null
+
+        val telecomRepository = mediaManager.call.state.jetpackTelecomRepository ?: return
+        val telecomCall = telecomRepository.currentCall.value as? TelecomCall.Registered ?: return
 
         val targetEndpointType = when (device) {
             is StreamAudioDevice.Speakerphone -> CallEndpointCompat.TYPE_SPEAKER
@@ -759,18 +771,62 @@ class MicrophoneManager(
 
         if (endpoint == null) {
             logger.w {
-                "[switchTelecomEndpointForDevice] No Telecom endpoint of type=$targetEndpointType available; available=${telecomCall.availableCallEndpoints.map { it.name }}"
+                "[switchTelecomEndpointForDevice] No Telecom endpoint of type=$targetEndpointType " +
+                    "available; waiting up to $TELECOM_ENDPOINT_WAIT_TIMEOUT; " +
+                    "available=${telecomCall.availableCallEndpoints.map { it.name }}"
+            }
+
+            pendingTelecomEndpointSwitch = mediaManager.scope.launch {
+                val availableEndpoint = withTimeoutOrNull(TELECOM_ENDPOINT_WAIT_TIMEOUT) {
+                    telecomRepository.currentCall.mapNotNull { call ->
+                        (call as? TelecomCall.Registered)
+                            ?.takeIf { it.id == telecomCall.id }
+                            ?.availableCallEndpoints
+                            ?.firstOrNull { it.type == targetEndpointType }
+                    }.first()
+                }
+
+                if (availableEndpoint == null) {
+                    logger.w {
+                        "[switchTelecomEndpointForDevice] Telecom endpoint of " +
+                            "type=$targetEndpointType did not appear within " +
+                            TELECOM_ENDPOINT_WAIT_TIMEOUT
+                    }
+                    return@launch
+                }
+
+                if (_selectedDevice.value != device) {
+                    logger.d {
+                        "[switchTelecomEndpointForDevice] Ignoring stale Telecom endpoint " +
+                            "switch; selected=${_selectedDevice.value}"
+                    }
+                    return@launch
+                }
+
+                val currentCall = (telecomRepository.currentCall.value as? TelecomCall.Registered)
+                    ?.takeIf { it.id == telecomCall.id }
+                    ?: return@launch
+                switchTelecomEndpoint(currentCall, availableEndpoint)
             }
             return
         }
 
+        switchTelecomEndpoint(telecomCall, endpoint)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun switchTelecomEndpoint(
+        telecomCall: TelecomCall.Registered,
+        endpoint: CallEndpointCompat,
+    ) {
         if (telecomCall.currentCallEndpoint?.identifier == endpoint.identifier) {
             logger.d { "[switchTelecomEndpointForDevice] Telecom endpoint already set to '${endpoint.name}'" }
             return
         }
 
         logger.i {
-            "[switchTelecomEndpointForDevice] Switching Telecom endpoint to '${endpoint.name}' (type=$targetEndpointType)"
+            "[switchTelecomEndpointForDevice] Switching Telecom endpoint to " +
+                "'${endpoint.name}' (type=${endpoint.type})"
         }
         telecomCall.processAction(TelecomCallAction.SwitchAudioEndpoint(endpoint.identifier))
     }
@@ -1238,6 +1294,8 @@ class MicrophoneManager(
     }
 
     fun cleanup() {
+        pendingTelecomEndpointSwitch?.cancel()
+        pendingTelecomEndpointSwitch = null
         ifAudioHandlerInitialized { it.stop() }
         cleanupUsbDeviceDetection()
         // Dropped with the call that captured it, so a value remembered from a call that ended in
