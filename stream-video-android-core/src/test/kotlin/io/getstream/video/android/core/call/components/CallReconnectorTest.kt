@@ -55,7 +55,6 @@ class CallReconnectorTest {
     private lateinit var sessionManager: CallSessionManager
     private lateinit var sessionMonitor: SessionMonitor
     private lateinit var lifecycle: CallLifecycleManager
-    private lateinit var statsReporter: CallStatsReporter
     private lateinit var apiClient: CallApiClient
     private lateinit var callAnalytics: CallAnalytics
     private lateinit var sessionFactory: RtcSessionFactory
@@ -67,7 +66,6 @@ class CallReconnectorTest {
         connectionFlow = MutableStateFlow(RealtimeConnection.Reconnecting)
         sessionMonitor = mockk(relaxed = true)
         lifecycle = mockk(relaxed = true)
-        statsReporter = mockk(relaxed = true)
         apiClient = mockk(relaxed = true)
         callAnalytics = mockk(relaxed = true)
         sessionFactory = mockk(relaxed = true)
@@ -94,7 +92,6 @@ class CallReconnectorTest {
         apiClient = apiClient,
         state = state,
         callAnalytics = callAnalytics,
-        statsReporter = statsReporter,
         sessionMonitor = { sessionMonitor },
         type = "default",
         id = "call-id",

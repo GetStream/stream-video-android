@@ -55,9 +55,10 @@ internal class CallStatsReporter(
 
             while (isActive) {
                 delay(reportingIntervalMs)
-                sessionManager.session.value?.sendCallStats(
-                    report = collectStats(),
-                )
+                // Still collected on every tick: it refreshes [statsReport],
+                // [statLatencyHistory] and [state.stats] for local observers.
+                collectStats()
+                sessionManager.session.value?.sendCallStats()
             }
         }
     }

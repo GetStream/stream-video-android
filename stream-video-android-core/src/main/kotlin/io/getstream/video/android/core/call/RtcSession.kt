@@ -40,7 +40,6 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.BuildConfig
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.CallStatsReport
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.RealtimeConnection
@@ -1179,12 +1178,10 @@ public class RtcSession internal constructor(
     private suspend fun sendConnectionTimeStats(reconnectStrategy: WebsocketReconnectStrategy? = null) {
         if (reconnectStrategy == null) {
             sendCallStats(
-                report = call.collectStats(),
                 connectionTimeSeconds = sessionManager.connectionTimeSeconds(),
             )
         } else {
             sendCallStats(
-                report = call.collectStats(),
                 reconnectionTimeSeconds = Pair(
                     sessionManager.reconnectionTimeSeconds(),
                     reconnectStrategy,
@@ -2000,7 +1997,6 @@ public class RtcSession internal constructor(
     }
 
     internal suspend fun sendCallStats(
-        report: CallStatsReport? = null,
         connectionTimeSeconds: Float? = null,
         reconnectionTimeSeconds: Pair<Float, WebsocketReconnectStrategy>? = null,
     ) {
@@ -2051,8 +2047,6 @@ public class RtcSession internal constructor(
                 unified_session_id = sessionManager.unifiedSessionId,
                 sdk_version = BuildConfig.STREAM_VIDEO_VERSION,
                 webrtc_version = BuildConfig.STREAM_WEBRTC_VERSION,
-                publisher_stats = report?.toJson(StreamPeerType.PUBLISHER) ?: "",
-                subscriber_stats = report?.toJson(StreamPeerType.SUBSCRIBER) ?: "",
                 rtc_stats = rtcStats,
 
                 encode_stats = publisherRtcStats?.performanceStats ?: emptyList(),
@@ -2266,8 +2260,7 @@ public class RtcSession internal constructor(
     }
 
     internal suspend fun prepareRejoin(reason: String) {
-        val stats = call.collectStats()
-        sendCallStats(stats)
+        sendCallStats()
 
         // Mark disconnected immediately — late ICE candidates will be routed
         // to iceTricklePendingEvents instead of being sent to the now-defunct SFU.

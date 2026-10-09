@@ -423,7 +423,6 @@ public class Call(
         apiClient = apiClient,
         state = state,
         callAnalytics = callAnalytics,
-        statsReporter = statsReporter,
         sessionMonitor = { sessionMonitor },
         type = type,
         id = id,
@@ -733,8 +732,6 @@ public class Call(
     }
 
     // endregion
-
-    internal suspend fun collectStats(): CallStatsReport = statsReporter.collectStats()
 
     // region Reconnection — unified loop
 
