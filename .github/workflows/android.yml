@@ -10,6 +10,8 @@ on:
     branches:
       - '**'
 
+  merge_group:
+
   workflow_dispatch:
 
 concurrency:
