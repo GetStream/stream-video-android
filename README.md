@@ -5,7 +5,7 @@
 <p align="center">
   <a href="https://github.com/GetStream/stream-video-android/actions/workflows/artifact-upload.yaml"><img src="https://github.com/GetStream/stream-video-android/actions/workflows/artifact-upload.yaml/badge.svg" /></a>
   <a href="https://android-arsenal.com/api?level=24"><img alt="API" src="https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=flat"/></a>
-  <a href="https://search.maven.org/search?q=stream-video-android"><img src="https://img.shields.io/maven-central/v/io.getstream/stream-video-android-core.svg?label=Maven%20Central" /></a>
+  <a href="https://github.com/GetStream/stream-video-android/releases"><img src="https://img.shields.io/github/v/release/GetStream/stream-video-android" /></a>
 </p>
 
 <p align="center">
@@ -32,6 +32,22 @@ Most users start with the Compose UI components and fall back to the lower-level
 Stream allows developers to rapidly deploy scalable feeds, chat messaging and video with an industry leading 99.999% uptime SLA guarantee.
 
 Stream provides UI components and state handling that make it easy to build video calling for your app. All calls run on Stream's network of edge servers around the world, ensuring optimal latency and reliability.
+
+## 🛠️ Installation
+
+Releases are published to the [Stream Maven repository](https://browse.stream-io-repo.com/releases/stream-video-android). Add it to your `settings.gradle.kts`:
+
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven("https://stream-io-repo.com")
+    }
+}
+```
+
+Earlier versions remain available from Maven Central.
 
 ## 📕 Tutorials
 
