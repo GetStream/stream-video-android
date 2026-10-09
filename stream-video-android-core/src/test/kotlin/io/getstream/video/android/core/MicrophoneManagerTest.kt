@@ -44,8 +44,11 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import io.mockk.verifyOrder
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -323,7 +326,7 @@ class MicrophoneManagerTest {
     }
 
     @Test
-    fun `select should not switch telecom endpoint when no matching endpoint exists`() {
+    fun `select should switch telecom endpoint when it appears before two second timeout`() = runTest {
         val bluetoothEndpoint = mockTelecomEndpoint(
             type = CallEndpointCompat.TYPE_BLUETOOTH,
             identifier = ParcelUuid.fromString("33333333-3333-3333-3333-333333333333"),
@@ -331,12 +334,50 @@ class MicrophoneManagerTest {
         )
         val telecomCall = registeredTelecomCall(
             currentEndpoint = null,
-            availableEndpoints = listOf(bluetoothEndpoint),
+            availableEndpoints = emptyList(),
         )
-        val mediaManager = mockMediaManagerWithTelecom(telecomCall)
+        val currentCall = MutableStateFlow<TelecomCall>(telecomCall)
+        val mediaManager = mockMediaManagerWithTelecom(currentCall, this)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val bluetoothHeadset = StreamAudioDevice.BluetoothHeadset(audio = mockk<AudioDevice>())
+
+        microphoneManager.select(bluetoothHeadset)
+
+        assertNull(telecomCall.actionSource.tryReceive().getOrNull())
+
+        runCurrent()
+        advanceTimeBy(1_999)
+        currentCall.value = telecomCall.copy(availableCallEndpoints = listOf(bluetoothEndpoint))
+        runCurrent()
+
+        assertEquals(
+            TelecomCallAction.SwitchAudioEndpoint(bluetoothEndpoint.identifier),
+            telecomCall.actionSource.tryReceive().getOrNull(),
+        )
+    }
+
+    @Test
+    fun `select should stop waiting after two second timeout`() = runTest {
+        val wiredEndpoint = mockTelecomEndpoint(
+            type = CallEndpointCompat.TYPE_WIRED_HEADSET,
+            identifier = ParcelUuid.fromString("44444444-4444-4444-4444-444444444444"),
+            name = "Wired headset",
+        )
+        val telecomCall = registeredTelecomCall(
+            currentEndpoint = null,
+            availableEndpoints = emptyList(),
+        )
+        val currentCall = MutableStateFlow<TelecomCall>(telecomCall)
+        val mediaManager = mockMediaManagerWithTelecom(currentCall, this)
         val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
 
         microphoneManager.select(StreamAudioDevice.WiredHeadset(audio = mockk<AudioDevice>()))
+        runCurrent()
+        advanceTimeBy(2_000)
+        runCurrent()
+
+        currentCall.value = telecomCall.copy(availableCallEndpoints = listOf(wiredEndpoint))
+        runCurrent()
 
         assertNull(telecomCall.actionSource.tryReceive().getOrNull())
     }
@@ -1009,12 +1050,20 @@ class MicrophoneManagerTest {
     }
 
     private fun mockMediaManagerWithTelecom(telecomCall: TelecomCall.Registered): MediaManagerImpl {
+        return mockMediaManagerWithTelecom(MutableStateFlow(telecomCall))
+    }
+
+    private fun mockMediaManagerWithTelecom(
+        currentCall: MutableStateFlow<TelecomCall>,
+        scope: CoroutineScope? = null,
+    ): MediaManagerImpl {
         val callState = mockk<CallState>(relaxed = true)
         val telecomRepository = mockk<JetpackTelecomRepository>(relaxed = true)
-        every { telecomRepository.currentCall } returns MutableStateFlow<TelecomCall>(telecomCall)
+        every { telecomRepository.currentCall } returns currentCall
         return mockMediaManager(callState = callState).also {
             every { callState.jetpackTelecomRepository } returns telecomRepository
             every { it.speaker } returns mockSpeakerManager(isEnabled = false)
+            if (scope != null) every { it.scope } returns scope
         }
     }
 
