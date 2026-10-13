@@ -17,10 +17,10 @@
 package io.getstream.video.android.core.call.components
 
 import android.content.Intent
-import io.getstream.android.video.generated.models.AudioSettingsResponse
-import io.getstream.android.video.generated.models.CallSettingsResponse
-import io.getstream.android.video.generated.models.OwnCapability
-import io.getstream.android.video.generated.models.VideoSettingsResponse
+import io.getstream.android.video.api.generated.models.AudioSettingsResponse
+import io.getstream.android.video.api.generated.models.CallSettingsResponse
+import io.getstream.android.video.api.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.CameraDirection

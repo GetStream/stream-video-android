@@ -16,10 +16,11 @@
 
 package io.getstream.video.android.core.analytics.reporting.dispatcher
 
-import io.getstream.android.video.generated.apis.ProductvideoApi
-import io.getstream.android.video.generated.models.ClientEvent
-import io.getstream.android.video.generated.models.ReportClientEventRequest
+import io.getstream.android.video.api.generated.models.ClientEvent
+import io.getstream.android.video.api.generated.models.ReportClientEventRequest
+import io.getstream.android.video.internal.generated.apis.ProductvideoApi
 import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.analytics.reporting.toLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

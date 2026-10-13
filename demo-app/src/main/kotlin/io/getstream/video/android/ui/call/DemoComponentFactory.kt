@@ -23,7 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import io.getstream.android.core.ui.design.StreamTokens
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.video.android.compose.theme.ParticipantVideoActionsContentParams
 import io.getstream.video.android.compose.theme.ParticipantVideoReactionContentParams
 import io.getstream.video.android.compose.theme.VideoComponentFactory

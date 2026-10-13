@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.content.ContextCompat
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.video.android.core.Call
 
 /**

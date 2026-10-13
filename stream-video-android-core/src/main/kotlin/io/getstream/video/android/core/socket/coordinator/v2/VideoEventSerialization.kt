@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.socket.coordinator.v2
 
 import io.getstream.android.core.api.serialization.StreamEventSerialization
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 
 /**

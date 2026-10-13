@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.notifications.internal.service.managers
 
-import io.getstream.android.video.generated.models.GetCallResponse
+import io.getstream.android.video.api.generated.models.GetCallResponse
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call

@@ -24,7 +24,7 @@ import okhttp3.Response
  *
  * The coordinator reads this query via `WithPinToSFUID`. It is not part of the
  * published OpenAPI join body, so this interceptor keeps
- * [io.getstream.android.video.generated.apis.ProductvideoApi.joinCall]
+ * [io.getstream.android.video.internal.generated.apis.ProductvideoApi.joinCall]
  * binary-compatible instead of adding a Retrofit `@Query`.
  */
 internal class CoordinatorSfuPinInterceptor(

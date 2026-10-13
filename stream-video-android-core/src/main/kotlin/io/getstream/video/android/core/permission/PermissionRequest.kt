@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core.permission
 
-import io.getstream.android.video.generated.models.PermissionRequestEvent
-import io.getstream.android.video.generated.models.UpdateUserPermissionsResponse
+import io.getstream.android.video.api.generated.models.PermissionRequestEvent
+import io.getstream.android.video.api.generated.models.UpdateUserPermissionsResponse
 import io.getstream.result.Result
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.utils.toUser

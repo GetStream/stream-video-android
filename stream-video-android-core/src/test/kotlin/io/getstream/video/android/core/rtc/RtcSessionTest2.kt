@@ -18,7 +18,7 @@ package io.getstream.video.android.core.rtc
 
 import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.result.Error
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState

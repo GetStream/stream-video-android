@@ -39,7 +39,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import kotlinx.coroutines.flow.MutableStateFlow

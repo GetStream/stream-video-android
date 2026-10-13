@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.analytics.reporting
 
-import io.getstream.android.video.generated.models.ClientEvent
+import io.getstream.android.video.api.generated.models.ClientEvent
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.analytics.call.observer.VideoAnalyticsIceState
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason

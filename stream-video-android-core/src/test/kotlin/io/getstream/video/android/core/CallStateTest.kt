@@ -17,15 +17,15 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.CallParticipantResponse
-import io.getstream.android.video.generated.models.CallSessionParticipantCountsUpdatedEvent
-import io.getstream.android.video.generated.models.CallSessionParticipantJoinedEvent
-import io.getstream.android.video.generated.models.CallSessionParticipantLeftEvent
-import io.getstream.android.video.generated.models.CallSessionResponse
-import io.getstream.android.video.generated.models.CallSettingsRequest
-import io.getstream.android.video.generated.models.MemberRequest
-import io.getstream.android.video.generated.models.ScreensharingSettingsRequest
-import io.getstream.android.video.generated.models.UserResponse
+import io.getstream.android.video.api.generated.models.CallParticipantResponse
+import io.getstream.android.video.api.generated.models.CallSessionParticipantCountsUpdatedEvent
+import io.getstream.android.video.api.generated.models.CallSessionParticipantJoinedEvent
+import io.getstream.android.video.api.generated.models.CallSessionParticipantLeftEvent
+import io.getstream.android.video.api.generated.models.CallSessionResponse
+import io.getstream.android.video.api.generated.models.CallSettingsRequest
+import io.getstream.android.video.api.generated.models.MemberRequest
+import io.getstream.android.video.api.generated.models.ScreensharingSettingsRequest
+import io.getstream.android.video.api.generated.models.UserResponse
 import io.getstream.result.Result
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
 import io.getstream.video.android.core.base.IntegrationTestBase

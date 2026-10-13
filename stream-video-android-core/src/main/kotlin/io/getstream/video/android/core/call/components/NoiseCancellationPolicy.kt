@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core.call.components
 
-import io.getstream.android.video.generated.models.CallSettingsResponse
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.CallSettingsResponse
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.video.android.core.utils.isAutoOn
 import io.getstream.video.android.core.utils.isEnabled
 

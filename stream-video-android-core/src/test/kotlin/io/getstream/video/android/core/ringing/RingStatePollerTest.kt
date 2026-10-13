@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.ringing
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.GetCallRingStateResponse
+import io.getstream.android.video.api.generated.models.GetCallRingStateResponse
 import io.getstream.result.Error
 import io.getstream.result.Result
 import kotlinx.coroutines.ExperimentalCoroutinesApi

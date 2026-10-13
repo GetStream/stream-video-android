@@ -18,7 +18,7 @@ package io.getstream.video.android.core.notifications.internal.telecom
 
 import android.content.Context
 import android.telecom.DisconnectCause
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.InteractionSource

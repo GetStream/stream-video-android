@@ -18,8 +18,8 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.core.api.model.connection.StreamConnectionState
-import io.getstream.android.video.generated.models.ConnectedEvent
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.ConnectedEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.base.TestBase

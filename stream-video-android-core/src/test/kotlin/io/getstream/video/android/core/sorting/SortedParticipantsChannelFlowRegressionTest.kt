@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.sorting
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallActions
 import io.getstream.video.android.core.ParticipantState

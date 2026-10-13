@@ -19,7 +19,7 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.compose.runtime.Stable
 import io.getstream.android.push.PushDevice
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.log.StreamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.events.VideoEventListener

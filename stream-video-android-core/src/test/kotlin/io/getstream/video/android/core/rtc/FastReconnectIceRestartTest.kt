@@ -19,7 +19,7 @@ package io.getstream.video.android.core.rtc
 import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.MediaManagerImpl

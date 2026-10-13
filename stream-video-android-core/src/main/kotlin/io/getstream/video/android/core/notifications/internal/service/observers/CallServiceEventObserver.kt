@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core.notifications.internal.service.observers
 
-import io.getstream.android.video.generated.models.CallEndedEvent
-import io.getstream.android.video.generated.models.LocalCallAcceptedPostEvent
-import io.getstream.android.video.generated.models.LocalCallRejectedPostEvent
+import io.getstream.android.video.api.generated.models.CallEndedEvent
+import io.getstream.android.video.api.generated.models.LocalCallAcceptedPostEvent
+import io.getstream.android.video.api.generated.models.LocalCallRejectedPostEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection

@@ -17,9 +17,9 @@
 package io.getstream.video.android.core.stories
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.CallAcceptedEvent
-import io.getstream.android.video.generated.models.CallRejectedEvent
-import io.getstream.android.video.generated.models.CallRingEvent
+import io.getstream.android.video.api.generated.models.CallAcceptedEvent
+import io.getstream.android.video.api.generated.models.CallRejectedEvent
+import io.getstream.android.video.api.generated.models.CallRingEvent
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.base.toResponse

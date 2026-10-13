@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.call.components
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent

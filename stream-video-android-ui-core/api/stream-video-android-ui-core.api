@@ -117,7 +117,7 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	protected fun loadConfigFromIntent (Landroid/content/Intent;)Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public fun onBackPressed (Lio/getstream/video/android/core/Call;)V
 	public fun onCallAction (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/call/state/CallAction;)V
-	public fun onCallEvent (Lio/getstream/video/android/core/Call;Lio/getstream/android/video/generated/models/VideoEvent;)V
+	public fun onCallEvent (Lio/getstream/video/android/core/Call;Lio/getstream/android/video/api/generated/models/VideoEvent;)V
 	public fun onConnectionEvent (Lio/getstream/video/android/core/Call;Lio/getstream/video/android/core/RealtimeConnection;)V
 	public fun onCreate (Landroid/os/Bundle;)V
 	public fun onCreate (Landroid/os/Bundle;Landroid/os/PersistableBundle;)V

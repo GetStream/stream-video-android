@@ -61,7 +61,8 @@ streamProject {
             "**/io/getstream/video/android/core/lifecycle/legacy/**"
         )
         koverClassExclusions = listOf(
-            "io.getstream.android.video.generated.*",
+            "io.getstream.android.video.api.generated.*",
+            "io.getstream.android.video.internal.generated.*",
             "io.getstream.video.android.core.model.*"
         )
     }

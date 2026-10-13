@@ -17,14 +17,14 @@
 package io.getstream.video.android.core.call.components
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.GetCallResponse
-import io.getstream.android.video.generated.models.GetOrCreateCallResponse
-import io.getstream.android.video.generated.models.GoLiveResponse
-import io.getstream.android.video.generated.models.MemberRequest
-import io.getstream.android.video.generated.models.RingCallRequest
-import io.getstream.android.video.generated.models.StartHLSBroadcastingResponse
-import io.getstream.android.video.generated.models.StopLiveResponse
-import io.getstream.android.video.generated.models.UpdateCallResponse
+import io.getstream.android.video.api.generated.models.GetCallResponse
+import io.getstream.android.video.api.generated.models.GetOrCreateCallResponse
+import io.getstream.android.video.api.generated.models.GoLiveResponse
+import io.getstream.android.video.api.generated.models.MemberRequest
+import io.getstream.android.video.api.generated.models.RingCallRequest
+import io.getstream.android.video.api.generated.models.StartHLSBroadcastingResponse
+import io.getstream.android.video.api.generated.models.StopLiveResponse
+import io.getstream.android.video.api.generated.models.UpdateCallResponse
 import io.getstream.result.Result
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.StreamVideoClient

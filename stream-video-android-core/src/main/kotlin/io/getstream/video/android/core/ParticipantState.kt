@@ -17,7 +17,7 @@
 package io.getstream.video.android.core
 
 import androidx.compose.runtime.Stable
-import io.getstream.android.video.generated.models.MuteUsersResponse
+import io.getstream.android.video.api.generated.models.MuteUsersResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.internal.InternalStreamVideoApi

@@ -24,15 +24,15 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Moshi.Builder
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import io.getstream.android.video.generated.infrastructure.BigDecimalAdapter
-import io.getstream.android.video.generated.infrastructure.BigIntegerAdapter
-import io.getstream.android.video.generated.infrastructure.ByteArrayAdapter
-import io.getstream.android.video.generated.infrastructure.LocalDateAdapter
-import io.getstream.android.video.generated.infrastructure.LocalDateTimeAdapter
-import io.getstream.android.video.generated.infrastructure.OffsetDateTimeAdapter
-import io.getstream.android.video.generated.infrastructure.URIAdapter
-import io.getstream.android.video.generated.infrastructure.UUIDAdapter
-import io.getstream.android.video.generated.models.VideoEventAdapter
+import io.getstream.android.video.api.generated.models.VideoEventAdapter
+import io.getstream.android.video.internal.generated.infrastructure.BigDecimalAdapter
+import io.getstream.android.video.internal.generated.infrastructure.BigIntegerAdapter
+import io.getstream.android.video.internal.generated.infrastructure.ByteArrayAdapter
+import io.getstream.android.video.internal.generated.infrastructure.LocalDateAdapter
+import io.getstream.android.video.internal.generated.infrastructure.LocalDateTimeAdapter
+import io.getstream.android.video.internal.generated.infrastructure.OffsetDateTimeAdapter
+import io.getstream.android.video.internal.generated.infrastructure.URIAdapter
+import io.getstream.android.video.internal.generated.infrastructure.UUIDAdapter
 import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.parser2.adapters.DateAdapter
 import retrofit2.Retrofit
@@ -50,94 +50,94 @@ internal class MoshiVideoParser : VideoParser {
             .addAdapter(DateAdapter())
             .add(lenientAdapter(VideoEventAdapter())).add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.AudioSettingsRequest.DefaultDevice.DefaultDeviceAdapter(),
+                    io.getstream.android.video.api.generated.models.AudioSettingsRequest.DefaultDevice.DefaultDeviceAdapter(),
                 ),
             ).add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.AudioSettingsResponse.DefaultDevice.DefaultDeviceAdapter(),
+                    io.getstream.android.video.api.generated.models.AudioSettingsResponse.DefaultDevice.DefaultDeviceAdapter(),
                 ),
             )
             .add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.CreateDeviceRequest.PushProvider.PushProviderAdapter(),
+                    io.getstream.android.video.api.generated.models.CreateDeviceRequest.PushProvider.PushProviderAdapter(),
                 ),
             )
             .add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.EncryptionSettingsRequest.Mode.ModeAdapter(),
+                    io.getstream.android.video.api.generated.models.EncryptionSettingsRequest.Mode.ModeAdapter(),
                 ),
             )
             .add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.EncryptionSettingsResponse.Mode.ModeAdapter(),
+                    io.getstream.android.video.api.generated.models.EncryptionSettingsResponse.Mode.ModeAdapter(),
                 ),
             )
             .add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.NoiseCancellationSettings.Mode.ModeAdapter(),
+                    io.getstream.android.video.api.generated.models.NoiseCancellationSettings.Mode.ModeAdapter(),
                 ),
             )
             .add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.OwnCapability.OwnCapabilityAdapter(),
+                    io.getstream.android.video.api.generated.models.OwnCapability.OwnCapabilityAdapter(),
                 ),
             )
             .add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.RecordSettingsRequest.Mode.ModeAdapter(),
+                    io.getstream.android.video.api.generated.models.RecordSettingsRequest.Mode.ModeAdapter(),
                 ),
             )
             .add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.RecordSettingsRequest.Quality.QualityAdapter(),
+                    io.getstream.android.video.api.generated.models.RecordSettingsRequest.Quality.QualityAdapter(),
                 ),
             )
             .add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.TranscriptionSettingsRequest.Mode.ModeAdapter(),
+                    io.getstream.android.video.api.generated.models.TranscriptionSettingsRequest.Mode.ModeAdapter(),
                 ),
             )
             .add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.TranscriptionSettingsResponse.Mode.ModeAdapter(),
+                    io.getstream.android.video.api.generated.models.TranscriptionSettingsResponse.Mode.ModeAdapter(),
                 ),
             )
             .add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.TranscriptionSettingsResponse.ClosedCaptionMode.ClosedCaptionModeAdapter(),
+                    io.getstream.android.video.api.generated.models.TranscriptionSettingsResponse.ClosedCaptionMode.ClosedCaptionModeAdapter(),
                 ),
             )
             .add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.VideoSettingsRequest.CameraFacing.CameraFacingAdapter(),
+                    io.getstream.android.video.api.generated.models.VideoSettingsRequest.CameraFacing.CameraFacingAdapter(),
                 ),
             ).add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.VideoSettingsResponse.CameraFacing.CameraFacingAdapter(),
+                    io.getstream.android.video.api.generated.models.VideoSettingsResponse.CameraFacing.CameraFacingAdapter(),
                 ),
             ).add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.LayoutSettingsRequest.Name.NameAdapter(),
+                    io.getstream.android.video.api.generated.models.LayoutSettingsRequest.Name.NameAdapter(),
                 ),
             ).add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.RTMPBroadcastRequest.Quality.QualityAdapter(),
+                    io.getstream.android.video.api.generated.models.RTMPBroadcastRequest.Quality.QualityAdapter(),
                 ),
             ).add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.RTMPSettingsRequest.Quality.QualityAdapter(),
+                    io.getstream.android.video.api.generated.models.RTMPSettingsRequest.Quality.QualityAdapter(),
                 ),
             ).add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.TranscriptionSettingsRequest.ClosedCaptionMode.ClosedCaptionModeAdapter(),
+                    io.getstream.android.video.api.generated.models.TranscriptionSettingsRequest.ClosedCaptionMode.ClosedCaptionModeAdapter(),
                 ),
             ).add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.TranscriptionSettingsRequest.Language.LanguageAdapter(),
+                    io.getstream.android.video.api.generated.models.TranscriptionSettingsRequest.Language.LanguageAdapter(),
                 ),
             ).add(
                 lenientAdapter(
-                    io.getstream.android.video.generated.models.TranscriptionSettingsResponse.Language.LanguageAdapter(),
+                    io.getstream.android.video.api.generated.models.TranscriptionSettingsResponse.Language.LanguageAdapter(),
                 ),
             )
             // Factories

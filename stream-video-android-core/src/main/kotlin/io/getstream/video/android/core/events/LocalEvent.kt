@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.android.video.generated.models
+package io.getstream.android.video.api.generated.models
 
 /**
  * Marker class for representing delayed or "slow" call-related events.
@@ -29,10 +29,10 @@ package io.getstream.android.video.generated.models
 abstract class LocalEvent : WSCallEvent, VideoEvent()
 
 /**
- * Delayed counterpart of [io.getstream.android.video.generated.models.CallRejectedEvent].
+ * Delayed counterpart of [io.getstream.android.video.api.generated.models.CallRejectedEvent].
  *
  * Emitted when a call rejection is inferred or detected late,
- * allowing the SDK to handle it as if a [io.getstream.android.video.generated.models.CallRejectedEvent] had
+ * allowing the SDK to handle it as if a [io.getstream.android.video.api.generated.models.CallRejectedEvent] had
  * been received in real time (or to apply adjusted logic if needed).
  */
 data class LocalCallMissedEvent(

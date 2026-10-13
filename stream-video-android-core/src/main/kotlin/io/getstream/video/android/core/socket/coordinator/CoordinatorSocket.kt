@@ -16,10 +16,10 @@
 
 package io.getstream.video.android.core.socket.coordinator
 
-import io.getstream.android.video.generated.models.ConnectedEvent
-import io.getstream.android.video.generated.models.ConnectionErrorEvent
-import io.getstream.android.video.generated.models.HealthCheckEvent
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.ConnectedEvent
+import io.getstream.android.video.api.generated.models.ConnectionErrorEvent
+import io.getstream.android.video.api.generated.models.HealthCheckEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.StreamVideo

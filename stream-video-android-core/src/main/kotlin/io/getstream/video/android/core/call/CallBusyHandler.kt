@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.call
 
-import io.getstream.android.video.generated.models.CallRingEvent
+import io.getstream.android.video.api.generated.models.CallRingEvent
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.model.StreamCallId
 import kotlinx.coroutines.flow.MutableStateFlow

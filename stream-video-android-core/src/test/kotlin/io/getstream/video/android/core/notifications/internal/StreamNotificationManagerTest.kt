@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.notifications.internal
 
 import android.content.Context
-import io.getstream.android.video.generated.apis.ProductvideoApi
+import io.getstream.android.video.internal.generated.apis.ProductvideoApi
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage

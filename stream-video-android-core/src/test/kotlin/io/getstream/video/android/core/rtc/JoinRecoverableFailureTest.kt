@@ -17,8 +17,8 @@
 package io.getstream.video.android.core.rtc
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.CallSettingsResponse
-import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.api.generated.models.CallSettingsResponse
+import io.getstream.android.video.api.generated.models.JoinCallResponse
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.CallState

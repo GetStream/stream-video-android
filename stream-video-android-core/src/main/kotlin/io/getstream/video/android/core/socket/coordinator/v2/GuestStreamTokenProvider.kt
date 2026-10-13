@@ -19,9 +19,9 @@ package io.getstream.video.android.core.socket.coordinator.v2
 import io.getstream.android.core.api.authentication.StreamTokenProvider
 import io.getstream.android.core.api.model.value.StreamToken
 import io.getstream.android.core.api.model.value.StreamUserId
-import io.getstream.android.video.generated.apis.ProductvideoApi
-import io.getstream.android.video.generated.models.CreateGuestRequest
-import io.getstream.android.video.generated.models.UserRequest
+import io.getstream.android.video.api.generated.models.CreateGuestRequest
+import io.getstream.android.video.api.generated.models.UserRequest
+import io.getstream.android.video.internal.generated.apis.ProductvideoApi
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
