@@ -30,8 +30,8 @@ import androidx.compose.runtime.Stable
 public data class EdgeData(
     val id: String,
     val latencyTestUrl: String,
-    val latitude: Float,
-    val longitude: Float,
+    val latitude: Double,
+    val longitude: Double,
     val green: Int,
     val yellow: Int,
     val red: Int,

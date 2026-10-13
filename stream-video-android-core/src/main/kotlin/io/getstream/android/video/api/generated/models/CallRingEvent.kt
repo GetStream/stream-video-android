@@ -56,7 +56,7 @@ data class CallRingEvent (
     val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "call.ring",
 
     @Json(name = "ring_id")
     val ringId: String? = null

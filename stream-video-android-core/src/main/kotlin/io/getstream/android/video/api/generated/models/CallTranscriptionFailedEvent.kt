@@ -44,7 +44,7 @@ data class CallTranscriptionFailedEvent (
     val egressId: String,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "call.transcription_failed",
 
     @Json(name = "error")
     val error: String? = null

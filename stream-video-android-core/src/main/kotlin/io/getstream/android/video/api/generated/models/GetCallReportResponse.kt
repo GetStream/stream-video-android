@@ -44,7 +44,7 @@ data class GetCallReportResponse (
     val report: io.getstream.android.video.api.generated.models.ReportResponse,
 
     @Json(name = "video_reactions")
-    val videoReactions: List<io.getstream.android.video.api.generated.models.VideoReactionsResponse>? = emptyList(),
+    val videoReactions: List<io.getstream.android.video.api.generated.models.VideoReactionsResponse>? = null,
 
     @Json(name = "chat_activity")
     val chatActivity: io.getstream.android.video.api.generated.models.ChatActivityStatsResponse? = null,

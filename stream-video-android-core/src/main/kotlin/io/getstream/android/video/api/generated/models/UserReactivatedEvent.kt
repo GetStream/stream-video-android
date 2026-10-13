@@ -44,7 +44,7 @@ data class UserReactivatedEvent (
     val user: io.getstream.android.video.api.generated.models.UserResponseCommonFields,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "user.reactivated",
 
     @Json(name = "received_at")
     val receivedAt: org.threeten.bp.OffsetDateTime? = null,

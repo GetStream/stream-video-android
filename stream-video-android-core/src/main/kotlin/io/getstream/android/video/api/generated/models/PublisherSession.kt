@@ -35,10 +35,10 @@ import com.squareup.moshi.ToJson
  */
 data class PublisherSession (
     @Json(name = "duration_min")
-    val durationMin: Float,
+    val durationMin: Double,
 
     @Json(name = "started_offset_min")
-    val startedOffsetMin: Float,
+    val startedOffsetMin: Double,
 
     @Json(name = "user_id")
     val userId: String,
@@ -47,7 +47,7 @@ data class PublisherSession (
     val userSessionId: String,
 
     @Json(name = "avg_jitter_ms")
-    val avgJitterMs: Float? = null,
+    val avgJitterMs: Double? = null,
 
     @Json(name = "browser")
     val browser: String? = null,
@@ -62,7 +62,7 @@ data class PublisherSession (
     val os: String? = null,
 
     @Json(name = "send_quality_score")
-    val sendQualityScore: Float? = null,
+    val sendQualityScore: Double? = null,
 
     @Json(name = "tool")
     val tool: String? = null,

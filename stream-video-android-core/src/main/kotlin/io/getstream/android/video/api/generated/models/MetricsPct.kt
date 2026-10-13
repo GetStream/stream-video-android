@@ -35,17 +35,17 @@ import com.squareup.moshi.ToJson
  */
 data class MetricsPct (
     @Json(name = "freezes")
-    val freezes: Float? = null,
+    val freezes: Double? = null,
 
     @Json(name = "geo")
-    val geo: Float? = null,
+    val geo: Double? = null,
 
     @Json(name = "jitter")
-    val jitter: Float? = null,
+    val jitter: Double? = null,
 
     @Json(name = "latency")
-    val latency: Float? = null,
+    val latency: Double? = null,
 
     @Json(name = "quality_score")
-    val qualityScore: Float? = null
+    val qualityScore: Double? = null
 )

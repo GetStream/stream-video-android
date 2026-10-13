@@ -47,7 +47,7 @@ data class CallRecordingStoppedEvent (
     val recordingType: RecordingType,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.recording_stopped"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

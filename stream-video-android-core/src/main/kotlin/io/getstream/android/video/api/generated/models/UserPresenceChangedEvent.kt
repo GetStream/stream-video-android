@@ -44,7 +44,7 @@ data class UserPresenceChangedEvent (
     val user: io.getstream.android.video.api.generated.models.UserResponseCommonFields,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "user.presence.changed",
 
     @Json(name = "received_at")
     val receivedAt: org.threeten.bp.OffsetDateTime? = null

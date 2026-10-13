@@ -35,5 +35,5 @@ import com.squareup.moshi.ToJson
  */
 data class MessageStatsResponse (
     @Json(name = "count_over_time")
-    val countOverTime: List<io.getstream.android.video.api.generated.models.CountByMinuteResponse>? = emptyList()
+    val countOverTime: List<io.getstream.android.video.api.generated.models.CountByMinuteResponse>? = null
 )

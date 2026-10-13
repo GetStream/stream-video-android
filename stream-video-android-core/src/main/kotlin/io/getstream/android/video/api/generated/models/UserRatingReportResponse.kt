@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 data class UserRatingReportResponse (
     @Json(name = "average")
-    val average: Float,
+    val average: Double,
 
     @Json(name = "count")
     val count: Int

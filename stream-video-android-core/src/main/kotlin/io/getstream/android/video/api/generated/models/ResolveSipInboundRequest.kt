@@ -50,5 +50,5 @@ data class ResolveSipInboundRequest (
     val challenge: io.getstream.android.video.api.generated.models.SIPChallengeRequest? = null,
 
     @Json(name = "sip_headers")
-    val sipHeaders: Map<String, String>? = emptyMap()
+    val sipHeaders: Map<String, String>? = null
 )

@@ -35,8 +35,8 @@ import com.squareup.moshi.ToJson
  */
 data class CoordinatesResponse (
     @Json(name = "latitude")
-    val latitude: Float,
+    val latitude: Double,
 
     @Json(name = "longitude")
-    val longitude: Float
+    val longitude: Double
 )

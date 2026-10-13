@@ -47,7 +47,7 @@ data class LayoutSettingsRequest (
     val externalCssUrl: String? = null,
 
     @Json(name = "options")
-    val options: Map<String, Any?>? = emptyMap()
+    val options: Map<String, Any?>? = null
 )
 {
     

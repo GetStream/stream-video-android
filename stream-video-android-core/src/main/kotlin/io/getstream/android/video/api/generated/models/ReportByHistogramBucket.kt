@@ -41,7 +41,7 @@ data class ReportByHistogramBucket (
     val count: Int,
 
     @Json(name = "sum")
-    val sum: Float,
+    val sum: Double,
 
     @Json(name = "lower_bound")
     val lowerBound: io.getstream.android.video.api.generated.models.Bound? = null,

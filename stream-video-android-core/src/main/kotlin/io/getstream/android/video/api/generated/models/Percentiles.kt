@@ -35,8 +35,8 @@ import com.squareup.moshi.ToJson
  */
 data class Percentiles (
     @Json(name = "p50")
-    val p50: Float? = null,
+    val p50: Double? = null,
 
     @Json(name = "p95")
-    val p95: Float? = null
+    val p95: Double? = null
 )

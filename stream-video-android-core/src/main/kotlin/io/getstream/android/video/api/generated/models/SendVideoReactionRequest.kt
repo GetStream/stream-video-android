@@ -41,5 +41,5 @@ data class SendVideoReactionRequest (
     val emojiCode: String? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = emptyMap()
+    val custom: Map<String, Any?>? = null
 )

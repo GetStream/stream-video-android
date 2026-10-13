@@ -47,7 +47,7 @@ data class CallRejectedEvent (
     val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "call.rejected",
 
     @Json(name = "reason")
     val reason: String? = null

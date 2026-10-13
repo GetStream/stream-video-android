@@ -50,7 +50,7 @@ data class CallUserMutedEvent (
     val mutedUserIds: List<String> = emptyList(),
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.user_muted"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

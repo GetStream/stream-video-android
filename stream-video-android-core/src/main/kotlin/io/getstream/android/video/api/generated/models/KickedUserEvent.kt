@@ -44,7 +44,7 @@ data class KickedUserEvent (
     val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "call.kicked_user",
 
     @Json(name = "kicked_by_user")
     val kickedByUser: io.getstream.android.video.api.generated.models.UserResponse? = null

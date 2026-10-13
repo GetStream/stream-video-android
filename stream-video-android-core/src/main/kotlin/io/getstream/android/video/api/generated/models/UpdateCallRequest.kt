@@ -38,7 +38,7 @@ data class UpdateCallRequest (
     val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = emptyMap(),
+    val custom: Map<String, Any?>? = null,
 
     @Json(name = "settings_override")
     val settingsOverride: io.getstream.android.video.api.generated.models.CallSettingsRequest? = null

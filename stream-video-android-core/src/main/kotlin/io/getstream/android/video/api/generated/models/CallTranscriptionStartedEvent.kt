@@ -44,7 +44,7 @@ data class CallTranscriptionStartedEvent (
     val egressId: String,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.transcription_started"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

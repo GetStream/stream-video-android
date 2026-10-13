@@ -41,7 +41,7 @@ data class MetricThreshold (
     val operator: String,
 
     @Json(name = "value")
-    val value: Float,
+    val value: Double,
 
     @Json(name = "value_unit")
     val valueUnit: String? = null,

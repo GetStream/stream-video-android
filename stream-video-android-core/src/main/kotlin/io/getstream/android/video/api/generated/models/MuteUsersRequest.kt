@@ -50,5 +50,5 @@ data class MuteUsersRequest (
     val video: Boolean? = null,
 
     @Json(name = "user_ids")
-    val userIds: List<String>? = emptyList()
+    val userIds: List<String>? = null
 )

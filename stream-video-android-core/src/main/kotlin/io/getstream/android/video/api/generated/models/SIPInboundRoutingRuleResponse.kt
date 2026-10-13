@@ -56,7 +56,7 @@ data class SIPInboundRoutingRuleResponse (
     val trunkIds: List<String> = emptyList(),
 
     @Json(name = "caller_numbers")
-    val callerNumbers: List<String>? = emptyList(),
+    val callerNumbers: List<String>? = null,
 
     @Json(name = "call_configs")
     val callConfigs: io.getstream.android.video.api.generated.models.SIPCallConfigsResponse? = null,

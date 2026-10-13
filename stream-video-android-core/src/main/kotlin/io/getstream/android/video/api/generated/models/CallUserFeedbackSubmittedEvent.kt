@@ -50,7 +50,7 @@ data class CallUserFeedbackSubmittedEvent (
     val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "call.user_feedback_submitted",
 
     @Json(name = "reason")
     val reason: String? = null,
@@ -62,7 +62,7 @@ data class CallUserFeedbackSubmittedEvent (
     val sdkVersion: String? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = emptyMap()
+    val custom: Map<String, Any?>? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

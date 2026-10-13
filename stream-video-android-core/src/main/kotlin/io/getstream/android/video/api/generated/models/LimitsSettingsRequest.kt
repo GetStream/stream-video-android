@@ -44,5 +44,5 @@ data class LimitsSettingsRequest (
     val maxParticipantsExcludeOwner: Boolean? = null,
 
     @Json(name = "max_participants_exclude_roles")
-    val maxParticipantsExcludeRoles: List<String>? = emptyList()
+    val maxParticipantsExcludeRoles: List<String>? = null
 )

@@ -38,8 +38,8 @@ data class UpdateUserPermissionsRequest (
     val userId: String,
 
     @Json(name = "grant_permissions")
-    val grantPermissions: List<String>? = emptyList(),
+    val grantPermissions: List<String>? = null,
 
     @Json(name = "revoke_permissions")
-    val revokePermissions: List<String>? = emptyList()
+    val revokePermissions: List<String>? = null
 )

@@ -44,7 +44,7 @@ data class CallTranscriptionStoppedEvent (
     val egressId: String,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.transcription_stopped"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

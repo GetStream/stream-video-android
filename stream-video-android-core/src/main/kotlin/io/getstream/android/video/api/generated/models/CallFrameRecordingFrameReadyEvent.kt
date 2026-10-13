@@ -59,7 +59,7 @@ data class CallFrameRecordingFrameReadyEvent (
     val users: Map<String, io.getstream.android.video.api.generated.models.UserResponse> = emptyMap(),
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.frame_recording_ready"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

@@ -44,13 +44,13 @@ data class CallEndedEvent (
     val call: io.getstream.android.video.api.generated.models.CallResponse,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "call.ended",
 
     @Json(name = "reason")
     val reason: String? = null,
 
     @Json(name = "members")
-    val members: List<io.getstream.android.video.api.generated.models.MemberResponse>? = emptyList(),
+    val members: List<io.getstream.android.video.api.generated.models.MemberResponse>? = null,
 
     @Json(name = "user")
     val user: io.getstream.android.video.api.generated.models.UserResponse? = null

@@ -47,7 +47,7 @@ data class CallRecordingFailedEvent (
     val recordingType: RecordingType,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.recording_failed"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

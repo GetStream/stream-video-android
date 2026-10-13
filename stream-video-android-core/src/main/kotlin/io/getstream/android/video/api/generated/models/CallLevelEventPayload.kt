@@ -44,5 +44,5 @@ data class CallLevelEventPayload (
     val userId: String,
 
     @Json(name = "payload")
-    val payload: Map<String, Any?>? = emptyMap()
+    val payload: Map<String, Any?>? = null
 )

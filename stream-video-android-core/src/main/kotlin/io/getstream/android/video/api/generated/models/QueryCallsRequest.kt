@@ -47,8 +47,8 @@ data class QueryCallsRequest (
     val watch: Boolean? = null,
 
     @Json(name = "sort")
-    val sort: List<io.getstream.android.video.api.generated.models.SortParamRequest>? = emptyList(),
+    val sort: List<io.getstream.android.video.api.generated.models.SortParamRequest>? = null,
 
     @Json(name = "filter_conditions")
-    val filterConditions: Map<String, Any?>? = emptyMap()
+    val filterConditions: Map<String, Any?>? = null
 )

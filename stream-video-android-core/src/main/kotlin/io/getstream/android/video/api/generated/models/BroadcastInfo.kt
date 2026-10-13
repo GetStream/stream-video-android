@@ -47,7 +47,7 @@ data class BroadcastInfo (
     val callType: String,
 
     @Json(name = "duration_min")
-    val durationMin: Float,
+    val durationMin: Double,
 
     @Json(name = "ended_at")
     val endedAt: String,

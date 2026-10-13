@@ -44,7 +44,7 @@ data class UserBannedEvent (
     val user: io.getstream.android.video.api.generated.models.UserResponseCommonFields,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "user.banned",
 
     @Json(name = "channel_id")
     val channelId: String? = null,
@@ -83,7 +83,7 @@ data class UserBannedEvent (
     val totalBans: Int? = null,
 
     @Json(name = "channel_custom")
-    val channelCustom: Map<String, Any?>? = emptyMap(),
+    val channelCustom: Map<String, Any?>? = null,
 
     @Json(name = "created_by")
     val createdBy: io.getstream.android.video.api.generated.models.UserResponseCommonFields? = null

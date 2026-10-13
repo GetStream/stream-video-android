@@ -50,5 +50,5 @@ data class PoorTail (
     val supporting: io.getstream.android.video.api.generated.models.Supporting,
 
     @Json(name = "healthy_pct")
-    val healthyPct: Float? = null
+    val healthyPct: Double? = null
 )

@@ -35,8 +35,8 @@ import com.squareup.moshi.ToJson
  */
 data class UpdateCallMembersRequest (
     @Json(name = "remove_members")
-    val removeMembers: List<String>? = emptyList(),
+    val removeMembers: List<String>? = null,
 
     @Json(name = "update_members")
-    val updateMembers: List<io.getstream.android.video.api.generated.models.MemberRequest>? = emptyList()
+    val updateMembers: List<io.getstream.android.video.api.generated.models.MemberRequest>? = null
 )

@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 data class CallReportResponse (
     @Json(name = "score")
-    val score: Float,
+    val score: Double,
 
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,

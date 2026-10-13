@@ -41,5 +41,5 @@ data class IngressSettingsResponse (
     val audioEncodingOptions: io.getstream.android.video.api.generated.models.IngressAudioEncodingResponse? = null,
 
     @Json(name = "video_encoding_options")
-    val videoEncodingOptions: Map<String, io.getstream.android.video.api.generated.models.IngressVideoEncodingResponse>? = emptyMap()
+    val videoEncodingOptions: Map<String, io.getstream.android.video.api.generated.models.IngressVideoEncodingResponse>? = null
 )

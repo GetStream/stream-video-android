@@ -62,7 +62,7 @@ data class CallStatsParticipantCounts (
     val averageLatencyMs: Int? = null,
 
     @Json(name = "avg_user_rating")
-    val avgUserRating: Float? = null,
+    val avgUserRating: Double? = null,
 
     @Json(name = "call_event_count")
     val callEventCount: Int? = null,

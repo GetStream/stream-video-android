@@ -47,7 +47,7 @@ data class CallSessionParticipantJoinedEvent (
     val participant: io.getstream.android.video.api.generated.models.CallParticipantResponse,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.session_participant_joined"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

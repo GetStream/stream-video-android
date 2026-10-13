@@ -59,5 +59,5 @@ data class APIError (
     val unrecoverable: Boolean? = null,
 
     @Json(name = "exception_fields")
-    val exceptionFields: Map<String, String>? = emptyMap()
+    val exceptionFields: Map<String, String>? = null
 )

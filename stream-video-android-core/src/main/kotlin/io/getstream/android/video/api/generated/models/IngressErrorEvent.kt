@@ -50,7 +50,7 @@ data class IngressErrorEvent (
     val userId: String,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "ingress.error",
 
     @Json(name = "code")
     val code: String? = null

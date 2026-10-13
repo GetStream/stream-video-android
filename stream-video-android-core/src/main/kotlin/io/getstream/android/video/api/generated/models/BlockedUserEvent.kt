@@ -44,7 +44,7 @@ data class BlockedUserEvent (
     val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "call.blocked_user",
 
     @Json(name = "blocked_by_user")
     val blockedByUser: io.getstream.android.video.api.generated.models.UserResponse? = null

@@ -47,10 +47,10 @@ data class CallRequest (
     val video: Boolean? = null,
 
     @Json(name = "members")
-    val members: List<io.getstream.android.video.api.generated.models.MemberRequest>? = emptyList(),
+    val members: List<io.getstream.android.video.api.generated.models.MemberRequest>? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = emptyMap(),
+    val custom: Map<String, Any?>? = null,
 
     @Json(name = "settings_override")
     val settingsOverride: io.getstream.android.video.api.generated.models.CallSettingsRequest? = null

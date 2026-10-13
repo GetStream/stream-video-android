@@ -53,11 +53,11 @@ data class Quality (
     val scoreBandsByWatchTimePct: io.getstream.android.video.api.generated.models.ScoreBands,
 
     @Json(name = "p50_quality_score")
-    val p50QualityScore: Float? = null,
+    val p50QualityScore: Double? = null,
 
     @Json(name = "p5_quality_score")
-    val p5QualityScore: Float? = null,
+    val p5QualityScore: Double? = null,
 
     @Json(name = "viewer_interruption_rate_pct")
-    val viewerInterruptionRatePct: Float? = null
+    val viewerInterruptionRatePct: Double? = null
 )

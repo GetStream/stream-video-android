@@ -41,5 +41,5 @@ data class PublisherStatsResponse (
     val unique: Int,
 
     @Json(name = "by_track")
-    val byTrack: List<io.getstream.android.video.api.generated.models.TrackStatsResponse>? = emptyList()
+    val byTrack: List<io.getstream.android.video.api.generated.models.TrackStatsResponse>? = null
 )

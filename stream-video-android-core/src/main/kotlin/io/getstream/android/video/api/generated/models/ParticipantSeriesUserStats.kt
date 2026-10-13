@@ -35,14 +35,14 @@ import com.squareup.moshi.ToJson
  */
 data class ParticipantSeriesUserStats (
     @Json(name = "metrics_order")
-    val metricsOrder: List<String>? = emptyList(),
+    val metricsOrder: List<String>? = null,
 
     @Json(name = "metrics")
-    val metrics: Map<String, List<List<Float>>>? = emptyMap(),
+    val metrics: Map<String, List<List<Double>>>? = null,
 
     @Json(name = "metrics_meta")
-    val metricsMeta: Map<String, io.getstream.android.video.api.generated.models.MetricDescriptor>? = emptyMap(),
+    val metricsMeta: Map<String, io.getstream.android.video.api.generated.models.MetricDescriptor>? = null,
 
     @Json(name = "thresholds")
-    val thresholds: Map<String, List<io.getstream.android.video.api.generated.models.MetricThreshold>>? = emptyMap()
+    val thresholds: Map<String, List<io.getstream.android.video.api.generated.models.MetricThreshold>>? = null
 )

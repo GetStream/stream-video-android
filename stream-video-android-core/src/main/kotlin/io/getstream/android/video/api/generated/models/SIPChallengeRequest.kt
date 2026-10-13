@@ -77,8 +77,8 @@ data class SIPChallengeRequest (
     val username: String? = null,
 
     @Json(name = "domain")
-    val domain: List<String>? = emptyList(),
+    val domain: List<String>? = null,
 
     @Json(name = "qop")
-    val qop: List<String>? = emptyList()
+    val qop: List<String>? = null
 )

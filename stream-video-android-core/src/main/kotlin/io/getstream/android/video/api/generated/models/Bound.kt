@@ -38,5 +38,5 @@ data class Bound (
     val inclusive: Boolean,
 
     @Json(name = "value")
-    val value: Float
+    val value: Double
 )
