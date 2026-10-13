@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,17 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CallParticipantTimeline (
     @Json(name = "severity")
-    val severity: kotlin.String,
+    val severity: String,
 
     @Json(name = "timestamp")
     val timestamp: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: String,
 
     @Json(name = "data")
-    val data: kotlin.collections.Map<kotlin.String, Any?> = emptyMap()
+    val data: Map<String, Any?> = emptyMap()
 )

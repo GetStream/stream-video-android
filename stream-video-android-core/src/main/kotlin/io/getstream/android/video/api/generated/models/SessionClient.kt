@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,19 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class SessionClient (
     @Json(name = "ip")
-    val ip: kotlin.String? = null,
+    val ip: String? = null,
 
     @Json(name = "name")
-    val name: kotlin.String? = null,
+    val name: String? = null,
 
     @Json(name = "network_type")
-    val networkType: kotlin.String? = null,
+    val networkType: String? = null,
 
     @Json(name = "version")
-    val version: kotlin.String? = null,
+    val version: String? = null,
 
     @Json(name = "location")
     val location: io.getstream.android.video.api.generated.models.CallStatsLocation? = null

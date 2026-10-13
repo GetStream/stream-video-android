@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,13 +33,12 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class EgressResponse (
     @Json(name = "broadcasting")
-    val broadcasting: kotlin.Boolean,
+    val broadcasting: Boolean,
 
     @Json(name = "rtmps")
-    val rtmps: kotlin.collections.List<io.getstream.android.video.api.generated.models.EgressRTMPResponse> = emptyList(),
+    val rtmps: List<io.getstream.android.video.api.generated.models.EgressRTMPResponse> = emptyList(),
 
     @Json(name = "composite_recording")
     val compositeRecording: io.getstream.android.video.api.generated.models.CompositeRecordingResponse? = null,

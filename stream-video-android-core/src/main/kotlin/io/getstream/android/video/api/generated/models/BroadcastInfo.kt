@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,14 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
+data class BroadcastInfo (
+    @Json(name = "app_id")
+    val appId: Int,
 
-data class SendReactionRequest (
-    @Json(name = "type")
-    val type: kotlin.String,
+    @Json(name = "call_cid")
+    val callCid: String,
 
-    @Json(name = "emoji_code")
-    val emojiCode: kotlin.String? = null,
+    @Json(name = "call_session_id")
+    val callSessionId: String,
 
-    @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
+    @Json(name = "call_type")
+    val callType: String,
+
+    @Json(name = "duration_min")
+    val durationMin: Float,
+
+    @Json(name = "ended_at")
+    val endedAt: String,
+
+    @Json(name = "started_at")
+    val startedAt: String,
+
+    @Json(name = "creators")
+    val creators: List<String> = emptyList(),
+
+    @Json(name = "source_mode")
+    val sourceMode: String? = null
 )

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,13 +33,12 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class ScreensharingSettingsRequest (
     @Json(name = "access_request_enabled")
-    val accessRequestEnabled: kotlin.Boolean? = null,
+    val accessRequestEnabled: Boolean? = null,
 
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean? = null,
+    val enabled: Boolean? = null,
 
     @Json(name = "target_resolution")
     val targetResolution: io.getstream.android.video.api.generated.models.TargetResolution? = null

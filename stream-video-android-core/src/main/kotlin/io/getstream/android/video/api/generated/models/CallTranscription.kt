@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,20 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * CallTranscription represents a transcription of a call.
  */
-
 data class CallTranscription (
     @Json(name = "end_time")
     val endTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "filename")
-    val filename: kotlin.String,
+    val filename: String,
 
     @Json(name = "session_id")
-    val sessionId: kotlin.String,
+    val sessionId: String,
 
     @Json(name = "start_time")
     val startTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "url")
-    val url: kotlin.String
+    val url: String
 )

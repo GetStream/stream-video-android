@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,20 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * Response containing the pre-authentication decision for a SIP trunk
  */
-
 data class ResolveSipAuthResponse (
     @Json(name = "auth_result")
-    val authResult: kotlin.String,
+    val authResult: String,
 
     @Json(name = "duration")
-    val duration: kotlin.String,
+    val duration: String,
 
     @Json(name = "password")
-    val password: kotlin.String? = null,
+    val password: String? = null,
 
     @Json(name = "trunk_id")
-    val trunkId: kotlin.String? = null,
+    val trunkId: String? = null,
 
     @Json(name = "username")
-    val username: kotlin.String? = null
+    val username: String? = null
 )

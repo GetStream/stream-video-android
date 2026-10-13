@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,19 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CallStatsMapSubscriber (
     @Json(name = "is_live")
-    val isLive: kotlin.Boolean,
+    val isLive: Boolean,
 
     @Json(name = "user_id")
-    val userId: kotlin.String,
+    val userId: String,
 
     @Json(name = "user_session_id")
-    val userSessionId: kotlin.String,
+    val userSessionId: String,
 
     @Json(name = "name")
-    val name: kotlin.String? = null,
+    val name: String? = null,
 
     @Json(name = "location")
     val location: io.getstream.android.video.api.generated.models.CallStatsLocation? = null

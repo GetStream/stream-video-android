@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -35,13 +31,12 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * Basic response information
+ * 
  */
+data class Percentiles (
+    @Json(name = "p50")
+    val p50: Float? = null,
 
-data class SendReactionResponse (
-    @Json(name = "duration")
-    val duration: kotlin.String,
-
-    @Json(name = "reaction")
-    val reaction: io.getstream.android.video.api.generated.models.ReactionResponse
+    @Json(name = "p95")
+    val p95: Float? = null
 )

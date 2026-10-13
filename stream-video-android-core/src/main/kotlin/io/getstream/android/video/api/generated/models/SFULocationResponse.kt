@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,13 +33,12 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class SFULocationResponse (
     @Json(name = "datacenter")
-    val datacenter: kotlin.String,
+    val datacenter: String,
 
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "coordinates")
     val coordinates: io.getstream.android.video.api.generated.models.CoordinatesResponse,
@@ -52,5 +47,5 @@ data class SFULocationResponse (
     val location: io.getstream.android.video.api.generated.models.LocationResponse,
 
     @Json(name = "count")
-    val count: kotlin.Int? = null
+    val count: Int? = null
 )

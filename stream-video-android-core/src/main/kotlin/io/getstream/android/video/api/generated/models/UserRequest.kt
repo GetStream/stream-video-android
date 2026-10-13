@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,23 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * User request object
  */
-
 data class UserRequest (
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "image")
-    val image: kotlin.String? = null,
+    val image: String? = null,
 
     @Json(name = "invisible")
-    val invisible: kotlin.Boolean? = null,
+    val invisible: Boolean? = null,
 
     @Json(name = "language")
-    val language: kotlin.String? = null,
+    val language: String? = null,
 
     @Json(name = "name")
-    val name: kotlin.String? = null,
+    val name: String? = null,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
+    val custom: Map<String, Any?>? = emptyMap()
 )

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,42 +33,41 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when call recording has started
  */
-
 data class CallRecordingStartedEvent (
     @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    val callCid: String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "egress_id")
-    val egressId: kotlin.String,
+    val egressId: String,
 
     @Json(name = "recording_type")
     val recordingType: RecordingType,
 
     @Json(name = "type")
-    val type: kotlin.String
+    val type: String
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {
     
-    override fun getEventType(): kotlin.String {
+    override fun getEventType(): String {
         return type
     }
 
-    override fun getCallCID(): kotlin.String {
+    override fun getCallCID(): String {
         return callCid
     }
     
     /**
     * RecordingType Enum
     */
-    sealed class RecordingType(val value: kotlin.String) {
+    sealed class RecordingType(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): RecordingType = when (s) {
+                fun fromString(s: String): RecordingType = when (s) {
                     "composite" -> Composite
                     "individual" -> Individual
                     "raw" -> Raw
@@ -82,7 +77,7 @@ data class CallRecordingStartedEvent (
             object Composite : RecordingType("composite")
             object Individual : RecordingType("individual")
             object Raw : RecordingType("raw")
-            data class Unknown(val unknownValue: kotlin.String) : RecordingType(unknownValue)
+            data class Unknown(val unknownValue: String) : RecordingType(unknownValue)
         
 
         class RecordingTypeAdapter : JsonAdapter<RecordingType>() {

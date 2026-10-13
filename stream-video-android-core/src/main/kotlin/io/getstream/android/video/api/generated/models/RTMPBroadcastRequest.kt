@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,19 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * RTMPBroadcastRequest is the payload for starting an RTMP broadcast.
  */
-
 data class RTMPBroadcastRequest (
     @Json(name = "name")
-    val name: kotlin.String,
+    val name: String,
 
     @Json(name = "stream_url")
-    val streamUrl: kotlin.String,
+    val streamUrl: String,
 
     @Json(name = "quality")
     val quality: Quality? = null,
 
     @Json(name = "stream_key")
-    val streamKey: kotlin.String? = null,
+    val streamKey: String? = null,
 
     @Json(name = "layout")
     val layout: io.getstream.android.video.api.generated.models.LayoutSettingsRequest? = null
@@ -59,11 +54,11 @@ data class RTMPBroadcastRequest (
     /**
     * Quality Enum
     */
-    sealed class Quality(val value: kotlin.String) {
+    sealed class Quality(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Quality = when (s) {
+                fun fromString(s: String): Quality = when (s) {
                     "portrait-1080x1920" -> Portrait1080x1920
                     "portrait-1440x2560" -> Portrait1440x2560
                     "portrait-360x640" -> Portrait360x640
@@ -87,7 +82,7 @@ data class RTMPBroadcastRequest (
             object Quality360p : Quality("360p")
             object Quality480p : Quality("480p")
             object Quality720p : Quality("720p")
-            data class Unknown(val unknownValue: kotlin.String) : Quality(unknownValue)
+            data class Unknown(val unknownValue: String) : Quality(unknownValue)
         
 
         class QualityAdapter : JsonAdapter<Quality>() {

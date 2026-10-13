@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,21 +33,20 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class EncryptionSettingsRequest (
     @Json(name = "mode")
-    val mode: Mode
+    val mode: Mode? = null
 )
 {
     
     /**
     * Mode Enum
     */
-    sealed class Mode(val value: kotlin.String) {
+    sealed class Mode(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Mode = when (s) {
+                fun fromString(s: String): Mode = when (s) {
                     "auto-on" -> AutoOn
                     "available" -> Available
                     "disabled" -> Disabled
@@ -61,7 +56,7 @@ data class EncryptionSettingsRequest (
             object AutoOn : Mode("auto-on")
             object Available : Mode("available")
             object Disabled : Mode("disabled")
-            data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
+            data class Unknown(val unknownValue: String) : Mode(unknownValue)
         
 
         class ModeAdapter : JsonAdapter<Mode>() {

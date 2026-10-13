@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,31 +33,30 @@ import com.squareup.moshi.ToJson
 /**
  * SIP Inbound Routing Rule response
  */
-
 data class SIPInboundRoutingRuleResponse (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "duration")
-    val duration: kotlin.String,
+    val duration: String,
 
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "name")
-    val name: kotlin.String,
+    val name: String,
 
     @Json(name = "updated_at")
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "called_numbers")
-    val calledNumbers: kotlin.collections.List<kotlin.String> = emptyList(),
+    val calledNumbers: List<String> = emptyList(),
 
     @Json(name = "trunk_ids")
-    val trunkIds: kotlin.collections.List<kotlin.String> = emptyList(),
+    val trunkIds: List<String> = emptyList(),
 
     @Json(name = "caller_numbers")
-    val callerNumbers: kotlin.collections.List<kotlin.String>? = emptyList(),
+    val callerNumbers: List<String>? = emptyList(),
 
     @Json(name = "call_configs")
     val callConfigs: io.getstream.android.video.api.generated.models.SIPCallConfigsResponse? = null,

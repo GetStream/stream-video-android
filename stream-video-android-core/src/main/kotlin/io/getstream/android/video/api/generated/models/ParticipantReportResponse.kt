@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,28 +33,27 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class ParticipantReportResponse (
     @Json(name = "sum")
-    val sum: kotlin.Int,
+    val sum: Int,
 
     @Json(name = "unique")
-    val unique: kotlin.Int,
+    val unique: Int,
 
     @Json(name = "max_concurrent")
-    val maxConcurrent: kotlin.Int? = null,
+    val maxConcurrent: Int? = null,
 
     @Json(name = "by_browser")
-    val byBrowser: kotlin.collections.List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
+    val byBrowser: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
 
     @Json(name = "by_country")
-    val byCountry: kotlin.collections.List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
+    val byCountry: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
 
     @Json(name = "by_device")
-    val byDevice: kotlin.collections.List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
+    val byDevice: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
 
     @Json(name = "by_operating_system")
-    val byOperatingSystem: kotlin.collections.List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
+    val byOperatingSystem: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
 
     @Json(name = "count_over_time")
     val countOverTime: io.getstream.android.video.api.generated.models.ParticipantCountOverTimeResponse? = null,

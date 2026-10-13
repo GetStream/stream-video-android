@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,26 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class ChatPreferencesResponse (
     @Json(name = "channel_mentions")
-    val channelMentions: kotlin.String? = null,
+    val channelMentions: String? = null,
 
     @Json(name = "default_preference")
-    val defaultPreference: kotlin.String? = null,
+    val defaultPreference: String? = null,
 
     @Json(name = "direct_mentions")
-    val directMentions: kotlin.String? = null,
+    val directMentions: String? = null,
 
     @Json(name = "group_mentions")
-    val groupMentions: kotlin.String? = null,
+    val groupMentions: String? = null,
 
     @Json(name = "here_mentions")
-    val hereMentions: kotlin.String? = null,
+    val hereMentions: String? = null,
 
     @Json(name = "role_mentions")
-    val roleMentions: kotlin.String? = null,
+    val roleMentions: String? = null,
 
     @Json(name = "thread_replies")
-    val threadReplies: kotlin.String? = null
+    val threadReplies: String? = null
 )

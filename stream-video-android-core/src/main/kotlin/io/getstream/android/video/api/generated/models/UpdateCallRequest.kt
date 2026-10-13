@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,13 +33,12 @@ import com.squareup.moshi.ToJson
 /**
  * Request for updating a call
  */
-
 data class UpdateCallRequest (
     @Json(name = "starts_at")
     val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap(),
+    val custom: Map<String, Any?>? = emptyMap(),
 
     @Json(name = "settings_override")
     val settingsOverride: io.getstream.android.video.api.generated.models.CallSettingsRequest? = null

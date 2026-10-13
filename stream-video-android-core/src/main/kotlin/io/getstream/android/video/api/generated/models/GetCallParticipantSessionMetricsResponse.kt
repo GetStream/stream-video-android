@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,31 +33,30 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-
 data class GetCallParticipantSessionMetricsResponse (
     @Json(name = "duration")
-    val duration: kotlin.String,
+    val duration: String,
 
     @Json(name = "is_publisher")
-    val isPublisher: kotlin.Boolean? = null,
+    val isPublisher: Boolean? = null,
 
     @Json(name = "is_subscriber")
-    val isSubscriber: kotlin.Boolean? = null,
+    val isSubscriber: Boolean? = null,
 
     @Json(name = "joined_at")
     val joinedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "publisher_type")
-    val publisherType: kotlin.String? = null,
+    val publisherType: String? = null,
 
     @Json(name = "user_id")
-    val userId: kotlin.String? = null,
+    val userId: String? = null,
 
     @Json(name = "user_session_id")
-    val userSessionId: kotlin.String? = null,
+    val userSessionId: String? = null,
 
     @Json(name = "published_tracks")
-    val publishedTracks: kotlin.collections.List<io.getstream.android.video.api.generated.models.PublishedTrackMetrics>? = emptyList(),
+    val publishedTracks: List<io.getstream.android.video.api.generated.models.PublishedTrackMetrics>? = emptyList(),
 
     @Json(name = "client")
     val client: io.getstream.android.video.api.generated.models.SessionClient? = null

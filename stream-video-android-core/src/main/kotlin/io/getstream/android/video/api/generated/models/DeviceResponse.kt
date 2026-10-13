@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -35,34 +31,33 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * Response for Device
+ * An object representing a device which can receive push notifications.
  */
-
 data class DeviceResponse (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "push_provider")
-    val pushProvider: kotlin.String,
+    val pushProvider: String,
 
     @Json(name = "user_id")
-    val userId: kotlin.String,
+    val userId: String,
 
     @Json(name = "disabled")
-    val disabled: kotlin.Boolean? = null,
+    val disabled: Boolean? = null,
 
     @Json(name = "disabled_reason")
-    val disabledReason: kotlin.String? = null,
+    val disabledReason: String? = null,
 
     @Json(name = "hardware_id")
-    val hardwareId: kotlin.String? = null,
+    val hardwareId: String? = null,
 
     @Json(name = "push_provider_name")
-    val pushProviderName: kotlin.String? = null,
+    val pushProviderName: String? = null,
 
     @Json(name = "voip")
-    val voip: kotlin.Boolean? = null
+    val voip: Boolean? = null
 )

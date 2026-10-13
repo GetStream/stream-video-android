@@ -29,7 +29,6 @@ internal fun ClientEvent.toLog(): String {
 
         appendIfNotNull("callSessionId", callSessionId)
         appendIfNotNull("stageId", stageId)
-        appendIfNotNull("userSessionId", userSessionId)
         appendIfNotNull("joinAttemptId", joinAttemptId)
         appendIfNotNull("joinReason", joinReason)
         appendIfNotNull("source", source)

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,27 +33,26 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class IngressSourceRequest (
     @Json(name = "fps")
     val fps: Fps,
 
     @Json(name = "height")
-    val height: kotlin.Int,
+    val height: Int,
 
     @Json(name = "width")
-    val width: kotlin.Int
+    val width: Int
 )
 {
     
     /**
     * Fps Enum
     */
-    sealed class Fps(val value: kotlin.String) {
+    sealed class Fps(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Fps = when (s) {
+                fun fromString(s: String): Fps = when (s) {
                     "30" -> Fps30
                     "60" -> Fps60
                     else -> Unknown(s)
@@ -65,7 +60,7 @@ data class IngressSourceRequest (
             }
             object Fps30 : Fps("30")
             object Fps60 : Fps("60")
-            data class Unknown(val unknownValue: kotlin.String) : Fps(unknownValue)
+            data class Unknown(val unknownValue: String) : Fps(unknownValue)
         
 
         class FpsAdapter : JsonAdapter<Fps>() {

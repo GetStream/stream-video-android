@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,10 +33,9 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when the WS connection fails
  */
-
 data class ConnectionErrorEvent (
     @Json(name = "connection_id")
-    val connectionId: kotlin.String,
+    val connectionId: String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
@@ -49,12 +44,12 @@ data class ConnectionErrorEvent (
     val error: io.getstream.android.video.api.generated.models.APIError,
 
     @Json(name = "type")
-    val type: kotlin.String
+    val type: String
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {
     
-    override fun getEventType(): kotlin.String {
+    override fun getEventType(): String {
         return type
     }    
 }

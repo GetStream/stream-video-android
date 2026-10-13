@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,11 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class StatsOptions (
     @Json(name = "enable_rtc_stats")
-    val enableRtcStats: kotlin.Boolean,
+    val enableRtcStats: Boolean,
 
     @Json(name = "reporting_interval_ms")
-    val reportingIntervalMs: kotlin.Int
+    val reportingIntervalMs: Int
 )

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -35,21 +31,20 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * The push preference details.
  */
-
 data class PushPreferencesResponse (
     @Json(name = "call_level")
-    val callLevel: kotlin.String? = null,
+    val callLevel: String? = null,
 
     @Json(name = "chat_level")
-    val chatLevel: kotlin.String? = null,
+    val chatLevel: String? = null,
 
     @Json(name = "disabled_until")
     val disabledUntil: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "feeds_level")
-    val feedsLevel: kotlin.String? = null,
+    val feedsLevel: String? = null,
 
     @Json(name = "chat_preferences")
     val chatPreferences: io.getstream.android.video.api.generated.models.ChatPreferencesResponse? = null,

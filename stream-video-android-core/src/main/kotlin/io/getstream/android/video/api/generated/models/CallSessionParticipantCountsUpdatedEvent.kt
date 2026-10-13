@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,34 +33,33 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when the participant counts in a call session are updated
  */
-
 data class CallSessionParticipantCountsUpdatedEvent (
     @Json(name = "anonymous_participant_count")
-    val anonymousParticipantCount: kotlin.Int,
+    val anonymousParticipantCount: Int,
 
     @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    val callCid: String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "session_id")
-    val sessionId: kotlin.String,
+    val sessionId: String,
 
     @Json(name = "participants_count_by_role")
-    val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int> = emptyMap(),
+    val participantsCountByRole: Map<String, Int> = emptyMap(),
 
     @Json(name = "type")
-    val type: kotlin.String
+    val type: String
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {
     
-    override fun getEventType(): kotlin.String {
+    override fun getEventType(): String {
         return type
     }
 
-    override fun getCallCID(): kotlin.String {
+    override fun getCallCID(): String {
         return callCid
     }    
 }

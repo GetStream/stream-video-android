@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,17 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class PublishedTrackFlags (
     @Json(name = "audio")
-    val audio: kotlin.Boolean,
+    val audio: Boolean,
 
     @Json(name = "screenshare")
-    val screenshare: kotlin.Boolean,
+    val screenshare: Boolean,
 
     @Json(name = "screenshare_audio")
-    val screenshareAudio: kotlin.Boolean,
+    val screenshareAudio: Boolean,
 
     @Json(name = "video")
-    val video: kotlin.Boolean
+    val video: Boolean
 )

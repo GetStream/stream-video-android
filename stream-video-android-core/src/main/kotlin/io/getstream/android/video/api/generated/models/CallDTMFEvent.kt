@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,22 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent asynchronously when a single DTMF digit is received from a SIP participant. The event is broadcast after the digit press ends. Use seq_number for ordering within a session and timestamp for the actual detection time.
  */
-
 data class CallDTMFEvent (
     @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    val callCid: String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "digit")
-    val digit: kotlin.String,
+    val digit: String,
 
     @Json(name = "duration_ms")
-    val durationMs: kotlin.Int,
+    val durationMs: Int,
 
     @Json(name = "seq_number")
-    val seqNumber: kotlin.Int,
+    val seqNumber: Int,
 
     @Json(name = "timestamp")
     val timestamp: org.threeten.bp.OffsetDateTime,
@@ -61,16 +56,16 @@ data class CallDTMFEvent (
     val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: kotlin.String
+    val type: String
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {
     
-    override fun getEventType(): kotlin.String {
+    override fun getEventType(): String {
         return type
     }
 
-    override fun getCallCID(): kotlin.String {
+    override fun getCallCID(): String {
         return callCid
     }    
 }

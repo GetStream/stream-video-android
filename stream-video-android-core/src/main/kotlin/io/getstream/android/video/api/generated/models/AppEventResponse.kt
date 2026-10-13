@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,16 +33,15 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class AppEventResponse (
     @Json(name = "auto_translation_enabled")
-    val autoTranslationEnabled: kotlin.Boolean,
+    val autoTranslationEnabled: Boolean,
 
     @Json(name = "name")
-    val name: kotlin.String,
+    val name: String,
 
     @Json(name = "async_url_enrich_enabled")
-    val asyncUrlEnrichEnabled: kotlin.Boolean? = null,
+    val asyncUrlEnrichEnabled: Boolean? = null,
 
     @Json(name = "file_upload_config")
     val fileUploadConfig: io.getstream.android.video.api.generated.models.FileUploadConfig? = null,

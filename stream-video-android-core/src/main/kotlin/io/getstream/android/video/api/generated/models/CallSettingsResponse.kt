@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,7 +33,6 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CallSettingsResponse (
     @Json(name = "audio")
     val audio: io.getstream.android.video.api.generated.models.AudioSettingsResponse,
@@ -48,6 +43,9 @@ data class CallSettingsResponse (
     @Json(name = "broadcasting")
     val broadcasting: io.getstream.android.video.api.generated.models.BroadcastSettingsResponse,
 
+    @Json(name = "encryption")
+    val encryption: io.getstream.android.video.api.generated.models.EncryptionSettingsResponse,
+
     @Json(name = "frame_recording")
     val frameRecording: io.getstream.android.video.api.generated.models.FrameRecordingSettingsResponse,
 
@@ -56,6 +54,9 @@ data class CallSettingsResponse (
 
     @Json(name = "individual_recording")
     val individualRecording: io.getstream.android.video.api.generated.models.IndividualRecordingSettingsResponse,
+
+    @Json(name = "lifecycle")
+    val lifecycle: io.getstream.android.video.api.generated.models.LifecycleSettingsResponse,
 
     @Json(name = "limits")
     val limits: io.getstream.android.video.api.generated.models.LimitsSettingsResponse,
@@ -85,8 +86,5 @@ data class CallSettingsResponse (
     val video: io.getstream.android.video.api.generated.models.VideoSettingsResponse,
 
     @Json(name = "ingress")
-    val ingress: io.getstream.android.video.api.generated.models.IngressSettingsResponse? = null,
-
-    @Json(name = "encryption")
-    val encryption: io.getstream.android.video.api.generated.models.EncryptionSettingsResponse? = null
+    val ingress: io.getstream.android.video.api.generated.models.IngressSettingsResponse? = null
 )

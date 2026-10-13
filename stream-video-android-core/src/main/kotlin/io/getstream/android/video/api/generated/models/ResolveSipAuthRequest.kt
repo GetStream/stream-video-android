@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,17 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * Request to determine SIP trunk authentication requirements
  */
-
 data class ResolveSipAuthRequest (
     @Json(name = "sip_caller_number")
-    val sipCallerNumber: kotlin.String,
+    val sipCallerNumber: String,
 
     @Json(name = "sip_trunk_number")
-    val sipTrunkNumber: kotlin.String,
+    val sipTrunkNumber: String,
 
     @Json(name = "from_host")
-    val fromHost: kotlin.String? = null,
+    val fromHost: String? = null,
 
     @Json(name = "source_ip")
-    val sourceIp: kotlin.String? = null
+    val sourceIp: String? = null
 )

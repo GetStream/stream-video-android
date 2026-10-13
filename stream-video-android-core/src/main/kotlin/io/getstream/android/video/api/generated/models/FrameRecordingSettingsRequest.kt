@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,10 +33,9 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class FrameRecordingSettingsRequest (
     @Json(name = "capture_interval_in_seconds")
-    val captureIntervalInSeconds: kotlin.Int,
+    val captureIntervalInSeconds: Int,
 
     @Json(name = "mode")
     val mode: Mode,
@@ -53,11 +48,11 @@ data class FrameRecordingSettingsRequest (
     /**
     * Mode Enum
     */
-    sealed class Mode(val value: kotlin.String) {
+    sealed class Mode(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Mode = when (s) {
+                fun fromString(s: String): Mode = when (s) {
                     "auto-on" -> AutoOn
                     "available" -> Available
                     "disabled" -> Disabled
@@ -67,7 +62,7 @@ data class FrameRecordingSettingsRequest (
             object AutoOn : Mode("auto-on")
             object Available : Mode("available")
             object Disabled : Mode("disabled")
-            data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
+            data class Unknown(val unknownValue: String) : Mode(unknownValue)
         
 
         class ModeAdapter : JsonAdapter<Mode>() {
@@ -86,11 +81,11 @@ data class FrameRecordingSettingsRequest (
     /**
     * Quality Enum
     */
-    sealed class Quality(val value: kotlin.String) {
+    sealed class Quality(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Quality = when (s) {
+                fun fromString(s: String): Quality = when (s) {
                     "1080p" -> Quality1080p
                     "1440p" -> Quality1440p
                     "360p" -> Quality360p
@@ -104,7 +99,7 @@ data class FrameRecordingSettingsRequest (
             object Quality360p : Quality("360p")
             object Quality480p : Quality("480p")
             object Quality720p : Quality("720p")
-            data class Unknown(val unknownValue: kotlin.String) : Quality(unknownValue)
+            data class Unknown(val unknownValue: String) : Quality(unknownValue)
         
 
         class QualityAdapter : JsonAdapter<Quality>() {

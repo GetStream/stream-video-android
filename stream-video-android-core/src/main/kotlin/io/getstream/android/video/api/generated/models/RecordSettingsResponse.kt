@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,14 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * RecordSettings is the payload for recording settings
  */
-
 data class RecordSettingsResponse (
     @Json(name = "audio_only")
-    val audioOnly: kotlin.Boolean,
+    val audioOnly: Boolean,
 
     @Json(name = "mode")
-    val mode: kotlin.String,
+    val mode: String,
 
     @Json(name = "quality")
-    val quality: kotlin.String
+    val quality: String
 )

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,37 +33,36 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class JoinCallRequest (
     @Json(name = "location")
-    val location: kotlin.String,
+    val location: String,
 
     @Json(name = "create")
-    val create: kotlin.Boolean? = null,
+    val create: Boolean? = null,
 
     @Json(name = "e2ee")
-    val e2ee: kotlin.Boolean? = null,
+    val e2ee: Boolean? = null,
 
     @Json(name = "hint_high_scale_livestream_publisher")
-    val hintHighScaleLivestreamPublisher: kotlin.Boolean? = null,
+    val hintHighScaleLivestreamPublisher: Boolean? = null,
 
     @Json(name = "members_limit")
-    val membersLimit: kotlin.Int? = null,
+    val membersLimit: Int? = null,
 
     @Json(name = "migrating_from")
-    val migratingFrom: kotlin.String? = null,
+    val migratingFrom: String? = null,
 
     @Json(name = "notify")
-    val notify: kotlin.Boolean? = null,
+    val notify: Boolean? = null,
 
     @Json(name = "ring")
-    val ring: kotlin.Boolean? = null,
+    val ring: Boolean? = null,
 
     @Json(name = "video")
-    val video: kotlin.Boolean? = null,
+    val video: Boolean? = null,
 
     @Json(name = "migrating_from_list")
-    val migratingFromList: kotlin.collections.List<kotlin.String>? = emptyList(),
+    val migratingFromList: List<String>? = emptyList(),
 
     @Json(name = "data")
     val data: io.getstream.android.video.api.generated.models.CallRequest? = null

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,14 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class MetricDescriptor (
     @Json(name = "label")
-    val label: kotlin.String,
+    val label: String,
 
     @Json(name = "description")
-    val description: kotlin.String? = null,
+    val description: String? = null,
 
     @Json(name = "unit")
-    val unit: kotlin.String? = null
+    val unit: String? = null
 )

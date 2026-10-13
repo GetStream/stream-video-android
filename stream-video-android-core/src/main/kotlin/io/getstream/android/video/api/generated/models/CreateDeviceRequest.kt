@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,33 +33,32 @@ import com.squareup.moshi.ToJson
 /**
  * Create device request
  */
-
 data class CreateDeviceRequest (
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "push_provider")
     val pushProvider: PushProvider,
 
     @Json(name = "hardware_id")
-    val hardwareId: kotlin.String? = null,
+    val hardwareId: String? = null,
 
     @Json(name = "push_provider_name")
-    val pushProviderName: kotlin.String? = null,
+    val pushProviderName: String? = null,
 
     @Json(name = "voip_token")
-    val voipToken: kotlin.Boolean? = null
+    val voipToken: Boolean? = null
 )
 {
     
     /**
     * PushProvider Enum
     */
-    sealed class PushProvider(val value: kotlin.String) {
+    sealed class PushProvider(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): PushProvider = when (s) {
+                fun fromString(s: String): PushProvider = when (s) {
                     "apn" -> Apn
                     "firebase" -> Firebase
                     "huawei" -> Huawei
@@ -75,7 +70,7 @@ data class CreateDeviceRequest (
             object Firebase : PushProvider("firebase")
             object Huawei : PushProvider("huawei")
             object Xiaomi : PushProvider("xiaomi")
-            data class Unknown(val unknownValue: kotlin.String) : PushProvider(unknownValue)
+            data class Unknown(val unknownValue: String) : PushProvider(unknownValue)
         
 
         class PushProviderAdapter : JsonAdapter<PushProvider>() {

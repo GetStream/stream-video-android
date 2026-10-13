@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,34 +33,33 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-
 data class QueryCallParticipantSessionsResponse (
     @Json(name = "call_id")
-    val callId: kotlin.String,
+    val callId: String,
 
     @Json(name = "call_session_id")
-    val callSessionId: kotlin.String,
+    val callSessionId: String,
 
     @Json(name = "call_type")
-    val callType: kotlin.String,
+    val callType: String,
 
     @Json(name = "duration")
-    val duration: kotlin.Int,
+    val duration: Int,
 
     @Json(name = "total_participant_duration")
-    val totalParticipantDuration: kotlin.Int,
+    val totalParticipantDuration: Int,
 
     @Json(name = "total_participant_sessions")
-    val totalParticipantSessions: kotlin.Int,
+    val totalParticipantSessions: Int,
 
     @Json(name = "participants_sessions")
-    val participantsSessions: kotlin.collections.List<io.getstream.android.video.api.generated.models.ParticipantSessionDetails> = emptyList(),
+    val participantsSessions: List<io.getstream.android.video.api.generated.models.ParticipantSessionDetails> = emptyList(),
 
     @Json(name = "next")
-    val next: kotlin.String? = null,
+    val next: String? = null,
 
     @Json(name = "prev")
-    val prev: kotlin.String? = null,
+    val prev: String? = null,
 
     @Json(name = "session")
     val session: io.getstream.android.video.api.generated.models.CallSessionResponse? = null

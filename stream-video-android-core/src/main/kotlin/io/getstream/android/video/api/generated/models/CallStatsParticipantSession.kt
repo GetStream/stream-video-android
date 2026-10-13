@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,70 +33,69 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CallStatsParticipantSession (
     @Json(name = "is_live")
-    val isLive: kotlin.Boolean,
+    val isLive: Boolean,
 
     @Json(name = "user_session_id")
-    val userSessionId: kotlin.String,
+    val userSessionId: String,
 
     @Json(name = "published_tracks")
     val publishedTracks: io.getstream.android.video.api.generated.models.PublishedTrackFlags,
 
     @Json(name = "browser")
-    val browser: kotlin.String? = null,
+    val browser: String? = null,
 
     @Json(name = "browser_version")
-    val browserVersion: kotlin.String? = null,
+    val browserVersion: String? = null,
 
     @Json(name = "cq_score")
-    val cqScore: kotlin.Int? = null,
+    val cqScore: Int? = null,
 
     @Json(name = "current_ip")
-    val currentIp: kotlin.String? = null,
+    val currentIp: String? = null,
 
     @Json(name = "current_sfu")
-    val currentSfu: kotlin.String? = null,
+    val currentSfu: String? = null,
 
     @Json(name = "distance_to_sfu_kilometers")
-    val distanceToSfuKilometers: kotlin.Float? = null,
+    val distanceToSfuKilometers: Float? = null,
 
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "freezes_duration_ms")
-    val freezesDurationMs: kotlin.Int? = null,
+    val freezesDurationMs: Int? = null,
 
     @Json(name = "ingress")
-    val ingress: kotlin.String? = null,
+    val ingress: String? = null,
 
     @Json(name = "jitter_ms")
-    val jitterMs: kotlin.Int? = null,
+    val jitterMs: Int? = null,
 
     @Json(name = "latency_ms")
-    val latencyMs: kotlin.Int? = null,
+    val latencyMs: Int? = null,
 
     @Json(name = "os")
-    val os: kotlin.String? = null,
+    val os: String? = null,
 
     @Json(name = "publisher_type")
-    val publisherType: kotlin.String? = null,
+    val publisherType: String? = null,
 
     @Json(name = "sdk")
-    val sdk: kotlin.String? = null,
+    val sdk: String? = null,
 
     @Json(name = "sdk_version")
-    val sdkVersion: kotlin.String? = null,
+    val sdkVersion: String? = null,
 
     @Json(name = "started_at")
     val startedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "unified_session_id")
-    val unifiedSessionId: kotlin.String? = null,
+    val unifiedSessionId: String? = null,
 
     @Json(name = "webrtc_version")
-    val webrtcVersion: kotlin.String? = null,
+    val webrtcVersion: String? = null,
 
     @Json(name = "location")
     val location: io.getstream.android.video.api.generated.models.CallStatsLocation? = null

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,10 +33,9 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a frame is captured from a call
  */
-
 data class CallFrameRecordingFrameReadyEvent (
     @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    val callCid: String,
 
     @Json(name = "captured_at")
     val capturedAt: org.threeten.bp.OffsetDateTime,
@@ -49,31 +44,31 @@ data class CallFrameRecordingFrameReadyEvent (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "egress_id")
-    val egressId: kotlin.String,
+    val egressId: String,
 
     @Json(name = "session_id")
-    val sessionId: kotlin.String,
+    val sessionId: String,
 
     @Json(name = "track_type")
-    val trackType: kotlin.String,
+    val trackType: String,
 
     @Json(name = "url")
-    val url: kotlin.String,
+    val url: String,
 
     @Json(name = "users")
-    val users: kotlin.collections.Map<kotlin.String, io.getstream.android.video.api.generated.models.UserResponse> = emptyMap(),
+    val users: Map<String, io.getstream.android.video.api.generated.models.UserResponse> = emptyMap(),
 
     @Json(name = "type")
-    val type: kotlin.String
+    val type: String
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {
     
-    override fun getEventType(): kotlin.String {
+    override fun getEventType(): String {
         return type
     }
 
-    override fun getCallCID(): kotlin.String {
+    override fun getCallCID(): String {
         return callCid
     }    
 }

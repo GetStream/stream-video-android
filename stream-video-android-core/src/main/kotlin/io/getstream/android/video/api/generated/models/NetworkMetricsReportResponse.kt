@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,17 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class NetworkMetricsReportResponse (
     @Json(name = "average_connection_time")
-    val averageConnectionTime: kotlin.Float? = null,
+    val averageConnectionTime: Float? = null,
 
     @Json(name = "average_jitter")
-    val averageJitter: kotlin.Float? = null,
+    val averageJitter: Float? = null,
 
     @Json(name = "average_latency")
-    val averageLatency: kotlin.Float? = null,
+    val averageLatency: Float? = null,
 
     @Json(name = "average_time_to_reconnect")
-    val averageTimeToReconnect: kotlin.Float? = null
+    val averageTimeToReconnect: Float? = null
 )

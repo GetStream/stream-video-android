@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,14 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class IngressAudioEncodingResponse (
     @Json(name = "bitrate")
-    val bitrate: kotlin.Int,
+    val bitrate: Int,
 
     @Json(name = "channels")
-    val channels: kotlin.Int,
+    val channels: Int,
 
     @Json(name = "enable_dtx")
-    val enableDtx: kotlin.Boolean
+    val enableDtx: Boolean
 )

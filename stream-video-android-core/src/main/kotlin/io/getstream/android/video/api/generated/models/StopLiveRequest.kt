@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,29 +33,28 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class StopLiveRequest (
     @Json(name = "continue_closed_caption")
-    val continueClosedCaption: kotlin.Boolean? = null,
+    val continueClosedCaption: Boolean? = null,
 
     @Json(name = "continue_composite_recording")
-    val continueCompositeRecording: kotlin.Boolean? = null,
+    val continueCompositeRecording: Boolean? = null,
 
     @Json(name = "continue_hls")
-    val continueHls: kotlin.Boolean? = null,
+    val continueHls: Boolean? = null,
 
     @Json(name = "continue_individual_recording")
-    val continueIndividualRecording: kotlin.Boolean? = null,
+    val continueIndividualRecording: Boolean? = null,
 
     @Json(name = "continue_raw_recording")
-    val continueRawRecording: kotlin.Boolean? = null,
+    val continueRawRecording: Boolean? = null,
 
     @Json(name = "continue_recording")
-    val continueRecording: kotlin.Boolean? = null,
+    val continueRecording: Boolean? = null,
 
     @Json(name = "continue_rtmp_broadcasts")
-    val continueRtmpBroadcasts: kotlin.Boolean? = null,
+    val continueRtmpBroadcasts: Boolean? = null,
 
     @Json(name = "continue_transcription")
-    val continueTranscription: kotlin.Boolean? = null
+    val continueTranscription: Boolean? = null
 )

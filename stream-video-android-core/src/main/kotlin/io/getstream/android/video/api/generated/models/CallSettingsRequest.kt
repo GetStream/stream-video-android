@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,7 +33,6 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CallSettingsRequest (
     @Json(name = "audio")
     val audio: io.getstream.android.video.api.generated.models.AudioSettingsRequest? = null,
@@ -62,6 +57,9 @@ data class CallSettingsRequest (
 
     @Json(name = "ingress")
     val ingress: io.getstream.android.video.api.generated.models.IngressSettingsRequest? = null,
+
+    @Json(name = "lifecycle")
+    val lifecycle: io.getstream.android.video.api.generated.models.LifecycleSettingsRequest? = null,
 
     @Json(name = "limits")
     val limits: io.getstream.android.video.api.generated.models.LimitsSettingsRequest? = null,

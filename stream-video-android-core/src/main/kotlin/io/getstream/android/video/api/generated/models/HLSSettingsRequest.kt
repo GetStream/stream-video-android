@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,14 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class HLSSettingsRequest (
     @Json(name = "quality_tracks")
-    val qualityTracks: kotlin.collections.List<kotlin.String> = emptyList(),
+    val qualityTracks: List<String> = emptyList(),
 
     @Json(name = "auto_on")
-    val autoOn: kotlin.Boolean? = null,
+    val autoOn: Boolean? = null,
 
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean? = null
+    val enabled: Boolean? = null
 )

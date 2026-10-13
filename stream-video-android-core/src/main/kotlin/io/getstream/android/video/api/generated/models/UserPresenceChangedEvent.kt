@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,19 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when the presence of a user changes. The event contains information about the user whose presence changed.
  */
-
 data class UserPresenceChangedEvent (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+    val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "user")
     val user: io.getstream.android.video.api.generated.models.UserResponseCommonFields,
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: String,
 
     @Json(name = "received_at")
     val receivedAt: org.threeten.bp.OffsetDateTime? = null
@@ -57,7 +52,7 @@ data class UserPresenceChangedEvent (
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {
     
-    override fun getEventType(): kotlin.String {
+    override fun getEventType(): String {
         return type
     }    
 }

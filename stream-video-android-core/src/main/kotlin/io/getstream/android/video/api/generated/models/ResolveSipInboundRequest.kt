@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,23 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * Request to resolve SIP inbound routing using challenge authentication
  */
-
 data class ResolveSipInboundRequest (
     @Json(name = "sip_caller_number")
-    val sipCallerNumber: kotlin.String,
+    val sipCallerNumber: String,
 
     @Json(name = "sip_trunk_number")
-    val sipTrunkNumber: kotlin.String,
+    val sipTrunkNumber: String,
 
     @Json(name = "routing_number")
-    val routingNumber: kotlin.String? = null,
+    val routingNumber: String? = null,
 
     @Json(name = "trunk_id")
-    val trunkId: kotlin.String? = null,
+    val trunkId: String? = null,
 
     @Json(name = "challenge")
     val challenge: io.getstream.android.video.api.generated.models.SIPChallengeRequest? = null,
 
     @Json(name = "sip_headers")
-    val sipHeaders: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()
+    val sipHeaders: Map<String, String>? = emptyMap()
 )

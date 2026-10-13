@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,16 +33,15 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CallParticipantResponse (
     @Json(name = "joined_at")
     val joinedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "role")
-    val role: kotlin.String,
+    val role: String,
 
     @Json(name = "user_session_id")
-    val userSessionId: kotlin.String,
+    val userSessionId: String,
 
     @Json(name = "user")
     val user: io.getstream.android.video.api.generated.models.UserResponse

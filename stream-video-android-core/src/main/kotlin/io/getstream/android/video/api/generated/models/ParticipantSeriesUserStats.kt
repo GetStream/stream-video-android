@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,17 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class ParticipantSeriesUserStats (
     @Json(name = "metrics_order")
-    val metricsOrder: kotlin.collections.List<kotlin.String>? = emptyList(),
+    val metricsOrder: List<String>? = emptyList(),
 
     @Json(name = "metrics")
-    val metrics: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.collections.List<kotlin.Float>>>? = emptyMap(),
+    val metrics: Map<String, List<List<Float>>>? = emptyMap(),
 
     @Json(name = "metrics_meta")
-    val metricsMeta: kotlin.collections.Map<kotlin.String, io.getstream.android.video.api.generated.models.MetricDescriptor>? = emptyMap(),
+    val metricsMeta: Map<String, io.getstream.android.video.api.generated.models.MetricDescriptor>? = emptyMap(),
 
     @Json(name = "thresholds")
-    val thresholds: kotlin.collections.Map<kotlin.String, kotlin.collections.List<io.getstream.android.video.api.generated.models.MetricThreshold>>? = emptyMap()
+    val thresholds: Map<String, List<io.getstream.android.video.api.generated.models.MetricThreshold>>? = emptyMap()
 )

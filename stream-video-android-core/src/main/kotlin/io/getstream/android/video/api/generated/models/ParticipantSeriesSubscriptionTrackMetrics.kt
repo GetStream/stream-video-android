@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,17 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class ParticipantSeriesSubscriptionTrackMetrics (
     @Json(name = "publisher_user_id")
-    val publisherUserId: kotlin.String,
+    val publisherUserId: String,
 
     @Json(name = "publisher_name")
-    val publisherName: kotlin.String? = null,
+    val publisherName: String? = null,
 
     @Json(name = "publisher_user_session_id")
-    val publisherUserSessionId: kotlin.String? = null,
+    val publisherUserSessionId: String? = null,
 
     @Json(name = "tracks")
-    val tracks: kotlin.collections.Map<kotlin.String, kotlin.collections.List<io.getstream.android.video.api.generated.models.ParticipantSeriesTrackMetrics>>? = emptyMap()
+    val tracks: Map<String, List<io.getstream.android.video.api.generated.models.ParticipantSeriesTrackMetrics>>? = emptyMap()
 )

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,13 +33,12 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CallStatsMapLocation (
     @Json(name = "count")
-    val count: kotlin.Int,
+    val count: Int,
 
     @Json(name = "live_count")
-    val liveCount: kotlin.Int,
+    val liveCount: Int,
 
     @Json(name = "location")
     val location: io.getstream.android.video.api.generated.models.CallStatsLocation? = null

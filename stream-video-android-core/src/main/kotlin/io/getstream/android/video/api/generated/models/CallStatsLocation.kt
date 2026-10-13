@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,29 +33,28 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CallStatsLocation (
     @Json(name = "accuracy_radius_meters")
-    val accuracyRadiusMeters: kotlin.Int? = null,
+    val accuracyRadiusMeters: Int? = null,
 
     @Json(name = "city")
-    val city: kotlin.String? = null,
+    val city: String? = null,
 
     @Json(name = "continent")
-    val continent: kotlin.String? = null,
+    val continent: String? = null,
 
     @Json(name = "country")
-    val country: kotlin.String? = null,
+    val country: String? = null,
 
     @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String? = null,
+    val countryIsoCode: String? = null,
 
     @Json(name = "latitude")
-    val latitude: kotlin.Float? = null,
+    val latitude: Float? = null,
 
     @Json(name = "longitude")
-    val longitude: kotlin.Float? = null,
+    val longitude: Float? = null,
 
     @Json(name = "subdivision")
-    val subdivision: kotlin.String? = null
+    val subdivision: String? = null
 )

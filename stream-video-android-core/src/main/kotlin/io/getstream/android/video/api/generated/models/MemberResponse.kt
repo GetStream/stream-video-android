@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,7 +33,6 @@ import com.squareup.moshi.ToJson
 /**
  * MemberResponse is the payload for a member of a call.
  */
-
 data class MemberResponse (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
@@ -46,10 +41,10 @@ data class MemberResponse (
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "user_id")
-    val userId: kotlin.String,
+    val userId: String,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+    val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "user")
     val user: io.getstream.android.video.api.generated.models.UserResponse,
@@ -58,5 +53,5 @@ data class MemberResponse (
     val deletedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "role")
-    val role: kotlin.String? = null
+    val role: String? = null
 )

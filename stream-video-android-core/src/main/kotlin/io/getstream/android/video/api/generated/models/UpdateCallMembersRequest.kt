@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,11 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * Update call members
  */
-
 data class UpdateCallMembersRequest (
     @Json(name = "remove_members")
-    val removeMembers: kotlin.collections.List<kotlin.String>? = emptyList(),
+    val removeMembers: List<String>? = emptyList(),
 
     @Json(name = "update_members")
-    val updateMembers: kotlin.collections.List<io.getstream.android.video.api.generated.models.MemberRequest>? = emptyList()
+    val updateMembers: List<io.getstream.android.video.api.generated.models.MemberRequest>? = emptyList()
 )

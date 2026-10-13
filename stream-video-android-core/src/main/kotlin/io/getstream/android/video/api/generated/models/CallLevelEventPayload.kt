@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,17 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CallLevelEventPayload (
     @Json(name = "event_type")
-    val eventType: kotlin.String,
+    val eventType: String,
 
     @Json(name = "timestamp")
-    val timestamp: kotlin.Int,
+    val timestamp: Int,
 
     @Json(name = "user_id")
-    val userId: kotlin.String,
+    val userId: String,
 
     @Json(name = "payload")
-    val payload: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
+    val payload: Map<String, Any?>? = emptyMap()
 )
