@@ -418,7 +418,12 @@ public class CallState(
         call.subscribe {
             logger.v { "[livestreamFlow] #track; event.type: ${it.getEventType()}" }
             if (it is TrackPublishedEvent) {
-                val participant = getOrCreateParticipant(it.sessionId, it.userId)
+                val participant = getOrCreateParticipant(
+                    it.sessionId,
+                    it.userId,
+                    source = it.participant?.source
+                        ?: ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+                )
 
                 if (it.trackType == TrackType.TRACK_TYPE_VIDEO) {
                     participant._videoEnabled.value = true
@@ -428,7 +433,12 @@ public class CallState(
             }
 
             if (it is TrackUnpublishedEvent) {
-                val participant = getOrCreateParticipant(it.sessionId, it.userId)
+                val participant = getOrCreateParticipant(
+                    it.sessionId,
+                    it.userId,
+                    source = it.participant?.source
+                        ?: ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+                )
 
                 if (it.trackType == TrackType.TRACK_TYPE_VIDEO) {
                     participant._videoEnabled.value = false
@@ -1210,7 +1220,12 @@ public class CallState(
 
             is TrackPublishedEvent -> {
                 // handled by ActiveSFUSession
-                val participant = getOrCreateParticipant(event.sessionId, event.userId)
+                val participant = getOrCreateParticipant(
+                    event.sessionId,
+                    event.userId,
+                    source = event.participant?.source
+                        ?: ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+                )
                 if (event.trackType == TrackType.TRACK_TYPE_AUDIO) {
                     participant._audioEnabled.value = true
                 } else if (event.trackType == TrackType.TRACK_TYPE_VIDEO) {
@@ -1227,7 +1242,12 @@ public class CallState(
 
             is TrackUnpublishedEvent -> {
                 // handled by ActiveSFUSession
-                val participant = getOrCreateParticipant(event.sessionId, event.userId)
+                val participant = getOrCreateParticipant(
+                    event.sessionId,
+                    event.userId,
+                    source = event.participant?.source
+                        ?: ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
+                )
                 if (event.trackType == TrackType.TRACK_TYPE_AUDIO) {
                     participant._audioEnabled.value = false
                 } else if (event.trackType == TrackType.TRACK_TYPE_VIDEO) {
@@ -1714,7 +1734,12 @@ public class CallState(
     private fun getOrCreateParticipants(participants: List<Participant>): List<ParticipantState> {
         // get or create the participant and update them
         val participantStates = participants.map {
-            val participantState = getOrCreateParticipant(it.session_id, it.user_id)
+            val participantState = getOrCreateParticipant(
+                it.session_id,
+                it.user_id,
+                false,
+                it.source,
+            )
             participantState.updateFromParticipantInfo(it)
             participantState
         }

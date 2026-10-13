@@ -174,7 +174,6 @@ import stream.video.sfu.signal.UpdateSubscriptionsResponse
 import java.io.InterruptedIOException
 import java.net.SocketTimeoutException
 import java.util.Collections
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 /**
@@ -339,13 +338,6 @@ public class RtcSession internal constructor(
      */
     private val muteSyncEnabled = AtomicBoolean(true)
 
-    /**
-     * Tracks whose SFU sync was skipped while [muteSyncEnabled] was false. [resumeMuteSync]
-     * flushes only these so we do not POST for unpublished tracks (the map is pre-seeded
-     * with audio/video/screen-share) or race [listenToMediaChanges] collectLatest replay.
-     */
-    private val pendingMuteSyncTracks: MutableSet<TrackType> =
-        ConcurrentHashMap.newKeySet()
     private val oneBasedSessionCounter = sessionCounter + 1
 
     /**
@@ -1402,7 +1394,6 @@ public class RtcSession internal constructor(
 
         mediaScope.cancel()
         muteSyncEnabled.set(false)
-        pendingMuteSyncTracks.clear()
         muteStateSyncJobs.cancelAll()
 
         // cleanup all non-local tracks
@@ -1451,11 +1442,10 @@ public class RtcSession internal constructor(
      * cannot lose another track's bit via a stale read–copy–write.
      *
      * During reconnect/migration, [cancelActiveWork] pauses SFU sync so collectors can keep
-     * recording the latest desired bits without posting to a stale connection. Tracks that
-     * would have posted are recorded in [pendingMuteSyncTracks]. Sync resumes from
-     * [connectRtc] once the active SFU is ready and flushes only those pending tracks —
-     * not the whole pre-seeded map — so unpublished tracks stay silent and
-     * [listenToMediaChanges] collectLatest replay does not cancel a redundant flush.
+     * recording the latest desired bits without posting to a stale connection. [resumeMuteSync]
+     * re-opens the gate from [connectRtc] once the active SFU is ready; it does not replay the
+     * skipped tracks itself, because [listenToMediaChanges] restarts in the same call and its
+     * collectLatest replay re-signals every track anyway.
      */
     private fun setMuteState(isEnabled: Boolean, trackType: TrackType) {
         logger.d { "[setPublishState] #sfu; $trackType isEnabled: $isEnabled" }
@@ -1466,15 +1456,10 @@ public class RtcSession internal constructor(
 
     private fun syncMuteStateToSfu(trackType: TrackType, isEnabled: Boolean) {
         if (!muteSyncEnabled.get()) {
-            pendingMuteSyncTracks.add(trackType)
-            // Resume may have flipped the flag between the check and the add. Fall through
-            // and post; same-track launch coalesces with any flush already in flight.
-            if (!muteSyncEnabled.get()) {
-                logger.d {
-                    "[syncMuteStateToSfu] pending until SFU is ready; $trackType isEnabled: $isEnabled"
-                }
-                return
+            logger.d {
+                "[syncMuteStateToSfu] skipped, SFU not ready; $trackType isEnabled: $isEnabled"
             }
+            return
         }
 
         val currentSfu = sfuUrl
@@ -1510,15 +1495,18 @@ public class RtcSession internal constructor(
         }
     }
 
+    /**
+     * Re-opens the SFU mute sync gate closed by [cancelActiveWork].
+     *
+     * Deliberately does not replay the tracks that were skipped while paused. [connectRtc]
+     * restarts [listenToMediaChanges] immediately after this, and its collectLatest replay
+     * re-signals camera, microphone and screen-share from their current state. Flushing here
+     * as well produced a second RPC for the same track that the replay then cancelled
+     * (`IOException: Canceled`), which is what this gate exists to avoid.
+     */
     private fun resumeMuteSync() {
         if (!muteSyncEnabled.compareAndSet(false, true)) return
-        val tracksToFlush = pendingMuteSyncTracks.toSet()
-        pendingMuteSyncTracks.clear()
-        logger.d { "[resumeMuteSync] flushing pending mute state for $tracksToFlush" }
-        tracksToFlush.forEach { trackType ->
-            val isEnabled = muteState.value[trackType] ?: return@forEach
-            syncMuteStateToSfu(trackType, isEnabled)
-        }
+        logger.d { "[resumeMuteSync] SFU ready, mute sync re-enabled" }
     }
 
     private fun isPermanentError(cause: Throwable): Boolean {
@@ -2260,11 +2248,6 @@ public class RtcSession internal constructor(
         iceMonitoringJob?.cancel()
         iceMonitoringJob = null
         muteSyncEnabled.set(false)
-        // Nothing is deferred at the moment we pause, so anything still in the set is
-        // a leftover from a collector that raced the previous [resumeMuteSync] and
-        // posted anyway. Dropping it here keeps the next resume from flushing a track
-        // this pause never deferred.
-        pendingMuteSyncTracks.clear()
         muteStateSyncJobs.cancelAll()
         participantsMonitoringJob?.cancel()
         participantsMonitoringJob = null

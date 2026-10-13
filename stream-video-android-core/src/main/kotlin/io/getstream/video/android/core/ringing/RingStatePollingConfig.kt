@@ -23,8 +23,10 @@ package io.getstream.video.android.core.ringing
  * must be usable, and a non-positive one is rejected rather than quietly disabling the fallback.
  *
  * @param startAfterMs how long a ring must go without a participant's ring status changing before
- * polling begins. Kept well above the coordinator's websocket ping interval so a merely slow
- * answer does not poll.
+ * polling begins. This is the trade the whole fallback turns on: a shorter quiet period recovers a
+ * dropped outcome sooner, and also makes rings whose callee is merely slow to answer pay for a read
+ * they did not need. The default is tuned for the first, because a caller stuck on a ringing screen
+ * is a visible failure and an extra read is not.
  * @param intervalMs the gap between reads once polling has begun. Measured from the end of one
  * read to the start of the next, so a slow read widens the gap rather than being absorbed by it.
  */
@@ -40,7 +42,7 @@ public data class RingStatePollingConfig(
     }
 
     public companion object {
-        public const val DEFAULT_START_AFTER_MS: Long = 15_000
+        public const val DEFAULT_START_AFTER_MS: Long = 9_000
         public const val DEFAULT_INTERVAL_MS: Long = 5_000
 
         /**

@@ -242,7 +242,6 @@ object StreamVideoInitHelper {
                         context = context,
                         apiKey = authData.apiKey,
                         user = loggedInUser,
-                        token = authData.token,
                     )
 
                     initializeStreamVideo(
@@ -330,7 +329,6 @@ object StreamVideoInitHelper {
         context: Context,
         apiKey: String,
         user: User,
-        token: String,
     ) {
         val offlinePlugin = StreamOfflinePluginFactory(context)
         val statePluginFactory = StreamStatePluginFactory(
@@ -358,10 +356,9 @@ object StreamVideoInitHelper {
             tokenProvider = object : io.getstream.chat.android.client.token.TokenProvider {
                 override fun loadToken(): String {
                     return runBlocking {
-                        val email = user.custom?.get("email")
                         val authData = StreamService.instance.getAuthData(
                             environment = AppConfig.currentEnvironment.value!!.env,
-                            userId = email,
+                            userId = chatUser.id,
                             StreamService.TOKEN_EXPIRY_TIME,
                         )
                         authData.token
@@ -495,12 +492,9 @@ object StreamVideoInitHelper {
             ),
             tokenProvider = localTokenProvider ?: object : TokenProvider {
                 override suspend fun loadToken(): String {
-                    val userEmail = user.custom?.get("email")
-                    val userId = user.id
-                    val userIdForTokenRenewal = if (userEmail.isNullOrEmpty()) userId else userEmail
                     val authData = StreamService.instance.getAuthData(
                         environment = AppConfig.currentEnvironment.value!!.env,
-                        userId = userIdForTokenRenewal,
+                        userId = user.id,
                         StreamService.TOKEN_EXPIRY_TIME,
                     )
                     return authData.token
