@@ -72,13 +72,14 @@ class CoordinatorRequestErrorInterceptorTest {
 
             assertThat(error.message).isEqualTo(
                 "HTTP $code POST video.stream-io-api.com/video/call/default/call-123/join?" +
-                    "connection_id=connection-456&api_key=REDACTED&access_token=REDACTED " +
-                    "failed: $reason",
+                    "connection_id=connection-456 failed: $reason",
             )
             assertThat(error.response()?.code()).isEqualTo(code)
             assertThat(error.response()?.errorBody()?.string()).isEqualTo("backend error")
             assertThat(error.message).contains("call-123")
             assertThat(error.message).contains("connection-456")
+            assertThat(error.message).doesNotContain("api_key")
+            assertThat(error.message).doesNotContain("access_token")
             assertThat(error.message).doesNotContain("api-key-secret")
             assertThat(error.message).doesNotContain("user-token-secret")
         }
@@ -92,10 +93,12 @@ class CoordinatorRequestErrorInterceptorTest {
 
         assertThat(error.message).isEqualTo(
             "POST video.stream-io-api.com/video/call/default/call-123/join?" +
-                "connection_id=connection-456&api_key=REDACTED&access_token=REDACTED failed: " +
+                "connection_id=connection-456 failed: " +
                 "DNS lookup failed — Unable to resolve host video.stream-io-api.com",
         )
         assertThat(error.message).contains("connection_id=connection-456")
+        assertThat(error.message).doesNotContain("api_key")
+        assertThat(error.message).doesNotContain("access_token")
         assertThat(error.message).doesNotContain("api-key-secret")
         assertThat(error.message).doesNotContain("user-token-secret")
         assertThat(error.cause).isInstanceOf(UnknownHostException::class.java)
@@ -124,9 +127,11 @@ class CoordinatorRequestErrorInterceptorTest {
         }
 
         assertThat(error.message).isEqualTo(
-            "GET video.stream-io-api.com/video/connect?connection_id=connection-456&api_key=REDACTED " +
+            "GET video.stream-io-api.com/video/connect?connection_id=connection-456 " +
                 "failed: DNS lookup failed — socket host unavailable",
         )
+        assertThat(error.message).doesNotContain("api_key")
+        assertThat(error.message).doesNotContain("api-key-secret")
         assertThat(error.cause).isSameInstanceAs(failure)
     }
 
