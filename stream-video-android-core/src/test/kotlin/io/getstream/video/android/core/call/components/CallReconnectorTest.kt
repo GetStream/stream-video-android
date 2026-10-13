@@ -22,6 +22,7 @@ import io.getstream.result.Result.Success
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.call.RtcSession
@@ -233,6 +234,84 @@ class CallReconnectorTest {
         assertThat(sessionManager.session.value).isSameInstanceAs(newSession)
         coVerify { oldSession.finalizeMigration() }
         verify { sessionMonitor.monitorSession(joinResponse) }
+    }
+
+    @Test
+    fun `rejoin leaves the call once the rejoin budget is spent`() = runTest(testDispatcher) {
+        val oldSession = mockk<RtcSession>(relaxed = true)
+        val newSession = mockk<RtcSession>(relaxed = true)
+        prepareRejoinOrMigrate(oldSession, newSession, mockk(relaxed = true))
+        repeat(RejoinRateLimiter.MAX_ATTEMPTS) { sessionManager.rejoinRateLimiter.tryRegister() }
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+            "rejoin",
+        )
+        advanceUntilIdle()
+
+        verify {
+            lifecycle.leave(CallLeaveReason.SdkDriven(SdkCause.REJOIN_ATTEMPT_LIMIT_EXCEEDED))
+        }
+        coVerify(exactly = 0) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `migrate counts against the rejoin budget`() = runTest(testDispatcher) {
+        val oldSession = mockk<RtcSession>(relaxed = true)
+        val newSession = mockk<RtcSession>(relaxed = true)
+        prepareRejoinOrMigrate(oldSession, newSession, mockk(relaxed = true))
+        repeat(RejoinRateLimiter.MAX_ATTEMPTS) { sessionManager.rejoinRateLimiter.tryRegister() }
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+            "migrate",
+        )
+        advanceUntilIdle()
+
+        verify {
+            lifecycle.leave(CallLeaveReason.SdkDriven(SdkCause.REJOIN_ATTEMPT_LIMIT_EXCEEDED))
+        }
+        coVerify(exactly = 0) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `fast reconnect does not count against the rejoin budget`() = runTest(testDispatcher) {
+        sessionManager.setActiveSession(null)
+        repeat(RejoinRateLimiter.MAX_ATTEMPTS) { sessionManager.rejoinRateLimiter.tryRegister() }
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+            "fast",
+        )
+        advanceUntilIdle()
+
+        verify(exactly = 0) {
+            lifecycle.leave(CallLeaveReason.SdkDriven(SdkCause.REJOIN_ATTEMPT_LIMIT_EXCEEDED))
+        }
+    }
+
+    @Test
+    fun `a rejoin with budget left still issues a join request`() = runTest(testDispatcher) {
+        val oldSession = mockk<RtcSession>(relaxed = true)
+        val newSession = mockk<RtcSession>(relaxed = true)
+        prepareRejoinOrMigrate(oldSession, newSession, mockk(relaxed = true))
+        coEvery { newSession.connectInternal(any(), any()) } returns SfuConnectionResult.Success
+        repeat(RejoinRateLimiter.MAX_ATTEMPTS - 1) {
+            sessionManager.rejoinRateLimiter.tryRegister()
+        }
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+            "rejoin",
+        )
+        advanceUntilIdle()
+
+        assertThat(sessionManager.session.value).isSameInstanceAs(newSession)
+        verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
     }
 
     /**

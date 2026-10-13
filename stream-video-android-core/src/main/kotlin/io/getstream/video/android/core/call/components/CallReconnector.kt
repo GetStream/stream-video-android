@@ -22,6 +22,7 @@ import io.getstream.video.android.core.BackendCause
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
@@ -216,6 +217,22 @@ internal class CallReconnector(
 
                 logger.i {
                     "[reconnect] loopIteration=$loopIteration strategy=$currentStrategy reason=$reason"
+                }
+
+                // REJOIN and MIGRATE each issue a new backend join; FAST does not, so only they
+                // count against the rolling budget.
+                val issuesNewJoin = when (currentStrategy) {
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+                    WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+                    -> true
+                    else -> false
+                }
+                if (issuesNewJoin && !sessionManager.rejoinRateLimiter.tryRegister()) {
+                    logger.w { "[reconnect] Rejoin attempt limit reached — leaving call ($reason)" }
+                    lifecycle.leave(
+                        CallLeaveReason.SdkDriven(SdkCause.REJOIN_ATTEMPT_LIMIT_EXCEEDED),
+                    )
+                    break
                 }
 
                 val outcome = when (currentStrategy) {
