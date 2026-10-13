@@ -61,16 +61,26 @@ class CoordinatorRequestErrorInterceptorTest {
                 .create(TestCoordinatorApi::class.java)
 
             val error = assertFailsWith<HttpException> {
-                api.joinSuspending("default", "abc", "secret")
+                api.joinSuspending(
+                    type = "default",
+                    id = "call-123",
+                    connectionId = "connection-456",
+                    apiKey = "api-key-secret",
+                    accessToken = "user-token-secret",
+                )
             }
 
             assertThat(error.message).isEqualTo(
-                "HTTP $code POST video.stream-io-api.com/video/call/{type}/{id}/join failed: $reason",
+                "HTTP $code POST video.stream-io-api.com/video/call/default/call-123/join?" +
+                    "connection_id=connection-456&api_key=REDACTED&access_token=REDACTED " +
+                    "failed: $reason",
             )
             assertThat(error.response()?.code()).isEqualTo(code)
             assertThat(error.response()?.errorBody()?.string()).isEqualTo("backend error")
-            assertThat(error.message).doesNotContain("abc")
-            assertThat(error.message).doesNotContain("secret")
+            assertThat(error.message).contains("call-123")
+            assertThat(error.message).contains("connection-456")
+            assertThat(error.message).doesNotContain("api-key-secret")
+            assertThat(error.message).doesNotContain("user-token-secret")
         }
     }
 
@@ -81,10 +91,13 @@ class CoordinatorRequestErrorInterceptorTest {
         )
 
         assertThat(error.message).isEqualTo(
-            "POST video.stream-io-api.com/video/call/{type}/{id}/join failed: " +
+            "POST video.stream-io-api.com/video/call/default/call-123/join?" +
+                "connection_id=connection-456&api_key=REDACTED&access_token=REDACTED failed: " +
                 "DNS lookup failed — Unable to resolve host video.stream-io-api.com",
         )
-        assertThat(error.message).doesNotContain("connection_id")
+        assertThat(error.message).contains("connection_id=connection-456")
+        assertThat(error.message).doesNotContain("api-key-secret")
+        assertThat(error.message).doesNotContain("user-token-secret")
         assertThat(error.cause).isInstanceOf(UnknownHostException::class.java)
     }
 
@@ -99,14 +112,20 @@ class CoordinatorRequestErrorInterceptorTest {
     fun `adds the URL endpoint to non-Retrofit transport failures`() {
         val failure = UnknownHostException("socket host unavailable")
         val client = clientThrowing(failure)
-        val request = Request.Builder().url("https://video.stream-io-api.com/video/connect").build()
+        val request = Request.Builder()
+            .url(
+                "https://video.stream-io-api.com/video/connect?" +
+                    "connection_id=connection-456&api_key=api-key-secret",
+            )
+            .build()
 
         val error = assertFailsWith<CoordinatorRequestException> {
             client.newCall(request).execute()
         }
 
         assertThat(error.message).isEqualTo(
-            "GET video.stream-io-api.com/video/connect failed: DNS lookup failed — socket host unavailable",
+            "GET video.stream-io-api.com/video/connect?connection_id=connection-456&api_key=REDACTED " +
+                "failed: DNS lookup failed — socket host unavailable",
         )
         assertThat(error.cause).isSameInstanceAs(failure)
     }
@@ -133,7 +152,15 @@ class CoordinatorRequestErrorInterceptorTest {
             .build()
             .create(TestCoordinatorApi::class.java)
 
-        return assertFailsWith { api.join("default", "abc", "secret").execute() }
+        return assertFailsWith {
+            api.join(
+                type = "default",
+                id = "call-123",
+                connectionId = "connection-456",
+                apiKey = "api-key-secret",
+                accessToken = "user-token-secret",
+            ).execute()
+        }
     }
 
     private fun clientThrowing(failure: IOException): OkHttpClient = OkHttpClient.Builder()
@@ -151,6 +178,8 @@ class CoordinatorRequestErrorInterceptorTest {
             @Path("type") type: String,
             @Path("id") id: String,
             @Query("connection_id") connectionId: String,
+            @Query("api_key") apiKey: String,
+            @Query("access_token") accessToken: String,
         ): Call<Unit>
 
         @POST("/video/call/{type}/{id}/join")
@@ -158,6 +187,8 @@ class CoordinatorRequestErrorInterceptorTest {
             @Path("type") type: String,
             @Path("id") id: String,
             @Query("connection_id") connectionId: String,
+            @Query("api_key") apiKey: String,
+            @Query("access_token") accessToken: String,
         )
     }
 }
