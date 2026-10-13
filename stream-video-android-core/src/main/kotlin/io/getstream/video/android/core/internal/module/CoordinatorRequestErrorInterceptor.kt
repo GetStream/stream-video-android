@@ -36,19 +36,12 @@ private object CoordinatorRequestErrorMessage {
     const val TIMEOUT_KEYWORD: String = "timeout"
     const val FAILURE_SEPARATOR: String = " failed: "
     const val CAUSE_SEPARATOR: String = " — "
-    const val REDACTED_QUERY_VALUE: String = "REDACTED"
 
-    val SENSITIVE_QUERY_PARAMETER_NAMES: Set<String> = setOf(
-        "api_key",
-        "apikey",
-        "authorization",
-        "jwt",
-    )
-    val SENSITIVE_QUERY_PARAMETER_MARKERS: Set<String> = setOf(
-        "token",
-        "access_token",
-        "secret",
-        "signature",
+    val ALLOWED_QUERY_PARAMETER_NAMES: Set<String> = setOf(
+        "call_session_id",
+        "connection_id",
+        "session_id",
+        "sfu_id",
     )
 }
 
@@ -58,7 +51,7 @@ private object CoordinatorRequestErrorMessage {
  * For HTTP 4xx and 5xx responses, the interceptor adds the endpoint to the OkHttp response message.
  * Retrofit then includes that message when it creates its `HttpException`, producing output such as:
  *
- * `HTTP 404 POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456&api_key=REDACTED failed: Not Found`
+ * `HTTP 404 POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: Not Found`
  *
  * The response code and body are not changed, so Retrofit error parsing and authentication retries
  * continue to work normally.
@@ -69,12 +62,13 @@ private object CoordinatorRequestErrorMessage {
  *
  * For example:
  *
- * `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456&api_key=REDACTED failed: DNS lookup failed — Unable to resolve host`
+ * `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: DNS lookup failed — Unable to resolve host`
  *
- * Resolved path parameters and non-sensitive query parameters are included to identify the exact
- * request. API keys, tokens, secrets, and signatures are replaced with `REDACTED`. Request headers are
- * never included. The original [IOException] is retained as the cause. If it has no usable message,
- * the output ends after the normalized failure category, for example `failed: request timed out`.
+ * Resolved path parameters and allowlisted diagnostic query parameters are included to identify the
+ * exact request. Every other query parameter is omitted, so newly introduced credentials remain
+ * excluded by default. Request headers are never included. The original [IOException] is retained as
+ * the cause. If it has no usable message, the output ends after the normalized failure category, for
+ * example `failed: request timed out`.
  */
 internal class CoordinatorRequestErrorInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -140,23 +134,14 @@ internal fun Request.sanitizedDescription(): String {
         .apply {
             repeat(url.querySize) { index ->
                 val name = url.queryParameterName(index)
-                val value = if (name.isSensitiveQueryParameter()) {
-                    CoordinatorRequestErrorMessage.REDACTED_QUERY_VALUE
-                } else {
-                    url.queryParameterValue(index)
+                if (name in CoordinatorRequestErrorMessage.ALLOWED_QUERY_PARAMETER_NAMES) {
+                    addQueryParameter(name, url.queryParameterValue(index))
                 }
-                addQueryParameter(name, value)
             }
         }
         .build()
     val query = sanitizedUrl.encodedQuery?.let { "?$it" }.orEmpty()
     return "$method ${sanitizedUrl.host}${sanitizedUrl.encodedPath}$query"
-}
-
-private fun String.isSensitiveQueryParameter(): Boolean {
-    val normalizedName = lowercase()
-    return normalizedName in CoordinatorRequestErrorMessage.SENSITIVE_QUERY_PARAMETER_NAMES ||
-        CoordinatorRequestErrorMessage.SENSITIVE_QUERY_PARAMETER_MARKERS.any(normalizedName::contains)
 }
 
 private fun IOException.failureDescription(): String {
