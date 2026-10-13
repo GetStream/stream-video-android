@@ -29,6 +29,7 @@ import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
+import io.getstream.video.android.core.internal.module.CoordinatorRequestException
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
@@ -50,9 +51,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okhttp3.Request
 import org.junit.After
 import org.junit.Before
 import org.threeten.bp.OffsetDateTime
+import java.io.IOException
+import java.io.InterruptedIOException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -359,6 +363,24 @@ class StreamVideoClientTest {
             result is io.getstream.result.Result.Failure,
             "expected Result.Failure, got $result",
         )
+    }
+
+    @Test
+    fun `apiCall includes endpoint from interceptor error when OkHttp reports call timeout`() = runTest {
+        val request = Request.Builder().url("https://hint.stream-io-video.com/").head().build()
+        val intercepted = CoordinatorRequestException(request, IOException("Canceled"))
+        val timeout = InterruptedIOException("timeout").apply { initCause(intercepted) }
+
+        val result = client.apiCall<String> { throw timeout }
+
+        val failure = result as io.getstream.result.Result.Failure
+        val error = failure.value as io.getstream.result.Error.ThrowableError
+        assertEquals(
+            "Safe call failed with HEAD hint.stream-io-video.com/ failed: request timed out — timeout",
+            error.message,
+        )
+        assertTrue(error.cause is CoordinatorRequestException)
+        assertEquals(timeout, error.cause.cause)
     }
 
     // Regression: StreamNotificationManager.createDevice() calls api.createDevice() directly

@@ -73,9 +73,8 @@ internal class CoordinatorConnectionModule(
 
     // API
 
-    override val http: OkHttpClient = OkHttpClient.Builder().addInterceptor(
-        HeadersInterceptor(HeadersUtil()),
-    )
+    override val http: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(HeadersInterceptor(HeadersUtil()))
         .apply {
             if (!pinnedSfuId.isNullOrBlank()) {
                 addInterceptor(CoordinatorSfuPinInterceptor(pinnedSfuId))
@@ -87,11 +86,12 @@ internal class CoordinatorConnectionModule(
             }.apply {
                 level = loggingLevel.httpLoggingLevel.level
             },
-        ).retryOnConnectionFailure(true)
-        .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-        .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-        .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
-        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
+        ).addInterceptor(CoordinatorRequestErrorInterceptor())
+        .retryOnConnectionFailure(true)
+        .connectTimeout(50L, TimeUnit.MILLISECONDS)
+        .writeTimeout(50L, TimeUnit.MILLISECONDS)
+        .readTimeout(50L, TimeUnit.MILLISECONDS)
+        .callTimeout(50L, TimeUnit.MILLISECONDS).build()
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,
