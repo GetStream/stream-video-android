@@ -58,17 +58,33 @@ private object CoordinatorRequestErrorMessage {
  *
  * Transport failures are wrapped in [CoordinatorRequestException] with a message in this format:
  *
- * `METHOD host/path?query failed: failure-category — original-cause-message`
+ * `METHOD host/path?query failed: normalized-reason — original-message`
  *
- * For example:
+ * Complete transport-error examples:
  *
- * `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: DNS lookup failed — Unable to resolve host`
+ * - [UnknownHostException]:
+ *   `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: DNS lookup failed — Unable to resolve host video.stream-io-api.com`
+ * - [SocketTimeoutException]:
+ *   `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: request timed out`
+ * - [InterruptedIOException] whose message contains `timeout`:
+ *   `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: request timed out`
+ * - Any other [InterruptedIOException]:
+ *   `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: request interrupted — Canceled`
+ * - [ConnectException]:
+ *   `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: connection failed — Failed to connect to video.stream-io-api.com`
+ * - [SSLException]:
+ *   `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: TLS connection failed — Chain validation failed`
+ * - Any other [IOException]:
+ *   `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: network I/O failed — unexpected end of stream`
+ *
+ * The `original-message` is supplied by OkHttp or the JVM through [IOException.message], not by the
+ * server. It is omitted when blank. The generic message `timeout` is also omitted because it adds no
+ * information to `request timed out`.
  *
  * Resolved path parameters and allowlisted diagnostic query parameters are included to identify the
  * exact request. Every other query parameter is omitted, so newly introduced credentials remain
  * excluded by default. Request headers are never included. The original [IOException] is retained as
- * the cause. If it has no usable message, the output ends after the normalized failure category, for
- * example `failed: request timed out`.
+ * the cause.
  */
 internal class CoordinatorRequestErrorInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -145,7 +161,17 @@ internal fun Request.sanitizedDescription(): String {
 }
 
 private fun IOException.failureDescription(): String {
-    val category = when (this) {
+    val category = failureCategory()
+    val detail = usefulFailureDetail(category)
+    return if (detail == null) {
+        category
+    } else {
+        "$category${CoordinatorRequestErrorMessage.CAUSE_SEPARATOR}$detail"
+    }
+}
+
+private fun IOException.failureCategory(): String =
+    when (this) {
         is UnknownHostException -> CoordinatorRequestErrorMessage.DNS_LOOKUP_FAILED
         is SocketTimeoutException -> CoordinatorRequestErrorMessage.REQUEST_TIMED_OUT
         is InterruptedIOException -> {
@@ -159,7 +185,14 @@ private fun IOException.failureDescription(): String {
         is SSLException -> CoordinatorRequestErrorMessage.TLS_CONNECTION_FAILED
         else -> CoordinatorRequestErrorMessage.NETWORK_IO_FAILED
     }
-    return message?.takeIf { it.isNotBlank() }
-        ?.let { "$category${CoordinatorRequestErrorMessage.CAUSE_SEPARATOR}$it" }
-        ?: category
+
+private fun IOException.usefulFailureDetail(category: String): String? {
+    val originalMessage = message
+    if (originalMessage.isNullOrBlank()) {
+        return null
+    }
+
+    val isGenericTimeout = category == CoordinatorRequestErrorMessage.REQUEST_TIMED_OUT &&
+        originalMessage.equals(CoordinatorRequestErrorMessage.TIMEOUT_KEYWORD, ignoreCase = true)
+    return if (isGenericTimeout) null else originalMessage
 }

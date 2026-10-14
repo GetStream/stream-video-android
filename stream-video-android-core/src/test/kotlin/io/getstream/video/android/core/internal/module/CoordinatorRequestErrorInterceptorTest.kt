@@ -33,8 +33,10 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import java.io.IOException
 import java.io.InterruptedIOException
+import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
+import javax.net.ssl.SSLException
 import kotlin.test.assertFailsWith
 
 class CoordinatorRequestErrorInterceptorTest {
@@ -105,10 +107,32 @@ class CoordinatorRequestErrorInterceptorTest {
     }
 
     @Test
-    fun `identifies timeout failures`() {
-        val error = executeWithFailure(SocketTimeoutException("timeout"))
+    fun `maps every supported transport failure to a readable message`() {
+        val failures = listOf(
+            UnknownHostException("Unable to resolve host") to
+                "DNS lookup failed — Unable to resolve host",
+            SocketTimeoutException("timeout") to
+                "request timed out",
+            InterruptedIOException("timeout") to
+                "request timed out",
+            InterruptedIOException("Canceled") to
+                "request interrupted — Canceled",
+            ConnectException("Connection refused") to
+                "connection failed — Connection refused",
+            SSLException("Handshake failed") to
+                "TLS connection failed — Handshake failed",
+            IOException("unexpected end of stream") to
+                "network I/O failed — unexpected end of stream",
+            IOException() to
+                "network I/O failed",
+        )
 
-        assertThat(error.message).endsWith("failed: request timed out — timeout")
+        failures.forEach { (exception, expectedMessage) ->
+            val error = executeWithFailure(exception)
+
+            assertThat(error.message).endsWith("failed: $expectedMessage")
+            assertThat(error.cause).isSameInstanceAs(exception)
+        }
     }
 
     @Test
@@ -144,7 +168,7 @@ class CoordinatorRequestErrorInterceptorTest {
         val error = timeout.withCoordinatorRequestContext()
 
         assertThat(error.message).isEqualTo(
-            "HEAD hint.stream-io-video.com/ failed: request timed out — timeout",
+            "HEAD hint.stream-io-video.com/ failed: request timed out",
         )
         assertThat(error.cause).isSameInstanceAs(timeout)
     }

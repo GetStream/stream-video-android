@@ -376,7 +376,7 @@ class StreamVideoClientTest {
         val failure = result as io.getstream.result.Result.Failure
         val error = failure.value as io.getstream.result.Error.ThrowableError
         assertEquals(
-            "Safe call failed with HEAD hint.stream-io-video.com/ failed: request timed out — timeout",
+            "Safe call failed with HEAD hint.stream-io-video.com/ failed: request timed out",
             error.message,
         )
         assertTrue(error.cause is CoordinatorRequestException)
