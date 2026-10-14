@@ -88,10 +88,10 @@ internal class CoordinatorConnectionModule(
             },
         ).addInterceptor(CoordinatorRequestErrorInterceptor())
         .retryOnConnectionFailure(true)
-        .connectTimeout(50L, TimeUnit.MILLISECONDS)
-        .writeTimeout(50L, TimeUnit.MILLISECONDS)
-        .readTimeout(50L, TimeUnit.MILLISECONDS)
-        .callTimeout(50L, TimeUnit.MILLISECONDS).build()
+        .connectTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .writeTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .readTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS)
+        .callTimeout(connectionTimeoutInMs, TimeUnit.MILLISECONDS).build()
     override val networkStateProvider: NetworkStateProvider by lazy {
         NetworkStateProvider(
             scope,
