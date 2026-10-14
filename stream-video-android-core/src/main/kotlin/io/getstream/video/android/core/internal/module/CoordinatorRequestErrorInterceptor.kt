@@ -19,6 +19,10 @@ package io.getstream.video.android.core.internal.module
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.ResponseBody.Companion.asResponseBody
+import okio.Buffer
+import okio.ForwardingSource
+import okio.buffer
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.ConnectException
@@ -53,8 +57,10 @@ private object CoordinatorRequestErrorMessage {
  *
  * `HTTP 404 POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: Not Found`
  *
- * The response code and body are not changed, so Retrofit error parsing and authentication retries
- * continue to work normally.
+ * The response code and payload are not changed, so Retrofit error parsing and authentication
+ * retries continue to work normally. The response body source is decorated so an [IOException]
+ * raised while consuming the payload receives the same endpoint context as an [IOException] raised
+ * by [Interceptor.Chain.proceed].
  *
  * Transport failures are wrapped in [CoordinatorRequestException] with a message in this format:
  *
@@ -90,7 +96,7 @@ internal class CoordinatorRequestErrorInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         return try {
-            val response = chain.proceed(request)
+            val response = chain.proceed(request).withRequestContextOnBodyReadFailure(request)
             if (response.code in 400..599) {
                 response.newBuilder()
                     .message(
@@ -106,6 +112,22 @@ internal class CoordinatorRequestErrorInterceptor : Interceptor {
             throw CoordinatorRequestException(request, exception)
         }
     }
+}
+
+private fun Response.withRequestContextOnBodyReadFailure(request: Request): Response {
+    val responseBody = body ?: return this
+    val source = object : ForwardingSource(responseBody.source()) {
+        override fun read(sink: Buffer, byteCount: Long): Long =
+            try {
+                super.read(sink, byteCount)
+            } catch (exception: IOException) {
+                throw CoordinatorRequestException(request, exception)
+            }
+    }.buffer()
+
+    return newBuilder()
+        .body(source.asResponseBody(responseBody.contentType(), responseBody.contentLength()))
+        .build()
 }
 
 internal class CoordinatorRequestException(

@@ -23,7 +23,12 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.ResponseBody.Companion.asResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
+import okio.Buffer
+import okio.Source
+import okio.Timeout
+import okio.buffer
 import org.junit.Test
 import retrofit2.Call
 import retrofit2.HttpException
@@ -160,6 +165,40 @@ class CoordinatorRequestErrorInterceptorTest {
     }
 
     @Test
+    fun `preserves endpoint context when consuming the response body fails`() {
+        val failure = IOException("body read failed")
+        val client = OkHttpClient.Builder()
+            .addInterceptor(CoordinatorRequestErrorInterceptor())
+            .addInterceptor { chain ->
+                Response.Builder()
+                    .request(chain.request())
+                    .protocol(Protocol.HTTP_1_1)
+                    .code(200)
+                    .message("OK")
+                    .body(failingResponseBody(failure))
+                    .build()
+            }
+            .build()
+        val request = Request.Builder()
+            .url(
+                "https://video.stream-io-api.com/video/call/default/call-123?" +
+                    "connection_id=connection-456&api_key=api-key-secret",
+            )
+            .build()
+
+        val response = client.newCall(request).execute()
+        val error = assertFailsWith<CoordinatorRequestException> {
+            response.use { it.body!!.string() }
+        }
+
+        assertThat(error.message).isEqualTo(
+            "GET video.stream-io-api.com/video/call/default/call-123?" +
+                "connection_id=connection-456 failed: network I/O failed — body read failed",
+        )
+        assertThat(error.cause).isSameInstanceAs(failure)
+    }
+
+    @Test
     fun `uses endpoint from nested interceptor error when OkHttp reports call timeout`() {
         val request = Request.Builder().url("https://hint.stream-io-video.com/").head().build()
         val intercepted = CoordinatorRequestException(request, IOException("Canceled"))
@@ -200,6 +239,15 @@ class CoordinatorRequestErrorInterceptorTest {
             },
         )
         .build()
+
+    private fun failingResponseBody(failure: IOException) =
+        object : Source {
+            override fun read(sink: Buffer, byteCount: Long): Long = throw failure
+
+            override fun timeout(): Timeout = Timeout.NONE
+
+            override fun close() = Unit
+        }.buffer().asResponseBody()
 
     private interface TestCoordinatorApi {
         @POST("/video/call/{type}/{id}/join")
