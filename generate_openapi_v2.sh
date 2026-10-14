@@ -14,7 +14,7 @@ MOSHI_ADAPTER_DIR="infrastructure"
 MOSHI_ADAPTER_PACKAGE="io.getstream.android.video.generated.infrastructure"
 CLASSES_TO_SKIP="PrivacySettingsResponse PrivacySettings StopRTMPBroadcastsRequest LocalCallAcceptedPostEvent LocalCallRejectedPostEvent"
 ANDROID_SDK="video"
-KEEP_CLASSES="WSAuthMessageRequest.kt"
+KEEP_CLASSES="WSAuthMessageRequest.kt LocalCallAcceptedPostEvent.kt LocalCallRejectedPostEvent.kt"
 OUTPUT_CLIENT_PATH="./stream-video-android-core/src/main/kotlin/io/getstream/android/video/generated/"
 
 # Parse key-value arguments
@@ -129,7 +129,7 @@ else
   # Function to check if a file should be kept
   should_keep() {
       local file_name=$(basename "$1")
-      for keep in "${KEEP_CLASSES[@]}"; do
+      for keep in $KEEP_CLASSES; do
          echo "file_name = $file_name, keep = $keep"
           if [[ "$file_name" == "$keep" ]]; then
               return 0  # File should be kept
