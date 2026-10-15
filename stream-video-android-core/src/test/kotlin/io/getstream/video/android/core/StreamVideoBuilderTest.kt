@@ -18,7 +18,6 @@ package io.getstream.video.android.core
 
 import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.call.CallType
-import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.model.User
 import io.mockk.every
@@ -46,42 +45,6 @@ class StreamVideoBuilderTest : TestBase() {
         val builder = StreamVideoBuilder(context = context, apiKey = authData!!.apiKey)
 
         val config = builder.createCallConfigurationRegistry(
-            callServiceConfigRegistry = CallServiceConfigRegistry().apply {
-                register(CallType.Default.name) {
-                    setRunCallServiceInForeground(testData.callConfigRegistryRunService)
-                    setAudioUsage(testData.callConfigRegistryAudioUsage)
-                }
-            },
-        ).get(CallType.Default.name)
-
-        assertEquals(testData.callConfigRegistryRunService, config.runCallServiceInForeground)
-        assertEquals(testData.callConfigRegistryAudioUsage, config.audioUsage)
-    }
-
-    @Test
-    fun createCallConfigurationRegistry_withLegacyCallConfigAndWithoutRegistryCallConfig_usesLegacy() {
-        val builder = StreamVideoBuilder(context = context, apiKey = authData!!.apiKey)
-
-        val config = builder.createCallConfigurationRegistry(
-            callServiceConfig = CallServiceConfig(
-                runCallServiceInForeground = testData.callConfigLegacyRunService,
-                audioUsage = testData.callConfigLegacyAudioUsage,
-            ),
-        ).get(CallType.Default.name)
-
-        assertEquals(testData.callConfigLegacyRunService, config.runCallServiceInForeground)
-        assertEquals(testData.callConfigLegacyAudioUsage, config.audioUsage)
-    }
-
-    @Test
-    fun createCallConfigurationRegistry_withBothRegistryCallConfigAndLegacyCallConfig_usesRegistry() {
-        val builder = StreamVideoBuilder(context = context, apiKey = authData!!.apiKey)
-
-        val config = builder.createCallConfigurationRegistry(
-            callServiceConfig = CallServiceConfig(
-                runCallServiceInForeground = testData.callConfigLegacyRunService,
-                audioUsage = testData.callConfigLegacyAudioUsage,
-            ),
             callServiceConfigRegistry = CallServiceConfigRegistry().apply {
                 register(CallType.Default.name) {
                     setRunCallServiceInForeground(testData.callConfigRegistryRunService)
