@@ -50,7 +50,7 @@ data class CallMemberUpdatedPermissionEvent (
     val capabilitiesByRole: Map<String, List<String>> = emptyMap(),
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.member_updated_permission"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

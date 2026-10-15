@@ -50,7 +50,7 @@ data class IngressStartedEvent (
     val userId: String,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "ingress.started",
 
     @Json(name = "client_ip")
     val clientIp: String? = null,

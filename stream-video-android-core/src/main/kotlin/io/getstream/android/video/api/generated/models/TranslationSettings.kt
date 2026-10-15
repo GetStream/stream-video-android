@@ -38,5 +38,5 @@ data class TranslationSettings (
     val enabled: Boolean? = null,
 
     @Json(name = "languages")
-    val languages: List<String>? = emptyList()
+    val languages: List<String>? = null
 )

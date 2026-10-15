@@ -44,7 +44,7 @@ data class UserUpdatedEvent (
     val user: io.getstream.android.video.api.generated.models.UserResponsePrivacyFields,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "user.updated",
 
     @Json(name = "received_at")
     val receivedAt: org.threeten.bp.OffsetDateTime? = null

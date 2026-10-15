@@ -44,7 +44,7 @@ data class CallLiveStartedEvent (
     val call: io.getstream.android.video.api.generated.models.CallResponse,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.live_started"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

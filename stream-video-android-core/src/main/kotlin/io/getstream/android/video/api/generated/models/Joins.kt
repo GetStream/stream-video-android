@@ -47,5 +47,5 @@ data class Joins (
     val joinAttempts: Int? = null,
 
     @Json(name = "join_success_rate")
-    val joinSuccessRate: Float? = null
+    val joinSuccessRate: Double? = null
 )

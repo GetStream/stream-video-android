@@ -47,5 +47,5 @@ data class CallStatsParticipant (
     val name: String? = null,
 
     @Json(name = "roles")
-    val roles: List<String>? = emptyList()
+    val roles: List<String>? = null
 )

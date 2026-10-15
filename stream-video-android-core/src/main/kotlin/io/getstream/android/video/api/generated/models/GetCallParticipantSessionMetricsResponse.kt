@@ -56,7 +56,7 @@ data class GetCallParticipantSessionMetricsResponse (
     val userSessionId: String? = null,
 
     @Json(name = "published_tracks")
-    val publishedTracks: List<io.getstream.android.video.api.generated.models.PublishedTrackMetrics>? = emptyList(),
+    val publishedTracks: List<io.getstream.android.video.api.generated.models.PublishedTrackMetrics>? = null,
 
     @Json(name = "client")
     val client: io.getstream.android.video.api.generated.models.SessionClient? = null

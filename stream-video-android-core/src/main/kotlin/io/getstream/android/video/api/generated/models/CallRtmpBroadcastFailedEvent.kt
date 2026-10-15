@@ -44,7 +44,7 @@ data class CallRtmpBroadcastFailedEvent (
     val name: String,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.rtmp_broadcast_failed"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

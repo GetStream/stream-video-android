@@ -38,23 +38,23 @@ data class ViewerBehavior (
     val connectionDurationP50S: Int,
 
     @Json(name = "connections_per_viewer_mean")
-    val connectionsPerViewerMean: Float,
+    val connectionsPerViewerMean: Double,
 
     @Json(name = "median_watch_min")
-    val medianWatchMin: Float,
+    val medianWatchMin: Double,
 
     @Json(name = "note")
     val note: String,
 
     @Json(name = "p90_watch_min")
-    val p90WatchMin: Float,
+    val p90WatchMin: Double,
 
     @Json(name = "bounce_rate_pct")
-    val bounceRatePct: Float? = null,
+    val bounceRatePct: Double? = null,
 
     @Json(name = "connections_under_30s_pct")
-    val connectionsUnder30sPct: Float? = null,
+    val connectionsUnder30sPct: Double? = null,
 
     @Json(name = "return_visit_rate_pct")
-    val returnVisitRatePct: Float? = null
+    val returnVisitRatePct: Double? = null
 )

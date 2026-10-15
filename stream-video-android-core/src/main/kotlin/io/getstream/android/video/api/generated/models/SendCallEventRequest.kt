@@ -35,5 +35,5 @@ import com.squareup.moshi.ToJson
  */
 data class SendCallEventRequest (
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = emptyMap()
+    val custom: Map<String, Any?>? = null
 )

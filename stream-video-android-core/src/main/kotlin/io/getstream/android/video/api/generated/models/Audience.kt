@@ -38,7 +38,7 @@ data class Audience (
     val avgConcurrentViewers: Int,
 
     @Json(name = "hours_watched")
-    val hoursWatched: Float,
+    val hoursWatched: Double,
 
     @Json(name = "peak_concurrent_viewers")
     val peakConcurrentViewers: Int,
@@ -59,10 +59,10 @@ data class Audience (
     val rampUpMinTo90pctPeak: Int? = null,
 
     @Json(name = "retention_at_90pct_mark")
-    val retentionAt90pctMark: Float? = null,
+    val retentionAt90pctMark: Double? = null,
 
     @Json(name = "retention_at_midpoint")
-    val retentionAtMidpoint: Float? = null,
+    val retentionAtMidpoint: Double? = null,
 
     @Json(name = "shape")
     val shape: String? = null

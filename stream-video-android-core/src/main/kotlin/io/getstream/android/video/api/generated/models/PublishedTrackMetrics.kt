@@ -44,7 +44,7 @@ data class PublishedTrackMetrics (
     val trackType: String? = null,
 
     @Json(name = "warnings")
-    val warnings: List<io.getstream.android.video.api.generated.models.SessionWarningResponse>? = emptyList(),
+    val warnings: List<io.getstream.android.video.api.generated.models.SessionWarningResponse>? = null,
 
     @Json(name = "bitrate")
     val bitrate: io.getstream.android.video.api.generated.models.MetricTimeSeries? = null,

@@ -77,5 +77,5 @@ data class UserResponseCommonFields (
     val name: String? = null,
 
     @Json(name = "teams_role")
-    val teamsRole: Map<String, String>? = emptyMap()
+    val teamsRole: Map<String, String>? = null
 )

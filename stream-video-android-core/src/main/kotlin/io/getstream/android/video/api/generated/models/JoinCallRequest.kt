@@ -62,7 +62,7 @@ data class JoinCallRequest (
     val video: Boolean? = null,
 
     @Json(name = "migrating_from_list")
-    val migratingFromList: List<String>? = emptyList(),
+    val migratingFromList: List<String>? = null,
 
     @Json(name = "data")
     val data: io.getstream.android.video.api.generated.models.CallRequest? = null

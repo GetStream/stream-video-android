@@ -56,5 +56,5 @@ data class FeedsPreferencesResponse (
     val reaction: String? = null,
 
     @Json(name = "custom_activity_types")
-    val customActivityTypes: Map<String, String>? = emptyMap()
+    val customActivityTypes: Map<String, String>? = null
 )

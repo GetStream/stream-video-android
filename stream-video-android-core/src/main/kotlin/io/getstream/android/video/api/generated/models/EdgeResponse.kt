@@ -50,10 +50,10 @@ data class EdgeResponse (
     val latencyTestUrl: String,
 
     @Json(name = "latitude")
-    val latitude: Float,
+    val latitude: Double,
 
     @Json(name = "longitude")
-    val longitude: Float,
+    val longitude: Double,
 
     @Json(name = "red")
     val red: Int,

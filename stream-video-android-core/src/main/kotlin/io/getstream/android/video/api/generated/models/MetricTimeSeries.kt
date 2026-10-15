@@ -35,5 +35,5 @@ import com.squareup.moshi.ToJson
  */
 data class MetricTimeSeries (
     @Json(name = "data_points")
-    val dataPoints: List<List<Float>>? = emptyList()
+    val dataPoints: List<List<Double>>? = null
 )

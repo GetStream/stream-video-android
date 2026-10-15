@@ -44,7 +44,7 @@ data class HealthCheckEvent (
     val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "health.check",
 
     @Json(name = "cid")
     val cid: String? = null,

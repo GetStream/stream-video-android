@@ -50,7 +50,7 @@ data class CallModerationWarningEvent (
     val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.moderation_warning"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

@@ -50,5 +50,5 @@ data class ConnectUserDetailsRequest (
     val name: String? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = emptyMap()
+    val custom: Map<String, Any?>? = null
 )

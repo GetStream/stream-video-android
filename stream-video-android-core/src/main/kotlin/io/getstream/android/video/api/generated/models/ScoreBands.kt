@@ -35,11 +35,11 @@ import com.squareup.moshi.ToJson
  */
 data class ScoreBands (
     @Json(name = "good")
-    val good: Float? = null,
+    val good: Double? = null,
 
     @Json(name = "ok")
-    val ok: Float? = null,
+    val ok: Double? = null,
 
     @Json(name = "poor")
-    val poor: Float? = null
+    val poor: Double? = null
 )

@@ -38,7 +38,7 @@ data class IndividualRecordingSettingsRequest (
     val mode: Mode,
 
     @Json(name = "output_types")
-    val outputTypes: List<String>? = emptyList()
+    val outputTypes: List<String>? = null
 )
 {
     

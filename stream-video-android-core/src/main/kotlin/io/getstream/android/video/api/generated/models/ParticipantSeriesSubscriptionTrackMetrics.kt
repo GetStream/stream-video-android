@@ -44,5 +44,5 @@ data class ParticipantSeriesSubscriptionTrackMetrics (
     val publisherUserSessionId: String? = null,
 
     @Json(name = "tracks")
-    val tracks: Map<String, List<io.getstream.android.video.api.generated.models.ParticipantSeriesTrackMetrics>>? = emptyMap()
+    val tracks: Map<String, List<io.getstream.android.video.api.generated.models.ParticipantSeriesTrackMetrics>>? = null
 )

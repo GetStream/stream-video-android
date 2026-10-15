@@ -38,8 +38,8 @@ data class RingCallRequest (
     val video: Boolean? = null,
 
     @Json(name = "members_ids")
-    val membersIds: List<String>? = emptyList(),
+    val membersIds: List<String>? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = emptyMap()
+    val custom: Map<String, Any?>? = null
 )

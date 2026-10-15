@@ -41,5 +41,5 @@ data class QueryAggregateCallStatsRequest (
     val to: String? = null,
 
     @Json(name = "report_types")
-    val reportTypes: List<String>? = emptyList()
+    val reportTypes: List<String>? = null
 )

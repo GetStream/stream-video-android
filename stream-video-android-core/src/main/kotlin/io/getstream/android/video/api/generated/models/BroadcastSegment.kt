@@ -41,17 +41,17 @@ data class BroadcastSegment (
     val sessions: Int,
 
     @Json(name = "avg_quality_score")
-    val avgQualityScore: Float? = null,
+    val avgQualityScore: Double? = null,
 
     @Json(name = "p5_quality_score")
-    val p5QualityScore: Float? = null,
+    val p5QualityScore: Double? = null,
 
     @Json(name = "poor_pct")
-    val poorPct: Float? = null,
+    val poorPct: Double? = null,
 
     @Json(name = "share_pct")
-    val sharePct: Float? = null,
+    val sharePct: Double? = null,
 
     @Json(name = "watch_share_pct")
-    val watchSharePct: Float? = null
+    val watchSharePct: Double? = null
 )

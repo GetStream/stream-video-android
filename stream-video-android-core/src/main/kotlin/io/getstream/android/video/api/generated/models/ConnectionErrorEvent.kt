@@ -44,7 +44,7 @@ data class ConnectionErrorEvent (
     val error: io.getstream.android.video.api.generated.models.APIError,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "connection.error"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {

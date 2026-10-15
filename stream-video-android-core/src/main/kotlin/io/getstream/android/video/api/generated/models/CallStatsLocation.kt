@@ -50,10 +50,10 @@ data class CallStatsLocation (
     val countryIsoCode: String? = null,
 
     @Json(name = "latitude")
-    val latitude: Float? = null,
+    val latitude: Double? = null,
 
     @Json(name = "longitude")
-    val longitude: Float? = null,
+    val longitude: Double? = null,
 
     @Json(name = "subdivision")
     val subdivision: String? = null

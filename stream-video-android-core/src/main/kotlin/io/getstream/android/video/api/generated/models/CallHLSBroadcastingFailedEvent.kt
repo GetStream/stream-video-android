@@ -41,7 +41,7 @@ data class CallHLSBroadcastingFailedEvent (
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.hls_broadcasting_failed"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

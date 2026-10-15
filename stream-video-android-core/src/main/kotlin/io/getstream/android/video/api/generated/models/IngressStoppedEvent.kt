@@ -47,7 +47,7 @@ data class IngressStoppedEvent (
     val userId: String,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "ingress.stopped"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

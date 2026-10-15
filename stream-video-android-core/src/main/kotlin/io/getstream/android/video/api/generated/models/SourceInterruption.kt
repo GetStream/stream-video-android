@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 data class SourceInterruption (
     @Json(name = "at_offset_min")
-    val atOffsetMin: Float,
+    val atOffsetMin: Double,
 
     @Json(name = "dead_air_s")
     val deadAirS: Int,

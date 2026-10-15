@@ -44,8 +44,8 @@ data class WSAuthMessage (
     val eventProtocol: Int? = null,
 
     @Json(name = "member_custom_include")
-    val memberCustomInclude: List<String>? = emptyList(),
+    val memberCustomInclude: List<String>? = null,
 
     @Json(name = "products")
-    val products: List<String>? = emptyList()
+    val products: List<String>? = null
 )

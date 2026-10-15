@@ -47,7 +47,7 @@ data class CallModerationBlurEvent (
     val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.moderation_blur"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

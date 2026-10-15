@@ -44,16 +44,16 @@ data class ParticipantReportResponse (
     val maxConcurrent: Int? = null,
 
     @Json(name = "by_browser")
-    val byBrowser: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
+    val byBrowser: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
 
     @Json(name = "by_country")
-    val byCountry: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
+    val byCountry: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
 
     @Json(name = "by_device")
-    val byDevice: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
+    val byDevice: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
 
     @Json(name = "by_operating_system")
-    val byOperatingSystem: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = emptyList(),
+    val byOperatingSystem: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
 
     @Json(name = "count_over_time")
     val countOverTime: io.getstream.android.video.api.generated.models.ParticipantCountOverTimeResponse? = null,

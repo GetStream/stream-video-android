@@ -83,5 +83,5 @@ data class OwnUserResponse (
     val pushPreferences: io.getstream.android.video.api.generated.models.PushPreferencesResponse? = null,
 
     @Json(name = "teams_role")
-    val teamsRole: Map<String, String>? = emptyMap()
+    val teamsRole: Map<String, String>? = null
 )

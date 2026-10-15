@@ -59,7 +59,7 @@ data class CallStatsParticipantSession (
     val currentSfu: String? = null,
 
     @Json(name = "distance_to_sfu_kilometers")
-    val distanceToSfuKilometers: Float? = null,
+    val distanceToSfuKilometers: Double? = null,
 
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,

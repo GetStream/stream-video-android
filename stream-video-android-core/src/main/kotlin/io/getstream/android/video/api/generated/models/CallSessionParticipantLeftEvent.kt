@@ -50,7 +50,7 @@ data class CallSessionParticipantLeftEvent (
     val participant: io.getstream.android.video.api.generated.models.CallParticipantResponse,
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "call.session_participant_left",
 
     @Json(name = "reason")
     val reason: String? = null

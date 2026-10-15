@@ -50,7 +50,7 @@ data class CallSessionParticipantCountsUpdatedEvent (
     val participantsCountByRole: Map<String, Int> = emptyMap(),
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.session_participant_count_updated"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

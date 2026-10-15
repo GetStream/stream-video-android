@@ -44,7 +44,7 @@ data class AppUpdatedEvent (
     val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "type")
-    val type: String,
+    val type: String = "app.updated",
 
     @Json(name = "received_at")
     val receivedAt: org.threeten.bp.OffsetDateTime? = null

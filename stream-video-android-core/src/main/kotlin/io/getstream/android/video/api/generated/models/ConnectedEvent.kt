@@ -44,7 +44,7 @@ data class ConnectedEvent (
     val me: io.getstream.android.video.api.generated.models.OwnUserResponse,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "connection.ok"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {

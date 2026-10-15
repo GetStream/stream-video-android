@@ -92,30 +92,30 @@ public final class io/getstream/android/video/api/generated/models/AppUpdatedEve
 }
 
 public final class io/getstream/android/video/api/generated/models/Audience {
-	public fun <init> (IFIIILjava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/String;)V
-	public synthetic fun <init> (IFIIILjava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IDIIILjava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/String;)V
+	public synthetic fun <init> (IDIIILjava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
-	public final fun component10 ()Ljava/lang/Float;
+	public final fun component10 ()Ljava/lang/Double;
 	public final fun component11 ()Ljava/lang/String;
-	public final fun component2 ()F
+	public final fun component2 ()D
 	public final fun component3 ()I
 	public final fun component4 ()I
 	public final fun component5 ()I
 	public final fun component6 ()Ljava/util/List;
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/lang/Integer;
-	public final fun component9 ()Ljava/lang/Float;
-	public final fun copy (IFIIILjava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/String;)Lio/getstream/android/video/api/generated/models/Audience;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/Audience;IFIIILjava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/Audience;
+	public final fun component9 ()Ljava/lang/Double;
+	public final fun copy (IDIIILjava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/String;)Lio/getstream/android/video/api/generated/models/Audience;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/Audience;IDIIILjava/util/List;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/Audience;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAvgConcurrentViewers ()I
 	public final fun getConcurrencyByMinute ()Ljava/util/List;
-	public final fun getHoursWatched ()F
+	public final fun getHoursWatched ()D
 	public final fun getPeakAt ()Ljava/lang/String;
 	public final fun getPeakConcurrentViewers ()I
 	public final fun getRampUpMinTo90pctPeak ()Ljava/lang/Integer;
-	public final fun getRetentionAt90pctMark ()Ljava/lang/Float;
-	public final fun getRetentionAtMidpoint ()Ljava/lang/Float;
+	public final fun getRetentionAt90pctMark ()Ljava/lang/Double;
+	public final fun getRetentionAtMidpoint ()Ljava/lang/Double;
 	public final fun getShape ()Ljava/lang/String;
 	public final fun getUniqueViewers ()I
 	public final fun getViewerConnections ()I
@@ -325,14 +325,14 @@ public final class io/getstream/android/video/api/generated/models/BlockedUserEv
 }
 
 public final class io/getstream/android/video/api/generated/models/Bound {
-	public fun <init> (ZF)V
+	public fun <init> (ZD)V
 	public final fun component1 ()Z
-	public final fun component2 ()F
-	public final fun copy (ZF)Lio/getstream/android/video/api/generated/models/Bound;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/Bound;ZFILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/Bound;
+	public final fun component2 ()D
+	public final fun copy (ZD)Lio/getstream/android/video/api/generated/models/Bound;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/Bound;ZDILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/Bound;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getInclusive ()Z
-	public final fun getValue ()F
+	public final fun getValue ()D
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -367,26 +367,26 @@ public final class io/getstream/android/video/api/generated/models/BroadcastDige
 }
 
 public final class io/getstream/android/video/api/generated/models/BroadcastInfo {
-	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)V
-	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;DLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)V
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;DLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()F
+	public final fun component5 ()D
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/util/List;
 	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)Lio/getstream/android/video/api/generated/models/BroadcastInfo;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/BroadcastInfo;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/BroadcastInfo;
+	public final fun copy (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;DLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;)Lio/getstream/android/video/api/generated/models/BroadcastInfo;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/BroadcastInfo;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;DLjava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/BroadcastInfo;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAppId ()I
 	public final fun getCallCid ()Ljava/lang/String;
 	public final fun getCallSessionId ()Ljava/lang/String;
 	public final fun getCallType ()Ljava/lang/String;
 	public final fun getCreators ()Ljava/util/List;
-	public final fun getDurationMin ()F
+	public final fun getDurationMin ()D
 	public final fun getEndedAt ()Ljava/lang/String;
 	public final fun getSourceMode ()Ljava/lang/String;
 	public final fun getStartedAt ()Ljava/lang/String;
@@ -395,25 +395,25 @@ public final class io/getstream/android/video/api/generated/models/BroadcastInfo
 }
 
 public final class io/getstream/android/video/api/generated/models/BroadcastSegment {
-	public fun <init> (Ljava/lang/String;ILjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)V
-	public synthetic fun <init> (Ljava/lang/String;ILjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;ILjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)V
+	public synthetic fun <init> (Ljava/lang/String;ILjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()I
-	public final fun component3 ()Ljava/lang/Float;
-	public final fun component4 ()Ljava/lang/Float;
-	public final fun component5 ()Ljava/lang/Float;
-	public final fun component6 ()Ljava/lang/Float;
-	public final fun component7 ()Ljava/lang/Float;
-	public final fun copy (Ljava/lang/String;ILjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)Lio/getstream/android/video/api/generated/models/BroadcastSegment;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/BroadcastSegment;Ljava/lang/String;ILjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/BroadcastSegment;
+	public final fun component3 ()Ljava/lang/Double;
+	public final fun component4 ()Ljava/lang/Double;
+	public final fun component5 ()Ljava/lang/Double;
+	public final fun component6 ()Ljava/lang/Double;
+	public final fun component7 ()Ljava/lang/Double;
+	public final fun copy (Ljava/lang/String;ILjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)Lio/getstream/android/video/api/generated/models/BroadcastSegment;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/BroadcastSegment;Ljava/lang/String;ILjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/BroadcastSegment;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAvgQualityScore ()Ljava/lang/Float;
+	public final fun getAvgQualityScore ()Ljava/lang/Double;
 	public final fun getKey ()Ljava/lang/String;
-	public final fun getP5QualityScore ()Ljava/lang/Float;
-	public final fun getPoorPct ()Ljava/lang/Float;
+	public final fun getP5QualityScore ()Ljava/lang/Double;
+	public final fun getPoorPct ()Ljava/lang/Double;
 	public final fun getSessions ()I
-	public final fun getSharePct ()Ljava/lang/Float;
-	public final fun getWatchSharePct ()Ljava/lang/Float;
+	public final fun getSharePct ()Ljava/lang/Double;
+	public final fun getWatchSharePct ()Ljava/lang/Double;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -452,6 +452,7 @@ public final class io/getstream/android/video/api/generated/models/BroadcastSett
 
 public final class io/getstream/android/video/api/generated/models/CallAcceptedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/CallResponse;Lio/getstream/android/video/api/generated/models/UserResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/CallResponse;Lio/getstream/android/video/api/generated/models/UserResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Lio/getstream/android/video/api/generated/models/CallResponse;
@@ -501,6 +502,7 @@ public final class io/getstream/android/video/api/generated/models/CallClosedCap
 
 public final class io/getstream/android/video/api/generated/models/CallClosedCaptionsFailedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -518,6 +520,7 @@ public final class io/getstream/android/video/api/generated/models/CallClosedCap
 
 public final class io/getstream/android/video/api/generated/models/CallClosedCaptionsStartedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -535,6 +538,7 @@ public final class io/getstream/android/video/api/generated/models/CallClosedCap
 
 public final class io/getstream/android/video/api/generated/models/CallClosedCaptionsStoppedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -574,6 +578,7 @@ public final class io/getstream/android/video/api/generated/models/CallCreatedEv
 
 public final class io/getstream/android/video/api/generated/models/CallDTMFEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;IILorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/UserResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;IILorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/UserResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -601,6 +606,7 @@ public final class io/getstream/android/video/api/generated/models/CallDTMFEvent
 
 public final class io/getstream/android/video/api/generated/models/CallDeletedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Lio/getstream/android/video/api/generated/models/CallResponse;
@@ -672,6 +678,7 @@ public final class io/getstream/android/video/api/generated/models/CallEndedEven
 
 public final class io/getstream/android/video/api/generated/models/CallFrameRecordingFailedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -723,6 +730,7 @@ public final class io/getstream/android/video/api/generated/models/CallFrameReco
 
 public final class io/getstream/android/video/api/generated/models/CallFrameRecordingStartedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -744,6 +752,7 @@ public final class io/getstream/android/video/api/generated/models/CallFrameReco
 
 public final class io/getstream/android/video/api/generated/models/CallFrameRecordingStoppedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -765,6 +774,7 @@ public final class io/getstream/android/video/api/generated/models/CallFrameReco
 
 public final class io/getstream/android/video/api/generated/models/CallHLSBroadcastingFailedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -782,6 +792,7 @@ public final class io/getstream/android/video/api/generated/models/CallHLSBroadc
 
 public final class io/getstream/android/video/api/generated/models/CallHLSBroadcastingStartedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -803,6 +814,7 @@ public final class io/getstream/android/video/api/generated/models/CallHLSBroadc
 
 public final class io/getstream/android/video/api/generated/models/CallHLSBroadcastingStoppedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -853,6 +865,7 @@ public final class io/getstream/android/video/api/generated/models/CallLevelEven
 
 public final class io/getstream/android/video/api/generated/models/CallLiveStartedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Lio/getstream/android/video/api/generated/models/CallResponse;
@@ -1123,6 +1136,7 @@ public final class io/getstream/android/video/api/generated/models/CallParticipa
 
 public final class io/getstream/android/video/api/generated/models/CallReactionEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/VideoReactionResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/VideoReactionResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Lio/getstream/android/video/api/generated/models/VideoReactionResponse;
@@ -1163,6 +1177,7 @@ public final class io/getstream/android/video/api/generated/models/CallRecording
 
 public final class io/getstream/android/video/api/generated/models/CallRecordingFailedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallRecordingFailedEvent$RecordingType;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallRecordingFailedEvent$RecordingType;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -1226,6 +1241,7 @@ public final class io/getstream/android/video/api/generated/models/CallRecording
 
 public final class io/getstream/android/video/api/generated/models/CallRecordingReadyEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallRecordingReadyEvent$RecordingType;Lio/getstream/android/video/api/generated/models/CallRecording;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallRecordingReadyEvent$RecordingType;Lio/getstream/android/video/api/generated/models/CallRecording;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -1291,6 +1307,7 @@ public final class io/getstream/android/video/api/generated/models/CallRecording
 
 public final class io/getstream/android/video/api/generated/models/CallRecordingStartedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallRecordingStartedEvent$RecordingType;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallRecordingStartedEvent$RecordingType;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -1354,6 +1371,7 @@ public final class io/getstream/android/video/api/generated/models/CallRecording
 
 public final class io/getstream/android/video/api/generated/models/CallRecordingStoppedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallRecordingStoppedEvent$RecordingType;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallRecordingStoppedEvent$RecordingType;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -1440,16 +1458,16 @@ public final class io/getstream/android/video/api/generated/models/CallRejectedE
 }
 
 public final class io/getstream/android/video/api/generated/models/CallReportResponse {
-	public fun <init> (FLorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
-	public synthetic fun <init> (FLorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()F
+	public fun <init> (DLorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)V
+	public synthetic fun <init> (DLorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()D
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun copy (FLorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)Lio/getstream/android/video/api/generated/models/CallReportResponse;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/CallReportResponse;FLorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/CallReportResponse;
+	public final fun copy (DLorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;)Lio/getstream/android/video/api/generated/models/CallReportResponse;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/CallReportResponse;DLorg/threeten/bp/OffsetDateTime;Lorg/threeten/bp/OffsetDateTime;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/CallReportResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getEndedAt ()Lorg/threeten/bp/OffsetDateTime;
-	public final fun getScore ()F
+	public final fun getScore ()D
 	public final fun getStartedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -1572,6 +1590,7 @@ public final class io/getstream/android/video/api/generated/models/CallRingEvent
 
 public final class io/getstream/android/video/api/generated/models/CallRtmpBroadcastFailedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -1591,6 +1610,7 @@ public final class io/getstream/android/video/api/generated/models/CallRtmpBroad
 
 public final class io/getstream/android/video/api/generated/models/CallRtmpBroadcastStartedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -1610,6 +1630,7 @@ public final class io/getstream/android/video/api/generated/models/CallRtmpBroad
 
 public final class io/getstream/android/video/api/generated/models/CallRtmpBroadcastStoppedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -1629,6 +1650,7 @@ public final class io/getstream/android/video/api/generated/models/CallRtmpBroad
 
 public final class io/getstream/android/video/api/generated/models/CallSessionEndedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -1674,6 +1696,7 @@ public final class io/getstream/android/video/api/generated/models/CallSessionPa
 
 public final class io/getstream/android/video/api/generated/models/CallSessionParticipantJoinedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallParticipantResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallParticipantResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -1755,6 +1778,7 @@ public final class io/getstream/android/video/api/generated/models/CallSessionRe
 
 public final class io/getstream/android/video/api/generated/models/CallSessionStartedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -1887,26 +1911,26 @@ public final class io/getstream/android/video/api/generated/models/CallStateResp
 
 public final class io/getstream/android/video/api/generated/models/CallStatsLocation {
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/Integer;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Ljava/lang/Float;
-	public final fun component7 ()Ljava/lang/Float;
+	public final fun component6 ()Ljava/lang/Double;
+	public final fun component7 ()Ljava/lang/Double;
 	public final fun component8 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/String;)Lio/getstream/android/video/api/generated/models/CallStatsLocation;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/CallStatsLocation;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/CallStatsLocation;
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/String;)Lio/getstream/android/video/api/generated/models/CallStatsLocation;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/CallStatsLocation;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/CallStatsLocation;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAccuracyRadiusMeters ()Ljava/lang/Integer;
 	public final fun getCity ()Ljava/lang/String;
 	public final fun getContinent ()Ljava/lang/String;
 	public final fun getCountry ()Ljava/lang/String;
 	public final fun getCountryIsoCode ()Ljava/lang/String;
-	public final fun getLatitude ()Ljava/lang/Float;
-	public final fun getLongitude ()Ljava/lang/Float;
+	public final fun getLatitude ()Ljava/lang/Double;
+	public final fun getLongitude ()Ljava/lang/Double;
 	public final fun getSubdivision ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -2034,10 +2058,10 @@ public final class io/getstream/android/video/api/generated/models/CallStatsPart
 }
 
 public final class io/getstream/android/video/api/generated/models/CallStatsParticipantCounts {
-	public fun <init> (IIIIIIILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Float;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
-	public synthetic fun <init> (IIIIIIILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Float;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IIIIIIILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (IIIIIIILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
-	public final fun component10 ()Ljava/lang/Float;
+	public final fun component10 ()Ljava/lang/Double;
 	public final fun component11 ()Ljava/lang/Integer;
 	public final fun component12 ()Ljava/lang/Integer;
 	public final fun component13 ()Ljava/lang/Integer;
@@ -2051,12 +2075,12 @@ public final class io/getstream/android/video/api/generated/models/CallStatsPart
 	public final fun component7 ()I
 	public final fun component8 ()Ljava/lang/Integer;
 	public final fun component9 ()Ljava/lang/Integer;
-	public final fun copy (IIIIIIILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Float;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)Lio/getstream/android/video/api/generated/models/CallStatsParticipantCounts;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/CallStatsParticipantCounts;IIIIIIILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Float;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/CallStatsParticipantCounts;
+	public final fun copy (IIIIIIILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)Lio/getstream/android/video/api/generated/models/CallStatsParticipantCounts;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/CallStatsParticipantCounts;IIIIIIILjava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Double;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/CallStatsParticipantCounts;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAverageJitterMs ()Ljava/lang/Integer;
 	public final fun getAverageLatencyMs ()Ljava/lang/Integer;
-	public final fun getAvgUserRating ()Ljava/lang/Float;
+	public final fun getAvgUserRating ()Ljava/lang/Double;
 	public final fun getCallEventCount ()Ljava/lang/Integer;
 	public final fun getCqScore ()Ljava/lang/Integer;
 	public final fun getLiveSessions ()I
@@ -2074,8 +2098,8 @@ public final class io/getstream/android/video/api/generated/models/CallStatsPart
 }
 
 public final class io/getstream/android/video/api/generated/models/CallStatsParticipantSession {
-	public fun <init> (ZLjava/lang/String;Lio/getstream/android/video/api/generated/models/PublishedTrackFlags;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallStatsLocation;)V
-	public synthetic fun <init> (ZLjava/lang/String;Lio/getstream/android/video/api/generated/models/PublishedTrackFlags;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallStatsLocation;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/lang/String;Lio/getstream/android/video/api/generated/models/PublishedTrackFlags;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallStatsLocation;)V
+	public synthetic fun <init> (ZLjava/lang/String;Lio/getstream/android/video/api/generated/models/PublishedTrackFlags;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallStatsLocation;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component10 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component11 ()Ljava/lang/Integer;
@@ -2097,16 +2121,16 @@ public final class io/getstream/android/video/api/generated/models/CallStatsPart
 	public final fun component6 ()Ljava/lang/Integer;
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/lang/String;
-	public final fun component9 ()Ljava/lang/Float;
-	public final fun copy (ZLjava/lang/String;Lio/getstream/android/video/api/generated/models/PublishedTrackFlags;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallStatsLocation;)Lio/getstream/android/video/api/generated/models/CallStatsParticipantSession;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/CallStatsParticipantSession;ZLjava/lang/String;Lio/getstream/android/video/api/generated/models/PublishedTrackFlags;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallStatsLocation;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/CallStatsParticipantSession;
+	public final fun component9 ()Ljava/lang/Double;
+	public final fun copy (ZLjava/lang/String;Lio/getstream/android/video/api/generated/models/PublishedTrackFlags;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallStatsLocation;)Lio/getstream/android/video/api/generated/models/CallStatsParticipantSession;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/CallStatsParticipantSession;ZLjava/lang/String;Lio/getstream/android/video/api/generated/models/PublishedTrackFlags;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallStatsLocation;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/CallStatsParticipantSession;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBrowser ()Ljava/lang/String;
 	public final fun getBrowserVersion ()Ljava/lang/String;
 	public final fun getCqScore ()Ljava/lang/Integer;
 	public final fun getCurrentIp ()Ljava/lang/String;
 	public final fun getCurrentSfu ()Ljava/lang/String;
-	public final fun getDistanceToSfuKilometers ()Ljava/lang/Float;
+	public final fun getDistanceToSfuKilometers ()Ljava/lang/Double;
 	public final fun getEndedAt ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun getFreezesDurationMs ()Ljava/lang/Integer;
 	public final fun getIngress ()Ljava/lang/String;
@@ -2246,6 +2270,7 @@ public final class io/getstream/android/video/api/generated/models/CallTranscrip
 
 public final class io/getstream/android/video/api/generated/models/CallTranscriptionReadyEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallTranscription;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/CallTranscription;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -2267,6 +2292,7 @@ public final class io/getstream/android/video/api/generated/models/CallTranscrip
 
 public final class io/getstream/android/video/api/generated/models/CallTranscriptionStartedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -2286,6 +2312,7 @@ public final class io/getstream/android/video/api/generated/models/CallTranscrip
 
 public final class io/getstream/android/video/api/generated/models/CallTranscriptionStoppedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -2516,6 +2543,7 @@ public final class io/getstream/android/video/api/generated/models/ClientEvent {
 
 public final class io/getstream/android/video/api/generated/models/ClosedCaptionEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/CallClosedCaption;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/CallClosedCaption;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Lio/getstream/android/video/api/generated/models/CallClosedCaption;
@@ -2620,6 +2648,7 @@ public final class io/getstream/android/video/api/generated/models/ConnectUserDe
 
 public final class io/getstream/android/video/api/generated/models/ConnectedEvent : io/getstream/android/video/api/generated/models/VideoEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/OwnUserResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/OwnUserResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Lio/getstream/android/video/api/generated/models/OwnUserResponse;
@@ -2638,6 +2667,7 @@ public final class io/getstream/android/video/api/generated/models/ConnectedEven
 
 public final class io/getstream/android/video/api/generated/models/ConnectionErrorEvent : io/getstream/android/video/api/generated/models/VideoEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/APIError;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/APIError;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Lio/getstream/android/video/api/generated/models/APIError;
@@ -2655,14 +2685,14 @@ public final class io/getstream/android/video/api/generated/models/ConnectionErr
 }
 
 public final class io/getstream/android/video/api/generated/models/CoordinatesResponse {
-	public fun <init> (FF)V
-	public final fun component1 ()F
-	public final fun component2 ()F
-	public final fun copy (FF)Lio/getstream/android/video/api/generated/models/CoordinatesResponse;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/CoordinatesResponse;FFILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/CoordinatesResponse;
+	public fun <init> (DD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun copy (DD)Lio/getstream/android/video/api/generated/models/CoordinatesResponse;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/CoordinatesResponse;DDILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/CoordinatesResponse;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getLatitude ()F
-	public final fun getLongitude ()F
+	public final fun getLatitude ()D
+	public final fun getLongitude ()D
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -2956,27 +2986,27 @@ public final class io/getstream/android/video/api/generated/models/DeleteTranscr
 }
 
 public final class io/getstream/android/video/api/generated/models/DeliveryZoneSegment {
-	public fun <init> (Ljava/lang/String;ZILjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)V
-	public synthetic fun <init> (Ljava/lang/String;ZILjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;ZILjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)V
+	public synthetic fun <init> (Ljava/lang/String;ZILjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Z
 	public final fun component3 ()I
-	public final fun component4 ()Ljava/lang/Float;
-	public final fun component5 ()Ljava/lang/Float;
-	public final fun component6 ()Ljava/lang/Float;
-	public final fun component7 ()Ljava/lang/Float;
-	public final fun component8 ()Ljava/lang/Float;
-	public final fun copy (Ljava/lang/String;ZILjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)Lio/getstream/android/video/api/generated/models/DeliveryZoneSegment;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/DeliveryZoneSegment;Ljava/lang/String;ZILjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/DeliveryZoneSegment;
+	public final fun component4 ()Ljava/lang/Double;
+	public final fun component5 ()Ljava/lang/Double;
+	public final fun component6 ()Ljava/lang/Double;
+	public final fun component7 ()Ljava/lang/Double;
+	public final fun component8 ()Ljava/lang/Double;
+	public final fun copy (Ljava/lang/String;ZILjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)Lio/getstream/android/video/api/generated/models/DeliveryZoneSegment;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/DeliveryZoneSegment;Ljava/lang/String;ZILjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/DeliveryZoneSegment;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAvgQualityScore ()Ljava/lang/Float;
+	public final fun getAvgQualityScore ()Ljava/lang/Double;
 	public final fun getKey ()Ljava/lang/String;
 	public final fun getOutlier ()Z
-	public final fun getP5QualityScore ()Ljava/lang/Float;
-	public final fun getPoorPct ()Ljava/lang/Float;
+	public final fun getP5QualityScore ()Ljava/lang/Double;
+	public final fun getPoorPct ()Ljava/lang/Double;
 	public final fun getSessions ()I
-	public final fun getSharePct ()Ljava/lang/Float;
-	public final fun getWatchSharePct ()Ljava/lang/Float;
+	public final fun getSharePct ()Ljava/lang/Double;
+	public final fun getWatchSharePct ()Ljava/lang/Double;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -3010,27 +3040,27 @@ public final class io/getstream/android/video/api/generated/models/DeviceRespons
 }
 
 public final class io/getstream/android/video/api/generated/models/EdgeResponse {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;FFILjava/lang/String;I)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;DDILjava/lang/String;I)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()I
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()I
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()F
-	public final fun component7 ()F
+	public final fun component6 ()D
+	public final fun component7 ()D
 	public final fun component8 ()I
 	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;FFILjava/lang/String;I)Lio/getstream/android/video/api/generated/models/EdgeResponse;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/EdgeResponse;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;FFILjava/lang/String;IILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/EdgeResponse;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;DDILjava/lang/String;I)Lio/getstream/android/video/api/generated/models/EdgeResponse;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/EdgeResponse;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;DDILjava/lang/String;IILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/EdgeResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getContinentCode ()Ljava/lang/String;
 	public final fun getCountryIsoCode ()Ljava/lang/String;
 	public final fun getGreen ()I
 	public final fun getId ()Ljava/lang/String;
 	public final fun getLatencyTestUrl ()Ljava/lang/String;
-	public final fun getLatitude ()F
-	public final fun getLongitude ()F
+	public final fun getLatitude ()D
+	public final fun getLongitude ()D
 	public final fun getRed ()I
 	public final fun getSubdivisionIsoCode ()Ljava/lang/String;
 	public final fun getYellow ()I
@@ -4186,6 +4216,7 @@ public final class io/getstream/android/video/api/generated/models/IngressStarte
 
 public final class io/getstream/android/video/api/generated/models/IngressStoppedEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Ljava/lang/String;
@@ -4368,20 +4399,20 @@ public final class io/getstream/android/video/api/generated/models/JoinCallRespo
 }
 
 public final class io/getstream/android/video/api/generated/models/Joins {
-	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Float;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Double;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/Map;
 	public final fun component3 ()Ljava/util/Map;
 	public final fun component4 ()Ljava/lang/Integer;
-	public final fun component5 ()Ljava/lang/Float;
-	public final fun copy (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Float;)Lio/getstream/android/video/api/generated/models/Joins;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/Joins;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Float;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/Joins;
+	public final fun component5 ()Ljava/lang/Double;
+	public final fun copy (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Double;)Lio/getstream/android/video/api/generated/models/Joins;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/Joins;Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;Ljava/lang/Integer;Ljava/lang/Double;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/Joins;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDisconnectReasons ()Ljava/util/Map;
 	public final fun getFailureStages ()Ljava/util/Map;
 	public final fun getJoinAttempts ()Ljava/lang/Integer;
-	public final fun getJoinSuccessRate ()Ljava/lang/Float;
+	public final fun getJoinSuccessRate ()Ljava/lang/Double;
 	public final fun getReason ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -4789,19 +4820,19 @@ public final class io/getstream/android/video/api/generated/models/MetricDescrip
 }
 
 public final class io/getstream/android/video/api/generated/models/MetricThreshold {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/lang/Integer;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;DLjava/lang/String;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;DLjava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()F
+	public final fun component3 ()D
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/Integer;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/lang/Integer;)Lio/getstream/android/video/api/generated/models/MetricThreshold;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/MetricThreshold;Ljava/lang/String;Ljava/lang/String;FLjava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/MetricThreshold;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;DLjava/lang/String;Ljava/lang/Integer;)Lio/getstream/android/video/api/generated/models/MetricThreshold;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/MetricThreshold;Ljava/lang/String;Ljava/lang/String;DLjava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/MetricThreshold;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getLevel ()Ljava/lang/String;
 	public final fun getOperator ()Ljava/lang/String;
-	public final fun getValue ()F
+	public final fun getValue ()D
 	public final fun getValueUnit ()Ljava/lang/String;
 	public final fun getWindowSeconds ()Ljava/lang/Integer;
 	public fun hashCode ()I
@@ -4823,21 +4854,21 @@ public final class io/getstream/android/video/api/generated/models/MetricTimeSer
 
 public final class io/getstream/android/video/api/generated/models/MetricsPct {
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)V
-	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/Float;
-	public final fun component2 ()Ljava/lang/Float;
-	public final fun component3 ()Ljava/lang/Float;
-	public final fun component4 ()Ljava/lang/Float;
-	public final fun component5 ()Ljava/lang/Float;
-	public final fun copy (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)Lio/getstream/android/video/api/generated/models/MetricsPct;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/MetricsPct;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/MetricsPct;
+	public fun <init> (Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)V
+	public synthetic fun <init> (Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Double;
+	public final fun component2 ()Ljava/lang/Double;
+	public final fun component3 ()Ljava/lang/Double;
+	public final fun component4 ()Ljava/lang/Double;
+	public final fun component5 ()Ljava/lang/Double;
+	public final fun copy (Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)Lio/getstream/android/video/api/generated/models/MetricsPct;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/MetricsPct;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/MetricsPct;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFreezes ()Ljava/lang/Float;
-	public final fun getGeo ()Ljava/lang/Float;
-	public final fun getJitter ()Ljava/lang/Float;
-	public final fun getLatency ()Ljava/lang/Float;
-	public final fun getQualityScore ()Ljava/lang/Float;
+	public final fun getFreezes ()Ljava/lang/Double;
+	public final fun getGeo ()Ljava/lang/Double;
+	public final fun getJitter ()Ljava/lang/Double;
+	public final fun getLatency ()Ljava/lang/Double;
+	public final fun getQualityScore ()Ljava/lang/Double;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -4878,19 +4909,19 @@ public final class io/getstream/android/video/api/generated/models/MuteUsersResp
 
 public final class io/getstream/android/video/api/generated/models/NetworkMetricsReportResponse {
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)V
-	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/Float;
-	public final fun component2 ()Ljava/lang/Float;
-	public final fun component3 ()Ljava/lang/Float;
-	public final fun component4 ()Ljava/lang/Float;
-	public final fun copy (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)Lio/getstream/android/video/api/generated/models/NetworkMetricsReportResponse;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/NetworkMetricsReportResponse;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/NetworkMetricsReportResponse;
+	public fun <init> (Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)V
+	public synthetic fun <init> (Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Double;
+	public final fun component2 ()Ljava/lang/Double;
+	public final fun component3 ()Ljava/lang/Double;
+	public final fun component4 ()Ljava/lang/Double;
+	public final fun copy (Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)Lio/getstream/android/video/api/generated/models/NetworkMetricsReportResponse;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/NetworkMetricsReportResponse;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/NetworkMetricsReportResponse;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAverageConnectionTime ()Ljava/lang/Float;
-	public final fun getAverageJitter ()Ljava/lang/Float;
-	public final fun getAverageLatency ()Ljava/lang/Float;
-	public final fun getAverageTimeToReconnect ()Ljava/lang/Float;
+	public final fun getAverageConnectionTime ()Ljava/lang/Double;
+	public final fun getAverageJitter ()Ljava/lang/Double;
+	public final fun getAverageLatency ()Ljava/lang/Double;
+	public final fun getAverageTimeToReconnect ()Ljava/lang/Double;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -5392,15 +5423,15 @@ public final class io/getstream/android/video/api/generated/models/PerSDKUsageRe
 
 public final class io/getstream/android/video/api/generated/models/Percentiles {
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/Float;Ljava/lang/Float;)V
-	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/Float;
-	public final fun component2 ()Ljava/lang/Float;
-	public final fun copy (Ljava/lang/Float;Ljava/lang/Float;)Lio/getstream/android/video/api/generated/models/Percentiles;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/Percentiles;Ljava/lang/Float;Ljava/lang/Float;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/Percentiles;
+	public fun <init> (Ljava/lang/Double;Ljava/lang/Double;)V
+	public synthetic fun <init> (Ljava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Double;
+	public final fun component2 ()Ljava/lang/Double;
+	public final fun copy (Ljava/lang/Double;Ljava/lang/Double;)Lio/getstream/android/video/api/generated/models/Percentiles;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/Percentiles;Ljava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/Percentiles;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getP50 ()Ljava/lang/Float;
-	public final fun getP95 ()Ljava/lang/Float;
+	public final fun getP50 ()Ljava/lang/Double;
+	public final fun getP95 ()Ljava/lang/Double;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -5471,18 +5502,18 @@ public final class io/getstream/android/video/api/generated/models/PoorByCause {
 }
 
 public final class io/getstream/android/video/api/generated/models/PoorTail {
-	public fun <init> (ILjava/lang/String;ILio/getstream/android/video/api/generated/models/PoorByCause;Lio/getstream/android/video/api/generated/models/Supporting;Ljava/lang/Float;)V
-	public synthetic fun <init> (ILjava/lang/String;ILio/getstream/android/video/api/generated/models/PoorByCause;Lio/getstream/android/video/api/generated/models/Supporting;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ILjava/lang/String;ILio/getstream/android/video/api/generated/models/PoorByCause;Lio/getstream/android/video/api/generated/models/Supporting;Ljava/lang/Double;)V
+	public synthetic fun <init> (ILjava/lang/String;ILio/getstream/android/video/api/generated/models/PoorByCause;Lio/getstream/android/video/api/generated/models/Supporting;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()I
 	public final fun component4 ()Lio/getstream/android/video/api/generated/models/PoorByCause;
 	public final fun component5 ()Lio/getstream/android/video/api/generated/models/Supporting;
-	public final fun component6 ()Ljava/lang/Float;
-	public final fun copy (ILjava/lang/String;ILio/getstream/android/video/api/generated/models/PoorByCause;Lio/getstream/android/video/api/generated/models/Supporting;Ljava/lang/Float;)Lio/getstream/android/video/api/generated/models/PoorTail;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/PoorTail;ILjava/lang/String;ILio/getstream/android/video/api/generated/models/PoorByCause;Lio/getstream/android/video/api/generated/models/Supporting;Ljava/lang/Float;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/PoorTail;
+	public final fun component6 ()Ljava/lang/Double;
+	public final fun copy (ILjava/lang/String;ILio/getstream/android/video/api/generated/models/PoorByCause;Lio/getstream/android/video/api/generated/models/Supporting;Ljava/lang/Double;)Lio/getstream/android/video/api/generated/models/PoorTail;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/PoorTail;ILjava/lang/String;ILio/getstream/android/video/api/generated/models/PoorByCause;Lio/getstream/android/video/api/generated/models/Supporting;Ljava/lang/Double;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/PoorTail;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getHealthyPct ()Ljava/lang/Float;
+	public final fun getHealthyPct ()Ljava/lang/Double;
 	public final fun getHealthyViewers ()I
 	public final fun getNote ()Ljava/lang/String;
 	public final fun getPoorByCause ()Lio/getstream/android/video/api/generated/models/PoorByCause;
@@ -5535,32 +5566,32 @@ public final class io/getstream/android/video/api/generated/models/PublishedTrac
 }
 
 public final class io/getstream/android/video/api/generated/models/PublisherSession {
-	public fun <init> (FFLjava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/EncodingProfile;)V
-	public synthetic fun <init> (FFLjava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/EncodingProfile;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()F
-	public final fun component10 ()Ljava/lang/Float;
+	public fun <init> (DDLjava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/EncodingProfile;)V
+	public synthetic fun <init> (DDLjava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/EncodingProfile;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()D
+	public final fun component10 ()Ljava/lang/Double;
 	public final fun component11 ()Ljava/lang/String;
 	public final fun component12 ()Lio/getstream/android/video/api/generated/models/EncodingProfile;
-	public final fun component2 ()F
+	public final fun component2 ()D
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/Float;
+	public final fun component5 ()Ljava/lang/Double;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Ljava/lang/String;
 	public final fun component8 ()Ljava/lang/String;
 	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (FFLjava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/EncodingProfile;)Lio/getstream/android/video/api/generated/models/PublisherSession;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/PublisherSession;FFLjava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Float;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/EncodingProfile;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/PublisherSession;
+	public final fun copy (DDLjava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/EncodingProfile;)Lio/getstream/android/video/api/generated/models/PublisherSession;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/PublisherSession;DDLjava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Double;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/EncodingProfile;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/PublisherSession;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAvgJitterMs ()Ljava/lang/Float;
+	public final fun getAvgJitterMs ()Ljava/lang/Double;
 	public final fun getBrowser ()Ljava/lang/String;
 	public final fun getDeliveryZone ()Ljava/lang/String;
-	public final fun getDurationMin ()F
+	public final fun getDurationMin ()D
 	public final fun getEncoding ()Lio/getstream/android/video/api/generated/models/EncodingProfile;
 	public final fun getIngest ()Ljava/lang/String;
 	public final fun getOs ()Ljava/lang/String;
-	public final fun getSendQualityScore ()Ljava/lang/Float;
-	public final fun getStartedOffsetMin ()F
+	public final fun getSendQualityScore ()Ljava/lang/Double;
+	public final fun getStartedOffsetMin ()D
 	public final fun getTool ()Ljava/lang/String;
 	public final fun getUserId ()Ljava/lang/String;
 	public final fun getUserSessionId ()Ljava/lang/String;
@@ -5608,29 +5639,29 @@ public final class io/getstream/android/video/api/generated/models/PushPreferenc
 }
 
 public final class io/getstream/android/video/api/generated/models/Quality {
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/ScoreBands;Lio/getstream/android/video/api/generated/models/ScoreBands;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/ScoreBands;Lio/getstream/android/video/api/generated/models/ScoreBands;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/ScoreBands;Lio/getstream/android/video/api/generated/models/ScoreBands;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/ScoreBands;Lio/getstream/android/video/api/generated/models/ScoreBands;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/List;
 	public final fun component3 ()Lio/getstream/android/video/api/generated/models/Percentiles;
 	public final fun component4 ()Lio/getstream/android/video/api/generated/models/Percentiles;
 	public final fun component5 ()Lio/getstream/android/video/api/generated/models/ScoreBands;
 	public final fun component6 ()Lio/getstream/android/video/api/generated/models/ScoreBands;
-	public final fun component7 ()Ljava/lang/Float;
-	public final fun component8 ()Ljava/lang/Float;
-	public final fun component9 ()Ljava/lang/Float;
-	public final fun copy (Ljava/lang/String;Ljava/util/List;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/ScoreBands;Lio/getstream/android/video/api/generated/models/ScoreBands;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)Lio/getstream/android/video/api/generated/models/Quality;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/Quality;Ljava/lang/String;Ljava/util/List;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/ScoreBands;Lio/getstream/android/video/api/generated/models/ScoreBands;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/Quality;
+	public final fun component7 ()Ljava/lang/Double;
+	public final fun component8 ()Ljava/lang/Double;
+	public final fun component9 ()Ljava/lang/Double;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/ScoreBands;Lio/getstream/android/video/api/generated/models/ScoreBands;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)Lio/getstream/android/video/api/generated/models/Quality;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/Quality;Ljava/lang/String;Ljava/util/List;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/Percentiles;Lio/getstream/android/video/api/generated/models/ScoreBands;Lio/getstream/android/video/api/generated/models/ScoreBands;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/Quality;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getConnectionAvgJitterMs ()Lio/getstream/android/video/api/generated/models/Percentiles;
 	public final fun getConnectionAvgLatencyMs ()Lio/getstream/android/video/api/generated/models/Percentiles;
 	public final fun getInterruptionIncidents ()Ljava/util/List;
-	public final fun getP50QualityScore ()Ljava/lang/Float;
-	public final fun getP5QualityScore ()Ljava/lang/Float;
+	public final fun getP50QualityScore ()Ljava/lang/Double;
+	public final fun getP5QualityScore ()Ljava/lang/Double;
 	public final fun getScoreBandsByConnectionPct ()Lio/getstream/android/video/api/generated/models/ScoreBands;
 	public final fun getScoreBandsByWatchTimePct ()Lio/getstream/android/video/api/generated/models/ScoreBands;
 	public final fun getViewerInterruptionNote ()Ljava/lang/String;
-	public final fun getViewerInterruptionRatePct ()Ljava/lang/Float;
+	public final fun getViewerInterruptionRatePct ()Ljava/lang/Double;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -6518,20 +6549,20 @@ public final class io/getstream/android/video/api/generated/models/RejectCallRes
 }
 
 public final class io/getstream/android/video/api/generated/models/ReportByHistogramBucket {
-	public fun <init> (Ljava/lang/String;IFLio/getstream/android/video/api/generated/models/Bound;Lio/getstream/android/video/api/generated/models/Bound;)V
-	public synthetic fun <init> (Ljava/lang/String;IFLio/getstream/android/video/api/generated/models/Bound;Lio/getstream/android/video/api/generated/models/Bound;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;IDLio/getstream/android/video/api/generated/models/Bound;Lio/getstream/android/video/api/generated/models/Bound;)V
+	public synthetic fun <init> (Ljava/lang/String;IDLio/getstream/android/video/api/generated/models/Bound;Lio/getstream/android/video/api/generated/models/Bound;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()I
-	public final fun component3 ()F
+	public final fun component3 ()D
 	public final fun component4 ()Lio/getstream/android/video/api/generated/models/Bound;
 	public final fun component5 ()Lio/getstream/android/video/api/generated/models/Bound;
-	public final fun copy (Ljava/lang/String;IFLio/getstream/android/video/api/generated/models/Bound;Lio/getstream/android/video/api/generated/models/Bound;)Lio/getstream/android/video/api/generated/models/ReportByHistogramBucket;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/ReportByHistogramBucket;Ljava/lang/String;IFLio/getstream/android/video/api/generated/models/Bound;Lio/getstream/android/video/api/generated/models/Bound;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/ReportByHistogramBucket;
+	public final fun copy (Ljava/lang/String;IDLio/getstream/android/video/api/generated/models/Bound;Lio/getstream/android/video/api/generated/models/Bound;)Lio/getstream/android/video/api/generated/models/ReportByHistogramBucket;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/ReportByHistogramBucket;Ljava/lang/String;IDLio/getstream/android/video/api/generated/models/Bound;Lio/getstream/android/video/api/generated/models/Bound;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/ReportByHistogramBucket;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCategory ()Ljava/lang/String;
 	public final fun getCount ()I
 	public final fun getLowerBound ()Lio/getstream/android/video/api/generated/models/Bound;
-	public final fun getSum ()F
+	public final fun getSum ()D
 	public final fun getUpperBound ()Lio/getstream/android/video/api/generated/models/Bound;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -7028,17 +7059,17 @@ public final class io/getstream/android/video/api/generated/models/SRTIngress {
 
 public final class io/getstream/android/video/api/generated/models/ScoreBands {
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)V
-	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/Float;
-	public final fun component2 ()Ljava/lang/Float;
-	public final fun component3 ()Ljava/lang/Float;
-	public final fun copy (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)Lio/getstream/android/video/api/generated/models/ScoreBands;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/ScoreBands;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/ScoreBands;
+	public fun <init> (Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)V
+	public synthetic fun <init> (Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/Double;
+	public final fun component2 ()Ljava/lang/Double;
+	public final fun component3 ()Ljava/lang/Double;
+	public final fun copy (Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)Lio/getstream/android/video/api/generated/models/ScoreBands;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/ScoreBands;Ljava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/ScoreBands;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getGood ()Ljava/lang/Float;
-	public final fun getOk ()Ljava/lang/Float;
-	public final fun getPoor ()Ljava/lang/Float;
+	public final fun getGood ()Ljava/lang/Double;
+	public final fun getOk ()Ljava/lang/Double;
+	public final fun getPoor ()Ljava/lang/Double;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -7270,16 +7301,16 @@ public final class io/getstream/android/video/api/generated/models/SourceHealth 
 }
 
 public final class io/getstream/android/video/api/generated/models/SourceInterruption {
-	public fun <init> (FILjava/lang/String;Ljava/lang/Boolean;)V
-	public synthetic fun <init> (FILjava/lang/String;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()F
+	public fun <init> (DILjava/lang/String;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (DILjava/lang/String;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()D
 	public final fun component2 ()I
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/Boolean;
-	public final fun copy (FILjava/lang/String;Ljava/lang/Boolean;)Lio/getstream/android/video/api/generated/models/SourceInterruption;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/SourceInterruption;FILjava/lang/String;Ljava/lang/Boolean;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/SourceInterruption;
+	public final fun copy (DILjava/lang/String;Ljava/lang/Boolean;)Lio/getstream/android/video/api/generated/models/SourceInterruption;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/SourceInterruption;DILjava/lang/String;Ljava/lang/Boolean;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/SourceInterruption;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAtOffsetMin ()F
+	public final fun getAtOffsetMin ()D
 	public final fun getDeadAirS ()I
 	public final fun getKind ()Ljava/lang/String;
 	public final fun getSeamless ()Ljava/lang/Boolean;
@@ -8670,6 +8701,7 @@ public final class io/getstream/android/video/api/generated/models/UnblockUserRe
 
 public final class io/getstream/android/video/api/generated/models/UnblockedUserEvent : io/getstream/android/video/api/generated/models/VideoEvent, io/getstream/android/video/api/generated/models/WSCallEvent {
 	public fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/UserResponse;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/threeten/bp/OffsetDateTime;Lio/getstream/android/video/api/generated/models/UserResponse;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Lorg/threeten/bp/OffsetDateTime;
 	public final fun component3 ()Lio/getstream/android/video/api/generated/models/UserResponse;
@@ -8989,13 +9021,13 @@ public final class io/getstream/android/video/api/generated/models/UserPresenceC
 }
 
 public final class io/getstream/android/video/api/generated/models/UserRatingReportResponse {
-	public fun <init> (FI)V
-	public final fun component1 ()F
+	public fun <init> (DI)V
+	public final fun component1 ()D
 	public final fun component2 ()I
-	public final fun copy (FI)Lio/getstream/android/video/api/generated/models/UserRatingReportResponse;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/UserRatingReportResponse;FIILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/UserRatingReportResponse;
+	public final fun copy (DI)Lio/getstream/android/video/api/generated/models/UserRatingReportResponse;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/UserRatingReportResponse;DIILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/UserRatingReportResponse;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAverage ()F
+	public final fun getAverage ()D
 	public final fun getCount ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -9411,27 +9443,27 @@ public final class io/getstream/android/video/api/generated/models/VideoSettings
 }
 
 public final class io/getstream/android/video/api/generated/models/ViewerBehavior {
-	public fun <init> (IFFLjava/lang/String;FLjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)V
-	public synthetic fun <init> (IFFLjava/lang/String;FLjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IDDLjava/lang/String;DLjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)V
+	public synthetic fun <init> (IDDLjava/lang/String;DLjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
-	public final fun component2 ()F
-	public final fun component3 ()F
+	public final fun component2 ()D
+	public final fun component3 ()D
 	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()F
-	public final fun component6 ()Ljava/lang/Float;
-	public final fun component7 ()Ljava/lang/Float;
-	public final fun component8 ()Ljava/lang/Float;
-	public final fun copy (IFFLjava/lang/String;FLjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)Lio/getstream/android/video/api/generated/models/ViewerBehavior;
-	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/ViewerBehavior;IFFLjava/lang/String;FLjava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/ViewerBehavior;
+	public final fun component5 ()D
+	public final fun component6 ()Ljava/lang/Double;
+	public final fun component7 ()Ljava/lang/Double;
+	public final fun component8 ()Ljava/lang/Double;
+	public final fun copy (IDDLjava/lang/String;DLjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;)Lio/getstream/android/video/api/generated/models/ViewerBehavior;
+	public static synthetic fun copy$default (Lio/getstream/android/video/api/generated/models/ViewerBehavior;IDDLjava/lang/String;DLjava/lang/Double;Ljava/lang/Double;Ljava/lang/Double;ILjava/lang/Object;)Lio/getstream/android/video/api/generated/models/ViewerBehavior;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBounceRatePct ()Ljava/lang/Float;
+	public final fun getBounceRatePct ()Ljava/lang/Double;
 	public final fun getConnectionDurationP50S ()I
-	public final fun getConnectionsPerViewerMean ()F
-	public final fun getConnectionsUnder30sPct ()Ljava/lang/Float;
-	public final fun getMedianWatchMin ()F
+	public final fun getConnectionsPerViewerMean ()D
+	public final fun getConnectionsUnder30sPct ()Ljava/lang/Double;
+	public final fun getMedianWatchMin ()D
 	public final fun getNote ()Ljava/lang/String;
-	public final fun getP90WatchMin ()F
-	public final fun getReturnVisitRatePct ()Ljava/lang/Float;
+	public final fun getP90WatchMin ()D
+	public final fun getReturnVisitRatePct ()Ljava/lang/Double;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -13858,22 +13890,22 @@ public final class io/getstream/video/android/core/model/CallUserState {
 }
 
 public final class io/getstream/video/android/core/model/EdgeData {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;FFIII)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;DDIII)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()F
-	public final fun component4 ()F
+	public final fun component3 ()D
+	public final fun component4 ()D
 	public final fun component5 ()I
 	public final fun component6 ()I
 	public final fun component7 ()I
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;FFIII)Lio/getstream/video/android/core/model/EdgeData;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/EdgeData;Ljava/lang/String;Ljava/lang/String;FFIIIILjava/lang/Object;)Lio/getstream/video/android/core/model/EdgeData;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;DDIII)Lio/getstream/video/android/core/model/EdgeData;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/EdgeData;Ljava/lang/String;Ljava/lang/String;DDIIIILjava/lang/Object;)Lio/getstream/video/android/core/model/EdgeData;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getGreen ()I
 	public final fun getId ()Ljava/lang/String;
 	public final fun getLatencyTestUrl ()Ljava/lang/String;
-	public final fun getLatitude ()F
-	public final fun getLongitude ()F
+	public final fun getLatitude ()D
+	public final fun getLongitude ()D
 	public final fun getRed ()I
 	public final fun getYellow ()I
 	public fun hashCode ()I

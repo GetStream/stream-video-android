@@ -44,7 +44,7 @@ data class CallReactionEvent (
     val reaction: io.getstream.android.video.api.generated.models.VideoReactionResponse,
 
     @Json(name = "type")
-    val type: String
+    val type: String = "call.reaction_new"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {
