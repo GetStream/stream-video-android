@@ -90,6 +90,7 @@ enum class SdkCause(
     ACTIVITY_DESTROYED("Activity destroyed"),
     STREAM_CALL_ACTIVITY_EXCEPTION("STREAM_CALL_ACTIVITY_EXCEPTION"),
     LEAVE_PREVIOUS_CALL_TO_ACCEPT_NEW_CALL("Leave previous call to accept new call"),
+    REJOIN_ATTEMPT_LIMIT_EXCEEDED("rejoin_attempt_limit_exceeded"),
 }
 
 @InternalStreamVideoApi
