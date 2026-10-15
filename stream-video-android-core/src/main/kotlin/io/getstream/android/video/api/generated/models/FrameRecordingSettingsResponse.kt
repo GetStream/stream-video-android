@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,27 +33,26 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class FrameRecordingSettingsResponse (
     @Json(name = "capture_interval_in_seconds")
-    val captureIntervalInSeconds: kotlin.Int,
+    val captureIntervalInSeconds: Int,
 
     @Json(name = "mode")
     val mode: Mode,
 
     @Json(name = "quality")
-    val quality: kotlin.String? = null
+    val quality: String? = null
 )
 {
     
     /**
     * Mode Enum
     */
-    sealed class Mode(val value: kotlin.String) {
+    sealed class Mode(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Mode = when (s) {
+                fun fromString(s: String): Mode = when (s) {
                     "auto-on" -> AutoOn
                     "available" -> Available
                     "disabled" -> Disabled
@@ -67,7 +62,7 @@ data class FrameRecordingSettingsResponse (
             object AutoOn : Mode("auto-on")
             object Available : Mode("available")
             object Disabled : Mode("disabled")
-            data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
+            data class Unknown(val unknownValue: String) : Mode(unknownValue)
         
 
         class ModeAdapter : JsonAdapter<Mode>() {

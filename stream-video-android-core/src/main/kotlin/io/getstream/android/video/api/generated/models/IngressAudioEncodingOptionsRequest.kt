@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,27 +33,26 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class IngressAudioEncodingOptionsRequest (
     @Json(name = "bitrate")
-    val bitrate: kotlin.Int,
+    val bitrate: Int,
 
     @Json(name = "channels")
     val channels: Channels,
 
     @Json(name = "enable_dtx")
-    val enableDtx: kotlin.Boolean? = null
+    val enableDtx: Boolean? = null
 )
 {
     
     /**
     * Channels Enum
     */
-    sealed class Channels(val value: kotlin.String) {
+    sealed class Channels(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Channels = when (s) {
+                fun fromString(s: String): Channels = when (s) {
                     "1" -> Channels1
                     "2" -> Channels2
                     else -> Unknown(s)
@@ -65,7 +60,7 @@ data class IngressAudioEncodingOptionsRequest (
             }
             object Channels1 : Channels("1")
             object Channels2 : Channels("2")
-            data class Unknown(val unknownValue: kotlin.String) : Channels(unknownValue)
+            data class Unknown(val unknownValue: String) : Channels(unknownValue)
         
 
         class ChannelsAdapter : JsonAdapter<Channels>() {

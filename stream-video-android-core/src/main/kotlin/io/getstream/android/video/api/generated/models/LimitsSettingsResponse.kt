@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,17 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class LimitsSettingsResponse (
     @Json(name = "max_participants_exclude_roles")
-    val maxParticipantsExcludeRoles: kotlin.collections.List<kotlin.String> = emptyList(),
+    val maxParticipantsExcludeRoles: List<String> = emptyList(),
 
     @Json(name = "max_duration_seconds")
-    val maxDurationSeconds: kotlin.Int? = null,
+    val maxDurationSeconds: Int? = null,
 
     @Json(name = "max_participants")
-    val maxParticipants: kotlin.Int? = null,
+    val maxParticipants: Int? = null,
 
     @Json(name = "max_participants_exclude_owner")
-    val maxParticipantsExcludeOwner: kotlin.Boolean? = null
+    val maxParticipantsExcludeOwner: Boolean? = null
 )

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,44 +33,49 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CallStatsParticipantCounts (
     @Json(name = "live_sessions")
-    val liveSessions: kotlin.Int,
+    val liveSessions: Int,
 
     @Json(name = "participants")
-    val participants: kotlin.Int,
+    val participants: Int,
 
     @Json(name = "peak_concurrent_sessions")
-    val peakConcurrentSessions: kotlin.Int,
+    val peakConcurrentSessions: Int,
 
     @Json(name = "peak_concurrent_users")
-    val peakConcurrentUsers: kotlin.Int,
+    val peakConcurrentUsers: Int,
 
     @Json(name = "publishers")
-    val publishers: kotlin.Int,
+    val publishers: Int,
 
     @Json(name = "sessions")
-    val sessions: kotlin.Int,
+    val sessions: Int,
 
     @Json(name = "sfus_used")
-    val sfusUsed: kotlin.Int,
+    val sfusUsed: Int,
 
     @Json(name = "average_jitter_ms")
-    val averageJitterMs: kotlin.Int? = null,
+    val averageJitterMs: Int? = null,
 
     @Json(name = "average_latency_ms")
-    val averageLatencyMs: kotlin.Int? = null,
+    val averageLatencyMs: Int? = null,
+
+    @Json(name = "avg_user_rating")
+    val avgUserRating: Float? = null,
 
     @Json(name = "call_event_count")
-    val callEventCount: kotlin.Int? = null,
+    val callEventCount: Int? = null,
 
     @Json(name = "cq_score")
-    val cqScore: kotlin.Int? = null,
+    val cqScore: Int? = null,
 
     @Json(name = "max_freezes_duration_ms")
-    val maxFreezesDurationMs: kotlin.Int? = null,
+    val maxFreezesDurationMs: Int? = null,
+
+    @Json(name = "min_user_rating")
+    val minUserRating: Int? = null,
 
     @Json(name = "total_participant_duration")
-    val totalParticipantDuration: kotlin.Int? = null
+    val totalParticipantDuration: Int? = null
 )

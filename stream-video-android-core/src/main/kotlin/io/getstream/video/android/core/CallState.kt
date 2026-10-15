@@ -73,7 +73,6 @@ import io.getstream.android.video.api.generated.models.MuteUsersResponse
 import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.android.video.api.generated.models.PermissionRequestEvent
 import io.getstream.android.video.api.generated.models.QueryCallMembersResponse
-import io.getstream.android.video.api.generated.models.ReactionResponse
 import io.getstream.android.video.api.generated.models.StartHLSBroadcastingResponse
 import io.getstream.android.video.api.generated.models.StopLiveResponse
 import io.getstream.android.video.api.generated.models.TranscriptionSettingsResponse.ClosedCaptionMode
@@ -81,6 +80,7 @@ import io.getstream.android.video.api.generated.models.UnblockedUserEvent
 import io.getstream.android.video.api.generated.models.UpdateCallResponse
 import io.getstream.android.video.api.generated.models.UpdatedCallPermissionsEvent
 import io.getstream.android.video.api.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.VideoReactionResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.CallType
@@ -749,8 +749,8 @@ public class CallState(
     private val _endedByUser: MutableStateFlow<User?> = MutableStateFlow(null)
     val endedByUser: StateFlow<User?> = _endedByUser
 
-    internal val _reactions = MutableStateFlow<List<ReactionResponse>>(emptyList())
-    val reactions: StateFlow<List<ReactionResponse>> = _reactions
+    internal val _reactions = MutableStateFlow<List<VideoReactionResponse>>(emptyList())
+    val reactions: StateFlow<List<VideoReactionResponse>> = _reactions
 
     private val _errors: MutableStateFlow<List<ErrorEvent>> = MutableStateFlow(emptyList())
     public val errors: StateFlow<List<ErrorEvent>> = _errors

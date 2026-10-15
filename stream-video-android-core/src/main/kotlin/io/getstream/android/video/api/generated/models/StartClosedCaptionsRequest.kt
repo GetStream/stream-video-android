@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,13 +33,12 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class StartClosedCaptionsRequest (
     @Json(name = "enable_transcription")
-    val enableTranscription: kotlin.Boolean? = null,
+    val enableTranscription: Boolean? = null,
 
     @Json(name = "external_storage")
-    val externalStorage: kotlin.String? = null,
+    val externalStorage: String? = null,
 
     @Json(name = "language")
     val language: Language? = null,
@@ -56,11 +51,11 @@ data class StartClosedCaptionsRequest (
     /**
     * Language Enum
     */
-    sealed class Language(val value: kotlin.String) {
+    sealed class Language(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Language = when (s) {
+                fun fromString(s: String): Language = when (s) {
                     "ar" -> Ar
                     "auto" -> Auto
                     "bg" -> Bg
@@ -138,7 +133,7 @@ data class StartClosedCaptionsRequest (
             object Tr : Language("tr")
             object Uk : Language("uk")
             object Zh : Language("zh")
-            data class Unknown(val unknownValue: kotlin.String) : Language(unknownValue)
+            data class Unknown(val unknownValue: String) : Language(unknownValue)
         
 
         class LanguageAdapter : JsonAdapter<Language>() {

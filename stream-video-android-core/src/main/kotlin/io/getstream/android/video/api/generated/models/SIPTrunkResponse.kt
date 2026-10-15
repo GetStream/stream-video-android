@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,32 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * SIP trunk information
  */
-
 data class SIPTrunkResponse (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "name")
-    val name: kotlin.String,
+    val name: String,
 
     @Json(name = "password")
-    val password: kotlin.String,
+    val password: String,
 
     @Json(name = "updated_at")
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "uri")
-    val uri: kotlin.String,
+    val uri: String,
 
     @Json(name = "username")
-    val username: kotlin.String,
+    val username: String,
 
     @Json(name = "allowed_ips")
-    val allowedIps: kotlin.collections.List<kotlin.String> = emptyList(),
+    val allowedIps: List<String> = emptyList(),
 
     @Json(name = "numbers")
-    val numbers: kotlin.collections.List<kotlin.String> = emptyList()
+    val numbers: List<String> = emptyList()
 )

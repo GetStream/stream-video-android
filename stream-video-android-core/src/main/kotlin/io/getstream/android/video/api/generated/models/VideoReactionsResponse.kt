@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,10 +33,9 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class VideoReactionsResponse (
     @Json(name = "reaction")
-    val reaction: kotlin.String,
+    val reaction: String,
 
     @Json(name = "count_over_time")
     val countOverTime: io.getstream.android.video.api.generated.models.VideoReactionOverTimeResponse? = null

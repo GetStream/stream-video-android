@@ -25,10 +25,12 @@ import io.getstream.android.video.api.generated.models.CallIngressResponse
 import io.getstream.android.video.api.generated.models.CallResponse
 import io.getstream.android.video.api.generated.models.CallSettingsResponse
 import io.getstream.android.video.api.generated.models.EgressResponse
+import io.getstream.android.video.api.generated.models.EncryptionSettingsResponse
 import io.getstream.android.video.api.generated.models.FrameRecordingSettingsResponse
 import io.getstream.android.video.api.generated.models.GeofenceSettingsResponse
 import io.getstream.android.video.api.generated.models.HLSSettingsResponse
 import io.getstream.android.video.api.generated.models.IndividualRecordingSettingsResponse
+import io.getstream.android.video.api.generated.models.LifecycleSettingsResponse
 import io.getstream.android.video.api.generated.models.LimitsSettingsResponse
 import io.getstream.android.video.api.generated.models.RTMPIngress
 import io.getstream.android.video.api.generated.models.RTMPSettingsResponse
@@ -299,6 +301,8 @@ internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
             IndividualRecordingSettingsResponse.Mode.Available,
         ),
         rawRecording = RawRecordingSettingsResponse(RawRecordingSettingsResponse.Mode.Available),
+        encryption = EncryptionSettingsResponse(EncryptionSettingsResponse.Mode.Available),
+        lifecycle = LifecycleSettingsResponse(LifecycleSettingsResponse.Mode.Reusable),
     )
     val response = CallResponse(
         id = id,

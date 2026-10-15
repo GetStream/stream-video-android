@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,19 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-
 data class QueryCallStatsMapResponse (
     @Json(name = "call_id")
-    val callId: kotlin.String,
+    val callId: String,
 
     @Json(name = "call_session_id")
-    val callSessionId: kotlin.String,
+    val callSessionId: String,
 
     @Json(name = "call_type")
-    val callType: kotlin.String,
+    val callType: String,
 
     @Json(name = "duration")
-    val duration: kotlin.String,
+    val duration: String,
 
     @Json(name = "counts")
     val counts: io.getstream.android.video.api.generated.models.CallStatsParticipantCounts,
@@ -61,7 +56,7 @@ data class QueryCallStatsMapResponse (
     val callStartedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "data_source")
-    val dataSource: kotlin.String? = null,
+    val dataSource: String? = null,
 
     @Json(name = "end_time")
     val endTime: org.threeten.bp.OffsetDateTime? = null,

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,23 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class MuteUsersRequest (
     @Json(name = "audio")
-    val audio: kotlin.Boolean? = null,
+    val audio: Boolean? = null,
 
     @Json(name = "mute_all_users")
-    val muteAllUsers: kotlin.Boolean? = null,
+    val muteAllUsers: Boolean? = null,
 
     @Json(name = "screenshare")
-    val screenshare: kotlin.Boolean? = null,
+    val screenshare: Boolean? = null,
 
     @Json(name = "screenshare_audio")
-    val screenshareAudio: kotlin.Boolean? = null,
+    val screenshareAudio: Boolean? = null,
 
     @Json(name = "video")
-    val video: kotlin.Boolean? = null,
+    val video: Boolean? = null,
 
     @Json(name = "user_ids")
-    val userIds: kotlin.collections.List<kotlin.String>? = emptyList()
+    val userIds: List<String>? = emptyList()
 )

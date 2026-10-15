@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,25 +33,24 @@ import com.squareup.moshi.ToJson
 /**
  * CallRequest is the payload for creating a call.
  */
-
 data class CallRequest (
     @Json(name = "channel_cid")
-    val channelCid: kotlin.String? = null,
+    val channelCid: String? = null,
 
     @Json(name = "starts_at")
     val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "team")
-    val team: kotlin.String? = null,
+    val team: String? = null,
 
     @Json(name = "video")
-    val video: kotlin.Boolean? = null,
+    val video: Boolean? = null,
 
     @Json(name = "members")
-    val members: kotlin.collections.List<io.getstream.android.video.api.generated.models.MemberRequest>? = emptyList(),
+    val members: List<io.getstream.android.video.api.generated.models.MemberRequest>? = emptyList(),
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap(),
+    val custom: Map<String, Any?>? = emptyMap(),
 
     @Json(name = "settings_override")
     val settingsOverride: io.getstream.android.video.api.generated.models.CallSettingsRequest? = null

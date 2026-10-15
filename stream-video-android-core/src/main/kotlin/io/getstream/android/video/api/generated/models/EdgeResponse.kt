@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,35 +33,34 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class EdgeResponse (
     @Json(name = "continent_code")
-    val continentCode: kotlin.String,
+    val continentCode: String,
 
     @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String,
+    val countryIsoCode: String,
 
     @Json(name = "green")
-    val green: kotlin.Int,
+    val green: Int,
 
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "latency_test_url")
-    val latencyTestUrl: kotlin.String,
+    val latencyTestUrl: String,
 
     @Json(name = "latitude")
-    val latitude: kotlin.Float,
+    val latitude: Float,
 
     @Json(name = "longitude")
-    val longitude: kotlin.Float,
+    val longitude: Float,
 
     @Json(name = "red")
-    val red: kotlin.Int,
+    val red: Int,
 
     @Json(name = "subdivision_iso_code")
-    val subdivisionIsoCode: kotlin.String,
+    val subdivisionIsoCode: String,
 
     @Json(name = "yellow")
-    val yellow: kotlin.Int
+    val yellow: Int
 )

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,49 +33,48 @@ import com.squareup.moshi.ToJson
 /**
  * Represents a call
  */
-
 data class CallResponse (
     @Json(name = "backstage")
-    val backstage: kotlin.Boolean,
+    val backstage: Boolean,
 
     @Json(name = "captioning")
-    val captioning: kotlin.Boolean,
+    val captioning: Boolean,
 
     @Json(name = "cid")
-    val cid: kotlin.String,
+    val cid: String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "current_session_id")
-    val currentSessionId: kotlin.String,
+    val currentSessionId: String,
 
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "recording")
-    val recording: kotlin.Boolean,
+    val recording: Boolean,
 
     @Json(name = "transcribing")
-    val transcribing: kotlin.Boolean,
+    val transcribing: Boolean,
 
     @Json(name = "translating")
-    val translating: kotlin.Boolean,
+    val translating: Boolean,
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: String,
 
     @Json(name = "updated_at")
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "blocked_user_ids")
-    val blockedUserIds: kotlin.collections.List<kotlin.String> = emptyList(),
+    val blockedUserIds: List<String> = emptyList(),
 
     @Json(name = "created_by")
     val createdBy: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+    val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "egress")
     val egress: io.getstream.android.video.api.generated.models.EgressResponse,
@@ -91,22 +86,22 @@ data class CallResponse (
     val settings: io.getstream.android.video.api.generated.models.CallSettingsResponse,
 
     @Json(name = "channel_cid")
-    val channelCid: kotlin.String? = null,
+    val channelCid: String? = null,
 
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "join_ahead_time_seconds")
-    val joinAheadTimeSeconds: kotlin.Int? = null,
+    val joinAheadTimeSeconds: Int? = null,
 
     @Json(name = "routing_number")
-    val routingNumber: kotlin.String? = null,
+    val routingNumber: String? = null,
 
     @Json(name = "starts_at")
     val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "team")
-    val team: kotlin.String? = null,
+    val team: String? = null,
 
     @Json(name = "session")
     val session: io.getstream.android.video.api.generated.models.CallSessionResponse? = null,

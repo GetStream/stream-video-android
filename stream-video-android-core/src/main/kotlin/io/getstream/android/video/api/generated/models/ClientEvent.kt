@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -35,94 +31,96 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * A single client-side telemetry event. When stage is CoordinatorJoin, CoordinatorWS, WSJoin, or PeerConnectionConnect the event reports a join-lifecycle attempt; initiation and completion of a stage attempt share the same stage_id. FirstAudioFrame and FirstVideoFrame report media readiness and only ever carry an initiated event. MediaDevicePermission reports the result of requesting screen-share, microphone, and camera permissions. Other stage values denote generic client events.
+ * A single client-side telemetry event. JoinInitiated is the top-level marker emitted when a user begins a join attempt and carries only join_attempt_id (no stage_id or coordinator_connect_id). When stage is CoordinatorJoin, CoordinatorWS, WSJoin, or PeerConnectionConnect the event reports a join-lifecycle attempt; initiation and completion of a stage attempt share the same stage_id. FirstAudioFrame and FirstVideoFrame report media readiness and only ever carry an initiated event. MediaDevicePermission reports the result of requesting screen-share, microphone, and camera permissions. Other stage values denote generic client events.
  */
-
 data class ClientEvent (
     @Json(name = "call_session_id")
-    val callSessionId: kotlin.String? = null,
+    val callSessionId: String? = null,
 
     @Json(name = "camera_permission_status")
-    val cameraPermissionStatus: kotlin.String? = null,
+    val cameraPermissionStatus: String? = null,
 
     @Json(name = "coordinator_connect_id")
-    val coordinatorConnectId: kotlin.String? = null,
-
-    @Json(name = "join_reason")
-    val joinReason: kotlin.String? = null,
+    val coordinatorConnectId: String? = null,
 
     @Json(name = "elapsed_time")
-    val elapsedTime: kotlin.Int? = null,
+    val elapsedTime: Int? = null,
 
     @Json(name = "event_type")
-    val eventType: kotlin.String? = null,
+    val eventType: String? = null,
 
     @Json(name = "ice_state")
-    val iceState: kotlin.String? = null,
+    val iceState: String? = null,
 
     @Json(name = "id")
-    val id: kotlin.String? = null,
+    val id: String? = null,
 
     @Json(name = "join_attempt_id")
-    val joinAttemptId: kotlin.String? = null,
+    val joinAttemptId: String? = null,
+
+    @Json(name = "join_reason")
+    val joinReason: String? = null,
+
+    @Json(name = "leave_initiator")
+    val leaveInitiator: String? = null,
+
+    @Json(name = "leave_reason")
+    val leaveReason: String? = null,
 
     @Json(name = "microphone_permission_status")
-    val microphonePermissionStatus: kotlin.String? = null,
+    val microphonePermissionStatus: String? = null,
 
     @Json(name = "outcome")
-    val outcome: kotlin.String? = null,
+    val outcome: String? = null,
 
     @Json(name = "peer_connection")
-    val peerConnection: kotlin.String? = null,
+    val peerConnection: String? = null,
 
     @Json(name = "previously_connected_timestamp")
     val previouslyConnectedTimestamp: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "retry_count_attempt")
-    val retryCountAttempt: kotlin.Int? = null,
+    val retryCountAttempt: Int? = null,
 
     @Json(name = "retry_failure_code")
-    val retryFailureCode: kotlin.String? = null,
+    val retryFailureCode: String? = null,
 
     @Json(name = "retry_failure_reason")
-    val retryFailureReason: kotlin.String? = null,
+    val retryFailureReason: String? = null,
 
     @Json(name = "screen_share_status")
-    val screenShareStatus: kotlin.String? = null,
+    val screenShareStatus: String? = null,
 
     @Json(name = "sdk_version")
-    val sdkVersion: kotlin.String? = null,
+    val sdkVersion: String? = null,
 
     @Json(name = "sfu_id")
-    val sfuId: kotlin.String? = null,
+    val sfuId: String? = null,
 
     @Json(name = "source")
-    val source: kotlin.String? = null,
+    val source: String? = null,
 
     @Json(name = "stage")
-    val stage: kotlin.String? = null,
+    val stage: String? = null,
 
     @Json(name = "stage_id")
-    val stageId: kotlin.String? = null,
+    val stageId: String? = null,
 
     @Json(name = "timestamp")
     val timestamp: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "track_id")
-    val trackId: kotlin.String? = null,
+    val trackId: String? = null,
 
     @Json(name = "type")
-    val type: kotlin.String? = null,
+    val type: String? = null,
 
     @Json(name = "user_agent")
-    val userAgent: kotlin.String? = null,
+    val userAgent: String? = null,
 
     @Json(name = "user_id")
-    val userId: kotlin.String? = null,
-
-    @Json(name = "user_session_id")
-    val userSessionId: kotlin.String? = null,
+    val userId: String? = null,
 
     @Json(name = "was_previously_connected")
-    val wasPreviouslyConnected: kotlin.Boolean? = null
+    val wasPreviouslyConnected: Boolean? = null
 )

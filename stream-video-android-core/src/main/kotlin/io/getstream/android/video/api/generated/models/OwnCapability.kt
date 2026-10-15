@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -40,11 +36,11 @@ import com.squareup.moshi.ToJson
 /**
  * OwnCapability Enum
  */
-sealed class OwnCapability(val value: kotlin.String) {
+sealed class OwnCapability(val value: String) {
     override fun toString(): String = value
 
     companion object {
-        fun fromString(s: kotlin.String): OwnCapability = when (s) {
+        fun fromString(s: String): OwnCapability = when (s) {
             "block-users" -> BlockUsers
             "change-max-duration" -> ChangeMaxDuration
             "create-call" -> CreateCall
@@ -120,7 +116,7 @@ sealed class OwnCapability(val value: kotlin.String) {
     object UpdateCallMember : OwnCapability("update-call-member")
     object UpdateCallPermissions : OwnCapability("update-call-permissions")
     object UpdateCallSettings : OwnCapability("update-call-settings")
-    data class Unknown(val unknownValue: kotlin.String) : OwnCapability(unknownValue)
+    data class Unknown(val unknownValue: String) : OwnCapability(unknownValue)
 
 
     class OwnCapabilityAdapter : JsonAdapter<OwnCapability>() {

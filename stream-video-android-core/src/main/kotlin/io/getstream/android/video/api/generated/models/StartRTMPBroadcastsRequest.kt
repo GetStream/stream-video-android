@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,8 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * StartRTMPBroadcastsRequest is the payload for starting RTMP broadcasts.
  */
-
 data class StartRTMPBroadcastsRequest (
     @Json(name = "broadcasts")
-    val broadcasts: kotlin.collections.List<io.getstream.android.video.api.generated.models.RTMPBroadcastRequest> = emptyList()
+    val broadcasts: List<io.getstream.android.video.api.generated.models.RTMPBroadcastRequest> = emptyList()
 )

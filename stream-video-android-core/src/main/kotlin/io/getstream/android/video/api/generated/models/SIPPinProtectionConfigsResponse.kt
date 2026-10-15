@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,17 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * PIN protection configuration response
  */
-
 data class SIPPinProtectionConfigsResponse (
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean,
+    val enabled: Boolean,
 
     @Json(name = "default_pin")
-    val defaultPin: kotlin.String? = null,
+    val defaultPin: String? = null,
 
     @Json(name = "max_attempts")
-    val maxAttempts: kotlin.Int? = null,
+    val maxAttempts: Int? = null,
 
     @Json(name = "required_pin_digits")
-    val requiredPinDigits: kotlin.Int? = null
+    val requiredPinDigits: Int? = null
 )

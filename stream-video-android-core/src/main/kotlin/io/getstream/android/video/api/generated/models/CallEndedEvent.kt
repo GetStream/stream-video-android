@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,10 +33,9 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen
  */
-
 data class CallEndedEvent (
     @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    val callCid: String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
@@ -49,13 +44,13 @@ data class CallEndedEvent (
     val call: io.getstream.android.video.api.generated.models.CallResponse,
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: String,
 
     @Json(name = "reason")
-    val reason: kotlin.String? = null,
+    val reason: String? = null,
 
     @Json(name = "members")
-    val members: kotlin.collections.List<io.getstream.android.video.api.generated.models.MemberResponse>? = emptyList(),
+    val members: List<io.getstream.android.video.api.generated.models.MemberResponse>? = emptyList(),
 
     @Json(name = "user")
     val user: io.getstream.android.video.api.generated.models.UserResponse? = null
@@ -63,11 +58,11 @@ data class CallEndedEvent (
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {
     
-    override fun getEventType(): kotlin.String {
+    override fun getEventType(): String {
         return type
     }
 
-    override fun getCallCID(): kotlin.String {
+    override fun getCallCID(): String {
         return callCid
     }    
 }

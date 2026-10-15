@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,14 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * Geographic location metadata
  */
-
 data class LocationResponse (
     @Json(name = "continent_code")
-    val continentCode: kotlin.String,
+    val continentCode: String,
 
     @Json(name = "country_iso_code")
-    val countryIsoCode: kotlin.String,
+    val countryIsoCode: String,
 
     @Json(name = "subdivision_iso_code")
-    val subdivisionIsoCode: kotlin.String
+    val subdivisionIsoCode: String
 )

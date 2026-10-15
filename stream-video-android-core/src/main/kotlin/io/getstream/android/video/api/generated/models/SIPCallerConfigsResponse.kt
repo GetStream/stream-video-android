@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,11 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * SIP caller configuration response
  */
-
 data class SIPCallerConfigsResponse (
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "custom_data")
-    val customData: kotlin.collections.Map<kotlin.String, Any?> = emptyMap()
+    val customData: Map<String, Any?> = emptyMap()
 )

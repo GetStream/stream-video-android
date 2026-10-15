@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,14 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class IngressSettingsResponse (
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean,
+    val enabled: Boolean,
 
     @Json(name = "audio_encoding_options")
     val audioEncodingOptions: io.getstream.android.video.api.generated.models.IngressAudioEncodingResponse? = null,
 
     @Json(name = "video_encoding_options")
-    val videoEncodingOptions: kotlin.collections.Map<kotlin.String, io.getstream.android.video.api.generated.models.IngressVideoEncodingResponse>? = emptyMap()
+    val videoEncodingOptions: Map<String, io.getstream.android.video.api.generated.models.IngressVideoEncodingResponse>? = emptyMap()
 )

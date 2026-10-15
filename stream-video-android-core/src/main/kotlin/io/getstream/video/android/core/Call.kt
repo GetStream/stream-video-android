@@ -41,7 +41,7 @@ import io.getstream.android.video.api.generated.models.RejectCallResponse
 import io.getstream.android.video.api.generated.models.RingCallRequest
 import io.getstream.android.video.api.generated.models.RingCallResponse
 import io.getstream.android.video.api.generated.models.SendCallEventResponse
-import io.getstream.android.video.api.generated.models.SendReactionResponse
+import io.getstream.android.video.api.generated.models.SendVideoReactionResponse
 import io.getstream.android.video.api.generated.models.StartTranscriptionResponse
 import io.getstream.android.video.api.generated.models.StopLiveResponse
 import io.getstream.android.video.api.generated.models.StopTranscriptionResponse
@@ -780,7 +780,7 @@ public class Call(
         type: String,
         emoji: String? = null,
         custom: Map<String, Any>? = null,
-    ): Result<SendReactionResponse> = apiClient.sendReaction(type, emoji, custom)
+    ): Result<SendVideoReactionResponse> = apiClient.sendReaction(type, emoji, custom)
 
     suspend fun queryMembers(
         filter: Map<String, Any>,

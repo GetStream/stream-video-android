@@ -22,8 +22,8 @@ import io.getstream.android.video.api.generated.models.EdgeResponse
 import io.getstream.android.video.api.generated.models.MemberResponse
 import io.getstream.android.video.api.generated.models.QueryCallMembersResponse
 import io.getstream.android.video.api.generated.models.QueryCallsResponse
-import io.getstream.android.video.api.generated.models.ReactionResponse
 import io.getstream.android.video.api.generated.models.UserResponse
+import io.getstream.android.video.api.generated.models.VideoReactionResponse
 import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
@@ -175,7 +175,7 @@ internal fun CallRecording.toRecording(): CallRecordingData {
 }
 
 @JvmSynthetic
-internal fun ReactionResponse.toReaction(): ReactionData {
+internal fun VideoReactionResponse.toReaction(): ReactionData {
     return ReactionData(
         type = type,
         user = user.toUser(),

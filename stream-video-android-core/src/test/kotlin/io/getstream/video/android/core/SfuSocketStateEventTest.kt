@@ -24,10 +24,10 @@ import io.getstream.android.video.api.generated.models.CallRecordingStartedEvent
 import io.getstream.android.video.api.generated.models.CallRecordingStoppedEvent
 import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.android.video.api.generated.models.PermissionRequestEvent
-import io.getstream.android.video.api.generated.models.ReactionResponse
 import io.getstream.android.video.api.generated.models.UnblockedUserEvent
 import io.getstream.android.video.api.generated.models.UpdatedCallPermissionsEvent
 import io.getstream.android.video.api.generated.models.UserResponse
+import io.getstream.android.video.api.generated.models.VideoReactionResponse
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.base.toResponse
 import io.getstream.video.android.core.events.AudioLevelChangedEvent
@@ -400,7 +400,7 @@ class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false
             callCid = call.cid,
             createdAt = nowUtc,
             type = "call.reaction",
-            reaction = ReactionResponse(
+            reaction = VideoReactionResponse(
                 type = "like",
                 user = testData.users["thierry"]!!.toUserResponse(),
                 custom = mutableMapOf("fruit" to "apple"),

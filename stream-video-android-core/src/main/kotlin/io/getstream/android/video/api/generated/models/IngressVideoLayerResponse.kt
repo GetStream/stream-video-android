@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,20 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class IngressVideoLayerResponse (
     @Json(name = "bitrate")
-    val bitrate: kotlin.Int,
+    val bitrate: Int,
 
     @Json(name = "codec")
-    val codec: kotlin.String,
+    val codec: String,
 
     @Json(name = "frame_rate_limit")
-    val frameRateLimit: kotlin.Int,
+    val frameRateLimit: Int,
 
     @Json(name = "max_dimension")
-    val maxDimension: kotlin.Int,
+    val maxDimension: Int,
 
     @Json(name = "min_dimension")
-    val minDimension: kotlin.Int
+    val minDimension: Int
 )

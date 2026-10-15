@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.sorting
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.api.generated.models.ReactionResponse
+import io.getstream.android.video.api.generated.models.VideoReactionResponse
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.pinning.PinEntry
@@ -301,7 +301,7 @@ class ParticipantComparatorsTest {
 
     private fun reactionWithType(type: String): Reaction = Reaction(
         id = "reaction-$type",
-        response = ReactionResponse(
+        response = VideoReactionResponse(
             type = type,
             user = USER_DUMMY,
         ),

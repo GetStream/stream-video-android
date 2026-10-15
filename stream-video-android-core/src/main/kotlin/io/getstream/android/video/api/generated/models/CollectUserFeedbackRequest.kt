@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,23 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CollectUserFeedbackRequest (
     @Json(name = "rating")
-    val rating: kotlin.Int,
+    val rating: Int,
 
     @Json(name = "sdk")
-    val sdk: kotlin.String,
+    val sdk: String,
 
     @Json(name = "sdk_version")
-    val sdkVersion: kotlin.String,
+    val sdkVersion: String,
 
     @Json(name = "reason")
-    val reason: kotlin.String? = null,
+    val reason: String? = null,
 
     @Json(name = "user_session_id")
-    val userSessionId: kotlin.String? = null,
+    val userSessionId: String? = null,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
+    val custom: Map<String, Any?>? = emptyMap()
 )

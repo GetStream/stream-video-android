@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,29 +33,28 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class FeedsPreferencesResponse (
     @Json(name = "comment")
-    val comment: kotlin.String? = null,
+    val comment: String? = null,
 
     @Json(name = "comment_mention")
-    val commentMention: kotlin.String? = null,
+    val commentMention: String? = null,
 
     @Json(name = "comment_reaction")
-    val commentReaction: kotlin.String? = null,
+    val commentReaction: String? = null,
 
     @Json(name = "comment_reply")
-    val commentReply: kotlin.String? = null,
+    val commentReply: String? = null,
 
     @Json(name = "follow")
-    val follow: kotlin.String? = null,
+    val follow: String? = null,
 
     @Json(name = "mention")
-    val mention: kotlin.String? = null,
+    val mention: String? = null,
 
     @Json(name = "reaction")
-    val reaction: kotlin.String? = null,
+    val reaction: String? = null,
 
     @Json(name = "custom_activity_types")
-    val customActivityTypes: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()
+    val customActivityTypes: Map<String, String>? = emptyMap()
 )

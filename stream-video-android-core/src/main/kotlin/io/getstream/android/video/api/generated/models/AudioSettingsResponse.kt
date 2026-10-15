@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,28 +33,27 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class AudioSettingsResponse (
     @Json(name = "access_request_enabled")
-    val accessRequestEnabled: kotlin.Boolean,
+    val accessRequestEnabled: Boolean,
 
     @Json(name = "default_device")
     val defaultDevice: DefaultDevice,
 
     @Json(name = "hifi_audio_enabled")
-    val hifiAudioEnabled: kotlin.Boolean,
+    val hifiAudioEnabled: Boolean,
 
     @Json(name = "mic_default_on")
-    val micDefaultOn: kotlin.Boolean,
+    val micDefaultOn: Boolean,
 
     @Json(name = "opus_dtx_enabled")
-    val opusDtxEnabled: kotlin.Boolean,
+    val opusDtxEnabled: Boolean,
 
     @Json(name = "redundant_coding_enabled")
-    val redundantCodingEnabled: kotlin.Boolean,
+    val redundantCodingEnabled: Boolean,
 
     @Json(name = "speaker_default_on")
-    val speakerDefaultOn: kotlin.Boolean,
+    val speakerDefaultOn: Boolean,
 
     @Json(name = "noise_cancellation")
     val noiseCancellation: io.getstream.android.video.api.generated.models.NoiseCancellationSettings? = null
@@ -68,11 +63,11 @@ data class AudioSettingsResponse (
     /**
     * DefaultDevice Enum
     */
-    sealed class DefaultDevice(val value: kotlin.String) {
+    sealed class DefaultDevice(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): DefaultDevice = when (s) {
+                fun fromString(s: String): DefaultDevice = when (s) {
                     "earpiece" -> Earpiece
                     "speaker" -> Speaker
                     else -> Unknown(s)
@@ -80,7 +75,7 @@ data class AudioSettingsResponse (
             }
             object Earpiece : DefaultDevice("earpiece")
             object Speaker : DefaultDevice("speaker")
-            data class Unknown(val unknownValue: kotlin.String) : DefaultDevice(unknownValue)
+            data class Unknown(val unknownValue: String) : DefaultDevice(unknownValue)
         
 
         class DefaultDeviceAdapter : JsonAdapter<DefaultDevice>() {

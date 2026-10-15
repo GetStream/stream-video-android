@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,26 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * Credentials for SIP inbound call authentication
  */
-
 data class SipInboundCredentials (
     @Json(name = "api_key")
-    val apiKey: kotlin.String,
+    val apiKey: String,
 
     @Json(name = "call_id")
-    val callId: kotlin.String,
+    val callId: String,
 
     @Json(name = "call_type")
-    val callType: kotlin.String,
+    val callType: String,
 
     @Json(name = "token")
-    val token: kotlin.String,
+    val token: String,
 
     @Json(name = "user_id")
-    val userId: kotlin.String,
+    val userId: String,
 
     @Json(name = "call_custom_data")
-    val callCustomData: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+    val callCustomData: Map<String, Any?> = emptyMap(),
 
     @Json(name = "user_custom_data")
-    val userCustomData: kotlin.collections.Map<kotlin.String, Any?> = emptyMap()
+    val userCustomData: Map<String, Any?> = emptyMap()
 )

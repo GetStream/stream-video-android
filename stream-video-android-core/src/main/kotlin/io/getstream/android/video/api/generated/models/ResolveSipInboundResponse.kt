@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,10 +33,9 @@ import com.squareup.moshi.ToJson
 /**
  * Response containing resolved SIP inbound routing information
  */
-
 data class ResolveSipInboundResponse (
     @Json(name = "duration")
-    val duration: kotlin.String,
+    val duration: String,
 
     @Json(name = "credentials")
     val credentials: io.getstream.android.video.api.generated.models.SipInboundCredentials,

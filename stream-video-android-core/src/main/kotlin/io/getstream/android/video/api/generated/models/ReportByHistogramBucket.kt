@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,16 +33,15 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class ReportByHistogramBucket (
     @Json(name = "category")
-    val category: kotlin.String,
+    val category: String,
 
     @Json(name = "count")
-    val count: kotlin.Int,
+    val count: Int,
 
     @Json(name = "sum")
-    val sum: kotlin.Float,
+    val sum: Float,
 
     @Json(name = "lower_bound")
     val lowerBound: io.getstream.android.video.api.generated.models.Bound? = null,

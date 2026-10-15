@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,20 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * PIN routing rule call configuration response
  */
-
 data class SIPInboundRoutingRulePinConfigsResponse (
     @Json(name = "custom_webhook_url")
-    val customWebhookUrl: kotlin.String? = null,
+    val customWebhookUrl: String? = null,
 
     @Json(name = "pin_failed_attempt_prompt")
-    val pinFailedAttemptPrompt: kotlin.String? = null,
+    val pinFailedAttemptPrompt: String? = null,
 
     @Json(name = "pin_hangup_prompt")
-    val pinHangupPrompt: kotlin.String? = null,
+    val pinHangupPrompt: String? = null,
 
     @Json(name = "pin_prompt")
-    val pinPrompt: kotlin.String? = null,
+    val pinPrompt: String? = null,
 
     @Json(name = "pin_success_prompt")
-    val pinSuccessPrompt: kotlin.String? = null
+    val pinSuccessPrompt: String? = null
 )

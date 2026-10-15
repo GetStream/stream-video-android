@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,11 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class TranslationSettings (
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean? = null,
+    val enabled: Boolean? = null,
 
     @Json(name = "languages")
-    val languages: kotlin.collections.List<kotlin.String>? = emptyList()
+    val languages: List<String>? = emptyList()
 )

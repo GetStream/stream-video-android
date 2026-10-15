@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,11 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class Bound (
     @Json(name = "inclusive")
-    val inclusive: kotlin.Boolean,
+    val inclusive: Boolean,
 
     @Json(name = "value")
-    val value: kotlin.Float
+    val value: Float
 )

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,43 +33,42 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a user begins streaming into a call
  */
-
 data class IngressStartedEvent (
     @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    val callCid: String,
 
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "ingress_stream_id")
-    val ingressStreamId: kotlin.String,
+    val ingressStreamId: String,
 
     @Json(name = "publisher_type")
-    val publisherType: kotlin.String,
+    val publisherType: String,
 
     @Json(name = "user_id")
-    val userId: kotlin.String,
+    val userId: String,
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: String,
 
     @Json(name = "client_ip")
-    val clientIp: kotlin.String? = null,
+    val clientIp: String? = null,
 
     @Json(name = "client_name")
-    val clientName: kotlin.String? = null,
+    val clientName: String? = null,
 
     @Json(name = "version")
-    val version: kotlin.String? = null
+    val version: String? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {
     
-    override fun getEventType(): kotlin.String {
+    override fun getEventType(): String {
         return type
     }
 
-    override fun getCallCID(): kotlin.String {
+    override fun getCallCID(): String {
         return callCid
     }    
 }

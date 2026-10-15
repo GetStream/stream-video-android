@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,14 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class SubscriberStatsResponse (
     @Json(name = "total")
-    val total: kotlin.Int,
+    val total: Int,
 
     @Json(name = "total_subscribed_duration_seconds")
-    val totalSubscribedDurationSeconds: kotlin.Int,
+    val totalSubscribedDurationSeconds: Int,
 
     @Json(name = "unique")
-    val unique: kotlin.Int
+    val unique: Int
 )

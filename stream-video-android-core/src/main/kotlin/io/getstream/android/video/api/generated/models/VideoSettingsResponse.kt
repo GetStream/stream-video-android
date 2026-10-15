@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,19 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class VideoSettingsResponse (
     @Json(name = "access_request_enabled")
-    val accessRequestEnabled: kotlin.Boolean,
+    val accessRequestEnabled: Boolean,
 
     @Json(name = "camera_default_on")
-    val cameraDefaultOn: kotlin.Boolean,
+    val cameraDefaultOn: Boolean,
 
     @Json(name = "camera_facing")
     val cameraFacing: CameraFacing,
 
     @Json(name = "enabled")
-    val enabled: kotlin.Boolean,
+    val enabled: Boolean,
 
     @Json(name = "target_resolution")
     val targetResolution: io.getstream.android.video.api.generated.models.TargetResolution
@@ -59,11 +54,11 @@ data class VideoSettingsResponse (
     /**
     * CameraFacing Enum
     */
-    sealed class CameraFacing(val value: kotlin.String) {
+    sealed class CameraFacing(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): CameraFacing = when (s) {
+                fun fromString(s: String): CameraFacing = when (s) {
                     "back" -> Back
                     "external" -> External
                     "front" -> Front
@@ -73,7 +68,7 @@ data class VideoSettingsResponse (
             object Back : CameraFacing("back")
             object External : CameraFacing("external")
             object Front : CameraFacing("front")
-            data class Unknown(val unknownValue: kotlin.String) : CameraFacing(unknownValue)
+            data class Unknown(val unknownValue: String) : CameraFacing(unknownValue)
         
 
         class CameraFacingAdapter : JsonAdapter<CameraFacing>() {

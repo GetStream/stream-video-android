@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,29 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class APIError (
     @Json(name = "code")
-    val code: kotlin.Int,
+    val code: Int,
 
     @Json(name = "duration")
-    val duration: kotlin.String,
+    val duration: String,
 
     @Json(name = "message")
-    val message: kotlin.String,
+    val message: String,
 
     @Json(name = "more_info")
-    val moreInfo: kotlin.String,
+    val moreInfo: String,
 
     @Json(name = "StatusCode")
-    val statusCode: kotlin.Int,
+    val statusCode: Int,
 
     @Json(name = "details")
-    val details: kotlin.collections.List<kotlin.Int> = emptyList(),
+    val details: List<Int> = emptyList(),
+
+    @Json(name = "cooldown_remaining_ms")
+    val cooldownRemainingMs: Int? = null,
 
     @Json(name = "unrecoverable")
-    val unrecoverable: kotlin.Boolean? = null,
+    val unrecoverable: Boolean? = null,
 
     @Json(name = "exception_fields")
-    val exceptionFields: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()
+    val exceptionFields: Map<String, String>? = emptyMap()
 )

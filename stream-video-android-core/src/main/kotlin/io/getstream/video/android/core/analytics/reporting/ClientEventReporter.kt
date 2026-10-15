@@ -617,7 +617,6 @@ internal class ClientEventReporter(
                 peerConnection = session.peerConnectionRole,
                 iceState = iceState,
                 wasPreviouslyConnected = session.wasPreviouslyConnected,
-                userSessionId = session.userSessionId,
                 joinStageAttemptId = session.joinStageAttemptIdSnapshot,
                 joinReason = session.joinReason,
             )

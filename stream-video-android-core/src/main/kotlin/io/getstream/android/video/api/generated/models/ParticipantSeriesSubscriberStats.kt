@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,20 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class ParticipantSeriesSubscriberStats (
     @Json(name = "global_metrics_order")
-    val globalMetricsOrder: kotlin.collections.List<kotlin.String>? = emptyList(),
+    val globalMetricsOrder: List<String>? = emptyList(),
 
     @Json(name = "subscriptions")
-    val subscriptions: kotlin.collections.List<io.getstream.android.video.api.generated.models.ParticipantSeriesSubscriptionTrackMetrics>? = emptyList(),
+    val subscriptions: List<io.getstream.android.video.api.generated.models.ParticipantSeriesSubscriptionTrackMetrics>? = emptyList(),
 
     @Json(name = "global")
-    val global: kotlin.collections.Map<kotlin.String, kotlin.collections.List<kotlin.collections.List<kotlin.Float>>>? = emptyMap(),
+    val global: Map<String, List<List<Float>>>? = emptyMap(),
 
     @Json(name = "global_meta")
-    val globalMeta: kotlin.collections.Map<kotlin.String, io.getstream.android.video.api.generated.models.MetricDescriptor>? = emptyMap(),
+    val globalMeta: Map<String, io.getstream.android.video.api.generated.models.MetricDescriptor>? = emptyMap(),
 
     @Json(name = "global_thresholds")
-    val globalThresholds: kotlin.collections.Map<kotlin.String, kotlin.collections.List<io.getstream.android.video.api.generated.models.MetricThreshold>>? = emptyMap()
+    val globalThresholds: Map<String, List<io.getstream.android.video.api.generated.models.MetricThreshold>>? = emptyMap()
 )

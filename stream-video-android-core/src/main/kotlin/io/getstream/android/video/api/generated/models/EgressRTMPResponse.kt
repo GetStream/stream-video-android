@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,17 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class EgressRTMPResponse (
     @Json(name = "name")
-    val name: kotlin.String,
+    val name: String,
 
     @Json(name = "started_at")
     val startedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "stream_key")
-    val streamKey: kotlin.String? = null,
+    val streamKey: String? = null,
 
     @Json(name = "stream_url")
-    val streamUrl: kotlin.String? = null
+    val streamUrl: String? = null
 )

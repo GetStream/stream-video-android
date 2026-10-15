@@ -35,25 +35,25 @@ import com.squareup.moshi.ToJson
  */
 data class GetCallRingStateResponse (
     @Json(name = "call_cid")
-    val callCid: kotlin.String,
+    val callCid: String,
 
     @Json(name = "created_by_user_id")
-    val createdByUserId: kotlin.String,
+    val createdByUserId: String,
 
     @Json(name = "duration")
-    val duration: kotlin.String,
+    val duration: String,
 
     @Json(name = "session_id")
-    val sessionId: kotlin.String,
+    val sessionId: String,
 
     @Json(name = "accepted_by")
-    val acceptedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    val acceptedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "missed_by")
-    val missedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    val missedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "rejected_by")
-    val rejectedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    val rejectedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "call_ended_at")
     val callEndedAt: org.threeten.bp.OffsetDateTime? = null,

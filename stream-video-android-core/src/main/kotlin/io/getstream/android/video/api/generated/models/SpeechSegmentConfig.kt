@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,11 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class SpeechSegmentConfig (
     @Json(name = "max_speech_caption_ms")
-    val maxSpeechCaptionMs: kotlin.Int? = null,
+    val maxSpeechCaptionMs: Int? = null,
 
     @Json(name = "silence_duration_ms")
-    val silenceDurationMs: kotlin.Int? = null
+    val silenceDurationMs: Int? = null
 )

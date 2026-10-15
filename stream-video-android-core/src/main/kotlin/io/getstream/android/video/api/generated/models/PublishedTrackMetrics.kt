@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,19 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class PublishedTrackMetrics (
     @Json(name = "codec")
-    val codec: kotlin.String? = null,
+    val codec: String? = null,
 
     @Json(name = "track_id")
-    val trackId: kotlin.String? = null,
+    val trackId: String? = null,
 
     @Json(name = "track_type")
-    val trackType: kotlin.String? = null,
+    val trackType: String? = null,
 
     @Json(name = "warnings")
-    val warnings: kotlin.collections.List<io.getstream.android.video.api.generated.models.SessionWarningResponse>? = emptyList(),
+    val warnings: List<io.getstream.android.video.api.generated.models.SessionWarningResponse>? = emptyList(),
 
     @Json(name = "bitrate")
     val bitrate: io.getstream.android.video.api.generated.models.MetricTimeSeries? = null,

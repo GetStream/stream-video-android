@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,16 +33,15 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class ParticipantSeriesTimeframe (
     @Json(name = "max_points")
-    val maxPoints: kotlin.Int,
+    val maxPoints: Int,
 
     @Json(name = "since")
     val since: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "step_seconds")
-    val stepSeconds: kotlin.Int,
+    val stepSeconds: Int,
 
     @Json(name = "until")
     val until: org.threeten.bp.OffsetDateTime

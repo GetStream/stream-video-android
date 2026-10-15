@@ -46,6 +46,8 @@ object Serializer {
         .add(io.getstream.android.video.api.generated.models.IngressSourceRequest.Fps.FpsAdapter())
         .add(io.getstream.android.video.api.generated.models.IngressVideoLayerRequest.Codec.CodecAdapter())
         .add(io.getstream.android.video.api.generated.models.LayoutSettingsRequest.Name.NameAdapter())
+        .add(io.getstream.android.video.api.generated.models.LifecycleSettingsRequest.Mode.ModeAdapter())
+        .add(io.getstream.android.video.api.generated.models.LifecycleSettingsResponse.Mode.ModeAdapter())
         .add(io.getstream.android.video.api.generated.models.NoiseCancellationSettings.Mode.ModeAdapter())
         .add(io.getstream.android.video.api.generated.models.OwnCapability.OwnCapabilityAdapter())
         .add(io.getstream.android.video.api.generated.models.RTMPBroadcastRequest.Quality.QualityAdapter())

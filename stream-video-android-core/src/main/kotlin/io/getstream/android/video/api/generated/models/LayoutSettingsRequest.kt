@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,33 +33,32 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class LayoutSettingsRequest (
     @Json(name = "name")
     val name: Name,
 
     @Json(name = "detect_orientation")
-    val detectOrientation: kotlin.Boolean? = null,
+    val detectOrientation: Boolean? = null,
 
     @Json(name = "external_app_url")
-    val externalAppUrl: kotlin.String? = null,
+    val externalAppUrl: String? = null,
 
     @Json(name = "external_css_url")
-    val externalCssUrl: kotlin.String? = null,
+    val externalCssUrl: String? = null,
 
     @Json(name = "options")
-    val options: kotlin.collections.Map<kotlin.String, Any?>? = emptyMap()
+    val options: Map<String, Any?>? = emptyMap()
 )
 {
     
     /**
     * Name Enum
     */
-    sealed class Name(val value: kotlin.String) {
+    sealed class Name(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Name = when (s) {
+                fun fromString(s: String): Name = when (s) {
                     "custom" -> Custom
                     "grid" -> Grid
                     "mobile" -> Mobile
@@ -77,7 +72,7 @@ data class LayoutSettingsRequest (
             object Mobile : Name("mobile")
             object SingleParticipant : Name("single-participant")
             object Spotlight : Name("spotlight")
-            data class Unknown(val unknownValue: kotlin.String) : Name(unknownValue)
+            data class Unknown(val unknownValue: String) : Name(unknownValue)
         
 
         class NameAdapter : JsonAdapter<Name>() {

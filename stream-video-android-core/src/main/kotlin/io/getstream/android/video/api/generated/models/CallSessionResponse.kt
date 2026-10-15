@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,28 +33,27 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class CallSessionResponse (
     @Json(name = "anonymous_participant_count")
-    val anonymousParticipantCount: kotlin.Int,
+    val anonymousParticipantCount: Int,
 
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "participants")
-    val participants: kotlin.collections.List<io.getstream.android.video.api.generated.models.CallParticipantResponse> = emptyList(),
+    val participants: List<io.getstream.android.video.api.generated.models.CallParticipantResponse> = emptyList(),
 
     @Json(name = "accepted_by")
-    val acceptedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    val acceptedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "missed_by")
-    val missedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    val missedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "participants_count_by_role")
-    val participantsCountByRole: kotlin.collections.Map<kotlin.String, kotlin.Int> = emptyMap(),
+    val participantsCountByRole: Map<String, Int> = emptyMap(),
 
     @Json(name = "rejected_by")
-    val rejectedBy: kotlin.collections.Map<kotlin.String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    val rejectedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "ended_at")
     val endedAt: org.threeten.bp.OffsetDateTime? = null,

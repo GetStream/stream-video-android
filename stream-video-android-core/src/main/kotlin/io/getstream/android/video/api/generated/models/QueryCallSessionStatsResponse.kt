@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,17 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-
 data class QueryCallSessionStatsResponse (
     @Json(name = "duration")
-    val duration: kotlin.String,
+    val duration: String,
 
     @Json(name = "call_stats")
-    val callStats: kotlin.collections.List<io.getstream.android.video.api.generated.models.CallStatsSessionResponse> = emptyList(),
+    val callStats: List<io.getstream.android.video.api.generated.models.CallStatsSessionResponse> = emptyList(),
 
     @Json(name = "next")
-    val next: kotlin.String? = null,
+    val next: String? = null,
 
     @Json(name = "prev")
-    val prev: kotlin.String? = null
+    val prev: String? = null
 )

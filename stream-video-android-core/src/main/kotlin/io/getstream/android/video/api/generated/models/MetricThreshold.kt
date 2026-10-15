@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,20 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class MetricThreshold (
     @Json(name = "level")
-    val level: kotlin.String,
+    val level: String,
 
     @Json(name = "operator")
-    val operator: kotlin.String,
+    val operator: String,
 
     @Json(name = "value")
-    val value: kotlin.Float,
+    val value: Float,
 
     @Json(name = "value_unit")
-    val valueUnit: kotlin.String? = null,
+    val valueUnit: String? = null,
 
     @Json(name = "window_seconds")
-    val windowSeconds: kotlin.Int? = null
+    val windowSeconds: Int? = null
 )

@@ -38,7 +38,6 @@ internal data class PostCallFlightSession(
     val joinSource: RingJoinSource? = null,
     val sfuId: String? = null,
     val callSessionId: String? = null,
-    val userSessionId: String? = null,
     val peerConnectionRole: PeerConnectionRole? = null,
     val wasPreviouslyConnected: Boolean = false,
 

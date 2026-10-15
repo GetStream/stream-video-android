@@ -34,7 +34,7 @@ import io.getstream.android.video.api.generated.models.RejectCallResponse
 import io.getstream.android.video.api.generated.models.RingCallRequest
 import io.getstream.android.video.api.generated.models.RingCallResponse
 import io.getstream.android.video.api.generated.models.SendCallEventResponse
-import io.getstream.android.video.api.generated.models.SendReactionResponse
+import io.getstream.android.video.api.generated.models.SendVideoReactionResponse
 import io.getstream.android.video.api.generated.models.StartClosedCaptionsResponse
 import io.getstream.android.video.api.generated.models.StartTranscriptionResponse
 import io.getstream.android.video.api.generated.models.StopClosedCaptionsResponse
@@ -243,7 +243,7 @@ internal class CallApiClient(
         type: String,
         emoji: String? = null,
         custom: Map<String, Any>? = null,
-    ): Result<SendReactionResponse> {
+    ): Result<SendVideoReactionResponse> {
         return clientImpl.sendReaction(this.type, id, type, emoji, custom)
     }
 

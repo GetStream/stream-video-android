@@ -30,8 +30,8 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
-public abstract class VideoEvent {
-    abstract fun getEventType(): kotlin.String 
+abstract class VideoEvent {
+    abstract fun getEventType(): String 
         
 }
 

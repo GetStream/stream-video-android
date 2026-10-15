@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,32 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * CallClosedCaption represents a closed caption of a call.
  */
-
 data class CallClosedCaption (
     @Json(name = "end_time")
     val endTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "language")
-    val language: kotlin.String,
+    val language: String,
 
     @Json(name = "speaker_id")
-    val speakerId: kotlin.String,
+    val speakerId: String,
 
     @Json(name = "start_time")
     val startTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "text")
-    val text: kotlin.String,
+    val text: String,
 
     @Json(name = "translated")
-    val translated: kotlin.Boolean,
+    val translated: Boolean,
 
     @Json(name = "user")
     val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "service")
-    val service: kotlin.String? = null
+    val service: String? = null
 )

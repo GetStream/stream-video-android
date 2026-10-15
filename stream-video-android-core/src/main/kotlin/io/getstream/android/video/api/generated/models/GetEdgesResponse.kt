@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,11 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-
 data class GetEdgesResponse (
     @Json(name = "duration")
-    val duration: kotlin.String,
+    val duration: String,
 
     @Json(name = "edges")
-    val edges: kotlin.collections.List<io.getstream.android.video.api.generated.models.EdgeResponse> = emptyList()
+    val edges: List<io.getstream.android.video.api.generated.models.EdgeResponse> = emptyList()
 )

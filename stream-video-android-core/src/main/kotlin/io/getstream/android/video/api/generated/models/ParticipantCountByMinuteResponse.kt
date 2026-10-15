@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,19 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class ParticipantCountByMinuteResponse (
     @Json(name = "first")
-    val first: kotlin.Int,
+    val first: Int,
 
     @Json(name = "last")
-    val last: kotlin.Int,
+    val last: Int,
 
     @Json(name = "max")
-    val max: kotlin.Int,
+    val max: Int,
 
     @Json(name = "min")
-    val min: kotlin.Int,
+    val min: Int,
 
     @Json(name = "start_ts")
     val startTs: org.threeten.bp.OffsetDateTime

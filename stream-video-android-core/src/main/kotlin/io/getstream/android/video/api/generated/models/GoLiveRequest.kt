@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,32 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class GoLiveRequest (
     @Json(name = "recording_storage_name")
-    val recordingStorageName: kotlin.String? = null,
+    val recordingStorageName: String? = null,
 
     @Json(name = "start_closed_caption")
-    val startClosedCaption: kotlin.Boolean? = null,
+    val startClosedCaption: Boolean? = null,
 
     @Json(name = "start_composite_recording")
-    val startCompositeRecording: kotlin.Boolean? = null,
+    val startCompositeRecording: Boolean? = null,
 
     @Json(name = "start_hls")
-    val startHls: kotlin.Boolean? = null,
+    val startHls: Boolean? = null,
 
     @Json(name = "start_individual_recording")
-    val startIndividualRecording: kotlin.Boolean? = null,
+    val startIndividualRecording: Boolean? = null,
 
     @Json(name = "start_raw_recording")
-    val startRawRecording: kotlin.Boolean? = null,
+    val startRawRecording: Boolean? = null,
 
     @Json(name = "start_recording")
-    val startRecording: kotlin.Boolean? = null,
+    val startRecording: Boolean? = null,
 
     @Json(name = "start_transcription")
-    val startTranscription: kotlin.Boolean? = null,
+    val startTranscription: Boolean? = null,
 
     @Json(name = "transcription_storage_name")
-    val transcriptionStorageName: kotlin.String? = null
+    val transcriptionStorageName: String? = null
 )

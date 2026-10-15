@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,14 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
+data class SourceInterruption (
+    @Json(name = "at_offset_min")
+    val atOffsetMin: Float,
 
-data class ICEServer (
-    @Json(name = "password")
-    val password: kotlin.String,
+    @Json(name = "dead_air_s")
+    val deadAirS: Int,
 
-    @Json(name = "username")
-    val username: kotlin.String,
+    @Json(name = "kind")
+    val kind: String,
 
-    @Json(name = "urls")
-    val urls: kotlin.collections.List<kotlin.String> = emptyList()
+    @Json(name = "seamless")
+    val seamless: Boolean? = null
 )

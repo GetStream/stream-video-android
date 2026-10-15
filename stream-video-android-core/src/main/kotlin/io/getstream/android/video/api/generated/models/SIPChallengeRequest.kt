@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,53 +33,52 @@ import com.squareup.moshi.ToJson
 /**
  * SIP digest challenge authentication data
  */
-
 data class SIPChallengeRequest (
     @Json(name = "a1")
-    val a1: kotlin.String? = null,
+    val a1: String? = null,
 
     @Json(name = "algorithm")
-    val algorithm: kotlin.String? = null,
+    val algorithm: String? = null,
 
     @Json(name = "charset")
-    val charset: kotlin.String? = null,
+    val charset: String? = null,
 
     @Json(name = "cnonce")
-    val cnonce: kotlin.String? = null,
+    val cnonce: String? = null,
 
     @Json(name = "method")
-    val method: kotlin.String? = null,
+    val method: String? = null,
 
     @Json(name = "nc")
-    val nc: kotlin.String? = null,
+    val nc: String? = null,
 
     @Json(name = "nonce")
-    val nonce: kotlin.String? = null,
+    val nonce: String? = null,
 
     @Json(name = "opaque")
-    val opaque: kotlin.String? = null,
+    val opaque: String? = null,
 
     @Json(name = "realm")
-    val realm: kotlin.String? = null,
+    val realm: String? = null,
 
     @Json(name = "response")
-    val response: kotlin.String? = null,
+    val response: String? = null,
 
     @Json(name = "stale")
-    val stale: kotlin.Boolean? = null,
+    val stale: Boolean? = null,
 
     @Json(name = "uri")
-    val uri: kotlin.String? = null,
+    val uri: String? = null,
 
     @Json(name = "userhash")
-    val userhash: kotlin.Boolean? = null,
+    val userhash: Boolean? = null,
 
     @Json(name = "username")
-    val username: kotlin.String? = null,
+    val username: String? = null,
 
     @Json(name = "domain")
-    val domain: kotlin.collections.List<kotlin.String>? = emptyList(),
+    val domain: List<String>? = emptyList(),
 
     @Json(name = "qop")
-    val qop: kotlin.collections.List<kotlin.String>? = emptyList()
+    val qop: List<String>? = emptyList()
 )

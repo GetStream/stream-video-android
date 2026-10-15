@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,7 +33,6 @@ import com.squareup.moshi.ToJson
 /**
  * Emitted when app settings are updated
  */
-
 data class AppUpdatedEvent (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
@@ -46,10 +41,10 @@ data class AppUpdatedEvent (
     val app: io.getstream.android.video.api.generated.models.AppEventResponse,
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+    val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "type")
-    val type: kotlin.String,
+    val type: String,
 
     @Json(name = "received_at")
     val receivedAt: org.threeten.bp.OffsetDateTime? = null
@@ -57,7 +52,7 @@ data class AppUpdatedEvent (
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {
     
-    override fun getEventType(): kotlin.String {
+    override fun getEventType(): String {
         return type
     }    
 }

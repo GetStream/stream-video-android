@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,13 +33,12 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class RecordSettingsRequest (
     @Json(name = "mode")
     val mode: Mode,
 
     @Json(name = "audio_only")
-    val audioOnly: kotlin.Boolean? = null,
+    val audioOnly: Boolean? = null,
 
     @Json(name = "quality")
     val quality: Quality? = null
@@ -53,11 +48,11 @@ data class RecordSettingsRequest (
     /**
     * Mode Enum
     */
-    sealed class Mode(val value: kotlin.String) {
+    sealed class Mode(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Mode = when (s) {
+                fun fromString(s: String): Mode = when (s) {
                     "auto-on" -> AutoOn
                     "available" -> Available
                     "disabled" -> Disabled
@@ -67,7 +62,7 @@ data class RecordSettingsRequest (
             object AutoOn : Mode("auto-on")
             object Available : Mode("available")
             object Disabled : Mode("disabled")
-            data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
+            data class Unknown(val unknownValue: String) : Mode(unknownValue)
         
 
         class ModeAdapter : JsonAdapter<Mode>() {
@@ -86,11 +81,11 @@ data class RecordSettingsRequest (
     /**
     * Quality Enum
     */
-    sealed class Quality(val value: kotlin.String) {
+    sealed class Quality(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Quality = when (s) {
+                fun fromString(s: String): Quality = when (s) {
                     "portrait-1080x1920" -> Portrait1080x1920
                     "portrait-1440x2560" -> Portrait1440x2560
                     "portrait-360x640" -> Portrait360x640
@@ -114,7 +109,7 @@ data class RecordSettingsRequest (
             object Quality360p : Quality("360p")
             object Quality480p : Quality("480p")
             object Quality720p : Quality("720p")
-            data class Unknown(val unknownValue: kotlin.String) : Quality(unknownValue)
+            data class Unknown(val unknownValue: String) : Quality(unknownValue)
         
 
         class QualityAdapter : JsonAdapter<Quality>() {

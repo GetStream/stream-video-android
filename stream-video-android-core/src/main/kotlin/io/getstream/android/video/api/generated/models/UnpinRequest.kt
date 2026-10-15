@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,11 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * UnpinRequest is the payload for unpinning a message.
  */
-
 data class UnpinRequest (
     @Json(name = "session_id")
-    val sessionId: kotlin.String,
+    val sessionId: String,
 
     @Json(name = "user_id")
-    val userId: kotlin.String
+    val userId: String
 )

@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,34 +33,33 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class UserResponseCommonFields (
     @Json(name = "created_at")
     val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "id")
-    val id: kotlin.String,
+    val id: String,
 
     @Json(name = "language")
-    val language: kotlin.String,
+    val language: String,
 
     @Json(name = "role")
-    val role: kotlin.String,
+    val role: String,
 
     @Json(name = "updated_at")
     val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "blocked_user_ids")
-    val blockedUserIds: kotlin.collections.List<kotlin.String> = emptyList(),
+    val blockedUserIds: List<String> = emptyList(),
 
     @Json(name = "teams")
-    val teams: kotlin.collections.List<kotlin.String> = emptyList(),
+    val teams: List<String> = emptyList(),
 
     @Json(name = "custom")
-    val custom: kotlin.collections.Map<kotlin.String, Any?> = emptyMap(),
+    val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "avg_response_time")
-    val avgResponseTime: kotlin.Int? = null,
+    val avgResponseTime: Int? = null,
 
     @Json(name = "deactivated_at")
     val deactivatedAt: org.threeten.bp.OffsetDateTime? = null,
@@ -73,17 +68,14 @@ data class UserResponseCommonFields (
     val deletedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "image")
-    val image: kotlin.String? = null,
+    val image: String? = null,
 
     @Json(name = "last_active")
     val lastActive: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "name")
-    val name: kotlin.String? = null,
-
-    @Json(name = "revoke_tokens_issued_before")
-    val revokeTokensIssuedBefore: org.threeten.bp.OffsetDateTime? = null,
+    val name: String? = null,
 
     @Json(name = "teams_role")
-    val teamsRole: kotlin.collections.Map<kotlin.String, kotlin.String>? = emptyMap()
+    val teamsRole: Map<String, String>? = emptyMap()
 )

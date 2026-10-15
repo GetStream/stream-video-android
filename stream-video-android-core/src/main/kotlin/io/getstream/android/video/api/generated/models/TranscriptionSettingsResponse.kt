@@ -23,10 +23,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.*
-import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonAdapter
@@ -37,7 +33,6 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-
 data class TranscriptionSettingsResponse (
     @Json(name = "closed_caption_mode")
     val closedCaptionMode: ClosedCaptionMode,
@@ -59,11 +54,11 @@ data class TranscriptionSettingsResponse (
     /**
     * ClosedCaptionMode Enum
     */
-    sealed class ClosedCaptionMode(val value: kotlin.String) {
+    sealed class ClosedCaptionMode(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): ClosedCaptionMode = when (s) {
+                fun fromString(s: String): ClosedCaptionMode = when (s) {
                     "auto-on" -> AutoOn
                     "available" -> Available
                     "disabled" -> Disabled
@@ -73,7 +68,7 @@ data class TranscriptionSettingsResponse (
             object AutoOn : ClosedCaptionMode("auto-on")
             object Available : ClosedCaptionMode("available")
             object Disabled : ClosedCaptionMode("disabled")
-            data class Unknown(val unknownValue: kotlin.String) : ClosedCaptionMode(unknownValue)
+            data class Unknown(val unknownValue: String) : ClosedCaptionMode(unknownValue)
         
 
         class ClosedCaptionModeAdapter : JsonAdapter<ClosedCaptionMode>() {
@@ -92,11 +87,11 @@ data class TranscriptionSettingsResponse (
     /**
     * Language Enum
     */
-    sealed class Language(val value: kotlin.String) {
+    sealed class Language(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Language = when (s) {
+                fun fromString(s: String): Language = when (s) {
                     "ar" -> Ar
                     "auto" -> Auto
                     "bg" -> Bg
@@ -174,7 +169,7 @@ data class TranscriptionSettingsResponse (
             object Tr : Language("tr")
             object Uk : Language("uk")
             object Zh : Language("zh")
-            data class Unknown(val unknownValue: kotlin.String) : Language(unknownValue)
+            data class Unknown(val unknownValue: String) : Language(unknownValue)
         
 
         class LanguageAdapter : JsonAdapter<Language>() {
@@ -193,11 +188,11 @@ data class TranscriptionSettingsResponse (
     /**
     * Mode Enum
     */
-    sealed class Mode(val value: kotlin.String) {
+    sealed class Mode(val value: String) {
             override fun toString(): String = value
 
             companion object {
-                fun fromString(s: kotlin.String): Mode = when (s) {
+                fun fromString(s: String): Mode = when (s) {
                     "auto-on" -> AutoOn
                     "available" -> Available
                     "disabled" -> Disabled
@@ -207,7 +202,7 @@ data class TranscriptionSettingsResponse (
             object AutoOn : Mode("auto-on")
             object Available : Mode("available")
             object Disabled : Mode("disabled")
-            data class Unknown(val unknownValue: kotlin.String) : Mode(unknownValue)
+            data class Unknown(val unknownValue: String) : Mode(unknownValue)
         
 
         class ModeAdapter : JsonAdapter<Mode>() {
