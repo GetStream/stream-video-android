@@ -45,7 +45,6 @@ import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.common.fromVideoErrorCode
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.TokenManager
-import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.suspendDebugOnly
@@ -419,12 +418,12 @@ internal open class SfuSocket(
     }
 
     /**
-     * Awaits until [VideoSocketState.Connected] is set.
+     * Awaits until [SfuSocketState.Connected] is set.
      *
      * @param timeoutInMillis Timeout time in milliseconds.
      */
     /**
-     * Awaits until [VideoSocketState.Connected] is set.
+     * Awaits until [SfuSocketState.Connected] is set.
      *
      * @param timeoutInMillis Timeout time in milliseconds.
      */
@@ -433,12 +432,12 @@ internal open class SfuSocket(
     }
 
     /**
-     * Awaits until specified [VideoSocketState] is set.
+     * Awaits until specified [SfuSocketState] is set.
      *
      * @param timeoutInMillis Timeout time in milliseconds.
      */
     /**
-     * Awaits until specified [VideoSocketState] is set.
+     * Awaits until specified [SfuSocketState] is set.
      *
      * @param timeoutInMillis Timeout time in milliseconds.
      */
