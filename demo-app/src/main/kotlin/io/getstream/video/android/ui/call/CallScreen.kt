@@ -813,29 +813,6 @@ fun CallScreen(
     }
 }
 
-@Deprecated(
-    "Use CallScreen with pictureInPictureConfiguration argument",
-    ReplaceWith(
-        "CallScreen(call, showDebugOptions, pictureInPictureConfiguration, onCallDisconnected, onUserLeaveCall)",
-    ),
-)
-@OptIn(FlowPreview::class)
-@Composable
-fun CallScreen(
-    call: Call,
-    showDebugOptions: Boolean = false,
-    onCallDisconnected: () -> Unit = {},
-    onUserLeaveCall: () -> Unit = {},
-) {
-    CallScreen(
-        call,
-        showDebugOptions,
-        PictureInPictureConfiguration(true),
-        onCallDisconnected,
-        onUserLeaveCall,
-    )
-}
-
 /**
  * Executes the transcription APIs based on the current transcription state and settings.
  *

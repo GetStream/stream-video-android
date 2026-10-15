@@ -37,13 +37,7 @@ public data class StreamCallActivityConfiguration(
     /** When the call has ended for any reason, close the screen */
     val closeScreenOnCallEnded: Boolean = true,
     /** When set to false, the activity will simply ignore the `showRationale` from the system and show the rationale screen anyway. */
-    @Deprecated(
-        message = "This property is deprecated. Use `canSkipPermissionRationale` instead.",
-        replaceWith = ReplaceWith("canSkipPermissionRationale"),
-    )
-    val canSkiPermissionRationale: Boolean = true,
-    /** When set to false, the activity will simply ignore the `showRationale` from the system and show the rationale screen anyway. */
-    val canSkipPermissionRationale: Boolean = canSkiPermissionRationale,
+    val canSkipPermissionRationale: Boolean = true,
     /** When set to true, the activity will keep the screen on. */
     val canKeepScreenOn: Boolean = true,
     /**

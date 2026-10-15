@@ -29,6 +29,7 @@ import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
 import io.getstream.video.android.core.call.state.ToggleCamera
 import io.getstream.video.android.core.call.state.ToggleMicrophone
+import io.getstream.video.android.core.pip.PictureInPictureConfiguration
 import io.getstream.video.android.model.User
 
 /**
@@ -80,7 +81,7 @@ class MainActivity3 : ComponentActivity() {
                 CallContent(
                     modifier = Modifier.fillMaxSize(),
                     call = call,
-                    enableInPictureInPicture = true,
+                    pictureInPictureConfiguration = PictureInPictureConfiguration(true),
                     onBackPressed = { finish() },
                     onCallAction = { callAction ->
                         when (callAction) {

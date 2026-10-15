@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.compose.ui.components.participants
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -26,8 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -42,65 +39,6 @@ import io.getstream.video.android.core.MemberState
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.model.userNameOrId
 import io.getstream.video.android.core.utils.toCallUser
-
-/**
- * Component that renders user avatars for call participants.
- *
- * @param participants The list of participants to render avatars for.
- *
- * @see [UserAvatar]
- */
-@Deprecated(
-    message = "This version of ParticipantAvatars is deprecated. Use the newer overload.",
-    replaceWith = ReplaceWith("ParticipantAvatars"),
-)
-@Composable
-public fun ParticipantAvatars(
-    participants: List<MemberState>,
-) {
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (participants.isNotEmpty()) {
-            if (participants.size == 1) {
-                val participant = participants.first()
-
-                VideoTheme.componentFactory.UserAvatar(
-                    UserAvatarParams(
-                        userImage = participant.user.image,
-                        userName = participant.user.userNameOrId,
-                        modifier = Modifier.size(StreamTokens.size80),
-                    ),
-                )
-            } else {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(StreamTokens.spacingLg)) {
-                        items(participants.take(2)) { participant ->
-                            VideoTheme.componentFactory.UserAvatar(
-                                UserAvatarParams(
-                                    userImage = participant.user.image,
-                                    userName = participant.user.userNameOrId,
-                                    modifier = Modifier.size(StreamTokens.size24),
-                                ),
-                            )
-                        }
-                    }
-
-                    if (participants.size >= 3) {
-                        VideoTheme.componentFactory.UserAvatar(
-                            UserAvatarParams(
-                                userImage = participants[2].user.image,
-                                userName = participants[2].user.userNameOrId,
-                                modifier = Modifier.size(StreamTokens.size16),
-                            ),
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 /**
  * Component that renders user avatars for a call.
