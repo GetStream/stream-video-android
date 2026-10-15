@@ -14747,6 +14747,7 @@ public abstract interface class io/getstream/video/android/core/notifications/ha
 }
 
 public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationProvider : io/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload, io/getstream/video/android/core/notifications/handlers/StreamSettingUpCallNotificationProvider {
+	public fun getSettingUpCallNotification (Ljava/lang/String;Lio/getstream/video/android/model/StreamCallId;)Landroid/app/Notification;
 }
 
 public abstract interface class io/getstream/video/android/core/notifications/handlers/StreamNotificationProviderWithPayload {

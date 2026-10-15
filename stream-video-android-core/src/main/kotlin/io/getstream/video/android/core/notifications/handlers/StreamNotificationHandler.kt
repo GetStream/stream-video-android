@@ -184,7 +184,13 @@ interface StreamNotificationUpdatesProvider {
 
 interface StreamNotificationProvider :
     StreamNotificationProviderWithPayload,
-    StreamSettingUpCallNotificationProvider
+    StreamSettingUpCallNotificationProvider {
+
+    override fun getSettingUpCallNotification(
+        trigger: String,
+        callId: StreamCallId,
+    ): Notification? = null
+}
 
 /**
  * Interceptor for notification builders.
