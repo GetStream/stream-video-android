@@ -82,7 +82,7 @@ public object ClosedCaptionsDefaults {
  * @param speakerColor Color used for rendering the speaker's name text.
  * @param textColor Color used for rendering the caption text.
  * @param maxVisibleCaptions The maximum number of captions visible at one time in the closed captions container.
- *                           Must be less than or equal to [ClosedCaptionsConfig.maxCaptions] to ensure consistency.
+ *                           Must be less than or equal to [ClosedCaptionsSettings.maxVisibleCaptions] to ensure consistency.
  * @param roundedCornerShape A shape used for the  caption container.
  *
  * Example Usage:
