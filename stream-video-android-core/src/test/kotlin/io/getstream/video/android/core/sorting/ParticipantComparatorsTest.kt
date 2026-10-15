@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.sorting
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.ReactionResponse
+import io.getstream.android.video.api.generated.models.ReactionResponse
 import io.getstream.video.android.core.events.PinUpdate
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.pinning.PinEntry
@@ -309,8 +309,8 @@ class ParticipantComparatorsTest {
     )
 
     private companion object {
-        private val USER_DUMMY: io.getstream.android.video.generated.models.UserResponse =
-            io.getstream.android.video.generated.models.UserResponse(
+        private val USER_DUMMY: io.getstream.android.video.api.generated.models.UserResponse =
+            io.getstream.android.video.api.generated.models.UserResponse(
                 createdAt = OffsetDateTime.parse("2026-05-14T00:00:00Z"),
                 id = "u",
                 language = "en",

@@ -16,14 +16,14 @@
 
 package io.getstream.video.android.core.socket.coordinator.v2
 
-import io.getstream.android.video.generated.models.APIError
-import io.getstream.android.video.generated.models.ConnectedEvent
-import io.getstream.android.video.generated.models.ConnectionErrorEvent
-import io.getstream.android.video.generated.models.CustomVideoEvent
-import io.getstream.android.video.generated.models.HealthCheckEvent
-import io.getstream.android.video.generated.models.OwnUserResponse
-import io.getstream.android.video.generated.models.UserResponse
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.APIError
+import io.getstream.android.video.api.generated.models.ConnectedEvent
+import io.getstream.android.video.api.generated.models.ConnectionErrorEvent
+import io.getstream.android.video.api.generated.models.CustomVideoEvent
+import io.getstream.android.video.api.generated.models.HealthCheckEvent
+import io.getstream.android.video.api.generated.models.OwnUserResponse
+import io.getstream.android.video.api.generated.models.UserResponse
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import org.junit.Test
 import org.threeten.bp.OffsetDateTime

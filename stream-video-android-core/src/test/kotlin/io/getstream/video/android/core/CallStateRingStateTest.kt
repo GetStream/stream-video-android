@@ -17,7 +17,7 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.GetCallRingStateResponse
+import io.getstream.android.video.api.generated.models.GetCallRingStateResponse
 import io.getstream.video.android.core.base.IntegrationTestBase
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

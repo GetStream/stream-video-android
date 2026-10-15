@@ -18,9 +18,9 @@ package io.getstream.video.android.core
 
 import androidx.compose.runtime.Stable
 import io.getstream.android.core.api.model.connection.StreamConnectionState
-import io.getstream.android.video.generated.models.CallCreatedEvent
-import io.getstream.android.video.generated.models.CallRingEvent
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.CallCreatedEvent
+import io.getstream.android.video.api.generated.models.CallRingEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.notifications.internal.service.CallService

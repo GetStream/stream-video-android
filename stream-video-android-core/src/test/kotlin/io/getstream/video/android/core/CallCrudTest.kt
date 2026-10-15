@@ -18,7 +18,7 @@ package io.getstream.video.android.core
 
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.MemberRequest
+import io.getstream.android.video.api.generated.models.MemberRequest
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.base.IntegrationTestBase

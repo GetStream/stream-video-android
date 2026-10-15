@@ -16,13 +16,13 @@
 
 package io.getstream.video.android.core.closedcaptions
 
-import io.getstream.android.video.generated.models.CallClosedCaption
-import io.getstream.android.video.generated.models.CallClosedCaptionsStartedEvent
-import io.getstream.android.video.generated.models.CallClosedCaptionsStoppedEvent
-import io.getstream.android.video.generated.models.CallResponse
-import io.getstream.android.video.generated.models.ClosedCaptionEvent
-import io.getstream.android.video.generated.models.TranscriptionSettingsResponse.ClosedCaptionMode
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.CallClosedCaption
+import io.getstream.android.video.api.generated.models.CallClosedCaptionsStartedEvent
+import io.getstream.android.video.api.generated.models.CallClosedCaptionsStoppedEvent
+import io.getstream.android.video.api.generated.models.CallResponse
+import io.getstream.android.video.api.generated.models.ClosedCaptionEvent
+import io.getstream.android.video.api.generated.models.TranscriptionSettingsResponse.ClosedCaptionMode
+import io.getstream.android.video.api.generated.models.VideoEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -78,7 +78,7 @@ class ClosedCaptionManager(
     /**
      *  Holds the current closed caption mode for the video call. This object contains information about closed
      *  captioning feature availability. This state is updated dynamically based on the server's transcription
-     *  setting which is [io.getstream.android.video.generated.models.TranscriptionSettingsResponse.closedCaptionMode]
+     *  setting which is [io.getstream.android.video.api.generated.models.TranscriptionSettingsResponse.closedCaptionMode]
      *
      *  Possible values:
      *  - [ClosedCaptionMode.Available]: Closed captions are available and can be enabled.

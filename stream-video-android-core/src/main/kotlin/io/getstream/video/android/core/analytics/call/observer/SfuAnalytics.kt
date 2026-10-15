@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.analytics.call.observer
 
-import io.getstream.android.video.generated.models.ClientEvent
+import io.getstream.android.video.api.generated.models.ClientEvent
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.call.observer.model.Stage

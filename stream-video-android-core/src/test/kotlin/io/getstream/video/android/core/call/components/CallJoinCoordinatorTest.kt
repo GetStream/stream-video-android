@@ -17,10 +17,10 @@
 package io.getstream.video.android.core.call.components
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.CallSettingsResponse
-import io.getstream.android.video.generated.models.JoinCallResponse
-import io.getstream.android.video.generated.models.RingCallRequest
-import io.getstream.android.video.generated.models.RingCallResponse
+import io.getstream.android.video.api.generated.models.CallSettingsResponse
+import io.getstream.android.video.api.generated.models.JoinCallResponse
+import io.getstream.android.video.api.generated.models.RingCallRequest
+import io.getstream.android.video.api.generated.models.RingCallResponse
 import io.getstream.result.Error
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success

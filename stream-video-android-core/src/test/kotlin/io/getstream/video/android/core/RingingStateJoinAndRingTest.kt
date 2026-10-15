@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core
 
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.base.toResponse
 import io.getstream.video.android.core.events.JoinCallResponseEvent

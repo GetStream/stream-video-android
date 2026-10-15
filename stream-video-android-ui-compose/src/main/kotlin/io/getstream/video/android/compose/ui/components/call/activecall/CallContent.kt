@@ -50,8 +50,8 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.android.core.ui.design.StreamTokens
-import io.getstream.android.video.generated.models.CallModerationBlurEvent
-import io.getstream.android.video.generated.models.CallModerationWarningEvent
+import io.getstream.android.video.api.generated.models.CallModerationBlurEvent
+import io.getstream.android.video.api.generated.models.CallModerationWarningEvent
 import io.getstream.log.StreamLog
 import io.getstream.video.android.compose.lifecycle.MediaPiPLifecycle
 import io.getstream.video.android.compose.permission.VideoPermissionsState

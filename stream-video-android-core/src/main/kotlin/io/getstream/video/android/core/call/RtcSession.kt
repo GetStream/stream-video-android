@@ -30,8 +30,8 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import io.getstream.android.video.generated.models.OwnCapability
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error

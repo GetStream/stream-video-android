@@ -7,15 +7,15 @@ REPO_URL="git@github.com:GetStream/chat.git"
 REFERENCE_TYPE="branch"
 REFERENCE_VALUE="master"
 API_SERVICE_CLASS_NAME="ProductvideoApi"
-MODEL_PACKAGE="io.getstream.android.video.generated.models"
-API_SERVICE_PACKAGE="io.getstream.android.video.generated.apis"
-API_SERVICE_DIR="apis"
-MOSHI_ADAPTER_DIR="infrastructure"
-MOSHI_ADAPTER_PACKAGE="io.getstream.android.video.generated.infrastructure"
+MODEL_PACKAGE="io.getstream.android.video.api.generated.models"
+API_SERVICE_PACKAGE="io.getstream.android.video.internal.generated.apis"
+API_SERVICE_DIR="../../internal/generated/apis"
+MOSHI_ADAPTER_DIR="../../internal/generated/infrastructure"
+MOSHI_ADAPTER_PACKAGE="io.getstream.android.video.internal.generated.infrastructure"
 CLASSES_TO_SKIP="PrivacySettingsResponse PrivacySettings StopRTMPBroadcastsRequest LocalCallAcceptedPostEvent LocalCallRejectedPostEvent"
 ANDROID_SDK="video"
-KEEP_CLASSES="WSAuthMessageRequest.kt"
-OUTPUT_CLIENT_PATH="./stream-video-android-core/src/main/kotlin/io/getstream/android/video/generated/"
+KEEP_CLASSES="WSAuthMessageRequest.kt LocalCallAcceptedPostEvent.kt LocalCallRejectedPostEvent.kt"
+OUTPUT_CLIENT_PATH="./stream-video-android-core/src/main/kotlin/io/getstream/android/video/api/generated/"
 
 # Parse key-value arguments
 for arg in "$@"; do
@@ -103,56 +103,64 @@ export APP_CONFIG_FILE="configs/test.yaml"
 
 #mkdir -p $OUTPUT_CLIENT_PATH //Create and delete files here TODO Rahul
 
-# Step 1: Delete/Create directory, and keep classes
-if [[ ! -d "$OUTPUT_CLIENT_PATH" ]]; then
-    echo "Error: Directory $OUTPUT_CLIENT_PATH does not exist."
-    # Function to create a directory if it doesn't exist
-    create_directory() {
-        local DIR_PATH=$OUTPUT_CLIENT_PATH
+# Step 1: Delete/Create directories, and keep classes
+# Models are written under OUTPUT_CLIENT_PATH (public api package); the api service and Moshi adapters
+# are written relative to it into the internal package, so each directory is cleaned separately.
+clean_output_dir() {
+  if [[ ! -d "$1" ]]; then
+      echo "Error: Directory $1 does not exist."
+      # Function to create a directory if it doesn't exist
+      create_directory() {
+          local DIR_PATH=$1
 
-        if [ -z $DIR_PATH ]; then
-            echo "Usage: create_directory <directory_path>"
-            return 1
-        fi
+          if [ -z $DIR_PATH ]; then
+              echo "Usage: create_directory <directory_path>"
+              return 1
+          fi
 
-        if [ ! -d "$DIR_PATH" ]; then
-            echo "Directory does not exist. Creating: $DIR_PATH"
-            mkdir -p $DIR_PATH
-            echo "Directory created successfully."
-        else
-            echo "Directory already exists: $DIR_PATH"
-        fi
+          if [ ! -d "$DIR_PATH" ]; then
+              echo "Directory does not exist. Creating: $DIR_PATH"
+              mkdir -p $DIR_PATH
+              echo "Directory created successfully."
+          else
+              echo "Directory already exists: $DIR_PATH"
+          fi
+      }
+      create_directory $1
+
+  else
+    # Function to check if a file should be kept
+    should_keep() {
+        local file_name=$(basename "$1")
+        for keep in ${KEEP_CLASSES}; do
+           echo "file_name = $file_name, keep = $keep"
+            if [[ "$file_name" == "$keep" ]]; then
+                return 0  # File should be kept
+            fi
+        done
+        return 1  # File should be deleted
     }
-    create_directory $OUTPUT_CLIENT_PATH
 
-else
-  # Function to check if a file should be kept
-  should_keep() {
-      local file_name=$(basename "$1")
-      for keep in "${KEEP_CLASSES[@]}"; do
-         echo "file_name = $file_name, keep = $keep"
-          if [[ "$file_name" == "$keep" ]]; then
-              return 0  # File should be kept
+    # Iterate through files in the directory recursively
+    find "$1" -type f | while read -r file; do
+          if ! should_keep "$file"; then
+              rm "$file"
+              echo "Deleted: $file"
+          else
+              echo "Kept: $file"
           fi
       done
-      return 1  # File should be deleted
-  }
 
-  # Iterate through files in the directory recursively
-  find "$OUTPUT_CLIENT_PATH" -type f | while read -r file; do
-        if ! should_keep "$file"; then
-            rm "$file"
-            echo "Deleted: $file"
-        else
-            echo "Kept: $file"
-        fi
-    done
+    # Remove empty directories
+    find "$1" -type d -empty -delete
 
-  # Remove empty directories
-  find "$OUTPUT_CLIENT_PATH" -type d -empty -delete
+    echo "🧹🧹Cleanup completed!"
+  fi
+}
 
-  echo "🧹🧹Cleanup completed!"
-fi
+clean_output_dir "$OUTPUT_CLIENT_PATH"
+clean_output_dir "$OUTPUT_CLIENT_PATH$API_SERVICE_DIR"
+clean_output_dir "$OUTPUT_CLIENT_PATH$MOSHI_ADAPTER_DIR"
 
 # Step 2: Clone the repository with shallow depth
 echo "🚀 Cloning repository: $REPO_URL (Type: $REFERENCE_TYPE, Value: $REFERENCE_VALUE)..."

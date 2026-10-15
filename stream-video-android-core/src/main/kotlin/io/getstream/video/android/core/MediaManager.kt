@@ -40,7 +40,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.telecom.CallEndpointCompat
-import io.getstream.android.video.generated.models.VideoSettingsResponse
+import io.getstream.android.video.api.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.extractCause
 import io.getstream.video.android.core.audio.AudioSwitchController

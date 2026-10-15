@@ -19,8 +19,8 @@ package io.getstream.video.android
 import android.app.Application
 import android.content.Context
 import dagger.hilt.android.HiltAndroidApp
-import io.getstream.android.video.generated.models.CallEndedEvent
-import io.getstream.android.video.generated.models.CustomVideoEvent
+import io.getstream.android.video.api.generated.models.CallEndedEvent
+import io.getstream.android.video.api.generated.models.CustomVideoEvent
 import io.getstream.video.android.DemoCallJoinInterceptor.Companion.CALLEE_READY_TO_JOIN_EVENT_TYPE
 import io.getstream.video.android.DemoCallJoinInterceptor.Companion.CALLER_READY_TO_JOIN_EVENT_TYPE
 import io.getstream.video.android.core.StreamVideo

@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.utils
 
-import io.getstream.android.video.generated.models.NoiseCancellationSettings
+import io.getstream.android.video.api.generated.models.NoiseCancellationSettings
 
 /**
  * Returns true if the noise cancellation mode is "auto-on".

@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.socket.sfu
 
-import io.getstream.android.video.generated.models.ConnectedEvent
+import io.getstream.android.video.api.generated.models.ConnectedEvent
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.events.JoinCallResponseEvent

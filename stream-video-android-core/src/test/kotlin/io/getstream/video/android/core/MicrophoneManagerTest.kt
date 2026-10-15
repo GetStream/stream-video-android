@@ -26,9 +26,9 @@ import android.os.Build
 import android.os.ParcelUuid
 import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallEndpointCompat
-import io.getstream.android.video.generated.models.AudioSettingsResponse
-import io.getstream.android.video.generated.models.CallSettingsResponse
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.AudioSettingsResponse
+import io.getstream.android.video.api.generated.models.CallSettingsResponse
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.video.android.core.audio.AudioHandler
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.UsbAudioInputDevice

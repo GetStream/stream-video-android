@@ -17,9 +17,9 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
-import io.getstream.android.video.generated.models.CallResponse
-import io.getstream.android.video.generated.models.MemberResponse
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.CallResponse
+import io.getstream.android.video.api.generated.models.MemberResponse
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.video.android.core.utils.toCallUser
 import java.io.Serializable
 import java.util.Date

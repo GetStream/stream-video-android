@@ -50,7 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.android.core.ui.design.StreamTokens
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.compose.R
 import io.getstream.video.android.compose.permission.LaunchPermissionRequest

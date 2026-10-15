@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.ringing
 
-import io.getstream.android.video.generated.models.GetCallRingStateResponse
+import io.getstream.android.video.api.generated.models.GetCallRingStateResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result

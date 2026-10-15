@@ -17,10 +17,10 @@
 package io.getstream.video.android.core.socket.coordinator.v2
 
 import io.getstream.android.core.api.model.value.StreamUserId
-import io.getstream.android.video.generated.apis.ProductvideoApi
-import io.getstream.android.video.generated.models.CreateGuestRequest
-import io.getstream.android.video.generated.models.CreateGuestResponse
-import io.getstream.android.video.generated.models.UserResponse
+import io.getstream.android.video.api.generated.models.CreateGuestRequest
+import io.getstream.android.video.api.generated.models.CreateGuestResponse
+import io.getstream.android.video.api.generated.models.UserResponse
+import io.getstream.android.video.internal.generated.apis.ProductvideoApi
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 import io.mockk.coEvery

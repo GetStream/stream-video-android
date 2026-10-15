@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.model
 
 import androidx.compose.runtime.Stable
-import io.getstream.android.video.generated.models.ICEServer
+import io.getstream.android.video.api.generated.models.ICEServer
 import java.io.Serializable
 
 @Stable

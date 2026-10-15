@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.analytics
 
-import io.getstream.android.video.generated.apis.ProductvideoApi
+import io.getstream.android.video.internal.generated.apis.ProductvideoApi
 import io.getstream.video.android.core.analytics.coordinator.CoordinatorAnalytics
 import io.getstream.video.android.core.analytics.coordinator.CoordinatorAnalyticsStateHolder
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter

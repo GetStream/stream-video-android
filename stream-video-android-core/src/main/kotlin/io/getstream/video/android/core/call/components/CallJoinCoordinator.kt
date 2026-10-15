@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core.call.components
 
-import io.getstream.android.video.generated.models.JoinCallResponse
-import io.getstream.android.video.generated.models.RingCallRequest
+import io.getstream.android.video.api.generated.models.JoinCallResponse
+import io.getstream.android.video.api.generated.models.RingCallRequest
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result

@@ -17,11 +17,11 @@
 package io.getstream.video.android.core.stories
 
 import com.google.common.truth.Truth.assertThat
-import io.getstream.android.video.generated.models.BlockedUserEvent
-import io.getstream.android.video.generated.models.CallMemberRemovedEvent
-import io.getstream.android.video.generated.models.CallMemberUpdatedPermissionEvent
-import io.getstream.android.video.generated.models.OwnCapability
-import io.getstream.android.video.generated.models.PermissionRequestEvent
+import io.getstream.android.video.api.generated.models.BlockedUserEvent
+import io.getstream.android.video.api.generated.models.CallMemberRemovedEvent
+import io.getstream.android.video.api.generated.models.CallMemberUpdatedPermissionEvent
+import io.getstream.android.video.api.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.PermissionRequestEvent
 import io.getstream.video.android.core.base.IntegrationTestBase
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore

@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.call.components
 
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.EventSubscription
 import io.getstream.video.android.core.events.GoAwayEvent

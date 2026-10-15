@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.socket.common
 
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.result.Error
 import io.getstream.video.android.core.errors.DisconnectCause
 

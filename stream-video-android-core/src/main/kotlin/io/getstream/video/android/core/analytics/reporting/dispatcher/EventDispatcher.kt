@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.analytics.reporting.dispatcher
 
-import io.getstream.android.video.generated.models.ClientEvent
+import io.getstream.android.video.api.generated.models.ClientEvent
 
 /**
  * Responsible for delivering telemetry [ClientEvent]s to the backend.

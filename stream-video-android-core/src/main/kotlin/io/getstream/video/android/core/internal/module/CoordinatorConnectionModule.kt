@@ -19,8 +19,8 @@ package io.getstream.video.android.core.internal.module
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
-import io.getstream.android.video.generated.apis.ProductvideoApi
-import io.getstream.android.video.generated.infrastructure.Serializer
+import io.getstream.android.video.internal.generated.apis.ProductvideoApi
+import io.getstream.android.video.internal.generated.infrastructure.Serializer
 import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.NetworkStateProvider

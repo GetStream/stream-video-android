@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.ui.menu.transcriptions
 
-import io.getstream.android.video.generated.models.CallSettingsResponse
-import io.getstream.android.video.generated.models.TranscriptionSettingsResponse
+import io.getstream.android.video.api.generated.models.CallSettingsResponse
+import io.getstream.android.video.api.generated.models.TranscriptionSettingsResponse
 import io.getstream.video.android.ui.menu.TranscriptionAvailableUiState
 import io.getstream.video.android.ui.menu.TranscriptionDisabledUiState
 import io.getstream.video.android.ui.menu.TranscriptionStoppedUiState

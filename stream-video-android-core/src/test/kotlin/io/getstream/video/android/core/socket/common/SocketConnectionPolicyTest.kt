@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core.socket.common
 
-import io.getstream.android.video.generated.models.ConnectedEvent
-import io.getstream.android.video.generated.models.OwnUserResponse
+import io.getstream.android.video.api.generated.models.ConnectedEvent
+import io.getstream.android.video.api.generated.models.OwnUserResponse
 import io.getstream.result.Error
 import io.getstream.video.android.core.ClientState
 import io.getstream.video.android.core.StreamVideo

@@ -18,11 +18,11 @@ package io.getstream.video.android.core.socket.coordinator
 
 import androidx.lifecycle.Lifecycle
 import com.squareup.moshi.JsonAdapter
-import io.getstream.android.video.generated.infrastructure.Serializer
-import io.getstream.android.video.generated.models.ConnectUserDetailsRequest
-import io.getstream.android.video.generated.models.ConnectedEvent
-import io.getstream.android.video.generated.models.VideoEvent
-import io.getstream.android.video.generated.models.WSAuthMessageRequest
+import io.getstream.android.video.api.generated.models.ConnectUserDetailsRequest
+import io.getstream.android.video.api.generated.models.ConnectedEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.WSAuthMessageRequest
+import io.getstream.android.video.internal.generated.infrastructure.Serializer
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.errors.DisconnectCause
 import io.getstream.video.android.core.internal.network.NetworkStateProvider

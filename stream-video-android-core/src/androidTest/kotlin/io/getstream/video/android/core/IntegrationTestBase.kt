@@ -19,7 +19,7 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
-import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.Priority
 import io.getstream.log.StreamLog

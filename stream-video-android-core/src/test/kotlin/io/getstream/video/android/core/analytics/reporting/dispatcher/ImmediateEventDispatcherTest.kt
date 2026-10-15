@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core.analytics.reporting.dispatcher
 
-import io.getstream.android.video.generated.apis.ProductvideoApi
-import io.getstream.android.video.generated.models.ClientEvent
-import io.getstream.android.video.generated.models.ReportClientEventResponse
+import io.getstream.android.video.api.generated.models.ClientEvent
+import io.getstream.android.video.api.generated.models.ReportClientEventResponse
+import io.getstream.android.video.internal.generated.apis.ProductvideoApi
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core
 
-import io.getstream.android.video.generated.models.CallSettingsResponse
-import io.getstream.android.video.generated.models.NoiseCancellationSettings
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.CallSettingsResponse
+import io.getstream.android.video.api.generated.models.NoiseCancellationSettings
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.components.CallMediaManager
 import io.getstream.video.android.core.call.components.CallSessionManager

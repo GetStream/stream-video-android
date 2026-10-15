@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core
 
-import io.getstream.android.video.generated.models.NoiseCancellationSettings
-import io.getstream.android.video.generated.models.OwnCapability
+import io.getstream.android.video.api.generated.models.NoiseCancellationSettings
+import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.result.Result
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.getstream.video.android.core.call.RtcSession

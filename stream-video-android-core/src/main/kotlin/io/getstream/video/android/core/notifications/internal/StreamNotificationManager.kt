@@ -27,8 +27,8 @@ import io.getstream.android.push.permissions.NotificationPermissionStatus.DENIED
 import io.getstream.android.push.permissions.NotificationPermissionStatus.GRANTED
 import io.getstream.android.push.permissions.NotificationPermissionStatus.RATIONALE_NEEDED
 import io.getstream.android.push.permissions.NotificationPermissionStatus.REQUESTED
-import io.getstream.android.video.generated.apis.ProductvideoApi
-import io.getstream.android.video.generated.models.CreateDeviceRequest
+import io.getstream.android.video.api.generated.models.CreateDeviceRequest
+import io.getstream.android.video.internal.generated.apis.ProductvideoApi
 import io.getstream.log.TaggedLogger
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
