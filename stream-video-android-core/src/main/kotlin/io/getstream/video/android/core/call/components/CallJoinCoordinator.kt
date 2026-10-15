@@ -240,7 +240,7 @@ internal class CallJoinCoordinator(
         if (!hasRequiredPermissions()) {
             logger.w {
                 "\n[Call.join()] called without having the required permissions.\n" +
-                    "This will work only if you have [runForegroundServiceForCalls = false] in the StreamVideoBuilder.\n" +
+                    "This will work only if the call type's CallServiceConfig has [runCallServiceInForeground = false].\n" +
                     "The reason is that [Call.join()] will by default start an ongoing call foreground service,\n" +
                     "To start this service and send the appropriate audio/video tracks the permissions are required,\n" +
                     "otherwise the service will fail to start, resulting in a crash.\n" +
