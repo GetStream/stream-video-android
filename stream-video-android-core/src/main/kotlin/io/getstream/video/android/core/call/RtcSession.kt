@@ -1001,27 +1001,6 @@ public class RtcSession internal constructor(
     }
 
     /**
-     * Public entry point kept for backward compatibility.
-     * Delegates to [connectInternal] and throws on failure.
-     *
-     * Prefer [connectInternal] which returns a typed [SfuConnectionResult]
-     * instead of throwing, enabling exhaustive `when` handling.
-     */
-    @Deprecated(
-        message = "Use connectInternal() which returns SfuConnectionResult instead of throwing.",
-        replaceWith = ReplaceWith("connectInternal(reconnectDetails, options)"),
-    )
-    suspend fun connect(
-        reconnectDetails: ReconnectDetails? = null,
-        options: List<PublishOption>? = null,
-    ) {
-        when (val result = connectInternal(reconnectDetails, options)) {
-            is SfuConnectionResult.Success -> Unit
-            is SfuConnectionResult.Failure -> throw result.error
-        }
-    }
-
-    /**
      * Connects to the SFU and suspends until the connection is established or
      * fails. Returns a typed [SfuConnectionResult] so callers can react to the
      * outcome without catching exceptions.

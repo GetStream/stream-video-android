@@ -21,7 +21,7 @@ import io.getstream.video.android.core.Call
 
 /**
  * Android permission check for [Call]
- * Depending on the call capabilities, [checkAndroidPermissions] will return true if all the android permissions are granted required by the call.
+ * Depending on the call capabilities, [checkAndroidPermissionsGroup] will return true if all the android permissions are granted required by the call.
  * By default having a capability to stream audio for an audio call will require the [android.Manifest.permission.RECORD_AUDIO] permission.
  * This check ensures that the required permission based on the call configuration are granted.
  *
@@ -37,24 +37,12 @@ import io.getstream.video.android.core.Call
  * It is possible to provide a separate implementation to this interface to override this behavior.
  *
  * NOTE:
- * If the [io.getstream.video.android.core.StreamVideoBuilder.runForegroundServiceForCalls] is true
- * the foreground service that starts will crash if [checkAndroidPermissions] returns false.
+ * If the call service runs in the foreground (`runCallServiceInForeground` in the call service config)
+ * the foreground service that starts will crash if [checkAndroidPermissionsGroup] reports missing permissions.
  *
  * @see [io.getstream.video.android.core.StreamVideoBuilder]
  */
 interface StreamPermissionCheck {
-
-    /**
-     * Return true if the user granted all the permissions so the [Call] can run.
-     *
-     * e.g. if the user granted the android.Manifest.permission.RECORD_AUDIO and the Call.state.ownCapability has "SendAudio"
-     * then we are safe to join and use the [call] since the permission for recording audio is granted and the user can stream the audio track.
-     */
-    @Deprecated("Use checkAndroidPermissionsGroup instead")
-    fun checkAndroidPermissions(
-        context: Context,
-        call: Call,
-    ): Boolean
 
     /**
      *  @return A [Pair] where:

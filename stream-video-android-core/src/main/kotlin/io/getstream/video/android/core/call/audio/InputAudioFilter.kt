@@ -18,15 +18,6 @@ package io.getstream.video.android.core.call.audio
 
 import java.nio.ByteBuffer
 
-@Deprecated(
-    message = "Use InputAudioFilter instead",
-    replaceWith = ReplaceWith(
-        expression = "InputAudioFilter",
-        imports = ["io.getstream.video.android.core.call.audio.InputAudioFilter"],
-    ),
-)
-public fun interface AudioFilter : InputAudioFilter
-
 /**
  * Manipulates the audio data before it's fed into WebRTC.
  */

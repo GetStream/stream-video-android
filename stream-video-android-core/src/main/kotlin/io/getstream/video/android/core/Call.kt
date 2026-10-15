@@ -121,13 +121,6 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 
-@Deprecated(
-    message = "No longer used internally. The reconnect deadline is now driven by the server's " +
-        "fastReconnectDeadlineSeconds. This constant will be removed in a future release.",
-    level = DeprecationLevel.WARNING,
-)
-const val sfuReconnectTimeoutMillis = 30_000
-
 /**
  * The call class gives you access to all call level API calls
  *
@@ -361,14 +354,13 @@ public class Call(
      * Creates [MediaManagerImpl] for this call. Captures `this` (and the test hook) so
      * [CallMediaManager] never needs a Call reference.
      */
-    private val mediaManagerFactory = MediaManagerFactory { audioUsage, audioUsageProvider ->
+    private val mediaManagerFactory = MediaManagerFactory { audioUsageProvider ->
         testInstanceProvider.mediaManagerCreator?.invoke()
             ?: MediaManagerImpl(
                 clientImpl.context,
                 this,
                 scope,
                 eglBase.eglBaseContext,
-                audioUsage,
                 audioUsageProvider,
             )
     }
@@ -909,14 +901,6 @@ public class Call(
     public fun subscribe(
         listener: VideoEventListener<VideoEvent>,
     ): EventSubscription = eventManager.subscribe(listener)
-
-    @Deprecated(
-        level = DeprecationLevel.WARNING,
-        message = "Deprecated in favor of the `events` flow.",
-        replaceWith = ReplaceWith("events.collect { }"),
-    )
-    public fun unsubscribe(eventSubscription: EventSubscription) =
-        eventManager.unsubscribe(eventSubscription)
 
     public suspend fun blockUser(userId: String): Result<BlockUserResponse> =
         apiClient.blockUser(userId)

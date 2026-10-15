@@ -485,26 +485,6 @@ public class CallState(
     )
 
     /**
-     * Alias for [participants], which is already sorted by the active [SortPreset].
-     *
-     * Kept for source compatibility while callers migrate. The previous dual-flow design
-     * (raw `participants` map ordering vs. sorted list) created subtle staleness bugs in
-     * the renderer; collapsing into a single sorted flow eliminates that class of issue.
-     */
-    /**
-     * Deprecated alias for [participants]. Return type is intentionally declared as
-     * [Flow] (not [StateFlow]) to preserve binary compatibility with the pre-existing
-     * public API — [StateFlow] is a [Flow], so consumers see the same underlying value.
-     */
-    @Deprecated(
-        message = "participants is already sorted. Use participants directly.",
-        replaceWith = ReplaceWith("participants"),
-        level = DeprecationLevel.WARNING,
-    )
-    val sortedParticipants: Flow<List<ParticipantState>>
-        get() = participants
-
-    /**
      * Switch the active sort preset.
      */
     fun setSortPreset(preset: SortPreset) = _sortedParticipantsState.setPreset(preset)
@@ -513,7 +493,7 @@ public class CallState(
      * Plug in an ad-hoc [Comparator] for participant sorting. Overrides the active preset
      * until called again with a different comparator or [setSortPreset] is invoked.
      *
-     * @param comparator a new comparator to be used in [sortedParticipants] flow.
+     * @param comparator a new comparator to be used in [participants] flow.
      */
     fun updateParticipantSortingOrder(
         comparator: Comparator<ParticipantState>,
@@ -2041,11 +2021,6 @@ public class CallState(
 
     fun updateRejectActionBundle(bundle: Bundle) {
         _rejectActionBundle.value = bundle
-    }
-
-    @Deprecated("Use updateNotification(Int, Notification) instead")
-    fun updateNotification(notification: Notification) {
-        atomicNotification.set(notification)
     }
 
     fun updateNotification(notificationId: Int, notification: Notification) {

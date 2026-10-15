@@ -9789,7 +9789,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun takeScreenshot (Lio/getstream/video/android/core/model/VideoTrack;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun toggleAudioProcessing ()Z
 	public final fun unpinForEveryone (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun unsubscribe (Lio/getstream/video/android/core/EventSubscription;)Z
 	public final fun update (Ljava/util/Map;Lio/getstream/android/video/api/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun update$default (Lio/getstream/video/android/core/Call;Ljava/util/Map;Lio/getstream/android/video/api/generated/models/CallSettingsRequest;Lorg/threeten/bp/OffsetDateTime;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun updateClosedCaptionsSettings (Lio/getstream/video/android/core/closedcaptions/ClosedCaptionsSettings;)V
@@ -9807,10 +9806,6 @@ public final class io/getstream/video/android/core/CallJoinInterceptionException
 
 public abstract interface class io/getstream/video/android/core/CallJoinInterceptor {
 	public abstract fun callReadyToJoin (Lio/getstream/video/android/core/Call;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class io/getstream/video/android/core/CallKt {
-	public static final field sfuReconnectTimeoutMillis I
 }
 
 public final class io/getstream/video/android/core/CallState {
@@ -9871,7 +9866,6 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getScreenSharingSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSession ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSettings ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getSortedParticipants ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getSpeakingWhileMuted ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getStartsAt ()Lkotlinx/coroutines/flow/StateFlow;
@@ -9901,7 +9895,6 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun updateFromResponse (Lio/getstream/android/video/api/generated/models/StopLiveResponse;)V
 	public final fun updateFromResponse (Lio/getstream/android/video/api/generated/models/UpdateCallResponse;)V
 	public final fun updateNotification (ILandroid/app/Notification;)V
-	public final fun updateNotification (Landroid/app/Notification;)V
 	public final fun updateParticipant (Lio/getstream/video/android/core/ParticipantState;)V
 	public final fun updateParticipantSortingOrder (Ljava/util/Comparator;)V
 	public final fun updateParticipantVisibility (Ljava/lang/String;Lio/getstream/video/android/core/model/VisibilityOnScreenState;)V
@@ -10091,12 +10084,11 @@ public final class io/getstream/video/android/core/LocalStats {
 }
 
 public final class io/getstream/video/android/core/MediaManagerImpl {
-	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/webrtc/EglBase$Context;ILkotlin/jvm/functions/Function0;)V
-	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/webrtc/EglBase$Context;ILkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/webrtc/EglBase$Context;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Landroid/content/Context;Lio/getstream/video/android/core/Call;Lkotlinx/coroutines/CoroutineScope;Lio/getstream/webrtc/EglBase$Context;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun cleanup ()V
 	public final fun getAudioSource ()Lio/getstream/webrtc/AudioSource;
 	public final fun getAudioTrack ()Lio/getstream/webrtc/AudioTrack;
-	public final fun getAudioUsage ()I
 	public final fun getAudioUsageProvider ()Lkotlin/jvm/functions/Function0;
 	public final fun getCall ()Lio/getstream/video/android/core/Call;
 	public final fun getContext ()Landroid/content/Context;
@@ -10168,14 +10160,13 @@ public final class io/getstream/video/android/core/MemberState {
 }
 
 public final class io/getstream/video/android/core/MicrophoneManager {
-	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;ILkotlin/jvm/functions/Function0;)V
+	public fun <init> (Lio/getstream/video/android/core/MediaManagerImpl;Lkotlin/jvm/functions/Function0;)V
 	public final fun canHandleDeviceSwitch ()Z
 	public final fun cleanup ()V
 	public final fun clearUsbDeviceSelection ()V
 	public final fun disable (Z)V
 	public static synthetic fun disable$default (Lio/getstream/video/android/core/MicrophoneManager;ZILjava/lang/Object;)V
 	public final fun getAudioBitrateProfile ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getAudioUsage ()I
 	public final fun getAudioUsageProvider ()Lkotlin/jvm/functions/Function0;
 	public final fun getDevices ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMediaManager ()Lio/getstream/video/android/core/MediaManagerImpl;
@@ -10713,8 +10704,6 @@ public final class io/getstream/video/android/core/call/CallType$Livestream : io
 
 public final class io/getstream/video/android/core/call/RtcSession {
 	public final fun cleanup ()V
-	public final fun connect (Lstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun connect$default (Lio/getstream/video/android/core/call/RtcSession;Lstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun getPublisherStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getSfuSocketState ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getSubscriberStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -10743,9 +10732,6 @@ public final class io/getstream/video/android/core/call/TrackDimensions {
 	public final fun setDimensions (Lstream/video/sfu/models/VideoDimension;)V
 	public final fun setVisible (Z)V
 	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class io/getstream/video/android/core/call/audio/AudioFilter : io/getstream/video/android/core/call/audio/InputAudioFilter {
 }
 
 public abstract interface class io/getstream/video/android/core/call/audio/InputAudioFilter {
@@ -10795,8 +10781,8 @@ public class io/getstream/video/android/core/call/connection/StreamPeerConnectio
 }
 
 public final class io/getstream/video/android/core/call/connection/StreamPeerConnectionFactory {
-	public fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lio/getstream/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lio/getstream/webrtc/Logging$Severity;)V
-	public synthetic fun <init> (Landroid/content/Context;ILkotlin/jvm/functions/Function0;Lio/getstream/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lio/getstream/webrtc/Logging$Severity;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function0;Lio/getstream/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lio/getstream/webrtc/Logging$Severity;)V
+	public synthetic fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function0;Lio/getstream/webrtc/ManagedAudioProcessingFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lio/getstream/webrtc/Logging$Severity;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun clearPreferredAudioInputDevice ()V
 	public final fun getEglBase ()Lio/getstream/webrtc/EglBase;
 	public final fun getSenderCapabilities (Lio/getstream/webrtc/MediaStreamTrack$MediaType;)Lio/getstream/webrtc/RtpCapabilities;
@@ -14879,7 +14865,6 @@ public final class io/getstream/video/android/core/permission/android/Permission
 }
 
 public abstract interface class io/getstream/video/android/core/permission/android/StreamPermissionCheck {
-	public abstract fun checkAndroidPermissions (Landroid/content/Context;Lio/getstream/video/android/core/Call;)Z
 	public abstract fun checkAndroidPermissionsGroup (Landroid/content/Context;Lio/getstream/video/android/core/Call;)Lkotlin/Pair;
 }
 

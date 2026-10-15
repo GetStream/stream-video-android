@@ -101,7 +101,6 @@ internal class CallMediaManager(
                 _peerConnectionFactory = StreamPeerConnectionFactory(
                     context = clientImpl.context,
                     audioProcessing = clientImpl.audioProcessing,
-                    audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
                     audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
                     audioBitrateProfileProvider = { mediaManager.microphone.audioBitrateProfile.value },
                     sharedEglBaseProvider = { eglBase() },
@@ -124,7 +123,6 @@ internal class CallMediaManager(
 
     val mediaManager by lazy {
         mediaManagerFactory.create(
-            audioUsage = clientImpl.callServiceConfigRegistry.get(type).audioUsage,
             audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
         )
     }

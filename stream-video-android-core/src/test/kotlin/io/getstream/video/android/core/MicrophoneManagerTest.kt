@@ -62,14 +62,13 @@ import stream.video.sfu.models.AudioBitrateProfile
 @Config(sdk = [Build.VERSION_CODES.O_MR1])
 class MicrophoneManagerTest {
 
-    private val audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
     private val audioUsageProvider = { AudioAttributes.USAGE_VOICE_COMMUNICATION }
 
     @Test
     fun `Ensure setup is called prior to any action onto the microphone manager`() = runTest {
         // Given
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
-        val actual = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val actual = MicrophoneManager(mediaManager, audioUsageProvider)
         val context = mockk<Context>(relaxed = true)
         every { mediaManager.context } returns context
         every { context.getSystemService(any()) } returns mockk<AudioManager>(relaxed = true)
@@ -123,7 +122,6 @@ class MicrophoneManagerTest {
         val actual =
             MicrophoneManager(
                 mediaManager,
-                audioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION,
                 audioUsageProvider = { AudioAttributes.USAGE_VOICE_COMMUNICATION },
             )
         val context = mockk<Context>(relaxed = true)
@@ -146,7 +144,7 @@ class MicrophoneManagerTest {
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
         val context = mockk<Context>(relaxed = true)
         val microphoneManager =
-            spyk(MicrophoneManager(mediaManager, audioUsage, audioUsageProvider))
+            spyk(MicrophoneManager(mediaManager, audioUsageProvider))
 
         every { mediaManager.context } returns context
         every { context.getSystemService(any()) } returns mockk<AudioManager>(relaxed = true)
@@ -170,7 +168,7 @@ class MicrophoneManagerTest {
     fun `Resume will call enable only if prior status was DeviceStatus#enabled`() {
         // Given
         val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
         val spyMicrophoneManager = spyk(microphoneManager)
         val mockContext = mockk<Context>(relaxed = true)
         val mockCallState = mockk<CallState>(relaxed = true)
@@ -294,7 +292,7 @@ class MicrophoneManagerTest {
         val mediaManager = mockMediaManager()
         val speakerManager = mockSpeakerManager(isEnabled = false)
         every { mediaManager.speaker } returns speakerManager
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
         val selectedDevice = StreamAudioDevice.Earpiece(audioDeviceInfo = mockk<AudioDeviceInfo>())
 
         microphoneManager.select(selectedDevice)
@@ -308,7 +306,7 @@ class MicrophoneManagerTest {
         val speakerStatus = MutableStateFlow<DeviceStatus>(DeviceStatus.NotSelected)
         val speakerManager = mockSpeakerManager(isEnabled = false, status = speakerStatus)
         every { mediaManager.speaker } returns speakerManager
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
 
         microphoneManager.select(
             StreamAudioDevice.Speakerphone(audioDeviceInfo = mockk<AudioDeviceInfo>()),
@@ -322,7 +320,7 @@ class MicrophoneManagerTest {
         val mediaManager = mockMediaManager()
         val speakerManager = mockSpeakerManager(isEnabled = false)
         every { mediaManager.speaker } returns speakerManager
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
         val earpiece = StreamAudioDevice.Earpiece(audioDeviceInfo = mockk<AudioDeviceInfo>())
 
         microphoneManager.select(earpiece)
@@ -346,7 +344,7 @@ class MicrophoneManagerTest {
                 ),
             )
         val mediaManager = mockMediaManagerWithTelecom(telecomCall)
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
 
         microphoneManager.select(
             StreamAudioDevice.Speakerphone(audioDeviceInfo = mockk<AudioDeviceInfo>()),
@@ -370,7 +368,7 @@ class MicrophoneManagerTest {
             availableEndpoints = listOf(earpieceEndpoint),
         )
         val mediaManager = mockMediaManagerWithTelecom(telecomCall)
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
 
         microphoneManager.select(
             StreamAudioDevice.Earpiece(audioDeviceInfo = mockk<AudioDeviceInfo>()),
@@ -391,7 +389,7 @@ class MicrophoneManagerTest {
             availableEndpoints = listOf(bluetoothEndpoint),
         )
         val mediaManager = mockMediaManagerWithTelecom(telecomCall)
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
 
         microphoneManager.select(
             StreamAudioDevice.WiredHeadset(audioDeviceInfo = mockk<AudioDeviceInfo>()),
@@ -411,7 +409,7 @@ class MicrophoneManagerTest {
         every { call.peerConnectionFactory } returns peerConnectionFactory
         every { peerConnectionFactory.setPreferredAudioInputDevice(deviceInfo) } returns true
 
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
 
         val result = microphoneManager.selectUsbDevice(usbDevice)
 
@@ -430,7 +428,7 @@ class MicrophoneManagerTest {
         every { call.peerConnectionFactory } returns peerConnectionFactory
         every { peerConnectionFactory.setPreferredAudioInputDevice(deviceInfo) } returns false
 
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
 
         val result = microphoneManager.selectUsbDevice(usbDevice)
 
@@ -444,7 +442,7 @@ class MicrophoneManagerTest {
             connection = MutableStateFlow(RealtimeConnection.PreJoin),
             settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = false)),
         )
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
 
         val result = microphoneManager.setAudioBitrateProfile(
             AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
@@ -465,7 +463,7 @@ class MicrophoneManagerTest {
             settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = false)),
             call = call,
         )
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
 
         // The profiles mean the same thing whenever they are set, so they answer to the same
         // dashboard setting; joining is not a way around it.
@@ -489,7 +487,7 @@ class MicrophoneManagerTest {
             settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = true)),
             call = call,
         )
-        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsageProvider)
 
         val result = microphoneManager.setAudioBitrateProfile(
             AudioBitrateProfile.AUDIO_BITRATE_PROFILE_MUSIC_HIGH_QUALITY,
@@ -739,7 +737,7 @@ class MicrophoneManagerTest {
     @Test
     fun `communication audio mode should be on by default`() {
         val microphoneManager =
-            MicrophoneManager(mockMediaManager(), audioUsage, audioUsageProvider)
+            MicrophoneManager(mockMediaManager(), audioUsageProvider)
 
         assertTrue(microphoneManager.communicationAudioModeEnabled.value)
     }
@@ -747,7 +745,7 @@ class MicrophoneManagerTest {
     @Test
     fun `setCommunicationAudioModeEnabled should report the requested state when refused`() {
         val microphoneManager =
-            MicrophoneManager(mockMediaManager(), audioUsage, audioUsageProvider)
+            MicrophoneManager(mockMediaManager(), audioUsageProvider)
 
         // No audio handler: this call does not manage routing, so the mode is left alone.
         assertFalse(microphoneManager.setCommunicationAudioModeEnabled(false))
@@ -973,7 +971,6 @@ class MicrophoneManagerTest {
             settings = MutableStateFlow(mockCallSettings(hifiAudioEnabled = true)),
             call = call,
         ),
-        audioUsage,
         audioUsageProvider,
     )
 
@@ -1043,7 +1040,7 @@ class MicrophoneManagerTest {
         every { mediaManager.speaker } returns mockSpeakerManager(isEnabled = false)
 
         val microphoneManager =
-            spyk(MicrophoneManager(mediaManager, audioUsage, audioUsageProvider))
+            spyk(MicrophoneManager(mediaManager, audioUsageProvider))
         every { microphoneManager.setup(any(), any()) } answers {
             secondArg<(() -> Unit)?>()?.invoke()
         }
