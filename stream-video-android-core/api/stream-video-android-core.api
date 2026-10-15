@@ -15443,8 +15443,6 @@ public final class io/getstream/video/android/core/socket/common/token/TokenRepo
 
 public final class io/getstream/video/android/core/socket/sfu/SfuSocketConnection : io/getstream/video/android/core/socket/common/SocketListener, io/getstream/video/android/core/socket/common/SocketActions {
 	public static final field Companion Lio/getstream/video/android/core/socket/sfu/SfuSocketConnection$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/socket/common/token/TokenRepository;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lokhttp3/OkHttpClient;Lio/getstream/video/android/core/internal/network/NetworkStateProvider;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/Lifecycle;Lio/getstream/video/android/core/socket/common/token/TokenProvider;Lio/getstream/video/android/core/socket/common/token/TokenRepository;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun connect (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun connect (Lstream/video/sfu/event/JoinRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun connectionId ()Lkotlinx/coroutines/flow/StateFlow;
@@ -15473,14 +15471,6 @@ public final class io/getstream/video/android/core/socket/sfu/SfuSocketConnectio
 }
 
 public final class io/getstream/video/android/core/socket/sfu/SfuSocketConnection$Companion {
-}
-
-public final class io/getstream/video/android/core/socket/sfu/state/RestartReason : java/lang/Enum {
-	public static final field NETWORK_AVAILABLE Lio/getstream/video/android/core/socket/sfu/state/RestartReason;
-	public static final field RECONNECT_STRATEGY Lio/getstream/video/android/core/socket/sfu/state/RestartReason;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/getstream/video/android/core/socket/sfu/state/RestartReason;
-	public static fun values ()[Lio/getstream/video/android/core/socket/sfu/state/RestartReason;
 }
 
 public abstract class io/getstream/video/android/core/socket/sfu/state/SfuSocketState {
@@ -15563,19 +15553,6 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketState$RestartConnection : io/getstream/video/android/core/socket/sfu/state/SfuSocketState {
-	public fun <init> (Lio/getstream/video/android/core/socket/sfu/state/RestartReason;Lstream/video/sfu/models/WebsocketReconnectStrategy;)V
-	public final fun component1 ()Lio/getstream/video/android/core/socket/sfu/state/RestartReason;
-	public final fun component2 ()Lstream/video/sfu/models/WebsocketReconnectStrategy;
-	public final fun copy (Lio/getstream/video/android/core/socket/sfu/state/RestartReason;Lstream/video/sfu/models/WebsocketReconnectStrategy;)Lio/getstream/video/android/core/socket/sfu/state/SfuSocketState$RestartConnection;
-	public static synthetic fun copy$default (Lio/getstream/video/android/core/socket/sfu/state/SfuSocketState$RestartConnection;Lio/getstream/video/android/core/socket/sfu/state/RestartReason;Lstream/video/sfu/models/WebsocketReconnectStrategy;ILjava/lang/Object;)Lio/getstream/video/android/core/socket/sfu/state/SfuSocketState$RestartConnection;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getReason ()Lio/getstream/video/android/core/socket/sfu/state/RestartReason;
-	public final fun getReconnectStrategy ()Lstream/video/sfu/models/WebsocketReconnectStrategy;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketState$WebSocketConnected : io/getstream/video/android/core/socket/sfu/state/SfuSocketState {
 	public static final field INSTANCE Lio/getstream/video/android/core/socket/sfu/state/SfuSocketState$WebSocketConnected;
 	public fun toString ()Ljava/lang/String;
@@ -15606,11 +15583,6 @@ public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketSta
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getConnectedEvent ()Lio/getstream/video/android/core/events/JoinCallResponseEvent;
 	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent$NetworkAvailable : io/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent {
-	public static final field INSTANCE Lio/getstream/video/android/core/socket/sfu/state/SfuSocketStateEvent$NetworkAvailable;
 	public fun toString ()Ljava/lang/String;
 }
 

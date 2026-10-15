@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.getstream.video.android.core.socket.sfu
 
 import io.getstream.log.taggedLogger
@@ -186,10 +184,6 @@ internal open class SfuSocket(
                         // Transport socket is open; now bound the wait for the SFU's
                         // JoinCallResponse with a dedicated, shorter timer.
                         startJoinResponseTimeout()
-                    }
-
-                    is SfuSocketState.RestartConnection -> {
-                        logger.w { "[onSocketStateChanged] RestartConnection is deprecated and no longer acted upon" }
                     }
 
                     is SfuSocketState.Disconnected -> {

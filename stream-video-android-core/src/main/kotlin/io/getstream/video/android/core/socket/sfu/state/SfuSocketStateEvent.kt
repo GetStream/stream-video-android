@@ -56,13 +56,6 @@ public sealed class SfuSocketStateEvent {
      */
     object NetworkNotAvailable : SfuSocketStateEvent() { override fun toString() = "NetworkNotAvailable" }
 
-    @Deprecated(
-        "NetworkAvailable is no longer sent. " +
-            "Network recovery is handled by Call's NetworkStateListener.",
-        level = DeprecationLevel.WARNING,
-    )
-    object NetworkAvailable : SfuSocketStateEvent() { override fun toString() = "NetworkAvailable" }
-
     /**
      * Event to notify an Unrecoverable Error happened on the WebSocket connection.
      */
