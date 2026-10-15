@@ -40,7 +40,6 @@ import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.renderer.FloatingParticipantVideo
 import io.getstream.video.android.compose.ui.components.call.renderer.ParticipantVideo
-import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.model.User
@@ -76,7 +75,6 @@ class MainActivity : ComponentActivity() {
         val client = StreamVideoBuilder(
             context = applicationContext,
             apiKey = apiKey, // demo API key
-            geo = GEO.GlobalEdgeNetwork,
             user = user,
             token = userToken,
         ).build()

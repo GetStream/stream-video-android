@@ -23,7 +23,6 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import io.getstream.android.push.PushProvider
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
-import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.notifications.NotificationConfig
@@ -70,7 +69,6 @@ class RingingApp : Application() {
                 StreamVideoBuilder(
                     context = context.applicationContext,
                     apiKey = "mmhfdzb5evj2",
-                    geo = GEO.GlobalEdgeNetwork,
                     user = user.delegate,
                     token = user.token,
                     notificationConfig = NotificationConfig(

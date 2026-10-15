@@ -32,7 +32,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.getstream.log.Priority
 import io.getstream.video.android.compose.theme.VideoTheme
-import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.logging.LoggingLevel
@@ -65,7 +64,6 @@ fun LiveNavHost(
     val client = StreamVideoBuilder(
         context = context,
         apiKey = "k436tyde94hj", // demo API key
-        geo = GEO.GlobalEdgeNetwork,
         user = user,
         token = userToken,
         ensureSingleInstance = false,
