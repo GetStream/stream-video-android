@@ -248,7 +248,7 @@ class RtcSessionTest2 {
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
-            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+            coJustRun { rtcSession.sendCallStats(any(), any()) }
 
             // When
             rtcSession.connect()
@@ -308,7 +308,7 @@ class RtcSessionTest2 {
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
-            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+            coJustRun { rtcSession.sendCallStats(any(), any()) }
 
             val result = rtcSession.connectInternal()
 
@@ -368,7 +368,7 @@ class RtcSessionTest2 {
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
-            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+            coJustRun { rtcSession.sendCallStats(any(), any()) }
 
             val resultDeferred = async { rtcSession.connectInternal() }
             // Socket state observation timeout = 2 * 50ms + 1000ms grace
@@ -440,7 +440,7 @@ class RtcSessionTest2 {
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
-            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+            coJustRun { rtcSession.sendCallStats(any(), any()) }
 
             val result = rtcSession.connectInternal()
 
@@ -499,7 +499,7 @@ class RtcSessionTest2 {
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
-            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+            coJustRun { rtcSession.sendCallStats(any(), any()) }
 
             val result = rtcSession.connectInternal()
 
@@ -548,7 +548,7 @@ class RtcSessionTest2 {
                     sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
                 ),
             )
-            coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
+            coJustRun { rtcSession.sendCallStats(any(), any()) }
 
             val reconnectDetails = ReconnectDetails(
                 strategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,

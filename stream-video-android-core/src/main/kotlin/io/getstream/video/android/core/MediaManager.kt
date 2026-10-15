@@ -719,7 +719,7 @@ class MicrophoneManager(
      * Select a specific device
      */
     fun select(device: StreamAudioDevice?) {
-        logger.i { "selecting device $device" }
+        logger.i { "[select] selecting device $device" }
         ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
         _selectedDevice.value = device
 

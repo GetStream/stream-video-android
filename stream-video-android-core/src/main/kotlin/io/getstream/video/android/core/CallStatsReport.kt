@@ -33,6 +33,10 @@ data class CallStatsReport(
     val stateStats: CallStats,
 )
 
+@Deprecated(
+    "The raw per-peer stats this serializes are no longer part of the SendStats payload. " +
+        "Nothing in the SDK calls it; it will be removed in the next major version.",
+)
 fun CallStatsReport.toJson(peerType: StreamPeerType): String {
     val stats: Map<String, RTCStats>? = if (peerType == StreamPeerType.PUBLISHER) {
         publisher?.origin?.statsMap

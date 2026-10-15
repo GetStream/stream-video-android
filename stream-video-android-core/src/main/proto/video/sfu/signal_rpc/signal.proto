@@ -79,14 +79,11 @@ message SendMetricsResponse {
 
 message SendStatsRequest {
   string session_id = 1;
-  string subscriber_stats = 2;
-  string publisher_stats = 3;
+  reserved 2, 3, 7, 8, 13, 14;
   string webrtc_version = 4;
   string sdk = 5;
   string sdk_version = 6;
 
-  models.InputDevices audio_devices = 7;
-  models.InputDevices video_devices = 8;
   oneof device_state {
     models.AndroidState android = 9;
     models.AppleState apple = 10;
@@ -94,8 +91,6 @@ message SendStatsRequest {
 
   Telemetry telemetry = 11;
   models.RTMPIngress rtmp = 12;
-  string subscriber_rtc_stats = 13 [deprecated = true];
-  string publisher_rtc_stats = 14 [deprecated = true];
   string rtc_stats = 15;
   // Encode stats for the publisher
   repeated models.PerformanceStats encode_stats = 16;
