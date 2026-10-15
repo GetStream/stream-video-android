@@ -75,30 +75,6 @@ class SfuSocketConnection internal constructor(
 ) : SocketListener<SfuDataEvent, JoinCallResponseEvent>(),
     SocketActions<SfuDataRequest, SfuDataEvent, StreamWebSocketEvent.Error, SfuSocketState, SfuToken, JoinRequest> {
 
-    @Deprecated(
-        message = "Pass a SfuAnalytics which is needed to trace sfu join events. ",
-        level = DeprecationLevel.WARNING,
-    )
-    public constructor(
-        apiKey: ApiKey,
-        url: String,
-        httpClient: OkHttpClient,
-        networkStateProvider: NetworkStateProvider,
-        scope: CoroutineScope = UserScope(ClientScope()),
-        lifecycle: Lifecycle,
-        tokenProvider: TokenProvider,
-        tokenRepository: TokenRepository,
-    ) : this(
-        apiKey = apiKey,
-        url = url,
-        httpClient = httpClient,
-        networkStateProvider = networkStateProvider,
-        scope = scope,
-        lifecycle = lifecycle,
-        tokenProvider = tokenProvider,
-        tokenRepository = tokenRepository,
-        sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
-    )
     companion object {
         internal const val DEFAULT_SFU_SOCKET_TIMEOUT: Long = 10000L
     }

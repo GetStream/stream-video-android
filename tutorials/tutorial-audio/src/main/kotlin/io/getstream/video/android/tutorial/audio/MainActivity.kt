@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.permission.LaunchMicrophonePermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.audio.AudioRoomContent
-import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.model.User
@@ -55,7 +54,6 @@ class MainActivity : ComponentActivity() {
         val client = StreamVideoBuilder(
             context = applicationContext,
             apiKey = "hd8szvscpxvd", // demo API key
-            geo = GEO.GlobalEdgeNetwork,
             user = user,
             token = userToken,
         ).build()

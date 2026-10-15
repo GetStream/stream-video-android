@@ -18,7 +18,6 @@ package io.getstream.video.android.core.call.connection.utils
 
 import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
-import io.getstream.video.android.core.errors.RtcException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -49,8 +48,8 @@ class ApiCallsTest {
     }
 
     @Test
-    fun `returns Failure when RtcException occurs`() = runTest {
-        val rtcException = RtcException("RTC Failed", RuntimeException())
+    fun `returns Failure when a generic exception occurs`() = runTest {
+        val rtcException = Exception("RTC Failed", RuntimeException())
         val result = safeApiCall<String> { throw rtcException }
 
         assertIs<Failure>(result)

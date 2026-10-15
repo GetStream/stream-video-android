@@ -16,40 +16,12 @@
 
 package io.getstream.video.android.core.lifecycle
 
-import io.getstream.log.StreamLog
-import io.getstream.video.android.core.socket.common.SocketConnectionPolicy
-import io.getstream.video.android.core.socket.coordinator.CoordinatorSocketStateService
-
 internal interface LifecycleHandler {
     suspend fun resume()
     suspend fun stopped()
-}
-
-internal class ConnectionPolicyLifecycleHandler(
-    private val connectionPolicies: List<SocketConnectionPolicy>,
-    private val socketStateService: CoordinatorSocketStateService,
-) : LifecycleHandler {
-
-    override suspend fun resume() {
-        val shouldConnect = connectionPolicies.all { it.shouldConnect() }
-
-        StreamLog.d(TAG) { "[resume] shouldConnect: $shouldConnect" }
-
-        if (shouldConnect) socketStateService.onResume()
-    }
-
-    override suspend fun stopped() {
-        val shouldDisconnect = connectionPolicies.all { it.shouldDisconnect() }
-
-        StreamLog.d(TAG) { "[stopped] shouldDisconnect: $shouldDisconnect" }
-
-        if (shouldDisconnect) socketStateService.onStop()
-    }
 }
 
 internal class NoOpLifecycleHandler : LifecycleHandler {
     override suspend fun resume() { /* No-op */ }
     override suspend fun stopped() { /* No-op */ }
 }
-
-private const val TAG = "Video:LifecycleHandler"
