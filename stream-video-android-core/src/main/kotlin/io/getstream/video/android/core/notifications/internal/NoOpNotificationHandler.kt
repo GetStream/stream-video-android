@@ -18,17 +18,11 @@ package io.getstream.video.android.core.notifications.internal
 
 import android.app.Notification
 import android.app.PendingIntent
-import androidx.core.app.NotificationCompat
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RingingState
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
 import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.model.User
-import kotlinx.coroutines.CoroutineScope
 
 internal object NoOpNotificationHandler : NotificationHandler {
 
@@ -115,31 +109,10 @@ internal object NoOpNotificationHandler : NotificationHandler {
         payload: Map<String, Any?>,
     ): Notification? = null
 
-    @Deprecated(
-        "Use StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
-        replaceWith = ReplaceWith(
-            "StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
-        ),
-        level = DeprecationLevel.WARNING,
-    )
-    override fun getSettingUpCallNotification(): Notification? = null
     override fun getSettingUpCallNotification(
         trigger: String,
         callId: StreamCallId,
     ): Notification? = null
-
-    @Deprecated(
-        level = DeprecationLevel.ERROR,
-        message = "This method is deprecated. Use the getNotificationUpdates method in the NotificationHandler interface instead.",
-    )
-    override fun getNotificationUpdates(
-        coroutineScope: CoroutineScope,
-        call: Call,
-        localUser: User,
-        onUpdate: (Notification) -> Unit,
-    ) {
-        /* NoOp */
-    }
 
     override fun onPermissionDenied() {
         /* NoOp */
@@ -155,22 +128,5 @@ internal object NoOpNotificationHandler : NotificationHandler {
 
     override fun onPermissionRequested() {
         /* NoOp */
-    }
-
-    override fun createMinimalMediaStyleNotification(
-        callId: StreamCallId,
-        mediaNotificationConfig: MediaNotificationConfig,
-        remoteParticipantCount: Int,
-
-    ): NotificationCompat.Builder? {
-        return null
-    }
-
-    override fun getMediaNotificationConfig(): MediaNotificationConfig {
-        return MediaNotificationConfig(
-            MediaNotificationContent("", ""),
-            MediaNotificationVisuals(android.R.drawable.ic_media_play, null),
-            null,
-        )
     }
 }

@@ -16,35 +16,36 @@
 
 package io.getstream.video.android.tutorial.ringing
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import io.getstream.android.samples.ringingcall.R
-import io.getstream.video.android.core.notifications.DefaultNotificationHandler
-import io.getstream.video.android.model.StreamCallId
+import io.getstream.video.android.core.notifications.handlers.CompatibilityStreamNotificationHandler
+import io.getstream.video.android.core.notifications.handlers.StreamNotificationBuilderInterceptors
 
 class CustomNotificationHandler(
-    private val application: Application,
-) : DefaultNotificationHandler(
+    application: Application,
+) : CompatibilityStreamNotificationHandler(
     application = application,
     hideRingingNotificationInForeground = true,
-) {
+    initialNotificationBuilderInterceptor = CustomNotificationInterceptors(application),
+)
 
-    override fun onRingingCall(callId: StreamCallId, callDisplayName: String) {
-        super.onRingingCall(callId, callDisplayName)
-    }
+private class CustomNotificationInterceptors(
+    private val application: Application,
+) : StreamNotificationBuilderInterceptors() {
 
-    @SuppressLint("MissingPermission")
-    override fun onMissedCall(callId: StreamCallId, callDisplayName: String) {
-        val notification = NotificationCompat.Builder(application, getChannelId())
+    override fun onBuildMissedCallNotification(
+        builder: NotificationCompat.Builder,
+        callDisplayName: String?,
+        payload: Map<String, Any?>,
+    ): NotificationCompat.Builder {
+        return builder
             .setSmallIcon(R.drawable.round_call_missed_24)
             .setContentIntent(buildContentIntent())
             .setContentTitle("Tutorial Missed Call from $callDisplayName")
             .setAutoCancel(true)
-            .build()
-        notificationManager.notify(callId.hashCode(), notification)
     }
 
     private fun buildContentIntent() = PendingIntent.getActivity(

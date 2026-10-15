@@ -21,6 +21,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ResolveInfo
+import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_ONGOING_CALL
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.ACTION_REJECT_CALL
@@ -310,7 +311,7 @@ public class DefaultStreamIntentResolver(
         resolveInfo: ResolveInfo,
         callId: StreamCallId,
         notificationId: Int,
-        flags: Int = DefaultNotificationHandler.PENDING_INTENT_FLAG,
+        flags: Int = PENDING_INTENT_FLAG,
     ): PendingIntent {
         val baseIntentAction =
             requireNotNull(
@@ -339,7 +340,7 @@ public class DefaultStreamIntentResolver(
         baseIntent: Intent,
         resolveInfo: ResolveInfo,
         callId: StreamCallId,
-        flags: Int = DefaultNotificationHandler.PENDING_INTENT_FLAG,
+        flags: Int = PENDING_INTENT_FLAG,
     ): PendingIntent {
         return PendingIntent.getBroadcast(
             context,
@@ -389,8 +390,16 @@ public class DefaultStreamIntentResolver(
                     context,
                     0,
                     buildComponentIntent(intent, resolveInfo, callId),
-                    DefaultNotificationHandler.PENDING_INTENT_FLAG,
+                    PENDING_INTENT_FLAG,
                 )
             }
+    }
+}
+
+private val PENDING_INTENT_FLAG: Int by lazy {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    } else {
+        PendingIntent.FLAG_UPDATE_CURRENT
     }
 }

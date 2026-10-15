@@ -17,14 +17,11 @@
 package io.getstream.video.android.core.notifications.handlers
 
 import android.app.Application
-import android.app.Notification
 import android.app.NotificationManager
 import android.support.v4.media.session.MediaSessionCompat
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.IncomingRingtoneOwner
 import io.getstream.video.android.core.R
 import io.getstream.video.android.core.StreamVideo
@@ -35,12 +32,6 @@ import io.getstream.video.android.core.notifications.DefaultStreamIntentResolver
 import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.StreamIntentResolver
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
-import io.getstream.video.android.model.StreamCallId
-import io.getstream.video.android.model.User
-import kotlinx.coroutines.CoroutineScope
 
 /**
  * Compatibility notification handler that bridges the new notification system
@@ -64,7 +55,8 @@ import kotlinx.coroutines.CoroutineScope
  *                 acceptCallPendingIntent: PendingIntent,
  *                 rejectCallPendingIntent: PendingIntent,
  *                 callerName: String?,
- *                 shouldHaveContentIntent: Boolean
+ *                 shouldHaveContentIntent: Boolean,
+ *                 payload: Map<String, Any?>,
  *             ): NotificationCompat.Builder {
  *                 builder.setContentTitle("My new and shiny incoming call")
  *                 builder.setContentText(
@@ -188,45 +180,7 @@ constructor(
     mediaSessionController,
 ) {
 
-    // Deprecated methods for compatibility
-    @Deprecated(
-        message = "Deprecated method. Use the onCallNotificationUpdate method instead.",
-        level = DeprecationLevel.ERROR,
-        replaceWith =
-        ReplaceWith("onCallNotificationUpdate(call)"),
-    )
-    override fun getNotificationUpdates(
-        coroutineScope: CoroutineScope,
-        call: Call,
-        localUser: User,
-        onUpdate: (Notification) -> Unit,
-    ) {
-        // Do nothing, deprecated
-    }
-
     override fun getStreamNotificationDispatcher(): NotificationDispatcher {
         return notificationDispatcher
-    }
-
-    @Deprecated(
-        "This interface is deprecated. Use the notification interceptors instead.",
-        level = DeprecationLevel.ERROR,
-    )
-    override fun createMinimalMediaStyleNotification(
-        callId: StreamCallId,
-        mediaNotificationConfig: MediaNotificationConfig,
-        remoteParticipantCount: Int,
-    ): NotificationCompat.Builder? = null
-
-    @Deprecated(
-        "This interface is deprecated. Use the notification interceptors instead.",
-        level = DeprecationLevel.ERROR,
-    )
-    override fun getMediaNotificationConfig(): MediaNotificationConfig {
-        return MediaNotificationConfig(
-            MediaNotificationContent("", ""),
-            MediaNotificationVisuals(android.R.drawable.ic_media_play, null),
-            null,
-        )
     }
 }

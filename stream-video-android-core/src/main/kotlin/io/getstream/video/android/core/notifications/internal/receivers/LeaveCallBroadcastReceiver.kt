@@ -40,7 +40,7 @@ internal class LeaveCallBroadcastReceiver : GenericCallActionBroadcastReceiver()
         logger.d { "[onReceive] #ringing; callId: ${call.id}, action: ${intent.action}" }
 
         // A call has at most one notification; its id is stored at creation time in
-        // CallState.notificationIdFlow (the source of truth, replacing the deprecated
+        // CallState.notificationIdFlow (the source of truth, replacing the removed
         // INTENT_EXTRA_NOTIFICATION_ID extra).
         val notificationId = call.state.notificationIdFlow.value
         // TODO: remove this legacy notification id once nothing posts under StreamCallId.hashCode().

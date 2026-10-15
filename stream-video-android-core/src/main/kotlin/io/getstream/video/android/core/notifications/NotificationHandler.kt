@@ -16,45 +16,18 @@
 
 package io.getstream.video.android.core.notifications
 
-import android.app.Notification
 import io.getstream.android.push.permissions.NotificationPermissionHandler
-import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.notifications.dispatchers.NotificationDispatcher
 import io.getstream.video.android.core.notifications.handlers.StreamNotificationHandler
 import io.getstream.video.android.core.notifications.handlers.StreamNotificationProvider
 import io.getstream.video.android.core.notifications.handlers.StreamNotificationUpdatesProvider
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationHandler
-import io.getstream.video.android.model.User
-import kotlinx.coroutines.CoroutineScope
 
 public interface NotificationHandler :
     NotificationPermissionHandler,
     StreamNotificationHandler,
     StreamNotificationProvider,
     StreamNotificationUpdatesProvider,
-    StreamNotificationDispatcher,
-    MediaNotificationHandler {
-
-    /**
-     * Get subsequent updates to notifications.
-     * Initially, notifications are posted by one of the other methods, and then this method can be used to re-post them with updated content.
-     *
-     * @param coroutineScope Coroutine scope used for the updates.
-     * @param call The Stream call object.
-     * @param localUser The local Stream user.
-     * @param onUpdate Callback to be called when the notification is updated.
-     */
-    @Deprecated(
-        level = DeprecationLevel.ERROR,
-        message = "This method is deprecated. Use the getNotificationUpdates method in the NotificationHandler interface instead.",
-        replaceWith = ReplaceWith("onCallNotificationUpdate(coroutineScope, call, localUser)"),
-    )
-    fun getNotificationUpdates(
-        coroutineScope: CoroutineScope,
-        call: Call,
-        localUser: User,
-        onUpdate: (Notification) -> Unit,
-    )
+    StreamNotificationDispatcher {
 
     companion object {
         const val ACTION_NOTIFICATION = "io.getstream.video.android.action.NOTIFICATION"
@@ -69,20 +42,6 @@ public interface NotificationHandler :
         const val INTENT_EXTRA_CALL_CID: String = "io.getstream.video.android.intent-extra.call_cid"
         const val INTENT_EXTRA_CALL_DISPLAY_NAME: String =
             "io.getstream.video.android.intent-extra.call_displayname"
-
-        @Deprecated(
-            message = "Notification ids are managed internally and this extra is no longer " +
-                "populated. Read the active notification id from CallState.notificationIdFlow, or " +
-                "derive it with StreamCallId.getNotificationId(NotificationType).",
-        )
-        const val INTENT_EXTRA_NOTIFICATION_ID: String =
-            "io.getstream.video.android.intent-extra.notification_id"
-
-        @Deprecated(
-            message = "Use StreamCallId.getNotificationId(NotificationType.Incoming)",
-            replaceWith = ReplaceWith("StreamCallId.getNotificationId(NotificationType.Incoming)"),
-        )
-        const val INCOMING_CALL_NOTIFICATION_ID = 24756
     }
 }
 

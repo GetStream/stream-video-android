@@ -29,7 +29,6 @@ import androidx.core.content.ContextCompat
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.StreamVideoClient
-import io.getstream.video.android.core.notifications.NotificationHandler
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_CID
 import io.getstream.video.android.core.notifications.NotificationHandler.Companion.INTENT_EXTRA_CALL_DISPLAY_NAME
 import io.getstream.video.android.core.notifications.internal.service.CallService.Companion.TRIGGER_INCOMING_CALL
@@ -232,12 +231,6 @@ class CallServiceTest {
     }
 
     // Test constants consistency
-    @Test
-    fun `notification ID constants are consistent`() {
-        // These constants should remain stable as they affect notification behavior
-        assertEquals(24756, NotificationHandler.INCOMING_CALL_NOTIFICATION_ID)
-    }
-
     @Test
     fun `intent extra keys are consistent`() {
         // These keys should remain stable as they affect intent parsing
