@@ -383,6 +383,87 @@ class MicrophoneManagerTest {
     }
 
     @Test
+    fun `select should discard older pending endpoint switch when a new device is selected`() = runTest {
+        val bluetoothEndpoint = mockTelecomEndpoint(
+            type = CallEndpointCompat.TYPE_BLUETOOTH,
+            identifier = ParcelUuid.fromString("55555555-5555-5555-5555-555555555555"),
+            name = "Bluetooth",
+        )
+        val speakerEndpoint = mockTelecomEndpoint(
+            type = CallEndpointCompat.TYPE_SPEAKER,
+            identifier = ParcelUuid.fromString("66666666-6666-6666-6666-666666666666"),
+            name = "Speaker",
+        )
+        val telecomCall = registeredTelecomCall(
+            currentEndpoint = null,
+            availableEndpoints = emptyList(),
+        )
+        val currentCall = MutableStateFlow<TelecomCall>(telecomCall)
+        val mediaManager = mockMediaManagerWithTelecom(currentCall, this)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+
+        microphoneManager.select(
+            StreamAudioDevice.BluetoothHeadset(audio = mockk<AudioDevice>()),
+        )
+        runCurrent()
+
+        microphoneManager.select(StreamAudioDevice.Speakerphone(audio = mockk<AudioDevice>()))
+        runCurrent()
+
+        currentCall.value = telecomCall.copy(
+            availableCallEndpoints = listOf(bluetoothEndpoint, speakerEndpoint),
+        )
+        runCurrent()
+
+        assertEquals(
+            TelecomCallAction.SwitchAudioEndpoint(speakerEndpoint.identifier),
+            telecomCall.actionSource.tryReceive().getOrNull(),
+        )
+        assertNull(telecomCall.actionSource.tryReceive().getOrNull())
+    }
+
+    @Test
+    fun `select should execute only the latest endpoint switch after Bluetooth Speaker Bluetooth selections`() = runTest {
+        val bluetoothEndpoint = mockTelecomEndpoint(
+            type = CallEndpointCompat.TYPE_BLUETOOTH,
+            identifier = ParcelUuid.fromString("55555555-5555-5555-5555-555555555555"),
+            name = "Bluetooth",
+        )
+        val speakerEndpoint = mockTelecomEndpoint(
+            type = CallEndpointCompat.TYPE_SPEAKER,
+            identifier = ParcelUuid.fromString("66666666-6666-6666-6666-666666666666"),
+            name = "Speaker",
+        )
+        val telecomCall = registeredTelecomCall(
+            currentEndpoint = null,
+            availableEndpoints = emptyList(),
+        )
+        val currentCall = MutableStateFlow<TelecomCall>(telecomCall)
+        val mediaManager = mockMediaManagerWithTelecom(currentCall, this)
+        val microphoneManager = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+        val bluetoothHeadset = StreamAudioDevice.BluetoothHeadset(audio = mockk<AudioDevice>())
+        val speakerphone = StreamAudioDevice.Speakerphone(audio = mockk<AudioDevice>())
+
+        microphoneManager.select(bluetoothHeadset)
+        runCurrent()
+        microphoneManager.select(speakerphone)
+        runCurrent()
+        microphoneManager.select(bluetoothHeadset)
+        runCurrent()
+
+        currentCall.value = telecomCall.copy(
+            availableCallEndpoints = listOf(bluetoothEndpoint, speakerEndpoint),
+        )
+        runCurrent()
+
+        assertEquals(
+            TelecomCallAction.SwitchAudioEndpoint(bluetoothEndpoint.identifier),
+            telecomCall.actionSource.tryReceive().getOrNull(),
+        )
+        assertNull(telecomCall.actionSource.tryReceive().getOrNull())
+    }
+
+    @Test
     fun `selectUsbDevice success should update state`() {
         val mediaManager = mockMediaManager()
         val call = mockk<Call>(relaxed = true)
