@@ -29,7 +29,7 @@ import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
-import io.getstream.video.android.core.internal.module.CoordinatorRequestException
+import io.getstream.video.android.core.internal.module.CoordinatorRequestErrorInterceptor
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
@@ -51,15 +51,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.junit.After
 import org.junit.Before
 import org.threeten.bp.OffsetDateTime
-import java.io.IOException
 import java.io.InterruptedIOException
+import java.net.UnknownHostException
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotSame
 import kotlin.test.assertTrue
 
 class StreamVideoClientTest {
@@ -367,8 +370,9 @@ class StreamVideoClientTest {
 
     @Test
     fun `apiCall includes endpoint from interceptor error when OkHttp reports call timeout`() = runTest {
-        val request = Request.Builder().url("https://hint.stream-io-video.com/").head().build()
-        val intercepted = CoordinatorRequestException(request, IOException("Canceled"))
+        val intercepted = InterruptedIOException(
+            "HEAD hint.stream-io-video.com/ failed: request interrupted — Canceled",
+        )
         val timeout = InterruptedIOException("timeout").apply { initCause(intercepted) }
 
         val result = client.apiCall<String> { throw timeout }
@@ -379,8 +383,36 @@ class StreamVideoClientTest {
             "Safe call failed with HEAD hint.stream-io-video.com/ failed: request timed out",
             error.message,
         )
-        assertTrue(error.cause is CoordinatorRequestException)
-        assertEquals(timeout, error.cause.cause)
+        assertTrue(error.cause is InterruptedIOException)
+        assertEquals(intercepted, error.cause.cause)
+    }
+
+    @Test
+    fun `apiCall exposes the standard transport exception type`() = runTest {
+        val original = UnknownHostException("Unable to resolve host")
+        val networkClient = OkHttpClient.Builder()
+            .addInterceptor(CoordinatorRequestErrorInterceptor())
+            .addInterceptor { throw original }
+            .build()
+        val request = Request.Builder()
+            .url("https://video.stream-io-api.com/calls?api_key=secret")
+            .build()
+
+        val result = client.apiCall {
+            networkClient.newCall(request).execute().use { "unused" }
+        }
+
+        val failure = result as io.getstream.result.Result.Failure
+        val error = failure.value as io.getstream.result.Error.ThrowableError
+        assertEquals(
+            "Safe call failed with GET video.stream-io-api.com/calls failed: " +
+                "DNS lookup failed — Unable to resolve host",
+            error.message,
+        )
+        assertTrue(error.cause is UnknownHostException)
+        assertNotSame(original, error.cause)
+        assertEquals(original.cause, error.cause.cause)
+        assertContentEquals(original.stackTrace, error.cause.stackTrace)
     }
 
     // Regression: StreamNotificationManager.createDevice() calls api.createDevice() directly

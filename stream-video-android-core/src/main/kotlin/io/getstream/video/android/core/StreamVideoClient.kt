@@ -92,7 +92,7 @@ import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
-import io.getstream.video.android.core.internal.module.withCoordinatorRequestContext
+import io.getstream.video.android.core.internal.module.restoreCoordinatorRequestContextFromCause
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.MuteUsersData
@@ -333,7 +333,7 @@ internal class StreamVideoClient internal constructor(
                 throw e
             }
         } catch (e: IOException) {
-            throw e.withCoordinatorRequestContext()
+            throw e.restoreCoordinatorRequestContextFromCause()
         }
     }
 

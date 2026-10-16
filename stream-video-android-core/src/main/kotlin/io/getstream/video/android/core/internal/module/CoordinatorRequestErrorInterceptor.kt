@@ -29,6 +29,10 @@ import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLException
+import javax.net.ssl.SSLHandshakeException
+import javax.net.ssl.SSLKeyException
+import javax.net.ssl.SSLPeerUnverifiedException
+import javax.net.ssl.SSLProtocolException
 
 private object CoordinatorRequestErrorMessage {
     const val DNS_LOOKUP_FAILED: String = "DNS lookup failed"
@@ -36,7 +40,6 @@ private object CoordinatorRequestErrorMessage {
     const val REQUEST_INTERRUPTED: String = "request interrupted"
     const val CONNECTION_FAILED: String = "connection failed"
     const val TLS_CONNECTION_FAILED: String = "TLS connection failed"
-    const val NETWORK_IO_FAILED: String = "network I/O failed"
     const val TIMEOUT_KEYWORD: String = "timeout"
     const val FAILURE_SEPARATOR: String = " failed: "
     const val CAUSE_SEPARATOR: String = " — "
@@ -58,11 +61,12 @@ private object CoordinatorRequestErrorMessage {
  * `HTTP 404 POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: Not Found`
  *
  * The response code and payload are not changed, so Retrofit error parsing and authentication
- * retries continue to work normally. The response body source is decorated so an [IOException]
- * raised while consuming the payload receives the same endpoint context as an [IOException] raised
+ * retries continue to work normally. The response body source is decorated so recognized transport
+ * exceptions raised while consuming the payload receive the same endpoint context as those raised
  * by [Interceptor.Chain.proceed].
  *
- * Transport failures are wrapped in [CoordinatorRequestException] with a message in this format:
+ * Recognized transport failures are recreated using their existing exception category and a message
+ * in this format:
  *
  * `METHOD host/path?query failed: normalized-reason — original-message`
  *
@@ -80,8 +84,6 @@ private object CoordinatorRequestErrorMessage {
  *   `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: connection failed — Failed to connect to video.stream-io-api.com`
  * - [SSLException]:
  *   `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: TLS connection failed — Chain validation failed`
- * - Any other [IOException]:
- *   `POST video.stream-io-api.com/video/call/default/call-123/join?connection_id=connection-456 failed: network I/O failed — unexpected end of stream`
  *
  * The `original-message` is supplied by OkHttp or the JVM through [IOException.message], not by the
  * server. It is omitted when blank. The generic message `timeout` is also omitted because it adds no
@@ -89,8 +91,10 @@ private object CoordinatorRequestErrorMessage {
  *
  * Resolved path parameters and allowlisted diagnostic query parameters are included to identify the
  * exact request. Every other query parameter is omitted, so newly introduced credentials remain
- * excluded by default. Request headers are never included. The original [IOException] is retained as
- * the cause.
+ * excluded by default. Request headers are never included. A recreated exception copies the
+ * original stack trace, direct cause, suppressed exceptions, and transferred-byte count where
+ * applicable, so formatting the message does not add another level to the exception hierarchy.
+ * Unrecognized [IOException] types are rethrown unchanged.
  */
 internal class CoordinatorRequestErrorInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -109,7 +113,7 @@ internal class CoordinatorRequestErrorInterceptor : Interceptor {
                 response
             }
         } catch (exception: IOException) {
-            throw CoordinatorRequestException(request, exception)
+            throw exception.recreateWithFormattedMessage(request)
         }
     }
 }
@@ -121,7 +125,7 @@ private fun Response.withRequestContextOnBodyReadFailure(request: Request): Resp
             try {
                 super.read(sink, byteCount)
             } catch (exception: IOException) {
-                throw CoordinatorRequestException(request, exception)
+                throw exception.recreateWithFormattedMessage(request)
             }
     }.buffer()
 
@@ -130,40 +134,64 @@ private fun Response.withRequestContextOnBodyReadFailure(request: Request): Resp
         .build()
 }
 
-internal class CoordinatorRequestException(
-    val requestDescription: String,
-    val failureReason: String,
-    cause: IOException,
-) : IOException(
-    requestDescription + CoordinatorRequestErrorMessage.FAILURE_SEPARATOR + failureReason,
-    cause,
-) {
-    constructor(request: Request, cause: IOException) : this(
-        requestDescription = request.sanitizedDescription(),
-        failureReason = cause.failureDescription(),
-        cause = cause,
-    )
-}
-
 /**
- * Restores coordinator request context when OkHttp's call timeout replaces the exception thrown by
- * the interceptor with a new [InterruptedIOException].
+ * Restores coordinator request context when OkHttp's call timeout replaces a recognized exception
+ * thrown by the interceptor with a new [InterruptedIOException].
  */
-internal fun IOException.withCoordinatorRequestContext(): IOException {
-    if (this is CoordinatorRequestException) return this
+internal fun IOException.restoreCoordinatorRequestContextFromCause(): IOException {
+    if (coordinatorRequestDescription() != null) return this
 
     var nestedCause = cause
     while (nestedCause != null && nestedCause !== nestedCause.cause) {
-        if (nestedCause is CoordinatorRequestException) {
-            return CoordinatorRequestException(
-                requestDescription = nestedCause.requestDescription,
-                failureReason = failureDescription(),
-                cause = this,
-            )
+        if (nestedCause is IOException) {
+            val requestDescription = nestedCause.coordinatorRequestDescription()
+            if (requestDescription != null) {
+                return recreateWithFormattedDescription(requestDescription)
+            }
         }
         nestedCause = nestedCause.cause
     }
     return this
+}
+
+private fun IOException.recreateWithFormattedMessage(request: Request): IOException =
+    recreateWithFormattedDescription(request.sanitizedDescription())
+
+private fun IOException.recreateWithFormattedDescription(
+    requestDescription: String,
+): IOException {
+    val failureDescription = failureDescription() ?: return this
+    val contextualMessage =
+        requestDescription + CoordinatorRequestErrorMessage.FAILURE_SEPARATOR + failureDescription
+    val contextualException: IOException = when (javaClass) {
+        UnknownHostException::class.java -> UnknownHostException(contextualMessage)
+        SocketTimeoutException::class.java -> SocketTimeoutException(contextualMessage)
+        InterruptedIOException::class.java -> InterruptedIOException(contextualMessage)
+        ConnectException::class.java -> ConnectException(contextualMessage)
+        SSLHandshakeException::class.java -> SSLHandshakeException(contextualMessage)
+        SSLKeyException::class.java -> SSLKeyException(contextualMessage)
+        SSLPeerUnverifiedException::class.java -> SSLPeerUnverifiedException(contextualMessage)
+        SSLProtocolException::class.java -> SSLProtocolException(contextualMessage)
+        SSLException::class.java -> SSLException(contextualMessage)
+        else -> return this
+    }
+    return contextualException.copyDiagnosticStateFrom(this)
+}
+
+private fun IOException.copyDiagnosticStateFrom(original: IOException): IOException = apply {
+    stackTrace = original.stackTrace
+    initCause(original.cause)
+    original.suppressed.forEach(::addSuppressed)
+
+    if (this is InterruptedIOException && original is InterruptedIOException) {
+        bytesTransferred = original.bytesTransferred
+    }
+}
+
+private fun IOException.coordinatorRequestDescription(): String? {
+    val message = message ?: return null
+    val separatorIndex = message.indexOf(CoordinatorRequestErrorMessage.FAILURE_SEPARATOR)
+    return if (separatorIndex > 0) message.substring(0, separatorIndex) else null
 }
 
 internal fun Request.sanitizedDescription(): String {
@@ -182,8 +210,8 @@ internal fun Request.sanitizedDescription(): String {
     return "$method ${sanitizedUrl.host}${sanitizedUrl.encodedPath}$query"
 }
 
-private fun IOException.failureDescription(): String {
-    val category = failureCategory()
+private fun IOException.failureDescription(): String? {
+    val category = failureCategory() ?: return null
     val detail = usefulFailureDetail(category)
     return if (detail == null) {
         category
@@ -192,7 +220,7 @@ private fun IOException.failureDescription(): String {
     }
 }
 
-private fun IOException.failureCategory(): String =
+private fun IOException.failureCategory(): String? =
     when (this) {
         is UnknownHostException -> CoordinatorRequestErrorMessage.DNS_LOOKUP_FAILED
         is SocketTimeoutException -> CoordinatorRequestErrorMessage.REQUEST_TIMED_OUT
@@ -205,7 +233,7 @@ private fun IOException.failureCategory(): String =
         }
         is ConnectException -> CoordinatorRequestErrorMessage.CONNECTION_FAILED
         is SSLException -> CoordinatorRequestErrorMessage.TLS_CONNECTION_FAILED
-        else -> CoordinatorRequestErrorMessage.NETWORK_IO_FAILED
+        else -> null
     }
 
 private fun IOException.usefulFailureDetail(category: String): String? {
