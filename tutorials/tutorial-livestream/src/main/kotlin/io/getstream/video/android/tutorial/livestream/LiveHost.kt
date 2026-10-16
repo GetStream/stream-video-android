@@ -51,6 +51,7 @@ import io.getstream.video.android.compose.ui.components.call.controls.actions.Le
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleCameraAction
 import io.getstream.video.android.compose.ui.components.call.controls.actions.ToggleMicrophoneAction
 import io.getstream.video.android.compose.ui.components.video.VideoRenderer
+import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideo
@@ -199,8 +200,10 @@ private fun LiveHostContent(
                 .clip(RoundedCornerShape(6.dp)),
             call = call,
             video = video,
-            videoFallbackContent = {
-                Text(text = "Video rendering failed")
+            videoRendererConfig = videoRenderConfig {
+                fallbackContent = {
+                    Text(text = "Video rendering failed")
+                }
             },
         )
     }

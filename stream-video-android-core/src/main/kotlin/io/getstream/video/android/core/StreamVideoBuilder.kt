@@ -37,14 +37,11 @@ import io.getstream.android.core.api.subscribe.StreamSubscriptionManager
 import io.getstream.log.AndroidStreamLogger
 import io.getstream.log.StreamLog
 import io.getstream.log.streamLog
-import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
-import io.getstream.video.android.core.notifications.internal.service.CallService
-import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
@@ -111,7 +108,6 @@ import java.util.concurrent.atomic.AtomicReference
  * Defaults to 5s.
  * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
- * @property callServiceConfig Configuration for the call foreground service. See [CallServiceConfig]. (Deprecated) Use `callServiceConfigRegistry` instead.
  * @property localCoordinatorAddress Local coordinator address (IP:port) to be used for testing. Leave null if not needed.
  * @property sounds Overwrite the default SDK sounds. See [io.getstream.video.android.core.sounds.RingingConfig].
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
@@ -154,29 +150,12 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val connectionTimeoutInMs: Long = 5_000,
     private var ensureSingleInstance: Boolean = true,
     private val videoDomain: String = "video.stream-io-api.com",
-    @Deprecated(
-        "This property is ignored. Set runCallServiceInForeground in the callServiceConfigRegistry parameter instead.",
-        replaceWith = ReplaceWith("callServiceConfigRegistry"),
-        level = DeprecationLevel.WARNING,
-    )
-    private val runForegroundServiceForCalls: Boolean = true,
-    @Deprecated(
-        "Use callServiceConfigRegistry instead",
-        replaceWith = ReplaceWith("callServiceConfigRegistry"),
-        level = DeprecationLevel.WARNING,
-    )
-    private val callServiceConfig: CallServiceConfig? = null,
     private val callServiceConfigRegistry: CallServiceConfigRegistry? = null,
     private val localCoordinatorAddress: String? = null,
     private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
     private val vibrationConfig: RingingCallVibrationConfig = disableVibrationConfig(),
     private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
-    @Deprecated(
-        message = "This property is ignored. Set audioUsage in the callServiceConfigRegistry parameter instead.",
-        level = DeprecationLevel.WARNING,
-    )
-    private val audioUsage: Int = defaultAudioUsage,
     private val appName: String? = null,
     private val audioProcessing: ManagedAudioProcessingFactory? = null,
     private val leaveAfterDisconnectSeconds: Long = 30,
@@ -380,7 +359,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         // Set call configuration
         val callConfigRegistry = createCallConfigurationRegistry(
             callServiceConfigRegistry,
-            callServiceConfig,
         )
 
         // Create the client
@@ -472,27 +450,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
     internal fun createCallConfigurationRegistry(
         callServiceConfigRegistry: CallServiceConfigRegistry? = null,
-        callServiceConfig: CallServiceConfig? = null,
     ): CallServiceConfigRegistry {
-        return if (callServiceConfigRegistry != null) {
-            callServiceConfigRegistry
-        } else {
-            CallServiceConfigRegistry().apply {
-                callServiceConfig?.let { legacyCallConfig ->
-                    // The legacy per-type service map always resolved every call type to
-                    // CallService unless a custom map was supplied, so the legacy config is
-                    // registered for all call types with that service.
-                    register(CallType.AnyMarker.name) {
-                        setServiceClass(CallService::class.java)
-                        setRunCallServiceInForeground(
-                            legacyCallConfig.runCallServiceInForeground,
-                        )
-                        setAudioUsage(legacyCallConfig.audioUsage)
-                        enableTelecom(legacyCallConfig.enableTelecom)
-                    }
-                }
-            }
-        }
+        return callServiceConfigRegistry ?: CallServiceConfigRegistry()
     }
 }
 

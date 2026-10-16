@@ -45,8 +45,6 @@ public class IntegrationTestHelper {
         a=sync-time:0
     """.trimIndent()
 
-    val callConfigLegacyRunService = false
-    val callConfigLegacyAudioUsage = AudioAttributes.USAGE_MEDIA
     val callConfigRegistryRunService = true
     val callConfigRegistryAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
 

@@ -109,18 +109,3 @@ public fun MediaPiPLifecycle(
         }
     }
 }
-
-@Deprecated(
-    "Use MediaPiPLifecycle with pictureInPictureConfiguration",
-    ReplaceWith("MediaPiPLifecycle(call, pictureInPictureConfiguration"),
-)
-@Composable
-public fun MediaPiPLifecycle(
-    call: Call,
-    enableInPictureInPicture: Boolean = false,
-) {
-    MediaPiPLifecycle(
-        call,
-        PictureInPictureConfiguration(enableInPictureInPicture),
-    )
-}

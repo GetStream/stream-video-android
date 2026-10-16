@@ -27,7 +27,6 @@ import io.getstream.video.android.core.MediaManagerImpl
  */
 internal fun interface MediaManagerFactory {
     fun create(
-        audioUsage: Int,
         audioUsageProvider: () -> Int,
     ): MediaManagerImpl
 }

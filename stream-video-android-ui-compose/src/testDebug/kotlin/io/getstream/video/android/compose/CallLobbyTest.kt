@@ -21,7 +21,6 @@ import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobbyCameraDisabledPreview
-import io.getstream.video.android.compose.ui.components.call.lobby.CallLobbyDeprecatedOverloadPreview
 import io.getstream.video.android.compose.ui.components.call.lobby.CallLobbyPreview
 import org.junit.Rule
 import org.junit.Test
@@ -45,13 +44,6 @@ internal class CallLobbyTest : PaparazziComposeTest {
     fun `call lobby with camera disabled`() {
         snapshotWithDarkMode {
             CallLobbyCameraDisabledPreview()
-        }
-    }
-
-    @Test
-    fun `call lobby deprecated overload`() {
-        snapshotWithDarkMode {
-            CallLobbyDeprecatedOverloadPreview()
         }
     }
 }

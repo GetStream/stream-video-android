@@ -37,11 +37,4 @@ internal class LivestreamBackstageTest : PaparazziComposeTest {
             LivestreamBackstagePreview()
         }
     }
-
-    @Test
-    fun `livestream backstage deprecated`() {
-        snapshotWithDarkMode {
-            LivestreamBackstageDeprecatedPreview()
-        }
-    }
 }
