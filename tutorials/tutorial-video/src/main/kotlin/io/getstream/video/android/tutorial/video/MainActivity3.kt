@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import io.getstream.video.android.compose.permission.LaunchCallPermissions
 import io.getstream.video.android.compose.theme.VideoTheme
 import io.getstream.video.android.compose.ui.components.call.activecall.CallContent
-import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.call.state.FlipCamera
 import io.getstream.video.android.core.call.state.LeaveCall
@@ -64,7 +63,6 @@ class MainActivity3 : ComponentActivity() {
         val client = StreamVideoBuilder(
             context = applicationContext,
             apiKey = apiKey, // demo API key
-            geo = GEO.GlobalEdgeNetwork,
             user = user,
             token = userToken,
         ).build()

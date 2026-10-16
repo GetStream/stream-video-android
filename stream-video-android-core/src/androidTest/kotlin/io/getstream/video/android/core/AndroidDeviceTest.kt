@@ -68,7 +68,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
     private val newClient: StreamVideo = StreamVideoBuilder(
         context = context,
         apiKey = apiKey,
-        geo = GEO.GlobalEdgeNetwork,
         testData.users["thierry"]!!,
         testData.tokens["thierry"]!!,
         ensureSingleInstance = false,

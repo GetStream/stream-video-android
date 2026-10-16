@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:Suppress("DEPRECATION")
-
 package io.getstream.video.android.core.socket.sfu
 
 import io.getstream.log.taggedLogger
@@ -45,7 +43,6 @@ import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.common.fromVideoErrorCode
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.TokenManager
-import io.getstream.video.android.core.socket.coordinator.state.VideoSocketState
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.safeCallWithResult
 import io.getstream.video.android.core.utils.suspendDebugOnly
@@ -187,10 +184,6 @@ internal open class SfuSocket(
                         // Transport socket is open; now bound the wait for the SFU's
                         // JoinCallResponse with a dedicated, shorter timer.
                         startJoinResponseTimeout()
-                    }
-
-                    is SfuSocketState.RestartConnection -> {
-                        logger.w { "[onSocketStateChanged] RestartConnection is deprecated and no longer acted upon" }
                     }
 
                     is SfuSocketState.Disconnected -> {
@@ -419,12 +412,12 @@ internal open class SfuSocket(
     }
 
     /**
-     * Awaits until [VideoSocketState.Connected] is set.
+     * Awaits until [SfuSocketState.Connected] is set.
      *
      * @param timeoutInMillis Timeout time in milliseconds.
      */
     /**
-     * Awaits until [VideoSocketState.Connected] is set.
+     * Awaits until [SfuSocketState.Connected] is set.
      *
      * @param timeoutInMillis Timeout time in milliseconds.
      */
@@ -433,12 +426,12 @@ internal open class SfuSocket(
     }
 
     /**
-     * Awaits until specified [VideoSocketState] is set.
+     * Awaits until specified [SfuSocketState] is set.
      *
      * @param timeoutInMillis Timeout time in milliseconds.
      */
     /**
-     * Awaits until specified [VideoSocketState] is set.
+     * Awaits until specified [SfuSocketState] is set.
      *
      * @param timeoutInMillis Timeout time in milliseconds.
      */

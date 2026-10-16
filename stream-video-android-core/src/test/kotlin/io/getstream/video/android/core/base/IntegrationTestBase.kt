@@ -50,7 +50,6 @@ import io.getstream.android.video.api.generated.models.VideoSettingsResponse
 import io.getstream.android.video.api.generated.models.WHIPIngress
 import io.getstream.log.Priority
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.GEO
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.StreamVideoClient
@@ -119,7 +118,6 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
         builder = StreamVideoBuilder(
             context = ApplicationProvider.getApplicationContext(),
             apiKey = authData?.apiKey!!,
-            geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = authData?.token!!,
             loggingLevel = LoggingLevel(Priority.DEBUG, HttpLoggingLevel.BASIC),

@@ -147,7 +147,6 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
         builder = StreamVideoBuilder(
             context = ApplicationProvider.getApplicationContext(),
             apiKey = "hd8szvscpxvd",
-            geo = GEO.GlobalEdgeNetwork,
             testData.users["thierry"]!!,
             testData.tokens["thierry"]!!,
             loggingLevel = LoggingLevel(priority = Priority.VERBOSE),

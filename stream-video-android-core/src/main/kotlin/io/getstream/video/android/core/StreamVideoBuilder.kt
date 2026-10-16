@@ -85,7 +85,6 @@ import java.util.concurrent.atomic.AtomicReference
  * val client = StreamVideoBuilder(
  *      context = context,
  *      apiKey = apiKey,
- *      geo = GEO.GlobalEdgeNetwork,
  *      user = user,
  *      token = token,
  *      sounds = ringingConfig(
@@ -100,7 +99,6 @@ import java.util.concurrent.atomic.AtomicReference
  *
  * @property context Android [Context] to be used for initializing Android resources.
  * @property apiKey Your Stream API Key. You can find it in the dashboard.
- * @property geo Your GEO routing policy. Supports geofencing for privacy concerns.
  * @property user The user object. Can be an authenticated user, guest user or anonymous.
  * @property token The token for this user, generated using your API secret on your server.
  * @property tokenProvider Used to make a request to your backend for a new token when the token has expired.
@@ -142,7 +140,6 @@ import java.util.concurrent.atomic.AtomicReference
 public class StreamVideoBuilder @JvmOverloads constructor(
     context: Context,
     private val apiKey: ApiKey,
-    private val geo: GEO = GEO.GlobalEdgeNetwork,
     private var user: User = User.anonymous(),
     private val token: UserToken = "",
     private val legacyTokenProvider: (suspend (error: Throwable?) -> String)? = null,
@@ -503,11 +500,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
  * Refactor Later
  */
 internal val tokenRepository = TokenRepository("")
-
-sealed class GEO {
-    /** Run calls over our global edge network, this is the default and right for most applications */
-    object GlobalEdgeNetwork : GEO()
-}
 
 /**
  * Aggregates the arguments handed to [StreamClient]'s factory function. Grouping them makes the

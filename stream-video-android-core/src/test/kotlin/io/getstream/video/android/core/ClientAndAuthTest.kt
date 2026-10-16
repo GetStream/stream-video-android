@@ -53,7 +53,6 @@ class ClientAndAuthTest : TestBase() {
         val builder = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = testData.tokens["thierry"]!!,
             ensureSingleInstance = false,
@@ -68,7 +67,6 @@ class ClientAndAuthTest : TestBase() {
         val builder = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = User(
                 type = UserType.Anonymous,
             ),
@@ -85,7 +83,6 @@ class ClientAndAuthTest : TestBase() {
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest-${System.currentTimeMillis()}",
                 type = UserType.Guest,
@@ -109,7 +106,6 @@ class ClientAndAuthTest : TestBase() {
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest-${System.currentTimeMillis()}",
                 type = UserType.Guest,
@@ -148,7 +144,6 @@ class ClientAndAuthTest : TestBase() {
         val authClient = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = authData!!.token,
             ensureSingleInstance = false,
@@ -166,7 +161,6 @@ class ClientAndAuthTest : TestBase() {
         val guestClient = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest-${System.currentTimeMillis()}",
                 type = UserType.Guest,
@@ -200,7 +194,6 @@ class ClientAndAuthTest : TestBase() {
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest",
                 type = UserType.Guest,
@@ -218,7 +211,6 @@ class ClientAndAuthTest : TestBase() {
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = User(
                 id = "guest",
                 type = UserType.Guest,
@@ -237,7 +229,6 @@ class ClientAndAuthTest : TestBase() {
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = authData!!.token,
         ).build()
@@ -259,7 +250,6 @@ class ClientAndAuthTest : TestBase() {
         StreamVideoBuilder(
             context = context,
             apiKey = "notvalid",
-            geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = authData!!.token,
         ).build()
@@ -271,7 +261,6 @@ class ClientAndAuthTest : TestBase() {
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = authData!!.token,
         ).build()
@@ -292,7 +281,6 @@ class ClientAndAuthTest : TestBase() {
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = testData.expiredToken,
             legacyTokenProvider = { error ->
@@ -312,7 +300,6 @@ class ClientAndAuthTest : TestBase() {
 //            StreamVideoBuilder(
 //                context = context,
 //                apiKey = "",
-//                geo = GEO.GlobalEdgeNetwork,
 //                testData.users["thierry"]!!,
 //                testData.tokens["thierry"]!!,
 //            ).build()
@@ -324,7 +311,6 @@ class ClientAndAuthTest : TestBase() {
         val builder = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = authData!!.token,
         )
@@ -339,7 +325,6 @@ class ClientAndAuthTest : TestBase() {
         val client = StreamVideoBuilder(
             context = context,
             apiKey = authData!!.apiKey,
-            geo = GEO.GlobalEdgeNetwork,
             user = testData.users["thierry"]!!,
             token = authData!!.token,
         ).build()
