@@ -670,18 +670,6 @@ constructor(
         }
     }
 
-    @Deprecated(
-        "Use StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
-        replaceWith = ReplaceWith(
-            "StreamSettingUpCallNotificationProvider.getSettingUpCallNotification(trigger,callId)",
-        ),
-        level = DeprecationLevel.WARNING,
-    )
-    override fun getSettingUpCallNotification(): Notification? {
-        logger.d { "[getSettingUpCallNotification]" }
-        return buildSettingUpCallNotification()
-    }
-
     /**
      * Builds the default "setting up call" foreground-service notification (used for outgoing /
      * livestream calls and as the fallback for any non-incoming trigger).

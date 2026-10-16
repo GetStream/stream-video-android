@@ -43,6 +43,7 @@ import io.getstream.video.android.core.internal.module.CoordinatorConnectionModu
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
+import io.getstream.video.android.core.notifications.internal.service.CallService
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.storage.DeviceTokenStorage
@@ -481,17 +482,16 @@ public class StreamVideoBuilder @JvmOverloads constructor(
         } else {
             CallServiceConfigRegistry().apply {
                 callServiceConfig?.let { legacyCallConfig ->
-                    legacyCallConfig.callServicePerType.forEach {
-                        CallType.fromName(it.key)?.let { callType ->
-                            register(callType.name) {
-                                setServiceClass(it.value)
-                                setRunCallServiceInForeground(
-                                    legacyCallConfig.runCallServiceInForeground,
-                                )
-                                setAudioUsage(legacyCallConfig.audioUsage)
-                                enableTelecom(legacyCallConfig.enableTelecom)
-                            }
-                        }
+                    // The legacy per-type service map always resolved every call type to
+                    // CallService unless a custom map was supplied, so the legacy config is
+                    // registered for all call types with that service.
+                    register(CallType.AnyMarker.name) {
+                        setServiceClass(CallService::class.java)
+                        setRunCallServiceInForeground(
+                            legacyCallConfig.runCallServiceInForeground,
+                        )
+                        setAudioUsage(legacyCallConfig.audioUsage)
+                        enableTelecom(legacyCallConfig.enableTelecom)
                     }
                 }
             }

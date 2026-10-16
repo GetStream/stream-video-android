@@ -17,77 +17,56 @@
 package io.getstream.video.android.tutorial.livestream
 
 import android.app.Application
-import android.app.Notification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import androidx.annotation.DrawableRes
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import io.getstream.android.push.permissions.DefaultNotificationPermissionHandler
 import io.getstream.android.push.permissions.NotificationPermissionHandler
-import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.notifications.DefaultNotificationHandler
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationConfig
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationContent
-import io.getstream.video.android.core.notifications.medianotifications.MediaNotificationVisuals
+import io.getstream.video.android.core.notifications.handlers.CompatibilityStreamNotificationHandler
+import io.getstream.video.android.core.notifications.handlers.StreamNotificationBuilderInterceptors
 import io.getstream.video.android.model.StreamCallId
 
 public open class LiveStreamNotificationHandler(
-
-    private val application: Application,
+    application: Application,
     notificationPermissionHandler: NotificationPermissionHandler =
         DefaultNotificationPermissionHandler
             .createDefaultNotificationPermissionHandler(application),
     hideRingingNotificationInForeground: Boolean = false,
-    @DrawableRes notificationIconRes: Int = android.R.drawable.ic_menu_call,
-) : DefaultNotificationHandler(
-    application,
-    notificationPermissionHandler,
-    hideRingingNotificationInForeground,
-    notificationIconRes,
-) {
+) : CompatibilityStreamNotificationHandler(
+    application = application,
+    notificationPermissionHandler = notificationPermissionHandler,
+    hideRingingNotificationInForeground = hideRingingNotificationInForeground,
+    initialNotificationBuilderInterceptor = LiveStreamNotificationInterceptors(application),
+)
 
-    private val logger by taggedLogger("LiveStreamNotificationHandler")
+/**
+ * Customizes the media-style notification shown for livestream calls (call types listed in
+ * `NotificationConfig.mediaNotificationCallTypes`, which includes `livestream` by default).
+ */
+private class LiveStreamNotificationInterceptors(
+    private val application: Application,
+) : StreamNotificationBuilderInterceptors() {
 
-    override fun getOngoingCallNotification(
+    override fun onBuildOngoingCallMediaNotification(
+        builder: NotificationCompat.Builder,
         callId: StreamCallId,
-        callDisplayName: String?,
-        isOutgoingCall: Boolean,
-        remoteParticipantCount: Int,
-    ): Notification? {
-        return if (callId.type.contains("livestream")) {
-            createMinimalMediaStyleNotification(
-                callId,
-                getMediaNotificationConfig(),
-                remoteParticipantCount,
-            )?.build()
-        } else {
-            super.getOngoingCallNotification(
-                callId,
-                callDisplayName,
-                isOutgoingCall,
-                remoteParticipantCount,
-            )
-        }
-    }
-
-    override fun getMediaNotificationConfig(): MediaNotificationConfig {
-        return MediaNotificationConfig(
-            MediaNotificationContent(
-                "Livestream on progress ",
-                "Tap to go back the livestream call",
-            ),
-            MediaNotificationVisuals(
-                android.R.drawable.ic_media_play,
+        payload: Map<String, Any?>,
+    ): NotificationCompat.Builder {
+        return builder
+            .setContentTitle("Livestream in progress")
+            .setContentText("Tap to go back to the livestream call")
+            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setLargeIcon(
                 getBitmapFromDrawable(
                     application.applicationContext,
-                    io.getstream.video.android.tutorial.livestream.R.drawable.getstream_mountain,
+                    R.drawable.getstream_mountain,
                 ),
-            ),
-            null,
-        )
+            )
     }
-    fun getBitmapFromDrawable(context: Context, drawableResId: Int): Bitmap {
+
+    private fun getBitmapFromDrawable(context: Context, drawableResId: Int): Bitmap {
         val drawable = ContextCompat.getDrawable(context, drawableResId)!!
         val bitmap = Bitmap.createBitmap(
             drawable.intrinsicWidth,

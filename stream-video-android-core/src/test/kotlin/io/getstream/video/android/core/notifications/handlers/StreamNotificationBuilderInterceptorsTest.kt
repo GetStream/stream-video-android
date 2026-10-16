@@ -79,6 +79,7 @@ class StreamNotificationBuilderInterceptorsTest {
             rejectCallPendingIntent = mockPendingIntent,
             callerName = callerName,
             shouldHaveContentIntent = shouldHaveContentIntent,
+            payload = emptyMap(),
         )
 
         // Then
@@ -98,6 +99,7 @@ class StreamNotificationBuilderInterceptorsTest {
             callId = mockStreamCallId,
             callDisplayName = callDisplayName,
             shouldHaveContentIntent = true,
+            payload = emptyMap(),
         )
 
         // Then
@@ -116,6 +118,7 @@ class StreamNotificationBuilderInterceptorsTest {
             callDisplayName = callDisplayName,
             isOutgoingCall = false,
             remoteParticipantCount = 1,
+            payload = emptyMap(),
         )
 
         // Then
@@ -131,6 +134,7 @@ class StreamNotificationBuilderInterceptorsTest {
         val result = interceptors.onBuildMissedCallNotification(
             builder = mockNotificationBuilder,
             callDisplayName = callDisplayName,
+            payload = emptyMap(),
         )
 
         // Then
@@ -187,6 +191,7 @@ class StreamNotificationBuilderInterceptorsTest {
                 rejectCallPendingIntent: PendingIntent,
                 callerName: String?,
                 shouldHaveContentIntent: Boolean,
+                payload: Map<String, Any?>,
             ): NotificationCompat.Builder {
                 return builder.setContentTitle("Custom Title: $callerName")
             }
@@ -203,6 +208,7 @@ class StreamNotificationBuilderInterceptorsTest {
             rejectCallPendingIntent = mockPendingIntent,
             callerName = "John Doe",
             shouldHaveContentIntent = true,
+            payload = emptyMap(),
         )
 
         // Then

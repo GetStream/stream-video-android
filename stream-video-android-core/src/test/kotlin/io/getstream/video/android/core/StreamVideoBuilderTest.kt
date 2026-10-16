@@ -18,8 +18,8 @@ package io.getstream.video.android.core
 
 import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.call.CallType
+import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
-import io.getstream.video.android.core.notifications.internal.service.callServiceConfig
 import io.getstream.video.android.model.User
 import io.mockk.every
 import io.mockk.mockk
@@ -63,7 +63,7 @@ class StreamVideoBuilderTest : TestBase() {
         val builder = StreamVideoBuilder(context = context, apiKey = authData!!.apiKey)
 
         val config = builder.createCallConfigurationRegistry(
-            callServiceConfig = callServiceConfig().copy(
+            callServiceConfig = CallServiceConfig(
                 runCallServiceInForeground = testData.callConfigLegacyRunService,
                 audioUsage = testData.callConfigLegacyAudioUsage,
             ),
@@ -78,7 +78,7 @@ class StreamVideoBuilderTest : TestBase() {
         val builder = StreamVideoBuilder(context = context, apiKey = authData!!.apiKey)
 
         val config = builder.createCallConfigurationRegistry(
-            callServiceConfig = callServiceConfig().copy(
+            callServiceConfig = CallServiceConfig(
                 runCallServiceInForeground = testData.callConfigLegacyRunService,
                 audioUsage = testData.callConfigLegacyAudioUsage,
             ),

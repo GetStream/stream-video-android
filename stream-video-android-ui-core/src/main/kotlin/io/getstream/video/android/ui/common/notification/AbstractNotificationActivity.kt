@@ -83,7 +83,7 @@ public abstract class AbstractNotificationActivity : ComponentActivity() {
      */
     private fun dismissIncomingCallNotifications(callCid: StreamCallId) {
         // A call has a single notification; the incoming-call notification's id comes from the
-        // shared generator, so derive it from the call id and cancel it. (Replaces the deprecated
+        // shared generator, so derive it from the call id and cancel it. (Replaces the removed
         // INTENT_EXTRA_NOTIFICATION_ID extra.)
         val notificationId = callCid.getNotificationId(NotificationType.Incoming)
         NotificationManagerCompat.from(this).cancel(notificationId)

@@ -36,7 +36,7 @@ internal class DismissNotificationActivity : Activity() {
         /**
          * @param baseIntentAction - Important - the action must be set. We are creating multiple
          * dismiss intents (accept, reject, ...) and the system will "think" the Pending intents
-         * we create in [DefaultNotificationHandler.getActivityForIntent] are identical. This can
+         * we create in [io.getstream.video.android.core.notifications.DefaultStreamIntentResolver] are identical. This can
          * lead to a reused intent with a wrong action.
          * See documentation of [PendingIntent.getActivities] - the last intent in the list is the key.
          *

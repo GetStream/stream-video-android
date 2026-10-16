@@ -219,7 +219,7 @@ class StreamDefaultNotificationHandlerTest {
         // Given
         val callDisplayName = "John Doe"
 
-        every { callBusyHandler.isBusyWithAnotherCall(testCallId.cid) } returns true
+        every { callBusyHandler.isBusyWithAnotherCall(testCallId.cid, any()) } returns true
 
         testHandler = StreamDefaultNotificationHandler(
             application = mockApplication,
@@ -236,7 +236,7 @@ class StreamDefaultNotificationHandlerTest {
 
         // Then — NOTHING downstream should execute
         verify(exactly = 0) {
-            mockIntentResolver.searchIncomingCallPendingIntent(any(), any())
+            mockIntentResolver.searchIncomingCallPendingIntent(any(), any(), any())
         }
         unmockkObject(StreamVideo)
     }
@@ -246,7 +246,7 @@ class StreamDefaultNotificationHandlerTest {
         // Given
         val callDisplayName = "John Doe"
         val notificationProvider = slot<() -> Notification?>()
-        every { callBusyHandler.isBusyWithAnotherCall(testCallId.cid) } returns false
+        every { callBusyHandler.isBusyWithAnotherCall(testCallId.cid, any()) } returns false
         every {
             serviceLauncher.showIncomingCall(
                 callId = testCallId,
@@ -753,6 +753,7 @@ class StreamDefaultNotificationHandlerTest {
             mockIntentResolver.searchNotificationCallPendingIntent(
                 testCallId,
                 any(),
+                any(),
             )
         } returns mockPendingIntent
 
@@ -793,6 +794,7 @@ class StreamDefaultNotificationHandlerTest {
         every {
             mockIntentResolver.searchLiveCallPendingIntent(
                 testCallId,
+                any(),
                 any(),
             )
         } returns mockPendingIntent
