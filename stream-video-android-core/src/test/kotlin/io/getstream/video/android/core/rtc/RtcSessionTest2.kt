@@ -204,7 +204,6 @@ class RtcSessionTest2 {
         assertEquals("Wrong sessionId", sessionId, rtcSession.fieldValue("sessionId"))
     }
 
-    @Suppress("DEPRECATION")
     @Test
     fun `connect calls socketConnection_connect with JoinRequest and sets state to Connected`() =
         runTest(
@@ -252,7 +251,7 @@ class RtcSessionTest2 {
             coJustRun { rtcSession.sendCallStats(any(), any(), any()) }
 
             // When
-            rtcSession.connect()
+            rtcSession.connectInternal()
 
             // Then
             coVerify {

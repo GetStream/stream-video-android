@@ -191,43 +191,6 @@ public fun VideoRenderer(
     }
 }
 
-/**
- * Renders a single video track based on the call state.
- *
- * @param call The call state that contains all the tracks and participants.
- * @param video A media contains a video track or an audio track to be rendered.
- * @param modifier Modifier for styling.
- * @param videoScalingType Setup the video scale type of this renderer.
- * @param videoFallbackContent Content is shown the video track is failed to load or not available.
- * @param onRendered An interface that will be invoked when the video is rendered.
- */
-@Deprecated("Use VideoRenderer which accepts `videoConfig` instead.")
-@Composable
-public fun VideoRenderer(
-    call: Call,
-    video: ParticipantState.Media?,
-    modifier: Modifier = Modifier,
-    videoScalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
-    videoFallbackContent: @Composable (Call) -> Unit = {
-        DefaultMediaTrackFallbackContent(
-            modifier,
-            call,
-        )
-    },
-    onRendered: (VideoTextureViewRenderer) -> Unit = {},
-) {
-    VideoRenderer(
-        call = call,
-        video = video,
-        modifier = modifier,
-        videoRendererConfig = videoRenderConfig {
-            this.videoScalingType = videoScalingType
-            this.fallbackContent = videoFallbackContent
-        },
-        onRendered = onRendered,
-    )
-}
-
 private fun isIncomingVideoEnabled(call: Call, sessionId: String, videoEnabledOverrides: Map<String, Boolean?>) =
     (videoEnabledOverrides[sessionId] ?: videoEnabledOverrides[ALL_PARTICIPANTS]) != false ||
         call.state.me.value?.sessionId == sessionId

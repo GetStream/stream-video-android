@@ -18,7 +18,6 @@ package io.getstream.video.android.compose.ui.components.call.lobby
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,28 +57,5 @@ internal fun CallLobbyCameraDisabledPreview() {
         modifier = Modifier.fillMaxWidth(),
         call = previewCall,
         isCameraEnabled = false,
-    )
-}
-
-@Preview
-@Composable
-private fun CallLobbyDeprecatedOverloadRootPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        CallLobbyDeprecatedOverloadPreview()
-    }
-}
-
-/**
- * Pins the deprecated [CallLobby] overload (the one taking `labelPosition`), which must keep
- * rendering exactly like the current overload until it is removed.
- */
-@Suppress("DEPRECATION")
-@Composable
-internal fun CallLobbyDeprecatedOverloadPreview() {
-    CallLobby(
-        modifier = Modifier.fillMaxWidth(),
-        call = previewCall,
-        labelPosition = Alignment.BottomStart,
     )
 }

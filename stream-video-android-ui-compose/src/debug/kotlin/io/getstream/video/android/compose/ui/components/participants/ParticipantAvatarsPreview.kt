@@ -47,9 +47,3 @@ internal fun ParticipantAvatarsOneMemberPreview() {
 internal fun ParticipantAvatarsTwoMembersPreview() {
     ParticipantAvatars(members = previewTwoMembers)
 }
-
-@Suppress("DEPRECATION")
-@Composable
-internal fun ParticipantAvatarsDeprecatedOverloadPreview() {
-    ParticipantAvatars(participants = previewMemberListState)
-}

@@ -259,7 +259,7 @@ class ClientState(private val client: StreamVideo) {
 
     /**
      * Start a foreground service that manages the call even when the UI is gone.
-     * This depends on the flag in [StreamVideoBuilder] called `runForegroundServiceForCalls`
+     * This depends on `CallServiceConfig.runCallServiceInForeground` for the call type.
      */
     internal fun maybeStartForegroundService(call: Call, trigger: String) {
         logger.d { "[maybeStartForegroundService], trigger: $trigger" }

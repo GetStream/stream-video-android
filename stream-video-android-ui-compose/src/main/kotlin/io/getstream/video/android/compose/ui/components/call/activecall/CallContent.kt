@@ -391,54 +391,6 @@ private fun ModerationWarningRootUi(
     }
 }
 
-@Deprecated("Use CallContent  with pictureInPictureConfiguration argument")
-@Composable
-public fun CallContent(
-    call: Call,
-    modifier: Modifier = Modifier,
-    layout: LayoutType = LayoutType.DYNAMIC,
-    permissions: VideoPermissionsState = rememberCallPermissionsState(call = call),
-    onBackPressed: () -> Unit = {},
-    onCallAction: (CallAction) -> Unit = { DefaultOnCallActionHandler.onCallAction(call, it) },
-    appBarContent: @Composable (call: Call) -> Unit = {
-        DefaultAppBarSlot(call, onBackPressed, onCallAction)
-    },
-    style: VideoRendererStyle = RegularVideoRendererStyle(),
-    videoRenderer: @Composable (
-        modifier: Modifier,
-        call: Call,
-        participant: ParticipantState,
-        style: VideoRendererStyle,
-    ) -> Unit = { videoModifier, videoCall, videoParticipant, videoStyle ->
-        DefaultVideoRendererSlot(videoModifier, videoCall, videoParticipant, videoStyle)
-    },
-    floatingVideoRenderer: @Composable (BoxScope.(call: Call, IntSize) -> Unit)? = null,
-    videoContent: @Composable RowScope.(call: Call) -> Unit = {
-        DefaultVideoContentSlot(call, layout, style, videoRenderer, floatingVideoRenderer)
-    },
-    videoOverlayContent: @Composable (call: Call) -> Unit = {
-        DefaultVideoOverlaySlot(call)
-    },
-    controlsContent: @Composable (call: Call) -> Unit = {
-        DefaultControlsSlot(call, onCallAction)
-    },
-    enableInPictureInPicture: Boolean,
-    pictureInPictureContent: @Composable (Call) -> Unit = {
-        DefaultPictureInPictureSlot(it)
-    },
-    enableDiagnostics: Boolean = false,
-    closedCaptionUi: @Composable (Call) -> Unit = {
-        DefaultClosedCaptionsSlot(call)
-    },
-) {
-    CallContent(
-        call, modifier, layout, permissions, onBackPressed, onCallAction, appBarContent, style,
-        videoRenderer, floatingVideoRenderer, videoContent, videoOverlayContent, controlsContent,
-        PictureInPictureConfiguration(enableInPictureInPicture),
-        pictureInPictureContent, enableDiagnostics, closedCaptionUi,
-    )
-}
-
 /**
  * Renders the default PiP content, using the call state that's provided.
  *

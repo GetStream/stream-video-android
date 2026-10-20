@@ -216,54 +216,6 @@ public fun ParticipantVideo(
     }
 }
 
-@Deprecated(
-    "Use ParticipantVideo which accepts mirrorMode instead.",
-    ReplaceWith(
-        "ParticipantVideo(call, participant, modifier, style, labelContent, connectionIndicatorContent, scalingType, videoFallbackContent, reactionContent, actionsContent, mirrorMode)",
-    ),
-)
-@Composable
-public fun ParticipantVideo(
-    call: Call,
-    participant: ParticipantState,
-    modifier: Modifier = Modifier,
-    style: VideoRendererStyle = RegularVideoRendererStyle(),
-    labelContent: @Composable BoxScope.(ParticipantState) -> Unit = {
-        DefaultLabelSlot(call, participant, style)
-    },
-    connectionIndicatorContent: @Composable BoxScope.(NetworkQuality) -> Unit = {
-        DefaultConnectionIndicatorSlot(it)
-    },
-    scalingType: VideoScalingType = VideoScalingType.SCALE_ASPECT_FILL,
-    videoFallbackContent: @Composable (Call) -> Unit = {
-        DefaultVideoFallbackSlot(call, participant)
-    },
-    reactionContent: @Composable BoxScope.(ParticipantState) -> Unit = {
-        DefaultReactionSlot(participant, style)
-    },
-    actionsContent: @Composable BoxScope.(
-        actions: List<ParticipantAction>,
-        call: Call,
-        participant: ParticipantState,
-    ) -> Unit = { actions, call, participant ->
-        DefaultActionsSlot(actions, call, participant)
-    },
-) {
-    ParticipantVideo(
-        call,
-        participant,
-        modifier,
-        style,
-        labelContent,
-        connectionIndicatorContent,
-        scalingType,
-        videoFallbackContent,
-        reactionContent,
-        MirrorMode.AUTO,
-        actionsContent,
-    )
-}
-
 /**
  * Renders a single participant with a given call, which contains all the call states.
  * Also displays participant information with a label and connection quality indicator.

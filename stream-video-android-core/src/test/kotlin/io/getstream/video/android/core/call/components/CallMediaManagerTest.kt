@@ -74,7 +74,7 @@ class CallMediaManagerTest {
         state = state,
         sessionManager = sessionManager,
         eglBase = { mockk(relaxed = true) },
-        mediaManagerFactory = MediaManagerFactory { _, _ -> mediaManager },
+        mediaManagerFactory = MediaManagerFactory { _ -> mediaManager },
     )
 
     @Test

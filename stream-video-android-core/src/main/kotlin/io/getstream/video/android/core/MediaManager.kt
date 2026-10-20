@@ -549,8 +549,6 @@ class ScreenShareManager(
  */
 class MicrophoneManager(
     val mediaManager: MediaManagerImpl,
-    @Deprecated("Use audioUsageProvider instead", replaceWith = ReplaceWith("audioUsageProvider"))
-    val audioUsage: Int,
     val audioUsageProvider: (() -> Int),
 ) {
     // Internal data
@@ -1800,13 +1798,11 @@ class MediaManagerImpl(
     val call: Call,
     val scope: CoroutineScope,
     val eglBaseContext: EglBase.Context,
-    @Deprecated("Use audioUsageProvider instead", replaceWith = ReplaceWith("audioUsageProvider"))
-    val audioUsage: Int = defaultAudioUsage,
-    val audioUsageProvider: (() -> Int) = { audioUsage },
+    val audioUsageProvider: (() -> Int) = { defaultAudioUsage },
 ) {
     internal val camera =
         CameraManager(this, eglBaseContext, DefaultCameraCharacteristicsValidator())
-    internal val microphone = MicrophoneManager(this, audioUsage, audioUsageProvider)
+    internal val microphone = MicrophoneManager(this, audioUsageProvider)
     internal val speaker = SpeakerManager(this, microphone, audioUsageProvider = audioUsageProvider)
     internal val screenShare = ScreenShareManager(this, eglBaseContext)
 

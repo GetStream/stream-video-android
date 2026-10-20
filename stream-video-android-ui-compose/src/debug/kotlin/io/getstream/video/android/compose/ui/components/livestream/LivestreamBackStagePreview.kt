@@ -39,11 +39,3 @@ internal fun LivestreamBackstagePreview() {
         LivestreamBackStage(call = previewCall)
     }
 }
-
-@Suppress("DEPRECATION")
-@Composable
-internal fun LivestreamBackstageDeprecatedPreview() {
-    Box {
-        LivestreamBackStage()
-    }
-}

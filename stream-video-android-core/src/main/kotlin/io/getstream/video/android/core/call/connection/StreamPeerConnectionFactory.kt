@@ -69,7 +69,7 @@ import java.nio.ByteOrder
  * Builds a factory that provides [PeerConnection]s when requested.
  *
  * @property context Used to build the underlying native components for the factory.
- * @property audioUsage signal to the system how the audio tracks are used.
+ * @property audioUsageProvider signal to the system how the audio tracks are used.
  * @property audioProcessing Factory that provides audio processing capabilities.
  * Set this to [AudioAttributes.USAGE_MEDIA] if you want the audio track to behave like media, useful for livestreaming scenarios.
  * @property sharedEglBaseProvider Provider function that returns the EGL base context. This is lazy-evaluated to avoid
@@ -77,9 +77,7 @@ import java.nio.ByteOrder
  */
 public class StreamPeerConnectionFactory(
     private val context: Context,
-    @Deprecated("Use audioUsageProvider instead")
-    private val audioUsage: Int = defaultAudioUsage,
-    private val audioUsageProvider: (() -> Int) = { audioUsage },
+    private val audioUsageProvider: (() -> Int) = { defaultAudioUsage },
     private var audioProcessing: ManagedAudioProcessingFactory? = null,
     private val audioBitrateProfileProvider: (() -> stream.video.sfu.models.AudioBitrateProfile)? = null,
     private val sharedEglBaseProvider: () -> EglBase = { EglBase.create() },
