@@ -154,6 +154,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -244,6 +247,9 @@ internal class StreamVideoClient internal constructor(
 
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
+
+    private val _events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
+    public override val events: SharedFlow<VideoEvent> = _events.asSharedFlow()
     private var calls = mutableMapOf<String, Call>()
     private val destroyedCalls = LruCache<Int, Call>(100)
     internal val callSoundAndVibrationPlayer = CallSoundAndVibrationPlayer(context)
@@ -694,6 +700,10 @@ internal class StreamVideoClient internal constructor(
             if (sub.filter == null || sub.filter.invoke(event)) {
                 sub.listener.onEvent(event)
             }
+        }
+
+        if (!_events.tryEmit(event)) {
+            logger.e { "Failed to emit event to observers: [event: $event]" }
         }
     }
 

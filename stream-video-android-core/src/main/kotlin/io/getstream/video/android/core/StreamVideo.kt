@@ -34,6 +34,7 @@ import io.getstream.video.android.model.User
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.IOException
 
@@ -51,6 +52,29 @@ public interface StreamVideo : NotificationHandler {
     public val userId: String
 
     val state: ClientState
+
+    /**
+     * Hot stream of every [VideoEvent] the client dispatches, in dispatch order.
+     *
+     * This covers coordinator (WebSocket) events, SFU events of active calls and the SDK-local
+     * events routed through the client. Incoming ring events dropped by the busy-call handling
+     * (see `rejectCallWhenBusy`) are not emitted. Each event is emitted after the client [state]
+     * has been updated for it and before it is dispatched to the matching [Call]; collectors run
+     * asynchronously, so call state may already reflect the event when a collector receives it.
+     * Use [Call.events] to observe the events of a single call.
+     *
+     * The flow does not replay: collectors receive only events emitted after they start
+     * collecting. Emission never suspends event dispatch: while any collector is more than 150
+     * events behind, new events are dropped for all collectors.
+     *
+     * Collect it in a scope tied to the observer's lifecycle, for example:
+     * ```kotlin
+     * lifecycleScope.launch {
+     *     client.events.filterIsInstance<CallRingEvent>().collect { event -> ... }
+     * }
+     * ```
+     */
+    public val events: SharedFlow<VideoEvent>
 
     /**
      * Create a call with the given type and id.
