@@ -9841,7 +9841,6 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getLive ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLiveDuration ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLiveDurationInMs ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getLivestream ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLocalParticipant ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMe ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getMember (Ljava/lang/String;)Lio/getstream/video/android/core/MemberState;
