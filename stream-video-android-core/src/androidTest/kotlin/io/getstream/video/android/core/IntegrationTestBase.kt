@@ -27,14 +27,24 @@ import io.getstream.log.streamLog
 import io.getstream.result.Result
 import io.getstream.video.android.core.logging.LoggingLevel
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class IntegrationTestHelper {
 
@@ -143,6 +153,9 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
     var nextEventContinuation: Continuation<VideoEvent>? = null
     var nextEventCompleted: Boolean = false
 
+    /** Scope of the per-test collector that fills [events]; cancelled after each test. */
+    private val eventCollectorScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+
     init {
         builder = StreamVideoBuilder(
             context = ApplicationProvider.getApplicationContext(),
@@ -174,19 +187,27 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
             clientImpl = client as StreamVideoClient
         }
 
-        // monitor for events
+        // monitor for events; started undispatched so the collector is subscribed before
+        // construction returns, and cancelled in tearDownEventCollector so it never outlives
+        // the test
         events = mutableListOf()
-        client.subscribe {
+        eventCollectorScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            client.events.collect {
+                events.add(it)
 
-            events.add(it)
-
-            nextEventContinuation?.let { continuation ->
-                if (!nextEventCompleted) {
-                    nextEventCompleted = true
-                    continuation.resume(value = it)
+                nextEventContinuation?.let { continuation ->
+                    if (!nextEventCompleted) {
+                        nextEventCompleted = true
+                        continuation.resume(value = it)
+                    }
                 }
             }
         }
+    }
+
+    @After
+    fun tearDownEventCollector() {
+        eventCollectorScope.cancel()
     }
 
     val call: Call by lazy {
@@ -218,25 +239,19 @@ open class IntegrationTestBase(connectCoordinatorWS: Boolean = true) : TestBase(
      * Otherwise wait for the next event of this type
      * TODO: add a timeout
      */
-    suspend inline fun <reified T : VideoEvent> waitForNextEvent(): T =
-        suspendCoroutine { continuation ->
-            var finished = false
-
-            val matchingEvents = events.filterIsInstance<T>()
-            if (matchingEvents.isNotEmpty()) {
-                continuation.resume(matchingEvents[0])
-                finished = true
-            }
-
-            client.subscribe {
-                if (!finished) {
-                    if (it is T) {
-                        continuation.resume(it)
-                        finished = true
-                    }
-                }
-            }
+    suspend inline fun <reified T : VideoEvent> waitForNextEvent(): T = coroutineScope {
+        // subscribe before checking history so an event arriving in between is not lost
+        val next = async(start = CoroutineStart.UNDISPATCHED) {
+            client.events.filterIsInstance<T>().first()
         }
+        val historical = events.filterIsInstance<T>().firstOrNull()
+        if (historical != null) {
+            next.cancel()
+            historical
+        } else {
+            next.await()
+        }
+    }
 
     @Before
     fun resetTestVars() {

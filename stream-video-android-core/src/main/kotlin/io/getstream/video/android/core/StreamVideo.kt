@@ -22,7 +22,6 @@ import io.getstream.android.push.PushDevice
 import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.log.StreamLog
 import io.getstream.result.Result
-import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.model.EdgeData
 import io.getstream.video.android.core.model.QueriedCalls
 import io.getstream.video.android.core.model.QueriedMembers
@@ -122,17 +121,6 @@ public interface StreamVideo : NotificationHandler {
         next: String? = null,
         limit: Int = 25,
     ): Result<QueriedMembers>
-
-    /** Subscribe for a specific list of events */
-    public fun subscribeFor(
-        vararg eventTypes: Class<out VideoEvent>,
-        listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription
-
-    /** Subscribe to all events */
-    public fun subscribe(
-        listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription
 
     /**
      * Get a cached device used to receive push notifications.

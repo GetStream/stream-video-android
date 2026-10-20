@@ -9784,8 +9784,6 @@ public final class io/getstream/video/android/core/Call {
 	public final fun stopRecording (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun stopScreenSharing ()V
 	public final fun stopTranscription (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun subscribe (Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
-	public final fun subscribeFor ([Ljava/lang/Class;Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public final fun takeScreenshot (Lio/getstream/video/android/core/model/VideoTrack;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun toggleAudioProcessing ()Z
 	public final fun unpinForEveryone (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -10047,16 +10045,6 @@ public final class io/getstream/video/android/core/DeviceStatus$NotSelected : io
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class io/getstream/video/android/core/EventSubscription {
-	public fun <init> (Lio/getstream/video/android/core/events/VideoEventListener;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Lio/getstream/video/android/core/events/VideoEventListener;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun dispose ()V
-	public final fun getFilter ()Lkotlin/jvm/functions/Function1;
-	public final fun getListener ()Lio/getstream/video/android/core/events/VideoEventListener;
-	public final fun isDisposed ()Z
-	public final fun setDisposed (Z)V
 }
 
 public final class io/getstream/video/android/core/LocalStats {
@@ -10507,8 +10495,6 @@ public abstract interface class io/getstream/video/android/core/StreamVideo : io
 	public static synthetic fun queryCalls$default (Lio/getstream/video/android/core/StreamVideo;Ljava/util/Map;Ljava/util/List;ILjava/lang/String;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun queryMembers (Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun queryMembers$default (Lio/getstream/video/android/core/StreamVideo;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public abstract fun subscribe (Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
-	public abstract fun subscribeFor ([Ljava/lang/Class;Lio/getstream/video/android/core/events/VideoEventListener;)Lio/getstream/video/android/core/EventSubscription;
 	public abstract fun updateDevice (Lio/getstream/video/android/model/Device;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
@@ -13278,10 +13264,6 @@ public final class io/getstream/video/android/core/events/UnknownEvent : io/gets
 	public final fun getEvent ()Ljava/lang/Object;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class io/getstream/video/android/core/events/VideoEventListener {
-	public abstract fun onEvent (Lio/getstream/android/video/api/generated/models/VideoEvent;)V
 }
 
 public final class io/getstream/video/android/core/filter/AndFilterObject : io/getstream/video/android/core/filter/FilterObject {

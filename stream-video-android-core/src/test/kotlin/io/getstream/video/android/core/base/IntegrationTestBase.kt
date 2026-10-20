@@ -58,16 +58,24 @@ import io.getstream.video.android.core.logging.LoggingLevel
 import io.mockk.MockKAnnotations
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import org.junit.After
 import org.junit.Before
 import org.threeten.bp.Clock
 import org.threeten.bp.OffsetDateTime
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 object IntegrationTestState {
     var client: StreamVideo? = null
@@ -107,6 +115,9 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
     lateinit var builder: StreamVideoBuilder
 
     var nextEventContinuation: Continuation<VideoEvent>? = null
+
+    /** Scope of the per-test collector that fills [events]; cancelled after each test. */
+    private lateinit var eventCollectorScope: CoroutineScope
     var nextEventCompleted: Boolean = false
 
     init {
@@ -155,18 +166,27 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
             clientImpl = client as StreamVideoClient
         }
 
-        // monitor for events
+        // monitor for events; started undispatched so the collector is subscribed before
+        // setup returns, and cancelled in tearDownEventCollector so it never outlives the test
         events = mutableListOf()
-        client.subscribe {
-            events.add(it)
+        eventCollectorScope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        eventCollectorScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            client.events.collect {
+                events.add(it)
 
-            nextEventContinuation?.let { continuation ->
-                if (!nextEventCompleted) {
-                    nextEventCompleted = true
-                    continuation.resume(value = it)
+                nextEventContinuation?.let { continuation ->
+                    if (!nextEventCompleted) {
+                        nextEventCompleted = true
+                        continuation.resume(value = it)
+                    }
                 }
             }
         }
+    }
+
+    @After
+    fun tearDownEventCollector() {
+        eventCollectorScope.cancel()
     }
 
     val call: Call by lazy {
@@ -204,24 +224,17 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
         // to wait the real time, not just the virtual dispatcher time.
         withContext(Dispatchers.Default.limitedParallelism(1)) {
             withTimeout(10000) {
-                suspendCoroutine { continuation ->
-                    var finished = false
-
-                    // check historical events
-                    val matchingEvents = events.filterIsInstance<T>()
-                    if (matchingEvents.isNotEmpty()) {
-                        continuation.resume(matchingEvents[0])
-                        finished = true
+                coroutineScope {
+                    // subscribe before checking history so an event arriving in between is not lost
+                    val next = async(start = CoroutineStart.UNDISPATCHED) {
+                        client.events.filterIsInstance<T>().first()
                     }
-
-                    client.subscribe {
-                        if (!finished) {
-                            // listen to the latest events
-                            if (it is T) {
-                                continuation.resume(it)
-                                finished = true
-                            }
-                        }
+                    val historical = events.filterIsInstance<T>().firstOrNull()
+                    if (historical != null) {
+                        next.cancel()
+                        historical
+                    } else {
+                        next.await()
                     }
                 }
             }

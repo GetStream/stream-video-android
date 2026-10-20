@@ -79,7 +79,6 @@ import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.e2ee.E2EEManager
 import io.getstream.video.android.core.e2ee.StreamEncryptionManager
-import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.QueriedMembers
@@ -887,20 +886,6 @@ public class Call(
     suspend fun startHLS(): Result<Any> = apiClient.startHLS()
 
     suspend fun stopHLS(): Result<Any> = apiClient.stopHLS()
-
-    public fun subscribeFor(
-        vararg eventTypes: Class<out VideoEvent>,
-        listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription = eventManager.subscribeFor(*eventTypes, listener = listener)
-
-    @Deprecated(
-        level = DeprecationLevel.WARNING,
-        message = "Deprecated in favor of the `events` flow.",
-        replaceWith = ReplaceWith("events.collect { }"),
-    )
-    public fun subscribe(
-        listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription = eventManager.subscribe(listener)
 
     public suspend fun blockUser(userId: String): Result<BlockUserResponse> =
         apiClient.blockUser(userId)

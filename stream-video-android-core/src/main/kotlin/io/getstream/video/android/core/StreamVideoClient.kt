@@ -94,7 +94,6 @@ import io.getstream.video.android.core.audio.AudioExecutionContext
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
@@ -246,10 +245,10 @@ internal class StreamVideoClient internal constructor(
         get() = userRepository.user.id
 
     private val logger by taggedLogger("Call:StreamVideo")
-    private var subscriptions = mutableSetOf<EventSubscription>()
 
     private val _events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
     public override val events: SharedFlow<VideoEvent> = _events.asSharedFlow()
+
     private var calls = mutableMapOf<String, Call>()
     private val destroyedCalls = LruCache<Int, Call>(100)
     internal val callSoundAndVibrationPlayer = CallSoundAndVibrationPlayer(context)
@@ -463,26 +462,6 @@ internal class StreamVideoClient internal constructor(
         )
     }
 
-    public override fun subscribeFor(
-        vararg eventTypes: Class<out VideoEvent>,
-        listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription {
-        val filter = { event: VideoEvent ->
-            eventTypes.any { type -> type.isInstance(event) }
-        }
-        val sub = EventSubscription(listener, filter)
-        subscriptions.add(sub)
-        return sub
-    }
-
-    public override fun subscribe(
-        listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription {
-        val sub = EventSubscription(listener)
-        subscriptions.add(sub)
-        return sub
-    }
-
     override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
         // Anonymous users never open a coordinator socket (iOS parity).
         if (user.type == UserType.Anonymous) return@safeSuspendingCall
@@ -649,8 +628,8 @@ internal class StreamVideoClient internal constructor(
      */
 
     /**
-     * Internal function that fires the event. It starts by updating client state and call state
-     * After that it loops over the subscriptions and calls their listener
+     * Internal function that fires the event. It updates the client state, emits the event to
+     * [events], then forwards it to the matching call (call events, then call state).
      */
 
     internal fun fireEvent(event: VideoEvent, cid: String = "") {
@@ -662,7 +641,7 @@ internal class StreamVideoClient internal constructor(
 
         val selectedCid = resolveSelectedCid(event, cid)
 
-        notifyClientSubscriptions(event)
+        emitClientEvent(event)
 
         if (selectedCid.isEmpty()) return
 
@@ -693,15 +672,7 @@ internal class StreamVideoClient internal constructor(
         return callEvent?.getCallCID().orEmpty()
     }
 
-    internal fun notifyClientSubscriptions(event: VideoEvent) {
-        subscriptions.forEach { sub ->
-            if (sub.isDisposed) return@forEach
-
-            if (sub.filter == null || sub.filter.invoke(event)) {
-                sub.listener.onEvent(event)
-            }
-        }
-
+    internal fun emitClientEvent(event: VideoEvent) {
         if (!_events.tryEmit(event)) {
             logger.e { "Failed to emit event to observers: [event: $event]" }
         }
@@ -1409,16 +1380,4 @@ internal class StreamVideoClient internal constructor(
             )
         }
     }
-}
-
-/** Extension function that makes it easy to use on kotlin, but keeps Java usable as well */
-public inline fun <reified T : VideoEvent> StreamVideo.subscribeFor(
-    listener: VideoEventListener<T>,
-): EventSubscription {
-    return this.subscribeFor(
-        T::class.java,
-        listener = { event ->
-            listener.onEvent(event as T)
-        },
-    )
 }
