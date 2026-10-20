@@ -67,13 +67,17 @@ import io.getstream.video.android.core.utils.safeCall
 import io.getstream.video.android.core.utils.safeCallWithDefault
 import io.getstream.video.android.core.utils.targetAudioMaxBitrateBps
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
 import org.webrtc.Camera2Capturer
@@ -92,6 +96,7 @@ import java.nio.ByteBuffer
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resumeWithException
+import kotlin.time.Duration.Companion.seconds
 
 sealed class DeviceStatus {
     data object NotSelected : DeviceStatus()
@@ -556,12 +561,17 @@ class MicrophoneManager(
     val audioUsage: Int,
     val audioUsageProvider: (() -> Int),
 ) {
+    private companion object {
+        val TELECOM_ENDPOINT_WAIT_TIMEOUT = 2.seconds
+    }
+
     // Internal data
     private val logger by taggedLogger("Media:MicrophoneManager")
 
     private lateinit var audioHandler: AudioSwitchDecorator
 
     private var setupCompleted = AtomicBoolean(false)
+    private val telecomEndpointSwitchCoordinator = TelecomEndpointSwitchCoordinator()
     internal var audioManager: AudioManager? = null
     internal var priorStatus: DeviceStatus? = null
 
@@ -712,15 +722,21 @@ class MicrophoneManager(
     fun select(device: StreamAudioDevice?) {
         logger.i { "[select] selecting device $device" }
         ifAudioHandlerInitialized { it.selectDevice(device?.toAudioDevice()) }
-        _selectedDevice.value = device
 
         // For Telecom-managed calls (e.g. audio calls registered as CALL_TYPE_AUDIO_CALL),
         // the Telecom framework controls audio routing and has higher priority than
         // AudioManager.setCommunicationDevice(). Route the switch through the Telecom API
         // so the OS honours it on all devices including Samsung S21 Ultra (Android 14).
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            switchTelecomEndpointForDevice(device)
+        val pendingEndpointWaitJob = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val requestToken = telecomEndpointSwitchCoordinator.beginRequest {
+                _selectedDevice.value = device
+            }
+            requestTelecomEndpointSwitch(device, requestToken)
+        } else {
+            _selectedDevice.value = device
+            null
         }
+        pendingEndpointWaitJob?.start()
 
         if (device !is StreamAudioDevice.Speakerphone && mediaManager.speaker.isEnabled.value == true) {
             mediaManager.speaker._status.value = DeviceStatus.Disabled
@@ -742,16 +758,20 @@ class MicrophoneManager(
      * Telecom endpoint API so the routing is actually honoured.
      */
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun switchTelecomEndpointForDevice(device: StreamAudioDevice?) {
-        val telecomCall = mediaManager.call.state.jetpackTelecomRepository
-            ?.currentCall?.value as? TelecomCall.Registered ?: return
+    private fun requestTelecomEndpointSwitch(
+        device: StreamAudioDevice?,
+        requestToken: TelecomEndpointSwitchCoordinator.RequestToken,
+    ): Job? {
+        val telecomRepository = mediaManager.call.state.jetpackTelecomRepository ?: return null
+        val telecomCall =
+            telecomRepository.currentCall.value as? TelecomCall.Registered ?: return null
 
         val targetEndpointType = when (device) {
             is StreamAudioDevice.Speakerphone -> CallEndpointCompat.TYPE_SPEAKER
             is StreamAudioDevice.Earpiece -> CallEndpointCompat.TYPE_EARPIECE
             is StreamAudioDevice.BluetoothHeadset -> CallEndpointCompat.TYPE_BLUETOOTH
             is StreamAudioDevice.WiredHeadset -> CallEndpointCompat.TYPE_WIRED_HEADSET
-            else -> return
+            else -> return null
         }
 
         val endpoint = telecomCall.availableCallEndpoints
@@ -759,18 +779,74 @@ class MicrophoneManager(
 
         if (endpoint == null) {
             logger.w {
-                "[switchTelecomEndpointForDevice] No Telecom endpoint of type=$targetEndpointType available; available=${telecomCall.availableCallEndpoints.map { it.name }}"
+                "[requestTelecomEndpointSwitch] No Telecom endpoint of type=$targetEndpointType " +
+                    "available; waiting up to $TELECOM_ENDPOINT_WAIT_TIMEOUT; " +
+                    "available=${telecomCall.availableCallEndpoints.map { it.name }}"
             }
-            return
+
+            val pendingEndpointWaitJob = mediaManager.scope.launch(start = CoroutineStart.LAZY) {
+                val availableEndpoint = withTimeoutOrNull(TELECOM_ENDPOINT_WAIT_TIMEOUT) {
+                    telecomRepository.currentCall.mapNotNull { call ->
+                        (call as? TelecomCall.Registered)
+                            ?.takeIf { it.id == telecomCall.id }
+                            ?.availableCallEndpoints
+                            ?.firstOrNull { it.type == targetEndpointType }
+                    }.first()
+                }
+
+                if (availableEndpoint == null) {
+                    logger.w {
+                        "[requestTelecomEndpointSwitch] Telecom endpoint of " +
+                            "type=$targetEndpointType did not appear within " +
+                            TELECOM_ENDPOINT_WAIT_TIMEOUT
+                    }
+                    return@launch
+                }
+
+                telecomEndpointSwitchCoordinator.runIfCurrent(requestToken) {
+                    if (_selectedDevice.value != device) {
+                        return@runIfCurrent
+                    }
+
+                    val currentCall =
+                        (telecomRepository.currentCall.value as? TelecomCall.Registered)
+                            ?.takeIf { it.id == telecomCall.id }
+                            ?: return@runIfCurrent
+                    switchTelecomEndpoint(currentCall, availableEndpoint)
+                }
+            }
+            return if (
+                telecomEndpointSwitchCoordinator.tryRegisterPendingJob(
+                    requestToken,
+                    pendingEndpointWaitJob,
+                )
+            ) {
+                pendingEndpointWaitJob
+            } else {
+                pendingEndpointWaitJob.cancel()
+                null
+            }
         }
 
+        telecomEndpointSwitchCoordinator.runIfCurrent(requestToken) {
+            switchTelecomEndpoint(telecomCall, endpoint)
+        }
+        return null
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun switchTelecomEndpoint(
+        telecomCall: TelecomCall.Registered,
+        endpoint: CallEndpointCompat,
+    ) {
         if (telecomCall.currentCallEndpoint?.identifier == endpoint.identifier) {
-            logger.d { "[switchTelecomEndpointForDevice] Telecom endpoint already set to '${endpoint.name}'" }
+            logger.d { "[switchTelecomEndpoint] Telecom endpoint already set to '${endpoint.name}'" }
             return
         }
 
         logger.i {
-            "[switchTelecomEndpointForDevice] Switching Telecom endpoint to '${endpoint.name}' (type=$targetEndpointType)"
+            "[switchTelecomEndpoint] Switching Telecom endpoint to " +
+                "'${endpoint.name}' (type=${endpoint.type})"
         }
         telecomCall.processAction(TelecomCallAction.SwitchAudioEndpoint(endpoint.identifier))
     }
@@ -1238,6 +1314,7 @@ class MicrophoneManager(
     }
 
     fun cleanup() {
+        telecomEndpointSwitchCoordinator.cancel()
         ifAudioHandlerInitialized { it.stop() }
         cleanupUsbDeviceDetection()
         // Dropped with the call that captured it, so a value remembered from a call that ended in
