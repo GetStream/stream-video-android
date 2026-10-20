@@ -55,8 +55,8 @@ private class LiveStreamNotificationInterceptors(
         payload: Map<String, Any?>,
     ): NotificationCompat.Builder {
         return builder
-            .setContentTitle("Livestream on progress ")
-            .setContentText("Tap to go back the livestream call")
+            .setContentTitle("Livestream in progress")
+            .setContentText("Tap to go back to the livestream call")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setLargeIcon(
                 getBitmapFromDrawable(
