@@ -62,7 +62,7 @@ public data class CallStatsParticipantSession (
     public val distanceToSfuKilometers: Double? = null,
 
     @Json(name = "ended_at")
-    public val endedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val endedAt: kotlin.time.Instant? = null,
 
     @Json(name = "freezes_duration_ms")
     public val freezesDurationMs: Int? = null,
@@ -89,7 +89,7 @@ public data class CallStatsParticipantSession (
     public val sdkVersion: String? = null,
 
     @Json(name = "started_at")
-    public val startedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val startedAt: kotlin.time.Instant? = null,
 
     @Json(name = "unified_session_id")
     public val unifiedSessionId: String? = null,

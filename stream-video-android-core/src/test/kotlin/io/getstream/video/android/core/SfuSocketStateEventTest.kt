@@ -42,11 +42,11 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.event.ConnectionQualityInfo
 import stream.video.sfu.models.ConnectionQuality
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.TrackType
+import kotlin.time.Clock
 
 @RunWith(RobolectricTestRunner::class)
 class SfuSocketStateEventTest : IntegrationTestBase(connectCoordinatorWS = false) {
@@ -455,9 +455,9 @@ private fun io.getstream.video.android.model.User.toUserResponse(): UserResponse
         image = image,
         name = name,
         custom = custom ?: emptyMap(),
-        createdAt = OffsetDateTime.now(),
-        updatedAt = OffsetDateTime.now(),
-        deletedAt = OffsetDateTime.now(),
+        createdAt = Clock.System.now(),
+        updatedAt = Clock.System.now(),
+        deletedAt = Clock.System.now(),
         // TODO: implement these
         blockedUserIds = emptyList(),
         language = "",

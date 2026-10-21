@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 public data class UpdateCallRequest (
     @Json(name = "starts_at")
-    public val startsAt: org.threeten.bp.OffsetDateTime? = null,
+    public val startsAt: kotlin.time.Instant? = null,
 
     @Json(name = "custom")
     public val custom: Map<String, Any?>? = null,

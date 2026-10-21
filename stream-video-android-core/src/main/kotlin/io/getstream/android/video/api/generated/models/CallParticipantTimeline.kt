@@ -38,7 +38,7 @@ public data class CallParticipantTimeline (
     public val severity: String,
 
     @Json(name = "timestamp")
-    public val timestamp: org.threeten.bp.OffsetDateTime,
+    public val timestamp: kotlin.time.Instant,
 
     @Json(name = "type")
     public val type: String,

@@ -38,7 +38,7 @@ public data class CallTranscriptionReadyEvent (
     public val callCid: String,
 
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "egress_id")
     public val egressId: String,

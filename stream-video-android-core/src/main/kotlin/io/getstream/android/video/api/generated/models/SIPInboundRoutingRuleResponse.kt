@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 public data class SIPInboundRoutingRuleResponse (
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "duration")
     public val duration: String,
@@ -47,7 +47,7 @@ public data class SIPInboundRoutingRuleResponse (
     public val name: String,
 
     @Json(name = "updated_at")
-    public val updatedAt: org.threeten.bp.OffsetDateTime,
+    public val updatedAt: kotlin.time.Instant,
 
     @Json(name = "called_numbers")
     public val calledNumbers: List<String> = emptyList(),

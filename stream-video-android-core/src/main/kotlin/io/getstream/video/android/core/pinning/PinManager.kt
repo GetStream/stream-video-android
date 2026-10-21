@@ -24,11 +24,9 @@ import io.getstream.video.android.core.events.ParticipantJoinedEvent
 import io.getstream.video.android.core.events.PinUpdate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.threeten.bp.Clock
-import org.threeten.bp.Instant
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 internal class PinManager(
     private val timeProvider: TimeProvider = DefaultTimeProvider(),
@@ -211,22 +209,19 @@ private data class PinLookup(
 }
 
 internal interface TimeProvider {
-    fun now(): OffsetDateTime
+    fun now(): Instant
     fun currentTimeMillis(): Long
-    fun fromMillis(millis: Long): OffsetDateTime
+    fun fromMillis(millis: Long): Instant
 }
 
 internal class DefaultTimeProvider : TimeProvider {
-    override fun now(): OffsetDateTime {
-        return OffsetDateTime.now(Clock.systemUTC())
+    override fun now(): Instant {
+        return Clock.System.now()
     }
 
     override fun currentTimeMillis(): Long = System.currentTimeMillis()
 
-    override fun fromMillis(millis: Long): OffsetDateTime {
-        return OffsetDateTime.ofInstant(
-            Instant.ofEpochMilli(millis),
-            ZoneOffset.UTC,
-        )
+    override fun fromMillis(millis: Long): Instant {
+        return Instant.fromEpochMilliseconds(millis)
     }
 }

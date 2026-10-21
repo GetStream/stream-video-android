@@ -41,5 +41,5 @@ public data class SessionWarningResponse (
     public val warning: String,
 
     @Json(name = "time")
-    public val time: org.threeten.bp.OffsetDateTime? = null
+    public val time: kotlin.time.Instant? = null
 )

@@ -24,7 +24,7 @@
 package io.getstream.android.video.api.generated.models
 
 import com.squareup.moshi.Json
-import org.threeten.bp.OffsetDateTime
+import kotlin.time.Instant
 
 /**
  * This event is sent after [CallRejectedEvent] is consumed in [io.getstream.video.android.core.CallState]
@@ -35,7 +35,7 @@ internal data class LocalCallRejectedPostEvent (
     val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: OffsetDateTime,
+    val createdAt: Instant,
 
     @Json(name = "call")
     val call: CallResponse,

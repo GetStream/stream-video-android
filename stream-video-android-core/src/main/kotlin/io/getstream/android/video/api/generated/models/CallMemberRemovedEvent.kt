@@ -38,7 +38,7 @@ public data class CallMemberRemovedEvent (
     public val callCid: String,
 
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "members")
     public val members: List<String> = emptyList(),

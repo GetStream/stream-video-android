@@ -28,9 +28,7 @@ import io.getstream.android.video.api.generated.models.VideoEventAdapter
 import io.getstream.android.video.internal.generated.infrastructure.BigDecimalAdapter
 import io.getstream.android.video.internal.generated.infrastructure.BigIntegerAdapter
 import io.getstream.android.video.internal.generated.infrastructure.ByteArrayAdapter
-import io.getstream.android.video.internal.generated.infrastructure.LocalDateAdapter
-import io.getstream.android.video.internal.generated.infrastructure.LocalDateTimeAdapter
-import io.getstream.android.video.internal.generated.infrastructure.OffsetDateTimeAdapter
+import io.getstream.android.video.internal.generated.infrastructure.InstantAdapter
 import io.getstream.android.video.internal.generated.infrastructure.URIAdapter
 import io.getstream.android.video.internal.generated.infrastructure.UUIDAdapter
 import io.getstream.video.android.core.socket.common.VideoParser
@@ -43,7 +41,7 @@ internal class MoshiVideoParser : VideoParser {
     private val moshi: Moshi by lazy {
         Builder()
             // Infrastructure @ToJson @FromJson
-            .add(OffsetDateTimeAdapter()).add(LocalDateTimeAdapter()).add(LocalDateAdapter())
+            .add(InstantAdapter())
             .add(UUIDAdapter()).add(ByteArrayAdapter()).add(URIAdapter()).add(BigDecimalAdapter())
             .add(BigIntegerAdapter())
             // JsonAdapter

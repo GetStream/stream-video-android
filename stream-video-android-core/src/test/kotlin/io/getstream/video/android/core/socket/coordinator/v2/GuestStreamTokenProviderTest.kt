@@ -30,8 +30,8 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.threeten.bp.OffsetDateTime
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 internal class GuestStreamTokenProviderTest {
 
@@ -162,7 +162,7 @@ internal class GuestStreamTokenProviderTest {
     )
 
     private companion object {
-        val FIXED_TIME: OffsetDateTime =
-            OffsetDateTime.parse("2026-01-01T00:00:00Z")
+        val FIXED_TIME: Instant =
+            Instant.parse("2026-01-01T00:00:00Z")
     }
 }

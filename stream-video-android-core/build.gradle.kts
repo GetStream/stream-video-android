@@ -196,8 +196,6 @@ dependencies {
     implementation(libs.moshi.kotlin)
     implementation(libs.moshi.adapters)
 
-    api(libs.threentenabp2)
-
     // stable marker annotations
     compileOnly(libs.compose.stable.marker)
 
