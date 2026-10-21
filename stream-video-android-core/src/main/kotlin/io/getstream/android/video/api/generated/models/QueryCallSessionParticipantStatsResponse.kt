@@ -53,10 +53,10 @@ public data class QueryCallSessionParticipantStatsResponse (
     public val counts: io.getstream.android.video.api.generated.models.CallStatsParticipantCounts,
 
     @Json(name = "call_ended_at")
-    public val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val callEndedAt: kotlin.time.Instant? = null,
 
     @Json(name = "call_started_at")
-    public val callStartedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val callStartedAt: kotlin.time.Instant? = null,
 
     @Json(name = "next")
     public val next: String? = null,

@@ -41,7 +41,7 @@ public data class PushPreferencesResponse (
     public val chatLevel: String? = null,
 
     @Json(name = "disabled_until")
-    public val disabledUntil: org.threeten.bp.OffsetDateTime? = null,
+    public val disabledUntil: kotlin.time.Instant? = null,
 
     @Json(name = "feeds_level")
     public val feedsLevel: String? = null,

@@ -24,11 +24,11 @@ public data class MemberState(
     val user: User,
     val custom: Map<String, Any?>,
     val role: String?,
-    val createdAt: org.threeten.bp.OffsetDateTime,
-    val updatedAt: org.threeten.bp.OffsetDateTime,
-    val deletedAt: org.threeten.bp.OffsetDateTime? = null,
-    val acceptedAt: org.threeten.bp.OffsetDateTime? = null,
-    val rejectedAt: org.threeten.bp.OffsetDateTime? = null,
+    val createdAt: kotlin.time.Instant,
+    val updatedAt: kotlin.time.Instant,
+    val deletedAt: kotlin.time.Instant? = null,
+    val acceptedAt: kotlin.time.Instant? = null,
+    val rejectedAt: kotlin.time.Instant? = null,
 
 ) {
     // Probably an easy way to get the participant would be nice

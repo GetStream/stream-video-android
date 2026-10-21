@@ -20,7 +20,6 @@ import android.app.Notification
 import android.content.Context
 import android.os.Build
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.jakewharton.threetenabp.AndroidThreeTen
 import io.getstream.android.core.api.StreamClient
 import io.getstream.android.core.api.authentication.StreamTokenProvider
 import io.getstream.android.core.api.log.StreamLoggerProvider
@@ -266,8 +265,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         setupStreamLog()
 
-        // Android JSR-310 backport backport
-        AndroidThreeTen.init(context)
         tokenRepository.updateToken(token)
         // This connection module class exposes the connections to the various retrofit APIs.
         val resolvedApiUrl = localCoordinatorAddress?.let {

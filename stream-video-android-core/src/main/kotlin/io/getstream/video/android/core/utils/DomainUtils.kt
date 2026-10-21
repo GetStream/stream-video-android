@@ -52,8 +52,8 @@ internal fun MemberResponse.toCallUser(): CallUser {
         teams = user.teams ?: emptyList(),
         role = user.role,
         state = null,
-        createdAt = Date(createdAt.toEpochSecond()),
-        updatedAt = Date(updatedAt.toEpochSecond()),
+        createdAt = Date(createdAt.toEpochMilliseconds()),
+        updatedAt = Date(updatedAt.toEpochMilliseconds()),
     )
 }
 
@@ -169,8 +169,8 @@ internal fun CallRecording.toRecording(): CallRecordingData {
     return CallRecordingData(
         fileName = filename,
         url = url,
-        start = startTime.toEpochSecond() * 1000,
-        end = endTime.toEpochSecond() * 1000,
+        start = startTime.toEpochMilliseconds(),
+        end = endTime.toEpochMilliseconds(),
     )
 }
 

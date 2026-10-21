@@ -17,12 +17,10 @@
 package io.getstream.video.android.core.utils
 
 import io.getstream.video.android.model.User
-import org.threeten.bp.Instant
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.ZoneId
 import java.io.File
 import java.util.Date
 import kotlin.random.Random
+import kotlin.time.Instant
 
 private val charPool: CharArray = (('a'..'z') + ('A'..'Z') + ('0'..'9')).toCharArray()
 
@@ -46,11 +44,8 @@ public fun randomString(size: Int = 20): String = buildString(capacity = size) {
     }
 }
 
-public fun randomDateOrNull(): OffsetDateTime? = randomDate().takeIf { randomBoolean() }
-public fun randomDate(): OffsetDateTime = OffsetDateTime.ofInstant(
-    Instant.ofEpochMilli(positiveRandomLong()),
-    ZoneId.systemDefault(),
-)
+public fun randomDateOrNull(): Instant? = randomDate().takeIf { randomBoolean() }
+public fun randomDate(): Instant = Instant.fromEpochMilliseconds(positiveRandomLong())
 public fun randomDateBefore(date: Long): Date = Date(date - positiveRandomInt())
 public fun randomDateAfter(date: Long): Date = Date(randomLongBetween(date))
 public fun randomCID(): String = "${randomString()}:${randomString()}"
@@ -63,8 +58,8 @@ public fun randomUser(
     name: String = randomString(),
     image: String = randomString(),
     role: String = randomString(),
-    createdAt: OffsetDateTime? = randomDateOrNull(),
-    updatedAt: OffsetDateTime? = randomDateOrNull(),
+    createdAt: Instant? = randomDateOrNull(),
+    updatedAt: Instant? = randomDateOrNull(),
     teams: List<String> = listOf(),
 ): User = User(
     id = id,

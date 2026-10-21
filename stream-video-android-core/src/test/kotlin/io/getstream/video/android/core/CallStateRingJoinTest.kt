@@ -41,10 +41,9 @@ import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.ZoneOffset
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 /**
  * What an outgoing ring does with an accept it learned by polling.
@@ -96,9 +95,9 @@ internal class CallStateRingJoinTest : TestBase() {
         )
     }
 
-    private val at: OffsetDateTime = OffsetDateTime.of(2026, 9, 16, 12, 0, 0, 0, ZoneOffset.UTC)
+    private val at: Instant = Instant.parse("2026-09-16T12:00:00Z")
 
-    private fun ringState(acceptedBy: Map<String, OffsetDateTime>) = GetCallRingStateResponse(
+    private fun ringState(acceptedBy: Map<String, Instant>) = GetCallRingStateResponse(
         callCid = "default:ring-join-test",
         createdByUserId = user.id,
         duration = "0ms",

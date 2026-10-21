@@ -38,7 +38,7 @@ public data class CallUserMutedEvent (
     public val callCid: String,
 
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "from_user_id")
     public val fromUserId: String,
