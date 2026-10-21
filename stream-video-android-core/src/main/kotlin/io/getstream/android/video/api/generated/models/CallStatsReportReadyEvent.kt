@@ -33,27 +33,27 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when the insights report is ready
  */
-data class CallStatsReportReadyEvent (
+public data class CallStatsReportReadyEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "session_id")
-    val sessionId: String,
+    public val sessionId: String,
 
     @Json(name = "counts")
-    val counts: io.getstream.android.video.api.generated.models.CallStatsParticipantCounts,
+    public val counts: io.getstream.android.video.api.generated.models.CallStatsParticipantCounts,
 
     @Json(name = "type")
-    val type: String = "call.stats_report_ready",
+    public val type: String = "call.stats_report_ready",
 
     @Json(name = "is_trimmed")
-    val isTrimmed: Boolean? = null,
+    public val isTrimmed: Boolean? = null,
 
     @Json(name = "participants_overview")
-    val participantsOverview: List<io.getstream.android.video.api.generated.models.CallStatsParticipant>? = null
+    public val participantsOverview: List<io.getstream.android.video.api.generated.models.CallStatsParticipant>? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

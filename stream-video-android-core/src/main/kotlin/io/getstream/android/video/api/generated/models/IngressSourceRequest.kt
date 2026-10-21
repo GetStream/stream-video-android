@@ -33,37 +33,37 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class IngressSourceRequest (
+public data class IngressSourceRequest (
     @Json(name = "fps")
-    val fps: Fps,
+    public val fps: Fps,
 
     @Json(name = "height")
-    val height: Int,
+    public val height: Int,
 
     @Json(name = "width")
-    val width: Int
+    public val width: Int
 )
 {
     
     /**
     * Fps Enum
     */
-    sealed class Fps(val value: String) {
+    public sealed class Fps(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Fps = when (s) {
+            public companion object {
+                public fun fromString(s: String): Fps = when (s) {
                     "30" -> Fps30
                     "60" -> Fps60
                     else -> Unknown(s)
                 }
             }
-            object Fps30 : Fps("30")
-            object Fps60 : Fps("60")
-            data class Unknown(val unknownValue: String) : Fps(unknownValue)
+            public object Fps30 : Fps("30")
+            public object Fps60 : Fps("60")
+            public data class Unknown(val unknownValue: String) : Fps(unknownValue)
         
 
-        class FpsAdapter : JsonAdapter<Fps>() {
+        public class FpsAdapter : JsonAdapter<Fps>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Fps? {
                 val s = reader.nextString() ?: return null

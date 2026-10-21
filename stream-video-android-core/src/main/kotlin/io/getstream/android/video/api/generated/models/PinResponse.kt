@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class PinResponse (
+public data class PinResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

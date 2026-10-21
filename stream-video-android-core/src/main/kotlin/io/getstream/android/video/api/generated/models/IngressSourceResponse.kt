@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class IngressSourceResponse (
+public data class IngressSourceResponse (
     @Json(name = "fps")
-    val fps: Int,
+    public val fps: Int,
 
     @Json(name = "height")
-    val height: Int,
+    public val height: Int,
 
     @Json(name = "width")
-    val width: Int
+    public val width: Int
 )

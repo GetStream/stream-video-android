@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallsPerDayReport (
+public data class CallsPerDayReport (
     @Json(name = "count")
-    val count: Int
+    public val count: Int
 )

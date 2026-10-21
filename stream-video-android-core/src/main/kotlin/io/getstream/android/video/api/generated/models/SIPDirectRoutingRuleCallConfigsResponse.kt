@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * Direct routing rule call configuration response
  */
-data class SIPDirectRoutingRuleCallConfigsResponse (
+public data class SIPDirectRoutingRuleCallConfigsResponse (
     @Json(name = "call_id")
-    val callId: String,
+    public val callId: String,
 
     @Json(name = "call_type")
-    val callType: String
+    public val callType: String
 )

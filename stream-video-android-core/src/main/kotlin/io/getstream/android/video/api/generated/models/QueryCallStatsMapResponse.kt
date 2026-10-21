@@ -33,46 +33,46 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class QueryCallStatsMapResponse (
+public data class QueryCallStatsMapResponse (
     @Json(name = "call_id")
-    val callId: String,
+    public val callId: String,
 
     @Json(name = "call_session_id")
-    val callSessionId: String,
+    public val callSessionId: String,
 
     @Json(name = "call_type")
-    val callType: String,
+    public val callType: String,
 
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "counts")
-    val counts: io.getstream.android.video.api.generated.models.CallStatsParticipantCounts,
+    public val counts: io.getstream.android.video.api.generated.models.CallStatsParticipantCounts,
 
     @Json(name = "call_ended_at")
-    val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "call_started_at")
-    val callStartedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val callStartedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "data_source")
-    val dataSource: String? = null,
+    public val dataSource: String? = null,
 
     @Json(name = "end_time")
-    val endTime: org.threeten.bp.OffsetDateTime? = null,
+    public val endTime: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "generated_at")
-    val generatedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val generatedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "start_time")
-    val startTime: org.threeten.bp.OffsetDateTime? = null,
+    public val startTime: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "publishers")
-    val publishers: io.getstream.android.video.api.generated.models.CallStatsMapPublishers? = null,
+    public val publishers: io.getstream.android.video.api.generated.models.CallStatsMapPublishers? = null,
 
     @Json(name = "sfus")
-    val sfus: io.getstream.android.video.api.generated.models.CallStatsMapSFUs? = null,
+    public val sfus: io.getstream.android.video.api.generated.models.CallStatsMapSFUs? = null,
 
     @Json(name = "subscribers")
-    val subscribers: io.getstream.android.video.api.generated.models.CallStatsMapSubscribers? = null
+    public val subscribers: io.getstream.android.video.api.generated.models.CallStatsMapSubscribers? = null
 )

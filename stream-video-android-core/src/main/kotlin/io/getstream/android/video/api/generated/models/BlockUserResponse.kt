@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * BlockUserResponse is the payload for blocking a user.
  */
-data class BlockUserResponse (
+public data class BlockUserResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

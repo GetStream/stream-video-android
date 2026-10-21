@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ParticipantSeriesTimeframe (
+public data class ParticipantSeriesTimeframe (
     @Json(name = "max_points")
-    val maxPoints: Int,
+    public val maxPoints: Int,
 
     @Json(name = "since")
-    val since: org.threeten.bp.OffsetDateTime,
+    public val since: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "step_seconds")
-    val stepSeconds: Int,
+    public val stepSeconds: Int,
 
     @Json(name = "until")
-    val until: org.threeten.bp.OffsetDateTime
+    public val until: org.threeten.bp.OffsetDateTime
 )

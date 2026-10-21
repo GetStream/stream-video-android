@@ -33,24 +33,24 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a moderation warning is issued to a user
  */
-data class CallModerationWarningEvent (
+public data class CallModerationWarningEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "message")
-    val message: String,
+    public val message: String,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?> = emptyMap(),
+    public val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "type")
-    val type: String = "call.moderation_warning"
+    public val type: String = "call.moderation_warning"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

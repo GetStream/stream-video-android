@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class FileUploadConfig (
+public data class FileUploadConfig (
     @Json(name = "size_limit")
-    val sizeLimit: Int,
+    public val sizeLimit: Int,
 
     @Json(name = "allowed_file_extensions")
-    val allowedFileExtensions: List<String> = emptyList(),
+    public val allowedFileExtensions: List<String> = emptyList(),
 
     @Json(name = "allowed_mime_types")
-    val allowedMimeTypes: List<String> = emptyList(),
+    public val allowedMimeTypes: List<String> = emptyList(),
 
     @Json(name = "blocked_file_extensions")
-    val blockedFileExtensions: List<String> = emptyList(),
+    public val blockedFileExtensions: List<String> = emptyList(),
 
     @Json(name = "blocked_mime_types")
-    val blockedMimeTypes: List<String> = emptyList()
+    public val blockedMimeTypes: List<String> = emptyList()
 )

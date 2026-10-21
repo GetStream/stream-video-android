@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CreateGuestRequest (
+public data class CreateGuestRequest (
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserRequest
+    public val user: io.getstream.android.video.api.generated.models.UserRequest
 )

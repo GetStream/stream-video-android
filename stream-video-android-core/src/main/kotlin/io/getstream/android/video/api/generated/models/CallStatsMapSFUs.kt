@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallStatsMapSFUs (
+public data class CallStatsMapSFUs (
     @Json(name = "locations")
-    val locations: List<io.getstream.android.video.api.generated.models.SFULocationResponse> = emptyList()
+    public val locations: List<io.getstream.android.video.api.generated.models.SFULocationResponse> = emptyList()
 )

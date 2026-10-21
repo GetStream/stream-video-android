@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class PublisherStatsResponse (
+public data class PublisherStatsResponse (
     @Json(name = "total")
-    val total: Int,
+    public val total: Int,
 
     @Json(name = "unique")
-    val unique: Int,
+    public val unique: Int,
 
     @Json(name = "by_track")
-    val byTrack: List<io.getstream.android.video.api.generated.models.TrackStatsResponse>? = null
+    public val byTrack: List<io.getstream.android.video.api.generated.models.TrackStatsResponse>? = null
 )

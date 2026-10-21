@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * AcceptCallResponse is the payload for accepting a call.
  */
-data class AcceptCallResponse (
+public data class AcceptCallResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

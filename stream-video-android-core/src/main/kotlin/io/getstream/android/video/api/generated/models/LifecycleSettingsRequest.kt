@@ -33,31 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class LifecycleSettingsRequest (
+public data class LifecycleSettingsRequest (
     @Json(name = "mode")
-    val mode: Mode? = null
+    public val mode: Mode? = null
 )
 {
     
     /**
     * Mode Enum
     */
-    sealed class Mode(val value: String) {
+    public sealed class Mode(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Mode = when (s) {
+            public companion object {
+                public fun fromString(s: String): Mode = when (s) {
                     "reusable" -> Reusable
                     "single_use" -> SingleUse
                     else -> Unknown(s)
                 }
             }
-            object Reusable : Mode("reusable")
-            object SingleUse : Mode("single_use")
-            data class Unknown(val unknownValue: String) : Mode(unknownValue)
+            public object Reusable : Mode("reusable")
+            public object SingleUse : Mode("single_use")
+            public data class Unknown(val unknownValue: String) : Mode(unknownValue)
         
 
-        class ModeAdapter : JsonAdapter<Mode>() {
+        public class ModeAdapter : JsonAdapter<Mode>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Mode? {
                 val s = reader.nextString() ?: return null

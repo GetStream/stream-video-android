@@ -33,34 +33,34 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class GetCallSessionParticipantStatsDetailsResponse (
+public data class GetCallSessionParticipantStatsDetailsResponse (
     @Json(name = "call_id")
-    val callId: String,
+    public val callId: String,
 
     @Json(name = "call_session_id")
-    val callSessionId: String,
+    public val callSessionId: String,
 
     @Json(name = "call_type")
-    val callType: String,
+    public val callType: String,
 
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "user_session_id")
-    val userSessionId: String,
+    public val userSessionId: String,
 
     @Json(name = "publisher")
-    val publisher: io.getstream.android.video.api.generated.models.ParticipantSeriesPublisherStats? = null,
+    public val publisher: io.getstream.android.video.api.generated.models.ParticipantSeriesPublisherStats? = null,
 
     @Json(name = "subscriber")
-    val subscriber: io.getstream.android.video.api.generated.models.ParticipantSeriesSubscriberStats? = null,
+    public val subscriber: io.getstream.android.video.api.generated.models.ParticipantSeriesSubscriberStats? = null,
 
     @Json(name = "timeframe")
-    val timeframe: io.getstream.android.video.api.generated.models.ParticipantSeriesTimeframe? = null,
+    public val timeframe: io.getstream.android.video.api.generated.models.ParticipantSeriesTimeframe? = null,
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.ParticipantSeriesUserStats? = null
+    public val user: io.getstream.android.video.api.generated.models.ParticipantSeriesUserStats? = null
 )

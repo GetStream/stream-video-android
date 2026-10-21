@@ -33,24 +33,24 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when the participant counts in a call session are updated
  */
-data class CallSessionParticipantCountsUpdatedEvent (
+public data class CallSessionParticipantCountsUpdatedEvent (
     @Json(name = "anonymous_participant_count")
-    val anonymousParticipantCount: Int,
+    public val anonymousParticipantCount: Int,
 
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "session_id")
-    val sessionId: String,
+    public val sessionId: String,
 
     @Json(name = "participants_count_by_role")
-    val participantsCountByRole: Map<String, Int> = emptyMap(),
+    public val participantsCountByRole: Map<String, Int> = emptyMap(),
 
     @Json(name = "type")
-    val type: String = "call.session_participant_count_updated"
+    public val type: String = "call.session_participant_count_updated"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

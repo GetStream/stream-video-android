@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * Request to determine SIP trunk authentication requirements
  */
-data class ResolveSipAuthRequest (
+public data class ResolveSipAuthRequest (
     @Json(name = "sip_caller_number")
-    val sipCallerNumber: String,
+    public val sipCallerNumber: String,
 
     @Json(name = "sip_trunk_number")
-    val sipTrunkNumber: String,
+    public val sipTrunkNumber: String,
 
     @Json(name = "from_host")
-    val fromHost: String? = null,
+    public val fromHost: String? = null,
 
     @Json(name = "source_ip")
-    val sourceIp: String? = null
+    public val sourceIp: String? = null
 )

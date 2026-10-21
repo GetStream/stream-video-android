@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * Response for DeleteRecording
  */
-data class DeleteRecordingResponse (
+public data class DeleteRecordingResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

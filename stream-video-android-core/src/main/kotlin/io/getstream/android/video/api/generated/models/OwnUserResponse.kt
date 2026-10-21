@@ -33,55 +33,55 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class OwnUserResponse (
+public data class OwnUserResponse (
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "language")
-    val language: String,
+    public val language: String,
 
     @Json(name = "role")
-    val role: String,
+    public val role: String,
 
     @Json(name = "updated_at")
-    val updatedAt: org.threeten.bp.OffsetDateTime,
+    public val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "blocked_user_ids")
-    val blockedUserIds: List<String> = emptyList(),
+    public val blockedUserIds: List<String> = emptyList(),
 
     @Json(name = "devices")
-    val devices: List<io.getstream.android.video.api.generated.models.DeviceResponse> = emptyList(),
+    public val devices: List<io.getstream.android.video.api.generated.models.DeviceResponse> = emptyList(),
 
     @Json(name = "teams")
-    val teams: List<String> = emptyList(),
+    public val teams: List<String> = emptyList(),
 
     @Json(name = "custom")
-    val custom: Map<String, Any?> = emptyMap(),
+    public val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "avg_response_time")
-    val avgResponseTime: Int? = null,
+    public val avgResponseTime: Int? = null,
 
     @Json(name = "deactivated_at")
-    val deactivatedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val deactivatedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "deleted_at")
-    val deletedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val deletedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "image")
-    val image: String? = null,
+    public val image: String? = null,
 
     @Json(name = "last_active")
-    val lastActive: org.threeten.bp.OffsetDateTime? = null,
+    public val lastActive: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "name")
-    val name: String? = null,
+    public val name: String? = null,
 
     @Json(name = "push_preferences")
-    val pushPreferences: io.getstream.android.video.api.generated.models.PushPreferencesResponse? = null,
+    public val pushPreferences: io.getstream.android.video.api.generated.models.PushPreferencesResponse? = null,
 
     @Json(name = "teams_role")
-    val teamsRole: Map<String, String>? = null
+    public val teamsRole: Map<String, String>? = null
 )

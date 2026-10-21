@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class QualityScoreReportResponse (
+public data class QualityScoreReportResponse (
     @Json(name = "daily")
-    val daily: List<io.getstream.android.video.api.generated.models.DailyAggregateQualityScoreReportResponse> = emptyList()
+    public val daily: List<io.getstream.android.video.api.generated.models.DailyAggregateQualityScoreReportResponse> = emptyList()
 )

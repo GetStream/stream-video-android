@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class GroupedStatsResponse (
+public data class GroupedStatsResponse (
     @Json(name = "name")
-    val name: String,
+    public val name: String,
 
     @Json(name = "unique")
-    val unique: Int
+    public val unique: Int
 )

@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class RequestPermissionRequest (
+public data class RequestPermissionRequest (
     @Json(name = "permissions")
-    val permissions: List<String> = emptyList()
+    public val permissions: List<String> = emptyList()
 )

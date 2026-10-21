@@ -33,27 +33,27 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a critical error occurs that breaks the streaming pipeline
  */
-data class IngressErrorEvent (
+public data class IngressErrorEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "error")
-    val error: String,
+    public val error: String,
 
     @Json(name = "ingress_stream_id")
-    val ingressStreamId: String,
+    public val ingressStreamId: String,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "type")
-    val type: String = "ingress.error",
+    public val type: String = "ingress.error",
 
     @Json(name = "code")
-    val code: String? = null
+    public val code: String? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

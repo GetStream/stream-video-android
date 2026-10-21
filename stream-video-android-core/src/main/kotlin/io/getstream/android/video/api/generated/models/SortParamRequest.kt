@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SortParamRequest (
+public data class SortParamRequest (
     @Json(name = "direction")
-    val direction: Int? = null,
+    public val direction: Int? = null,
 
     @Json(name = "field")
-    val field: String? = null,
+    public val field: String? = null,
 
     @Json(name = "type")
-    val type: String? = null
+    public val type: String? = null
 )

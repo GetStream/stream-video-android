@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * UnpinRequest is the payload for unpinning a message.
  */
-data class UnpinRequest (
+public data class UnpinRequest (
     @Json(name = "session_id")
-    val sessionId: String,
+    public val sessionId: String,
 
     @Json(name = "user_id")
-    val userId: String
+    public val userId: String
 )

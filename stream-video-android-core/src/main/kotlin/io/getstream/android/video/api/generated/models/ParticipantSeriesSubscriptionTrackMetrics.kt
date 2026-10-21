@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ParticipantSeriesSubscriptionTrackMetrics (
+public data class ParticipantSeriesSubscriptionTrackMetrics (
     @Json(name = "publisher_user_id")
-    val publisherUserId: String,
+    public val publisherUserId: String,
 
     @Json(name = "publisher_name")
-    val publisherName: String? = null,
+    public val publisherName: String? = null,
 
     @Json(name = "publisher_user_session_id")
-    val publisherUserSessionId: String? = null,
+    public val publisherUserSessionId: String? = null,
 
     @Json(name = "tracks")
-    val tracks: Map<String, List<io.getstream.android.video.api.generated.models.ParticipantSeriesTrackMetrics>>? = null
+    public val tracks: Map<String, List<io.getstream.android.video.api.generated.models.ParticipantSeriesTrackMetrics>>? = null
 )

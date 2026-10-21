@@ -33,40 +33,40 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class PublisherSession (
+public data class PublisherSession (
     @Json(name = "duration_min")
-    val durationMin: Double,
+    public val durationMin: Double,
 
     @Json(name = "started_offset_min")
-    val startedOffsetMin: Double,
+    public val startedOffsetMin: Double,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "user_session_id")
-    val userSessionId: String,
+    public val userSessionId: String,
 
     @Json(name = "avg_jitter_ms")
-    val avgJitterMs: Double? = null,
+    public val avgJitterMs: Double? = null,
 
     @Json(name = "browser")
-    val browser: String? = null,
+    public val browser: String? = null,
 
     @Json(name = "delivery_zone")
-    val deliveryZone: String? = null,
+    public val deliveryZone: String? = null,
 
     @Json(name = "ingest")
-    val ingest: String? = null,
+    public val ingest: String? = null,
 
     @Json(name = "os")
-    val os: String? = null,
+    public val os: String? = null,
 
     @Json(name = "send_quality_score")
-    val sendQualityScore: Double? = null,
+    public val sendQualityScore: Double? = null,
 
     @Json(name = "tool")
-    val tool: String? = null,
+    public val tool: String? = null,
 
     @Json(name = "encoding")
-    val encoding: io.getstream.android.video.api.generated.models.EncodingProfile? = null
+    public val encoding: io.getstream.android.video.api.generated.models.EncodingProfile? = null
 )

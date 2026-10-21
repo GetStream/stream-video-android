@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * DeleteTranscriptionResponse is the payload for deleting a transcription.
  */
-data class DeleteTranscriptionResponse (
+public data class DeleteTranscriptionResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

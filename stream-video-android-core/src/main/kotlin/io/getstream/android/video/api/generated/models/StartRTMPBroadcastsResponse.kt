@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * StartRTMPBroadcastsResponse is the payload for starting an RTMP broadcast.
  */
-data class StartRTMPBroadcastsResponse (
+public data class StartRTMPBroadcastsResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

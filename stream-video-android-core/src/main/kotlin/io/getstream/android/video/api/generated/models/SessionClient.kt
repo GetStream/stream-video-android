@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SessionClient (
+public data class SessionClient (
     @Json(name = "ip")
-    val ip: String? = null,
+    public val ip: String? = null,
 
     @Json(name = "name")
-    val name: String? = null,
+    public val name: String? = null,
 
     @Json(name = "network_type")
-    val networkType: String? = null,
+    public val networkType: String? = null,
 
     @Json(name = "version")
-    val version: String? = null,
+    public val version: String? = null,
 
     @Json(name = "location")
-    val location: io.getstream.android.video.api.generated.models.CallStatsLocation? = null
+    public val location: io.getstream.android.video.api.generated.models.CallStatsLocation? = null
 )

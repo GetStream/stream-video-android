@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class PublishedTrackFlags (
+public data class PublishedTrackFlags (
     @Json(name = "audio")
-    val audio: Boolean,
+    public val audio: Boolean,
 
     @Json(name = "screenshare")
-    val screenshare: Boolean,
+    public val screenshare: Boolean,
 
     @Json(name = "screenshare_audio")
-    val screenshareAudio: Boolean,
+    public val screenshareAudio: Boolean,
 
     @Json(name = "video")
-    val video: Boolean
+    public val video: Boolean
 )

@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallParticipantResponse (
+public data class CallParticipantResponse (
     @Json(name = "joined_at")
-    val joinedAt: org.threeten.bp.OffsetDateTime,
+    public val joinedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "role")
-    val role: String,
+    public val role: String,
 
     @Json(name = "user_session_id")
-    val userSessionId: String,
+    public val userSessionId: String,
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserResponse
+    public val user: io.getstream.android.video.api.generated.models.UserResponse
 )

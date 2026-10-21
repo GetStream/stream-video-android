@@ -33,28 +33,28 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class FeedsPreferencesResponse (
+public data class FeedsPreferencesResponse (
     @Json(name = "comment")
-    val comment: String? = null,
+    public val comment: String? = null,
 
     @Json(name = "comment_mention")
-    val commentMention: String? = null,
+    public val commentMention: String? = null,
 
     @Json(name = "comment_reaction")
-    val commentReaction: String? = null,
+    public val commentReaction: String? = null,
 
     @Json(name = "comment_reply")
-    val commentReply: String? = null,
+    public val commentReply: String? = null,
 
     @Json(name = "follow")
-    val follow: String? = null,
+    public val follow: String? = null,
 
     @Json(name = "mention")
-    val mention: String? = null,
+    public val mention: String? = null,
 
     @Json(name = "reaction")
-    val reaction: String? = null,
+    public val reaction: String? = null,
 
     @Json(name = "custom_activity_types")
-    val customActivityTypes: Map<String, String>? = null
+    public val customActivityTypes: Map<String, String>? = null
 )

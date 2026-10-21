@@ -33,37 +33,37 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class IngressAudioEncodingOptionsRequest (
+public data class IngressAudioEncodingOptionsRequest (
     @Json(name = "bitrate")
-    val bitrate: Int,
+    public val bitrate: Int,
 
     @Json(name = "channels")
-    val channels: Channels,
+    public val channels: Channels,
 
     @Json(name = "enable_dtx")
-    val enableDtx: Boolean? = null
+    public val enableDtx: Boolean? = null
 )
 {
     
     /**
     * Channels Enum
     */
-    sealed class Channels(val value: String) {
+    public sealed class Channels(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Channels = when (s) {
+            public companion object {
+                public fun fromString(s: String): Channels = when (s) {
                     "1" -> Channels1
                     "2" -> Channels2
                     else -> Unknown(s)
                 }
             }
-            object Channels1 : Channels("1")
-            object Channels2 : Channels("2")
-            data class Unknown(val unknownValue: String) : Channels(unknownValue)
+            public object Channels1 : Channels("1")
+            public object Channels2 : Channels("2")
+            public data class Unknown(val unknownValue: String) : Channels(unknownValue)
         
 
-        class ChannelsAdapter : JsonAdapter<Channels>() {
+        public class ChannelsAdapter : JsonAdapter<Channels>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Channels? {
                 val s = reader.nextString() ?: return null

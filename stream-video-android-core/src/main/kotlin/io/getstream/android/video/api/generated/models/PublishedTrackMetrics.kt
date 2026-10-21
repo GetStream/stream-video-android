@@ -33,25 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class PublishedTrackMetrics (
+public data class PublishedTrackMetrics (
     @Json(name = "codec")
-    val codec: String? = null,
+    public val codec: String? = null,
 
     @Json(name = "track_id")
-    val trackId: String? = null,
+    public val trackId: String? = null,
 
     @Json(name = "track_type")
-    val trackType: String? = null,
+    public val trackType: String? = null,
 
     @Json(name = "warnings")
-    val warnings: List<io.getstream.android.video.api.generated.models.SessionWarningResponse>? = null,
+    public val warnings: List<io.getstream.android.video.api.generated.models.SessionWarningResponse>? = null,
 
     @Json(name = "bitrate")
-    val bitrate: io.getstream.android.video.api.generated.models.MetricTimeSeries? = null,
+    public val bitrate: io.getstream.android.video.api.generated.models.MetricTimeSeries? = null,
 
     @Json(name = "framerate")
-    val framerate: io.getstream.android.video.api.generated.models.MetricTimeSeries? = null,
+    public val framerate: io.getstream.android.video.api.generated.models.MetricTimeSeries? = null,
 
     @Json(name = "resolution")
-    val resolution: io.getstream.android.video.api.generated.models.ResolutionMetricsTimeSeries? = null
+    public val resolution: io.getstream.android.video.api.generated.models.ResolutionMetricsTimeSeries? = null
 )

@@ -33,24 +33,24 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a call member is muted
  */
-data class CallUserMutedEvent (
+public data class CallUserMutedEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "from_user_id")
-    val fromUserId: String,
+    public val fromUserId: String,
 
     @Json(name = "reason")
-    val reason: String,
+    public val reason: String,
 
     @Json(name = "muted_user_ids")
-    val mutedUserIds: List<String> = emptyList(),
+    public val mutedUserIds: List<String> = emptyList(),
 
     @Json(name = "type")
-    val type: String = "call.user_muted"
+    public val type: String = "call.user_muted"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

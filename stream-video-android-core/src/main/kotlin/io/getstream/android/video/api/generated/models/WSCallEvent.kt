@@ -16,6 +16,6 @@
 
 package io.getstream.android.video.api.generated.models
 
-sealed interface WSCallEvent {
-    fun getCallCID(): String
+public sealed interface WSCallEvent {
+    public fun getCallCID(): String
 }

@@ -33,31 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * An object representing a device which can receive push notifications.
  */
-data class DeviceResponse (
+public data class DeviceResponse (
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "push_provider")
-    val pushProvider: String,
+    public val pushProvider: String,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "disabled")
-    val disabled: Boolean? = null,
+    public val disabled: Boolean? = null,
 
     @Json(name = "disabled_reason")
-    val disabledReason: String? = null,
+    public val disabledReason: String? = null,
 
     @Json(name = "hardware_id")
-    val hardwareId: String? = null,
+    public val hardwareId: String? = null,
 
     @Json(name = "push_provider_name")
-    val pushProviderName: String? = null,
+    public val pushProviderName: String? = null,
 
     @Json(name = "voip")
-    val voip: Boolean? = null
+    public val voip: Boolean? = null
 )

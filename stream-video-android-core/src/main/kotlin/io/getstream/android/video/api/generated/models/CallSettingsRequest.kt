@@ -33,58 +33,58 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallSettingsRequest (
+public data class CallSettingsRequest (
     @Json(name = "audio")
-    val audio: io.getstream.android.video.api.generated.models.AudioSettingsRequest? = null,
+    public val audio: io.getstream.android.video.api.generated.models.AudioSettingsRequest? = null,
 
     @Json(name = "backstage")
-    val backstage: io.getstream.android.video.api.generated.models.BackstageSettingsRequest? = null,
+    public val backstage: io.getstream.android.video.api.generated.models.BackstageSettingsRequest? = null,
 
     @Json(name = "broadcasting")
-    val broadcasting: io.getstream.android.video.api.generated.models.BroadcastSettingsRequest? = null,
+    public val broadcasting: io.getstream.android.video.api.generated.models.BroadcastSettingsRequest? = null,
 
     @Json(name = "encryption")
-    val encryption: io.getstream.android.video.api.generated.models.EncryptionSettingsRequest? = null,
+    public val encryption: io.getstream.android.video.api.generated.models.EncryptionSettingsRequest? = null,
 
     @Json(name = "frame_recording")
-    val frameRecording: io.getstream.android.video.api.generated.models.FrameRecordingSettingsRequest? = null,
+    public val frameRecording: io.getstream.android.video.api.generated.models.FrameRecordingSettingsRequest? = null,
 
     @Json(name = "geofencing")
-    val geofencing: io.getstream.android.video.api.generated.models.GeofenceSettingsRequest? = null,
+    public val geofencing: io.getstream.android.video.api.generated.models.GeofenceSettingsRequest? = null,
 
     @Json(name = "individual_recording")
-    val individualRecording: io.getstream.android.video.api.generated.models.IndividualRecordingSettingsRequest? = null,
+    public val individualRecording: io.getstream.android.video.api.generated.models.IndividualRecordingSettingsRequest? = null,
 
     @Json(name = "ingress")
-    val ingress: io.getstream.android.video.api.generated.models.IngressSettingsRequest? = null,
+    public val ingress: io.getstream.android.video.api.generated.models.IngressSettingsRequest? = null,
 
     @Json(name = "lifecycle")
-    val lifecycle: io.getstream.android.video.api.generated.models.LifecycleSettingsRequest? = null,
+    public val lifecycle: io.getstream.android.video.api.generated.models.LifecycleSettingsRequest? = null,
 
     @Json(name = "limits")
-    val limits: io.getstream.android.video.api.generated.models.LimitsSettingsRequest? = null,
+    public val limits: io.getstream.android.video.api.generated.models.LimitsSettingsRequest? = null,
 
     @Json(name = "raw_recording")
-    val rawRecording: io.getstream.android.video.api.generated.models.RawRecordingSettingsRequest? = null,
+    public val rawRecording: io.getstream.android.video.api.generated.models.RawRecordingSettingsRequest? = null,
 
     @Json(name = "recording")
-    val recording: io.getstream.android.video.api.generated.models.RecordSettingsRequest? = null,
+    public val recording: io.getstream.android.video.api.generated.models.RecordSettingsRequest? = null,
 
     @Json(name = "ring")
-    val ring: io.getstream.android.video.api.generated.models.RingSettingsRequest? = null,
+    public val ring: io.getstream.android.video.api.generated.models.RingSettingsRequest? = null,
 
     @Json(name = "screensharing")
-    val screensharing: io.getstream.android.video.api.generated.models.ScreensharingSettingsRequest? = null,
+    public val screensharing: io.getstream.android.video.api.generated.models.ScreensharingSettingsRequest? = null,
 
     @Json(name = "session")
-    val session: io.getstream.android.video.api.generated.models.SessionSettingsRequest? = null,
+    public val session: io.getstream.android.video.api.generated.models.SessionSettingsRequest? = null,
 
     @Json(name = "thumbnails")
-    val thumbnails: io.getstream.android.video.api.generated.models.ThumbnailsSettingsRequest? = null,
+    public val thumbnails: io.getstream.android.video.api.generated.models.ThumbnailsSettingsRequest? = null,
 
     @Json(name = "transcription")
-    val transcription: io.getstream.android.video.api.generated.models.TranscriptionSettingsRequest? = null,
+    public val transcription: io.getstream.android.video.api.generated.models.TranscriptionSettingsRequest? = null,
 
     @Json(name = "video")
-    val video: io.getstream.android.video.api.generated.models.VideoSettingsRequest? = null
+    public val video: io.getstream.android.video.api.generated.models.VideoSettingsRequest? = null
 )

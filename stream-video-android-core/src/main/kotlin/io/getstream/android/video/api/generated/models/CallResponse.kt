@@ -33,79 +33,79 @@ import com.squareup.moshi.ToJson
 /**
  * Represents a call
  */
-data class CallResponse (
+public data class CallResponse (
     @Json(name = "backstage")
-    val backstage: Boolean,
+    public val backstage: Boolean,
 
     @Json(name = "captioning")
-    val captioning: Boolean,
+    public val captioning: Boolean,
 
     @Json(name = "cid")
-    val cid: String,
+    public val cid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "current_session_id")
-    val currentSessionId: String,
+    public val currentSessionId: String,
 
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "recording")
-    val recording: Boolean,
+    public val recording: Boolean,
 
     @Json(name = "transcribing")
-    val transcribing: Boolean,
+    public val transcribing: Boolean,
 
     @Json(name = "translating")
-    val translating: Boolean,
+    public val translating: Boolean,
 
     @Json(name = "type")
-    val type: String,
+    public val type: String,
 
     @Json(name = "updated_at")
-    val updatedAt: org.threeten.bp.OffsetDateTime,
+    public val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "blocked_user_ids")
-    val blockedUserIds: List<String> = emptyList(),
+    public val blockedUserIds: List<String> = emptyList(),
 
     @Json(name = "created_by")
-    val createdBy: io.getstream.android.video.api.generated.models.UserResponse,
+    public val createdBy: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?> = emptyMap(),
+    public val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "egress")
-    val egress: io.getstream.android.video.api.generated.models.EgressResponse,
+    public val egress: io.getstream.android.video.api.generated.models.EgressResponse,
 
     @Json(name = "ingress")
-    val ingress: io.getstream.android.video.api.generated.models.CallIngressResponse,
+    public val ingress: io.getstream.android.video.api.generated.models.CallIngressResponse,
 
     @Json(name = "settings")
-    val settings: io.getstream.android.video.api.generated.models.CallSettingsResponse,
+    public val settings: io.getstream.android.video.api.generated.models.CallSettingsResponse,
 
     @Json(name = "channel_cid")
-    val channelCid: String? = null,
+    public val channelCid: String? = null,
 
     @Json(name = "ended_at")
-    val endedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val endedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "join_ahead_time_seconds")
-    val joinAheadTimeSeconds: Int? = null,
+    public val joinAheadTimeSeconds: Int? = null,
 
     @Json(name = "routing_number")
-    val routingNumber: String? = null,
+    public val routingNumber: String? = null,
 
     @Json(name = "starts_at")
-    val startsAt: org.threeten.bp.OffsetDateTime? = null,
+    public val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "team")
-    val team: String? = null,
+    public val team: String? = null,
 
     @Json(name = "session")
-    val session: io.getstream.android.video.api.generated.models.CallSessionResponse? = null,
+    public val session: io.getstream.android.video.api.generated.models.CallSessionResponse? = null,
 
     @Json(name = "thumbnails")
-    val thumbnails: io.getstream.android.video.api.generated.models.ThumbnailResponse? = null
+    public val thumbnails: io.getstream.android.video.api.generated.models.ThumbnailResponse? = null
 )

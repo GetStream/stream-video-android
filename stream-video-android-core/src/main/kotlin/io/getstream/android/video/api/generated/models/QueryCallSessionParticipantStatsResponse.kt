@@ -33,40 +33,40 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class QueryCallSessionParticipantStatsResponse (
+public data class QueryCallSessionParticipantStatsResponse (
     @Json(name = "call_id")
-    val callId: String,
+    public val callId: String,
 
     @Json(name = "call_session_id")
-    val callSessionId: String,
+    public val callSessionId: String,
 
     @Json(name = "call_type")
-    val callType: String,
+    public val callType: String,
 
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "participants")
-    val participants: List<io.getstream.android.video.api.generated.models.CallStatsParticipant> = emptyList(),
+    public val participants: List<io.getstream.android.video.api.generated.models.CallStatsParticipant> = emptyList(),
 
     @Json(name = "counts")
-    val counts: io.getstream.android.video.api.generated.models.CallStatsParticipantCounts,
+    public val counts: io.getstream.android.video.api.generated.models.CallStatsParticipantCounts,
 
     @Json(name = "call_ended_at")
-    val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "call_started_at")
-    val callStartedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val callStartedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "next")
-    val next: String? = null,
+    public val next: String? = null,
 
     @Json(name = "prev")
-    val prev: String? = null,
+    public val prev: String? = null,
 
     @Json(name = "tmp_data_source")
-    val tmpDataSource: String? = null,
+    public val tmpDataSource: String? = null,
 
     @Json(name = "call_events")
-    val callEvents: List<io.getstream.android.video.api.generated.models.CallLevelEventPayload>? = null
+    public val callEvents: List<io.getstream.android.video.api.generated.models.CallLevelEventPayload>? = null
 )

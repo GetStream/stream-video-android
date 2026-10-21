@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class AppEventResponse (
+public data class AppEventResponse (
     @Json(name = "auto_translation_enabled")
-    val autoTranslationEnabled: Boolean,
+    public val autoTranslationEnabled: Boolean,
 
     @Json(name = "name")
-    val name: String,
+    public val name: String,
 
     @Json(name = "async_url_enrich_enabled")
-    val asyncUrlEnrichEnabled: Boolean? = null,
+    public val asyncUrlEnrichEnabled: Boolean? = null,
 
     @Json(name = "file_upload_config")
-    val fileUploadConfig: io.getstream.android.video.api.generated.models.FileUploadConfig? = null,
+    public val fileUploadConfig: io.getstream.android.video.api.generated.models.FileUploadConfig? = null,
 
     @Json(name = "image_upload_config")
-    val imageUploadConfig: io.getstream.android.video.api.generated.models.FileUploadConfig? = null
+    public val imageUploadConfig: io.getstream.android.video.api.generated.models.FileUploadConfig? = null
 )

@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ThumbnailsSettingsRequest (
+public data class ThumbnailsSettingsRequest (
     @Json(name = "enabled")
-    val enabled: Boolean? = null
+    public val enabled: Boolean? = null
 )

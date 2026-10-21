@@ -33,22 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * The push preference details.
  */
-data class PushPreferencesResponse (
+public data class PushPreferencesResponse (
     @Json(name = "call_level")
-    val callLevel: String? = null,
+    public val callLevel: String? = null,
 
     @Json(name = "chat_level")
-    val chatLevel: String? = null,
+    public val chatLevel: String? = null,
 
     @Json(name = "disabled_until")
-    val disabledUntil: org.threeten.bp.OffsetDateTime? = null,
+    public val disabledUntil: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "feeds_level")
-    val feedsLevel: String? = null,
+    public val feedsLevel: String? = null,
 
     @Json(name = "chat_preferences")
-    val chatPreferences: io.getstream.android.video.api.generated.models.ChatPreferencesResponse? = null,
+    public val chatPreferences: io.getstream.android.video.api.generated.models.ChatPreferencesResponse? = null,
 
     @Json(name = "feeds_preferences")
-    val feedsPreferences: io.getstream.android.video.api.generated.models.FeedsPreferencesResponse? = null
+    public val feedsPreferences: io.getstream.android.video.api.generated.models.FeedsPreferencesResponse? = null,
+
+    @Json(name = "schedule")
+    public val schedule: io.getstream.android.video.api.generated.models.PushScheduleResponse? = null
 )

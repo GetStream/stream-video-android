@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class UserFeedbackReport (
+public data class UserFeedbackReport (
     @Json(name = "unreported_count")
-    val unreportedCount: Int,
+    public val unreportedCount: Int,
 
     @Json(name = "count_by_rating")
-    val countByRating: Map<String, Int> = emptyMap()
+    public val countByRating: Map<String, Int> = emptyMap()
 )

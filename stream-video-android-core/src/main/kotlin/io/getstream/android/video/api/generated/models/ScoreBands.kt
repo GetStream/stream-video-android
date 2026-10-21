@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ScoreBands (
+public data class ScoreBands (
     @Json(name = "good")
-    val good: Double? = null,
+    public val good: Double? = null,
 
     @Json(name = "ok")
-    val ok: Double? = null,
+    public val ok: Double? = null,
 
     @Json(name = "poor")
-    val poor: Double? = null
+    public val poor: Double? = null
 )

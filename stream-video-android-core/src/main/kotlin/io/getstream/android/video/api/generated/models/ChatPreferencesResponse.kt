@@ -33,25 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ChatPreferencesResponse (
+public data class ChatPreferencesResponse (
     @Json(name = "channel_mentions")
-    val channelMentions: String? = null,
+    public val channelMentions: String? = null,
 
     @Json(name = "default_preference")
-    val defaultPreference: String? = null,
+    public val defaultPreference: String? = null,
 
     @Json(name = "direct_mentions")
-    val directMentions: String? = null,
+    public val directMentions: String? = null,
 
     @Json(name = "group_mentions")
-    val groupMentions: String? = null,
+    public val groupMentions: String? = null,
 
     @Json(name = "here_mentions")
-    val hereMentions: String? = null,
+    public val hereMentions: String? = null,
 
     @Json(name = "role_mentions")
-    val roleMentions: String? = null,
+    public val roleMentions: String? = null,
 
     @Json(name = "thread_replies")
-    val threadReplies: String? = null
+    public val threadReplies: String? = null
 )

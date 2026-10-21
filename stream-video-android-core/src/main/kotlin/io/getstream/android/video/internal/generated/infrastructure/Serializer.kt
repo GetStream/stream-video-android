@@ -25,9 +25,9 @@ package io.getstream.android.video.internal.generated.infrastructure
 
 import com.squareup.moshi.Moshi
 
-object Serializer {
+public object Serializer {
     @JvmStatic
-    val moshiBuilder: Moshi.Builder = Moshi.Builder()
+    public val moshiBuilder: Moshi.Builder = Moshi.Builder()
         .add(io.getstream.android.video.api.generated.models.AudioSettingsRequest.DefaultDevice.DefaultDeviceAdapter())
         .add(io.getstream.android.video.api.generated.models.AudioSettingsResponse.DefaultDevice.DefaultDeviceAdapter())
         .add(io.getstream.android.video.api.generated.models.CallRecordingFailedEvent.RecordingType.RecordingTypeAdapter())
@@ -78,7 +78,7 @@ object Serializer {
         .addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
     
     @JvmStatic
-    val moshi: Moshi by lazy {
+    public val moshi: Moshi by lazy {
         moshiBuilder.build()
     }
 }

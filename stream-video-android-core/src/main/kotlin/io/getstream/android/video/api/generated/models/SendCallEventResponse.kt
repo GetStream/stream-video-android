@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SendCallEventResponse (
+public data class SendCallEventResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

@@ -21,14 +21,14 @@ import com.squareup.moshi.ToJson
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
 
-class LocalDateAdapter {
+public class LocalDateAdapter {
     @ToJson
-    fun toJson(value: LocalDate): String {
+    public fun toJson(value: LocalDate): String {
         return DateTimeFormatter.ISO_LOCAL_DATE.format(value)
     }
 
     @FromJson
-    fun fromJson(value: String): LocalDate {
+    public fun fromJson(value: String): LocalDate {
         return LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE)
     }
 

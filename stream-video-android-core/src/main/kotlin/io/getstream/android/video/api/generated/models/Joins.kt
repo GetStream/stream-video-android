@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class Joins (
+public data class Joins (
     @Json(name = "reason")
-    val reason: String,
+    public val reason: String,
 
     @Json(name = "disconnect_reasons")
-    val disconnectReasons: Map<String, Int> = emptyMap(),
+    public val disconnectReasons: Map<String, Int> = emptyMap(),
 
     @Json(name = "failure_stages")
-    val failureStages: Map<String, Int> = emptyMap(),
+    public val failureStages: Map<String, Int> = emptyMap(),
 
     @Json(name = "join_attempts")
-    val joinAttempts: Int? = null,
+    public val joinAttempts: Int? = null,
 
     @Json(name = "join_success_rate")
-    val joinSuccessRate: Double? = null
+    public val joinSuccessRate: Double? = null
 )

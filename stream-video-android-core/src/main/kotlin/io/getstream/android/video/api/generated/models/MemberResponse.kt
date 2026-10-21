@@ -33,25 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * MemberResponse is the payload for a member of a call.
  */
-data class MemberResponse (
+public data class MemberResponse (
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "updated_at")
-    val updatedAt: org.threeten.bp.OffsetDateTime,
+    public val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?> = emptyMap(),
+    public val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserResponse,
+    public val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "deleted_at")
-    val deletedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val deletedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "role")
-    val role: String? = null
+    public val role: String? = null
 )

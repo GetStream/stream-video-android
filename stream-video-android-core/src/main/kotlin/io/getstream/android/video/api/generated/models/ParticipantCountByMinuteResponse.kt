@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ParticipantCountByMinuteResponse (
+public data class ParticipantCountByMinuteResponse (
     @Json(name = "first")
-    val first: Int,
+    public val first: Int,
 
     @Json(name = "last")
-    val last: Int,
+    public val last: Int,
 
     @Json(name = "max")
-    val max: Int,
+    public val max: Int,
 
     @Json(name = "min")
-    val min: Int,
+    public val min: Int,
 
     @Json(name = "start_ts")
-    val startTs: org.threeten.bp.OffsetDateTime
+    public val startTs: org.threeten.bp.OffsetDateTime
 )

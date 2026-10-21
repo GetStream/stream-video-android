@@ -33,37 +33,37 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class JoinCallRequest (
+public data class JoinCallRequest (
     @Json(name = "location")
-    val location: String,
+    public val location: String,
 
     @Json(name = "create")
-    val create: Boolean? = null,
+    public val create: Boolean? = null,
 
     @Json(name = "e2ee")
-    val e2ee: Boolean? = null,
+    public val e2ee: Boolean? = null,
 
     @Json(name = "hint_high_scale_livestream_publisher")
-    val hintHighScaleLivestreamPublisher: Boolean? = null,
+    public val hintHighScaleLivestreamPublisher: Boolean? = null,
 
     @Json(name = "members_limit")
-    val membersLimit: Int? = null,
+    public val membersLimit: Int? = null,
 
     @Json(name = "migrating_from")
-    val migratingFrom: String? = null,
+    public val migratingFrom: String? = null,
 
     @Json(name = "notify")
-    val notify: Boolean? = null,
+    public val notify: Boolean? = null,
 
     @Json(name = "ring")
-    val ring: Boolean? = null,
+    public val ring: Boolean? = null,
 
     @Json(name = "video")
-    val video: Boolean? = null,
+    public val video: Boolean? = null,
 
     @Json(name = "migrating_from_list")
-    val migratingFromList: List<String>? = null,
+    public val migratingFromList: List<String>? = null,
 
     @Json(name = "data")
-    val data: io.getstream.android.video.api.generated.models.CallRequest? = null
+    public val data: io.getstream.android.video.api.generated.models.CallRequest? = null
 )

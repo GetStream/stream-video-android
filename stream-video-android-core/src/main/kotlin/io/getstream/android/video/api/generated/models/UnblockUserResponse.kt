@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * UnblockUserResponse is the payload for unblocking a user.
  */
-data class UnblockUserResponse (
+public data class UnblockUserResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

@@ -33,28 +33,28 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallStatsLocation (
+public data class CallStatsLocation (
     @Json(name = "accuracy_radius_meters")
-    val accuracyRadiusMeters: Int? = null,
+    public val accuracyRadiusMeters: Int? = null,
 
     @Json(name = "city")
-    val city: String? = null,
+    public val city: String? = null,
 
     @Json(name = "continent")
-    val continent: String? = null,
+    public val continent: String? = null,
 
     @Json(name = "country")
-    val country: String? = null,
+    public val country: String? = null,
 
     @Json(name = "country_iso_code")
-    val countryIsoCode: String? = null,
+    public val countryIsoCode: String? = null,
 
     @Json(name = "latitude")
-    val latitude: Double? = null,
+    public val latitude: Double? = null,
 
     @Json(name = "longitude")
-    val longitude: Double? = null,
+    public val longitude: Double? = null,
 
     @Json(name = "subdivision")
-    val subdivision: String? = null
+    public val subdivision: String? = null
 )

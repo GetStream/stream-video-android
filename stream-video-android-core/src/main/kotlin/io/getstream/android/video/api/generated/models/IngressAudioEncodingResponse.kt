@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class IngressAudioEncodingResponse (
+public data class IngressAudioEncodingResponse (
     @Json(name = "bitrate")
-    val bitrate: Int,
+    public val bitrate: Int,
 
     @Json(name = "channels")
-    val channels: Int,
+    public val channels: Int,
 
     @Json(name = "enable_dtx")
-    val enableDtx: Boolean
+    public val enableDtx: Boolean
 )

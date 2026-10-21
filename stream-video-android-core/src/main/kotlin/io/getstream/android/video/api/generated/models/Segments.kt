@@ -33,22 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class Segments (
+public data class Segments (
     @Json(name = "by_country_reason")
-    val byCountryReason: String,
+    public val byCountryReason: String,
 
     @Json(name = "by_browser")
-    val byBrowser: List<io.getstream.android.video.api.generated.models.BroadcastSegment> = emptyList(),
+    public val byBrowser: List<io.getstream.android.video.api.generated.models.BroadcastSegment> = emptyList(),
 
     @Json(name = "by_country")
-    val byCountry: List<io.getstream.android.video.api.generated.models.BroadcastSegment> = emptyList(),
+    public val byCountry: List<io.getstream.android.video.api.generated.models.BroadcastSegment> = emptyList(),
 
     @Json(name = "by_delivery_zone")
-    val byDeliveryZone: List<io.getstream.android.video.api.generated.models.DeliveryZoneSegment> = emptyList(),
+    public val byDeliveryZone: List<io.getstream.android.video.api.generated.models.DeliveryZoneSegment> = emptyList(),
 
     @Json(name = "by_os")
-    val byOs: List<io.getstream.android.video.api.generated.models.BroadcastSegment> = emptyList(),
+    public val byOs: List<io.getstream.android.video.api.generated.models.BroadcastSegment> = emptyList(),
 
     @Json(name = "by_sdk")
-    val bySdk: List<io.getstream.android.video.api.generated.models.BroadcastSegment> = emptyList()
+    public val bySdk: List<io.getstream.android.video.api.generated.models.BroadcastSegment> = emptyList()
 )

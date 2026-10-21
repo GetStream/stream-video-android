@@ -33,28 +33,28 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallStatsReportSummaryResponse (
+public data class CallStatsReportSummaryResponse (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "call_duration_seconds")
-    val callDurationSeconds: Int,
+    public val callDurationSeconds: Int,
 
     @Json(name = "call_session_id")
-    val callSessionId: String,
+    public val callSessionId: String,
 
     @Json(name = "call_status")
-    val callStatus: String,
+    public val callStatus: String,
 
     @Json(name = "first_stats_time")
-    val firstStatsTime: org.threeten.bp.OffsetDateTime,
+    public val firstStatsTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime? = null,
+    public val createdAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "min_user_rating")
-    val minUserRating: Int? = null,
+    public val minUserRating: Int? = null,
 
     @Json(name = "quality_score")
-    val qualityScore: Int? = null
+    public val qualityScore: Int? = null
 )

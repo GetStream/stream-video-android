@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallStatsMapLocation (
+public data class CallStatsMapLocation (
     @Json(name = "count")
-    val count: Int,
+    public val count: Int,
 
     @Json(name = "live_count")
-    val liveCount: Int,
+    public val liveCount: Int,
 
     @Json(name = "location")
-    val location: io.getstream.android.video.api.generated.models.CallStatsLocation? = null
+    public val location: io.getstream.android.video.api.generated.models.CallStatsLocation? = null
 )

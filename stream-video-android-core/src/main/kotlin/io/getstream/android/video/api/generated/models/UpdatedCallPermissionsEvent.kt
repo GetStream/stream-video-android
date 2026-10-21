@@ -33,21 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly
  */
-data class UpdatedCallPermissionsEvent (
+public data class UpdatedCallPermissionsEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "own_capabilities")
-    val ownCapabilities: List<io.getstream.android.video.api.generated.models.OwnCapability> = emptyList(),
+    public val ownCapabilities: List<io.getstream.android.video.api.generated.models.OwnCapability> = emptyList(),
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserResponse,
+    public val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: String = "call.permissions_updated"
+    public val type: String = "call.permissions_updated"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {
