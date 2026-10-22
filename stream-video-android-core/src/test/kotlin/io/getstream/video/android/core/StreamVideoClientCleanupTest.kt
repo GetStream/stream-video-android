@@ -102,7 +102,7 @@ class StreamVideoClientCleanupTest {
         tokenRepository = mockk(relaxed = true),
         streamNotificationManager = mockk(relaxed = true),
         enableCallNotificationUpdates = false,
-        sounds = mockk(relaxed = true),
+        ringingConfig = mockk(relaxed = true),
         vibrationConfig = mockk(relaxed = true),
         analytics = mockk(relaxed = true),
         cleanupDisconnectTimeoutMs = cleanupDisconnectTimeoutMs,

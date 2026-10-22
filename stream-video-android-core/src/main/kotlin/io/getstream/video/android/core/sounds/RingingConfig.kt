@@ -33,22 +33,18 @@ import io.getstream.video.android.core.utils.safeCallWithDefault
  *
  * Example using raw resources:
  * ```kotlin
- * val sounds = ringingConfig(
- *     resRingingConfig(context, R.raw.my_incoming_sound, R.raw.my_outgoing_sound),
- *     defaultMutedRingingConfig()
+ * StreamVideoBuilder(
+ *     ringingConfig = resRingingConfig(context, R.raw.my_incoming_sound, R.raw.my_outgoing_sound),
+ *     mutedRingingConfig = defaultMutedRingingConfig(),
  * )
- *
- * StreamVideoBuilder(sounds = sounds)
  * ```
  *
  * Example using URIs:
  * ```kotlin
- * val sounds = ringingConfig(
- *     uriRingingConfig(incomingUri, outgoingUri),
- *     defaultMutedRingingConfig()
+ * StreamVideoBuilder(
+ *     ringingConfig = uriRingingConfig(incomingUri, outgoingUri),
+ *     mutedRingingConfig = defaultMutedRingingConfig(),
  * )
- *
- * StreamVideoBuilder(sounds = sounds)
  * ```
  *
  * If a sound URI is `null`, no sound will be played.
@@ -89,34 +85,6 @@ public interface RingingConfig {
 public interface MutedRingingConfig {
     val playIncomingSoundIfMuted: Boolean
     val playOutgoingSoundIfMuted: Boolean
-}
-
-/**
- * Contains all the sounds that the SDK uses.
- */
-@Deprecated(
-    message = "Sounds will be deprecated in the future and replaced with RingingConfig. It is recommended to use one of the factory methods along with toSounds() to create the Sounds object.",
-    replaceWith = ReplaceWith("RingingConfig"),
-    level = DeprecationLevel.WARNING,
-)
-public data class Sounds(
-    val ringingConfig: RingingConfig,
-    val mutedRingingConfig: MutedRingingConfig? = null,
-)
-
-// Factories
-/**
- * Creates a [Sounds] object using the provided [RingingConfig] and [MutedRingingConfig].
- *
- * @param ringingConfig The configuration for incoming and outgoing call sounds.
- * @param mutedRingingConfig The configuration for handling incoming and outgoing call sounds if device is muted. Can be null.
- * @return A [Sounds] object containing the specified configurations.
- */
-public fun ringingConfig(
-    ringingConfig: RingingConfig,
-    mutedRingingConfig: MutedRingingConfig?,
-): Sounds {
-    return Sounds(ringingConfig, mutedRingingConfig)
 }
 
 /**
@@ -207,11 +175,6 @@ public fun emptyRingingConfig(): RingingConfig = object : RingingConfig {
     override val incomingCallSoundUri: Uri? = null
     override val outgoingCallSoundUri: Uri? = null
 }
-
-/**
- * Converts a ringing config to a [Sounds] object.
- */
-public fun RingingConfig.toSounds() = Sounds(this)
 
 // Internal utilities
 private fun Int?.toUriOrNull(context: Context): Uri? =

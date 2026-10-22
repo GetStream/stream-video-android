@@ -20,7 +20,6 @@ import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import io.getstream.video.android.compose.ui.PIXEL_4A_HDPI
 import io.getstream.video.android.compose.ui.PaparazziComposeTest
-import io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContentPreview
 import io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContentPreview
 import org.junit.Rule
 import org.junit.Test
@@ -32,20 +31,6 @@ internal class AudioCallContentTest : PaparazziComposeTest {
         deviceConfig = PIXEL_4A_HDPI,
         renderingMode = SessionParams.RenderingMode.SHRINK,
     )
-
-    @Test
-    fun `audio call content`() {
-        snapshot {
-            AudioCallContentPreview()
-        }
-    }
-
-    @Test
-    fun `audio call content in dark mode`() {
-        snapshot(isInDarkMode = true) {
-            AudioCallContentPreview()
-        }
-    }
 
     @Test
     fun `audio only call content`() {

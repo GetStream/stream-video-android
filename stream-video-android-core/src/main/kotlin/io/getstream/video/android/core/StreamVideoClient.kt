@@ -124,8 +124,9 @@ import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvid
 import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
+import io.getstream.video.android.core.sounds.MutedRingingConfig
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
-import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.sounds.RingingConfig
 import io.getstream.video.android.core.user.StreamUserRepositoryImpl
 import io.getstream.video.android.core.user.WritableUserRepository
 import io.getstream.video.android.core.utils.LatencyResult
@@ -195,7 +196,8 @@ internal class StreamVideoClient internal constructor(
     internal val userRepository: WritableUserRepository = StreamUserRepositoryImpl(initialUser),
     internal val enableCallNotificationUpdates: Boolean,
     internal val callServiceConfigRegistry: CallServiceConfigRegistry = CallServiceConfigRegistry(),
-    internal val sounds: Sounds,
+    internal val ringingConfig: RingingConfig,
+    internal val mutedRingingConfig: MutedRingingConfig? = null,
     internal val vibrationConfig: RingingCallVibrationConfig,
     internal val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
     internal val crashOnMissingPermission: Boolean = false,
@@ -1260,23 +1262,6 @@ internal class StreamVideoClient internal constructor(
 
             result.edges.map { it.toEdge() }
         }
-    }
-
-    /**
-     * @see StreamVideo.logOut
-     */
-    @Deprecated(
-        message = "Kept for source compatibility; see StreamVideo.logOut for migration guidance.",
-        replaceWith = ReplaceWith(
-            expression = "StreamVideo.removeClient()",
-            imports = ["io.getstream.video.android.core.StreamVideo"],
-        ),
-        level = DeprecationLevel.WARNING,
-    )
-    override fun logOut() {
-        scope.launch(
-            CoroutineName("logOut"),
-        ) { streamNotificationManager.deviceTokenStorage.clear() }
     }
 
     override fun call(type: String, id: String): Call {
