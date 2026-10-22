@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -50,6 +51,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import stream.video.sfu.models.AudioBitrateProfile
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -265,6 +267,14 @@ class CallLobbyViewModel @Inject constructor(
             dataStore.clear()
             ChatClient.instance().disconnect(true).enqueue()
             delay(200)
+            StreamVideo.instanceOrNull()?.let { streamVideo ->
+                val device = try {
+                    streamVideo.getDevice().firstOrNull()
+                } catch (_: IOException) {
+                    null
+                }
+                device?.let { streamVideo.deleteDevice(it) }
+            }
             StreamVideo.removeClient()
         }
     }
