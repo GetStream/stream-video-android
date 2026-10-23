@@ -22,11 +22,8 @@ import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.webrtc.CameraEnumerationAndroid
 import io.getstream.webrtc.RTCStats
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import stream.video.sfu.models.TrackType
 
 data class MediaStatsInfo(
@@ -135,15 +132,11 @@ public data class LocalStats(
 public class CallStats(val call: Call, val callScope: CoroutineScope) {
     private val logger by taggedLogger("CallStats")
 
-    private val supervisorJob = SupervisorJob()
-    private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)
-    // TODO: cleanup the scope
-
-    val publisher = PeerConnectionStats(scope)
-    val subscriber = PeerConnectionStats(scope)
+    val publisher = PeerConnectionStats(callScope)
+    val subscriber = PeerConnectionStats(callScope)
     val _local = MutableStateFlow<LocalStats?>(null)
     val local: StateFlow<LocalStats?> =
-        _local.stateIn(scope, SharingStarted.WhileSubscribed(), null)
+        _local
 
     fun updateFromRTCStats(stats: RtcStatsReport?, isPublisher: Boolean = true) {
         if (stats == null) return

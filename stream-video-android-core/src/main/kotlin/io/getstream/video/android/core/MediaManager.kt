@@ -555,6 +555,7 @@ class MicrophoneManager(
     private val logger by taggedLogger("Media:MicrophoneManager")
 
     private lateinit var audioHandler: AudioSwitchDecorator
+    private var audioHandlerStopped = false
 
     private var setupCompleted = AtomicBoolean(false)
     internal var audioManager: AudioManager? = null
@@ -1233,7 +1234,8 @@ class MicrophoneManager(
     }
 
     fun cleanup() {
-        ifAudioHandlerInitialized { it.stop() }
+        if (!audioHandlerStopped) ifAudioHandlerInitialized { it.stop() }
+        audioHandlerStopped = true
         cleanupUsbDeviceDetection()
         // Dropped with the call that captured it, so a value remembered from a call that ended in
         // music cannot be put back onto the next one.
@@ -1263,7 +1265,7 @@ class MicrophoneManager(
                 setupUsbDeviceDetection()
             }
 
-            if (canHandleDeviceSwitch() && !::audioHandler.isInitialized) {
+            if (canHandleDeviceSwitch() && (!::audioHandler.isInitialized || audioHandlerStopped)) {
                 // Use default priority (Bluetooth -> Wired -> Earpiece -> Speakerphone)
                 // unless preferSpeaker is true, then prioritize speakerphone over earpiece
                 val preferredDeviceList = listOf(
@@ -1315,6 +1317,7 @@ class MicrophoneManager(
                     audioHandler.setCommunicationModeEnabled(false)
                 }
 
+                audioHandlerStopped = false
                 logger.d { "[setup] Calling start on instance $audioHandler" }
                 audioHandler.start()
             } else {
@@ -1711,6 +1714,9 @@ class CameraManager(
     }
 
     fun cleanup() {
+        job?.cancel()
+        job = null
+        if (!setupCompleted) return
         stopCapture()
         if (::videoCapturer.isInitialized) {
             videoCapturer.dispose()
@@ -2040,6 +2046,11 @@ class MediaManagerImpl(
         _videoSource = null
         _screenShareTrack = null
         _screenShareVideoSource = null
+    }
+
+    /** Reopens track creation only after the previous call scope and media cleanup have finished. */
+    internal fun prepareForJoin() {
+        synchronized(mediaLock) { released = false }
     }
 
     fun cleanup() {

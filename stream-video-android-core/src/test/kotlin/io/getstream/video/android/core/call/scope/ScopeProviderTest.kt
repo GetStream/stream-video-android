@@ -18,11 +18,13 @@ package io.getstream.video.android.core.call.scope
 
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -31,12 +33,12 @@ import org.junit.Test
 class ScopeProviderTest {
 
     private lateinit var clientScope: ClientScope
-    private lateinit var scopeProvider: ScopeProvider
+    private lateinit var scopeProvider: ScopeProviderImpl
 
     @Before
     fun setup() {
         clientScope = ClientScope()
-        scopeProvider = ScopeProviderImpl(clientScope)
+        scopeProvider = ScopeProviderImpl(clientScope, "default:test-call")
     }
 
     @After
@@ -123,5 +125,22 @@ class ScopeProviderTest {
         // Both scopes should be valid
         assertNotNull(scope1)
         assertNotNull(scope2)
+    }
+
+    @Test
+    fun `restart creates a new call job and allows new RTC scopes`() = runTest {
+        val firstCallJob = scopeProvider.coroutineContext[Job]!!
+        scopeProvider.getRtcSessionScope(SupervisorJob(), "test-call-1")
+
+        scopeProvider.cleanup()?.join()
+        assertTrue(firstCallJob.isCancelled)
+
+        scopeProvider.restart()
+        val secondCallJob = scopeProvider.coroutineContext[Job]!!
+
+        assertEquals(2, scopeProvider.debugInstanceId)
+        assertNotEquals(firstCallJob, secondCallJob)
+        assertTrue(secondCallJob.isActive)
+        assertNotNull(scopeProvider.getRtcSessionScope(SupervisorJob(), "test-call-1"))
     }
 }

@@ -89,6 +89,8 @@ class ReconnectEscalationTest {
         every { mockClientImpl.scope } returns testScope as CoroutineScope
         every { mockClientImpl.leaveAfterDisconnectSeconds } returns 120L
         every { mockClientImpl.apiKey } returns "test-api-key"
+        every { mockClientImpl.state.activeCall } returns MutableStateFlow<Call?>(null)
+        every { mockClientImpl.state.ringingCall } returns MutableStateFlow<Call?>(null)
 
         val user = User(id = "test-user", role = "user")
 

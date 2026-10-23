@@ -23,6 +23,7 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.base.toResponse
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.video.android.core.utils.toResponse
 import io.getstream.video.android.model.User
@@ -111,7 +112,7 @@ internal class CallStateRingJoinTest : TestBase() {
     /** An outgoing ring we started, registered as ringing, with nobody having answered yet. */
     private fun outgoingRing(): CallState {
         ringingCall.value = call
-        val callState = CallState(client, call, user, scope)
+        val callState = CallState(client, call, user, ScopeProviderImpl(scope, "default:test-call"))
         callState.updateFromResponse(call.toResponse(user.toResponse()))
         assertThat(callState.ringingState.value)
             .isEqualTo(RingingState.Outgoing(acceptedByCallee = false))

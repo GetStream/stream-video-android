@@ -85,6 +85,8 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.scope.RestartableStateFlow
+import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionManager
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
@@ -152,7 +154,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -230,16 +231,29 @@ internal typealias IsPinned = Boolean
  *
  */
 @Stable
-public class CallState(
+public class CallState internal constructor(
     private val client: StreamVideo,
     private val call: Call,
     private val user: User,
-    @InternalStreamVideoApi
-    val scope: CoroutineScope,
+    private val scopeProvider: ScopeProviderImpl,
 ) {
 
     private val logger by taggedLogger("CallState")
     private var participantsVisibilityMonitor: Job? = null
+    private var participantVisibilityFlow: Flow<List<String>>? = null
+
+    @InternalStreamVideoApi
+    val scope: CoroutineScope = scopeProvider
+
+    private fun <T> Flow<T>.stateIn(
+        started: SharingStarted,
+        initialValue: T,
+    ): StateFlow<T> = RestartableStateFlow(
+        upstream = this,
+        scopeProvider = scopeProvider,
+        initialValue = initialValue,
+        started = started,
+    )
 
     // Create a CallActions implementation that delegates to the Call object
     @InternalStreamVideoApi
@@ -360,7 +374,7 @@ public class CallState(
             combined.putAll(server)
             combined.putAll(local) // local overrides server on key collision
             combined.toMap()
-        }.stateIn(scope, SharingStarted.Eagerly, emptyMap())
+        }.stateIn(SharingStarted.Eagerly, emptyMap())
 
     internal val _pinnedParticipants: StateFlow<Map<SessionId, OffsetDateTime>> =
         _pinnedParticipantsDetailed.mapState { detailed ->
@@ -396,7 +410,7 @@ public class CallState(
             val filteredVideo = participants.firstOrNull {
                 it.video.value?.enabled == true
             }?.video?.value
-            scope.launch {
+            launch {
                 if (_backstage.value) {
                     send(null)
                 } else {
@@ -405,7 +419,7 @@ public class CallState(
             }
         }
 
-        scope.launch {
+        launch {
             _participants.collect {
                 logger.v {
                     "[livestreamFlow] #track; participants: ${it.size} =>" + "${it.map { "${it.value.userId.value} - ${it.value.video.value?.enabled}" }}"
@@ -415,7 +429,7 @@ public class CallState(
         }
 
         // The caller i.e. `livestream` is deprecated as well
-        call.subscribe {
+        val subscription = call.subscribe {
             logger.v { "[livestreamFlow] #track; event.type: ${it.getEventType()}" }
             if (it is TrackPublishedEvent) {
                 val participant = getOrCreateParticipant(
@@ -454,7 +468,7 @@ public class CallState(
         logger.d { "[livestreamFlow] #track; no args" }
         emitLivestreamVideo()
 
-        awaitClose { }
+        awaitClose { subscription.dispose() }
     }
 
     @Deprecated(
@@ -471,10 +485,12 @@ public class CallState(
         ),
     )
     val livestream: StateFlow<ParticipantState.Video?> =
-        livestreamFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
+        livestreamFlow.debounce(
+            1000,
+        ).stateIn(SharingStarted.WhileSubscribed(10_000L), null)
 
     private val _sortedParticipantsState = SortedParticipantsState(
-        scope = scope,
+        scopeProvider = { scopeProvider },
         call = call,
         participants = _participants,
         pinnedParticipantsDetailed = _pinnedParticipantsDetailed,
@@ -576,11 +592,11 @@ public class CallState(
     /** how long the call has been running, rounded to seconds, null if the call didn't start yet */
     public val duration: StateFlow<Duration?> =
         _durationInMs.transform { emit(((it ?: 0L) / 1000L).toDuration(DurationUnit.SECONDS)) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+            .stateIn(SharingStarted.WhileSubscribed(10000L), null)
 
     /** how many milliseconds the call has been running, null if the call didn't start yet */
     public val durationInMs: StateFlow<Long?> =
-        _durationInMs.stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+        _durationInMs.stateIn(SharingStarted.WhileSubscribed(10000L), null)
 
     /** how many milliseconds the call has been running in the simple date format. */
     public val durationInDateFormat: StateFlow<String?> = durationInMs.mapState { durationInMs ->
@@ -643,7 +659,7 @@ public class CallState(
                 emit(duration)
             }
         }
-    }.distinctUntilChanged().stateIn(scope, SharingStarted.WhileSubscribed(10000L), null)
+    }.distinctUntilChanged().stateIn(SharingStarted.WhileSubscribed(10000L), null)
 
     /**
      * How long the call has been live for, represented as [Duration], or null if the call hasn't been live yet.
@@ -922,7 +938,7 @@ public class CallState(
             }
 
             is LocalCallMissedEvent -> {
-                scope.launch {
+                scopeProvider.launch {
                     val newRejectedBySet = _rejectedBy.value.toMutableSet()
                     StreamVideo.instanceOrNull()?.let {
                         newRejectedBySet.add(it.user.id)
@@ -1339,7 +1355,7 @@ public class CallState(
             -> closedCaptionManager.handleEvent(event)
 
             is CallModerationBlurEvent -> {
-                scope.launch {
+                scopeProvider.launch {
                     val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
                     if (callServiceConfig.moderationConfig.videoModerationConfig.enable) {
                         call.state.moderationManager.applyVideoModeration()
@@ -1551,7 +1567,7 @@ public class CallState(
         if (!shouldJoin) return false
 
         call.setJoinSource(source)
-        autoJoiningCall = scope.launch {
+        autoJoiningCall = scopeProvider.launch {
             // errors are handled inside the join function
             val joinResult = call.join()
             autoJoiningCall = null
@@ -1618,7 +1634,7 @@ public class CallState(
     fun markSpeakingAsMuted() {
         _speakingWhileMuted.value = true
         speakingWhileMutedResetJob?.cancel()
-        speakingWhileMutedResetJob = scope.launch {
+        speakingWhileMutedResetJob = scopeProvider.launch {
             delay(2000)
             _speakingWhileMuted.value = false
         }
@@ -1758,7 +1774,7 @@ public class CallState(
         } else {
             ParticipantState(
                 sessionId = sessionId,
-                scope = scope,
+                scope = scopeProvider,
                 callActions = callActions,
                 initialUserId = userId,
                 source = source,
@@ -1972,11 +1988,12 @@ public class CallState(
      * @see CallState.updateParticipantVisibility
      */
     fun updateParticipantVisibilityFlow(flow: Flow<List<String>>?) {
+        participantVisibilityFlow = flow
         // Cancel any previous job.
         participantsVisibilityMonitor?.cancel()
 
         if (flow != null) {
-            participantsVisibilityMonitor = scope.launch {
+            participantsVisibilityMonitor = scopeProvider.launch {
                 flow.collectLatest { visibleParticipantIds ->
                     internalParticipants.forEach {
                         if (visibleParticipantIds.contains(it.key)) {
@@ -2044,7 +2061,7 @@ public class CallState(
     private fun observeTelecomHold(repo: JetpackTelecomRepository) {
         telecomHoldObserverJob?.cancel()
 
-        telecomHoldObserverJob = scope.launch(DispatcherProvider.Default) {
+        telecomHoldObserverJob = scopeProvider.launch(DispatcherProvider.Default) {
             repo.currentCall
                 .map { (it as? TelecomCall.Registered)?.isOnHold == true }
                 .distinctUntilChanged()
@@ -2058,6 +2075,33 @@ public class CallState(
                     }
                 }
         }
+    }
+
+    internal fun restart() {
+        internalParticipants.clear()
+        _participants.value = emptyMap()
+        _activeSpeakers.value = emptyList()
+        _dominantSpeaker.value = null
+        _screenSharingSession.value = null
+        _speakingWhileMuted.value = false
+        _audioProcessingEnabled.value = false
+        _ringingState.value = RingingState.Idle
+        acceptedOnThisDevice = false
+        isJoinAndRingInProgress.set(false)
+        atomicNotification.set(null)
+        telecomHoldObserverJob = null
+        autoJoiningCall = null
+        speakingWhileMutedResetJob = null
+        participantsVisibilityMonitor = null
+        _notificationIdFlow.value = null
+        _serviceRoute.value = ServiceRoute.UNDECIDED
+        _sortedParticipantsState.restart()
+        restartScopeObservers()
+    }
+
+    private fun restartScopeObservers() {
+        participantVisibilityFlow?.let { updateParticipantVisibilityFlow(it) }
+        jetpackTelecomRepository?.let { observeTelecomHold(it) }
     }
 
     internal fun cleanup() {

@@ -16,14 +16,13 @@
 
 package io.getstream.video.android.core.call.scope
 
+import io.getstream.video.android.core.call.Restartable
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
-/**
- * Provider for coroutine scopes used in RTC sessions.
- * This allows for centralized management and reuse of scopes across SDK instances.
- */
-internal interface ScopeProvider {
+/** Owns a Call's coroutine generations and creates the scopes used by its RTC session. */
+internal interface ScopeProvider : CoroutineScope, Restartable {
     /**
      * Provides the main coroutine scope for RTC session operations.
      * This scope is based on the client's main scope with a supervisor job.
@@ -39,5 +38,5 @@ internal interface ScopeProvider {
     /**
      * Cleans up resources when the provider is no longer needed.
      */
-    fun cleanup()
+    fun cleanup(): Job?
 }

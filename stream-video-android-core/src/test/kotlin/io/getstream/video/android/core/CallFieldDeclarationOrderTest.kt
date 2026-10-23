@@ -23,7 +23,7 @@ import java.io.File
 /**
  * Structural regression guard for a leaking-this race in [Call]'s primary constructor.
  *
- * `Call` declares `val state = CallState(client, this, user, scope)` which passes
+ * `Call` declares `val state = CallState(client, this, user, scopeProvider)` which passes
  * `this` to [CallState]. CallState constructs [io.getstream.video.android.core.sorting.SortedParticipantsState],
  * whose `init` launches `scope.launch { call.events.collect { ... } }`. The
  * `events` flow is owned by `eventManager` (CallEventManager) and `Call.events`
