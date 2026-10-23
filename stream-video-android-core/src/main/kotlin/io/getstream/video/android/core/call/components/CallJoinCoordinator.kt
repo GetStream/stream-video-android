@@ -137,6 +137,7 @@ internal class CallJoinCoordinator(
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
         callAnalytics.joinAnalytics.onJoinFunctionStart()
+        lifecycle.prepareForJoin()
         var coalesced = false
         return joinFlight.run(
             JOIN_FLIGHT_KEY,
@@ -266,7 +267,6 @@ internal class CallJoinCoordinator(
 
         var result: Result<RtcSession>
 
-        lifecycle.resetLeaveGuard()
         while (retryCount < 3) {
             result = joinInternal(
                 create,
@@ -325,6 +325,7 @@ internal class CallJoinCoordinator(
         video: Boolean = isVideoEnabled(),
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
+        lifecycle.prepareForJoin()
         logger.d { "[joinAndRing] #ringing; #track; members: $members, video: $video" }
         state.toggleJoinAndRingProgress(true)
         return join(

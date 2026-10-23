@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.base.toResponse
+import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.utils.toResponse
@@ -72,7 +73,7 @@ internal class CallStateTelecomHoldTest : TestBase() {
 
     @Test
     fun `putting an active call on hold leaves the call with CALL_ON_HOLD`() {
-        val callState = CallState(client, call, user, scope)
+        val callState = CallState(client, call, user, ScopeProviderImpl(scope, "default:test-call"))
         callState.updateFromResponse(call.toResponse(user.toResponse()))
         activeCall.value = call
         callState.updateRingingState()

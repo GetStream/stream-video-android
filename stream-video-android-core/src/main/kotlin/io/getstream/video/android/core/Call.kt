@@ -54,6 +54,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
+import io.getstream.video.android.core.call.Restartable
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.components.CallApiClient
@@ -65,6 +66,7 @@ import io.getstream.video.android.core.call.components.CallLifecycleManager
 import io.getstream.video.android.core.call.components.CallMediaManager
 import io.getstream.video.android.core.call.components.CallReconnector
 import io.getstream.video.android.core.call.components.CallRenderer
+import io.getstream.video.android.core.call.components.CallRestartCoordinator
 import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.components.CallStatsReporter
 import io.getstream.video.android.core.call.components.ClientCallRegistry
@@ -73,7 +75,6 @@ import io.getstream.video.android.core.call.components.NoiseCancellationPolicy
 import io.getstream.video.android.core.call.components.RtcSessionFactory
 import io.getstream.video.android.core.call.components.SessionMonitor
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
-import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.video.VideoFilter
 import io.getstream.video.android.core.closedcaptions.ClosedCaptionsSettings
@@ -90,8 +91,6 @@ import io.getstream.video.android.core.notifications.internal.telecom.TelecomCal
 import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.video.android.core.ringing.RingStatePoller
-import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.getstream.video.android.core.utils.SerialProcessor
@@ -103,8 +102,6 @@ import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -140,13 +137,16 @@ public class Call(
     val user: User,
 ) {
     internal val clientImpl = client as StreamVideoClient
-    internal val scopeProvider: ScopeProvider = ScopeProviderImpl(clientImpl.scope)
+
+    internal val scopeProvider = ScopeProviderImpl(
+        coroutineScope = clientImpl.scope,
+        callCid = "$type:$id",
+    )
 
     private val logger by taggedLogger("Call:$type:$id")
-    private val supervisorJob = SupervisorJob()
     internal var powerManager: PowerManager? = null
 
-    internal val scope = CoroutineScope(clientImpl.scope.coroutineContext + supervisorJob)
+    internal val scope: CoroutineScope = scopeProvider
 
     /** Delegate that owns the live RTC session state and reconnect bookkeeping. */
     private val sessionManager = CallSessionManager()
@@ -267,7 +267,7 @@ public class Call(
     val events: MutableSharedFlow<VideoEvent> = eventManager.events
 
     /** The call state contains all state such as the participant list, reactions etc */
-    val state = CallState(client, this, user, scope)
+    val state = CallState(client, this, user, scopeProvider)
 
     internal val callAnalytics =
         CallAnalytics(
@@ -370,31 +370,43 @@ public class Call(
         type = type,
         id = id,
         clientImpl = clientImpl,
-        scope = scope,
+        scopeProvider = { scope },
         state = state,
         sessionManager = sessionManager,
         eglBase = { eglBase },
         mediaManagerFactory = mediaManagerFactory,
     )
 
+    /** Restores persistent components after the previous Call generation has been cleaned up. */
+    private val restartCoordinator = CallRestartCoordinator(
+        scopeProvider = scopeProvider,
+        restartables = listOf(
+            sessionManager,
+            callAnalytics,
+            Restartable(state::restart),
+            media,
+        ),
+        onRestarted = {
+            clientImpl.onCallReused(this@Call)
+            autoOnApplied = false
+            noiseCancellationSignalPending = false
+            desiredNoiseCancellationEnabled = false
+            observeNoiseCancellationSignalTarget()
+            observeNoiseCancellationPolicy()
+        },
+    )
+
     /** Delegate that owns leave / end / cleanup teardown and the destroyed flag. */
     private val lifecycle: CallLifecycleManager = CallLifecycleManager(
         clientImpl = clientImpl,
         sessionManager = sessionManager,
-        scopeProvider = scopeProvider,
         callRegistry = callRegistry,
-        // Lets the REST calls queued before leave finish before the scope is torn down.
         shutDownJobs = {
-            UserScope(ClientScope()).launch {
-                supervisorJob.children.forEach { it.join() }
-                supervisorJob.cancel()
-            }
-            scope.cancel()
-            // Cancelling the scope already reaches the poller, which runs on the call's job.
-            // Stopping it explicitly also clears the job reference, so a call torn down and
-            // re-armed does not see a cancelled job as a running one.
             stopRingStatePolling()
+            _ringStatePoller = null
+            scopeProvider.cleanup()
         },
+        restartCoordinator = restartCoordinator,
         state = state,
         callAnalytics = callAnalytics,
         statsReporter = statsReporter,
@@ -569,12 +581,13 @@ public class Call(
     private var autoOnApplied: Boolean = false
 
     init {
+        state.startScopeJobs()
         media.startAudioLevelMonitoring()
+        observeNoiseCancellationSignalTarget()
+        observeNoiseCancellationPolicy()
         powerManager = safeCallWithDefault(null) {
             clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
-        observeNoiseCancellationSignalTarget()
-        observeNoiseCancellationPolicy()
     }
 
     /** Basic crud operations */
@@ -612,6 +625,7 @@ public class Call(
 
     /**
      * Joins the call. Concurrent callers share one in-flight attempt.
+     * The same instance can be joined again after [leave]; pending cleanup finishes first.
      *
      * Cancelling this coroutine does not abort that attempt — only [leave] does.
      *

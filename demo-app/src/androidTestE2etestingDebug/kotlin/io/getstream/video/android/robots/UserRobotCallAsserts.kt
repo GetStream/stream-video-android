@@ -74,6 +74,16 @@ fun UserRobot.assertThatCallIsEnded(): UserRobot {
     return this
 }
 
+fun UserRobot.assertCallUiIsRendered(): UserRobot {
+    assertTrue(
+        "Call information",
+        CallPage.callInfoView.waitDisplayed(timeOutMillis = 30.seconds),
+    )
+    assertTrue("Hang-up control", CallPage.hangUpButton.waitDisplayed())
+    assertTrue("Video surface", CallPage.videoView.waitDisplayed())
+    return this
+}
+
 fun UserRobot.assertUserMicrophone(isEnabled: Boolean, videoCall: Boolean = true): UserRobot {
     // The participant view icon updates slightly after the control toggle, so both
     // checks poll instead of asserting the icon at the instant the toggle appears.

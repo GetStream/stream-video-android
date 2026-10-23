@@ -19,6 +19,7 @@ package io.getstream.video.android.core
 import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.base.toResponse
+import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.events.ParticipantCount
 import io.getstream.video.android.core.utils.toResponse
@@ -91,7 +92,7 @@ internal class RingingStateJoinAndRingTest : TestBase() {
     }
 
     private fun callStateInJoinAndRingWindow(): CallState {
-        val callState = CallState(client, call, user, scope)
+        val callState = CallState(client, call, user, ScopeProviderImpl(scope, "default:test-call"))
         // The call was created by us; nobody accepted or rejected yet.
         callState.updateFromResponse(call.toResponse(user.toResponse()))
         // joinAndRing() toggled the flag and the join completed (active call registered),
@@ -114,7 +115,7 @@ internal class RingingStateJoinAndRingTest : TestBase() {
 
     @Test
     fun `a recompute before the SFU join sets Outgoing still yields Idle`() {
-        val callState = CallState(client, call, user, scope)
+        val callState = CallState(client, call, user, ScopeProviderImpl(scope, "default:test-call"))
         callState.updateFromResponse(call.toResponse(user.toResponse()))
         callState.toggleJoinAndRingProgress(true)
         activeCall.value = call

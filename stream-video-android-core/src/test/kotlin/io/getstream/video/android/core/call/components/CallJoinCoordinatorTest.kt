@@ -36,6 +36,7 @@ import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -44,6 +45,9 @@ import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
@@ -51,6 +55,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -121,15 +126,20 @@ class CallJoinCoordinatorTest {
         unmockkAll()
     }
 
-    private fun coordinator() = CallJoinCoordinator(
+    private fun coordinator(
+        scope: CoroutineScope = testScope,
+        lifecycle: CallLifecycleManager = this.lifecycle,
+        sessionFactory: RtcSessionFactory =
+            RtcSessionFactory { _, _, _, _, _, _, _ -> mockSession },
+    ) = CallJoinCoordinator(
         clientImpl = clientImpl,
         state = state,
         callAnalytics = callAnalytics,
         type = "default",
         id = "test-call",
-        scope = testScope,
+        scope = scope,
         sessionManager = sessionManager,
-        sessionFactory = RtcSessionFactory { _, _, _, _, _, _, _ -> mockSession },
+        sessionFactory = sessionFactory,
         media = media,
         lifecycle = lifecycle,
         apiClient = apiClient,
@@ -145,6 +155,64 @@ class CallJoinCoordinatorTest {
                 any(), any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns result
+    }
+
+    @Test
+    fun `join succeeds repeatedly after leave with a restarted scope provider`() = runTest(
+        testDispatcher,
+    ) {
+        every { clientImpl.scope } returns backgroundScope
+        val provider = ScopeProviderImpl(backgroundScope, "default:test-call")
+        val actualLifecycle = CallLifecycleManager(
+            clientImpl = clientImpl,
+            sessionManager = sessionManager,
+            callRegistry = callRegistry,
+            shutDownJobs = { provider.cleanup() },
+            restartCoordinator = CallRestartCoordinator(
+                scopeProvider = provider,
+                restartables = emptyList(),
+            ),
+            state = state,
+            callAnalytics = callAnalytics,
+            statsReporter = mockk(relaxed = true),
+            media = media,
+            iceMonitor = mockk(relaxed = true),
+            sessionMonitor = { sessionMonitor },
+            connectivityMonitor = { mockk(relaxed = true) },
+            type = "default",
+            id = "test-call",
+        )
+        val providerJobs = mutableListOf<Job>()
+        val coordinator = coordinator(
+            scope = backgroundScope,
+            lifecycle = actualLifecycle,
+            sessionFactory = RtcSessionFactory { _, _, _, _, _, _, _ ->
+                // RtcSession needs this provider on every join, including after cleanup.
+                providerJobs += provider.coroutineContext[Job]!!
+                val job = SupervisorJob()
+                provider.getRtcSessionScope(job, "test-call")
+                job.cancel()
+                mockSession
+            },
+        )
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+        repeat(3) {
+            assertThat(coordinator.join()).isInstanceOf(Success::class.java)
+            val gate = CompletableDeferred<Unit>()
+            coEvery { mockSession.sendLeaveEvent(any()) } coAnswers { gate.await() }
+            actualLifecycle.leave()
+            val nextJoin = async { coordinator.join() }
+            runCurrent()
+            assertThat(nextJoin.isCompleted).isFalse()
+            gate.complete(Unit)
+            assertThat(nextJoin.await()).isInstanceOf(Success::class.java)
+        }
+        actualLifecycle.leave()
+        runCurrent()
+        coVerify(exactly = 4) { mockSession.connectInternal() }
+        assertThat(providerJobs.distinct()).hasSize(4)
+        assertThat(providerJobs.all { it.isCancelled }).isTrue()
     }
 
     @Test
@@ -379,7 +447,7 @@ class CallJoinCoordinatorTest {
         val joinAnalytics = callAnalytics.joinAnalytics
         verify(exactly = 2) { joinAnalytics.onJoinFunctionStart() }
         verify(exactly = 1) { callAnalytics.mediaPermissionObserver.mediaPermissionStatus() }
-        verify(exactly = 1) { lifecycle.resetLeaveGuard() }
+        coVerify(exactly = 2) { lifecycle.prepareForJoin() }
         verify { state.callJoinInterceptor = interceptor }
         verify(exactly = 0) { state.callJoinInterceptor = null }
     }

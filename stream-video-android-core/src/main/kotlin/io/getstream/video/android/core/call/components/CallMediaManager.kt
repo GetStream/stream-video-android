@@ -28,12 +28,14 @@ import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.Restartable
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.webrtc.EglBase
 import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -53,12 +55,15 @@ internal class CallMediaManager(
     private val type: String,
     private val id: String,
     private val clientImpl: StreamVideoClient,
-    private val scope: CoroutineScope,
+    private val scopeProvider: () -> CoroutineScope,
     private val state: CallState,
     private val sessionManager: CallSessionManager,
     private val eglBase: () -> EglBase,
     private val mediaManagerFactory: MediaManagerFactory,
-) {
+) : Restartable {
+    private var cameraEnabledBeforeLeave: Boolean? = null
+    private var microphoneEnabledBeforeLeave: Boolean? = null
+
     private val logger by taggedLogger("Call:MediaManager:$type:$id")
 
     private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
@@ -67,6 +72,7 @@ internal class CallMediaManager(
         }
     })
     private val audioLevelOutputHelper = RampValueUpAndDownHelper()
+    private var audioLevelMonitoringJob: Job? = null
 
     /** Smoothed local microphone volume level (0..1). */
     val localMicrophoneAudioLevel: StateFlow<Float> = audioLevelOutputHelper.currentLevel
@@ -121,15 +127,18 @@ internal class CallMediaManager(
             _peerConnectionFactory = value
         }
 
-    val mediaManager by lazy {
+    private val mediaManagerDelegate = lazy {
         mediaManagerFactory.create(
             audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
         )
     }
 
+    val mediaManager: MediaManagerImpl get() = mediaManagerDelegate.value
+
     /** Starts streaming smoothed microphone audio levels into [localMicrophoneAudioLevel]. */
     fun startAudioLevelMonitoring() {
-        scope.launch {
+        audioLevelMonitoringJob?.cancel()
+        audioLevelMonitoringJob = scopeProvider().launch {
             soundInputProcessor.currentAudioLevel.collect {
                 audioLevelOutputHelper.rampToValue(it)
             }
@@ -246,11 +255,16 @@ internal class CallMediaManager(
             camera.setEnabled(callSettings.video.cameraDefaultOn)
         }
 
+        cameraEnabledBeforeLeave?.let { camera.setEnabled(it) }
+        cameraEnabledBeforeLeave = null
+
         // Mic
         if (microphone.status.value == DeviceStatus.NotSelected) {
             val enabled = callSettings.audio.micDefaultOn
             microphone.setEnabled(enabled)
         }
+        microphoneEnabledBeforeLeave?.let { microphone.setEnabled(it) }
+        microphoneEnabledBeforeLeave = null
     }
 
     private fun monitorHeadset() {
@@ -278,7 +292,7 @@ internal class CallMediaManager(
                     microphone.select(deviceBeforeHeadset)
                 }
             }
-        }.launchIn(scope)
+        }.launchIn(scopeProvider())
     }
 
     fun startScreenSharing(
@@ -403,9 +417,17 @@ internal class CallMediaManager(
 
     /** Disables all local capture devices. Used when leaving the call. */
     fun disableLocalCapture() {
+        if (!mediaManagerDelegate.isInitialized()) return
+        cameraEnabledBeforeLeave = mediaManager.camera.status.value is DeviceStatus.Enabled
+        microphoneEnabledBeforeLeave = mediaManager.microphone.status.value is DeviceStatus.Enabled
         stopScreenSharing()
         mediaManager.camera.disable()
         mediaManager.microphone.disable()
+    }
+
+    override fun restart() {
+        startAudioLevelMonitoring()
+        if (mediaManagerDelegate.isInitialized()) mediaManager.prepareForJoin()
     }
 
     fun cleanup() {
@@ -414,6 +436,6 @@ internal class CallMediaManager(
         resetDesiredAudioProcessing()
         resetDesiredHardwareNoiseSuppressor()
         resetDesiredHardwareAcousticEchoCanceler()
-        mediaManager.cleanup()
+        if (mediaManagerDelegate.isInitialized()) mediaManager.cleanup()
     }
 }

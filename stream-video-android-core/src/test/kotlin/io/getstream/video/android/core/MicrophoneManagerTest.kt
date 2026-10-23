@@ -30,6 +30,7 @@ import io.getstream.android.video.api.generated.models.AudioSettingsResponse
 import io.getstream.android.video.api.generated.models.CallSettingsResponse
 import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.video.android.core.audio.AudioHandler
+import io.getstream.video.android.core.audio.AudioSwitchDecorator
 import io.getstream.video.android.core.audio.StreamAudioDevice
 import io.getstream.video.android.core.audio.UsbAudioInputDevice
 import io.getstream.video.android.core.call.RtcSession
@@ -41,8 +42,10 @@ import io.getstream.webrtc.AudioTrack
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.slot
 import io.mockk.spyk
+import io.mockk.unmockkConstructor
 import io.mockk.verify
 import io.mockk.verifyOrder
 import kotlinx.coroutines.channels.Channel
@@ -136,6 +139,29 @@ class MicrophoneManagerTest {
         verify(exactly = 0) {
             // Setup was not called, but still there is no exception
             microphoneManager.setup()
+        }
+    }
+
+    @Test
+    fun `setup starts fresh audio routing after cleanup`() {
+        mockkConstructor(AudioSwitchDecorator::class)
+        try {
+            every { anyConstructed<AudioSwitchDecorator>().start() } returns Unit
+            every { anyConstructed<AudioSwitchDecorator>().stop() } returns Unit
+            val mediaManager = mockk<MediaManagerImpl>(relaxed = true)
+            val context = mockk<Context>(relaxed = true)
+            every { mediaManager.context } returns context
+            val audioManager = mockk<AudioManager>(relaxed = true)
+            every { context.getSystemService(Context.AUDIO_SERVICE) } returns audioManager
+            every { context.getSystemService(AudioManager::class.java) } returns audioManager
+            val microphone = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+            microphone.setup()
+            microphone.cleanup()
+            microphone.setup()
+            verify(exactly = 2) { anyConstructed<AudioSwitchDecorator>().start() }
+            verify(exactly = 1) { anyConstructed<AudioSwitchDecorator>().stop() }
+        } finally {
+            unmockkConstructor(AudioSwitchDecorator::class)
         }
     }
 

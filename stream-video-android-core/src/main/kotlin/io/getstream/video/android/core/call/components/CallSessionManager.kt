@@ -16,6 +16,7 @@
 
 package io.getstream.video.android.core.call.components
 
+import io.getstream.video.android.core.call.Restartable
 import io.getstream.video.android.core.call.RtcSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Keeping this state in a single component gives the join, reconnect, connectivity and
  * lifecycle collaborators a single source of truth to depend on.
  */
-internal class CallSessionManager() {
+internal class CallSessionManager() : Restartable {
     private val _session: MutableStateFlow<RtcSession?> = MutableStateFlow(null)
 
     /**
@@ -48,7 +49,18 @@ internal class CallSessionManager() {
 
     var sessionId = UUID.randomUUID().toString()
 
-    val unifiedSessionId = UUID.randomUUID().toString()
+    var unifiedSessionId = UUID.randomUUID().toString()
+        private set
+
+    override fun restart() {
+        sessionId = UUID.randomUUID().toString()
+        unifiedSessionId = UUID.randomUUID().toString()
+        nonFastReconnectAttempts = 0
+        connectStartTime = 0L
+        reconnectStartTime = 0L
+        location = null
+        clearFailedSfuIds()
+    }
 
     /** Cached SFU location used when (re)joining a call. */
     var location: String? = null

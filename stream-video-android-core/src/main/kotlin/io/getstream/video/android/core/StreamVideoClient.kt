@@ -281,6 +281,11 @@ internal class StreamVideoClient internal constructor(
         calls.remove(call.cid)
     }
 
+    internal fun onCallReused(call: Call) {
+        destroyedCalls.remove(call.hashCode())
+        calls[call.cid] = call
+    }
+
     override fun cleanup() {
         // remove all cached calls
         calls.clear()
