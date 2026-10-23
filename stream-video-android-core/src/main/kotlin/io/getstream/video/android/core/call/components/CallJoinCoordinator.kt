@@ -325,7 +325,6 @@ internal class CallJoinCoordinator(
         video: Boolean = isVideoEnabled(),
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
-        lifecycle.prepareForJoin()
         logger.d { "[joinAndRing] #ringing; #track; members: $members, video: $video" }
         state.toggleJoinAndRingProgress(true)
         return join(

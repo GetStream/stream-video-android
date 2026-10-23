@@ -70,7 +70,7 @@ class CallMediaManagerTest {
         type = "default",
         id = "call-id",
         clientImpl = clientImpl,
-        scopeProvider = { testScope },
+        coroutineScope = testScope,
         state = state,
         sessionManager = sessionManager,
         eglBase = { mockk(relaxed = true) },

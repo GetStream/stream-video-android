@@ -2096,10 +2096,10 @@ public class CallState internal constructor(
         _notificationIdFlow.value = null
         _serviceRoute.value = ServiceRoute.UNDECIDED
         _sortedParticipantsState.restart()
-        startScopeJobs()
+        restartScopeObservers()
     }
 
-    internal fun startScopeJobs() {
+    private fun restartScopeObservers() {
         participantVisibilityFlow?.let { updateParticipantVisibilityFlow(it) }
         jetpackTelecomRepository?.let { observeTelecomHold(it) }
     }

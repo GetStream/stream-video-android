@@ -44,7 +44,7 @@ internal class ScopeProviderImpl(
 
     private val logger by taggedLogger("ScopeProvider:$callCid")
     private val generation = SynchronizedScopeGeneration(
-        createCallJob = { SupervisorJob(coroutineScope.coroutineContext[Job]) },
+        callJobFactory = { SupervisorJob(coroutineScope.coroutineContext[Job]) },
     )
     private val restartListeners = CopyOnWriteArrayList<() -> Unit>()
 
@@ -109,6 +109,6 @@ internal class ScopeProviderImpl(
         restartListeners += listener
     }
 
-    private fun SynchronizedScopeGeneration.Generation.logPrefix(): String =
+    private fun SynchronizedScopeGeneration.CallScopeGeneration.logPrefix(): String =
         "[debug-instance-$debugInstanceId]"
 }

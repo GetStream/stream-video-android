@@ -55,7 +55,7 @@ internal class CallMediaManager(
     private val type: String,
     private val id: String,
     private val clientImpl: StreamVideoClient,
-    private val scopeProvider: () -> CoroutineScope,
+    private val coroutineScope: CoroutineScope,
     private val state: CallState,
     private val sessionManager: CallSessionManager,
     private val eglBase: () -> EglBase,
@@ -138,7 +138,7 @@ internal class CallMediaManager(
     /** Starts streaming smoothed microphone audio levels into [localMicrophoneAudioLevel]. */
     fun startAudioLevelMonitoring() {
         audioLevelMonitoringJob?.cancel()
-        audioLevelMonitoringJob = scopeProvider().launch {
+        audioLevelMonitoringJob = coroutineScope.launch {
             soundInputProcessor.currentAudioLevel.collect {
                 audioLevelOutputHelper.rampToValue(it)
             }
@@ -292,7 +292,7 @@ internal class CallMediaManager(
                     microphone.select(deviceBeforeHeadset)
                 }
             }
-        }.launchIn(scopeProvider())
+        }.launchIn(coroutineScope)
     }
 
     fun startScreenSharing(

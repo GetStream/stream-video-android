@@ -28,28 +28,28 @@ import java.util.concurrent.atomic.AtomicReference
  * and applying cleanup and restart lifecycle operations.
  */
 internal class SynchronizedScopeGeneration(
-    private val createCallJob: () -> CompletableJob,
+    private val callJobFactory: () -> CompletableJob,
 ) {
 
-    internal data class Generation(
+    internal data class CallScopeGeneration(
         val debugInstanceId: Int,
         val callJob: CompletableJob,
     )
 
     internal data class ExecutorAccess(
-        val generation: Generation,
+        val generation: CallScopeGeneration,
         val executor: ExecutorService,
         val created: Boolean,
     )
 
     internal data class CleanupAccess(
-        val generation: Generation,
+        val generation: CallScopeGeneration,
         val executor: ExecutorService?,
         val cleanedUpNow: Boolean,
     )
 
-    private class SynchronizedGeneration(
-        val generation: Generation,
+    private class CallScopeGenerationState(
+        val generation: CallScopeGeneration,
     ) {
         val lock = Any()
         var executor: ExecutorService? = null
@@ -60,9 +60,9 @@ internal class SynchronizedScopeGeneration(
     private val debugInstanceCounter = AtomicInteger(0)
     private val current = AtomicReference(createGeneration())
 
-    internal fun current(): Generation = current.get().generation
+    internal fun current(): CallScopeGeneration = current.get().generation
 
-    internal fun requireActive(): Generation {
+    internal fun requireActive(): CallScopeGeneration {
         val currentGeneration = current.get()
         return synchronized(currentGeneration.lock) {
             checkActive(currentGeneration)
@@ -117,7 +117,7 @@ internal class SynchronizedScopeGeneration(
         }
     }
 
-    internal fun restart(): Generation = synchronized(restartLock) {
+    internal fun restart(): CallScopeGeneration = synchronized(restartLock) {
         val currentGeneration = current.get()
         synchronized(currentGeneration.lock) {
             check(currentGeneration.isCleanedUp) {
@@ -127,14 +127,14 @@ internal class SynchronizedScopeGeneration(
         }
     }
 
-    private fun createGeneration(): SynchronizedGeneration = SynchronizedGeneration(
-        generation = Generation(
+    private fun createGeneration(): CallScopeGenerationState = CallScopeGenerationState(
+        generation = CallScopeGeneration(
             debugInstanceId = debugInstanceCounter.incrementAndGet(),
-            callJob = createCallJob(),
+            callJob = callJobFactory(),
         ),
     )
 
-    private fun checkActive(generation: SynchronizedGeneration) {
+    private fun checkActive(generation: CallScopeGenerationState) {
         check(!generation.isCleanedUp) { "ScopeProvider has been cleaned up" }
     }
 }

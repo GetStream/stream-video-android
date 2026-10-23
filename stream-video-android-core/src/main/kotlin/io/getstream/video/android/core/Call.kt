@@ -370,7 +370,7 @@ public class Call(
         type = type,
         id = id,
         clientImpl = clientImpl,
-        scopeProvider = { scope },
+        coroutineScope = scopeProvider,
         state = state,
         sessionManager = sessionManager,
         eglBase = { eglBase },
@@ -581,13 +581,12 @@ public class Call(
     private var autoOnApplied: Boolean = false
 
     init {
-        state.startScopeJobs()
         media.startAudioLevelMonitoring()
-        observeNoiseCancellationSignalTarget()
-        observeNoiseCancellationPolicy()
         powerManager = safeCallWithDefault(null) {
             clientImpl.context.getSystemService(POWER_SERVICE) as? PowerManager
         }
+        observeNoiseCancellationSignalTarget()
+        observeNoiseCancellationPolicy()
     }
 
     /** Basic crud operations */
