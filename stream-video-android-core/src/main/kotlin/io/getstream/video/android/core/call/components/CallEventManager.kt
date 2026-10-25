@@ -18,17 +18,14 @@ package io.getstream.video.android.core.call.components
 
 import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
-import io.getstream.video.android.core.EventSubscription
 import io.getstream.video.android.core.events.GoAwayEvent
-import io.getstream.video.android.core.events.VideoEventListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import java.util.Collections
 
 /**
- * Owns the event pipeline for a call: the shared [events] flow, the set of legacy
- * [EventSubscription]s, and the dispatch / handling of incoming [VideoEvent]s.
+ * Owns the event pipeline for a call: the shared [events] flow and the dispatch / handling of
+ * incoming [VideoEvent]s.
  */
 internal class CallEventManager(
     private val type: String,
@@ -42,32 +39,6 @@ internal class CallEventManager(
 
     val events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
 
-    private val subscriptions = Collections.synchronizedSet(mutableSetOf<EventSubscription>())
-
-    fun subscribeFor(
-        vararg eventTypes: Class<out VideoEvent>,
-        listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription = synchronized(subscriptions) {
-        val filter = { event: VideoEvent ->
-            eventTypes.any { type -> type.isInstance(event) }
-        }
-        val sub = EventSubscription(listener, filter)
-        subscriptions.add(sub)
-        return sub
-    }
-
-    fun subscribe(
-        listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription = synchronized(subscriptions) {
-        val sub = EventSubscription(listener)
-        subscriptions.add(sub)
-        return sub
-    }
-
-    fun unsubscribe(eventSubscription: EventSubscription) = synchronized(subscriptions) {
-        subscriptions.remove(eventSubscription)
-    }
-
     fun handleEvent(event: VideoEvent) {
         logger.v { "[call handleEvent] #sfu; event.type: ${event.getEventType()}" }
 
@@ -79,23 +50,7 @@ internal class CallEventManager(
         }
     }
 
-    fun fireEvent(event: VideoEvent) = synchronized(subscriptions) {
-        subscriptions.forEach { sub ->
-            if (!sub.isDisposed) {
-                // subs without filters should always fire
-                if (sub.filter == null) {
-                    sub.listener.onEvent(event)
-                }
-
-                // if there is a filter, check it and fire if it matches
-                sub.filter?.let {
-                    if (it.invoke(event)) {
-                        sub.listener.onEvent(event)
-                    }
-                }
-            }
-        }
-
+    fun fireEvent(event: VideoEvent) {
         if (!events.tryEmit(event)) {
             logger.e { "Failed to emit event to observers: [event: $event]" }
         }

@@ -21,7 +21,6 @@ import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.SFUConnectedEvent
-import io.getstream.video.android.core.events.VideoEventListener
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.launch
@@ -35,7 +34,7 @@ import org.junit.Test
 
 /**
  * Unit tests for [CallEventManager] which owns the event pipeline for a call:
- * the shared events flow, legacy subscriptions and dispatch of incoming events.
+ * the shared events flow and dispatch of incoming events.
  */
 class CallEventManagerTest {
 
@@ -50,59 +49,6 @@ class CallEventManagerTest {
     private fun manager() = CallEventManager("default", "call-id", testScope, reconnector = {
         reconnector
     })
-
-    @Test
-    fun `subscribe without filter receives every fired event`() {
-        val manager = manager()
-        val received = mutableListOf<VideoEvent>()
-        manager.subscribe { received.add(it) }
-
-        val event = mockk<VideoEvent>(relaxed = true)
-        manager.fireEvent(event)
-
-        assertThat(received).containsExactly(event)
-    }
-
-    @Test
-    fun `subscribeFor only receives matching event types`() {
-        val manager = manager()
-        val received = mutableListOf<VideoEvent>()
-        manager.subscribeFor(GoAwayEvent::class.java) { received.add(it) }
-
-        val matching = mockk<GoAwayEvent>(relaxed = true)
-        val nonMatching = mockk<SFUConnectedEvent>(relaxed = true)
-
-        manager.fireEvent(nonMatching)
-        assertThat(received).isEmpty()
-
-        manager.fireEvent(matching)
-        assertThat(received).containsExactly(matching)
-    }
-
-    @Test
-    fun `unsubscribe stops future delivery`() {
-        val manager = manager()
-        val received = mutableListOf<VideoEvent>()
-        val listener = VideoEventListener<VideoEvent> { received.add(it) }
-        val subscription = manager.subscribe(listener)
-
-        manager.unsubscribe(subscription)
-        manager.fireEvent(mockk(relaxed = true))
-
-        assertThat(received).isEmpty()
-    }
-
-    @Test
-    fun `disposed subscriptions do not receive events`() {
-        val manager = manager()
-        val received = mutableListOf<VideoEvent>()
-        val subscription = manager.subscribe { received.add(it) }
-        subscription.dispose()
-
-        manager.fireEvent(mockk(relaxed = true))
-
-        assertThat(received).isEmpty()
-    }
 
     @Test
     fun `fireEvent emits to the shared events flow`() = runTest(testDispatcher) {
