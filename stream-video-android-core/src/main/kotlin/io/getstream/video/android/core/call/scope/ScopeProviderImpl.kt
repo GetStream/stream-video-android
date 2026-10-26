@@ -23,7 +23,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.Executors
 import kotlin.jvm.Throws
 
 /**
@@ -41,20 +40,20 @@ internal class ScopeProviderImpl(
 ) : ScopeProvider {
 
     private val logger by taggedLogger("ScopeProvider:$callCid")
-    private val generation = SynchronizedScopeGeneration(
+    private val generationManager = CallScopeGenerationManager(
         parentCoroutineContext = coroutineScope.coroutineContext,
     )
     private val restartListeners = CopyOnWriteArrayList<() -> Unit>()
 
-    internal val debugInstanceId: Int get() = generation.current().debugInstanceId
+    internal val debugInstanceId: Int get() = generationManager.currentDebugInstanceId
 
     override val callScope: CoroutineScope
-        get() = generation.current().callScope
+        get() = generationManager.currentCallScope
 
     @Throws(IllegalStateException::class)
     override fun getCoroutineScope(supervisorJob: CompletableJob): CoroutineScope {
-        val currentGeneration = generation.requireActive()
-        logger.d { "${currentGeneration.logPrefix()} Creating coroutine scope for RTC session main" }
+        val debugInstanceId = generationManager.requireActive()
+        logger.d { "${debugInstanceId.logPrefix()} Creating coroutine scope for RTC session main" }
         return CoroutineScope(
             coroutineScope.coroutineContext +
                 supervisorJob +
@@ -64,42 +63,33 @@ internal class ScopeProviderImpl(
 
     @Throws(IllegalStateException::class)
     override fun getRtcSessionScope(supervisorJob: CompletableJob, callId: String): CoroutineScope {
-        val executorAccess = generation.getOrCreateExecutor {
-            Executors.newSingleThreadExecutor { runnable ->
-                Thread(runnable, "rtc-call-$callId")
-            }
-        }
-        if (executorAccess.created) {
-            logger.d {
-                "${executorAccess.generation.logPrefix()} Creating new single thread executor for callId: $callId"
-            }
-        }
+        val executor = generationManager.getOrCreateExecutor(callId)
         logger.d {
-            "${executorAccess.generation.logPrefix()} Creating RTC session scope with dedicated executor for callId: $callId"
+            "${generationManager.currentDebugInstanceId.logPrefix()} Creating RTC session scope with dedicated executor for callId: $callId"
         }
         return CoroutineScope(
             coroutineScope.coroutineContext +
                 supervisorJob +
                 CoroutineName("rtc-session-coroutine") +
-                executorAccess.executor.asCoroutineDispatcher(),
+                executor.asCoroutineDispatcher(),
         )
     }
 
     override fun cleanup(): Job? {
-        val cleanupAccess = generation.cleanup()
-        if (cleanupAccess.cleanedUpNow) {
-            cleanupAccess.generation.callJob.cancel()
+        val cleanupResult = generationManager.cleanup()
+        if (cleanupResult.cleanedUpNow) {
+            cleanupResult.callJob.cancel()
             logger.d {
-                "${cleanupAccess.generation.logPrefix()} Cleaning up ScopeProvider and shutting down executor"
+                "${cleanupResult.debugInstanceId.logPrefix()} Cleaning up ScopeProvider and shutting down executor"
             }
-            cleanupAccess.executor?.shutdown()
+            cleanupResult.executor?.shutdown()
         }
-        return cleanupAccess.generation.callJob
+        return cleanupResult.callJob
     }
 
     override fun restart() {
-        val nextGeneration = generation.restart()
-        logger.d { "${nextGeneration.logPrefix()} Restarted ScopeProvider" }
+        val debugInstanceId = generationManager.restart()
+        logger.d { "${debugInstanceId.logPrefix()} Restarted ScopeProvider" }
         restartListeners.forEach { it() }
     }
 
@@ -107,6 +97,5 @@ internal class ScopeProviderImpl(
         restartListeners += listener
     }
 
-    private fun SynchronizedScopeGeneration.CallScopeGeneration.logPrefix(): String =
-        "[debug-instance-$debugInstanceId]"
+    private fun Int.logPrefix(): String = "[debug-instance-$this]"
 }
