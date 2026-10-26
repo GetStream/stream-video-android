@@ -386,6 +386,7 @@ public class Call(
         restartables = listOf(
             sessionManager,
             callAnalytics,
+            statsReporter,
             Restartable {
                 state.restart()
                 Result.Success(Unit)

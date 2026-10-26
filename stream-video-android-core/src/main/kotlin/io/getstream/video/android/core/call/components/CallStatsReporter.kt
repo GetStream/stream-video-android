@@ -17,8 +17,11 @@
 package io.getstream.video.android.core.call.components
 
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.CallStatsReport
+import io.getstream.video.android.core.call.Restartable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -36,7 +39,7 @@ internal class CallStatsReporter(
     private val scope: CoroutineScope,
     private val sessionManager: CallSessionManager,
     private val state: CallState,
-) {
+) : Restartable {
     private val logger by taggedLogger("Call:StatsReporter:$type:$id")
 
     /** Contains stats events for observation. */
@@ -64,6 +67,13 @@ internal class CallStatsReporter(
 
     fun stop() {
         callStatsReportingJob?.cancel()
+    }
+
+    override fun restart(): Result<Unit> {
+        stop()
+        statsReport.value = null
+        statLatencyHistory.value = listOf(0, 0, 0)
+        return Success(Unit)
     }
 
     suspend fun collectStats(): CallStatsReport {

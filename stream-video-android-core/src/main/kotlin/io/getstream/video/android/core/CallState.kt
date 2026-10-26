@@ -2078,6 +2078,7 @@ public class CallState internal constructor(
     }
 
     internal fun restart() {
+        stats.reset()
         internalParticipants.clear()
         _participants.value = emptyMap()
         _activeSpeakers.value = emptyList()

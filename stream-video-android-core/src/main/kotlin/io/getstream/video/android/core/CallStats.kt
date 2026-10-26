@@ -95,6 +95,20 @@ public class PeerConnectionStats(scope: CoroutineScope) {
     internal var lastAudioBytes: Long? = null
     internal var lastAudioTimestampUs: Double? = null
 
+    internal fun reset() {
+        _latency.value = 0
+        _resolution.value = ""
+        _qualityDropReason.value = ""
+        _jitterInMs.value = 0
+        _bitrateKbps.value = 0F
+        _videoCodec.value = ""
+        _audioBitrateKbps.value = 0F
+        _audioCodec.value = ""
+        _audioTargetBitrateKbps.value = 0F
+        lastAudioBytes = null
+        lastAudioTimestampUs = null
+    }
+
     /**
      * Derives the audio bitrate from the change in [bytes] since the previous poll.
      *
@@ -137,6 +151,12 @@ public class CallStats(val call: Call, val callScope: CoroutineScope) {
     val _local = MutableStateFlow<LocalStats?>(null)
     val local: StateFlow<LocalStats?> =
         _local
+
+    internal fun reset() {
+        publisher.reset()
+        subscriber.reset()
+        _local.value = null
+    }
 
     fun updateFromRTCStats(stats: RtcStatsReport?, isPublisher: Boolean = true) {
         if (stats == null) return

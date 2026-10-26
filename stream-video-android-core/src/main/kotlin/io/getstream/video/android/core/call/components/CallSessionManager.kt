@@ -60,6 +60,7 @@ internal class CallSessionManager() : Restartable {
         nonFastReconnectAttempts = 0
         connectStartTime = 0L
         reconnectStartTime = 0L
+        reconnectDeadlineMillis = DEFAULT_RECONNECT_DEADLINE_MILLIS
         location = null
         clearFailedSfuIds()
         return Success(Unit)
@@ -110,5 +111,9 @@ internal class CallSessionManager() : Restartable {
      * reconnect loop and the connectivity monitor, so it lives with the other shared
      * reconnect bookkeeping.
      */
-    var reconnectDeadlineMillis: Int = 10_000
+    var reconnectDeadlineMillis: Int = DEFAULT_RECONNECT_DEADLINE_MILLIS
+
+    private companion object {
+        const val DEFAULT_RECONNECT_DEADLINE_MILLIS = 10_000
+    }
 }
