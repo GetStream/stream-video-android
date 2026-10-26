@@ -52,7 +52,7 @@ class CallLifecycleManagerTest {
         var shutdowns = 0
         private val parent = test.backgroundScope
         val scopeProvider = ScopeProviderImpl(parent, "default:test-call")
-        val scope: CoroutineScope get() = scopeProvider
+        val scope: CoroutineScope get() = scopeProvider.callScope
         init {
             every { state._connection } returns MutableStateFlow(RealtimeConnection.PreJoin)
         }

@@ -26,6 +26,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -128,17 +129,20 @@ class ScopeProviderTest {
     }
 
     @Test
-    fun `restart creates a new call job and allows new RTC scopes`() = runTest {
-        val firstCallJob = scopeProvider.coroutineContext[Job]!!
+    fun `restart creates a new call scope and allows new RTC scopes`() = runTest {
+        val firstCallScope = scopeProvider.callScope
+        val firstCallJob = firstCallScope.coroutineContext[Job]!!
         scopeProvider.getRtcSessionScope(SupervisorJob(), "test-call-1")
 
         scopeProvider.cleanup()?.join()
         assertTrue(firstCallJob.isCancelled)
 
         scopeProvider.restart()
-        val secondCallJob = scopeProvider.coroutineContext[Job]!!
+        val secondCallScope = scopeProvider.callScope
+        val secondCallJob = secondCallScope.coroutineContext[Job]!!
 
         assertEquals(2, scopeProvider.debugInstanceId)
+        assertNotSame(firstCallScope, secondCallScope)
         assertNotEquals(firstCallJob, secondCallJob)
         assertTrue(secondCallJob.isActive)
         assertNotNull(scopeProvider.getRtcSessionScope(SupervisorJob(), "test-call-1"))

@@ -188,7 +188,7 @@ class CallJoinCoordinatorTest {
             lifecycle = actualLifecycle,
             sessionFactory = RtcSessionFactory { _, _, _, _, _, _, _ ->
                 // RtcSession needs this provider on every join, including after cleanup.
-                providerJobs += provider.coroutineContext[Job]!!
+                providerJobs += provider.callScope.coroutineContext[Job]!!
                 val job = SupervisorJob()
                 provider.getRtcSessionScope(job, "test-call")
                 job.cancel()

@@ -21,11 +21,9 @@ import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
-import kotlin.coroutines.CoroutineContext
 import kotlin.jvm.Throws
 
 /**
@@ -44,14 +42,14 @@ internal class ScopeProviderImpl(
 
     private val logger by taggedLogger("ScopeProvider:$callCid")
     private val generation = SynchronizedScopeGeneration(
-        callJobFactory = { SupervisorJob(coroutineScope.coroutineContext[Job]) },
+        parentCoroutineContext = coroutineScope.coroutineContext,
     )
     private val restartListeners = CopyOnWriteArrayList<() -> Unit>()
 
     internal val debugInstanceId: Int get() = generation.current().debugInstanceId
 
-    override val coroutineContext: CoroutineContext
-        get() = coroutineScope.coroutineContext + generation.current().callJob
+    override val callScope: CoroutineScope
+        get() = generation.current().callScope
 
     @Throws(IllegalStateException::class)
     override fun getCoroutineScope(supervisorJob: CompletableJob): CoroutineScope {

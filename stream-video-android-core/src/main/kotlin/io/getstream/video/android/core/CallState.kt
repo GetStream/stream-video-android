@@ -243,7 +243,7 @@ public class CallState internal constructor(
     private var participantVisibilityFlow: Flow<List<String>>? = null
 
     @InternalStreamVideoApi
-    val scope: CoroutineScope = scopeProvider
+    val scope: CoroutineScope = call.scope
 
     private fun <T> Flow<T>.stateIn(
         started: SharingStarted,
@@ -490,7 +490,7 @@ public class CallState internal constructor(
         ).stateIn(SharingStarted.WhileSubscribed(10_000L), null)
 
     private val _sortedParticipantsState = SortedParticipantsState(
-        scopeProvider = { scopeProvider },
+        scopeProvider = { scopeProvider.callScope },
         call = call,
         participants = _participants,
         pinnedParticipantsDetailed = _pinnedParticipantsDetailed,
@@ -938,7 +938,7 @@ public class CallState internal constructor(
             }
 
             is LocalCallMissedEvent -> {
-                scopeProvider.launch {
+                scopeProvider.callScope.launch {
                     val newRejectedBySet = _rejectedBy.value.toMutableSet()
                     StreamVideo.instanceOrNull()?.let {
                         newRejectedBySet.add(it.user.id)
@@ -1355,7 +1355,7 @@ public class CallState internal constructor(
             -> closedCaptionManager.handleEvent(event)
 
             is CallModerationBlurEvent -> {
-                scopeProvider.launch {
+                scopeProvider.callScope.launch {
                     val callServiceConfig = StreamVideo.instanceOrNull()?.state?.callConfigRegistry?.get(call.type) ?: CallServiceConfig()
                     if (callServiceConfig.moderationConfig.videoModerationConfig.enable) {
                         call.state.moderationManager.applyVideoModeration()
@@ -1567,7 +1567,7 @@ public class CallState internal constructor(
         if (!shouldJoin) return false
 
         call.setJoinSource(source)
-        autoJoiningCall = scopeProvider.launch {
+        autoJoiningCall = scopeProvider.callScope.launch {
             // errors are handled inside the join function
             val joinResult = call.join()
             autoJoiningCall = null
@@ -1634,7 +1634,7 @@ public class CallState internal constructor(
     fun markSpeakingAsMuted() {
         _speakingWhileMuted.value = true
         speakingWhileMutedResetJob?.cancel()
-        speakingWhileMutedResetJob = scopeProvider.launch {
+        speakingWhileMutedResetJob = scopeProvider.callScope.launch {
             delay(2000)
             _speakingWhileMuted.value = false
         }
@@ -1774,7 +1774,7 @@ public class CallState internal constructor(
         } else {
             ParticipantState(
                 sessionId = sessionId,
-                scope = scopeProvider,
+                scope = scope,
                 callActions = callActions,
                 initialUserId = userId,
                 source = source,
@@ -1993,7 +1993,7 @@ public class CallState internal constructor(
         participantsVisibilityMonitor?.cancel()
 
         if (flow != null) {
-            participantsVisibilityMonitor = scopeProvider.launch {
+            participantsVisibilityMonitor = scopeProvider.callScope.launch {
                 flow.collectLatest { visibleParticipantIds ->
                     internalParticipants.forEach {
                         if (visibleParticipantIds.contains(it.key)) {
@@ -2061,7 +2061,7 @@ public class CallState internal constructor(
     private fun observeTelecomHold(repo: JetpackTelecomRepository) {
         telecomHoldObserverJob?.cancel()
 
-        telecomHoldObserverJob = scopeProvider.launch(DispatcherProvider.Default) {
+        telecomHoldObserverJob = scopeProvider.callScope.launch(DispatcherProvider.Default) {
             repo.currentCall
                 .map { (it as? TelecomCall.Registered)?.isOnHold == true }
                 .distinctUntilChanged()

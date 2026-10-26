@@ -146,7 +146,10 @@ public class Call(
     private val logger by taggedLogger("Call:$type:$id")
     internal var powerManager: PowerManager? = null
 
-    internal val scope: CoroutineScope = scopeProvider
+    internal val scope: CoroutineScope = object : CoroutineScope {
+        override val coroutineContext
+            get() = scopeProvider.callScope.coroutineContext
+    }
 
     /** Delegate that owns the live RTC session state and reconnect bookkeeping. */
     private val sessionManager = CallSessionManager()
@@ -370,7 +373,7 @@ public class Call(
         type = type,
         id = id,
         clientImpl = clientImpl,
-        coroutineScope = scopeProvider,
+        coroutineScope = scope,
         state = state,
         sessionManager = sessionManager,
         eglBase = { eglBase },

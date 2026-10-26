@@ -17,22 +17,27 @@
 package io.getstream.video.android.core.call.scope
 
 import kotlinx.coroutines.CompletableJob
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Provides synchronized access to the resources that change between Call scope generations.
  *
- * Synchronization is isolated here so [ScopeProviderImpl] can focus on creating coroutine scopes
- * and applying cleanup and restart lifecycle operations.
+ * Synchronization and Call scope creation are isolated here so [ScopeProviderImpl] can focus on
+ * exposing scopes and applying cleanup and restart lifecycle operations.
  */
 internal class SynchronizedScopeGeneration(
-    private val callJobFactory: () -> CompletableJob,
+    private val parentCoroutineContext: CoroutineContext,
 ) {
 
     internal data class CallScopeGeneration(
         val debugInstanceId: Int,
+        val callScope: CoroutineScope,
         val callJob: CompletableJob,
     )
 
@@ -127,12 +132,16 @@ internal class SynchronizedScopeGeneration(
         }
     }
 
-    private fun createGeneration(): CallScopeGenerationState = CallScopeGenerationState(
-        generation = CallScopeGeneration(
-            debugInstanceId = debugInstanceCounter.incrementAndGet(),
-            callJob = callJobFactory(),
-        ),
-    )
+    private fun createGeneration(): CallScopeGenerationState {
+        val callJob = SupervisorJob(parentCoroutineContext[Job])
+        return CallScopeGenerationState(
+            generation = CallScopeGeneration(
+                debugInstanceId = debugInstanceCounter.incrementAndGet(),
+                callScope = CoroutineScope(parentCoroutineContext + callJob),
+                callJob = callJob,
+            ),
+        )
+    }
 
     private fun checkActive(generation: CallScopeGenerationState) {
         check(!generation.isCleanedUp) { "ScopeProvider has been cleaned up" }

@@ -22,7 +22,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 
 /** Owns a Call's coroutine generations and creates the scopes used by its RTC session. */
-internal interface ScopeProvider : CoroutineScope, Restartable {
+internal interface ScopeProvider : Restartable {
+    /** The coroutine scope for the current Call generation. */
+    val callScope: CoroutineScope
+
     /**
      * Provides the main coroutine scope for RTC session operations.
      * This scope is based on the client's main scope with a supervisor job.

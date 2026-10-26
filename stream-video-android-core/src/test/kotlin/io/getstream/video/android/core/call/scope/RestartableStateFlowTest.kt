@@ -83,7 +83,7 @@ class RestartableStateFlowTest {
         val scope = ScopeProviderImpl(backgroundScope, "default:test-call")
         scope.cleanup()?.join()
         var ran = false
-        val job = scope.launch { ran = true }
+        val job = scope.callScope.launch { ran = true }
         job.join()
         assertFalse(ran)
     }

@@ -54,7 +54,7 @@ internal class RestartableStateFlow<T>(
         // TODO: Revisit whether this manual SharingStarted implementation can be simplified.
         //  It currently uses the exposed StateFlow's subscriber count to preserve stateIn's
         //  WhileSubscribed and replay-reset behavior across scope restarts.
-        producerJob = scopeProvider.launch {
+        producerJob = scopeProvider.callScope.launch {
             started.command(state.subscriptionCount).distinctUntilChanged().collectLatest { command ->
                 when (command) {
                     SharingCommand.START -> upstream.collect { state.value = it }
