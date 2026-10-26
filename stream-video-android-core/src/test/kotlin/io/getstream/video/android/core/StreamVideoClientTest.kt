@@ -60,9 +60,14 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.threeten.bp.OffsetDateTime
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotSame
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class StreamVideoClientTest {
@@ -130,6 +135,48 @@ class StreamVideoClientTest {
             recordPrivateCalls = true,
         )
         return ClientHarness(client, streamClientMock, tokenRepo)
+    }
+
+    @Test
+    fun `concurrent call requests return the same cached instance`() {
+        val requestCount = 16
+        val startRequests = CountDownLatch(1)
+        val executor = Executors.newFixedThreadPool(requestCount)
+
+        try {
+            val requests = List(requestCount) {
+                executor.submit<Call> {
+                    startRequests.await()
+                    client.call("default", "concurrent-call")
+                }
+            }
+
+            startRequests.countDown()
+            val calls = requests.map { it.get(10, TimeUnit.SECONDS) }
+
+            assertTrue(calls.all { it === calls.first() })
+        } finally {
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
+    fun `reused call fills only an empty cache and old cleanup preserves its replacement`() {
+        val originalCall = client.call("default", "reusable-call")
+
+        client.onCallCleanUp(originalCall)
+        client.onCallReused(originalCall)
+        assertSame(originalCall, client.call("default", "reusable-call"))
+
+        client.onCallCleanUp(originalCall)
+        val replacementCall = client.call("default", "reusable-call")
+        assertNotSame(originalCall, replacementCall)
+
+        client.onCallReused(originalCall)
+        assertSame(replacementCall, client.call("default", "reusable-call"))
+
+        client.onCallCleanUp(originalCall)
+        assertSame(replacementCall, client.call("default", "reusable-call"))
     }
 
     @Test
@@ -236,10 +283,12 @@ class StreamVideoClientTest {
             every { session } returns sessionFlow
         }
 
-        client::class.java.getDeclaredField("calls").apply {
+        @Suppress("UNCHECKED_CAST")
+        val calls = client::class.java.getDeclaredField("calls").run {
             isAccessible = true
-            set(client, mutableMapOf("video:123" to call))
+            get(client) as MutableMap<String, Call>
         }
+        calls["video:123"] = call
 
         client.propagateEventToCall("video:123", event)
 

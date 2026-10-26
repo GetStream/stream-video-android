@@ -219,6 +219,7 @@ public class Call(
         }
 
         override fun markActive() {
+            clientImpl.onCallJoined(this@Call)
             client.state.setActiveCall(this@Call)
         }
 

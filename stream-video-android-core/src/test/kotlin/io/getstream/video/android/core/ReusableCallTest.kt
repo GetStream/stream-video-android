@@ -39,6 +39,7 @@ import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.video.android.core.events.ParticipantMigrationCompleteEvent
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.AudioTrack
@@ -102,11 +103,12 @@ class ReusableCallTest {
 
         val firstSession = reusableSession()
         val secondSession = reusableSession()
-        val sessions = ArrayDeque(listOf(firstSession, secondSession))
+        val thirdSession = reusableSession()
+        val sessions = ArrayDeque(listOf(firstSession, secondSession, thirdSession))
         var secondGenerationSnapshot: ResetSnapshot? = null
         val firstSessionId = call.sessionId
         call.unitTestRtcSessionFactory = {
-            if (sessions.size == 1) {
+            if (sessions.size == 2) {
                 secondGenerationSnapshot = ResetSnapshot(
                     sessionWasCleared = call.session.value == null,
                     participantsWereCleared = call.state.participants.value.isEmpty(),
@@ -133,6 +135,7 @@ class ReusableCallTest {
             Success(joinResponse(call, "session-$joinNumber"))
         }
         coEvery { firstSession.connectInternal(any(), any()) } returns SfuConnectionResult.Success
+        coEvery { thirdSession.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
         val secondVideoTrack = VideoTrack(
             streamId = "second-video",
@@ -243,6 +246,26 @@ class ReusableCallTest {
 
         call.leave()
         runCurrent()
+
+        val replacementCall = client.call("default", "reusable-call")
+        assertThat(replacementCall).isNotSameInstanceAs(call)
+
+        assertThat(call.join()).isEqualTo(Success(thirdSession))
+        assertThat(client.call("default", "reusable-call")).isSameInstanceAs(replacementCall)
+
+        val routedEvent = mockk<VideoEvent>(relaxed = true)
+        client.fireEvent(routedEvent, call.cid)
+        runCurrent()
+        assertThat(receivedEvents).contains(routedEvent)
+
+        val sfuEvent = ParticipantMigrationCompleteEvent
+        client.fireEvent(sfuEvent, call.cid)
+        runCurrent()
+        assertThat(receivedEvents).contains(sfuEvent)
+
+        call.leave()
+        runCurrent()
+        assertThat(client.call("default", "reusable-call")).isSameInstanceAs(replacementCall)
     }
 
     private data class ResetSnapshot(
