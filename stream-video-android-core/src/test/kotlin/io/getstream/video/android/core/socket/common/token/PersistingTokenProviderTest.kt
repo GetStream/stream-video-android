@@ -24,7 +24,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class PersistingTokenProviderTest {
-    private val tokenProvider: TokenProvider = mockk()
+    private val tokenProvider: TokenLoader = mockk()
     private val tokenRepository: TokenRepository = mockk(relaxed = true)
 
     private val provider = PersistingTokenProvider(tokenProvider, tokenRepository)

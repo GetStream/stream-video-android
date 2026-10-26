@@ -16,6 +16,17 @@
 
 package io.getstream.video.android.core.socket.common.token
 
-internal class ConstantTokenProvider(private val token: String) : TokenProvider {
-    override suspend fun loadToken(): String = token
+import io.getstream.android.core.api.authentication.StreamTokenProvider
+import io.getstream.android.core.api.model.value.StreamUserId
+
+/**
+ * Loads SFU tokens from the same [StreamTokenProvider] the coordinator connection uses.
+ * [userId] is read on each load so a guest identity adopted after `createGuest` is visible.
+ */
+internal class StreamTokenLoader(
+    private val provider: StreamTokenProvider,
+    private val userId: () -> String,
+) : TokenLoader {
+    override suspend fun loadToken(): String =
+        provider.loadToken(StreamUserId.fromString(userId())).rawValue
 }

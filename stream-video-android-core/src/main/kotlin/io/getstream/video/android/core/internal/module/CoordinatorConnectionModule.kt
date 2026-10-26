@@ -25,7 +25,6 @@ import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.logging.LoggingLevel
-import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.trace.Tracer
 import io.getstream.video.android.core.user.UserRepository
@@ -45,7 +44,6 @@ import java.util.concurrent.TimeUnit
 internal class CoordinatorConnectionModule(
     // Coordinator API
     context: Context,
-    tokenProvider: TokenProvider,
     userRepository: UserRepository,
     val tokenRepository: TokenRepository,
     override val scope: CoroutineScope,

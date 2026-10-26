@@ -18,6 +18,7 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.core.api.model.connection.StreamConnectionState
+import io.getstream.android.core.api.model.value.StreamToken
 import io.getstream.android.video.api.generated.models.ConnectedEvent
 import io.getstream.android.video.api.generated.models.VideoEvent
 import io.getstream.log.taggedLogger
@@ -283,8 +284,8 @@ class ClientAndAuthTest : TestBase() {
             apiKey = authData!!.apiKey,
             user = testData.users["thierry"]!!,
             token = testData.expiredToken,
-            legacyTokenProvider = { error ->
-                testData.tokens["thierry"]!!
+            tokenProvider = { _ ->
+                StreamToken.fromString(testData.tokens["thierry"]!!)
             },
         ).build()
 

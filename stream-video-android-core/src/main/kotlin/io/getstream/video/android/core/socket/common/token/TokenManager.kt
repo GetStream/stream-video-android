@@ -38,7 +38,7 @@ internal interface TokenManager {
     fun expireToken()
 
     /**
-     * Check if a [TokenProvider] has been provided.
+     * Check if a [TokenLoader] has been provided.
      *
      * @return true if a token provider has been provided, false on another case.
      */

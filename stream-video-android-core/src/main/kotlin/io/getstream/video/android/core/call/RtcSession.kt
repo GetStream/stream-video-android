@@ -87,6 +87,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
+import io.getstream.video.android.core.socket.common.token.StreamTokenLoader
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
@@ -325,6 +326,10 @@ public class RtcSession internal constructor(
             },
             tracer = sfuTracer,
             tokenRepository = TokenRepository(sfuToken),
+            tokenLoader = StreamTokenLoader(
+                provider = clientImpl.tokenProvider,
+                userId = { clientImpl.userId },
+            ),
             sfuAnalytics = sfuAnalytics,
         )
     },
