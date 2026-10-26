@@ -71,11 +71,10 @@ internal class CallLifecycleManager(
     private var sfuSocketReconnectionTime: Long? = null
 
     /** Wait outside the call scope, which may already be cancelled by leave. */
-    suspend fun prepareForJoin() {
+    suspend fun prepareForJoin(): Result<Unit> =
         cleanupState.prepareForJoin {
             restartCoordinator.restart()
         }
-    }
 
     fun leave(reason: CallLeaveReason) {
         logger.d { "[leave] #ringing; call_cid:$cid" }

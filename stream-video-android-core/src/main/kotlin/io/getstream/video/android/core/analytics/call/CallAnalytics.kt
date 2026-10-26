@@ -18,6 +18,8 @@ package io.getstream.video.android.core.analytics.call
 
 import android.content.Context
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
@@ -99,13 +101,16 @@ internal class CallAnalytics(
             sfuAnalyticsStateHolder,
         )
 
-    override fun restart() {
+    override fun restart(): Result<Unit> {
+        val currentJoinAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
         joinAnalyticsStateHolder.reset()
+        joinAnalyticsStateHolder.updateJoinStageAttemptId(currentJoinAttemptId)
         sfuAnalyticsStateHolder.updateSfuId("")
         sfuAnalyticsStateHolder.updateStageId("")
         sfuAnalyticsStateHolder.updateStage(Stage.NOT_STARTED)
         peerConnectionAnalytics.stateHolder.reset()
         resetAfterJoinSuccess()
+        return Success(Unit)
     }
 
     fun resetAfterJoinSuccess() {

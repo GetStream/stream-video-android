@@ -17,6 +17,8 @@
 package io.getstream.video.android.core.call.scope
 
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
+import io.getstream.result.Result.Success
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -87,10 +89,13 @@ internal class ScopeProviderImpl(
         return cleanupResult.callJob
     }
 
-    override fun restart() {
-        val debugInstanceId = generationManager.restart()
-        logger.d { "${debugInstanceId.logPrefix()} Restarted ScopeProvider" }
-        restartListeners.forEach { it() }
+    override fun restart(): Result<Unit> = generationManager.restart().also { result ->
+        if (result is Success) {
+            logger.d {
+                "${generationManager.currentDebugInstanceId.logPrefix()} Restarted ScopeProvider"
+            }
+            restartListeners.forEach { it() }
+        }
     }
 
     internal fun onRestart(listener: () -> Unit) {

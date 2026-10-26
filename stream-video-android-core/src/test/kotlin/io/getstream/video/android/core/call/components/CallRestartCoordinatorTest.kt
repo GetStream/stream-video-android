@@ -16,9 +16,13 @@
 
 package io.getstream.video.android.core.call.components
 
+import io.getstream.result.Error
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.Restartable
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 
 class CallRestartCoordinatorTest {
 
@@ -26,16 +30,46 @@ class CallRestartCoordinatorTest {
     fun `restart recreates scope before restarting components and completing bookkeeping`() {
         val events = mutableListOf<String>()
         val coordinator = CallRestartCoordinator(
-            scopeProvider = Restartable { events += "scope" },
+            scopeProvider = Restartable {
+                events += "scope"
+                Success(Unit)
+            },
             restartables = listOf(
-                Restartable { events += "state" },
-                Restartable { events += "media" },
+                Restartable {
+                    events += "state"
+                    Success(Unit)
+                },
+                Restartable {
+                    events += "media"
+                    Success(Unit)
+                },
             ),
             onRestarted = { events += "bookkeeping" },
         )
 
-        coordinator.restart()
+        assertEquals(Success(Unit), coordinator.restart())
 
         assertEquals(listOf("scope", "state", "media", "bookkeeping"), events)
+    }
+
+    @Test
+    fun `restart returns scope failure without restarting persistent components`() {
+        val failure = Failure(Error.GenericError("scope restart failed"))
+        val events = mutableListOf<String>()
+        val coordinator = CallRestartCoordinator(
+            scopeProvider = Restartable { failure },
+            restartables = listOf(
+                Restartable {
+                    events += "state"
+                    Success(Unit)
+                },
+            ),
+            onRestarted = { events += "bookkeeping" },
+        )
+
+        val result = coordinator.restart()
+
+        assertSame(failure, result)
+        assertEquals(emptyList(), events)
     }
 }

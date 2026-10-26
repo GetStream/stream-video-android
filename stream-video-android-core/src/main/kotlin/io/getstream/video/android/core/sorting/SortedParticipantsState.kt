@@ -17,6 +17,8 @@
 package io.getstream.video.android.core.sorting
 
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.call.Restartable
@@ -71,7 +73,7 @@ internal class SortedParticipantsState(
         restart()
     }
 
-    override fun restart() {
+    override fun restart(): Result<Unit> {
         inputsJob?.cancel()
         eventsJob?.cancel()
         lastSortOrder = emptyList()
@@ -92,6 +94,7 @@ internal class SortedParticipantsState(
                 resort(currentSortInputs())
             }
         }
+        return Success(Unit)
     }
 
     fun setPreset(preset: SortPreset) {

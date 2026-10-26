@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core.call
 
+import io.getstream.result.Result
+
 /** A component that can restore its own state for another Call lifecycle generation. */
 internal fun interface Restartable {
-    /** Resets values and reinitialises resources owned by this component. */
-    fun restart()
+    /** Resets owned state, returning a failure when the next lifecycle cannot be prepared. */
+    fun restart(): Result<Unit>
 }

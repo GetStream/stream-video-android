@@ -386,7 +386,10 @@ public class Call(
         restartables = listOf(
             sessionManager,
             callAnalytics,
-            Restartable(state::restart),
+            Restartable {
+                state.restart()
+                Result.Success(Unit)
+            },
             media,
         ),
         onRestarted = {

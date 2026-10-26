@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.call.scope
 
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Job
@@ -27,6 +29,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNotSame
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -137,7 +140,7 @@ class ScopeProviderTest {
         scopeProvider.cleanup()?.join()
         assertTrue(firstCallJob.isCancelled)
 
-        scopeProvider.restart()
+        assertEquals(Success(Unit), scopeProvider.restart())
         val secondCallScope = scopeProvider.callScope
         val secondCallJob = secondCallScope.coroutineContext[Job]!!
 
@@ -146,5 +149,20 @@ class ScopeProviderTest {
         assertNotEquals(firstCallJob, secondCallJob)
         assertTrue(secondCallJob.isActive)
         assertNotNull(scopeProvider.getRtcSessionScope(SupervisorJob(), "test-call-1"))
+    }
+
+    @Test
+    fun `restart before cleanup returns a failure and keeps the current scope`() = runTest {
+        val firstCallScope = scopeProvider.callScope
+
+        val result = scopeProvider.restart()
+
+        assertTrue(result is Failure)
+        assertEquals(
+            "ScopeProvider cannot restart before its current generation is cleaned up",
+            (result as Failure).value.message,
+        )
+        assertSame(firstCallScope, scopeProvider.callScope)
+        assertEquals(1, scopeProvider.debugInstanceId)
     }
 }

@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.call.components
 
+import io.getstream.result.Result
+import io.getstream.result.Result.Success
 import kotlinx.coroutines.Job
 
 /** Stores and synchronizes the cleanup state shared by leave, cleanup and the next join. */
@@ -63,7 +65,7 @@ internal class CallCleanupState {
     }
 
     /** Waits for cleanup and cancellation, then atomically restores the active lifecycle state. */
-    suspend fun prepareForJoin(restart: () -> Unit) {
+    suspend fun prepareForJoin(restart: () -> Result<Unit>): Result<Unit> {
         while (true) {
             val pending = synchronized(lock) {
                 PendingJobs(cleanupJob, cancelledCallJob)
@@ -71,19 +73,21 @@ internal class CallCleanupState {
             pending.cleanup?.join()
             pending.cancelledCall?.join()
 
-            synchronized(lock) {
+            val restartResult = synchronized(lock) {
                 if (cleanupJob !== pending.cleanup || cancelledCallJob !== pending.cancelledCall) {
-                    return@synchronized
+                    return@synchronized null
                 }
                 if (destroyed) {
-                    restart()
+                    val result = restart()
+                    if (result !is Success) return@synchronized result
                     destroyed = false
                     cleanupJob = null
                     cancelledCallJob = null
                     cleanedUp = false
                 }
-                return
+                Success(Unit)
             }
+            if (restartResult != null) return restartResult
         }
     }
 }

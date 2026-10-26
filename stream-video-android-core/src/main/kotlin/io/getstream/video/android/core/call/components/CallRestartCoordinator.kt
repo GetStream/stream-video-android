@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.core.call.components
 
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.Restartable
 
 /** Coordinates restoration of a Call after its previous lifecycle generation has ended. */
@@ -25,9 +28,15 @@ internal class CallRestartCoordinator(
     private val onRestarted: () -> Unit = {},
 ) {
     /** Restarts generation-owned resources first, then each persistent component in order. */
-    fun restart() {
-        scopeProvider.restart()
-        restartables.forEach(Restartable::restart)
+    fun restart(): Result<Unit> {
+        val scopeResult = scopeProvider.restart()
+        if (scopeResult is Failure) return scopeResult
+
+        restartables.forEach { restartable ->
+            val result = restartable.restart()
+            if (result is Failure) return result
+        }
         onRestarted()
+        return Success(Unit)
     }
 }

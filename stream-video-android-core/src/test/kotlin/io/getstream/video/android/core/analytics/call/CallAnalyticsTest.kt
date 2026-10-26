@@ -202,4 +202,19 @@ class CallAnalyticsTest {
 
         assertEquals("", analytics.videoAnalytics.stageId.value)
     }
+
+    @Test
+    fun `restart preserves the join attempt started before lifecycle preparation`() = runTest {
+        val analytics = callAnalytics(backgroundScope)
+        analytics.joinAnalyticsStateHolder.updateJoinStageAttemptId("current-attempt")
+        analytics.joinAnalyticsStateHolder.updateStage(Stage.COMPLETED)
+
+        analytics.restart()
+
+        assertEquals(
+            "current-attempt",
+            analytics.joinAnalyticsStateHolder.state.value.joinStageAttemptId,
+        )
+        assertEquals(Stage.NOT_STARTED, analytics.joinAnalyticsStateHolder.state.value.joinStage)
+    }
 }

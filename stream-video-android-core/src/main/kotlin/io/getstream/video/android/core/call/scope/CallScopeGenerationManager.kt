@@ -16,6 +16,10 @@
 
 package io.getstream.video.android.core.call.scope
 
+import io.getstream.result.Error
+import io.getstream.result.Result
+import io.getstream.result.Result.Failure
+import io.getstream.result.Result.Success
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -95,11 +99,16 @@ internal class CallScopeGenerationManager(
         }
     }
 
-    internal fun restart(): Int = synchronized(lifecycleLock) {
-        check(current.get().isCleanedUp) {
-            "ScopeProvider cannot restart before its current generation is cleaned up"
+    internal fun restart(): Result<Unit> = synchronized(lifecycleLock) {
+        if (!current.get().isCleanedUp) {
+            return@synchronized Failure(
+                Error.GenericError(
+                    "ScopeProvider cannot restart before its current generation is cleaned up",
+                ),
+            )
         }
-        createGeneration().also(current::set).debugInstanceId
+        current.set(createGeneration())
+        Success(Unit)
     }
 
     private fun createGeneration(): GenerationState {

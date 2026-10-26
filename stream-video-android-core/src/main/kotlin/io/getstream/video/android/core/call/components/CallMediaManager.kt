@@ -22,6 +22,8 @@ import io.getstream.android.video.api.generated.models.CallSettingsResponse
 import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.android.video.api.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
@@ -425,9 +427,10 @@ internal class CallMediaManager(
         mediaManager.microphone.disable()
     }
 
-    override fun restart() {
+    override fun restart(): Result<Unit> {
         startAudioLevelMonitoring()
         if (mediaManagerDelegate.isInitialized()) mediaManager.prepareForJoin()
+        return Success(Unit)
     }
 
     fun cleanup() {

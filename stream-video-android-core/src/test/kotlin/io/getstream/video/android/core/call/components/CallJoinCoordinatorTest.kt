@@ -118,6 +118,7 @@ class CallJoinCoordinatorTest {
         every { state.connection } returns connectionFlow
         every { state.settings } returns MutableStateFlow<CallSettingsResponse?>(null)
         every { state.e2eeEnabled } returns MutableStateFlow(false)
+        coEvery { lifecycle.prepareForJoin() } returns Success(Unit)
         coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
     }
 
@@ -226,6 +227,29 @@ class CallJoinCoordinatorTest {
         assertThat(result).isInstanceOf(Success::class.java)
         assertThat((result as Success).value).isSameInstanceAs(mockSession)
         verify { sessionMonitor.monitorSession(mockJoinResponse) }
+    }
+
+    @Test
+    fun `join returns lifecycle preparation failure and reports its message`() = runTest(
+        testDispatcher,
+    ) {
+        val error = Error.GenericError("scope restart failed")
+        coEvery { lifecycle.prepareForJoin() } returns Failure(error)
+
+        val result = coordinator().join()
+
+        assertThat(result).isEqualTo(Failure(error))
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Failed(error))
+        verify(exactly = 1) { callAnalytics.joinAnalytics.onJoinFunctionStart() }
+        verify(exactly = 1) {
+            callAnalytics.joinAnalytics.onJoinPreparationError(
+                failureCode = "CALL_RESTART_FAILED",
+                message = "scope restart failed",
+            )
+        }
+        coVerify(exactly = 0) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+        }
     }
 
     @Test

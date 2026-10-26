@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.call.components
 
+import io.getstream.result.Result
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.Restartable
 import io.getstream.video.android.core.call.RtcSession
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +54,7 @@ internal class CallSessionManager() : Restartable {
     var unifiedSessionId = UUID.randomUUID().toString()
         private set
 
-    override fun restart() {
+    override fun restart(): Result<Unit> {
         sessionId = UUID.randomUUID().toString()
         unifiedSessionId = UUID.randomUUID().toString()
         nonFastReconnectAttempts = 0
@@ -60,6 +62,7 @@ internal class CallSessionManager() : Restartable {
         reconnectStartTime = 0L
         location = null
         clearFailedSfuIds()
+        return Success(Unit)
     }
 
     /** Cached SFU location used when (re)joining a call. */
