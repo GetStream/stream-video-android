@@ -15,12 +15,12 @@ tasks.register<Exec>("generateOpenApiClient") {
     val moshiAdaptersDir = project.findProperty("moshiAdaptersDir") as? String ?: "infrastructure"
     val moshiAdapterPackage = project.findProperty("moshiAdapterPackageName") as? String ?: "io.getstream.android.video.generated.infrastructure"
 
-    val classesToSkip = project.findProperty("classesToSkip") as? String ?: "PrivacySettingsResponse,PrivacySettings,StopRTMPBroadcastsRequest,LocalCallAcceptedPostEvent,LocalCallRejectedPostEvent"
+    val classesToSkip = project.findProperty("classesToSkip") as? String ?: "PrivacySettingsResponse PrivacySettings StopRTMPBroadcastsRequest LocalCallAcceptedPostEvent LocalCallRejectedPostEvent"
     val androidSdk = "video"
 
 //    val outputSpec = project.findProperty("outputSpec") as? String ?: "./releases/video-openapi-clientside"
     val outputClient = project.findProperty("outputClient") as? String ?: "stream-video-android-core/src/main/kotlin/io/getstream/android/video/generated/"
-    val keepClasses = project.findProperty("keepClasses") as? String ?: "WSAuthMessageRequest.kt"
+    val keepClasses = project.findProperty("keepClasses") as? String ?: "WSAuthMessageRequest.kt LocalCallAcceptedPostEvent.kt LocalCallRejectedPostEvent.kt"
     val buildDir = project.layout.buildDirectory.asFile.get()
 
     println("outputClient = $outputClient")

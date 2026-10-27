@@ -31,6 +31,7 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -99,6 +100,39 @@ class JetpackTelecomRepositoryTest {
         assertEquals(CallAttributesCompat.DIRECTION_INCOMING, attributes.captured.direction)
         assertEquals(CallAttributesCompat.CALL_TYPE_VIDEO_CALL, attributes.captured.callType)
         assertTrue(repository.currentCall.value is TelecomCall.None)
+    }
+
+    @Test
+    fun `registerCall buffers actions until collector starts`() = runTest {
+        val callControlScope = mockk<CallControlScope>(relaxed = true) {
+            every { coroutineContext } returns
+                backgroundScope.coroutineContext + StandardTestDispatcher(testScheduler)
+            every { getCallId() } returns ParcelUuid(UUID.randomUUID())
+            every { currentCallEndpoint } returns emptyFlow()
+            every { availableEndpoints } returns emptyFlow()
+            every { isMuted } returns emptyFlow()
+        }
+        coEvery {
+            callsManager.addCall(any(), any(), any(), any(), any(), any())
+        } coAnswers {
+            arg<CallControlScope.() -> Unit>(5).invoke(callControlScope)
+        }
+        val sendResults = mutableListOf<Boolean>()
+
+        repository.registerCall(
+            displayName = "Caller",
+            address = Uri.parse("stream:call-id"),
+            isIncoming = true,
+            isVideoCall = false,
+            onRegistered = {
+                val registeredCall = repository.currentCall.value as TelecomCall.Registered
+                sendResults += registeredCall.processAction(TelecomCallAction.ToggleMute(true))
+                sendResults += registeredCall.processAction(TelecomCallAction.ToggleMute(false))
+            },
+            onException = { throw AssertionError("Unexpected registration failure", it) },
+        )
+
+        assertEquals(listOf(true, true), sendResults)
     }
 
     @Test

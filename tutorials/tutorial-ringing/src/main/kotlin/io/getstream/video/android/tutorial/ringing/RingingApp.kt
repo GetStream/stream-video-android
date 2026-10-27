@@ -29,8 +29,13 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.notifications.NotificationConfig
 import io.getstream.video.android.model.Device
 import io.getstream.video.android.model.User
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 
 class RingingApp : Application() {
 
@@ -42,6 +47,8 @@ class RingingApp : Application() {
     }
 
     companion object {
+
+        private const val TOKEN_URL = "https://pronto.getstream.io/api/auth/create-token"
 
         var currentUser: TutorialUser? = null
 
@@ -62,17 +69,17 @@ class RingingApp : Application() {
                 }
             }
 
-        fun login(context: Context, user: TutorialUser) {
+        suspend fun login(context: Context, user: TutorialUser) {
             if (!StreamVideo.isInstalled) {
-                currentUser = user
+                val (apiKey, token) = fetchCredentials(user.id)
                 // Initialize StreamVideo. For a production app we recommend adding
                 // the client to your Application class or di module.
                 StreamVideoBuilder(
                     context = context.applicationContext,
-                    apiKey = "mmhfdzb5evj2",
+                    apiKey = apiKey,
                     geo = GEO.GlobalEdgeNetwork,
                     user = user.delegate,
-                    token = user.token,
+                    token = token,
                     notificationConfig = NotificationConfig(
                         // Make the notification low priority if the app is in foreground, so its not visible as a popup, since we want to handle
                         // the incoming call in full screen when app is running.
@@ -89,8 +96,23 @@ class RingingApp : Application() {
                         ),
                     ),
                 ).build()
+                currentUser = user
             }
         }
+
+        // Credentials come from Stream's demo token generator; use your own backend in production.
+        private suspend fun fetchCredentials(userId: String): Pair<String, String> =
+            withContext(Dispatchers.IO) {
+                val url = URL("$TOKEN_URL?environment=demo&user_id=$userId")
+                val connection = url.openConnection() as HttpURLConnection
+                try {
+                    val body = connection.inputStream.bufferedReader().use { it.readText() }
+                    val json = JSONObject(body)
+                    json.getString("apiKey") to json.getString("token")
+                } finally {
+                    connection.disconnect()
+                }
+            }
 
         suspend fun logout() {
             if (StreamVideo.isInstalled) {
@@ -116,7 +138,6 @@ class RingingApp : Application() {
 
 data class TutorialUser(
     val delegate: User,
-    val token: String,
     val checked: Boolean = false,
 ) {
     val id: String get() = delegate.id
@@ -130,21 +151,18 @@ data class TutorialUser(
                     id = "android-tutorial-1",
                     name = "User 1",
                 ),
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0xIn0.3qB-FI6OAqf5ZEETtgs0XhaMmiaRF2jDJOqCVRsqqbc",
             ),
             TutorialUser(
                 User(
                     id = "android-tutorial-2",
                     name = "User 2",
                 ),
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0yIn0.ksOq5ahC0745oZdPDKr2hyLp0j9exfwLE-AQITc9ZSc",
             ),
             TutorialUser(
                 User(
                     id = "android-tutorial-3",
                     name = "User 3",
                 ),
-                token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5kcm9pZC10dXRvcmlhbC0zIn0.g5h8coX8J1XUNHagPFoGBI0D7bN6P0w2Sd2rui89puE",
             ),
         )
     }

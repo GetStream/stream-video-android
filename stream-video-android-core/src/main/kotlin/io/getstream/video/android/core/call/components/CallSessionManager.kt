@@ -56,6 +56,9 @@ internal class CallSessionManager() {
     /** Increment this only for REJOIN and MIGRATION strategies. */
     var nonFastReconnectAttempts = 0
 
+    /** Rolling-window budget for REJOIN and MIGRATE attempts; reset on every fresh join. */
+    val rejoinRateLimiter = RejoinRateLimiter()
+
     var connectStartTime = 0L
     var reconnectStartTime = 0L
 

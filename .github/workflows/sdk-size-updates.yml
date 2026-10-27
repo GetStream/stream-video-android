@@ -15,7 +15,7 @@ jobs:
   update-sdk-sizes:
     permissions:
       contents: read
-    uses: GetStream/stream-build-conventions-android/.github/workflows/sdk-size-updates.yml@d275481d345e4b3b1252006dbb6cf029c9e32767
+    uses: GetStream/stream-build-conventions-android/.github/workflows/sdk-size-updates.yml@b7fed46e2cb963eb18c62693435bfdf3360e105a
     with:
       modules: "stream-video-android-core stream-video-android-ui-xml stream-video-android-ui-compose"
       metrics-project: "stream-video-android-metrics"
