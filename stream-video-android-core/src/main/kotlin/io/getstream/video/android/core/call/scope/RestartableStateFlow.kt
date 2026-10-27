@@ -30,8 +30,34 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /**
- * Keeps state storage and subscriber identity across call scopes. Sharing commands are driven
- * by the exposed state's subscribers, so WhileSubscribed does not collect without subscribers.
+ * A [StateFlow] whose state and collector subscriptions survive Call coroutine-scope restarts.
+ *
+ * ## What it is
+ *
+ * A regular `Flow.stateIn(callScope, ...)` permanently binds its producer to one Call scope. After
+ * `Call.leave()` cancels that scope, the StateFlow object remains accessible but its upstream is no
+ * longer collected. It therefore cannot produce values when the same Call instance is joined again.
+ *
+ * [RestartableStateFlow] separates the stable [StateFlow] storage from its producer coroutine. The
+ * storage and its existing collectors remain unchanged, while this flow uses [scopeProvider] to
+ * start a new producer in each Call-scope generation. A restart resets [value] to [initialValue]
+ * and reconnects [upstream] using the configured [started] policy.
+ *
+ * ## How to create it
+ *
+ * Pass the upstream flow and the same [ScopeProviderImpl] that owns the reusable Call lifecycle:
+ *
+ * ```kotlin
+ * val duration: StateFlow<Long?> = RestartableStateFlow(
+ *     upstream = durationFlow,
+ *     scopeProvider = scopeProvider,
+ *     initialValue = null,
+ *     started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 10_000L),
+ * )
+ * ```
+ *
+ * Use this instead of `stateIn(callScope, ...)` for derived Call state that must resume producing
+ * values after `leave()` followed by another `join()` on the same Call instance.
  */
 @OptIn(InternalCoroutinesApi::class, ExperimentalForInheritanceCoroutinesApi::class)
 internal class RestartableStateFlow<T>(
@@ -48,12 +74,21 @@ internal class RestartableStateFlow<T>(
         restartProducer()
     }
 
+    /**
+     * Starts the upstream producer in the current Call scope while preserving the configured
+     * [SharingStarted] behaviour of `Flow.stateIn`.
+     *
+     * Collecting a `shareIn` result into [state] would introduce a permanent internal subscriber.
+     * With `SharingStarted.WhileSubscribed`, that subscriber would keep [upstream] active even when
+     * nobody is collecting this StateFlow. Instead, the sharing commands are derived from the
+     * actual subscribers of [state]: [SharingCommand.START] collects [upstream],
+     * [SharingCommand.STOP] stops that collection, and
+     * [SharingCommand.STOP_AND_RESET_REPLAY_CACHE] restores [initialValue]. [collectLatest]
+     * cancels the previous command's upstream collection whenever the sharing command changes.
+     */
     private fun restartProducer() {
         producerJob?.cancel()
         state.value = initialValue
-        // TODO: Revisit whether this manual SharingStarted implementation can be simplified.
-        //  It currently uses the exposed StateFlow's subscriber count to preserve stateIn's
-        //  WhileSubscribed and replay-reset behavior across scope restarts.
         producerJob = scopeProvider.callScope.launch {
             started.command(state.subscriptionCount).distinctUntilChanged().collectLatest { command ->
                 when (command) {
@@ -71,9 +106,3 @@ internal class RestartableStateFlow<T>(
         state.collect(collector)
     }
 }
-
-internal fun <T> Flow<T>.restartableStateIn(
-    scopeProvider: ScopeProviderImpl,
-    started: SharingStarted,
-    initialValue: T,
-): RestartableStateFlow<T> = RestartableStateFlow(this, scopeProvider, initialValue, started)

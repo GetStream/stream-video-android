@@ -30,7 +30,19 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.CoroutineContext
 
-/** Manages the state and lifecycle transitions of the current Call coroutine scope generation. */
+/**
+ * Owns the coroutine scope and RTC executor used by one active Call lifecycle.
+ *
+ * A generation is created when the `Call` is created. `Call.leave()`, `Call.end()`, or
+ * `Call.cleanup()` eventually invokes [cleanup] through [ScopeProviderImpl.cleanup], marking that
+ * generation as unusable and returning its resources for cancellation. If the same Call instance
+ * is joined again, `Call.join()` invokes [restart] through the Call restart coordinator and
+ * [ScopeProviderImpl.restart], replacing the cleaned generation with a fresh scope and job.
+ *
+ * During `Call.join()`, creation of a new RTC session invokes [requireActive] and
+ * [getOrCreateExecutor] through [ScopeProviderImpl]. All transitions are synchronized so RTC
+ * session creation, cleanup, and restart cannot modify the generation concurrently.
+ */
 internal class CallScopeGenerationManager(
     private val parentCoroutineContext: CoroutineContext,
 ) {
@@ -62,10 +74,22 @@ internal class CallScopeGenerationManager(
     internal val currentDebugInstanceId: Int
         get() = current.get().debugInstanceId
 
+    /**
+     * Verifies that the current generation can create RTC session scopes.
+     *
+     * Invoked by `Call.join()` while constructing an RTC session through
+     * [ScopeProviderImpl.getCoroutineScope].
+     */
     internal fun requireActive(): Int = synchronized(lifecycleLock) {
         current.get().also(::checkActive).debugInstanceId
     }
 
+    /**
+     * Returns the current generation's dedicated RTC executor, creating it on first use.
+     *
+     * Invoked by `Call.join()` while constructing an RTC session through
+     * [ScopeProviderImpl.getRtcSessionScope].
+     */
     internal fun getOrCreateExecutor(
         callId: String,
     ): ExecutorService = synchronized(lifecycleLock) {
@@ -77,6 +101,12 @@ internal class CallScopeGenerationManager(
         }
     }
 
+    /**
+     * Marks the current generation as cleaned and detaches its resources exactly once.
+     *
+     * Invoked through [ScopeProviderImpl.cleanup] by `Call.leave()`, `Call.end()`, or
+     * `Call.cleanup()`.
+     */
     internal fun cleanup(): CleanupResult = synchronized(lifecycleLock) {
         val generation = current.get()
         if (generation.isCleanedUp) {
@@ -99,6 +129,12 @@ internal class CallScopeGenerationManager(
         }
     }
 
+    /**
+     * Replaces a cleaned generation with a fresh Call scope and job.
+     *
+     * Invoked through [ScopeProviderImpl.restart] when `Call.join()` reuses the same Call instance
+     * after its previous lifecycle was cleaned up.
+     */
     internal fun restart(): Result<Unit> = synchronized(lifecycleLock) {
         if (!current.get().isCleanedUp) {
             return@synchronized Failure(

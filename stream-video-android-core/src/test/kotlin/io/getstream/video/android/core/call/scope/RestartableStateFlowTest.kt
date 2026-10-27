@@ -61,13 +61,18 @@ class RestartableStateFlowTest {
     fun `while subscribed starts and stops upstream using actual subscriber count`() = runTest {
         val scope = ScopeProviderImpl(backgroundScope, "default:test-call")
         var active = 0
-        val state = flow {
-            active++
-            try {
-                emit(1)
-                awaitCancellation()
-            } finally { active-- }
-        }.restartableStateIn(scope, SharingStarted.WhileSubscribed(stopTimeoutMillis = 0), 0)
+        val state = RestartableStateFlow(
+            upstream = flow {
+                active++
+                try {
+                    emit(1)
+                    awaitCancellation()
+                } finally { active-- }
+            },
+            scopeProvider = scope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 0),
+            initialValue = 0,
+        )
         runCurrent()
         assertEquals(0, active)
         val collector = backgroundScope.launch { state.collect {} }
@@ -92,10 +97,11 @@ class RestartableStateFlowTest {
     fun `replay expiration restores initial value`() = runTest {
         val scope = ScopeProviderImpl(backgroundScope, "default:test-call")
         val upstream = MutableStateFlow(1)
-        val state = upstream.restartableStateIn(
-            scope,
-            SharingStarted.WhileSubscribed(replayExpirationMillis = 0),
-            0,
+        val state = RestartableStateFlow(
+            upstream = upstream,
+            scopeProvider = scope,
+            started = SharingStarted.WhileSubscribed(replayExpirationMillis = 0),
+            initialValue = 0,
         )
         val collector = backgroundScope.launch { state.collect {} }
         runCurrent()
