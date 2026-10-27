@@ -141,7 +141,7 @@ public data class LocalStats(
     val sdkVersion: String,
     val deviceModel: String,
 )
-//TODO Rahul, make internal constructor,
+
 public class CallStats(val call: Call, val callScope: CoroutineScope) {
     private val logger by taggedLogger("CallStats")
 
