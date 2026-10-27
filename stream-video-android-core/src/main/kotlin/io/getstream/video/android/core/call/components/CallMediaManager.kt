@@ -22,18 +22,22 @@ import io.getstream.android.video.api.generated.models.CallSettingsResponse
 import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.android.video.api.generated.models.VideoSettingsResponse
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.CameraDirection
 import io.getstream.video.android.core.DeviceStatus
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.audio.StreamAudioDevice
+import io.getstream.video.android.core.call.Restartable
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
 import io.getstream.video.android.core.call.utils.SoundInputProcessor
 import io.getstream.video.android.core.utils.RampValueUpAndDownHelper
 import io.getstream.webrtc.EglBase
 import io.getstream.webrtc.audio.JavaAudioDeviceModule.AudioSamples
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -53,12 +57,26 @@ internal class CallMediaManager(
     private val type: String,
     private val id: String,
     private val clientImpl: StreamVideoClient,
-    private val scope: CoroutineScope,
+    private val coroutineScope: CoroutineScope,
     private val state: CallState,
     private val sessionManager: CallSessionManager,
     private val eglBase: () -> EglBase,
     private val mediaManagerFactory: MediaManagerFactory,
-) {
+) : Restartable {
+    /**
+     * Camera state before leave forcibly disables capture. Without restoring it when the Call is
+     * restarted after leave, an enabled camera would remain `Disabled` and skip the server default
+     * applied only to `NotSelected`. `null` means there is no pending state to restore.
+     */
+    private var cameraEnabledBeforeLeave: Boolean? = null
+
+    /**
+     * Microphone state before leave forcibly disables capture. Without restoring it when the Call
+     * is restarted after leave, an enabled microphone would remain `Disabled` and skip the server
+     * default applied only to `NotSelected`. `null` means there is no pending state to restore.
+     */
+    private var microphoneEnabledBeforeLeave: Boolean? = null
+
     private val logger by taggedLogger("Call:MediaManager:$type:$id")
 
     private val soundInputProcessor = SoundInputProcessor(thresholdCrossedCallback = {
@@ -67,6 +85,15 @@ internal class CallMediaManager(
         }
     })
     private val audioLevelOutputHelper = RampValueUpAndDownHelper()
+
+    /**
+     * Collects microphone audio levels for the current Call-scope generation.
+     *
+     * Leaving the Call cancels the generation that owns this job. [startAudioLevelMonitoring]
+     * cancels any previous reference and replaces it with a collector in the current scope, so
+     * restarting the Call after leave resumes level updates without running duplicate collectors.
+     */
+    private var audioLevelMonitoringJob: Job? = null
 
     /** Smoothed local microphone volume level (0..1). */
     val localMicrophoneAudioLevel: StateFlow<Float> = audioLevelOutputHelper.currentLevel
@@ -121,15 +148,18 @@ internal class CallMediaManager(
             _peerConnectionFactory = value
         }
 
-    val mediaManager by lazy {
+    private val mediaManagerDelegate = lazy {
         mediaManagerFactory.create(
             audioUsageProvider = { clientImpl.callServiceConfigRegistry.get(type).audioUsage },
         )
     }
 
+    val mediaManager: MediaManagerImpl get() = mediaManagerDelegate.value
+
     /** Starts streaming smoothed microphone audio levels into [localMicrophoneAudioLevel]. */
     fun startAudioLevelMonitoring() {
-        scope.launch {
+        audioLevelMonitoringJob?.cancel()
+        audioLevelMonitoringJob = coroutineScope.launch {
             soundInputProcessor.currentAudioLevel.collect {
                 audioLevelOutputHelper.rampToValue(it)
             }
@@ -246,11 +276,24 @@ internal class CallMediaManager(
             camera.setEnabled(callSettings.video.cameraDefaultOn)
         }
 
+        /**
+         * Restores the camera state captured during leave when a destroyed Call is restarted.
+         * The saved value is cleared after applying it so it affects only the first join after leave.
+         */
+        cameraEnabledBeforeLeave?.let { camera.setEnabled(it) }
+        cameraEnabledBeforeLeave = null
+
         // Mic
         if (microphone.status.value == DeviceStatus.NotSelected) {
             val enabled = callSettings.audio.micDefaultOn
             microphone.setEnabled(enabled)
         }
+        /**
+         * Restores the microphone state captured during leave when a destroyed Call is restarted.
+         * The saved value is cleared after applying it so it affects only the first join after leave.
+         */
+        microphoneEnabledBeforeLeave?.let { microphone.setEnabled(it) }
+        microphoneEnabledBeforeLeave = null
     }
 
     private fun monitorHeadset() {
@@ -278,7 +321,7 @@ internal class CallMediaManager(
                     microphone.select(deviceBeforeHeadset)
                 }
             }
-        }.launchIn(scope)
+        }.launchIn(coroutineScope)
     }
 
     fun startScreenSharing(
@@ -403,9 +446,18 @@ internal class CallMediaManager(
 
     /** Disables all local capture devices. Used when leaving the call. */
     fun disableLocalCapture() {
+        if (!mediaManagerDelegate.isInitialized()) return
+        cameraEnabledBeforeLeave = mediaManager.camera.status.value is DeviceStatus.Enabled
+        microphoneEnabledBeforeLeave = mediaManager.microphone.status.value is DeviceStatus.Enabled
         stopScreenSharing()
         mediaManager.camera.disable()
         mediaManager.microphone.disable()
+    }
+
+    override fun restart(): Result<Unit> {
+        startAudioLevelMonitoring()
+        if (mediaManagerDelegate.isInitialized()) mediaManager.prepareForJoin()
+        return Success(Unit)
     }
 
     fun cleanup() {
@@ -414,6 +466,6 @@ internal class CallMediaManager(
         resetDesiredAudioProcessing()
         resetDesiredHardwareNoiseSuppressor()
         resetDesiredHardwareAcousticEchoCanceler()
-        mediaManager.cleanup()
+        if (mediaManagerDelegate.isInitialized()) mediaManager.cleanup()
     }
 }

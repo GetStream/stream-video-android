@@ -18,6 +18,8 @@ package io.getstream.video.android.core.analytics.call
 
 import android.content.Context
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
@@ -34,6 +36,7 @@ import io.getstream.video.android.core.analytics.call.observer.model.Stage
 import io.getstream.video.android.core.analytics.call.observer.toVideoAnalyticsIceState
 import io.getstream.video.android.core.analytics.reporting.ClientEventReporter
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
+import io.getstream.video.android.core.call.Restartable
 import io.getstream.video.android.core.call.RtcSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -47,7 +50,7 @@ internal class CallAnalytics(
     val participants: StateFlow<List<ParticipantState>>,
     val eventReporter: ClientEventReporter,
     val observerScope: CoroutineScope,
-) {
+) : Restartable {
     val logger by taggedLogger("CallAnalyticsHooks")
 
     val joinAnalyticsStateHolder = JoinAnalyticsStateHolder()
@@ -97,6 +100,18 @@ internal class CallAnalytics(
             joinAnalyticsStateHolder,
             sfuAnalyticsStateHolder,
         )
+
+    override fun restart(): Result<Unit> {
+        val currentJoinAttemptId = joinAnalyticsStateHolder.state.value.joinStageAttemptId
+        joinAnalyticsStateHolder.reset()
+        joinAnalyticsStateHolder.updateJoinStageAttemptId(currentJoinAttemptId)
+        sfuAnalyticsStateHolder.updateSfuId("")
+        sfuAnalyticsStateHolder.updateStageId("")
+        sfuAnalyticsStateHolder.updateStage(Stage.NOT_STARTED)
+        peerConnectionAnalytics.stateHolder.reset()
+        resetAfterJoinSuccess()
+        return Success(Unit)
+    }
 
     fun resetAfterJoinSuccess() {
         videoAnalytics.reset()

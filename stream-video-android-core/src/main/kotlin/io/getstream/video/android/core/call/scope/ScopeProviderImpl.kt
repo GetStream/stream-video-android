@@ -17,36 +17,45 @@
 package io.getstream.video.android.core.call.scope
 
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
+import io.getstream.result.Result.Success
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.jvm.Throws
 
 /**
- * Implementation of [ScopeProvider] that manages coroutine scopes for RTC sessions.
+ * Coroutine-scope owner for a reusable Call and its RTC session.
  *
  * This implementation ensures that:
+ * - Each generation has its own call [Job]
  * - Each Call gets its own dedicated single thread executor
  * - RtcSessions use the thread from their parent Call
- * - Executors are created on demand and cleaned up with the Call
- * - Scopes are properly managed and cleaned up
+ * - Cleanup cancels the current generation; a later join restarts this provider
  */
 internal class ScopeProviderImpl(
     private val coroutineScope: CoroutineScope,
+    private val callCid: String,
 ) : ScopeProvider {
 
-    private val logger by taggedLogger("ScopeProviderImpl")
-    private var executor: ExecutorService? = null
-    private var isCleanedUp = false
+    private val logger by taggedLogger("ScopeProvider:$callCid")
+    private val generationManager = CallScopeGenerationManager(
+        parentCoroutineContext = coroutineScope.coroutineContext,
+    )
+    private val restartListeners = CopyOnWriteArrayList<() -> Unit>()
+
+    internal val debugInstanceId: Int get() = generationManager.currentDebugInstanceId
+
+    override val callScope: CoroutineScope
+        get() = generationManager.currentCallScope
 
     @Throws(IllegalStateException::class)
     override fun getCoroutineScope(supervisorJob: CompletableJob): CoroutineScope {
-        // Future: We should not throw exception. Instead return Result.Fail
-        check(!isCleanedUp) { "ScopeProvider has been cleaned up" }
-        logger.d { "Creating coroutine scope for RTC session main" }
+        val debugInstanceId = generationManager.requireActive()
+        logger.d { "${debugInstanceId.logPrefix()} Creating coroutine scope for RTC session main" }
         return CoroutineScope(
             coroutineScope.coroutineContext +
                 supervisorJob +
@@ -56,45 +65,42 @@ internal class ScopeProviderImpl(
 
     @Throws(IllegalStateException::class)
     override fun getRtcSessionScope(supervisorJob: CompletableJob, callId: String): CoroutineScope {
-        // Future: We should not throw exception. Instead return Result.Fail
-        check(!isCleanedUp) { "ScopeProvider has been cleaned up" }
-        logger.d { "Creating RTC session scope for callId: $callId" }
+        val executor = generationManager.getOrCreateExecutor(callId)
+        logger.d {
+            "${generationManager.currentDebugInstanceId.logPrefix()} Creating RTC session scope with dedicated executor for callId: $callId"
+        }
+        return CoroutineScope(
+            coroutineScope.coroutineContext +
+                supervisorJob +
+                CoroutineName("rtc-session-coroutine") +
+                executor.asCoroutineDispatcher(),
+        )
+    }
 
-        // Get or create executor for this call
-        if (executor == null) {
-            logger.d { "Creating new single thread executor for callId: $callId" }
-            executor = Executors.newSingleThreadExecutor { runnable ->
-                Thread(runnable, "rtc-call-$callId")
+    override fun cleanup(): Job? {
+        val cleanupResult = generationManager.cleanup()
+        if (cleanupResult.cleanedUpNow) {
+            cleanupResult.callJob.cancel()
+            logger.d {
+                "${cleanupResult.debugInstanceId.logPrefix()} Cleaning up ScopeProvider and shutting down executor"
             }
+            cleanupResult.executor?.shutdown()
         }
+        return cleanupResult.callJob
+    }
 
-        val currentExecutor = executor
-        return if (currentExecutor != null) {
-            logger.d { "Creating RTC session scope with dedicated executor for callId: $callId" }
-            CoroutineScope(
-                coroutineScope.coroutineContext +
-                    supervisorJob +
-                    CoroutineName("rtc-session-coroutine") +
-                    currentExecutor.asCoroutineDispatcher(),
-            )
-        } else {
-            // Fallback to regular scope without executor if executor is null
-            logger.w { "Executor is null, falling back to regular scope for callId: $callId" }
-            CoroutineScope(
-                coroutineScope.coroutineContext +
-                    supervisorJob +
-                    CoroutineName("rtc-session-coroutine"),
-            )
+    override fun restart(): Result<Unit> = generationManager.restart().also { result ->
+        if (result is Success) {
+            logger.d {
+                "${generationManager.currentDebugInstanceId.logPrefix()} Restarted ScopeProvider"
+            }
+            restartListeners.forEach { it() }
         }
     }
 
-    override fun cleanup() {
-        if (isCleanedUp) return
-        isCleanedUp = true
-        logger.d { "Cleaning up ScopeProvider and shutting down executor" }
-
-        // Shutdown the executor
-        executor?.shutdown()
-        executor = null
+    internal fun onRestart(listener: () -> Unit) {
+        restartListeners += listener
     }
+
+    private fun Int.logPrefix(): String = "[debug-instance-$this]"
 }

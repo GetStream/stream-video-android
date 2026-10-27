@@ -70,7 +70,7 @@ class CallMediaManagerTest {
         type = "default",
         id = "call-id",
         clientImpl = clientImpl,
-        scope = testScope,
+        coroutineScope = testScope,
         state = state,
         sessionManager = sessionManager,
         eglBase = { mockk(relaxed = true) },
@@ -102,8 +102,37 @@ class CallMediaManagerTest {
     }
 
     @Test
+    fun `rejoin restores the camera and microphone choices from before leave`() {
+        val cameraStatus = MutableStateFlow<DeviceStatus>(DeviceStatus.Enabled)
+        val microphoneStatus = MutableStateFlow<DeviceStatus>(DeviceStatus.Disabled)
+        every { mediaManager.camera.status } returns cameraStatus
+        every { mediaManager.microphone.status } returns microphoneStatus
+        every { mediaManager.camera.disable(any()) } answers { cameraStatus.value = DeviceStatus.Disabled }
+        val manager = manager()
+        manager.mediaManager
+        manager.disableLocalCapture()
+        manager.cleanup()
+        manager.restart()
+        manager.updateMediaManagerFromSettings(mockk(relaxed = true))
+        verify { mediaManager.prepareForJoin() }
+        verify { mediaManager.camera.setEnabled(true) }
+        verify { mediaManager.microphone.setEnabled(false) }
+    }
+
+    @Test
+    fun `leaving an unused call does not create media resources`() {
+        val manager = manager()
+        manager.disableLocalCapture()
+        manager.cleanup()
+        verify(exactly = 0) { mediaManager.cleanup() }
+        verify(exactly = 0) { mediaManager.camera }
+    }
+
+    @Test
     fun `cleanup delegates to the media manager`() {
-        manager().cleanup()
+        val manager = manager()
+        manager.mediaManager
+        manager.cleanup()
         verify { mediaManager.cleanup() }
     }
 

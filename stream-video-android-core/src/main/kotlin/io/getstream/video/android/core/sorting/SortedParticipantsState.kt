@@ -17,10 +17,14 @@
 package io.getstream.video.android.core.sorting
 
 import io.getstream.log.taggedLogger
+import io.getstream.result.Result
+import io.getstream.result.Result.Success
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
+import io.getstream.video.android.core.call.Restartable
 import io.getstream.video.android.core.pinning.PinEntry
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -35,19 +39,19 @@ import kotlinx.coroutines.sync.withLock
  * any collector subscribed (the builder block launched coroutines on the outer scope and
  * returned immediately, so subsequent trySend calls hit a closed channel). The new
  * implementation backs the public list with a [MutableStateFlow] and writes to it from
- * collectors launched on the provided [scope].
+ * collectors launched on the current scope returned by [scopeProvider].
  *
  * Sorting is driven by a [SortPreset] (default [SortPreset.Default]) resolved against the
  * latest pin snapshot before each pass. Consumers can override with a custom
  * [Comparator] via [updateComparator] for ad-hoc orderings.
  */
 internal class SortedParticipantsState(
-    scope: CoroutineScope,
+    private val scopeProvider: () -> CoroutineScope,
     private val call: Call,
     private val participants: StateFlow<Map<String, ParticipantState>>,
     private val pinnedParticipantsDetailed: StateFlow<Map<String, PinEntry>>,
     initialPreset: SortPreset = SortPreset.Default,
-) {
+) : Restartable {
     private val logger by taggedLogger("ParticipantSorting")
 
     private val presetFlow = MutableStateFlow<SortPreset>(initialPreset)
@@ -62,9 +66,20 @@ internal class SortedParticipantsState(
 
     private val _sortedParticipants = MutableStateFlow<List<ParticipantState>>(emptyList())
     val sortedParticipants: StateFlow<List<ParticipantState>> = _sortedParticipants
+    private var inputsJob: Job? = null
+    private var eventsJob: Job? = null
 
     init {
-        scope.launch {
+        restart()
+    }
+
+    override fun restart(): Result<Unit> {
+        inputsJob?.cancel()
+        eventsJob?.cancel()
+        lastSortOrder = emptyList()
+        _sortedParticipants.value = emptyList()
+        val scope = scopeProvider()
+        inputsJob = scope.launch {
             combine(
                 participants,
                 pinnedParticipantsDetailed,
@@ -74,11 +89,12 @@ internal class SortedParticipantsState(
                 SortInputs(p, pins, preset, custom)
             }.collect { resort(it) }
         }
-        scope.launch {
+        eventsJob = scope.launch {
             call.events.collect {
                 resort(currentSortInputs())
             }
         }
+        return Success(Unit)
     }
 
     fun setPreset(preset: SortPreset) {

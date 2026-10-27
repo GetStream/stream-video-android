@@ -169,6 +169,7 @@ import okhttp3.Request
 import okhttp3.Response
 import retrofit2.HttpException
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 internal const val WAIT_FOR_CONNECTION_ID_TIMEOUT = 5000L
 internal const val defaultAudioUsage = AudioAttributes.USAGE_VOICE_COMMUNICATION
@@ -244,7 +245,33 @@ internal class StreamVideoClient internal constructor(
 
     private val logger by taggedLogger("Call:StreamVideo")
     private var subscriptions = mutableSetOf<EventSubscription>()
-    private var calls = mutableMapOf<String, Call>()
+
+    /**
+     * Canonical get-or-create cache used by [call].
+     *
+     * The following APIs can access the cache concurrently:
+     * - `client.call(type, id)` → get or create a call.
+     * - `call.join()` → restore a retained call only when its CID is absent.
+     * - `call.leave()` → remove only the matching call instance.
+     *
+     * [ConcurrentHashMap] coordinates these operations without locking the complete call lifecycle.
+     */
+    private val calls = ConcurrentHashMap<String, Call>()
+
+    /**
+     * Rejoined [Call] instances that are not stored in [calls], but still need coordinator and SFU
+     * events.
+     *
+     * A non-cached call can exist when an app retains `callA`, invokes `callA.leave()` (which
+     * removes it from [calls]), and then obtains `callA1` through [call] for the same CID. If the
+     * app later invokes `callA.join()`, the retained call is allowed to rejoin, but it must not
+     * replace the newer `callA1` in the get-or-create cache.
+     *
+     * Coordinator and SFU events are routed through `calls[cid]`. Because the successfully rejoined
+     * `callA` is no longer that cached instance, it is added here so both event sources are also
+     * propagated to it. The call is removed from this map when it leaves again.
+     */
+    private val reusedCallEventTargets = ConcurrentHashMap<String, MutableSet<Call>>()
     private val destroyedCalls = LruCache<Int, Call>(100)
     internal val callSoundAndVibrationPlayer = CallSoundAndVibrationPlayer(context)
 
@@ -278,12 +305,33 @@ internal class StreamVideoClient internal constructor(
             destroyedCalls.put(call.hashCode(), call)
         }
         logger.d { "[cleanup] Removing call from cache: ${call.cid}" }
-        calls.remove(call.cid)
+        calls.remove(call.cid, call)
+        reusedCallEventTargets.computeIfPresent(call.cid) { _, reusedCalls ->
+            reusedCalls.remove(call)
+            reusedCalls.takeUnless { it.isEmpty() }
+        }
+    }
+
+    internal fun onCallReused(call: Call) {
+        destroyedCalls.remove(call.hashCode())
+        calls.putIfAbsent(call.cid, call)
+    }
+
+    internal fun onCallJoined(call: Call) {
+        val cachedCall = calls.putIfAbsent(call.cid, call)
+        if (cachedCall == null || cachedCall === call) {
+            return
+        }
+
+        reusedCallEventTargets.compute(call.cid) { _, reusedCalls ->
+            (reusedCalls ?: ConcurrentHashMap.newKeySet()).apply { add(call) }
+        }
     }
 
     override fun cleanup() {
         // remove all cached calls
         calls.clear()
+        reusedCallEventTargets.clear()
         destroyedCalls.evictAll()
         // cancel the StreamClient subscription before tearing down the socket
         streamClientSubscription?.cancel()
@@ -698,7 +746,7 @@ internal class StreamVideoClient internal constructor(
     }
 
     internal fun forwardToCallSubscriptions(cid: String, event: VideoEvent) {
-        calls[cid]?.fireEvent(event)
+        forEachCallInstance(cid) { call -> call.fireEvent(event) }
         notifyDestroyedCalls(event)
     }
 
@@ -718,10 +766,18 @@ internal class StreamVideoClient internal constructor(
     }
 
     internal fun propagateEventToCall(cid: String, event: VideoEvent) {
-        calls[cid]?.let { call ->
+        forEachCallInstance(cid) { call ->
             call.state.handleEvent(event)
             call.session.value?.handleEvent(event)
             call.handleEvent(event)
+        }
+    }
+
+    private inline fun forEachCallInstance(cid: String, action: (Call) -> Unit) {
+        val cachedCall = calls[cid]
+        cachedCall?.let(action)
+        reusedCallEventTargets[cid]?.forEach { reusedCall ->
+            if (reusedCall !== cachedCall) action(reusedCall)
         }
     }
 
@@ -1283,13 +1339,7 @@ internal class StreamVideoClient internal constructor(
         val idOrRandom = id.ifEmpty { UUID.randomUUID().toString() }
 
         val cid = "$type:$idOrRandom"
-        return if (calls.contains(cid)) {
-            calls[cid]!!
-        } else {
-            val call = Call(this, type, idOrRandom, user)
-            calls[cid] = call
-            call
-        }
+        return calls.computeIfAbsent(cid) { Call(this, type, idOrRandom, user) }
     }
 
     @OptIn(InternalCoroutinesApi::class)

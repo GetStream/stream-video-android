@@ -128,6 +128,17 @@ internal class JoinAnalytics(
         }
     }
 
+    /** Records a failure that prevents the Call from reaching the Coordinator join request. */
+    fun onJoinPreparationError(failureCode: String, message: String) {
+        resetStage()
+        onJoinRequestStart(JoinReason.FirstAttempt)
+        onJoinRequestPermanentError(
+            retryCount = 0,
+            failureCode = failureCode,
+            message = message,
+        )
+    }
+
     /**
      * Records a terminal join failure after all retry attempts to connect to the Coordinator or
      * SFU have been exhausted.

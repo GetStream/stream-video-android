@@ -75,6 +75,7 @@ internal class CallJoinCoordinator(
 ) {
     private companion object {
         const val JOIN_FLIGHT_KEY = "join"
+        const val DESTROYED_CALL_JOIN_FAILED = "DESTROYED_CALL_JOIN_FAILED"
     }
 
     private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
@@ -137,6 +138,17 @@ internal class CallJoinCoordinator(
         callJoinInterceptor: CallJoinInterceptor? = null,
     ): Result<RtcSession> {
         callAnalytics.joinAnalytics.onJoinFunctionStart()
+        when (val preparation = lifecycle.prepareForJoin()) {
+            is Failure -> {
+                state._connection.value = RealtimeConnection.Failed(preparation.value)
+                callAnalytics.joinAnalytics.onJoinPreparationError(
+                    failureCode = DESTROYED_CALL_JOIN_FAILED,
+                    message = preparation.value.message,
+                )
+                return preparation
+            }
+            is Success -> Unit
+        }
         var coalesced = false
         return joinFlight.run(
             JOIN_FLIGHT_KEY,
@@ -266,7 +278,6 @@ internal class CallJoinCoordinator(
 
         var result: Result<RtcSession>
 
-        lifecycle.resetLeaveGuard()
         while (retryCount < 3) {
             result = joinInternal(
                 create,

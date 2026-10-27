@@ -75,6 +75,17 @@ internal fun Call.injectLocation(location: String?) {
  */
 internal fun Call.nonFastReconnectAttempts(): Int = sessionManager().nonFastReconnectAttempts
 
+/** Seeds per-session reconnect bookkeeping for reusable Call lifecycle tests. */
+internal fun Call.injectReconnectState(attempts: Int, deadlineMillis: Int) {
+    sessionManager().nonFastReconnectAttempts = attempts
+    sessionManager().reconnectDeadlineMillis = deadlineMillis
+}
+
+/** Seeds a transient ringing state that must not survive leave and rejoin. */
+internal fun CallState.injectRingingState(state: RingingState) {
+    mutableStateField<RingingState>("_ringingState").value = state
+}
+
 /**
  * Reaches the [CallSessionManager] that owns the session and reconnect bookkeeping.
  *

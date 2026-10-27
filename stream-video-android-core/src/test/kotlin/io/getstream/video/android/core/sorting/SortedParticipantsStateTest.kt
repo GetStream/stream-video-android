@@ -251,7 +251,7 @@ class SortedParticipantsStateTest {
             MutableStateFlow<Map<String, ParticipantState>>(emptyMap())
         val pinned: MutableStateFlow<Map<String, PinEntry>> =
             MutableStateFlow(emptyMap())
-        val state = SortedParticipantsState(scope, call, participants, pinned)
+        val state = SortedParticipantsState({ scope }, call, participants, pinned)
         return SutHandle(
             scope = scope,
             callActions = callActions,

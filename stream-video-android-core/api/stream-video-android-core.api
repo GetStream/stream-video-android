@@ -9809,7 +9809,6 @@ public abstract interface class io/getstream/video/android/core/CallJoinIntercep
 }
 
 public final class io/getstream/video/android/core/CallState {
-	public fun <init> (Lio/getstream/video/android/core/StreamVideo;Lio/getstream/video/android/core/Call;Lio/getstream/video/android/model/User;Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun clearParticipants ()V
 	public final fun getAcceptedBy ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getActiveSpeakers ()Lkotlinx/coroutines/flow/StateFlow;
@@ -10300,7 +10299,7 @@ public final class io/getstream/video/android/core/ParticipantState$Video : io/g
 }
 
 public final class io/getstream/video/android/core/PeerConnectionStats {
-	public fun <init> (Lkotlinx/coroutines/CoroutineScope;)V
+	public fun <init> ()V
 	public final fun getAudioBitrateKbps ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getAudioCodec ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getAudioTargetBitrateKbps ()Lkotlinx/coroutines/flow/StateFlow;

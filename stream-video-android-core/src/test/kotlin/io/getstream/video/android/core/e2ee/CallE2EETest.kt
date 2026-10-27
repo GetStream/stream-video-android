@@ -40,6 +40,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.mockk
 import io.mockk.unmockkAll
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -93,6 +94,8 @@ class CallE2EETest {
             }
         every { mockClientImpl.scope } returns testScope as CoroutineScope
         every { mockClientImpl.apiKey } returns "test-api-key"
+        every { mockClientImpl.state.activeCall } returns MutableStateFlow<Call?>(null)
+        every { mockClientImpl.state.ringingCall } returns MutableStateFlow<Call?>(null)
         // Keeps joinRequest off the success path, which would try to apply a mocked response.
         coEvery {
             mockClientImpl.joinCall(

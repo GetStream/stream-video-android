@@ -173,6 +173,28 @@ class JoinAnalyticsTest {
     }
 
     @Test
+    fun `onJoinPreparationError reports the failure message`() {
+        joinAnalytics.onJoinFunctionStart()
+
+        joinAnalytics.onJoinPreparationError(
+            failureCode = "DESTROYED_CALL_JOIN_FAILED",
+            message = "scope restart failed",
+        )
+
+        verify(exactly = 1) {
+            reporter.reportCoordinatorJoinCompleted(
+                "stage-1",
+                false,
+                0,
+                "scope restart failed",
+                "DESTROYED_CALL_JOIN_FAILED",
+                null,
+            )
+        }
+        assertEquals(Stage.COMPLETED, stateHolder.state.value.joinStage)
+    }
+
+    @Test
     fun `onJoinRequestRetryExhausted behaves like a permanent error`() {
         joinAnalytics.onJoinRequestStart(JoinReason.FirstAttempt)
 

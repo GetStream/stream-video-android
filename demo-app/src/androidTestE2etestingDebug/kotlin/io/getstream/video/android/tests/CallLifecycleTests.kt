@@ -16,11 +16,18 @@
 
 package io.getstream.video.android.tests
 
+import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.StreamVideo
+import io.getstream.video.android.robots.assertCallUiIsRendered
 import io.getstream.video.android.robots.assertParticipantsCountOnCall
 import io.getstream.video.android.robots.assertThatCallIsEnded
 import io.getstream.video.android.uiautomator.seconds
 import io.qameta.allure.kotlin.Allure.step
 import io.qameta.allure.kotlin.AllureId
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.UUID
 
@@ -105,8 +112,9 @@ class CallLifecycleTests : StreamTestCase() {
 
     @AllureId("7012")
     @Test
-    fun testUserReentersTheCall() {
+    fun testUserReusesTheSameCallObjectAfterLeaving() {
         val participants = 1
+        lateinit var reusableCall: Call
 
         step("GIVEN user starts a call") {
             userRobot.joinCall()
@@ -115,11 +123,44 @@ class CallLifecycleTests : StreamTestCase() {
             participantRobot.joinCall(callId)
             userRobot.waitForParticipantsOnCall(participants)
         }
-        step("WHEN user re-enters the call as the same user") {
-            userRobot.endCall().joinCall(callId)
+        step("AND the call UI is rendered") {
+            userRobot.assertCallUiIsRendered()
+            reusableCall = requireNotNull(StreamVideo.instance().state.activeCall.value) {
+                "Expected the rendered call to be registered as the active call"
+            }
         }
-        step("THEN there is one participant on the call") {
-            userRobot.assertParticipantsCountOnCall(participants)
+        step("WHEN user leaves the call") {
+            userRobot
+                .endCall()
+                .assertThatCallIsEnded()
+        }
+        step("AND the same Call object joins again") {
+            val rejoinResult = runBlocking {
+                withTimeout(60_000) {
+                    reusableCall.join()
+                }
+            }
+
+            assertTrue(
+                "Expected the same Call object to rejoin successfully",
+                rejoinResult.isSuccess,
+            )
+            assertSame(reusableCall, StreamVideo.instance().state.activeCall.value)
+        }
+        step("AND the call screen is opened for the rejoined call") {
+            userRobot.joinCall(callId)
+        }
+        step("THEN the call UI is rendered with the participant") {
+            userRobot
+                .waitForParticipantsOnCall(participants)
+                .assertParticipantsCountOnCall(participants)
+                .assertCallUiIsRendered()
+            assertSame(reusableCall, StreamVideo.instance().state.activeCall.value)
+        }
+        step("AND user can leave the reused call") {
+            userRobot
+                .endCall()
+                .assertThatCallIsEnded()
         }
     }
 

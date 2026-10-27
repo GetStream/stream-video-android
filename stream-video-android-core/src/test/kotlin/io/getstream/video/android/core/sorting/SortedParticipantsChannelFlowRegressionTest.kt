@@ -71,7 +71,7 @@ class SortedParticipantsChannelFlowRegressionTest {
             val pinned: StateFlow<Map<String, PinEntry>> =
                 MutableStateFlow(emptyMap())
 
-            val sut = SortedParticipantsState(scope, call, participants, pinned)
+            val sut = SortedParticipantsState({ scope }, call, participants, pinned)
 
             val sortedFlow = sut.sortedParticipants
 

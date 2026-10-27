@@ -25,12 +25,14 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.StreamVideo
 import io.getstream.video.android.data.datasource.local.InMemoryStore
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.mapper.isValidCallCid
 import io.getstream.video.android.model.mapper.toTypeAndId
 import io.getstream.video.android.tooling.util.StreamBuildFlavorUtil
 import io.getstream.video.android.util.InitializedState
 import io.getstream.video.android.util.NetworkMonitor
+import io.getstream.video.android.util.RetainedCallProvider
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -133,7 +135,10 @@ class CallJoinViewModel @Inject constructor(
         } else {
             "default" to newCallId
         }
-        return streamVideo.call(type = type, id = id)
+        return RetainedCallProvider.instance.getOrCreate(
+            streamVideo = streamVideo,
+            callId = StreamCallId(type = type, id = id),
+        )
     }
 
     fun logOut() {

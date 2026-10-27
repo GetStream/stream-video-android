@@ -39,6 +39,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +53,7 @@ import io.getstream.video.android.core.call.CallType
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfig
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.util.StreamVideoInitHelper
+import io.getstream.video.android.util.config.AppConfig
 
 /**
  * A row in the call settings screen: one call type and its current [CallServiceConfig].
@@ -92,6 +94,7 @@ fun CallSettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     val registry = remember { StreamVideoInitHelper.callServiceConfigRegistry }
+    val reuseCallAfterLeave by AppConfig.reuseCallAfterLeave.collectAsState()
 
     // Intercept the system back press so it dismisses this overlay instead of finishing the activity.
     BackHandler(onBack = onClose)
@@ -124,7 +127,9 @@ fun CallSettingsScreen(
     CallSettingsContent(
         items = items,
         registryAvailable = registry != null,
+        reuseCallAfterLeave = reuseCallAfterLeave,
         onClose = onClose,
+        onReuseCallAfterLeaveChanged = AppConfig::setReuseCallAfterLeave,
         onForegroundChanged = { callType, enabled ->
             updateConfig(callType) { it.copy(runCallServiceInForeground = enabled) }
         },
@@ -146,7 +151,9 @@ fun CallSettingsScreen(
 private fun CallSettingsContent(
     items: List<CallTypeConfigItem>,
     registryAvailable: Boolean,
+    reuseCallAfterLeave: Boolean,
     onClose: () -> Unit,
+    onReuseCallAfterLeaveChanged: (Boolean) -> Unit,
     onForegroundChanged: (CallType, Boolean) -> Unit,
     onTelecomChanged: (CallType, Boolean) -> Unit,
     onAudioUsageChanged: (CallType, Int) -> Unit,
@@ -188,37 +195,82 @@ private fun CallSettingsContent(
             }
         }
 
-        if (!registryAvailable) {
-            Text(
-                text = "Call service config registry is not available yet. " +
-                    "Sign in / start the SDK first.",
-                modifier = Modifier.padding(16.dp),
-                style = VideoTheme.typography.bodyDefault,
-                color = VideoTheme.colors.textSecondary,
-            )
-            return@Column
-        }
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            items(items, key = { it.callType.name }) { item ->
-                CallTypeConfigCard(
-                    item = item,
-                    onForegroundChanged = { enabled ->
-                        onForegroundChanged(
-                            item.callType,
-                            enabled,
-                        )
-                    },
-                    onTelecomChanged = { enabled -> onTelecomChanged(item.callType, enabled) },
-                    onAudioUsageChanged = { usage -> onAudioUsageChanged(item.callType, usage) },
+            item(key = "debug-options") {
+                DebugOptionsCard(
+                    reuseCallAfterLeave = reuseCallAfterLeave,
+                    onReuseCallAfterLeaveChanged = onReuseCallAfterLeaveChanged,
                 )
             }
+
+            if (!registryAvailable) {
+                item(key = "registry-unavailable") {
+                    Text(
+                        text = "Call service config registry is not available yet. " +
+                            "Sign in / start the SDK first.",
+                        style = VideoTheme.typography.bodyDefault,
+                        color = VideoTheme.colors.textSecondary,
+                    )
+                }
+            } else {
+                items(items, key = { it.callType.name }) { item ->
+                    CallTypeConfigCard(
+                        item = item,
+                        onForegroundChanged = { enabled ->
+                            onForegroundChanged(
+                                item.callType,
+                                enabled,
+                            )
+                        },
+                        onTelecomChanged = { enabled -> onTelecomChanged(item.callType, enabled) },
+                        onAudioUsageChanged = { usage ->
+                            onAudioUsageChanged(
+                                item.callType,
+                                usage,
+                            )
+                        },
+                    )
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun DebugOptionsCard(
+    reuseCallAfterLeave: Boolean,
+    onReuseCallAfterLeaveChanged: (Boolean) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = VideoTheme.colors.backgroundCoreElevation1,
+                shape = RoundedCornerShape(16.dp),
+            )
+            .padding(16.dp),
+    ) {
+        Text(
+            text = "Debug",
+            style = VideoTheme.typography.headingLarge,
+            color = VideoTheme.colors.textPrimary,
+        )
+        Text(
+            text = "Retains the first Call object for a CID and uses it for the next join.",
+            modifier = Modifier.padding(top = 2.dp, bottom = 8.dp),
+            style = VideoTheme.typography.bodyEmphasis,
+            color = VideoTheme.colors.textSecondary,
+        )
+        ToggleRow(
+            label = "Restart same Call after leave",
+            checked = reuseCallAfterLeave,
+            onCheckedChange = onReuseCallAfterLeaveChanged,
+        )
     }
 }
 
@@ -389,7 +441,9 @@ private fun CallSettingsContentPreview() {
         CallSettingsContent(
             items = previewCallTypeConfigItems(),
             registryAvailable = true,
+            reuseCallAfterLeave = true,
             onClose = {},
+            onReuseCallAfterLeaveChanged = {},
             onForegroundChanged = { _, _ -> },
             onTelecomChanged = { _, _ -> },
             onAudioUsageChanged = { _, _ -> },
@@ -408,7 +462,9 @@ private fun CallSettingsUnavailablePreview() {
         CallSettingsContent(
             items = emptyList(),
             registryAvailable = false,
+            reuseCallAfterLeave = false,
             onClose = {},
+            onReuseCallAfterLeaveChanged = {},
             onForegroundChanged = { _, _ -> },
             onTelecomChanged = { _, _ -> },
             onAudioUsageChanged = { _, _ -> },

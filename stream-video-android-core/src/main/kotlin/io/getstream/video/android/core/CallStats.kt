@@ -22,11 +22,8 @@ import io.getstream.video.android.core.call.stats.model.RtcStatsReport
 import io.getstream.webrtc.CameraEnumerationAndroid
 import io.getstream.webrtc.RTCStats
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import stream.video.sfu.models.TrackType
 
 data class MediaStatsInfo(
@@ -50,8 +47,7 @@ data class MediaStatsInfo(
         }
     }
 }
-
-public class PeerConnectionStats(scope: CoroutineScope) {
+public class PeerConnectionStats {
     internal var _latency: MutableStateFlow<Int> = MutableStateFlow(0)
     val latency: StateFlow<Int> = _latency
 
@@ -98,6 +94,20 @@ public class PeerConnectionStats(scope: CoroutineScope) {
     internal var lastAudioBytes: Long? = null
     internal var lastAudioTimestampUs: Double? = null
 
+    internal fun reset() {
+        _latency.value = 0
+        _resolution.value = ""
+        _qualityDropReason.value = ""
+        _jitterInMs.value = 0
+        _bitrateKbps.value = 0F
+        _videoCodec.value = ""
+        _audioBitrateKbps.value = 0F
+        _audioCodec.value = ""
+        _audioTargetBitrateKbps.value = 0F
+        lastAudioBytes = null
+        lastAudioTimestampUs = null
+    }
+
     /**
      * Derives the audio bitrate from the change in [bytes] since the previous poll.
      *
@@ -135,15 +145,17 @@ public data class LocalStats(
 public class CallStats(val call: Call, val callScope: CoroutineScope) {
     private val logger by taggedLogger("CallStats")
 
-    private val supervisorJob = SupervisorJob()
-    private val scope = CoroutineScope(callScope.coroutineContext + supervisorJob)
-    // TODO: cleanup the scope
-
-    val publisher = PeerConnectionStats(scope)
-    val subscriber = PeerConnectionStats(scope)
+    val publisher = PeerConnectionStats()
+    val subscriber = PeerConnectionStats()
     val _local = MutableStateFlow<LocalStats?>(null)
     val local: StateFlow<LocalStats?> =
-        _local.stateIn(scope, SharingStarted.WhileSubscribed(), null)
+        _local
+
+    internal fun reset() {
+        publisher.reset()
+        subscriber.reset()
+        _local.value = null
+    }
 
     fun updateFromRTCStats(stats: RtcStatsReport?, isPublisher: Boolean = true) {
         if (stats == null) return

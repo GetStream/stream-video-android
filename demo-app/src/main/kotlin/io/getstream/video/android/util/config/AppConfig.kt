@@ -43,6 +43,7 @@ object AppConfig {
     private val logger by taggedLogger("RemoteConfig")
     private const val SHARED_PREF_NAME = "stream_demo_app"
     private const val SELECTED_ENV = "selected_env_v2"
+    private const val REUSE_CALL_AFTER_LEAVE = "reuse_call_after_leave"
 
     // Data
     private lateinit var environment: StreamEnvironment
@@ -83,6 +84,9 @@ object AppConfig {
     )
     val currentEnvironment = MutableStateFlow(availableEnvironments.default(BuildConfig.FLAVOR))
 
+    /** Debug option for retaining and restarting the same Call object after leave. */
+    val reuseCallAfterLeave = MutableStateFlow(false)
+
     // Utilities
     private val moshi: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
 
@@ -102,6 +106,7 @@ object AppConfig {
     ) {
         // Load prefs
         prefs = context.getSharedPreferences(SHARED_PREF_NAME, MODE_PRIVATE)
+        reuseCallAfterLeave.value = prefs.getBoolean(REUSE_CALL_AFTER_LEAVE, false)
         try {
             val jsonAdapter: JsonAdapter<StreamEnvironment> = moshi.adapter()
             val selectedEnvData = prefs.getString(SELECTED_ENV, null)
@@ -130,6 +135,14 @@ object AppConfig {
             putString(SELECTED_ENV, jsonAdapter.toJson(environment))
         }
         currentEnvironment.value = environment
+    }
+
+    /** Updates and persists the reusable-Call debug option. */
+    fun setReuseCallAfterLeave(enabled: Boolean) {
+        reuseCallAfterLeave.value = enabled
+        if (::prefs.isInitialized) {
+            prefs.edit { putBoolean(REUSE_CALL_AFTER_LEAVE, enabled) }
+        }
     }
 
     fun List<StreamEnvironment>.fromUri(env: Uri): StreamEnvironment? {
