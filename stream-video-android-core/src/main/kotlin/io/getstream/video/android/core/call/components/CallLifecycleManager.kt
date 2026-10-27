@@ -40,7 +40,7 @@ internal class CallLifecycleManager(
     private val clientImpl: StreamVideoClient,
     private val sessionManager: CallSessionManager,
     private val callRegistry: ClientCallRegistry,
-    /** Detaches and cancels the call scope, returning its job so rejoin can await cancellation. */
+    /** Detaches and cancels the call scope, returning its job so restart after leave can await it. */
     private val shutDownJobs: () -> Job?,
     private val restartCoordinator: CallRestartCoordinator,
     private val state: CallState,

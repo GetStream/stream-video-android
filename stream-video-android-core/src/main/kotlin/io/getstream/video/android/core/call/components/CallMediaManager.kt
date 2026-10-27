@@ -63,7 +63,18 @@ internal class CallMediaManager(
     private val eglBase: () -> EglBase,
     private val mediaManagerFactory: MediaManagerFactory,
 ) : Restartable {
+    /**
+     * Camera state before leave forcibly disables capture. Without restoring it when the Call is
+     * restarted after leave, an enabled camera would remain `Disabled` and skip the server default
+     * applied only to `NotSelected`. `null` means there is no pending state to restore.
+     */
     private var cameraEnabledBeforeLeave: Boolean? = null
+
+    /**
+     * Microphone state before leave forcibly disables capture. Without restoring it when the Call
+     * is restarted after leave, an enabled microphone would remain `Disabled` and skip the server
+     * default applied only to `NotSelected`. `null` means there is no pending state to restore.
+     */
     private var microphoneEnabledBeforeLeave: Boolean? = null
 
     private val logger by taggedLogger("Call:MediaManager:$type:$id")
@@ -74,6 +85,14 @@ internal class CallMediaManager(
         }
     })
     private val audioLevelOutputHelper = RampValueUpAndDownHelper()
+
+    /**
+     * Collects microphone audio levels for the current Call-scope generation.
+     *
+     * Leaving the Call cancels the generation that owns this job. [startAudioLevelMonitoring]
+     * cancels any previous reference and replaces it with a collector in the current scope, so
+     * restarting the Call after leave resumes level updates without running duplicate collectors.
+     */
     private var audioLevelMonitoringJob: Job? = null
 
     /** Smoothed local microphone volume level (0..1). */
@@ -257,6 +276,10 @@ internal class CallMediaManager(
             camera.setEnabled(callSettings.video.cameraDefaultOn)
         }
 
+        /**
+         * Restores the camera state captured during leave when a destroyed Call is restarted.
+         * The saved value is cleared after applying it so it affects only the first join after leave.
+         */
         cameraEnabledBeforeLeave?.let { camera.setEnabled(it) }
         cameraEnabledBeforeLeave = null
 
@@ -265,6 +288,10 @@ internal class CallMediaManager(
             val enabled = callSettings.audio.micDefaultOn
             microphone.setEnabled(enabled)
         }
+        /**
+         * Restores the microphone state captured during leave when a destroyed Call is restarted.
+         * The saved value is cleared after applying it so it affects only the first join after leave.
+         */
         microphoneEnabledBeforeLeave?.let { microphone.setEnabled(it) }
         microphoneEnabledBeforeLeave = null
     }

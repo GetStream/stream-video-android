@@ -41,8 +41,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  *   and session-specific state.
  *
  * Cache access through `StreamVideo.call(type, id)` is coordinated separately by
- * `StreamVideoClient`; this class only owns synchronization between leave, cleanup, and rejoin for
- * one retained `Call` instance.
+ * `StreamVideoClient`; this class only owns synchronization between leave, cleanup, and restarting
+ * one retained `Call` instance after leave.
  */
 internal class CallCleanupState {
     private companion object {
