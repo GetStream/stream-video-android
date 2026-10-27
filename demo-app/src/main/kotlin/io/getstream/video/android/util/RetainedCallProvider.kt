@@ -66,21 +66,41 @@ internal class RetainedCallProvider private constructor() {
         }
 
         val call = getOrCreate(streamVideo, callId)
-        Log.i(TAG, "Using retained Call for ${call.cid}: identity=${System.identityHashCode(call)}")
         onSuccess?.invoke(call)
         return true
     }
 
-    private fun getOrCreate(streamVideo: StreamVideo, callId: StreamCallId): Call =
-        synchronized(lock) {
+    /**
+     * Returns the retained Call when the debug option is enabled, or delegates to the SDK's normal
+     * get-or-create behaviour when it is disabled.
+     *
+     * Join and lobby screens must use this entry point as well as CallActivity. Otherwise they can
+     * populate the SDK cache with a second Call after the retained instance has left but before the
+     * activity asks for it.
+     */
+    fun getOrCreate(streamVideo: StreamVideo, callId: StreamCallId): Call {
+        if (!AppConfig.reuseCallAfterLeave.value) {
+            clear()
+            return streamVideo.call(callId.type, callId.id)
+        }
+
+        return synchronized(lock) {
             if (retainedCallsClient !== streamVideo) {
                 retainedCalls.clear()
                 retainedCallsClient = streamVideo
             }
             retainedCalls.getOrPut(callId.cid) {
                 streamVideo.call(callId.type, callId.id)
+            }.also { call ->
+                Log.i(
+                    TAG,
+                    "Using retained Call for ${call.cid}: identity=${System.identityHashCode(
+                        call,
+                    )}",
+                )
             }
         }
+    }
 
     private fun clear() {
         synchronized(lock) {

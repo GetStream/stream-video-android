@@ -32,6 +32,7 @@ import io.getstream.video.android.datastore.delegate.StreamUserDataStore
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import io.getstream.video.android.util.DemoE2eeKeys
+import io.getstream.video.android.util.RetainedCallProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -70,7 +71,7 @@ class CallLobbyViewModel @Inject constructor(
 
     val call: Call by lazy {
         val streamVideo = StreamVideo.instance()
-        val call = streamVideo.call(type = callId.type, id = callId.id)
+        val call = RetainedCallProvider.instance.getOrCreate(streamVideo, callId)
 
         viewModelScope.launch {
             // create the call if it doesn't exist - this will also load the settings for the call,
