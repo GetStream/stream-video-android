@@ -47,8 +47,7 @@ data class MediaStatsInfo(
         }
     }
 }
-
-public class PeerConnectionStats(scope: CoroutineScope) {
+public class PeerConnectionStats {
     internal var _latency: MutableStateFlow<Int> = MutableStateFlow(0)
     val latency: StateFlow<Int> = _latency
 
@@ -142,12 +141,12 @@ public data class LocalStats(
     val sdkVersion: String,
     val deviceModel: String,
 )
-
+//TODO Rahul, make internal constructor,
 public class CallStats(val call: Call, val callScope: CoroutineScope) {
     private val logger by taggedLogger("CallStats")
 
-    val publisher = PeerConnectionStats(callScope)
-    val subscriber = PeerConnectionStats(callScope)
+    val publisher = PeerConnectionStats()
+    val subscriber = PeerConnectionStats()
     val _local = MutableStateFlow<LocalStats?>(null)
     val local: StateFlow<LocalStats?> =
         _local
