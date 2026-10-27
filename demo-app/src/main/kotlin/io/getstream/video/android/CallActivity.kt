@@ -44,6 +44,7 @@ import io.getstream.video.android.core.call.state.CallAction
 import io.getstream.video.android.core.e2ee.E2EEEventType
 import io.getstream.video.android.core.e2ee.StreamEncryptionManager
 import io.getstream.video.android.datastore.delegate.StreamUserDataStore
+import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.ui.call.CallScreen
 import io.getstream.video.android.ui.call.DemoComponentFactory
 import io.getstream.video.android.ui.common.StreamActivityUiDelegate
@@ -53,6 +54,7 @@ import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
 import io.getstream.video.android.ui.lobby.deriveE2EEKey
 import io.getstream.video.android.util.DemoE2eeKeys
 import io.getstream.video.android.util.FullScreenCircleProgressBar
+import io.getstream.video.android.util.RetainedCallProvider
 import io.getstream.video.android.util.StreamVideoInitHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -120,6 +122,22 @@ class CallActivity : ComposeStreamCallActivity() {
                         previousRingingStates.add(it)
                     }
                 }
+        }
+    }
+
+    /**
+     * Keeps the first Call object used by this activity when the Call Settings debug option is on.
+     * After leave removes that Call from the SDK cache, opening the same CID returns this retained
+     * instance so its next join exercises restart-after-leave behavior.
+     */
+    @StreamCallActivityDelicateApi
+    override fun call(
+        cid: StreamCallId,
+        onSuccess: ((Call) -> Unit)?,
+        onError: ((Exception) -> Unit)?,
+    ) {
+        if (!RetainedCallProvider.instance.provide(cid, onSuccess, onError)) {
+            super.call(cid, onSuccess, onError)
         }
     }
 
