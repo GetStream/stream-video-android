@@ -114,19 +114,17 @@ internal class CallLifecycleManager(
             callRegistry.detach()
 
             clientImpl.scope.launch {
-                try {
-                    val leaveReason = "[reason=${reason::class.simpleName}, message=${reason.message}]"
-                    callAnalytics.onCallLeave(sessionManager.session, reason)
-                    safeCall {
-                        sessionManager.session.value?.sfuTracer?.trace("leave-call", leaveReason)
-                        val stats = statsReporter.collectStats()
-                        sessionManager.session.value?.sendCallStats(stats)
-                    }
-                    // Must complete before cleanup() cancels the session's supervisor job.
-                    safeCall { sessionManager.session.value?.sendLeaveEvent(leaveReason) }
-                } finally {
-                    cleanup()
+                val leaveReason = "[reason=${reason::class.simpleName}, message=${reason.message}]"
+                callAnalytics.onCallLeave(sessionManager.session, reason)
+                safeCall {
+                    sessionManager.session.value?.sfuTracer?.trace("leave-call", leaveReason)
+                    val stats = statsReporter.collectStats()
+                    sessionManager.session.value?.sendCallStats(stats)
                 }
+                // Must complete before cleanup() cancels the session's supervisor job.
+                safeCall { sessionManager.session.value?.sendLeaveEvent(leaveReason) }
+
+                cleanup()
             }
         }
     }
