@@ -157,18 +157,12 @@ internal class CallLifecycleManager(
      */
     fun cleanup() {
         cleanupState.cleanupOnce {
-            try {
-                state.cleanup()
-                sessionManager.session.value?.cleanup()
-            } finally {
-                cleanupState.recordCancelledCallJob(shutDownJobs())
-                try {
-                    statsReporter.stop()
-                    media.cleanup()
-                } finally {
-                    sessionManager.setActiveSession(null)
-                }
-            }
+            state.cleanup()
+            sessionManager.session.value?.cleanup()
+            cleanupState.recordCancelledCallJob(shutDownJobs())
+            statsReporter.stop()
+            media.cleanup()
+            sessionManager.setActiveSession(null)
         }
     }
 
