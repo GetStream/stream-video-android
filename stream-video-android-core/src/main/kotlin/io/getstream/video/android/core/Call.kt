@@ -632,7 +632,10 @@ public class Call(
 
     /**
      * Joins the call. Concurrent callers share one in-flight attempt.
-     * The same instance can be joined again after [leave]; pending cleanup finishes first.
+     *
+     * When invoked after [leave], this method waits for pending cleanup, resets session-specific
+     * state, and creates a new coroutine scope and [RtcSession]. The [Call] instance and its
+     * [events] flow remain stable across the leave and join cycle.
      *
      * Cancelling this coroutine does not abort that attempt — only [leave] does.
      *
@@ -769,12 +772,28 @@ public class Call(
 
     // endregion
 
+    /**
+     * Leaves the call for the supplied SDK reason and starts cleanup asynchronously.
+     *
+     * The call is removed from the client's get-or-create cache and its current coroutine scope and
+     * RTC session are cleaned up. The same [Call] instance can be retained and joined again. A
+     * later [join] waits for cleanup to finish before creating a new scope and RTC session.
+     */
     @InternalStreamVideoApi
     fun leave(reason: CallLeaveReason) {
         detachE2EEManager()
         lifecycle.leave(reason)
     }
 
+    /**
+     * Leaves the call and starts cleanup asynchronously.
+     *
+     * The call is removed from the client's get-or-create cache and its current coroutine scope and
+     * RTC session are cleaned up. The same [Call] instance can be retained and joined again. A
+     * later [join] waits for cleanup to finish before creating a new scope and RTC session.
+     *
+     * @param reason A user-defined reason included with the leave operation.
+     */
     fun leave(reason: String = "user") {
         detachE2EEManager()
         lifecycle.leave(reason)

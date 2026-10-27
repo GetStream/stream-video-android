@@ -29,11 +29,27 @@ import kotlin.test.assertTrue
 class CallCleanupStateTest {
 
     @Test
+    fun `joining an active call does not restart its lifecycle`() = runTest {
+        val cleanupState = CallCleanupState()
+        var restartInvoked = false
+
+        val result = cleanupState.prepareForJoin {
+            restartInvoked = true
+            Success(Unit)
+        }
+
+        assertEquals(Success(Unit), result)
+        assertFalse(restartInvoked)
+        assertFalse(cleanupState.isDestroyed)
+    }
+
+    @Test
     fun `failed restart keeps the call destroyed so a later join can retry`() = runTest {
         val cleanupState = CallCleanupState()
         cleanupState.startLeave {
             Job().apply { complete() }
         }
+        cleanupState.cleanupOnce {}
         val failure = Failure(Error.GenericError("scope restart failed"))
 
         assertEquals(failure, cleanupState.prepareForJoin { failure })
@@ -41,5 +57,22 @@ class CallCleanupStateTest {
 
         assertEquals(Success(Unit), cleanupState.prepareForJoin { Success(Unit) })
         assertFalse(cleanupState.isDestroyed)
+    }
+
+    @Test
+    fun `leave and cleanup after restart destroy the new lifecycle`() = runTest {
+        val cleanupState = CallCleanupState()
+        cleanupState.cleanupOnce {}
+        assertEquals(Success(Unit), cleanupState.prepareForJoin { Success(Unit) })
+        assertFalse(cleanupState.isDestroyed)
+
+        var cleanupInvoked = false
+        cleanupState.startLeave {
+            Job().apply { complete() }
+        }
+        cleanupState.cleanupOnce { cleanupInvoked = true }
+
+        assertTrue(cleanupInvoked)
+        assertTrue(cleanupState.isDestroyed)
     }
 }

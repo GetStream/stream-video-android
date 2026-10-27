@@ -53,8 +53,11 @@ public interface StreamVideo : NotificationHandler {
     val state: ClientState
 
     /**
-     * Create a call with the given type and id.
-     * For GetStream Devs: Careful when invoking it during call/service cleanup as it will fill itself in [io.getstream.video.android.core.StreamVideoClient.calls] map
+     * Returns the cached [Call] for the given type and ID, or creates one when none is cached.
+     *
+     * A call is removed from the cache when [Call.leave] is invoked. Calling this method afterward
+     * may therefore return a new [Call] instance. A previously retained instance can still be
+     * joined again independently.
      */
     public fun call(type: String, id: String = ""): Call
 

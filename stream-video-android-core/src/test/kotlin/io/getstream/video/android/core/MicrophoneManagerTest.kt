@@ -154,7 +154,7 @@ class MicrophoneManagerTest {
             val audioManager = mockk<AudioManager>(relaxed = true)
             every { context.getSystemService(Context.AUDIO_SERVICE) } returns audioManager
             every { context.getSystemService(AudioManager::class.java) } returns audioManager
-            val microphone = MicrophoneManager(mediaManager, audioUsage, audioUsageProvider)
+            val microphone = MicrophoneManager(mediaManager, audioUsageProvider)
             microphone.setup()
             microphone.cleanup()
             microphone.setup()
