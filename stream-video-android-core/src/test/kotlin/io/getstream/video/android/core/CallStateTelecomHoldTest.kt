@@ -64,6 +64,7 @@ internal class CallStateTelecomHoldTest : TestBase() {
         every { id } returns "telecom-hold-test"
         every { cid } returns "default:telecom-hold-test"
         every { events } returns MutableSharedFlow<VideoEvent>()
+        every { scope } returns this@CallStateTelecomHoldTest.scope
     }
 
     @After
