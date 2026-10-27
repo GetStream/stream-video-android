@@ -25,7 +25,6 @@ import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.utils.safeCall
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -86,6 +85,18 @@ internal class CallLifecycleManager(
         internalLeave(CallLeaveReason.Custom(reason))
     }
 
+    /**
+     * Starts the terminal leave operation for the current Call lifecycle.
+     *
+     * Leave must run through [CallCleanupState.startLeave] because multiple SDK paths may request it
+     * concurrently. The cleanup state atomically accepts only the first request, marks the current
+     * lifecycle as destroyed, and retains the asynchronous leave job. A later `Call.join()` can then
+     * wait for that job instead of recreating the Call while leave signaling or cleanup is still in
+     * progress.
+     *
+     * The asynchronous work runs on the client scope because [cleanup] cancels the Call scope that
+     * initiated leave. Running it on the Call scope could cancel the leave event before it is sent.
+     */
     private fun internalLeave(reason: CallLeaveReason) {
         cleanupState.startLeave {
             stopConnectionMonitors()
@@ -102,7 +113,7 @@ internal class CallLifecycleManager(
 
             callRegistry.detach()
 
-            clientImpl.scope.launch(start = CoroutineStart.LAZY) {
+            clientImpl.scope.launch {
                 try {
                     val leaveReason = "[reason=${reason::class.simpleName}, message=${reason.message}]"
                     callAnalytics.onCallLeave(sessionManager.session, reason)
@@ -116,7 +127,7 @@ internal class CallLifecycleManager(
                 } finally {
                     cleanup()
                 }
-            }.also { it.start() }
+            }
         }
     }
 
@@ -134,6 +145,16 @@ internal class CallLifecycleManager(
         return result
     }
 
+    /**
+     * Performs terminal resource cleanup for the current Call lifecycle.
+     *
+     * Cleanup must run through [CallCleanupState.cleanupOnce] because it can be reached from the
+     * asynchronous leave `finally` block and from direct cleanup paths. The cleanup state ensures
+     * these paths cannot release the same session, media, and coroutine resources more than once.
+     * It also marks the lifecycle as destroyed and records the cancelled Call job before cleanup
+     * completes, allowing a later `Call.join()` to wait for the old scope's children and `finally`
+     * blocks before restarting the Call.
+     */
     fun cleanup() {
         cleanupState.cleanupOnce {
             try {
