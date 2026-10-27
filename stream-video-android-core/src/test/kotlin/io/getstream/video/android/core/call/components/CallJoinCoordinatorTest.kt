@@ -235,15 +235,16 @@ class CallJoinCoordinatorTest {
     ) {
         val error = Error.GenericError("scope restart failed")
         coEvery { lifecycle.prepareForJoin() } returns Failure(error)
+        val joinAnalytics = callAnalytics.joinAnalytics
 
         val result = coordinator().join()
 
         assertThat(result).isEqualTo(Failure(error))
         assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Failed(error))
-        verify(exactly = 1) { callAnalytics.joinAnalytics.onJoinFunctionStart() }
+        verify(exactly = 1) { joinAnalytics.onJoinFunctionStart() }
         verify(exactly = 1) {
-            callAnalytics.joinAnalytics.onJoinPreparationError(
-                failureCode = "CALL_RESTART_FAILED",
+            joinAnalytics.onJoinPreparationError(
+                failureCode = "DESTROYED_CALL_JOIN_FAILED",
                 message = "scope restart failed",
             )
         }

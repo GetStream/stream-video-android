@@ -75,7 +75,7 @@ internal class CallJoinCoordinator(
 ) {
     private companion object {
         const val JOIN_FLIGHT_KEY = "join"
-        const val CALL_RESTART_FAILED = "CALL_RESTART_FAILED"
+        const val DESTROYED_CALL_JOIN_FAILED = "DESTROYED_CALL_JOIN_FAILED"
     }
 
     private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
@@ -142,7 +142,7 @@ internal class CallJoinCoordinator(
             is Failure -> {
                 state._connection.value = RealtimeConnection.Failed(preparation.value)
                 callAnalytics.joinAnalytics.onJoinPreparationError(
-                    failureCode = CALL_RESTART_FAILED,
+                    failureCode = DESTROYED_CALL_JOIN_FAILED,
                     message = preparation.value.message,
                 )
                 return preparation

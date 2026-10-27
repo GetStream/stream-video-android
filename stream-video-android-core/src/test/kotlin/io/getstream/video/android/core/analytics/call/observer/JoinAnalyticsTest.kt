@@ -177,7 +177,7 @@ class JoinAnalyticsTest {
         joinAnalytics.onJoinFunctionStart()
 
         joinAnalytics.onJoinPreparationError(
-            failureCode = "CALL_RESTART_FAILED",
+            failureCode = "DESTROYED_CALL_JOIN_FAILED",
             message = "scope restart failed",
         )
 
@@ -187,7 +187,7 @@ class JoinAnalyticsTest {
                 false,
                 0,
                 "scope restart failed",
-                "CALL_RESTART_FAILED",
+                "DESTROYED_CALL_JOIN_FAILED",
                 null,
             )
         }
