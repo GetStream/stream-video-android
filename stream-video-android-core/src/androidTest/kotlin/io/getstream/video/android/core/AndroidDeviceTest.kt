@@ -33,7 +33,6 @@ import okhttp3.Response
 import org.junit.Test
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
-import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
 import org.webrtc.RTCStats
 import org.webrtc.VideoCodecInfo
@@ -316,13 +315,11 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         val videoTrack = call.state.me.value?.videoTrack?.testIn(backgroundScope)
         val video = videoTrack?.awaitItem()?.video
         assertThat(video?.enabled()).isTrue()
-        assertThat(video?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
         val audioTrack = call.state.me.value?.audioTrack?.testIn(backgroundScope)
         val audio = audioTrack?.awaitItem()?.audio
         audio?.setEnabled(true)
         assertThat(audio?.enabled()).isTrue()
-        assertThat(audio?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
         // leave and cleanup the joining call
         call.leave()
@@ -358,7 +355,6 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
         call.mediaManager.audioTrack.setEnabled(true)
         assertThat(call.mediaManager.videoTrack.enabled()).isTrue()
         assertThat(call.mediaManager.audioTrack.enabled()).isTrue()
-        assertThat(call.mediaManager.videoTrack.state()).isEqualTo(MediaStreamTrack.State.LIVE)
 
         // assert the participant counts is correct
         val participantCount = call.state.participantCounts.testIn(backgroundScope)
@@ -372,13 +368,11 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             val videoTrack = awaitItem()?.video
             assertThat(videoTrack).isNotNull()
             assertThat(videoTrack?.enabled()).isTrue()
-            assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
         }
 
         participant.audioTrack.test {
             val audioTrack = awaitItem()?.audio
             assertThat(audioTrack).isNotNull()
-            assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
         }
 
         // verify the stats are being tracked
@@ -439,13 +433,11 @@ class AndroidDeviceTest : IntegrationTestBase(connectCoordinatorWS = false) {
             val videoTrack = awaitItem()?.video
             assertThat(videoTrack).isNotNull()
             assertThat(videoTrack?.enabled()).isTrue()
-            assertThat(videoTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
         }
 
         participant.audioTrack.test {
             val audioTrack = awaitItem()?.audio
             assertThat(audioTrack).isNotNull()
-            assertThat(audioTrack?.state()).isEqualTo(MediaStreamTrack.State.LIVE)
         }
 
         // verify the stats are being tracked

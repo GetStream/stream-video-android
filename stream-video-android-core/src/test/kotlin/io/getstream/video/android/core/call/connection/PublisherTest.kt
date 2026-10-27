@@ -141,7 +141,6 @@ class PublisherTest {
             mockk<AudioTrack>(relaxed = true) {
                 every { id() } returns secondArg<String>()
                 every { kind() } returns "audio"
-                every { state() } returns MediaStreamTrack.State.LIVE
                 every { enabled() } returns true
             }
         }
@@ -149,7 +148,6 @@ class PublisherTest {
             mockk<VideoTrack>(relaxed = true) {
                 every { id() } returns secondArg<String>()
                 every { kind() } returns "video"
-                every { state() } returns MediaStreamTrack.State.LIVE
                 every { enabled() } returns true
             }
         }
@@ -292,12 +290,43 @@ class PublisherTest {
     }
 
     @Test
-    fun `getAnnouncedTracks includes video layers even when track is not LIVE`() {
+    fun `getAnnouncedTracks includes video layers and unmuted when track is enabled but not LIVE`() {
         val mockVideoTrack = mockk<VideoTrack>(relaxed = true) {
             every { id() } returns "video-1"
             every { kind() } returns "video"
             every { isDisposed } returns false
             every { state() } returns MediaStreamTrack.State.ENDED
+            every { enabled() } returns true
+        }
+        val mockSender = mockk<RtpSender>(relaxed = true) {
+            every { track() } returns mockVideoTrack
+        }
+        val mockTransceiver = mockk<RtpTransceiver>(relaxed = true) {
+            every { sender } returns mockSender
+            every { mid } returns "0"
+        }
+        every { mockTransceiverCache.items() } returns listOf(
+            TransceiverId(videoPublishOption, mockTransceiver),
+        )
+        every { mockTransceiverCache.indexOf(videoPublishOption) } returns 0
+        every { mockTransceiverCache.getLayers(videoPublishOption) } returns null
+
+        val announced = publisher.getAnnouncedTracks(null, null)
+
+        assertEquals(1, announced.size)
+        // Not LIVE yet is the capturer still starting, not a mute. Announcing muted=true here
+        // sticks on the SFU after the earlier updateMuteStates(unmuted).
+        assertFalse(announced[0].muted)
+        assertTrue(announced[0].layers.isNotEmpty())
+    }
+
+    @Test
+    fun `getAnnouncedTracks announces a disabled track as muted even when it is LIVE`() {
+        val mockVideoTrack = mockk<VideoTrack>(relaxed = true) {
+            every { id() } returns "video-1"
+            every { kind() } returns "video"
+            every { isDisposed } returns false
+            every { enabled() } returns false
         }
         val mockSender = mockk<RtpSender>(relaxed = true) {
             every { track() } returns mockVideoTrack
@@ -316,7 +345,6 @@ class PublisherTest {
 
         assertEquals(1, announced.size)
         assertTrue(announced[0].muted)
-        assertTrue(announced[0].layers.isNotEmpty())
     }
 
     @Test
@@ -407,7 +435,6 @@ class PublisherTest {
     fun `close with stopTracks = true stops publishing and closes connection`() = runTest {
         val mockVideoTrack = mockk<VideoTrack>(relaxed = true) {
             every { kind() } returns "video"
-            every { state() } returns MediaStreamTrack.State.LIVE
         }
         val mockTransceiver = mockk<RtpTransceiver>(relaxed = true)
         every { mockPeerConnection.addTransceiver(mockVideoTrack, any()) } returns mockTransceiver
@@ -434,7 +461,6 @@ class PublisherTest {
         // 2) Mock a video track & transceiver so that a transceiver is created when we publish.
         val mockVideoTrack = mockk<VideoTrack>(relaxed = true) {
             every { kind() } returns "video"
-            every { state() } returns MediaStreamTrack.State.LIVE
         }
         val mockTransceiver = mockk<RtpTransceiver>(relaxed = true)
         // Ensure that when we publish the video track, the Publisher calls addTransceiver(...) on the PeerConnection,
@@ -475,11 +501,9 @@ class PublisherTest {
         // First: mock a video track & transceiver
         val mockVideoTrack = mockk<VideoTrack>(relaxed = true) {
             every { kind() } returns "video"
-            every { state() } returns MediaStreamTrack.State.LIVE
         }
         val mockAudioTrack = mockk<AudioTrack>(relaxed = true) {
             every { kind() } returns "audio"
-            every { state() } returns MediaStreamTrack.State.LIVE
         }
 
         val mockAudioTransceiver = mockk<RtpTransceiver>(relaxed = true) {
@@ -555,13 +579,11 @@ class PublisherTest {
         runTest(coroutineContext) {
             val liveVideoTrack = mockk<VideoTrack>(relaxed = true) {
                 every { kind() } returns "video"
-                every { state() } returns MediaStreamTrack.State.LIVE
                 every { enabled() } returns true
                 every { isDisposed } returns false
             }
             val liveAudioTrack = mockk<AudioTrack>(relaxed = true) {
                 every { kind() } returns "audio"
-                every { state() } returns MediaStreamTrack.State.LIVE
                 every { enabled() } returns true
                 every { isDisposed } returns false
             }
@@ -594,6 +616,47 @@ class PublisherTest {
             verify(exactly = 0) { mockTransceiverCache.remove(audioPublishOption) }
             assertEquals(2, mockTransceiverCache.items().size)
         }
+
+    @Test
+    fun `syncPublishOptions adds a new option when the track is enabled but not LIVE`() {
+        val endedTrack = mockk<VideoTrack>(relaxed = true) {
+            every { kind() } returns "video"
+            every { state() } returns MediaStreamTrack.State.ENDED
+            every { enabled() } returns true
+            every { isDisposed } returns false
+        }
+        val existingTransceiver = mockk<RtpTransceiver>(relaxed = true) {
+            every { sender.track() } returns endedTrack
+        }
+        mockTransceiverCache.add(videoPublishOption, existingTransceiver)
+        every {
+            mockPeerConnection.addTransceiver(any<MediaStreamTrack>(), any())
+        } returns mockk(relaxed = true)
+
+        val newOption = videoPublishOption.copy(id = 99)
+        publisher.syncPublishOptions(null, listOf(videoPublishOption, newOption))
+
+        verify(exactly = 1) { publisher.addTransceiver(any(), any(), any(), newOption) }
+        verify(exactly = 0) { publisher.addTransceiver(any(), any(), any(), videoPublishOption) }
+    }
+
+    @Test
+    fun `syncPublishOptions does not add a transceiver when the published track is disabled`() {
+        val mutedTrack = mockk<VideoTrack>(relaxed = true) {
+            every { kind() } returns "video"
+            every { enabled() } returns false
+            every { isDisposed } returns false
+        }
+        val existingTransceiver = mockk<RtpTransceiver>(relaxed = true) {
+            every { sender.track() } returns mutedTrack
+        }
+        mockTransceiverCache.add(videoPublishOption, existingTransceiver)
+
+        val newOption = videoPublishOption.copy(id = 99)
+        publisher.syncPublishOptions(null, listOf(videoPublishOption, newOption))
+
+        verify(exactly = 0) { publisher.addTransceiver(any(), any(), any(), any()) }
+    }
 
     /**
      * Bug #2: when the sender can't be reused, [Publisher.publishStreamInternal] falls back to a new
@@ -633,7 +696,6 @@ class PublisherTest {
             every { senderB.track() } returns mockk<VideoTrack>(relaxed = true) {
                 every { isDisposed } returns false
                 every { kind() } returns "video"
-                every { state() } returns MediaStreamTrack.State.LIVE
                 every { id() } returns "track-B"
             }
 
@@ -659,7 +721,6 @@ class PublisherTest {
         runTest(coroutineContext) {
             val liveTrack = mockk<VideoTrack>(relaxed = true) {
                 every { kind() } returns "video"
-                every { state() } returns MediaStreamTrack.State.LIVE
                 every { enabled() } returns true
                 every { isDisposed } returns false
             }
@@ -696,7 +757,6 @@ class PublisherTest {
         // 1) Mock a video track with a specific ID
         val mockVideoTrack = mockk<VideoTrack>(relaxed = true) {
             every { kind() } returns "video"
-            every { state() } returns MediaStreamTrack.State.LIVE
             every { id() } returns "my-video-track-id" // Important for the test
         }
 
@@ -736,7 +796,6 @@ class PublisherTest {
     fun `changePublishQuality updates transceiver parameters`() = runTest {
         val videoTrack = mockk<VideoTrack>(relaxed = true) {
             every { kind() } returns "video"
-            every { state() } returns MediaStreamTrack.State.LIVE
             every { id() } returns "video-id"
         }
         val parameters = mockk<RtpParameters>(relaxed = true)
@@ -796,12 +855,10 @@ class PublisherTest {
     fun `getAnnouncedTracks returns track info for each live transceiver`() = runTest {
         val videoTrack = mockk<VideoTrack>(relaxed = true) {
             every { kind() } returns "video"
-            every { state() } returns MediaStreamTrack.State.LIVE
             every { id() } returns "video-id-123"
         }
         val audioTrack = mockk<AudioTrack>(relaxed = true) {
             every { kind() } returns "audio"
-            every { state() } returns MediaStreamTrack.State.LIVE
             every { id() } returns "audio-id-456"
         }
         val videoTransceiver = mockk<RtpTransceiver>(relaxed = true)
@@ -824,7 +881,6 @@ class PublisherTest {
     fun `publishStream re-enables a disabled track`() = testScope.runTest {
         val mockVideoTrack = mockk<VideoTrack>(relaxed = true) {
             every { kind() } returns "video"
-            every { state() } returns MediaStreamTrack.State.LIVE
             every { enabled() } returns false
         }
         val mockTransceiver = mockk<RtpTransceiver>(relaxed = true)
