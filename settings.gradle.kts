@@ -52,7 +52,8 @@ include(":metrics:stream-video-android-metrics")
 
 buildCache {
     local {
-        isEnabled = !System.getenv().containsKey("CI")
+        isEnabled = !System.getenv().containsKey("CI") ||
+            System.getenv("GRADLE_LOCAL_BUILD_CACHE") == "true"
         removeUnusedEntriesAfterDays = 7
     }
     val localProperties = java.util.Properties()
