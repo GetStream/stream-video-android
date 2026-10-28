@@ -43,14 +43,8 @@ public data class PushPreferencesResponse (
     @Json(name = "disabled_until")
     public val disabledUntil: org.threeten.bp.OffsetDateTime? = null,
 
-    @Json(name = "feeds_level")
-    public val feedsLevel: String? = null,
-
     @Json(name = "chat_preferences")
     public val chatPreferences: io.getstream.android.video.api.generated.models.ChatPreferencesResponse? = null,
-
-    @Json(name = "feeds_preferences")
-    public val feedsPreferences: io.getstream.android.video.api.generated.models.FeedsPreferencesResponse? = null,
 
     @Json(name = "schedule")
     public val schedule: io.getstream.android.video.api.generated.models.PushScheduleResponse? = null
