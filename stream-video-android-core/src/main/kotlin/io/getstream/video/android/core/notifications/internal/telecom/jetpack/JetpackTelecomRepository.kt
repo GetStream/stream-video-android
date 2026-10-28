@@ -108,7 +108,9 @@ internal class JetpackTelecomRepository(
         )
 
         // Creates a channel to send actions to the call scope.
-        val actionSource = Channel<TelecomCallAction>()
+        val actionSource = Channel<TelecomCallAction>(
+            capacity = Channel.BUFFERED,
+        )
         // Register the call and handle actions in the scope
         try {
             logger.d { "[registerCall] addCall" }
@@ -269,7 +271,14 @@ internal class JetpackTelecomRepository(
 
         if (newEndpoint != null) {
             requestEndpointChange(newEndpoint).also {
-                logger.d { "[doSwitchEndpoint] Endpoint ${newEndpoint.name} changed: $it " }
+                when (it) {
+                    is CallControlResult.Success -> {
+                        logger.d { "[doSwitchEndpoint] Endpoint ${newEndpoint.name} changed successfully: $it " }
+                    }
+                    is CallControlResult.Error -> {
+                        logger.w { "[doSwitchEndpoint] Endpoint ${newEndpoint.name} changed with error: $it " }
+                    }
+                }
             }
         }
     }
@@ -296,6 +305,7 @@ internal class JetpackTelecomRepository(
             }
 
             is CallControlResult.Error -> {
+                logger.w { "[CallControlScope.doAnswer] error with ${result.errorCode}" }
                 updateCurrentCall {
                     TelecomCall.Unregistered(
                         id = id,

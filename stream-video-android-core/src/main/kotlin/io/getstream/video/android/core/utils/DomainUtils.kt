@@ -52,8 +52,8 @@ internal fun MemberResponse.toCallUser(): CallUser {
         teams = user.teams ?: emptyList(),
         role = user.role,
         state = null,
-        createdAt = Date(createdAt.toEpochSecond()),
-        updatedAt = Date(updatedAt.toEpochSecond()),
+        createdAt = Date(createdAt.toInstant().toEpochMilli()),
+        updatedAt = Date(updatedAt.toInstant().toEpochMilli()),
     )
 }
 
