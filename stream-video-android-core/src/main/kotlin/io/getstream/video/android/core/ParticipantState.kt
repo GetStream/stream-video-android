@@ -229,10 +229,12 @@ public data class ParticipantState(
     fun updateFromParticipantInfo(participant: Participant) {
         sessionId = participant.session_id
 
-        val joinedAtMilli =
-            participant.joined_at?.toEpochMilli() ?: OffsetDateTime.now().toEpochSecond()
-        val instant = Instant.ofEpochSecond(joinedAtMilli)
-        _joinedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
+        _joinedAt.value = participant.joined_at?.let {
+            OffsetDateTime.ofInstant(
+                Instant.ofEpochSecond(it.epochSecond, it.nano.toLong()),
+                ZoneOffset.UTC,
+            )
+        } ?: OffsetDateTime.now(ZoneOffset.UTC)
 
         trackLookupPrefix = participant.track_lookup_prefix
         _networkQuality.value = NetworkQuality.fromConnectionQuality(participant.connection_quality)
