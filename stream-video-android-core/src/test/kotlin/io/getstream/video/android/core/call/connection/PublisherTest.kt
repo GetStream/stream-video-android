@@ -326,6 +326,7 @@ class PublisherTest {
             every { id() } returns "video-1"
             every { kind() } returns "video"
             every { isDisposed } returns false
+            every { state() } returns MediaStreamTrack.State.LIVE
             every { enabled() } returns false
         }
         val mockSender = mockk<RtpSender>(relaxed = true) {
