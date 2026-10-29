@@ -18,7 +18,7 @@ package io.getstream.video.android.core.socket.common.token
 
 internal class TokenManagerImpl(private val tokenRepository: TokenRepository) : TokenManager {
 
-    private lateinit var provider: TokenProvider
+    private lateinit var provider: TokenLoader
 
     override fun updateToken(token: String) {
         this.tokenRepository.updateToken(token)

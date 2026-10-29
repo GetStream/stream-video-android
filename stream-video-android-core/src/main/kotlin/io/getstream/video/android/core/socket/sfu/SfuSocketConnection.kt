@@ -33,8 +33,8 @@ import io.getstream.video.android.core.socket.common.StreamWebSocketEvent
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
 import io.getstream.video.android.core.socket.common.token.PersistingTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenLoader
 import io.getstream.video.android.core.socket.common.token.TokenManagerImpl
-import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.utils.mapState
@@ -64,7 +64,7 @@ class SfuSocketConnection internal constructor(
     /** Lifecycle */
     private val lifecycle: Lifecycle,
     /** Token provider */
-    private val tokenProvider: TokenProvider,
+    private val tokenProvider: TokenLoader,
     private val tokenRepository: TokenRepository,
     private val sfuAnalytics: SfuAnalytics,
     /**

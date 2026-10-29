@@ -30,6 +30,7 @@ import io.getstream.android.core.api.model.config.StreamComponentProvider
 import io.getstream.android.core.api.model.config.StreamSocketConfig
 import io.getstream.android.core.api.model.value.StreamApiKey
 import io.getstream.android.core.api.model.value.StreamHttpClientInfoHeader
+import io.getstream.android.core.api.model.value.StreamToken
 import io.getstream.android.core.api.model.value.StreamUserId
 import io.getstream.android.core.api.model.value.StreamWsUrl
 import io.getstream.android.core.api.observers.lifecycle.StreamLifecycleMonitor
@@ -50,12 +51,9 @@ import io.getstream.video.android.core.permission.android.StreamPermissionCheck
 import io.getstream.video.android.core.ringing.RingStatePollingConfig
 import io.getstream.video.android.core.socket.common.scope.ClientScope
 import io.getstream.video.android.core.socket.common.scope.UserScope
-import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
-import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.coordinator.v2.AnonymousStreamTokenProvider
 import io.getstream.video.android.core.socket.coordinator.v2.GuestStreamTokenProvider
-import io.getstream.video.android.core.socket.coordinator.v2.IntegrationStreamTokenProvider
 import io.getstream.video.android.core.socket.coordinator.v2.VideoEventSerialization
 import io.getstream.video.android.core.socket.coordinator.v2.WritableUserRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
@@ -98,7 +96,8 @@ import java.util.concurrent.atomic.AtomicReference
  * @property apiKey Your Stream API Key. You can find it in the dashboard.
  * @property user The user object. Can be an authenticated user, guest user or anonymous.
  * @property token The token for this user, generated using your API secret on your server.
- * @property tokenProvider Used to make a request to your backend for a new token when the token has expired.
+ * @property tokenProvider Loads a new user token when the current one expires. The same provider
+ * authenticates the coordinator connection and the SFU socket.
  * @property loggingLevel Represents and wraps SDK logging levels for Stream logger, HTTP interceptor and native WebRTC logging.
  * @property notificationConfig The configurations for handling push notification.
  * @property ringNotification Overwrite the default notification logic for incoming calls.
@@ -138,12 +137,9 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val apiKey: ApiKey,
     private var user: User = User.anonymous(),
     private val token: UserToken = "",
-    private val legacyTokenProvider: (suspend (error: Throwable?) -> String)? = null,
-    private val tokenProvider: TokenProvider = legacyTokenProvider?.let { legacy ->
-        object : TokenProvider {
-            override suspend fun loadToken(): String = legacy.invoke(null)
-        }
-    } ?: RepositoryTokenProvider(tokenRepository),
+    private val tokenProvider: StreamTokenProvider = StreamTokenProvider {
+        StreamToken.fromString(tokenRepository.getToken().ifBlank { token })
+    },
     private val loggingLevel: LoggingLevel = LoggingLevel(),
     private val notificationConfig: NotificationConfig = NotificationConfig(),
     private val ringNotification: ((call: Call) -> Notification?)? = null,
@@ -233,7 +229,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
      * @throws RuntimeException If an instance of the client already exists and [ensureSingleInstance] is set to true.
      * @throws IllegalArgumentException If [apiKey] is blank.
      * @throws IllegalArgumentException If [user] type is [UserType.Authenticated] and the [user] id is blank.
-     * @throws IllegalArgumentException If [user] type is [UserType.Authenticated] and both [token] and [tokenProvider] are empty.
+     * @throws IllegalArgumentException If [user] type is [UserType.Authenticated] and [token] is empty.
      * @throws ConnectException If the WebSocket connection fails.
      */
     public fun build(): StreamVideo {
@@ -291,7 +287,6 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             loggingLevel = loggingLevel,
             userRepository = userRepository,
             apiKey = apiKey,
-            tokenProvider = tokenProvider,
             lifecycle = lifecycle,
             tokenRepository = tokenRepository,
             pinnedSfuId = sfuId,
@@ -304,14 +299,14 @@ public class StreamVideoBuilder @JvmOverloads constructor(
 
         // Select the core token provider based on user type — mirrors iOS's
         // `initialConnectIfRequired` dispatch.
-        //  - Authenticated: adapt the integration-supplied TokenProvider.
+        //  - Authenticated: the integration-supplied StreamTokenProvider.
         //  - Guest: SDK obtains the JWT via createGuest REST call. Until the token
         //    arrives, REST auth runs as "anonymous" (same as iOS's AnonymousAuth transport for
         //    createGuest); GuestStreamTokenProvider flips it to "jwt" and syncs the token into
         //    the legacy Retrofit path the moment the server issues it.
         //  - Anonymous: REST-only. Construction succeeds; connect attempts fail.
         val streamTokenProvider: StreamTokenProvider = when (user.type) {
-            UserType.Authenticated -> IntegrationStreamTokenProvider(tokenProvider)
+            UserType.Authenticated -> tokenProvider
             UserType.Guest -> {
                 coordinatorConnectionModule.updateAuthType("anonymous")
                 GuestStreamTokenProvider(
@@ -371,7 +366,7 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             lifecycle = lifecycle,
             coordinatorConnectionModule = coordinatorConnectionModule,
             streamClient = streamClient,
-            tokenProvider = tokenProvider,
+            tokenProvider = streamTokenProvider,
             streamNotificationManager = streamNotificationManager,
             userRepository = userRepository,
             enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,

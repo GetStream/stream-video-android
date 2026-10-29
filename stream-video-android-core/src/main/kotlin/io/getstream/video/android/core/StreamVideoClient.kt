@@ -22,7 +22,10 @@ import android.os.Looper
 import androidx.collection.LruCache
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.core.api.StreamClient
+import io.getstream.android.core.api.authentication.StreamTokenProvider
 import io.getstream.android.core.api.model.connection.StreamConnectionState
+import io.getstream.android.core.api.model.value.StreamToken
+import io.getstream.android.core.api.model.value.StreamUserId
 import io.getstream.android.core.api.socket.listeners.StreamClientListener
 import io.getstream.android.core.api.subscribe.StreamSubscription
 import io.getstream.android.push.PushDevice
@@ -120,8 +123,6 @@ import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.ringing.RingStatePollingConfig
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
-import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
@@ -190,7 +191,9 @@ internal class StreamVideoClient internal constructor(
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
     internal val streamClient: StreamClient,
     internal val tokenRepository: TokenRepository,
-    internal val tokenProvider: TokenProvider = RepositoryTokenProvider(tokenRepository),
+    internal val tokenProvider: StreamTokenProvider = StreamTokenProvider {
+        StreamToken.fromString(tokenRepository.getToken().ifBlank { token })
+    },
     internal val streamNotificationManager: StreamNotificationManager,
     internal val userRepository: WritableUserRepository = StreamUserRepositoryImpl(initialUser),
     internal val enableCallNotificationUpdates: Boolean,
@@ -378,12 +381,14 @@ internal class StreamVideoClient internal constructor(
         try {
             apiCall()
         } catch (e: HttpException) {
-            // Retry once with a new token if the token is expired.
+            // Retry once with a new token if the token is expired. Anonymous users have no
+            // provider to refresh from (AnonymousStreamTokenProvider always throws), so the
+            // original auth error is the result instead of a confusing IllegalStateException.
             // REST-side: tokenRepository update stays for CoordinatorAuthInterceptor until
             // HTTP is unified through core. WS-side: handled by core's StreamTokenManager
             // via the StreamTokenProvider wired at builder time.
-            if (e.isAuthError()) {
-                val newToken = tokenProvider.loadToken()
+            if (e.isAuthError() && user.type != UserType.Anonymous) {
+                val newToken = tokenProvider.loadToken(StreamUserId.fromString(userId)).rawValue
                 tokenRepository.updateToken(newToken)
                 token = newToken
                 apiCall()

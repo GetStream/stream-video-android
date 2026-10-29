@@ -19,9 +19,10 @@ package io.getstream.video.android.core
 import android.content.Context
 import android.net.ConnectivityManager
 import io.getstream.android.core.api.StreamClient
+import io.getstream.android.core.api.authentication.StreamTokenProvider
+import io.getstream.android.core.api.model.value.StreamToken
 import io.getstream.video.android.core.socket.coordinator.v2.AnonymousStreamTokenProvider
 import io.getstream.video.android.core.socket.coordinator.v2.GuestStreamTokenProvider
-import io.getstream.video.android.core.socket.coordinator.v2.IntegrationStreamTokenProvider
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 import io.mockk.every
@@ -30,6 +31,7 @@ import io.mockk.unmockkAll
 import org.junit.After
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /**
@@ -66,15 +68,14 @@ internal class StreamVideoBuilderDispatchTest {
     }
 
     @Test
-    fun `Authenticated path selects IntegrationStreamTokenProvider`() {
+    fun `Authenticated path uses the builder StreamTokenProvider`() {
+        val provider = StreamTokenProvider { StreamToken.fromString("user-token") }
         val capturedProvider = captureFactoryArgsFor(
             user = User(id = "auth-1", type = UserType.Authenticated),
             token = "user-token",
+            tokenProvider = provider,
         )?.tokenProvider
-        assertTrue(
-            capturedProvider is IntegrationStreamTokenProvider,
-            "Expected IntegrationStreamTokenProvider, got: ${capturedProvider?.javaClass}",
-        )
+        assertSame(provider, capturedProvider)
     }
 
     @Test
@@ -113,7 +114,11 @@ internal class StreamVideoBuilderDispatchTest {
         assertEquals("ws://10.0.2.2:3030/video/connect", capturedUrl)
     }
 
-    private fun builderFor(user: User, token: String = "token"): StreamVideoBuilder {
+    private fun builderFor(
+        user: User,
+        token: String = "token",
+        tokenProvider: StreamTokenProvider? = null,
+    ): StreamVideoBuilder {
         val context = mockk<Context>(relaxed = true)
         every { context.applicationContext } returns context
         every {
@@ -124,6 +129,7 @@ internal class StreamVideoBuilderDispatchTest {
             apiKey = "apikey",
             user = user,
             token = token,
+            tokenProvider = tokenProvider ?: StreamTokenProvider { StreamToken.fromString(token) },
         )
     }
 
@@ -131,8 +137,12 @@ internal class StreamVideoBuilderDispatchTest {
      * Substitutes the `streamClientFactory` seam so the factory args can be observed without
      * invoking core's real factory.
      */
-    private fun captureFactoryArgsFor(user: User, token: String): StreamClientFactoryArgs? {
-        val builder = builderFor(user = user, token = token)
+    private fun captureFactoryArgsFor(
+        user: User,
+        token: String,
+        tokenProvider: StreamTokenProvider? = null,
+    ): StreamClientFactoryArgs? {
+        val builder = builderFor(user = user, token = token, tokenProvider = tokenProvider)
         var captured: StreamClientFactoryArgs? = null
         builder.streamClientFactory = { args ->
             captured = args

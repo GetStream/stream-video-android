@@ -20,6 +20,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import io.getstream.android.core.api.authentication.StreamTokenProvider
+import io.getstream.android.core.api.model.value.StreamToken
 import io.getstream.android.push.firebase.FirebasePushDeviceGenerator
 import io.getstream.chat.android.client.ChatClient
 import io.getstream.chat.android.client.logger.ChatLogLevel
@@ -45,7 +47,6 @@ import io.getstream.video.android.core.notifications.handlers.CompatibilityStrea
 import io.getstream.video.android.core.notifications.internal.service.CallServiceConfigRegistry
 import io.getstream.video.android.core.notifications.internal.service.DefaultCallConfigurations
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomConfig
-import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.sounds.enableRingingCallVibrationConfig
 import io.getstream.video.android.data.services.stream.GetAuthDataResponse
 import io.getstream.video.android.data.services.stream.StreamService
@@ -201,8 +202,8 @@ object StreamVideoInitHelper {
                     loggingLevel = LoggingLevel(priority = Priority.VERBOSE),
                     localCoordinatorAddress = localCfg.coordinatorAddress,
                     sfuId = localCfg.sfuId,
-                    localTokenProvider = object : TokenProvider {
-                        override suspend fun loadToken(): String = localCfg.resolveToken()
+                    localTokenProvider = StreamTokenProvider {
+                        StreamToken.fromString(localCfg.resolveToken())
                     },
                 )
             } else {
@@ -378,7 +379,7 @@ object StreamVideoInitHelper {
         loggingLevel: LoggingLevel,
         localCoordinatorAddress: String? = null,
         sfuId: String? = null,
-        localTokenProvider: TokenProvider? = null,
+        localTokenProvider: StreamTokenProvider? = null,
     ): StreamVideo {
         val callServiceConfigRegistry = CallServiceConfigRegistry()
         callServiceConfigRegistry.apply {
@@ -490,15 +491,13 @@ object StreamVideoInitHelper {
                     ),
                 ),
             ),
-            tokenProvider = localTokenProvider ?: object : TokenProvider {
-                override suspend fun loadToken(): String {
-                    val authData = StreamService.instance.getAuthData(
-                        environment = AppConfig.currentEnvironment.value!!.env,
-                        userId = user.id,
-                        StreamService.TOKEN_EXPIRY_TIME,
-                    )
-                    return authData.token
-                }
+            tokenProvider = localTokenProvider ?: StreamTokenProvider {
+                val authData = StreamService.instance.getAuthData(
+                    environment = AppConfig.currentEnvironment.value!!.env,
+                    userId = user.id,
+                    StreamService.TOKEN_EXPIRY_TIME,
+                )
+                StreamToken.fromString(authData.token)
             },
             callUpdatesAfterLeave = true,
             appName = "Stream Video Demo App",
