@@ -30,7 +30,7 @@ This repository hosts Stream’s Kotlin-based Video SDK for Android. It delivers
 - Instrumented tests: `./gradlew connectedCheck` (ensure an emulator/device).
 - Formatting: `./gradlew spotlessApply` (CI enforces `spotlessCheck`).
 - Demo app: `./gradlew :demo-app:installDebug` (device/emulator attached).
-- OpenAPI regeneration: `./generate-openapi.sh` (requires env setup from `env.properties.sample`).
+- OpenAPI regeneration: `./generate_openapi_v2.sh` (clones `GetStream/chat` over SSH for the spec).
 
 ### Public API & release management
 - Modules shipped to Maven must retain binary compatibility; prefer additive changes.
