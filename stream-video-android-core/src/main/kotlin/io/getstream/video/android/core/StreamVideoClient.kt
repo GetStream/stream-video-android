@@ -381,11 +381,13 @@ internal class StreamVideoClient internal constructor(
         try {
             apiCall()
         } catch (e: HttpException) {
-            // Retry once with a new token if the token is expired.
+            // Retry once with a new token if the token is expired. Anonymous users have no
+            // provider to refresh from (AnonymousStreamTokenProvider always throws), so the
+            // original auth error is the result instead of a confusing IllegalStateException.
             // REST-side: tokenRepository update stays for CoordinatorAuthInterceptor until
             // HTTP is unified through core. WS-side: handled by core's StreamTokenManager
             // via the StreamTokenProvider wired at builder time.
-            if (e.isAuthError()) {
+            if (e.isAuthError() && user.type != UserType.Anonymous) {
                 val newToken = tokenProvider.loadToken(StreamUserId.fromString(userId)).rawValue
                 tokenRepository.updateToken(newToken)
                 token = newToken

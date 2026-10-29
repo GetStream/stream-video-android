@@ -87,7 +87,7 @@ import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
 import io.getstream.video.android.core.socket.common.VideoParser
 import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
-import io.getstream.video.android.core.socket.common.token.StreamTokenLoader
+import io.getstream.video.android.core.socket.common.token.TokenLoader
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
@@ -326,10 +326,9 @@ public class RtcSession internal constructor(
             },
             tracer = sfuTracer,
             tokenRepository = TokenRepository(sfuToken),
-            tokenLoader = StreamTokenLoader(
-                provider = clientImpl.tokenProvider,
-                userId = { clientImpl.userId },
-            ),
+            // The SFU only accepts the join-response credential, never the user JWT: a bad
+            // one is replaced by rejoining (new credential), not by reloading this provider.
+            tokenLoader = TokenLoader { sfuToken },
             sfuAnalytics = sfuAnalytics,
         )
     },
