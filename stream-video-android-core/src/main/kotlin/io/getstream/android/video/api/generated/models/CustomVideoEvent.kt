@@ -33,21 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * A custom event, this event is used to send custom events to other participants in the call.
  */
-data class CustomVideoEvent (
+public data class CustomVideoEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?> = emptyMap(),
+    public val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserResponse,
+    public val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: String = "custom"
+    public val type: String = "custom"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

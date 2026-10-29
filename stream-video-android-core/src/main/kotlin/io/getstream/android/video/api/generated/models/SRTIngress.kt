@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SRTIngress (
+public data class SRTIngress (
     @Json(name = "address")
-    val address: String
+    public val address: String
 )

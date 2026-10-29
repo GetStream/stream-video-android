@@ -33,43 +33,43 @@ import com.squareup.moshi.ToJson
 /**
  * SIP Inbound Routing Rule response
  */
-data class SIPInboundRoutingRuleResponse (
+public data class SIPInboundRoutingRuleResponse (
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "name")
-    val name: String,
+    public val name: String,
 
     @Json(name = "updated_at")
-    val updatedAt: org.threeten.bp.OffsetDateTime,
+    public val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "called_numbers")
-    val calledNumbers: List<String> = emptyList(),
+    public val calledNumbers: List<String> = emptyList(),
 
     @Json(name = "trunk_ids")
-    val trunkIds: List<String> = emptyList(),
+    public val trunkIds: List<String> = emptyList(),
 
     @Json(name = "caller_numbers")
-    val callerNumbers: List<String>? = null,
+    public val callerNumbers: List<String>? = null,
 
     @Json(name = "call_configs")
-    val callConfigs: io.getstream.android.video.api.generated.models.SIPCallConfigsResponse? = null,
+    public val callConfigs: io.getstream.android.video.api.generated.models.SIPCallConfigsResponse? = null,
 
     @Json(name = "caller_configs")
-    val callerConfigs: io.getstream.android.video.api.generated.models.SIPCallerConfigsResponse? = null,
+    public val callerConfigs: io.getstream.android.video.api.generated.models.SIPCallerConfigsResponse? = null,
 
     @Json(name = "direct_routing_configs")
-    val directRoutingConfigs: io.getstream.android.video.api.generated.models.SIPDirectRoutingRuleCallConfigsResponse? = null,
+    public val directRoutingConfigs: io.getstream.android.video.api.generated.models.SIPDirectRoutingRuleCallConfigsResponse? = null,
 
     @Json(name = "pin_protection_configs")
-    val pinProtectionConfigs: io.getstream.android.video.api.generated.models.SIPPinProtectionConfigsResponse? = null,
+    public val pinProtectionConfigs: io.getstream.android.video.api.generated.models.SIPPinProtectionConfigsResponse? = null,
 
     @Json(name = "pin_routing_configs")
-    val pinRoutingConfigs: io.getstream.android.video.api.generated.models.SIPInboundRoutingRulePinConfigsResponse? = null
+    public val pinRoutingConfigs: io.getstream.android.video.api.generated.models.SIPInboundRoutingRulePinConfigsResponse? = null
 )

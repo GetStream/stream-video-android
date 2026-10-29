@@ -33,31 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * SIP trunk information
  */
-data class SIPTrunkResponse (
+public data class SIPTrunkResponse (
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "name")
-    val name: String,
+    public val name: String,
 
     @Json(name = "password")
-    val password: String,
+    public val password: String,
 
     @Json(name = "updated_at")
-    val updatedAt: org.threeten.bp.OffsetDateTime,
+    public val updatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "uri")
-    val uri: String,
+    public val uri: String,
 
     @Json(name = "username")
-    val username: String,
+    public val username: String,
 
     @Json(name = "allowed_ips")
-    val allowedIps: List<String> = emptyList(),
+    public val allowedIps: List<String> = emptyList(),
 
     @Json(name = "numbers")
-    val numbers: List<String> = emptyList()
+    public val numbers: List<String> = emptyList()
 )

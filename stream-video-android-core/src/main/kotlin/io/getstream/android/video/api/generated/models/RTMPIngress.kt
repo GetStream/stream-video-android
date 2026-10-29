@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * RTMP input settings
  */
-data class RTMPIngress (
+public data class RTMPIngress (
     @Json(name = "address")
-    val address: String
+    public val address: String
 )

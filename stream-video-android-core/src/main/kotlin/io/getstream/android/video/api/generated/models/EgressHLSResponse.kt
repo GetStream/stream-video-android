@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class EgressHLSResponse (
+public data class EgressHLSResponse (
     @Json(name = "playlist_url")
-    val playlistUrl: String,
+    public val playlistUrl: String,
 
     @Json(name = "status")
-    val status: String
+    public val status: String
 )

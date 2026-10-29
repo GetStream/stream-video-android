@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class MetricDescriptor (
+public data class MetricDescriptor (
     @Json(name = "label")
-    val label: String,
+    public val label: String,
 
     @Json(name = "description")
-    val description: String? = null,
+    public val description: String? = null,
 
     @Json(name = "unit")
-    val unit: String? = null
+    public val unit: String? = null
 )

@@ -33,22 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CollectUserFeedbackRequest (
+public data class CollectUserFeedbackRequest (
     @Json(name = "rating")
-    val rating: Int,
+    public val rating: Int,
 
     @Json(name = "sdk")
-    val sdk: String,
+    public val sdk: String,
 
     @Json(name = "sdk_version")
-    val sdkVersion: String,
+    public val sdkVersion: String,
 
     @Json(name = "reason")
-    val reason: String? = null,
+    public val reason: String? = null,
 
     @Json(name = "user_session_id")
-    val userSessionId: String? = null,
+    public val userSessionId: String? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = null
+    public val custom: Map<String, Any?>? = null
 )

@@ -33,25 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class BroadcastSegment (
+public data class BroadcastSegment (
     @Json(name = "key")
-    val key: String,
+    public val key: String,
 
     @Json(name = "sessions")
-    val sessions: Int,
+    public val sessions: Int,
 
     @Json(name = "avg_quality_score")
-    val avgQualityScore: Double? = null,
+    public val avgQualityScore: Double? = null,
 
     @Json(name = "p5_quality_score")
-    val p5QualityScore: Double? = null,
+    public val p5QualityScore: Double? = null,
 
     @Json(name = "poor_pct")
-    val poorPct: Double? = null,
+    public val poorPct: Double? = null,
 
     @Json(name = "share_pct")
-    val sharePct: Double? = null,
+    public val sharePct: Double? = null,
 
     @Json(name = "watch_share_pct")
-    val watchSharePct: Double? = null
+    public val watchSharePct: Double? = null
 )

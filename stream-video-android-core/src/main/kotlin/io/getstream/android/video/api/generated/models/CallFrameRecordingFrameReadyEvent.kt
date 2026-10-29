@@ -33,33 +33,33 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a frame is captured from a call
  */
-data class CallFrameRecordingFrameReadyEvent (
+public data class CallFrameRecordingFrameReadyEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "captured_at")
-    val capturedAt: org.threeten.bp.OffsetDateTime,
+    public val capturedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "egress_id")
-    val egressId: String,
+    public val egressId: String,
 
     @Json(name = "session_id")
-    val sessionId: String,
+    public val sessionId: String,
 
     @Json(name = "track_type")
-    val trackType: String,
+    public val trackType: String,
 
     @Json(name = "url")
-    val url: String,
+    public val url: String,
 
     @Json(name = "users")
-    val users: Map<String, io.getstream.android.video.api.generated.models.UserResponse> = emptyMap(),
+    public val users: Map<String, io.getstream.android.video.api.generated.models.UserResponse> = emptyMap(),
 
     @Json(name = "type")
-    val type: String = "call.frame_recording_ready"
+    public val type: String = "call.frame_recording_ready"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

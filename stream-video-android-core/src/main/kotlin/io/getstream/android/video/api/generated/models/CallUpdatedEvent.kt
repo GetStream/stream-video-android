@@ -33,21 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a call is updated, clients should use this update the local state of the call.
  */
-data class CallUpdatedEvent (
+public data class CallUpdatedEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "call")
-    val call: io.getstream.android.video.api.generated.models.CallResponse,
+    public val call: io.getstream.android.video.api.generated.models.CallResponse,
 
     @Json(name = "capabilities_by_role")
-    val capabilitiesByRole: Map<String, List<String>> = emptyMap(),
+    public val capabilitiesByRole: Map<String, List<String>> = emptyMap(),
 
     @Json(name = "type")
-    val type: String = "call.updated"
+    public val type: String = "call.updated"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

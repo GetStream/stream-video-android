@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * StartHLSBroadcastingResponse is the payload for starting an HLS broadcasting.
  */
-data class StartHLSBroadcastingResponse (
+public data class StartHLSBroadcastingResponse (
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "playlist_url")
-    val playlistUrl: String
+    public val playlistUrl: String
 )

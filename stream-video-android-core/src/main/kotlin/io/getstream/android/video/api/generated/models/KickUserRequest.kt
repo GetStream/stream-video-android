@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * KickUserRequest is the payload for kicking a user from a call. Optionally block the user as well.
  */
-data class KickUserRequest (
+public data class KickUserRequest (
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "block")
-    val block: Boolean? = null
+    public val block: Boolean? = null
 )

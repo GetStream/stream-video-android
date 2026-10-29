@@ -33,45 +33,45 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class VideoSettingsResponse (
+public data class VideoSettingsResponse (
     @Json(name = "access_request_enabled")
-    val accessRequestEnabled: Boolean,
+    public val accessRequestEnabled: Boolean,
 
     @Json(name = "camera_default_on")
-    val cameraDefaultOn: Boolean,
+    public val cameraDefaultOn: Boolean,
 
     @Json(name = "camera_facing")
-    val cameraFacing: CameraFacing,
+    public val cameraFacing: CameraFacing,
 
     @Json(name = "enabled")
-    val enabled: Boolean,
+    public val enabled: Boolean,
 
     @Json(name = "target_resolution")
-    val targetResolution: io.getstream.android.video.api.generated.models.TargetResolution
+    public val targetResolution: io.getstream.android.video.api.generated.models.TargetResolution
 )
 {
     
     /**
     * CameraFacing Enum
     */
-    sealed class CameraFacing(val value: String) {
+    public sealed class CameraFacing(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): CameraFacing = when (s) {
+            public companion object {
+                public fun fromString(s: String): CameraFacing = when (s) {
                     "back" -> Back
                     "external" -> External
                     "front" -> Front
                     else -> Unknown(s)
                 }
             }
-            object Back : CameraFacing("back")
-            object External : CameraFacing("external")
-            object Front : CameraFacing("front")
-            data class Unknown(val unknownValue: String) : CameraFacing(unknownValue)
+            public object Back : CameraFacing("back")
+            public object External : CameraFacing("external")
+            public object Front : CameraFacing("front")
+            public data class Unknown(val unknownValue: String) : CameraFacing(unknownValue)
         
 
-        class CameraFacingAdapter : JsonAdapter<CameraFacing>() {
+        public class CameraFacingAdapter : JsonAdapter<CameraFacing>() {
             @FromJson
             override fun fromJson(reader: JsonReader): CameraFacing? {
                 val s = reader.nextString() ?: return null

@@ -33,28 +33,28 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class QueryAggregateCallStatsResponse (
+public data class QueryAggregateCallStatsResponse (
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "call_duration_report")
-    val callDurationReport: io.getstream.android.video.api.generated.models.CallDurationReportResponse? = null,
+    public val callDurationReport: io.getstream.android.video.api.generated.models.CallDurationReportResponse? = null,
 
     @Json(name = "call_participant_count_report")
-    val callParticipantCountReport: io.getstream.android.video.api.generated.models.CallParticipantCountReportResponse? = null,
+    public val callParticipantCountReport: io.getstream.android.video.api.generated.models.CallParticipantCountReportResponse? = null,
 
     @Json(name = "calls_per_day_report")
-    val callsPerDayReport: io.getstream.android.video.api.generated.models.CallsPerDayReportResponse? = null,
+    public val callsPerDayReport: io.getstream.android.video.api.generated.models.CallsPerDayReportResponse? = null,
 
     @Json(name = "network_metrics_report")
-    val networkMetricsReport: io.getstream.android.video.api.generated.models.NetworkMetricsReportResponse? = null,
+    public val networkMetricsReport: io.getstream.android.video.api.generated.models.NetworkMetricsReportResponse? = null,
 
     @Json(name = "quality_score_report")
-    val qualityScoreReport: io.getstream.android.video.api.generated.models.QualityScoreReportResponse? = null,
+    public val qualityScoreReport: io.getstream.android.video.api.generated.models.QualityScoreReportResponse? = null,
 
     @Json(name = "sdk_usage_report")
-    val sdkUsageReport: io.getstream.android.video.api.generated.models.SDKUsageReportResponse? = null,
+    public val sdkUsageReport: io.getstream.android.video.api.generated.models.SDKUsageReportResponse? = null,
 
     @Json(name = "user_feedback_report")
-    val userFeedbackReport: io.getstream.android.video.api.generated.models.UserFeedbackReportResponse? = null
+    public val userFeedbackReport: io.getstream.android.video.api.generated.models.UserFeedbackReportResponse? = null
 )

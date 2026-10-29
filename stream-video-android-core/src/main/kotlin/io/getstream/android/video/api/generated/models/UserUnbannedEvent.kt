@@ -33,48 +33,48 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a user gets unbanned. The event contains information about the user that was unbanned.
  */
-data class UserUnbannedEvent (
+public data class UserUnbannedEvent (
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?> = emptyMap(),
+    public val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserResponseCommonFields,
+    public val user: io.getstream.android.video.api.generated.models.UserResponseCommonFields,
 
     @Json(name = "type")
-    val type: String = "user.unbanned",
+    public val type: String = "user.unbanned",
 
     @Json(name = "channel_id")
-    val channelId: String? = null,
+    public val channelId: String? = null,
 
     @Json(name = "channel_member_count")
-    val channelMemberCount: Int? = null,
+    public val channelMemberCount: Int? = null,
 
     @Json(name = "channel_message_count")
-    val channelMessageCount: Int? = null,
+    public val channelMessageCount: Int? = null,
 
     @Json(name = "channel_type")
-    val channelType: String? = null,
+    public val channelType: String? = null,
 
     @Json(name = "cid")
-    val cid: String? = null,
+    public val cid: String? = null,
 
     @Json(name = "received_at")
-    val receivedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val receivedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "shadow")
-    val shadow: Boolean? = null,
+    public val shadow: Boolean? = null,
 
     @Json(name = "team")
-    val team: String? = null,
+    public val team: String? = null,
 
     @Json(name = "channel_custom")
-    val channelCustom: Map<String, Any?>? = null,
+    public val channelCustom: Map<String, Any?>? = null,
 
     @Json(name = "created_by")
-    val createdBy: io.getstream.android.video.api.generated.models.UserResponseCommonFields? = null
+    public val createdBy: io.getstream.android.video.api.generated.models.UserResponseCommonFields? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {

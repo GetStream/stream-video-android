@@ -33,22 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ConnectUserDetailsRequest (
+public data class ConnectUserDetailsRequest (
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "image")
-    val image: String? = null,
+    public val image: String? = null,
 
     @Json(name = "invisible")
-    val invisible: Boolean? = null,
+    public val invisible: Boolean? = null,
 
     @Json(name = "language")
-    val language: String? = null,
+    public val language: String? = null,
 
     @Json(name = "name")
-    val name: String? = null,
+    public val name: String? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = null
+    public val custom: Map<String, Any?>? = null
 )

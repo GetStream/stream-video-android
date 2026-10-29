@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SpeechSegmentConfig (
+public data class SpeechSegmentConfig (
     @Json(name = "max_speech_caption_ms")
-    val maxSpeechCaptionMs: Int? = null,
+    public val maxSpeechCaptionMs: Int? = null,
 
     @Json(name = "silence_duration_ms")
-    val silenceDurationMs: Int? = null
+    public val silenceDurationMs: Int? = null
 )

@@ -33,23 +33,23 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class RTMPSettingsRequest (
+public data class RTMPSettingsRequest (
     @Json(name = "enabled")
-    val enabled: Boolean? = null,
+    public val enabled: Boolean? = null,
 
     @Json(name = "quality")
-    val quality: Quality? = null
+    public val quality: Quality? = null
 )
 {
     
     /**
     * Quality Enum
     */
-    sealed class Quality(val value: String) {
+    public sealed class Quality(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Quality = when (s) {
+            public companion object {
+                public fun fromString(s: String): Quality = when (s) {
                     "portrait-1080x1920" -> Portrait1080x1920
                     "portrait-1440x2560" -> Portrait1440x2560
                     "portrait-360x640" -> Portrait360x640
@@ -63,20 +63,20 @@ data class RTMPSettingsRequest (
                     else -> Unknown(s)
                 }
             }
-            object Portrait1080x1920 : Quality("portrait-1080x1920")
-            object Portrait1440x2560 : Quality("portrait-1440x2560")
-            object Portrait360x640 : Quality("portrait-360x640")
-            object Portrait480x854 : Quality("portrait-480x854")
-            object Portrait720x1280 : Quality("portrait-720x1280")
-            object Quality1080p : Quality("1080p")
-            object Quality1440p : Quality("1440p")
-            object Quality360p : Quality("360p")
-            object Quality480p : Quality("480p")
-            object Quality720p : Quality("720p")
-            data class Unknown(val unknownValue: String) : Quality(unknownValue)
+            public object Portrait1080x1920 : Quality("portrait-1080x1920")
+            public object Portrait1440x2560 : Quality("portrait-1440x2560")
+            public object Portrait360x640 : Quality("portrait-360x640")
+            public object Portrait480x854 : Quality("portrait-480x854")
+            public object Portrait720x1280 : Quality("portrait-720x1280")
+            public object Quality1080p : Quality("1080p")
+            public object Quality1440p : Quality("1440p")
+            public object Quality360p : Quality("360p")
+            public object Quality480p : Quality("480p")
+            public object Quality720p : Quality("720p")
+            public data class Unknown(val unknownValue: String) : Quality(unknownValue)
         
 
-        class QualityAdapter : JsonAdapter<Quality>() {
+        public class QualityAdapter : JsonAdapter<Quality>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Quality? {
                 val s = reader.nextString() ?: return null

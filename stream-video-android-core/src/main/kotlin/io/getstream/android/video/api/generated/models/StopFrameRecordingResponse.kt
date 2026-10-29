@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class StopFrameRecordingResponse (
+public data class StopFrameRecordingResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

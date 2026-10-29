@@ -33,49 +33,49 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallStatsParticipantCounts (
+public data class CallStatsParticipantCounts (
     @Json(name = "live_sessions")
-    val liveSessions: Int,
+    public val liveSessions: Int,
 
     @Json(name = "participants")
-    val participants: Int,
+    public val participants: Int,
 
     @Json(name = "peak_concurrent_sessions")
-    val peakConcurrentSessions: Int,
+    public val peakConcurrentSessions: Int,
 
     @Json(name = "peak_concurrent_users")
-    val peakConcurrentUsers: Int,
+    public val peakConcurrentUsers: Int,
 
     @Json(name = "publishers")
-    val publishers: Int,
+    public val publishers: Int,
 
     @Json(name = "sessions")
-    val sessions: Int,
+    public val sessions: Int,
 
     @Json(name = "sfus_used")
-    val sfusUsed: Int,
+    public val sfusUsed: Int,
 
     @Json(name = "average_jitter_ms")
-    val averageJitterMs: Int? = null,
+    public val averageJitterMs: Int? = null,
 
     @Json(name = "average_latency_ms")
-    val averageLatencyMs: Int? = null,
+    public val averageLatencyMs: Int? = null,
 
     @Json(name = "avg_user_rating")
-    val avgUserRating: Double? = null,
+    public val avgUserRating: Double? = null,
 
     @Json(name = "call_event_count")
-    val callEventCount: Int? = null,
+    public val callEventCount: Int? = null,
 
     @Json(name = "cq_score")
-    val cqScore: Int? = null,
+    public val cqScore: Int? = null,
 
     @Json(name = "max_freezes_duration_ms")
-    val maxFreezesDurationMs: Int? = null,
+    public val maxFreezesDurationMs: Int? = null,
 
     @Json(name = "min_user_rating")
-    val minUserRating: Int? = null,
+    public val minUserRating: Int? = null,
 
     @Json(name = "total_participant_duration")
-    val totalParticipantDuration: Int? = null
+    public val totalParticipantDuration: Int? = null
 )

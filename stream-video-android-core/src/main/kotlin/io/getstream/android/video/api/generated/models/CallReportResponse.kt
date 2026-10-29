@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallReportResponse (
+public data class CallReportResponse (
     @Json(name = "score")
-    val score: Double,
+    public val score: Double,
 
     @Json(name = "ended_at")
-    val endedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val endedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "started_at")
-    val startedAt: org.threeten.bp.OffsetDateTime? = null
+    public val startedAt: org.threeten.bp.OffsetDateTime? = null
 )

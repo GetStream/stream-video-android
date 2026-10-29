@@ -33,22 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class MuteUsersRequest (
+public data class MuteUsersRequest (
     @Json(name = "audio")
-    val audio: Boolean? = null,
+    public val audio: Boolean? = null,
 
     @Json(name = "mute_all_users")
-    val muteAllUsers: Boolean? = null,
+    public val muteAllUsers: Boolean? = null,
 
     @Json(name = "screenshare")
-    val screenshare: Boolean? = null,
+    public val screenshare: Boolean? = null,
 
     @Json(name = "screenshare_audio")
-    val screenshareAudio: Boolean? = null,
+    public val screenshareAudio: Boolean? = null,
 
     @Json(name = "video")
-    val video: Boolean? = null,
+    public val video: Boolean? = null,
 
     @Json(name = "user_ids")
-    val userIds: List<String>? = null
+    public val userIds: List<String>? = null
 )

@@ -33,21 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when streaming stops due to user action or call ended
  */
-data class IngressStoppedEvent (
+public data class IngressStoppedEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "ingress_stream_id")
-    val ingressStreamId: String,
+    public val ingressStreamId: String,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "type")
-    val type: String = "ingress.stopped"
+    public val type: String = "ingress.stopped"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

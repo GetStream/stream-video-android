@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class PerSDKUsageReport (
+public data class PerSDKUsageReport (
     @Json(name = "total")
-    val total: Int,
+    public val total: Int,
 
     @Json(name = "by_version")
-    val byVersion: Map<String, Int> = emptyMap()
+    public val byVersion: Map<String, Int> = emptyMap()
 )

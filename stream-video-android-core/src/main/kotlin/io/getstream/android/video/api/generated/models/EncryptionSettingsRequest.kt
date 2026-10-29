@@ -33,33 +33,33 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class EncryptionSettingsRequest (
+public data class EncryptionSettingsRequest (
     @Json(name = "mode")
-    val mode: Mode? = null
+    public val mode: Mode? = null
 )
 {
     
     /**
     * Mode Enum
     */
-    sealed class Mode(val value: String) {
+    public sealed class Mode(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Mode = when (s) {
+            public companion object {
+                public fun fromString(s: String): Mode = when (s) {
                     "auto-on" -> AutoOn
                     "available" -> Available
                     "disabled" -> Disabled
                     else -> Unknown(s)
                 }
             }
-            object AutoOn : Mode("auto-on")
-            object Available : Mode("available")
-            object Disabled : Mode("disabled")
-            data class Unknown(val unknownValue: String) : Mode(unknownValue)
+            public object AutoOn : Mode("auto-on")
+            public object Available : Mode("available")
+            public object Disabled : Mode("disabled")
+            public data class Unknown(val unknownValue: String) : Mode(unknownValue)
         
 
-        class ModeAdapter : JsonAdapter<Mode>() {
+        public class ModeAdapter : JsonAdapter<Mode>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Mode? {
                 val s = reader.nextString() ?: return null

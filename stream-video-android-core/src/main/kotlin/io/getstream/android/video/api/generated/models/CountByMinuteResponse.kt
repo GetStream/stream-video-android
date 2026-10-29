@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CountByMinuteResponse (
+public data class CountByMinuteResponse (
     @Json(name = "count")
-    val count: Int,
+    public val count: Int,
 
     @Json(name = "start_ts")
-    val startTs: org.threeten.bp.OffsetDateTime
+    public val startTs: org.threeten.bp.OffsetDateTime
 )

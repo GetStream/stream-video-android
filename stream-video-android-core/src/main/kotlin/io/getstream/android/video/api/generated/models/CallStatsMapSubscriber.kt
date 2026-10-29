@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallStatsMapSubscriber (
+public data class CallStatsMapSubscriber (
     @Json(name = "is_live")
-    val isLive: Boolean,
+    public val isLive: Boolean,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "user_session_id")
-    val userSessionId: String,
+    public val userSessionId: String,
 
     @Json(name = "name")
-    val name: String? = null,
+    public val name: String? = null,
 
     @Json(name = "location")
-    val location: io.getstream.android.video.api.generated.models.CallStatsLocation? = null
+    public val location: io.getstream.android.video.api.generated.models.CallStatsLocation? = null
 )

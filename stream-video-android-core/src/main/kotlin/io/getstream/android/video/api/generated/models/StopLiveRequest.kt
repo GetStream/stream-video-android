@@ -33,28 +33,28 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class StopLiveRequest (
+public data class StopLiveRequest (
     @Json(name = "continue_closed_caption")
-    val continueClosedCaption: Boolean? = null,
+    public val continueClosedCaption: Boolean? = null,
 
     @Json(name = "continue_composite_recording")
-    val continueCompositeRecording: Boolean? = null,
+    public val continueCompositeRecording: Boolean? = null,
 
     @Json(name = "continue_hls")
-    val continueHls: Boolean? = null,
+    public val continueHls: Boolean? = null,
 
     @Json(name = "continue_individual_recording")
-    val continueIndividualRecording: Boolean? = null,
+    public val continueIndividualRecording: Boolean? = null,
 
     @Json(name = "continue_raw_recording")
-    val continueRawRecording: Boolean? = null,
+    public val continueRawRecording: Boolean? = null,
 
     @Json(name = "continue_recording")
-    val continueRecording: Boolean? = null,
+    public val continueRecording: Boolean? = null,
 
     @Json(name = "continue_rtmp_broadcasts")
-    val continueRtmpBroadcasts: Boolean? = null,
+    public val continueRtmpBroadcasts: Boolean? = null,
 
     @Json(name = "continue_transcription")
-    val continueTranscription: Boolean? = null
+    public val continueTranscription: Boolean? = null
 )

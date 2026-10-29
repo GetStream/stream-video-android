@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class QueryCallParticipantsRequest (
+public data class QueryCallParticipantsRequest (
     @Json(name = "filter_conditions")
-    val filterConditions: Map<String, Any?>? = null
+    public val filterConditions: Map<String, Any?>? = null
 )

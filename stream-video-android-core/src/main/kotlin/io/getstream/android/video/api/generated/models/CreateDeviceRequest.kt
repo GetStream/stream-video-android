@@ -33,32 +33,32 @@ import com.squareup.moshi.ToJson
 /**
  * Create device request
  */
-data class CreateDeviceRequest (
+public data class CreateDeviceRequest (
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "push_provider")
-    val pushProvider: PushProvider,
+    public val pushProvider: PushProvider,
 
     @Json(name = "hardware_id")
-    val hardwareId: String? = null,
+    public val hardwareId: String? = null,
 
     @Json(name = "push_provider_name")
-    val pushProviderName: String? = null,
+    public val pushProviderName: String? = null,
 
     @Json(name = "voip_token")
-    val voipToken: Boolean? = null
+    public val voipToken: Boolean? = null
 )
 {
     
     /**
     * PushProvider Enum
     */
-    sealed class PushProvider(val value: String) {
+    public sealed class PushProvider(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): PushProvider = when (s) {
+            public companion object {
+                public fun fromString(s: String): PushProvider = when (s) {
                     "apn" -> Apn
                     "firebase" -> Firebase
                     "huawei" -> Huawei
@@ -66,14 +66,14 @@ data class CreateDeviceRequest (
                     else -> Unknown(s)
                 }
             }
-            object Apn : PushProvider("apn")
-            object Firebase : PushProvider("firebase")
-            object Huawei : PushProvider("huawei")
-            object Xiaomi : PushProvider("xiaomi")
-            data class Unknown(val unknownValue: String) : PushProvider(unknownValue)
+            public object Apn : PushProvider("apn")
+            public object Firebase : PushProvider("firebase")
+            public object Huawei : PushProvider("huawei")
+            public object Xiaomi : PushProvider("xiaomi")
+            public data class Unknown(val unknownValue: String) : PushProvider(unknownValue)
         
 
-        class PushProviderAdapter : JsonAdapter<PushProvider>() {
+        public class PushProviderAdapter : JsonAdapter<PushProvider>() {
             @FromJson
             override fun fromJson(reader: JsonReader): PushProvider? {
                 val s = reader.nextString() ?: return null

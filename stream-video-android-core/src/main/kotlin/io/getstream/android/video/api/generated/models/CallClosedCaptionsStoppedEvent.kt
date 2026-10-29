@@ -33,15 +33,15 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when call closed captions has stopped
  */
-data class CallClosedCaptionsStoppedEvent (
+public data class CallClosedCaptionsStoppedEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "type")
-    val type: String = "call.closed_captions_stopped"
+    public val type: String = "call.closed_captions_stopped"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

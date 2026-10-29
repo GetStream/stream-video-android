@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * DeleteCallResponse is the payload for deleting a call.
  */
-data class DeleteCallResponse (
+public data class DeleteCallResponse (
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "call")
-    val call: io.getstream.android.video.api.generated.models.CallResponse,
+    public val call: io.getstream.android.video.api.generated.models.CallResponse,
 
     @Json(name = "task_id")
-    val taskId: String? = null
+    public val taskId: String? = null
 )

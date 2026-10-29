@@ -33,22 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class GetOrCreateCallResponse (
+public data class GetOrCreateCallResponse (
     @Json(name = "created")
-    val created: Boolean,
+    public val created: Boolean,
 
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "members")
-    val members: List<io.getstream.android.video.api.generated.models.MemberResponse> = emptyList(),
+    public val members: List<io.getstream.android.video.api.generated.models.MemberResponse> = emptyList(),
 
     @Json(name = "own_capabilities")
-    val ownCapabilities: List<io.getstream.android.video.api.generated.models.OwnCapability> = emptyList(),
+    public val ownCapabilities: List<io.getstream.android.video.api.generated.models.OwnCapability> = emptyList(),
 
     @Json(name = "call")
-    val call: io.getstream.android.video.api.generated.models.CallResponse,
+    public val call: io.getstream.android.video.api.generated.models.CallResponse,
 
     @Json(name = "membership")
-    val membership: io.getstream.android.video.api.generated.models.MemberResponse? = null
+    public val membership: io.getstream.android.video.api.generated.models.MemberResponse? = null
 )

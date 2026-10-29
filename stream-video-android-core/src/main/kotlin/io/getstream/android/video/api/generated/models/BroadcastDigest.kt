@@ -33,34 +33,34 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class BroadcastDigest (
+public data class BroadcastDigest (
     @Json(name = "schema_version")
-    val schemaVersion: String,
+    public val schemaVersion: String,
 
     @Json(name = "audience")
-    val audience: io.getstream.android.video.api.generated.models.Audience,
+    public val audience: io.getstream.android.video.api.generated.models.Audience,
 
     @Json(name = "broadcast")
-    val broadcast: io.getstream.android.video.api.generated.models.BroadcastInfo,
+    public val broadcast: io.getstream.android.video.api.generated.models.BroadcastInfo,
 
     @Json(name = "coverage")
-    val coverage: io.getstream.android.video.api.generated.models.Coverage,
+    public val coverage: io.getstream.android.video.api.generated.models.Coverage,
 
     @Json(name = "joins")
-    val joins: io.getstream.android.video.api.generated.models.Joins,
+    public val joins: io.getstream.android.video.api.generated.models.Joins,
 
     @Json(name = "poor_tail")
-    val poorTail: io.getstream.android.video.api.generated.models.PoorTail,
+    public val poorTail: io.getstream.android.video.api.generated.models.PoorTail,
 
     @Json(name = "quality")
-    val quality: io.getstream.android.video.api.generated.models.Quality,
+    public val quality: io.getstream.android.video.api.generated.models.Quality,
 
     @Json(name = "segments")
-    val segments: io.getstream.android.video.api.generated.models.Segments,
+    public val segments: io.getstream.android.video.api.generated.models.Segments,
 
     @Json(name = "source")
-    val source: io.getstream.android.video.api.generated.models.SourceHealth,
+    public val source: io.getstream.android.video.api.generated.models.SourceHealth,
 
     @Json(name = "viewers")
-    val viewers: io.getstream.android.video.api.generated.models.ViewerBehavior
+    public val viewers: io.getstream.android.video.api.generated.models.ViewerBehavior
 )

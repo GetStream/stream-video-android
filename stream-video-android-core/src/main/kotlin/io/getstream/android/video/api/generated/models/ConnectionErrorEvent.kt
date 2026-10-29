@@ -33,18 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when the WS connection fails
  */
-data class ConnectionErrorEvent (
+public data class ConnectionErrorEvent (
     @Json(name = "connection_id")
-    val connectionId: String,
+    public val connectionId: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "error")
-    val error: io.getstream.android.video.api.generated.models.APIError,
+    public val error: io.getstream.android.video.api.generated.models.APIError,
 
     @Json(name = "type")
-    val type: String = "connection.error"
+    public val type: String = "connection.error"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {

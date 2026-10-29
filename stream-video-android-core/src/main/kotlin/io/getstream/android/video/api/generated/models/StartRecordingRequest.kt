@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class StartRecordingRequest (
+public data class StartRecordingRequest (
     @Json(name = "recording_external_storage")
-    val recordingExternalStorage: String? = null
+    public val recordingExternalStorage: String? = null
 )

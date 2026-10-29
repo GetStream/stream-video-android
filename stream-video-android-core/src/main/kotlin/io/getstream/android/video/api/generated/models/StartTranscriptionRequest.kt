@@ -33,26 +33,26 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class StartTranscriptionRequest (
+public data class StartTranscriptionRequest (
     @Json(name = "enable_closed_captions")
-    val enableClosedCaptions: Boolean? = null,
+    public val enableClosedCaptions: Boolean? = null,
 
     @Json(name = "language")
-    val language: Language? = null,
+    public val language: Language? = null,
 
     @Json(name = "transcription_external_storage")
-    val transcriptionExternalStorage: String? = null
+    public val transcriptionExternalStorage: String? = null
 )
 {
     
     /**
     * Language Enum
     */
-    sealed class Language(val value: String) {
+    public sealed class Language(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Language = when (s) {
+            public companion object {
+                public fun fromString(s: String): Language = when (s) {
                     "ar" -> Ar
                     "auto" -> Auto
                     "bg" -> Bg
@@ -93,47 +93,47 @@ data class StartTranscriptionRequest (
                     else -> Unknown(s)
                 }
             }
-            object Ar : Language("ar")
-            object Auto : Language("auto")
-            object Bg : Language("bg")
-            object Ca : Language("ca")
-            object Cs : Language("cs")
-            object Da : Language("da")
-            object De : Language("de")
-            object El : Language("el")
-            object En : Language("en")
-            object Es : Language("es")
-            object Et : Language("et")
-            object Fi : Language("fi")
-            object Fr : Language("fr")
-            object He : Language("he")
-            object Hi : Language("hi")
-            object Hr : Language("hr")
-            object Hu : Language("hu")
-            object Id : Language("id")
-            object It : Language("it")
-            object Ja : Language("ja")
-            object Ko : Language("ko")
-            object Ms : Language("ms")
-            object Nl : Language("nl")
-            object No : Language("no")
-            object Pl : Language("pl")
-            object Pt : Language("pt")
-            object Ro : Language("ro")
-            object Ru : Language("ru")
-            object Sk : Language("sk")
-            object Sl : Language("sl")
-            object Sv : Language("sv")
-            object Ta : Language("ta")
-            object Th : Language("th")
-            object Tl : Language("tl")
-            object Tr : Language("tr")
-            object Uk : Language("uk")
-            object Zh : Language("zh")
-            data class Unknown(val unknownValue: String) : Language(unknownValue)
+            public object Ar : Language("ar")
+            public object Auto : Language("auto")
+            public object Bg : Language("bg")
+            public object Ca : Language("ca")
+            public object Cs : Language("cs")
+            public object Da : Language("da")
+            public object De : Language("de")
+            public object El : Language("el")
+            public object En : Language("en")
+            public object Es : Language("es")
+            public object Et : Language("et")
+            public object Fi : Language("fi")
+            public object Fr : Language("fr")
+            public object He : Language("he")
+            public object Hi : Language("hi")
+            public object Hr : Language("hr")
+            public object Hu : Language("hu")
+            public object Id : Language("id")
+            public object It : Language("it")
+            public object Ja : Language("ja")
+            public object Ko : Language("ko")
+            public object Ms : Language("ms")
+            public object Nl : Language("nl")
+            public object No : Language("no")
+            public object Pl : Language("pl")
+            public object Pt : Language("pt")
+            public object Ro : Language("ro")
+            public object Ru : Language("ru")
+            public object Sk : Language("sk")
+            public object Sl : Language("sl")
+            public object Sv : Language("sv")
+            public object Ta : Language("ta")
+            public object Th : Language("th")
+            public object Tl : Language("tl")
+            public object Tr : Language("tr")
+            public object Uk : Language("uk")
+            public object Zh : Language("zh")
+            public data class Unknown(val unknownValue: String) : Language(unknownValue)
         
 
-        class LanguageAdapter : JsonAdapter<Language>() {
+        public class LanguageAdapter : JsonAdapter<Language>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Language? {
                 val s = reader.nextString() ?: return null

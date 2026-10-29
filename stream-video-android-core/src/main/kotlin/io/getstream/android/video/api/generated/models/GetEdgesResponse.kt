@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class GetEdgesResponse (
+public data class GetEdgesResponse (
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "edges")
-    val edges: List<io.getstream.android.video.api.generated.models.EdgeResponse> = emptyList()
+    public val edges: List<io.getstream.android.video.api.generated.models.EdgeResponse> = emptyList()
 )

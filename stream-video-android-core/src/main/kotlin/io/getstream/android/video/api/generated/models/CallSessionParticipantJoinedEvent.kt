@@ -33,21 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a participant joins a call session
  */
-data class CallSessionParticipantJoinedEvent (
+public data class CallSessionParticipantJoinedEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "session_id")
-    val sessionId: String,
+    public val sessionId: String,
 
     @Json(name = "participant")
-    val participant: io.getstream.android.video.api.generated.models.CallParticipantResponse,
+    public val participant: io.getstream.android.video.api.generated.models.CallParticipantResponse,
 
     @Json(name = "type")
-    val type: String = "call.session_participant_joined"
+    public val type: String = "call.session_participant_joined"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

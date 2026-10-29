@@ -33,18 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server
  */
-data class ConnectedEvent (
+public data class ConnectedEvent (
     @Json(name = "connection_id")
-    val connectionId: String,
+    public val connectionId: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "me")
-    val me: io.getstream.android.video.api.generated.models.OwnUserResponse,
+    public val me: io.getstream.android.video.api.generated.models.OwnUserResponse,
 
     @Json(name = "type")
-    val type: String = "connection.ok"
+    public val type: String = "connection.ok"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {

@@ -33,15 +33,15 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when HLS broadcasting has failed
  */
-data class CallHLSBroadcastingFailedEvent (
+public data class CallHLSBroadcastingFailedEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "type")
-    val type: String = "call.hls_broadcasting_failed"
+    public val type: String = "call.hls_broadcasting_failed"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

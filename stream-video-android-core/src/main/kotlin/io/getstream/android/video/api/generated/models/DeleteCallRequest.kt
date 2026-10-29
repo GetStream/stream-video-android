@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * DeleteCallRequest is the payload for deleting a call.
  */
-data class DeleteCallRequest (
+public data class DeleteCallRequest (
     @Json(name = "hard")
-    val hard: Boolean? = null
+    public val hard: Boolean? = null
 )

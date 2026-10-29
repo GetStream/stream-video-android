@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class IngressVideoEncodingResponse (
+public data class IngressVideoEncodingResponse (
     @Json(name = "layers")
-    val layers: List<io.getstream.android.video.api.generated.models.IngressVideoLayerResponse> = emptyList(),
+    public val layers: List<io.getstream.android.video.api.generated.models.IngressVideoLayerResponse> = emptyList(),
 
     @Json(name = "source")
-    val source: io.getstream.android.video.api.generated.models.IngressSourceResponse
+    public val source: io.getstream.android.video.api.generated.models.IngressSourceResponse
 )

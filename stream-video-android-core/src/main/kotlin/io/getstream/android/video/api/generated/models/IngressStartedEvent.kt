@@ -33,33 +33,33 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a user begins streaming into a call
  */
-data class IngressStartedEvent (
+public data class IngressStartedEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "ingress_stream_id")
-    val ingressStreamId: String,
+    public val ingressStreamId: String,
 
     @Json(name = "publisher_type")
-    val publisherType: String,
+    public val publisherType: String,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "type")
-    val type: String = "ingress.started",
+    public val type: String = "ingress.started",
 
     @Json(name = "client_ip")
-    val clientIp: String? = null,
+    public val clientIp: String? = null,
 
     @Json(name = "client_name")
-    val clientName: String? = null,
+    public val clientName: String? = null,
 
     @Json(name = "version")
-    val version: String? = null
+    public val version: String? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

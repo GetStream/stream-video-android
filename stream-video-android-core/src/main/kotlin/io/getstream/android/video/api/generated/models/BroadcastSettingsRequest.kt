@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class BroadcastSettingsRequest (
+public data class BroadcastSettingsRequest (
     @Json(name = "enabled")
-    val enabled: Boolean? = null,
+    public val enabled: Boolean? = null,
 
     @Json(name = "hls")
-    val hls: io.getstream.android.video.api.generated.models.HLSSettingsRequest? = null,
+    public val hls: io.getstream.android.video.api.generated.models.HLSSettingsRequest? = null,
 
     @Json(name = "rtmp")
-    val rtmp: io.getstream.android.video.api.generated.models.RTMPSettingsRequest? = null
+    public val rtmp: io.getstream.android.video.api.generated.models.RTMPSettingsRequest? = null
 )

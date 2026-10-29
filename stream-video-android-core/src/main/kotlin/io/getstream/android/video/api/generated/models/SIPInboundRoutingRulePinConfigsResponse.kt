@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * PIN routing rule call configuration response
  */
-data class SIPInboundRoutingRulePinConfigsResponse (
+public data class SIPInboundRoutingRulePinConfigsResponse (
     @Json(name = "custom_webhook_url")
-    val customWebhookUrl: String? = null,
+    public val customWebhookUrl: String? = null,
 
     @Json(name = "pin_failed_attempt_prompt")
-    val pinFailedAttemptPrompt: String? = null,
+    public val pinFailedAttemptPrompt: String? = null,
 
     @Json(name = "pin_hangup_prompt")
-    val pinHangupPrompt: String? = null,
+    public val pinHangupPrompt: String? = null,
 
     @Json(name = "pin_prompt")
-    val pinPrompt: String? = null,
+    public val pinPrompt: String? = null,
 
     @Json(name = "pin_success_prompt")
-    val pinSuccessPrompt: String? = null
+    public val pinSuccessPrompt: String? = null
 )

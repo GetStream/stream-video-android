@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class StopClosedCaptionsRequest (
+public data class StopClosedCaptionsRequest (
     @Json(name = "stop_transcription")
-    val stopTranscription: Boolean? = null
+    public val stopTranscription: Boolean? = null
 )

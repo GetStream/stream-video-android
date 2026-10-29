@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * MuteUsersResponse is the response payload for the mute users endpoint.
  */
-data class MuteUsersResponse (
+public data class MuteUsersResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

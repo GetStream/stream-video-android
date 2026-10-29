@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallStatsParticipant (
+public data class CallStatsParticipant (
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "sessions")
-    val sessions: List<io.getstream.android.video.api.generated.models.CallStatsParticipantSession> = emptyList(),
+    public val sessions: List<io.getstream.android.video.api.generated.models.CallStatsParticipantSession> = emptyList(),
 
     @Json(name = "latest_activity_at")
-    val latestActivityAt: org.threeten.bp.OffsetDateTime? = null,
+    public val latestActivityAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "name")
-    val name: String? = null,
+    public val name: String? = null,
 
     @Json(name = "roles")
-    val roles: List<String>? = null
+    public val roles: List<String>? = null
 )

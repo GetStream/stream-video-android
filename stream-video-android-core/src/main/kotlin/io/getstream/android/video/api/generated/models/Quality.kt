@@ -33,31 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class Quality (
+public data class Quality (
     @Json(name = "viewer_interruption_note")
-    val viewerInterruptionNote: String,
+    public val viewerInterruptionNote: String,
 
     @Json(name = "interruption_incidents")
-    val interruptionIncidents: List<io.getstream.android.video.api.generated.models.Incident> = emptyList(),
+    public val interruptionIncidents: List<io.getstream.android.video.api.generated.models.Incident> = emptyList(),
 
     @Json(name = "connection_avg_jitter_ms")
-    val connectionAvgJitterMs: io.getstream.android.video.api.generated.models.Percentiles,
+    public val connectionAvgJitterMs: io.getstream.android.video.api.generated.models.Percentiles,
 
     @Json(name = "connection_avg_latency_ms")
-    val connectionAvgLatencyMs: io.getstream.android.video.api.generated.models.Percentiles,
+    public val connectionAvgLatencyMs: io.getstream.android.video.api.generated.models.Percentiles,
 
     @Json(name = "score_bands_by_connection_pct")
-    val scoreBandsByConnectionPct: io.getstream.android.video.api.generated.models.ScoreBands,
+    public val scoreBandsByConnectionPct: io.getstream.android.video.api.generated.models.ScoreBands,
 
     @Json(name = "score_bands_by_watch_time_pct")
-    val scoreBandsByWatchTimePct: io.getstream.android.video.api.generated.models.ScoreBands,
+    public val scoreBandsByWatchTimePct: io.getstream.android.video.api.generated.models.ScoreBands,
 
     @Json(name = "p50_quality_score")
-    val p50QualityScore: Double? = null,
+    public val p50QualityScore: Double? = null,
 
     @Json(name = "p5_quality_score")
-    val p5QualityScore: Double? = null,
+    public val p5QualityScore: Double? = null,
 
     @Json(name = "viewer_interruption_rate_pct")
-    val viewerInterruptionRatePct: Double? = null
+    public val viewerInterruptionRatePct: Double? = null
 )

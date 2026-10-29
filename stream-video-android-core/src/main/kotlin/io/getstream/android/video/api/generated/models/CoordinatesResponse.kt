@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * Geographic coordinates
  */
-data class CoordinatesResponse (
+public data class CoordinatesResponse (
     @Json(name = "latitude")
-    val latitude: Double,
+    public val latitude: Double,
 
     @Json(name = "longitude")
-    val longitude: Double
+    public val longitude: Double
 )

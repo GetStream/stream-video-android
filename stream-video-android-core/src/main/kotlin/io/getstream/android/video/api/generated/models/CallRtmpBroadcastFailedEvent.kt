@@ -33,18 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a call RTMP broadcast has failed
  */
-data class CallRtmpBroadcastFailedEvent (
+public data class CallRtmpBroadcastFailedEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "name")
-    val name: String,
+    public val name: String,
 
     @Json(name = "type")
-    val type: String = "call.rtmp_broadcast_failed"
+    public val type: String = "call.rtmp_broadcast_failed"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

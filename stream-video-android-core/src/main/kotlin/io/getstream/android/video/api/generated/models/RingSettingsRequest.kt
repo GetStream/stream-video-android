@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class RingSettingsRequest (
+public data class RingSettingsRequest (
     @Json(name = "auto_cancel_timeout_ms")
-    val autoCancelTimeoutMs: Int,
+    public val autoCancelTimeoutMs: Int,
 
     @Json(name = "incoming_call_timeout_ms")
-    val incomingCallTimeoutMs: Int,
+    public val incomingCallTimeoutMs: Int,
 
     @Json(name = "missed_call_timeout_ms")
-    val missedCallTimeoutMs: Int? = null
+    public val missedCallTimeoutMs: Int? = null
 )

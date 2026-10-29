@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class StartClosedCaptionsResponse (
+public data class StartClosedCaptionsResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

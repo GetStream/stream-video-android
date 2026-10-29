@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class QueryCallsResponse (
+public data class QueryCallsResponse (
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "calls")
-    val calls: List<io.getstream.android.video.api.generated.models.CallStateResponseFields> = emptyList(),
+    public val calls: List<io.getstream.android.video.api.generated.models.CallStateResponseFields> = emptyList(),
 
     @Json(name = "next")
-    val next: String? = null,
+    public val next: String? = null,
 
     @Json(name = "prev")
-    val prev: String? = null
+    public val prev: String? = null
 )

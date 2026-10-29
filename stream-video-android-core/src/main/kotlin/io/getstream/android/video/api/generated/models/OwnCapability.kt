@@ -36,11 +36,11 @@ import com.squareup.moshi.ToJson
 /**
  * OwnCapability Enum
  */
-sealed class OwnCapability(val value: String) {
+public sealed class OwnCapability(public val value: String) {
     override fun toString(): String = value
 
-    companion object {
-        fun fromString(s: String): OwnCapability = when (s) {
+    public companion object {
+        public fun fromString(s: String): OwnCapability = when (s) {
             "block-users" -> BlockUsers
             "change-max-duration" -> ChangeMaxDuration
             "create-call" -> CreateCall
@@ -80,46 +80,46 @@ sealed class OwnCapability(val value: String) {
             else -> Unknown(s)
         }
     }
-    object BlockUsers : OwnCapability("block-users")
-    object ChangeMaxDuration : OwnCapability("change-max-duration")
-    object CreateCall : OwnCapability("create-call")
-    object CreateReaction : OwnCapability("create-reaction")
-    object EnableNoiseCancellation : OwnCapability("enable-noise-cancellation")
-    object EndCall : OwnCapability("end-call")
-    object JoinBackstage : OwnCapability("join-backstage")
-    object JoinCall : OwnCapability("join-call")
-    object JoinEndedCall : OwnCapability("join-ended-call")
-    object KickUser : OwnCapability("kick-user")
-    object MuteUsers : OwnCapability("mute-users")
-    object PinForEveryone : OwnCapability("pin-for-everyone")
-    object ReadCall : OwnCapability("read-call")
-    object RemoveCallMember : OwnCapability("remove-call-member")
-    object Screenshare : OwnCapability("screenshare")
-    object SendAudio : OwnCapability("send-audio")
-    object SendClosedCaptionsCall : OwnCapability("send-closed-captions-call")
-    object SendVideo : OwnCapability("send-video")
-    object StartBroadcastCall : OwnCapability("start-broadcast-call")
-    object StartClosedCaptionsCall : OwnCapability("start-closed-captions-call")
-    object StartFrameRecordCall : OwnCapability("start-frame-record-call")
-    object StartIndividualRecordCall : OwnCapability("start-individual-record-call")
-    object StartRawRecordCall : OwnCapability("start-raw-record-call")
-    object StartRecordCall : OwnCapability("start-record-call")
-    object StartTranscriptionCall : OwnCapability("start-transcription-call")
-    object StopBroadcastCall : OwnCapability("stop-broadcast-call")
-    object StopClosedCaptionsCall : OwnCapability("stop-closed-captions-call")
-    object StopFrameRecordCall : OwnCapability("stop-frame-record-call")
-    object StopIndividualRecordCall : OwnCapability("stop-individual-record-call")
-    object StopRawRecordCall : OwnCapability("stop-raw-record-call")
-    object StopRecordCall : OwnCapability("stop-record-call")
-    object StopTranscriptionCall : OwnCapability("stop-transcription-call")
-    object UpdateCall : OwnCapability("update-call")
-    object UpdateCallMember : OwnCapability("update-call-member")
-    object UpdateCallPermissions : OwnCapability("update-call-permissions")
-    object UpdateCallSettings : OwnCapability("update-call-settings")
-    data class Unknown(val unknownValue: String) : OwnCapability(unknownValue)
+    public object BlockUsers : OwnCapability("block-users")
+    public object ChangeMaxDuration : OwnCapability("change-max-duration")
+    public object CreateCall : OwnCapability("create-call")
+    public object CreateReaction : OwnCapability("create-reaction")
+    public object EnableNoiseCancellation : OwnCapability("enable-noise-cancellation")
+    public object EndCall : OwnCapability("end-call")
+    public object JoinBackstage : OwnCapability("join-backstage")
+    public object JoinCall : OwnCapability("join-call")
+    public object JoinEndedCall : OwnCapability("join-ended-call")
+    public object KickUser : OwnCapability("kick-user")
+    public object MuteUsers : OwnCapability("mute-users")
+    public object PinForEveryone : OwnCapability("pin-for-everyone")
+    public object ReadCall : OwnCapability("read-call")
+    public object RemoveCallMember : OwnCapability("remove-call-member")
+    public object Screenshare : OwnCapability("screenshare")
+    public object SendAudio : OwnCapability("send-audio")
+    public object SendClosedCaptionsCall : OwnCapability("send-closed-captions-call")
+    public object SendVideo : OwnCapability("send-video")
+    public object StartBroadcastCall : OwnCapability("start-broadcast-call")
+    public object StartClosedCaptionsCall : OwnCapability("start-closed-captions-call")
+    public object StartFrameRecordCall : OwnCapability("start-frame-record-call")
+    public object StartIndividualRecordCall : OwnCapability("start-individual-record-call")
+    public object StartRawRecordCall : OwnCapability("start-raw-record-call")
+    public object StartRecordCall : OwnCapability("start-record-call")
+    public object StartTranscriptionCall : OwnCapability("start-transcription-call")
+    public object StopBroadcastCall : OwnCapability("stop-broadcast-call")
+    public object StopClosedCaptionsCall : OwnCapability("stop-closed-captions-call")
+    public object StopFrameRecordCall : OwnCapability("stop-frame-record-call")
+    public object StopIndividualRecordCall : OwnCapability("stop-individual-record-call")
+    public object StopRawRecordCall : OwnCapability("stop-raw-record-call")
+    public object StopRecordCall : OwnCapability("stop-record-call")
+    public object StopTranscriptionCall : OwnCapability("stop-transcription-call")
+    public object UpdateCall : OwnCapability("update-call")
+    public object UpdateCallMember : OwnCapability("update-call-member")
+    public object UpdateCallPermissions : OwnCapability("update-call-permissions")
+    public object UpdateCallSettings : OwnCapability("update-call-settings")
+    public data class Unknown(val unknownValue: String) : OwnCapability(unknownValue)
 
 
-    class OwnCapabilityAdapter : JsonAdapter<OwnCapability>() {
+    public class OwnCapabilityAdapter : JsonAdapter<OwnCapability>() {
         @FromJson
         override fun fromJson(reader: JsonReader): OwnCapability? {
             val s = reader.nextString() ?: return null

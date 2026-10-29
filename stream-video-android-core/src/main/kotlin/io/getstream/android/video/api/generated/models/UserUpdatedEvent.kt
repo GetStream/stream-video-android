@@ -33,21 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a user gets updated. The event contains information about the updated user.
  */
-data class UserUpdatedEvent (
+public data class UserUpdatedEvent (
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?> = emptyMap(),
+    public val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserResponsePrivacyFields,
+    public val user: io.getstream.android.video.api.generated.models.UserResponsePrivacyFields,
 
     @Json(name = "type")
-    val type: String = "user.updated",
+    public val type: String = "user.updated",
 
     @Json(name = "received_at")
-    val receivedAt: org.threeten.bp.OffsetDateTime? = null
+    public val receivedAt: org.threeten.bp.OffsetDateTime? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {

@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ReportByHistogramBucket (
+public data class ReportByHistogramBucket (
     @Json(name = "category")
-    val category: String,
+    public val category: String,
 
     @Json(name = "count")
-    val count: Int,
+    public val count: Int,
 
     @Json(name = "sum")
-    val sum: Double,
+    public val sum: Double,
 
     @Json(name = "lower_bound")
-    val lowerBound: io.getstream.android.video.api.generated.models.Bound? = null,
+    public val lowerBound: io.getstream.android.video.api.generated.models.Bound? = null,
 
     @Json(name = "upper_bound")
-    val upperBound: io.getstream.android.video.api.generated.models.Bound? = null
+    public val upperBound: io.getstream.android.video.api.generated.models.Bound? = null
 )

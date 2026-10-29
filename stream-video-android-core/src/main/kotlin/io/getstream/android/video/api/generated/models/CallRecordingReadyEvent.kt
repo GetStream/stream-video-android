@@ -33,24 +33,24 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when call recording is ready
  */
-data class CallRecordingReadyEvent (
+public data class CallRecordingReadyEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "egress_id")
-    val egressId: String,
+    public val egressId: String,
 
     @Json(name = "recording_type")
-    val recordingType: RecordingType,
+    public val recordingType: RecordingType,
 
     @Json(name = "call_recording")
-    val callRecording: io.getstream.android.video.api.generated.models.CallRecording,
+    public val callRecording: io.getstream.android.video.api.generated.models.CallRecording,
 
     @Json(name = "type")
-    val type: String = "call.recording_ready"
+    public val type: String = "call.recording_ready"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {
@@ -66,24 +66,24 @@ data class CallRecordingReadyEvent (
     /**
     * RecordingType Enum
     */
-    sealed class RecordingType(val value: String) {
+    public sealed class RecordingType(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): RecordingType = when (s) {
+            public companion object {
+                public fun fromString(s: String): RecordingType = when (s) {
                     "composite" -> Composite
                     "individual" -> Individual
                     "raw" -> Raw
                     else -> Unknown(s)
                 }
             }
-            object Composite : RecordingType("composite")
-            object Individual : RecordingType("individual")
-            object Raw : RecordingType("raw")
-            data class Unknown(val unknownValue: String) : RecordingType(unknownValue)
+            public object Composite : RecordingType("composite")
+            public object Individual : RecordingType("individual")
+            public object Raw : RecordingType("raw")
+            public data class Unknown(val unknownValue: String) : RecordingType(unknownValue)
         
 
-        class RecordingTypeAdapter : JsonAdapter<RecordingType>() {
+        public class RecordingTypeAdapter : JsonAdapter<RecordingType>() {
             @FromJson
             override fun fromJson(reader: JsonReader): RecordingType? {
                 val s = reader.nextString() ?: return null

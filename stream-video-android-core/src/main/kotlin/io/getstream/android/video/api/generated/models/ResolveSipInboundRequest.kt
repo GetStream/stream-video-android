@@ -33,22 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * Request to resolve SIP inbound routing using challenge authentication
  */
-data class ResolveSipInboundRequest (
+public data class ResolveSipInboundRequest (
     @Json(name = "sip_caller_number")
-    val sipCallerNumber: String,
+    public val sipCallerNumber: String,
 
     @Json(name = "sip_trunk_number")
-    val sipTrunkNumber: String,
+    public val sipTrunkNumber: String,
 
     @Json(name = "routing_number")
-    val routingNumber: String? = null,
+    public val routingNumber: String? = null,
 
     @Json(name = "trunk_id")
-    val trunkId: String? = null,
+    public val trunkId: String? = null,
 
     @Json(name = "challenge")
-    val challenge: io.getstream.android.video.api.generated.models.SIPChallengeRequest? = null,
+    public val challenge: io.getstream.android.video.api.generated.models.SIPChallengeRequest? = null,
 
     @Json(name = "sip_headers")
-    val sipHeaders: Map<String, String>? = null
+    public val sipHeaders: Map<String, String>? = null
 )

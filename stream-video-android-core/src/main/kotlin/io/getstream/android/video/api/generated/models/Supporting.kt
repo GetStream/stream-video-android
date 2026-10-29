@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class Supporting (
+public data class Supporting (
     @Json(name = "delivery_incident_windows")
-    val deliveryIncidentWindows: List<io.getstream.android.video.api.generated.models.Incident> = emptyList(),
+    public val deliveryIncidentWindows: List<io.getstream.android.video.api.generated.models.Incident> = emptyList(),
 
     @Json(name = "edge_outlier_zones")
-    val edgeOutlierZones: List<String> = emptyList(),
+    public val edgeOutlierZones: List<String> = emptyList(),
 
     @Json(name = "source_drop_windows")
-    val sourceDropWindows: List<io.getstream.android.video.api.generated.models.TimeWindow> = emptyList()
+    public val sourceDropWindows: List<io.getstream.android.video.api.generated.models.TimeWindow> = emptyList()
 )

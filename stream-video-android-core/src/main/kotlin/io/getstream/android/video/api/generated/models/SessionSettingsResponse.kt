@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SessionSettingsResponse (
+public data class SessionSettingsResponse (
     @Json(name = "inactivity_timeout_seconds")
-    val inactivityTimeoutSeconds: Int
+    public val inactivityTimeoutSeconds: Int
 )

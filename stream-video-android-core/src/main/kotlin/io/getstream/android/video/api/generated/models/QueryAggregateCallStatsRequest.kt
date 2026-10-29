@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class QueryAggregateCallStatsRequest (
+public data class QueryAggregateCallStatsRequest (
     @Json(name = "from")
-    val from: String? = null,
+    public val from: String? = null,
 
     @Json(name = "to")
-    val to: String? = null,
+    public val to: String? = null,
 
     @Json(name = "report_types")
-    val reportTypes: List<String>? = null
+    public val reportTypes: List<String>? = null
 )

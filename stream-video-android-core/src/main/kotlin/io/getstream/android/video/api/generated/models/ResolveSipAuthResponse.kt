@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * Response containing the pre-authentication decision for a SIP trunk
  */
-data class ResolveSipAuthResponse (
+public data class ResolveSipAuthResponse (
     @Json(name = "auth_result")
-    val authResult: String,
+    public val authResult: String,
 
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "password")
-    val password: String? = null,
+    public val password: String? = null,
 
     @Json(name = "trunk_id")
-    val trunkId: String? = null,
+    public val trunkId: String? = null,
 
     @Json(name = "username")
-    val username: String? = null
+    public val username: String? = null
 )

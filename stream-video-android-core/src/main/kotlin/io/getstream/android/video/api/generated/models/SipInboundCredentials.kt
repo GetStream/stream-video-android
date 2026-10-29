@@ -33,25 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * Credentials for SIP inbound call authentication
  */
-data class SipInboundCredentials (
+public data class SipInboundCredentials (
     @Json(name = "api_key")
-    val apiKey: String,
+    public val apiKey: String,
 
     @Json(name = "call_id")
-    val callId: String,
+    public val callId: String,
 
     @Json(name = "call_type")
-    val callType: String,
+    public val callType: String,
 
     @Json(name = "token")
-    val token: String,
+    public val token: String,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "call_custom_data")
-    val callCustomData: Map<String, Any?> = emptyMap(),
+    public val callCustomData: Map<String, Any?> = emptyMap(),
 
     @Json(name = "user_custom_data")
-    val userCustomData: Map<String, Any?> = emptyMap()
+    public val userCustomData: Map<String, Any?> = emptyMap()
 )

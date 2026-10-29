@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class UpdateUserPermissionsRequest (
+public data class UpdateUserPermissionsRequest (
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "grant_permissions")
-    val grantPermissions: List<String>? = null,
+    public val grantPermissions: List<String>? = null,
 
     @Json(name = "revoke_permissions")
-    val revokePermissions: List<String>? = null
+    public val revokePermissions: List<String>? = null
 )
