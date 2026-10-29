@@ -38,10 +38,10 @@ public data class CallFrameRecordingFrameReadyEvent (
     public val callCid: String,
 
     @Json(name = "captured_at")
-    public val capturedAt: org.threeten.bp.OffsetDateTime,
+    public val capturedAt: kotlin.time.Instant,
 
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "egress_id")
     public val egressId: String,

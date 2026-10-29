@@ -29,8 +29,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.format.DateTimeFormatter
+import kotlin.time.Instant
 
 @Serializable
 public sealed class UserType {
@@ -47,21 +46,20 @@ public sealed class UserType {
     public data object Anonymous : UserType()
 }
 
-@Serializer(forClass = OffsetDateTime::class)
-public object OffsetDateTimeSerializer : KSerializer<OffsetDateTime> {
-    private val formatter: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-
-    override fun serialize(encoder: Encoder, value: OffsetDateTime) {
-        encoder.encodeString(value.format(formatter))
+@Serializer(forClass = Instant::class)
+public object InstantSerializer : KSerializer<Instant> {
+    override fun serialize(encoder: Encoder, value: Instant) {
+        encoder.encodeString(value.toString())
     }
 
-    override fun deserialize(decoder: Decoder): OffsetDateTime {
-        return OffsetDateTime.parse(decoder.decodeString(), formatter)
+    // Instant.parse also accepts the offset form written by the former OffsetDateTime serializer.
+    override fun deserialize(decoder: Decoder): Instant {
+        return Instant.parse(decoder.decodeString())
     }
 
     override val descriptor: SerialDescriptor
         get() = PrimitiveSerialDescriptor(
-            OffsetDateTime::class.qualifiedName!!,
+            Instant::class.qualifiedName!!,
             PrimitiveKind.STRING,
         )
 }
@@ -77,12 +75,12 @@ public data class User(
     val image: String? = null,
     val teams: List<String>? = emptyList(),
     val custom: Map<String, String>? = emptyMap(),
-    @Serializable(with = OffsetDateTimeSerializer::class)
-    val createdAt: OffsetDateTime? = null,
-    @Serializable(with = OffsetDateTimeSerializer::class)
-    val updatedAt: OffsetDateTime? = null,
-    @Serializable(with = OffsetDateTimeSerializer::class)
-    val deletedAt: OffsetDateTime? = null,
+    @Serializable(with = InstantSerializer::class)
+    val createdAt: Instant? = null,
+    @Serializable(with = InstantSerializer::class)
+    val updatedAt: Instant? = null,
+    @Serializable(with = InstantSerializer::class)
+    val deletedAt: Instant? = null,
 ) {
     public fun isValid(): Boolean {
         return id.isNotEmpty()

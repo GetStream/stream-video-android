@@ -30,8 +30,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import org.threeten.bp.OffsetDateTime
 import java.util.UUID
+import kotlin.time.Instant
 
 /**
  * Stream Video mock utils to initialize [StreamVideo] for writing unit testings or supporting Compose previews.
@@ -163,8 +163,8 @@ public val previewMemberListState: List<MemberState>
             participants.add(
                 MemberState(
                     user = user,
-                    createdAt = OffsetDateTime.MIN,
-                    updatedAt = OffsetDateTime.MIN,
+                    createdAt = Instant.DISTANT_PAST,
+                    updatedAt = Instant.DISTANT_PAST,
                     custom = emptyMap(),
                     role = "admin",
                 ),

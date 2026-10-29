@@ -31,32 +31,16 @@ BuildConfig.CORE_TEST_LOCAL
 
 ## OpenAPI build
 
-Run the generate openapi. This command line will automatically pull/update the latest version of the protocol repository and generate Open API classes.  
+Regenerate the OpenAPI client with:
 
 ```bash
-./generate-openapi.sh
+./generate_openapi_v2.sh
 ```
 
-Note that now you have your generated files here:
-
-* ~/workspace/generated/
-
-The code for android is here
-* ~/workspace/stream-video-android/
-
-You can see the diff here:
-
-```bash
-diff -rq ~/workspace/generated/src/main/kotlin/org/openapitools/client ~/workspace/stream-video-android/src/main/kotlin/org/openapitools/client
-```
+It clones `GetStream/chat` (branch `master` by default; `--ref-value=` picks another branch), generates from `releases/video-openapi-clientside.yaml`, and writes the models to `stream-video-android-core/src/main/kotlin/io/getstream/android/video/api/generated/`. Review the result with `git diff`.
 
 * Protocol is visible here: https://getstream.github.io/protocol/
 * https://www.notion.so/Getting-Started-to-Video-for-Android-Developers-be5ae7e2e9584f78b757163ecff1033b
-
-### Advanced use cases (Most people don't need this)
-* If you want to use the locally checked out `protocol` repository, then use `LOCAL_ENV=1` with the generate command.
-* (For stream developers only) If you want to directly get it from the coordinator repository then use `OPENAPI_ROOT_USE_COORDINATOR_REPO=1`
-  switch along with `LOCAL_ENV=1` with the generate command. This is a shortcut.
 
 ## Writing integration tests
 

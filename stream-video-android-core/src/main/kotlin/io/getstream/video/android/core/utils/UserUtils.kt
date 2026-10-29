@@ -18,7 +18,7 @@ package io.getstream.video.android.core.utils
 
 import io.getstream.android.video.api.generated.models.UserResponse
 import io.getstream.video.android.model.User
-import org.threeten.bp.OffsetDateTime
+import kotlin.time.Clock
 
 internal fun User.toResponse(): UserResponse {
     return UserResponse(
@@ -28,8 +28,8 @@ internal fun User.toResponse(): UserResponse {
         image = image,
         teams = teams ?: emptyList(),
         custom = custom ?: emptyMap(),
-        createdAt = createdAt ?: OffsetDateTime.now(),
-        updatedAt = updatedAt ?: OffsetDateTime.now(),
+        createdAt = createdAt ?: Clock.System.now(),
+        updatedAt = updatedAt ?: Clock.System.now(),
         deletedAt = deletedAt,
         // TODO: Implement these fields
         blockedUserIds = emptyList(),

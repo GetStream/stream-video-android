@@ -25,15 +25,13 @@ import io.mockk.mockk
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.threeten.bp.Instant
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 @RunWith(RobolectricTestRunner::class)
 class PinManagerTest {
@@ -164,7 +162,7 @@ class PinManagerTest {
     @Test
     fun `setServerPins should preserve existing timestamp`() {
         val existingTime =
-            OffsetDateTime.parse("2025-01-01T00:00:00Z")
+            Instant.parse("2025-01-01T00:00:00Z")
 
         manager.updateServerPins(
             mapOf(
@@ -208,7 +206,7 @@ class PinManagerTest {
         val first = manager.serverPins.value["s1"]!!
         val second = manager.serverPins.value["s2"]!!
 
-        assertTrue(first.at.isAfter(second.at))
+        assertTrue(first.at > second.at)
     }
 
     @Test
@@ -373,17 +371,14 @@ class PinManagerTest {
 }
 
 internal class FakeTimeProvider(
-    private var currentTime: OffsetDateTime =
-        OffsetDateTime.parse("2026-01-01T00:00:00Z"),
+    private var currentTime: Instant =
+        Instant.parse("2026-01-01T00:00:00Z"),
 ) : TimeProvider {
 
-    override fun now(): OffsetDateTime = currentTime
+    override fun now(): Instant = currentTime
     override fun currentTimeMillis(): Long = 100L
 
-    override fun fromMillis(millis: Long): OffsetDateTime {
-        return OffsetDateTime.ofInstant(
-            Instant.ofEpochMilli(millis),
-            ZoneOffset.UTC,
-        )
+    override fun fromMillis(millis: Long): Instant {
+        return Instant.fromEpochMilliseconds(millis)
     }
 }

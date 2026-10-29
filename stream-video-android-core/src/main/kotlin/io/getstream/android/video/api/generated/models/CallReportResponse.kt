@@ -38,8 +38,8 @@ public data class CallReportResponse (
     public val score: Double,
 
     @Json(name = "ended_at")
-    public val endedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val endedAt: kotlin.time.Instant? = null,
 
     @Json(name = "started_at")
-    public val startedAt: org.threeten.bp.OffsetDateTime? = null
+    public val startedAt: kotlin.time.Instant? = null
 )

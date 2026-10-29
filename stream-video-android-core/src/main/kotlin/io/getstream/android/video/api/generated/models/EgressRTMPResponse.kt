@@ -38,7 +38,7 @@ public data class EgressRTMPResponse (
     public val name: String,
 
     @Json(name = "started_at")
-    public val startedAt: org.threeten.bp.OffsetDateTime,
+    public val startedAt: kotlin.time.Instant,
 
     @Json(name = "stream_key")
     public val streamKey: String? = null,

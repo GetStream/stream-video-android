@@ -59,11 +59,11 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
-import org.threeten.bp.OffsetDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 class StreamVideoClientTest {
     private lateinit var client: StreamVideoClient
@@ -435,11 +435,11 @@ class StreamVideoClientTest {
             accessToken = "guest-jwt",
             duration = "1ms",
             user = UserResponse(
-                createdAt = OffsetDateTime.MIN,
+                createdAt = Instant.DISTANT_PAST,
                 id = "server_normalized_id",
                 language = "en",
                 role = "guest",
-                updatedAt = OffsetDateTime.MIN,
+                updatedAt = Instant.DISTANT_PAST,
                 name = "Guest",
             ),
         )

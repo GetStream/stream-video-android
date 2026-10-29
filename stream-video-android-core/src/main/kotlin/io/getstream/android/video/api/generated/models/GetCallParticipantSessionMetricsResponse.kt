@@ -44,7 +44,7 @@ public data class GetCallParticipantSessionMetricsResponse (
     public val isSubscriber: Boolean? = null,
 
     @Json(name = "joined_at")
-    public val joinedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val joinedAt: kotlin.time.Instant? = null,
 
     @Json(name = "publisher_type")
     public val publisherType: String? = null,

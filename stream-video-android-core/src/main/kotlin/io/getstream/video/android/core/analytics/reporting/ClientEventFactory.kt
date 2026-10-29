@@ -27,8 +27,7 @@ import io.getstream.video.android.core.analytics.reporting.model.EventType
 import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionRole
 import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.webrtc.PeerConnection
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.ZoneOffset
+import kotlin.time.Clock
 
 internal class ClientEventFactory(
     val sdkVersion: String,
@@ -67,7 +66,7 @@ internal class ClientEventFactory(
         id = callId,
         sdkVersion = sdkVersion,
         stage = stage.value,
-        timestamp = OffsetDateTime.now(ZoneOffset.UTC),
+        timestamp = Clock.System.now(),
         type = callType,
         userAgent = userAgent.invoke().take(512),
         userId = StreamVideo.Companion.instanceOrNull()?.userId,

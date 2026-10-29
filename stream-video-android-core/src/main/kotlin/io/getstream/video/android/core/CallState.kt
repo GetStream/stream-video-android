@@ -156,8 +156,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import org.threeten.bp.Clock
-import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.ParticipantSource
 import stream.video.sfu.models.TrackType
@@ -171,8 +169,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.collections.map
 import kotlin.collections.toMutableList
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
+import kotlin.time.Instant
 import kotlin.time.toDuration
 
 @Stable
@@ -290,13 +290,13 @@ public class CallState(
     public val participants: StateFlow<List<ParticipantState>>
         get() = _sortedParticipantsState.sortedParticipants
 
-    private val _startedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    private val _startedAt: MutableStateFlow<Instant?> = MutableStateFlow(null)
 
     /**
      * Will return always null with current SFU implementation - it may be fixed later. For now
      * do not use it.
      */
-    public val startedAt: StateFlow<OffsetDateTime?> = _startedAt
+    public val startedAt: StateFlow<Instant?> = _startedAt
 
     private val _participantCounts: MutableStateFlow<ParticipantCount?> = MutableStateFlow(null)
     val participantCounts: StateFlow<ParticipantCount?> = _participantCounts
@@ -362,7 +362,7 @@ public class CallState(
             combined.toMap()
         }.stateIn(scope, SharingStarted.Eagerly, emptyMap())
 
-    internal val _pinnedParticipants: StateFlow<Map<SessionId, OffsetDateTime>> =
+    internal val _pinnedParticipants: StateFlow<Map<SessionId, Instant>> =
         _pinnedParticipantsDetailed.mapState { detailed ->
             detailed.mapValues { it.value.at }
         }
@@ -370,7 +370,7 @@ public class CallState(
     /**
      * Pinned participants, combined value both from server and local pins.
      */
-    val pinnedParticipants: StateFlow<Map<SessionId, OffsetDateTime>> = _pinnedParticipants
+    val pinnedParticipants: StateFlow<Map<SessionId, Instant>> = _pinnedParticipants
 
     val stats = CallStats(call, scope)
 
@@ -563,11 +563,11 @@ public class CallState(
         while (currentCoroutineContext().isActive) {
             delay(1000)
             val started = _session.value?.startedAt
-            val ended = _session.value?.endedAt ?: OffsetDateTime.now()
+            val ended = _session.value?.endedAt ?: Clock.System.now()
             val difference = if (started == null) {
                 null
             } else {
-                ended.toInstant().toEpochMilli() - started.toInstant().toEpochMilli()
+                ended.toEpochMilliseconds() - started.toEpochMilliseconds()
             }
             emit(difference)
         }
@@ -635,11 +635,10 @@ public class CallState(
             delay(1000)
 
             val liveStartedAt = _session.value?.liveStartedAt
-            val liveEndedAt = _session.value?.liveEndedAt ?: OffsetDateTime.now()
+            val liveEndedAt = _session.value?.liveEndedAt ?: Clock.System.now()
 
             liveStartedAt?.let {
-                val duration = liveEndedAt.toInstant().toEpochMilli() - liveStartedAt.toInstant()
-                    .toEpochMilli()
+                val duration = liveEndedAt.toEpochMilliseconds() - liveStartedAt.toEpochMilliseconds()
                 emit(duration)
             }
         }
@@ -684,16 +683,16 @@ public class CallState(
     val session: StateFlow<CallSessionResponse?> = _session
 
     /** startsAt */
-    private val _startsAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
-    val startsAt: StateFlow<OffsetDateTime?> = _startsAt
+    private val _startsAt: MutableStateFlow<Instant?> = MutableStateFlow(null)
+    val startsAt: StateFlow<Instant?> = _startsAt
 
-    private val _updatedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
+    private val _updatedAt: MutableStateFlow<Instant?> = MutableStateFlow(null)
 
     /** updatedAt */
-    val updatedAt: StateFlow<OffsetDateTime?> = _updatedAt
+    val updatedAt: StateFlow<Instant?> = _updatedAt
 
-    private val _createdAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
-    val createdAt: StateFlow<OffsetDateTime?> = _createdAt
+    private val _createdAt: MutableStateFlow<Instant?> = MutableStateFlow(null)
+    val createdAt: StateFlow<Instant?> = _createdAt
 
     private val _blockedUserIds: MutableStateFlow<List<String>> = MutableStateFlow(emptyList())
     val blockedUserIds: StateFlow<List<String>> = _blockedUserIds
@@ -724,8 +723,8 @@ public class CallState(
 
     internal val _hasPermissionMap = mutableMapOf<String, StateFlow<Boolean>>()
 
-    private val _endedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
-    val endedAt: StateFlow<OffsetDateTime?> = _endedAt
+    private val _endedAt: MutableStateFlow<Instant?> = MutableStateFlow(null)
+    val endedAt: StateFlow<Instant?> = _endedAt
     private val _endedByUser: MutableStateFlow<User?> = MutableStateFlow(null)
     val endedByUser: StateFlow<User?> = _endedByUser
 
@@ -951,7 +950,7 @@ public class CallState(
             is CallEndedEvent -> {
                 cancelTimeout()
                 updateFromResponse(event.call)
-                _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
+                _endedAt.value = Clock.System.now()
                 _endedByUser.value = event.user?.toUser()
                 updateRingingState()
                 call.leave(
@@ -962,7 +961,7 @@ public class CallState(
             }
 
             is CallEndedSfuEvent -> {
-                _endedAt.value = OffsetDateTime.now(Clock.systemUTC())
+                _endedAt.value = Clock.System.now()
                 call.leave(
                     CallLeaveReason.Backend(
                         cause = BackendCause.CALL_ENDED_SFU_EVENT,

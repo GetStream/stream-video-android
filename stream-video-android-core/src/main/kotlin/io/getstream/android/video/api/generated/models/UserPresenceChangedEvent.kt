@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 public data class UserPresenceChangedEvent (
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "custom")
     public val custom: Map<String, Any?> = emptyMap(),
@@ -47,7 +47,7 @@ public data class UserPresenceChangedEvent (
     public val type: String = "user.presence.changed",
 
     @Json(name = "received_at")
-    public val receivedAt: org.threeten.bp.OffsetDateTime? = null
+    public val receivedAt: kotlin.time.Instant? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {

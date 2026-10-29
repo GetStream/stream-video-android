@@ -44,13 +44,12 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.threeten.bp.Clock
-import org.threeten.bp.OffsetDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 @RunWith(RobolectricTestRunner::class)
 class CallStateTest : IntegrationTestBase() {
@@ -140,7 +139,7 @@ class CallStateTest : IntegrationTestBase() {
         call.state.pinManager.updateLocalPins(
             mutableMapOf(
                 "1" to PinEntry(
-                    PinUpdate("1", "userId"), OffsetDateTime.now(Clock.systemUTC()), PinType.Local,
+                    PinUpdate("1", "userId"), Clock.System.now(), PinType.Local,
                 ),
             ),
         )

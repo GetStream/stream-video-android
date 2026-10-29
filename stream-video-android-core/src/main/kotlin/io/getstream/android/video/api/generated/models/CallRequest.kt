@@ -38,7 +38,7 @@ public data class CallRequest (
     public val channelCid: String? = null,
 
     @Json(name = "starts_at")
-    public val startsAt: org.threeten.bp.OffsetDateTime? = null,
+    public val startsAt: kotlin.time.Instant? = null,
 
     @Json(name = "team")
     public val team: String? = null,

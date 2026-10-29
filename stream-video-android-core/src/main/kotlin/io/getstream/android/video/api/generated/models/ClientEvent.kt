@@ -77,7 +77,7 @@ public data class ClientEvent (
     public val peerConnection: String? = null,
 
     @Json(name = "previously_connected_timestamp")
-    public val previouslyConnectedTimestamp: org.threeten.bp.OffsetDateTime? = null,
+    public val previouslyConnectedTimestamp: kotlin.time.Instant? = null,
 
     @Json(name = "retry_count_attempt")
     public val retryCountAttempt: Int? = null,
@@ -107,7 +107,7 @@ public data class ClientEvent (
     public val stageId: String? = null,
 
     @Json(name = "timestamp")
-    public val timestamp: org.threeten.bp.OffsetDateTime? = null,
+    public val timestamp: kotlin.time.Instant? = null,
 
     @Json(name = "track_id")
     public val trackId: String? = null,

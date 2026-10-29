@@ -36,7 +36,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 private fun ClosedCaptionEvent.key(): String {
-    return "${closedCaption.speakerId}/${closedCaption.startTime.toEpochSecond()}"
+    return "${closedCaption.speakerId}/${closedCaption.startTime.epochSeconds}"
 }
 
 /**
