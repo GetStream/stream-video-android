@@ -33,22 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class QueryCallsRequest (
+public data class QueryCallsRequest (
     @Json(name = "limit")
-    val limit: Int? = null,
+    public val limit: Int? = null,
 
     @Json(name = "next")
-    val next: String? = null,
+    public val next: String? = null,
 
     @Json(name = "prev")
-    val prev: String? = null,
+    public val prev: String? = null,
 
     @Json(name = "watch")
-    val watch: Boolean? = null,
+    public val watch: Boolean? = null,
 
     @Json(name = "sort")
-    val sort: List<io.getstream.android.video.api.generated.models.SortParamRequest>? = null,
+    public val sort: List<io.getstream.android.video.api.generated.models.SortParamRequest>? = null,
 
     @Json(name = "filter_conditions")
-    val filterConditions: Map<String, Any?>? = null
+    public val filterConditions: Map<String, Any?>? = null
 )

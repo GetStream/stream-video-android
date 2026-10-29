@@ -33,34 +33,34 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ParticipantReportResponse (
+public data class ParticipantReportResponse (
     @Json(name = "sum")
-    val sum: Int,
+    public val sum: Int,
 
     @Json(name = "unique")
-    val unique: Int,
+    public val unique: Int,
 
     @Json(name = "max_concurrent")
-    val maxConcurrent: Int? = null,
+    public val maxConcurrent: Int? = null,
 
     @Json(name = "by_browser")
-    val byBrowser: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
+    public val byBrowser: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
 
     @Json(name = "by_country")
-    val byCountry: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
+    public val byCountry: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
 
     @Json(name = "by_device")
-    val byDevice: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
+    public val byDevice: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
 
     @Json(name = "by_operating_system")
-    val byOperatingSystem: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
+    public val byOperatingSystem: List<io.getstream.android.video.api.generated.models.GroupedStatsResponse>? = null,
 
     @Json(name = "count_over_time")
-    val countOverTime: io.getstream.android.video.api.generated.models.ParticipantCountOverTimeResponse? = null,
+    public val countOverTime: io.getstream.android.video.api.generated.models.ParticipantCountOverTimeResponse? = null,
 
     @Json(name = "publishers")
-    val publishers: io.getstream.android.video.api.generated.models.PublisherStatsResponse? = null,
+    public val publishers: io.getstream.android.video.api.generated.models.PublisherStatsResponse? = null,
 
     @Json(name = "subscribers")
-    val subscribers: io.getstream.android.video.api.generated.models.SubscriberStatsResponse? = null
+    public val subscribers: io.getstream.android.video.api.generated.models.SubscriberStatsResponse? = null
 )

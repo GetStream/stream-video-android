@@ -33,31 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class GetCallParticipantSessionMetricsResponse (
+public data class GetCallParticipantSessionMetricsResponse (
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "is_publisher")
-    val isPublisher: Boolean? = null,
+    public val isPublisher: Boolean? = null,
 
     @Json(name = "is_subscriber")
-    val isSubscriber: Boolean? = null,
+    public val isSubscriber: Boolean? = null,
 
     @Json(name = "joined_at")
-    val joinedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val joinedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "publisher_type")
-    val publisherType: String? = null,
+    public val publisherType: String? = null,
 
     @Json(name = "user_id")
-    val userId: String? = null,
+    public val userId: String? = null,
 
     @Json(name = "user_session_id")
-    val userSessionId: String? = null,
+    public val userSessionId: String? = null,
 
     @Json(name = "published_tracks")
-    val publishedTracks: List<io.getstream.android.video.api.generated.models.PublishedTrackMetrics>? = null,
+    public val publishedTracks: List<io.getstream.android.video.api.generated.models.PublishedTrackMetrics>? = null,
 
     @Json(name = "client")
-    val client: io.getstream.android.video.api.generated.models.SessionClient? = null
+    public val client: io.getstream.android.video.api.generated.models.SessionClient? = null
 )

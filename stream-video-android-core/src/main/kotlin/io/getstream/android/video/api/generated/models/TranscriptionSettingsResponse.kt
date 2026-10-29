@@ -33,45 +33,45 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class TranscriptionSettingsResponse (
+public data class TranscriptionSettingsResponse (
     @Json(name = "closed_caption_mode")
-    val closedCaptionMode: ClosedCaptionMode,
+    public val closedCaptionMode: ClosedCaptionMode,
 
     @Json(name = "language")
-    val language: Language,
+    public val language: Language,
 
     @Json(name = "mode")
-    val mode: Mode,
+    public val mode: Mode,
 
     @Json(name = "speech_segment_config")
-    val speechSegmentConfig: io.getstream.android.video.api.generated.models.SpeechSegmentConfig? = null,
+    public val speechSegmentConfig: io.getstream.android.video.api.generated.models.SpeechSegmentConfig? = null,
 
     @Json(name = "translation")
-    val translation: io.getstream.android.video.api.generated.models.TranslationSettings? = null
+    public val translation: io.getstream.android.video.api.generated.models.TranslationSettings? = null
 )
 {
     
     /**
     * ClosedCaptionMode Enum
     */
-    sealed class ClosedCaptionMode(val value: String) {
+    public sealed class ClosedCaptionMode(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): ClosedCaptionMode = when (s) {
+            public companion object {
+                public fun fromString(s: String): ClosedCaptionMode = when (s) {
                     "auto-on" -> AutoOn
                     "available" -> Available
                     "disabled" -> Disabled
                     else -> Unknown(s)
                 }
             }
-            object AutoOn : ClosedCaptionMode("auto-on")
-            object Available : ClosedCaptionMode("available")
-            object Disabled : ClosedCaptionMode("disabled")
-            data class Unknown(val unknownValue: String) : ClosedCaptionMode(unknownValue)
+            public object AutoOn : ClosedCaptionMode("auto-on")
+            public object Available : ClosedCaptionMode("available")
+            public object Disabled : ClosedCaptionMode("disabled")
+            public data class Unknown(val unknownValue: String) : ClosedCaptionMode(unknownValue)
         
 
-        class ClosedCaptionModeAdapter : JsonAdapter<ClosedCaptionMode>() {
+        public class ClosedCaptionModeAdapter : JsonAdapter<ClosedCaptionMode>() {
             @FromJson
             override fun fromJson(reader: JsonReader): ClosedCaptionMode? {
                 val s = reader.nextString() ?: return null
@@ -87,11 +87,11 @@ data class TranscriptionSettingsResponse (
     /**
     * Language Enum
     */
-    sealed class Language(val value: String) {
+    public sealed class Language(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Language = when (s) {
+            public companion object {
+                public fun fromString(s: String): Language = when (s) {
                     "ar" -> Ar
                     "auto" -> Auto
                     "bg" -> Bg
@@ -132,47 +132,47 @@ data class TranscriptionSettingsResponse (
                     else -> Unknown(s)
                 }
             }
-            object Ar : Language("ar")
-            object Auto : Language("auto")
-            object Bg : Language("bg")
-            object Ca : Language("ca")
-            object Cs : Language("cs")
-            object Da : Language("da")
-            object De : Language("de")
-            object El : Language("el")
-            object En : Language("en")
-            object Es : Language("es")
-            object Et : Language("et")
-            object Fi : Language("fi")
-            object Fr : Language("fr")
-            object He : Language("he")
-            object Hi : Language("hi")
-            object Hr : Language("hr")
-            object Hu : Language("hu")
-            object Id : Language("id")
-            object It : Language("it")
-            object Ja : Language("ja")
-            object Ko : Language("ko")
-            object Ms : Language("ms")
-            object Nl : Language("nl")
-            object No : Language("no")
-            object Pl : Language("pl")
-            object Pt : Language("pt")
-            object Ro : Language("ro")
-            object Ru : Language("ru")
-            object Sk : Language("sk")
-            object Sl : Language("sl")
-            object Sv : Language("sv")
-            object Ta : Language("ta")
-            object Th : Language("th")
-            object Tl : Language("tl")
-            object Tr : Language("tr")
-            object Uk : Language("uk")
-            object Zh : Language("zh")
-            data class Unknown(val unknownValue: String) : Language(unknownValue)
+            public object Ar : Language("ar")
+            public object Auto : Language("auto")
+            public object Bg : Language("bg")
+            public object Ca : Language("ca")
+            public object Cs : Language("cs")
+            public object Da : Language("da")
+            public object De : Language("de")
+            public object El : Language("el")
+            public object En : Language("en")
+            public object Es : Language("es")
+            public object Et : Language("et")
+            public object Fi : Language("fi")
+            public object Fr : Language("fr")
+            public object He : Language("he")
+            public object Hi : Language("hi")
+            public object Hr : Language("hr")
+            public object Hu : Language("hu")
+            public object Id : Language("id")
+            public object It : Language("it")
+            public object Ja : Language("ja")
+            public object Ko : Language("ko")
+            public object Ms : Language("ms")
+            public object Nl : Language("nl")
+            public object No : Language("no")
+            public object Pl : Language("pl")
+            public object Pt : Language("pt")
+            public object Ro : Language("ro")
+            public object Ru : Language("ru")
+            public object Sk : Language("sk")
+            public object Sl : Language("sl")
+            public object Sv : Language("sv")
+            public object Ta : Language("ta")
+            public object Th : Language("th")
+            public object Tl : Language("tl")
+            public object Tr : Language("tr")
+            public object Uk : Language("uk")
+            public object Zh : Language("zh")
+            public data class Unknown(val unknownValue: String) : Language(unknownValue)
         
 
-        class LanguageAdapter : JsonAdapter<Language>() {
+        public class LanguageAdapter : JsonAdapter<Language>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Language? {
                 val s = reader.nextString() ?: return null
@@ -188,24 +188,24 @@ data class TranscriptionSettingsResponse (
     /**
     * Mode Enum
     */
-    sealed class Mode(val value: String) {
+    public sealed class Mode(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Mode = when (s) {
+            public companion object {
+                public fun fromString(s: String): Mode = when (s) {
                     "auto-on" -> AutoOn
                     "available" -> Available
                     "disabled" -> Disabled
                     else -> Unknown(s)
                 }
             }
-            object AutoOn : Mode("auto-on")
-            object Available : Mode("available")
-            object Disabled : Mode("disabled")
-            data class Unknown(val unknownValue: String) : Mode(unknownValue)
+            public object AutoOn : Mode("auto-on")
+            public object Available : Mode("available")
+            public object Disabled : Mode("disabled")
+            public data class Unknown(val unknownValue: String) : Mode(unknownValue)
         
 
-        class ModeAdapter : JsonAdapter<Mode>() {
+        public class ModeAdapter : JsonAdapter<Mode>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Mode? {
                 val s = reader.nextString() ?: return null

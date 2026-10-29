@@ -33,25 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallStatsSessionResponse (
+public data class CallStatsSessionResponse (
     @Json(name = "call_id")
-    val callId: String,
+    public val callId: String,
 
     @Json(name = "call_session_id")
-    val callSessionId: String,
+    public val callSessionId: String,
 
     @Json(name = "call_type")
-    val callType: String,
+    public val callType: String,
 
     @Json(name = "generated_at")
-    val generatedAt: org.threeten.bp.OffsetDateTime,
+    public val generatedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "counts")
-    val counts: io.getstream.android.video.api.generated.models.CallStatsParticipantCounts,
+    public val counts: io.getstream.android.video.api.generated.models.CallStatsParticipantCounts,
 
     @Json(name = "call_ended_at")
-    val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "call_started_at")
-    val callStartedAt: org.threeten.bp.OffsetDateTime? = null
+    public val callStartedAt: org.threeten.bp.OffsetDateTime? = null
 )

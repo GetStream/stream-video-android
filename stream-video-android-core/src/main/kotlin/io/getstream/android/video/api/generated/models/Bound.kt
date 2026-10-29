@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class Bound (
+public data class Bound (
     @Json(name = "inclusive")
-    val inclusive: Boolean,
+    public val inclusive: Boolean,
 
     @Json(name = "value")
-    val value: Double
+    public val value: Double
 )

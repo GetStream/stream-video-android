@@ -33,22 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * CallRecording represents a recording of a call.
  */
-data class CallRecording (
+public data class CallRecording (
     @Json(name = "end_time")
-    val endTime: org.threeten.bp.OffsetDateTime,
+    public val endTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "filename")
-    val filename: String,
+    public val filename: String,
 
     @Json(name = "recording_type")
-    val recordingType: String,
+    public val recordingType: String,
 
     @Json(name = "session_id")
-    val sessionId: String,
+    public val sessionId: String,
 
     @Json(name = "start_time")
-    val startTime: org.threeten.bp.OffsetDateTime,
+    public val startTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "url")
-    val url: String
+    public val url: String
 )

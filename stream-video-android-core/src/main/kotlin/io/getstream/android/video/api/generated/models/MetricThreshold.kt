@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class MetricThreshold (
+public data class MetricThreshold (
     @Json(name = "level")
-    val level: String,
+    public val level: String,
 
     @Json(name = "operator")
-    val operator: String,
+    public val operator: String,
 
     @Json(name = "value")
-    val value: Double,
+    public val value: Double,
 
     @Json(name = "value_unit")
-    val valueUnit: String? = null,
+    public val valueUnit: String? = null,
 
     @Json(name = "window_seconds")
-    val windowSeconds: Int? = null
+    public val windowSeconds: Int? = null
 )

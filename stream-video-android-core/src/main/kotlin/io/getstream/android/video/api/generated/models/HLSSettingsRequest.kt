@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class HLSSettingsRequest (
+public data class HLSSettingsRequest (
     @Json(name = "quality_tracks")
-    val qualityTracks: List<String> = emptyList(),
+    public val qualityTracks: List<String> = emptyList(),
 
     @Json(name = "auto_on")
-    val autoOn: Boolean? = null,
+    public val autoOn: Boolean? = null,
 
     @Json(name = "enabled")
-    val enabled: Boolean? = null
+    public val enabled: Boolean? = null
 )

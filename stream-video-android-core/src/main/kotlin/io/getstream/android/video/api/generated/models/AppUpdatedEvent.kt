@@ -33,21 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * Emitted when app settings are updated
  */
-data class AppUpdatedEvent (
+public data class AppUpdatedEvent (
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "app")
-    val app: io.getstream.android.video.api.generated.models.AppEventResponse,
+    public val app: io.getstream.android.video.api.generated.models.AppEventResponse,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?> = emptyMap(),
+    public val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "type")
-    val type: String = "app.updated",
+    public val type: String = "app.updated",
 
     @Json(name = "received_at")
-    val receivedAt: org.threeten.bp.OffsetDateTime? = null
+    public val receivedAt: org.threeten.bp.OffsetDateTime? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {

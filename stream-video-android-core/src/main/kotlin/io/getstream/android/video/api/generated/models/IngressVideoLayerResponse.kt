@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class IngressVideoLayerResponse (
+public data class IngressVideoLayerResponse (
     @Json(name = "bitrate")
-    val bitrate: Int,
+    public val bitrate: Int,
 
     @Json(name = "codec")
-    val codec: String,
+    public val codec: String,
 
     @Json(name = "frame_rate_limit")
-    val frameRateLimit: Int,
+    public val frameRateLimit: Int,
 
     @Json(name = "max_dimension")
-    val maxDimension: Int,
+    public val maxDimension: Int,
 
     @Json(name = "min_dimension")
-    val minDimension: Int
+    public val minDimension: Int
 )

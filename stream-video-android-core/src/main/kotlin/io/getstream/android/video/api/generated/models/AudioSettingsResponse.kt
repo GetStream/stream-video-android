@@ -33,52 +33,52 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class AudioSettingsResponse (
+public data class AudioSettingsResponse (
     @Json(name = "access_request_enabled")
-    val accessRequestEnabled: Boolean,
+    public val accessRequestEnabled: Boolean,
 
     @Json(name = "default_device")
-    val defaultDevice: DefaultDevice,
+    public val defaultDevice: DefaultDevice,
 
     @Json(name = "hifi_audio_enabled")
-    val hifiAudioEnabled: Boolean,
+    public val hifiAudioEnabled: Boolean,
 
     @Json(name = "mic_default_on")
-    val micDefaultOn: Boolean,
+    public val micDefaultOn: Boolean,
 
     @Json(name = "opus_dtx_enabled")
-    val opusDtxEnabled: Boolean,
+    public val opusDtxEnabled: Boolean,
 
     @Json(name = "redundant_coding_enabled")
-    val redundantCodingEnabled: Boolean,
+    public val redundantCodingEnabled: Boolean,
 
     @Json(name = "speaker_default_on")
-    val speakerDefaultOn: Boolean,
+    public val speakerDefaultOn: Boolean,
 
     @Json(name = "noise_cancellation")
-    val noiseCancellation: io.getstream.android.video.api.generated.models.NoiseCancellationSettings? = null
+    public val noiseCancellation: io.getstream.android.video.api.generated.models.NoiseCancellationSettings? = null
 )
 {
     
     /**
     * DefaultDevice Enum
     */
-    sealed class DefaultDevice(val value: String) {
+    public sealed class DefaultDevice(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): DefaultDevice = when (s) {
+            public companion object {
+                public fun fromString(s: String): DefaultDevice = when (s) {
                     "earpiece" -> Earpiece
                     "speaker" -> Speaker
                     else -> Unknown(s)
                 }
             }
-            object Earpiece : DefaultDevice("earpiece")
-            object Speaker : DefaultDevice("speaker")
-            data class Unknown(val unknownValue: String) : DefaultDevice(unknownValue)
+            public object Earpiece : DefaultDevice("earpiece")
+            public object Speaker : DefaultDevice("speaker")
+            public data class Unknown(val unknownValue: String) : DefaultDevice(unknownValue)
         
 
-        class DefaultDeviceAdapter : JsonAdapter<DefaultDevice>() {
+        public class DefaultDeviceAdapter : JsonAdapter<DefaultDevice>() {
             @FromJson
             override fun fromJson(reader: JsonReader): DefaultDevice? {
                 val s = reader.nextString() ?: return null

@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class PoorByCause (
+public data class PoorByCause (
     @Json(name = "delivery")
-    val delivery: Int,
+    public val delivery: Int,
 
     @Json(name = "edge")
-    val edge: Int,
+    public val edge: Int,
 
     @Json(name = "isolated_local")
-    val isolatedLocal: Int,
+    public val isolatedLocal: Int,
 
     @Json(name = "source")
-    val source: Int,
+    public val source: Int,
 
     @Json(name = "unattributed")
-    val unattributed: Int
+    public val unattributed: Int
 )

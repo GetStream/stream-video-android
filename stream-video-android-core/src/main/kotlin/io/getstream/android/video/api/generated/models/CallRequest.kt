@@ -33,25 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * CallRequest is the payload for creating a call.
  */
-data class CallRequest (
+public data class CallRequest (
     @Json(name = "channel_cid")
-    val channelCid: String? = null,
+    public val channelCid: String? = null,
 
     @Json(name = "starts_at")
-    val startsAt: org.threeten.bp.OffsetDateTime? = null,
+    public val startsAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "team")
-    val team: String? = null,
+    public val team: String? = null,
 
     @Json(name = "video")
-    val video: Boolean? = null,
+    public val video: Boolean? = null,
 
     @Json(name = "members")
-    val members: List<io.getstream.android.video.api.generated.models.MemberRequest>? = null,
+    public val members: List<io.getstream.android.video.api.generated.models.MemberRequest>? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = null,
+    public val custom: Map<String, Any?>? = null,
 
     @Json(name = "settings_override")
-    val settingsOverride: io.getstream.android.video.api.generated.models.CallSettingsRequest? = null
+    public val settingsOverride: io.getstream.android.video.api.generated.models.CallSettingsRequest? = null
 )

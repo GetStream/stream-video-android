@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * Send a call event to the other user
  */
-data class SendCallEventRequest (
+public data class SendCallEventRequest (
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = null
+    public val custom: Map<String, Any?>? = null
 )

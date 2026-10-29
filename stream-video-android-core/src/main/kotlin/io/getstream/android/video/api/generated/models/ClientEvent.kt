@@ -33,94 +33,94 @@ import com.squareup.moshi.ToJson
 /**
  * A single client-side telemetry event. JoinInitiated is the top-level marker emitted when a user begins a join attempt and carries only join_attempt_id (no stage_id or coordinator_connect_id). When stage is CoordinatorJoin, CoordinatorWS, WSJoin, or PeerConnectionConnect the event reports a join-lifecycle attempt; initiation and completion of a stage attempt share the same stage_id. FirstAudioFrame and FirstVideoFrame report media readiness and only ever carry an initiated event. MediaDevicePermission reports the result of requesting screen-share, microphone, and camera permissions. Other stage values denote generic client events.
  */
-data class ClientEvent (
+public data class ClientEvent (
     @Json(name = "call_session_id")
-    val callSessionId: String? = null,
+    public val callSessionId: String? = null,
 
     @Json(name = "camera_permission_status")
-    val cameraPermissionStatus: String? = null,
+    public val cameraPermissionStatus: String? = null,
 
     @Json(name = "coordinator_connect_id")
-    val coordinatorConnectId: String? = null,
+    public val coordinatorConnectId: String? = null,
 
     @Json(name = "elapsed_time")
-    val elapsedTime: Int? = null,
+    public val elapsedTime: Int? = null,
 
     @Json(name = "event_type")
-    val eventType: String? = null,
+    public val eventType: String? = null,
 
     @Json(name = "ice_state")
-    val iceState: String? = null,
+    public val iceState: String? = null,
 
     @Json(name = "id")
-    val id: String? = null,
+    public val id: String? = null,
 
     @Json(name = "join_attempt_id")
-    val joinAttemptId: String? = null,
+    public val joinAttemptId: String? = null,
 
     @Json(name = "join_reason")
-    val joinReason: String? = null,
+    public val joinReason: String? = null,
 
     @Json(name = "leave_initiator")
-    val leaveInitiator: String? = null,
+    public val leaveInitiator: String? = null,
 
     @Json(name = "leave_reason")
-    val leaveReason: String? = null,
+    public val leaveReason: String? = null,
 
     @Json(name = "microphone_permission_status")
-    val microphonePermissionStatus: String? = null,
+    public val microphonePermissionStatus: String? = null,
 
     @Json(name = "outcome")
-    val outcome: String? = null,
+    public val outcome: String? = null,
 
     @Json(name = "peer_connection")
-    val peerConnection: String? = null,
+    public val peerConnection: String? = null,
 
     @Json(name = "previously_connected_timestamp")
-    val previouslyConnectedTimestamp: org.threeten.bp.OffsetDateTime? = null,
+    public val previouslyConnectedTimestamp: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "retry_count_attempt")
-    val retryCountAttempt: Int? = null,
+    public val retryCountAttempt: Int? = null,
 
     @Json(name = "retry_failure_code")
-    val retryFailureCode: String? = null,
+    public val retryFailureCode: String? = null,
 
     @Json(name = "retry_failure_reason")
-    val retryFailureReason: String? = null,
+    public val retryFailureReason: String? = null,
 
     @Json(name = "screen_share_status")
-    val screenShareStatus: String? = null,
+    public val screenShareStatus: String? = null,
 
     @Json(name = "sdk_version")
-    val sdkVersion: String? = null,
+    public val sdkVersion: String? = null,
 
     @Json(name = "sfu_id")
-    val sfuId: String? = null,
+    public val sfuId: String? = null,
 
     @Json(name = "source")
-    val source: String? = null,
+    public val source: String? = null,
 
     @Json(name = "stage")
-    val stage: String? = null,
+    public val stage: String? = null,
 
     @Json(name = "stage_id")
-    val stageId: String? = null,
+    public val stageId: String? = null,
 
     @Json(name = "timestamp")
-    val timestamp: org.threeten.bp.OffsetDateTime? = null,
+    public val timestamp: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "track_id")
-    val trackId: String? = null,
+    public val trackId: String? = null,
 
     @Json(name = "type")
-    val type: String? = null,
+    public val type: String? = null,
 
     @Json(name = "user_agent")
-    val userAgent: String? = null,
+    public val userAgent: String? = null,
 
     @Json(name = "user_id")
-    val userId: String? = null,
+    public val userId: String? = null,
 
     @Json(name = "was_previously_connected")
-    val wasPreviouslyConnected: Boolean? = null
+    public val wasPreviouslyConnected: Boolean? = null
 )

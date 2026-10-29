@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * StartRTMPBroadcastsRequest is the payload for starting RTMP broadcasts.
  */
-data class StartRTMPBroadcastsRequest (
+public data class StartRTMPBroadcastsRequest (
     @Json(name = "broadcasts")
-    val broadcasts: List<io.getstream.android.video.api.generated.models.RTMPBroadcastRequest> = emptyList()
+    public val broadcasts: List<io.getstream.android.video.api.generated.models.RTMPBroadcastRequest> = emptyList()
 )

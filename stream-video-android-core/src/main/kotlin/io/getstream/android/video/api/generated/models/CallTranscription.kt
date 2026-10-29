@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * CallTranscription represents a transcription of a call.
  */
-data class CallTranscription (
+public data class CallTranscription (
     @Json(name = "end_time")
-    val endTime: org.threeten.bp.OffsetDateTime,
+    public val endTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "filename")
-    val filename: String,
+    public val filename: String,
 
     @Json(name = "session_id")
-    val sessionId: String,
+    public val sessionId: String,
 
     @Json(name = "start_time")
-    val startTime: org.threeten.bp.OffsetDateTime,
+    public val startTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "url")
-    val url: String
+    public val url: String
 )

@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * ICE server configuration for WebRTC connections
  */
-data class ICEServerResponse (
+public data class ICEServerResponse (
     @Json(name = "password")
-    val password: String,
+    public val password: String,
 
     @Json(name = "username")
-    val username: String,
+    public val username: String,
 
     @Json(name = "urls")
-    val urls: List<String> = emptyList()
+    public val urls: List<String> = emptyList()
 )

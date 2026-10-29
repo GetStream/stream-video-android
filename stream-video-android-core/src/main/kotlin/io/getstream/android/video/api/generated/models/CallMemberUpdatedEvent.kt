@@ -33,21 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when one or more members are updated
  */
-data class CallMemberUpdatedEvent (
+public data class CallMemberUpdatedEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "members")
-    val members: List<io.getstream.android.video.api.generated.models.MemberResponse> = emptyList(),
+    public val members: List<io.getstream.android.video.api.generated.models.MemberResponse> = emptyList(),
 
     @Json(name = "call")
-    val call: io.getstream.android.video.api.generated.models.CallResponse,
+    public val call: io.getstream.android.video.api.generated.models.CallResponse,
 
     @Json(name = "type")
-    val type: String = "call.member_updated"
+    public val type: String = "call.member_updated"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

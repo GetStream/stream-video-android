@@ -33,21 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when call transcription is ready
  */
-data class CallTranscriptionReadyEvent (
+public data class CallTranscriptionReadyEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "egress_id")
-    val egressId: String,
+    public val egressId: String,
 
     @Json(name = "call_transcription")
-    val callTranscription: io.getstream.android.video.api.generated.models.CallTranscription,
+    public val callTranscription: io.getstream.android.video.api.generated.models.CallTranscription,
 
     @Json(name = "type")
-    val type: String = "call.transcription_ready"
+    public val type: String = "call.transcription_ready"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

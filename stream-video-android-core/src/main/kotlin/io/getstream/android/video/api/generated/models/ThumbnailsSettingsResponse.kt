@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ThumbnailsSettingsResponse (
+public data class ThumbnailsSettingsResponse (
     @Json(name = "enabled")
-    val enabled: Boolean
+    public val enabled: Boolean
 )

@@ -33,24 +33,24 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a user rejects a notification to join a call.
  */
-data class CallRejectedEvent (
+public data class CallRejectedEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "call")
-    val call: io.getstream.android.video.api.generated.models.CallResponse,
+    public val call: io.getstream.android.video.api.generated.models.CallResponse,
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserResponse,
+    public val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: String = "call.rejected",
+    public val type: String = "call.rejected",
 
     @Json(name = "reason")
-    val reason: String? = null
+    public val reason: String? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

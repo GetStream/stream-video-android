@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ReportResponse (
+public data class ReportResponse (
     @Json(name = "call")
-    val call: io.getstream.android.video.api.generated.models.CallReportResponse,
+    public val call: io.getstream.android.video.api.generated.models.CallReportResponse,
 
     @Json(name = "participants")
-    val participants: io.getstream.android.video.api.generated.models.ParticipantReportResponse,
+    public val participants: io.getstream.android.video.api.generated.models.ParticipantReportResponse,
 
     @Json(name = "user_ratings")
-    val userRatings: io.getstream.android.video.api.generated.models.UserRatingReportResponse
+    public val userRatings: io.getstream.android.video.api.generated.models.UserRatingReportResponse
 )

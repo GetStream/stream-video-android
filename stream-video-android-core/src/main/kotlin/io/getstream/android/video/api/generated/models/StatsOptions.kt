@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class StatsOptions (
+public data class StatsOptions (
     @Json(name = "enable_rtc_stats")
-    val enableRtcStats: Boolean,
+    public val enableRtcStats: Boolean,
 
     @Json(name = "reporting_interval_ms")
-    val reportingIntervalMs: Int
+    public val reportingIntervalMs: Int
 )

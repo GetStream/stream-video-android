@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SDKUsageReport (
+public data class SDKUsageReport (
     @Json(name = "per_sdk_usage")
-    val perSdkUsage: Map<String, io.getstream.android.video.api.generated.models.PerSDKUsageReport> = emptyMap()
+    public val perSdkUsage: Map<String, io.getstream.android.video.api.generated.models.PerSDKUsageReport> = emptyMap()
 )

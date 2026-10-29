@@ -33,40 +33,40 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallSessionResponse (
+public data class CallSessionResponse (
     @Json(name = "anonymous_participant_count")
-    val anonymousParticipantCount: Int,
+    public val anonymousParticipantCount: Int,
 
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "participants")
-    val participants: List<io.getstream.android.video.api.generated.models.CallParticipantResponse> = emptyList(),
+    public val participants: List<io.getstream.android.video.api.generated.models.CallParticipantResponse> = emptyList(),
 
     @Json(name = "accepted_by")
-    val acceptedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val acceptedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "missed_by")
-    val missedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val missedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "participants_count_by_role")
-    val participantsCountByRole: Map<String, Int> = emptyMap(),
+    public val participantsCountByRole: Map<String, Int> = emptyMap(),
 
     @Json(name = "rejected_by")
-    val rejectedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val rejectedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "ended_at")
-    val endedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val endedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "live_ended_at")
-    val liveEndedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val liveEndedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "live_started_at")
-    val liveStartedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val liveStartedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "started_at")
-    val startedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val startedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "timer_ends_at")
-    val timerEndsAt: org.threeten.bp.OffsetDateTime? = null
+    public val timerEndsAt: org.threeten.bp.OffsetDateTime? = null
 )

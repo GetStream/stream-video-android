@@ -33,25 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ParticipantSessionDetails (
+public data class ParticipantSessionDetails (
     @Json(name = "publisher_type")
-    val publisherType: String,
+    public val publisherType: String,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "user_session_id")
-    val userSessionId: String,
+    public val userSessionId: String,
 
     @Json(name = "roles")
-    val roles: List<String> = emptyList(),
+    public val roles: List<String> = emptyList(),
 
     @Json(name = "duration_in_seconds")
-    val durationInSeconds: Int? = null,
+    public val durationInSeconds: Int? = null,
 
     @Json(name = "joined_at")
-    val joinedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val joinedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "left_at")
-    val leftAt: org.threeten.bp.OffsetDateTime? = null
+    public val leftAt: org.threeten.bp.OffsetDateTime? = null
 )

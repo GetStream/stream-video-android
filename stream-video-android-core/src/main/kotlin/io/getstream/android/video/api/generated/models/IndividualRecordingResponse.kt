@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class IndividualRecordingResponse (
+public data class IndividualRecordingResponse (
     @Json(name = "status")
-    val status: String
+    public val status: String
 )

@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * Geographic location metadata
  */
-data class LocationResponse (
+public data class LocationResponse (
     @Json(name = "continent_code")
-    val continentCode: String,
+    public val continentCode: String,
 
     @Json(name = "country_iso_code")
-    val countryIsoCode: String,
+    public val countryIsoCode: String,
 
     @Json(name = "subdivision_iso_code")
-    val subdivisionIsoCode: String
+    public val subdivisionIsoCode: String
 )

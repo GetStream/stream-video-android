@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class EgressRTMPResponse (
+public data class EgressRTMPResponse (
     @Json(name = "name")
-    val name: String,
+    public val name: String,
 
     @Json(name = "started_at")
-    val startedAt: org.threeten.bp.OffsetDateTime,
+    public val startedAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "stream_key")
-    val streamKey: String? = null,
+    public val streamKey: String? = null,
 
     @Json(name = "stream_url")
-    val streamUrl: String? = null
+    public val streamUrl: String? = null
 )

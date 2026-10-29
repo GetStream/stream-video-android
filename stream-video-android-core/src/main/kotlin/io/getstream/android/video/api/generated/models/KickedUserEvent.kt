@@ -33,21 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent to call participants to notify when a user is kicked from a call. Clients should make the kicked user leave the call UI.
  */
-data class KickedUserEvent (
+public data class KickedUserEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserResponse,
+    public val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: String = "call.kicked_user",
+    public val type: String = "call.kicked_user",
 
     @Json(name = "kicked_by_user")
-    val kickedByUser: io.getstream.android.video.api.generated.models.UserResponse? = null
+    public val kickedByUser: io.getstream.android.video.api.generated.models.UserResponse? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

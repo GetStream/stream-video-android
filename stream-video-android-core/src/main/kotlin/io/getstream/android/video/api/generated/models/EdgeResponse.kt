@@ -33,34 +33,34 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class EdgeResponse (
+public data class EdgeResponse (
     @Json(name = "continent_code")
-    val continentCode: String,
+    public val continentCode: String,
 
     @Json(name = "country_iso_code")
-    val countryIsoCode: String,
+    public val countryIsoCode: String,
 
     @Json(name = "green")
-    val green: Int,
+    public val green: Int,
 
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "latency_test_url")
-    val latencyTestUrl: String,
+    public val latencyTestUrl: String,
 
     @Json(name = "latitude")
-    val latitude: Double,
+    public val latitude: Double,
 
     @Json(name = "longitude")
-    val longitude: Double,
+    public val longitude: Double,
 
     @Json(name = "red")
-    val red: Int,
+    public val red: Int,
 
     @Json(name = "subdivision_iso_code")
-    val subdivisionIsoCode: String,
+    public val subdivisionIsoCode: String,
 
     @Json(name = "yellow")
-    val yellow: Int
+    public val yellow: Int
 )

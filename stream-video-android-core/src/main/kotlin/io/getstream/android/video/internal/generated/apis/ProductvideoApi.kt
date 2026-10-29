@@ -33,14 +33,14 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.PUT
 
-interface ProductvideoApi {
+public interface ProductvideoApi {
     
     /**
      * Query call members
      * Query call members with filter query
      */
     @POST("/video/call/members")
-    suspend fun queryCallMembers(
+    public suspend fun queryCallMembers(
         @Body queryCallMembersRequest: io.getstream.android.video.api.generated.models.QueryCallMembersRequest
     ): io.getstream.android.video.api.generated.models.QueryCallMembersResponse
     
@@ -49,7 +49,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/stats")
-    suspend fun queryCallStats(
+    public suspend fun queryCallStats(
         @Body queryCallStatsRequest: io.getstream.android.video.api.generated.models.QueryCallStatsRequest
     ): io.getstream.android.video.api.generated.models.QueryCallStatsResponse
     
@@ -58,7 +58,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/stats")
-    suspend fun queryCallStats(
+    public suspend fun queryCallStats(
     ): io.getstream.android.video.api.generated.models.QueryCallStatsResponse
     
     /**
@@ -66,7 +66,7 @@ interface ProductvideoApi {
      * 
      */
     @GET("/video/call/{type}/{id}")
-    suspend fun getCall(
+    public suspend fun getCall(
         @Path("type") type: String,
         @Path("id") id: String,
         @Query("connection_id") connectionId: String? = null,
@@ -81,7 +81,7 @@ interface ProductvideoApi {
      * 
      */
     @PATCH("/video/call/{type}/{id}")
-    suspend fun updateCall(
+    public suspend fun updateCall(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body updateCallRequest: io.getstream.android.video.api.generated.models.UpdateCallRequest
@@ -92,7 +92,7 @@ interface ProductvideoApi {
      * 
      */
     @PATCH("/video/call/{type}/{id}")
-    suspend fun updateCall(
+    public suspend fun updateCall(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.UpdateCallResponse
@@ -102,7 +102,7 @@ interface ProductvideoApi {
      * Gets or creates a new call
      */
     @POST("/video/call/{type}/{id}")
-    suspend fun getOrCreateCall(
+    public suspend fun getOrCreateCall(
         @Path("type") type: String,
         @Path("id") id: String,
         @Query("connection_id") connectionId: String? = null ,
@@ -114,7 +114,7 @@ interface ProductvideoApi {
      * Gets or creates a new call
      */
     @POST("/video/call/{type}/{id}")
-    suspend fun getOrCreateCall(
+    public suspend fun getOrCreateCall(
         @Path("type") type: String,
         @Path("id") id: String,
         @Query("connection_id") connectionId: String? = null
@@ -125,7 +125,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/accept")
-    suspend fun acceptCall(
+    public suspend fun acceptCall(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.AcceptCallResponse
@@ -135,7 +135,7 @@ interface ProductvideoApi {
      * Block a user, preventing them from joining the call until they are unblocked.
      */
     @POST("/video/call/{type}/{id}/block")
-    suspend fun blockUser(
+    public suspend fun blockUser(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body blockUserRequest: io.getstream.android.video.api.generated.models.BlockUserRequest
@@ -146,7 +146,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/delete")
-    suspend fun deleteCall(
+    public suspend fun deleteCall(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body deleteCallRequest: io.getstream.android.video.api.generated.models.DeleteCallRequest
@@ -157,7 +157,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/delete")
-    suspend fun deleteCall(
+    public suspend fun deleteCall(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.DeleteCallResponse
@@ -167,7 +167,7 @@ interface ProductvideoApi {
      * Sends custom event to the call
      */
     @POST("/video/call/{type}/{id}/event")
-    suspend fun sendCallEvent(
+    public suspend fun sendCallEvent(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body sendCallEventRequest: io.getstream.android.video.api.generated.models.SendCallEventRequest
@@ -178,7 +178,7 @@ interface ProductvideoApi {
      * Sends custom event to the call
      */
     @POST("/video/call/{type}/{id}/event")
-    suspend fun sendCallEvent(
+    public suspend fun sendCallEvent(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.SendCallEventResponse
@@ -188,7 +188,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/feedback")
-    suspend fun collectUserFeedback(
+    public suspend fun collectUserFeedback(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body collectUserFeedbackRequest: io.getstream.android.video.api.generated.models.CollectUserFeedbackRequest
@@ -199,7 +199,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/go_live")
-    suspend fun goLive(
+    public suspend fun goLive(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body goLiveRequest: io.getstream.android.video.api.generated.models.GoLiveRequest
@@ -210,7 +210,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/go_live")
-    suspend fun goLive(
+    public suspend fun goLive(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.GoLiveResponse
@@ -220,7 +220,7 @@ interface ProductvideoApi {
      * Request to join a call
      */
     @POST("/video/call/{type}/{id}/join")
-    suspend fun joinCall(
+    public suspend fun joinCall(
         @Path("type") type: String,
         @Path("id") id: String,
         @Query("connection_id") connectionId: String? = null ,
@@ -232,7 +232,7 @@ interface ProductvideoApi {
      * Kicks a user from the call. Optionally block the user from rejoining by setting block=true.
      */
     @POST("/video/call/{type}/{id}/kick")
-    suspend fun kickUser(
+    public suspend fun kickUser(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body kickUserRequest: io.getstream.android.video.api.generated.models.KickUserRequest
@@ -243,7 +243,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/mark_ended")
-    suspend fun endCall(
+    public suspend fun endCall(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.EndCallResponse
@@ -253,7 +253,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/members")
-    suspend fun updateCallMembers(
+    public suspend fun updateCallMembers(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body updateCallMembersRequest: io.getstream.android.video.api.generated.models.UpdateCallMembersRequest
@@ -264,7 +264,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/members")
-    suspend fun updateCallMembers(
+    public suspend fun updateCallMembers(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.UpdateCallMembersResponse
@@ -274,7 +274,7 @@ interface ProductvideoApi {
      * Mutes users in a call
      */
     @POST("/video/call/{type}/{id}/mute_users")
-    suspend fun muteUsers(
+    public suspend fun muteUsers(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body muteUsersRequest: io.getstream.android.video.api.generated.models.MuteUsersRequest
@@ -285,7 +285,7 @@ interface ProductvideoApi {
      * Mutes users in a call
      */
     @POST("/video/call/{type}/{id}/mute_users")
-    suspend fun muteUsers(
+    public suspend fun muteUsers(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.MuteUsersResponse
@@ -295,7 +295,7 @@ interface ProductvideoApi {
      * Returns a list of participants connected to the call
      */
     @POST("/video/call/{type}/{id}/participants")
-    suspend fun queryCallParticipants(
+    public suspend fun queryCallParticipants(
         @Path("id") id: String,
         @Path("type") type: String,
         @Query("limit") limit: Int? = null ,
@@ -307,7 +307,7 @@ interface ProductvideoApi {
      * Returns a list of participants connected to the call
      */
     @POST("/video/call/{type}/{id}/participants")
-    suspend fun queryCallParticipants(
+    public suspend fun queryCallParticipants(
         @Path("id") id: String,
         @Path("type") type: String,
         @Query("limit") limit: Int? = null
@@ -318,7 +318,7 @@ interface ProductvideoApi {
      * Pins a track for all users in the call.
      */
     @POST("/video/call/{type}/{id}/pin")
-    suspend fun videoPin(
+    public suspend fun videoPin(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body pinRequest: io.getstream.android.video.api.generated.models.PinRequest
@@ -329,7 +329,7 @@ interface ProductvideoApi {
      * Sends reaction to the call
      */
     @POST("/video/call/{type}/{id}/reaction")
-    suspend fun sendVideoReaction(
+    public suspend fun sendVideoReaction(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body sendVideoReactionRequest: io.getstream.android.video.api.generated.models.SendVideoReactionRequest
@@ -340,7 +340,7 @@ interface ProductvideoApi {
      * Lists recordings
      */
     @GET("/video/call/{type}/{id}/recordings")
-    suspend fun listRecordings(
+    public suspend fun listRecordings(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.ListRecordingsResponse
@@ -350,7 +350,7 @@ interface ProductvideoApi {
      * Starts recording
      */
     @POST("/video/call/{type}/{id}/recordings/{recording_type}/start")
-    suspend fun startRecording(
+    public suspend fun startRecording(
         @Path("type") type: String,
         @Path("id") id: String,
         @Path("recording_type") recordingType: String ,
@@ -362,7 +362,7 @@ interface ProductvideoApi {
      * Starts recording
      */
     @POST("/video/call/{type}/{id}/recordings/{recording_type}/start")
-    suspend fun startRecording(
+    public suspend fun startRecording(
         @Path("type") type: String,
         @Path("id") id: String,
         @Path("recording_type") recordingType: String
@@ -373,7 +373,7 @@ interface ProductvideoApi {
      * Stops recording
      */
     @POST("/video/call/{type}/{id}/recordings/{recording_type}/stop")
-    suspend fun stopRecording(
+    public suspend fun stopRecording(
         @Path("type") type: String,
         @Path("id") id: String,
         @Path("recording_type") recordingType: String
@@ -384,7 +384,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/reject")
-    suspend fun rejectCall(
+    public suspend fun rejectCall(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body rejectCallRequest: io.getstream.android.video.api.generated.models.RejectCallRequest
@@ -395,7 +395,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/reject")
-    suspend fun rejectCall(
+    public suspend fun rejectCall(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.RejectCallResponse
@@ -405,7 +405,7 @@ interface ProductvideoApi {
      * 
      */
     @GET("/video/call/{type}/{id}/report")
-    suspend fun getCallReport(
+    public suspend fun getCallReport(
         @Path("type") type: String,
         @Path("id") id: String,
         @Query("session_id") sessionId: String? = null
@@ -416,7 +416,7 @@ interface ProductvideoApi {
      * Request permission to perform an action
      */
     @POST("/video/call/{type}/{id}/request_permission")
-    suspend fun requestPermission(
+    public suspend fun requestPermission(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body requestPermissionRequest: io.getstream.android.video.api.generated.models.RequestPermissionRequest
@@ -427,7 +427,7 @@ interface ProductvideoApi {
      * Sends a ring notification to the provided users who are not already in the call. All users should be members of the call
      */
     @POST("/video/call/{type}/{id}/ring")
-    suspend fun ringCall(
+    public suspend fun ringCall(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body ringCallRequest: io.getstream.android.video.api.generated.models.RingCallRequest
@@ -438,7 +438,7 @@ interface ProductvideoApi {
      * Sends a ring notification to the provided users who are not already in the call. All users should be members of the call
      */
     @POST("/video/call/{type}/{id}/ring")
-    suspend fun ringCall(
+    public suspend fun ringCall(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.RingCallResponse
@@ -448,7 +448,7 @@ interface ProductvideoApi {
      * Returns who accepted, rejected, or missed the ring for a call session. Safe to poll: it performs no writes and emits no events. Use it to reconcile after a dropped call.accepted, call.rejected, or call.missed websocket event. call_session_id identifies the session, so the state stays readable after the call has ended.
      */
     @GET("/video/call/{type}/{id}/ring_state")
-    suspend fun getCallRingState(
+    public suspend fun getCallRingState(
         @Path("type") type: String,
         @Path("id") id: String,
         @Query("call_session_id") callSessionId: String
@@ -459,7 +459,7 @@ interface ProductvideoApi {
      * Starts RTMP broadcasts for the provided RTMP destinations
      */
     @POST("/video/call/{type}/{id}/rtmp_broadcasts")
-    suspend fun startRTMPBroadcasts(
+    public suspend fun startRTMPBroadcasts(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body startRTMPBroadcastsRequest: io.getstream.android.video.api.generated.models.StartRTMPBroadcastsRequest
@@ -470,7 +470,7 @@ interface ProductvideoApi {
      * Stop all RTMP broadcasts for the provided call
      */
     @POST("/video/call/{type}/{id}/rtmp_broadcasts/stop")
-    suspend fun stopAllRTMPBroadcasts(
+    public suspend fun stopAllRTMPBroadcasts(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.StopAllRTMPBroadcastsResponse
@@ -480,7 +480,7 @@ interface ProductvideoApi {
      * 
      */
     @GET("/video/call/{type}/{id}/session/{session}/participant/{user}/{user_session}/details/track")
-    suspend fun getCallParticipantSessionMetrics(
+    public suspend fun getCallParticipantSessionMetrics(
         @Path("type") type: String,
         @Path("id") id: String,
         @Path("session") session: String,
@@ -495,7 +495,7 @@ interface ProductvideoApi {
      * 
      */
     @GET("/video/call/{type}/{id}/session/{session}/participant_sessions")
-    suspend fun queryCallParticipantSessions(
+    public suspend fun queryCallParticipantSessions(
         @Path("type") type: String,
         @Path("id") id: String,
         @Path("session") session: String,
@@ -510,7 +510,7 @@ interface ProductvideoApi {
      * Starts HLS broadcasting
      */
     @POST("/video/call/{type}/{id}/start_broadcasting")
-    suspend fun startHLSBroadcasting(
+    public suspend fun startHLSBroadcasting(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.StartHLSBroadcastingResponse
@@ -520,7 +520,7 @@ interface ProductvideoApi {
      * Starts closed captions
      */
     @POST("/video/call/{type}/{id}/start_closed_captions")
-    suspend fun startClosedCaptions(
+    public suspend fun startClosedCaptions(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body startClosedCaptionsRequest: io.getstream.android.video.api.generated.models.StartClosedCaptionsRequest
@@ -531,7 +531,7 @@ interface ProductvideoApi {
      * Starts closed captions
      */
     @POST("/video/call/{type}/{id}/start_closed_captions")
-    suspend fun startClosedCaptions(
+    public suspend fun startClosedCaptions(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.StartClosedCaptionsResponse
@@ -541,7 +541,7 @@ interface ProductvideoApi {
      * Starts frame by frame recording
      */
     @POST("/video/call/{type}/{id}/start_frame_recording")
-    suspend fun startFrameRecording(
+    public suspend fun startFrameRecording(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body startFrameRecordingRequest: io.getstream.android.video.api.generated.models.StartFrameRecordingRequest
@@ -552,7 +552,7 @@ interface ProductvideoApi {
      * Starts frame by frame recording
      */
     @POST("/video/call/{type}/{id}/start_frame_recording")
-    suspend fun startFrameRecording(
+    public suspend fun startFrameRecording(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.StartFrameRecordingResponse
@@ -562,7 +562,7 @@ interface ProductvideoApi {
      * Starts transcription
      */
     @POST("/video/call/{type}/{id}/start_transcription")
-    suspend fun startTranscription(
+    public suspend fun startTranscription(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body startTranscriptionRequest: io.getstream.android.video.api.generated.models.StartTranscriptionRequest
@@ -573,7 +573,7 @@ interface ProductvideoApi {
      * Starts transcription
      */
     @POST("/video/call/{type}/{id}/start_transcription")
-    suspend fun startTranscription(
+    public suspend fun startTranscription(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.StartTranscriptionResponse
@@ -583,7 +583,7 @@ interface ProductvideoApi {
      * Stops HLS broadcasting
      */
     @POST("/video/call/{type}/{id}/stop_broadcasting")
-    suspend fun stopHLSBroadcasting(
+    public suspend fun stopHLSBroadcasting(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.StopHLSBroadcastingResponse
@@ -593,7 +593,7 @@ interface ProductvideoApi {
      * Stops closed captions
      */
     @POST("/video/call/{type}/{id}/stop_closed_captions")
-    suspend fun stopClosedCaptions(
+    public suspend fun stopClosedCaptions(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body stopClosedCaptionsRequest: io.getstream.android.video.api.generated.models.StopClosedCaptionsRequest
@@ -604,7 +604,7 @@ interface ProductvideoApi {
      * Stops closed captions
      */
     @POST("/video/call/{type}/{id}/stop_closed_captions")
-    suspend fun stopClosedCaptions(
+    public suspend fun stopClosedCaptions(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.StopClosedCaptionsResponse
@@ -614,7 +614,7 @@ interface ProductvideoApi {
      * Stops frame recording
      */
     @POST("/video/call/{type}/{id}/stop_frame_recording")
-    suspend fun stopFrameRecording(
+    public suspend fun stopFrameRecording(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.StopFrameRecordingResponse
@@ -624,7 +624,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/stop_live")
-    suspend fun stopLive(
+    public suspend fun stopLive(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body stopLiveRequest: io.getstream.android.video.api.generated.models.StopLiveRequest
@@ -635,7 +635,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call/{type}/{id}/stop_live")
-    suspend fun stopLive(
+    public suspend fun stopLive(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.StopLiveResponse
@@ -645,7 +645,7 @@ interface ProductvideoApi {
      * Stops transcription
      */
     @POST("/video/call/{type}/{id}/stop_transcription")
-    suspend fun stopTranscription(
+    public suspend fun stopTranscription(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body stopTranscriptionRequest: io.getstream.android.video.api.generated.models.StopTranscriptionRequest
@@ -656,7 +656,7 @@ interface ProductvideoApi {
      * Stops transcription
      */
     @POST("/video/call/{type}/{id}/stop_transcription")
-    suspend fun stopTranscription(
+    public suspend fun stopTranscription(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.StopTranscriptionResponse
@@ -666,7 +666,7 @@ interface ProductvideoApi {
      * Lists transcriptions
      */
     @GET("/video/call/{type}/{id}/transcriptions")
-    suspend fun listTranscriptions(
+    public suspend fun listTranscriptions(
         @Path("type") type: String,
         @Path("id") id: String
     ): io.getstream.android.video.api.generated.models.ListTranscriptionsResponse
@@ -676,7 +676,7 @@ interface ProductvideoApi {
      * Removes the block for a user on a call. The user will be able to join the call again.
      */
     @POST("/video/call/{type}/{id}/unblock")
-    suspend fun unblockUser(
+    public suspend fun unblockUser(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body unblockUserRequest: io.getstream.android.video.api.generated.models.UnblockUserRequest
@@ -687,7 +687,7 @@ interface ProductvideoApi {
      * Unpins a track for all users in the call.
      */
     @POST("/video/call/{type}/{id}/unpin")
-    suspend fun videoUnpin(
+    public suspend fun videoUnpin(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body unpinRequest: io.getstream.android.video.api.generated.models.UnpinRequest
@@ -698,7 +698,7 @@ interface ProductvideoApi {
      * Updates user permissions
      */
     @POST("/video/call/{type}/{id}/user_permissions")
-    suspend fun updateUserPermissions(
+    public suspend fun updateUserPermissions(
         @Path("type") type: String,
         @Path("id") id: String ,
         @Body updateUserPermissionsRequest: io.getstream.android.video.api.generated.models.UpdateUserPermissionsRequest
@@ -709,7 +709,7 @@ interface ProductvideoApi {
      * Deletes recording
      */
     @DELETE("/video/call/{type}/{id}/{session}/recordings/{filename}")
-    suspend fun deleteRecording(
+    public suspend fun deleteRecording(
         @Path("type") type: String,
         @Path("id") id: String,
         @Path("session") session: String,
@@ -721,7 +721,7 @@ interface ProductvideoApi {
      * Deletes transcription
      */
     @DELETE("/video/call/{type}/{id}/{session}/transcriptions/{filename}")
-    suspend fun deleteTranscription(
+    public suspend fun deleteTranscription(
         @Path("type") type: String,
         @Path("id") id: String,
         @Path("session") session: String,
@@ -733,7 +733,7 @@ interface ProductvideoApi {
      * Reports a batch of client-side telemetry events. Events are processed independently; one invalid event does not block the rest of the batch, but the request fails if any event is invalid.
      */
     @POST("/video/call_client_event")
-    suspend fun reportClientCallEvent(
+    public suspend fun reportClientCallEvent(
         @Body reportClientEventRequest: io.getstream.android.video.api.generated.models.ReportClientEventRequest
     ): io.getstream.android.video.api.generated.models.ReportClientEventResponse
     
@@ -742,7 +742,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call_stats")
-    suspend fun queryCallSessionStats(
+    public suspend fun queryCallSessionStats(
         @Body queryCallSessionStatsRequest: io.getstream.android.video.api.generated.models.QueryCallSessionStatsRequest
     ): io.getstream.android.video.api.generated.models.QueryCallSessionStatsResponse
     
@@ -751,7 +751,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/call_stats")
-    suspend fun queryCallSessionStats(
+    public suspend fun queryCallSessionStats(
     ): io.getstream.android.video.api.generated.models.QueryCallSessionStatsResponse
     
     /**
@@ -759,7 +759,7 @@ interface ProductvideoApi {
      * 
      */
     @GET("/video/call_stats/{call_type}/{call_id}/{session}/map")
-    suspend fun getCallStatsMap(
+    public suspend fun getCallStatsMap(
         @Path("call_type") callType: String,
         @Path("call_id") callId: String,
         @Path("session") session: String,
@@ -775,7 +775,7 @@ interface ProductvideoApi {
      * 
      */
     @GET("/video/call_stats/{call_type}/{call_id}/{session}/participant/{user}/{user_session}/details")
-    suspend fun getCallSessionParticipantStatsDetails(
+    public suspend fun getCallSessionParticipantStatsDetails(
         @Path("call_type") callType: String,
         @Path("call_id") callId: String,
         @Path("session") session: String,
@@ -791,7 +791,7 @@ interface ProductvideoApi {
      * 
      */
     @GET("/video/call_stats/{call_type}/{call_id}/{session}/participants")
-    suspend fun queryCallSessionParticipantStats(
+    public suspend fun queryCallSessionParticipantStats(
         @Path("call_type") callType: String,
         @Path("call_id") callId: String,
         @Path("session") session: String,
@@ -807,7 +807,7 @@ interface ProductvideoApi {
      * 
      */
     @GET("/video/call_stats/{call_type}/{call_id}/{session}/participants/{user}/{user_session}/timeline")
-    suspend fun getCallSessionParticipantStatsTimeline(
+    public suspend fun getCallSessionParticipantStatsTimeline(
         @Path("call_type") callType: String,
         @Path("call_id") callId: String,
         @Path("session") session: String,
@@ -823,7 +823,7 @@ interface ProductvideoApi {
      * Query calls with filter query
      */
     @POST("/video/calls")
-    suspend fun queryCalls(
+    public suspend fun queryCalls(
         @Query("connection_id") connectionId: String? = null ,
         @Body queryCallsRequest: io.getstream.android.video.api.generated.models.QueryCallsRequest
     ): io.getstream.android.video.api.generated.models.QueryCallsResponse
@@ -833,7 +833,7 @@ interface ProductvideoApi {
      * Query calls with filter query
      */
     @POST("/video/calls")
-    suspend fun queryCalls(
+    public suspend fun queryCalls(
         @Query("connection_id") connectionId: String? = null
     ): io.getstream.android.video.api.generated.models.QueryCallsResponse
     
@@ -842,7 +842,7 @@ interface ProductvideoApi {
      * Deletes one device
      */
     @DELETE("/video/devices")
-    suspend fun deleteDevice(
+    public suspend fun deleteDevice(
         @Query("id") id: String
     ): io.getstream.android.video.api.generated.models.Response
     
@@ -851,7 +851,7 @@ interface ProductvideoApi {
      * Returns all available devices
      */
     @GET("/video/devices")
-    suspend fun listDevices(
+    public suspend fun listDevices(
     ): io.getstream.android.video.api.generated.models.ListDevicesResponse
     
     /**
@@ -859,7 +859,7 @@ interface ProductvideoApi {
      * Adds a new device to a user, if the same device already exists the call will have no effect
      */
     @POST("/video/devices")
-    suspend fun createDevice(
+    public suspend fun createDevice(
         @Body createDeviceRequest: io.getstream.android.video.api.generated.models.CreateDeviceRequest
     ): io.getstream.android.video.api.generated.models.Response
     
@@ -868,7 +868,7 @@ interface ProductvideoApi {
      * Returns the list of all edges available for video calls.
      */
     @GET("/video/edges")
-    suspend fun getEdges(
+    public suspend fun getEdges(
     ): io.getstream.android.video.api.generated.models.GetEdgesResponse
     
     /**
@@ -876,7 +876,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/guest")
-    suspend fun createGuest(
+    public suspend fun createGuest(
         @Body createGuestRequest: io.getstream.android.video.api.generated.models.CreateGuestRequest
     ): io.getstream.android.video.api.generated.models.CreateGuestResponse
     
@@ -885,7 +885,7 @@ interface ProductvideoApi {
      * Establishes WebSocket connection for user to video
      */
     @GET("/video/longpoll")
-    suspend fun videoConnect(
+    public suspend fun videoConnect(
     )
     
     /**
@@ -893,7 +893,7 @@ interface ProductvideoApi {
      * Determine authentication requirements for an inbound SIP call before sending a digest challenge
      */
     @POST("/video/sip/auth")
-    suspend fun resolveSipAuth(
+    public suspend fun resolveSipAuth(
         @Body resolveSipAuthRequest: io.getstream.android.video.api.generated.models.ResolveSipAuthRequest
     ): io.getstream.android.video.api.generated.models.ResolveSipAuthResponse
     
@@ -902,7 +902,7 @@ interface ProductvideoApi {
      * Resolve SIP inbound routing based on trunk number, caller number, and challenge authentication
      */
     @POST("/video/sip/resolve")
-    suspend fun resolveSipInbound(
+    public suspend fun resolveSipInbound(
         @Body resolveSipInboundRequest: io.getstream.android.video.api.generated.models.ResolveSipInboundRequest
     ): io.getstream.android.video.api.generated.models.ResolveSipInboundResponse
     
@@ -911,7 +911,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/stats")
-    suspend fun queryAggregateCallStats(
+    public suspend fun queryAggregateCallStats(
         @Body queryAggregateCallStatsRequest: io.getstream.android.video.api.generated.models.QueryAggregateCallStatsRequest
     ): io.getstream.android.video.api.generated.models.QueryAggregateCallStatsResponse
     
@@ -920,7 +920,7 @@ interface ProductvideoApi {
      * 
      */
     @POST("/video/stats")
-    suspend fun queryAggregateCallStats(
+    public suspend fun queryAggregateCallStats(
     ): io.getstream.android.video.api.generated.models.QueryAggregateCallStatsResponse
     
 }

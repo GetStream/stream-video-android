@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class DailyAggregateCallDurationReportResponse (
+public data class DailyAggregateCallDurationReportResponse (
     @Json(name = "date")
-    val date: String,
+    public val date: String,
 
     @Json(name = "report")
-    val report: io.getstream.android.video.api.generated.models.CallDurationReport
+    public val report: io.getstream.android.video.api.generated.models.CallDurationReport
 )

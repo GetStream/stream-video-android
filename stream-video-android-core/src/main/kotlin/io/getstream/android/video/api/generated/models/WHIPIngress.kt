@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class WHIPIngress (
+public data class WHIPIngress (
     @Json(name = "address")
-    val address: String
+    public val address: String
 )

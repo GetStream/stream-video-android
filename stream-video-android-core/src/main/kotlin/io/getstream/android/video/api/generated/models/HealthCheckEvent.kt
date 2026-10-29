@@ -33,24 +33,24 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class HealthCheckEvent (
+public data class HealthCheckEvent (
     @Json(name = "connection_id")
-    val connectionId: String,
+    public val connectionId: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?> = emptyMap(),
+    public val custom: Map<String, Any?> = emptyMap(),
 
     @Json(name = "type")
-    val type: String = "health.check",
+    public val type: String = "health.check",
 
     @Json(name = "cid")
-    val cid: String? = null,
+    public val cid: String? = null,
 
     @Json(name = "received_at")
-    val receivedAt: org.threeten.bp.OffsetDateTime? = null
+    public val receivedAt: org.threeten.bp.OffsetDateTime? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {

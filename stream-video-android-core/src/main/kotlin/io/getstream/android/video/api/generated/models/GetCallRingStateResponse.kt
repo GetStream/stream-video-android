@@ -33,34 +33,34 @@ import com.squareup.moshi.ToJson
 /**
  * The ring state of a call session: who accepted, rejected, or missed the ring.
  */
-data class GetCallRingStateResponse (
+public data class GetCallRingStateResponse (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_by_user_id")
-    val createdByUserId: String,
+    public val createdByUserId: String,
 
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "session_id")
-    val sessionId: String,
+    public val sessionId: String,
 
     @Json(name = "accepted_by")
-    val acceptedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val acceptedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "missed_by")
-    val missedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val missedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "rejected_by")
-    val rejectedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val rejectedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
 
     @Json(name = "call_ended_at")
-    val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "session_ended_at")
-    val sessionEndedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val sessionEndedAt: org.threeten.bp.OffsetDateTime? = null,
 
     @Json(name = "session_started_at")
-    val sessionStartedAt: org.threeten.bp.OffsetDateTime? = null
+    public val sessionStartedAt: org.threeten.bp.OffsetDateTime? = null
 )

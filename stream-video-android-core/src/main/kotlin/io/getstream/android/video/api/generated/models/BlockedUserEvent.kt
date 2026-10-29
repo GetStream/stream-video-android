@@ -33,21 +33,21 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent to call participants to notify when a user is blocked on a call, clients can use this event to show a notification.
  */
-data class BlockedUserEvent (
+public data class BlockedUserEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserResponse,
+    public val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "type")
-    val type: String = "call.blocked_user",
+    public val type: String = "call.blocked_user",
 
     @Json(name = "blocked_by_user")
-    val blockedByUser: io.getstream.android.video.api.generated.models.UserResponse? = null
+    public val blockedByUser: io.getstream.android.video.api.generated.models.UserResponse? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class TranslationSettings (
+public data class TranslationSettings (
     @Json(name = "enabled")
-    val enabled: Boolean? = null,
+    public val enabled: Boolean? = null,
 
     @Json(name = "languages")
-    val languages: List<String>? = null
+    public val languages: List<String>? = null
 )

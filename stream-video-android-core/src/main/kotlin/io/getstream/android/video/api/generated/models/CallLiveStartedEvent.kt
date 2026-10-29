@@ -33,18 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a call is started. Clients receiving this event should start the call.
  */
-data class CallLiveStartedEvent (
+public data class CallLiveStartedEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "call")
-    val call: io.getstream.android.video.api.generated.models.CallResponse,
+    public val call: io.getstream.android.video.api.generated.models.CallResponse,
 
     @Json(name = "type")
-    val type: String = "call.live_started"
+    public val type: String = "call.live_started"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

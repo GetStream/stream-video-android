@@ -33,18 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when closed captions are being sent in a call, clients should use this to show the closed captions in the call screen
  */
-data class ClosedCaptionEvent (
+public data class ClosedCaptionEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "closed_caption")
-    val closedCaption: io.getstream.android.video.api.generated.models.CallClosedCaption,
+    public val closedCaption: io.getstream.android.video.api.generated.models.CallClosedCaption,
 
     @Json(name = "type")
-    val type: String = "call.closed_caption"
+    public val type: String = "call.closed_caption"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {

@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class LimitsSettingsResponse (
+public data class LimitsSettingsResponse (
     @Json(name = "max_participants_exclude_roles")
-    val maxParticipantsExcludeRoles: List<String> = emptyList(),
+    public val maxParticipantsExcludeRoles: List<String> = emptyList(),
 
     @Json(name = "max_duration_seconds")
-    val maxDurationSeconds: Int? = null,
+    public val maxDurationSeconds: Int? = null,
 
     @Json(name = "max_participants")
-    val maxParticipants: Int? = null,
+    public val maxParticipants: Int? = null,
 
     @Json(name = "max_participants_exclude_owner")
-    val maxParticipantsExcludeOwner: Boolean? = null
+    public val maxParticipantsExcludeOwner: Boolean? = null
 )

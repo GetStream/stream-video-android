@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SessionWarningResponse (
+public data class SessionWarningResponse (
     @Json(name = "code")
-    val code: String,
+    public val code: String,
 
     @Json(name = "warning")
-    val warning: String,
+    public val warning: String,
 
     @Json(name = "time")
-    val time: org.threeten.bp.OffsetDateTime? = null
+    public val time: org.threeten.bp.OffsetDateTime? = null
 )

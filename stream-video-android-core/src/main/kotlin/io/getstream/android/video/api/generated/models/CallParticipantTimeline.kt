@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallParticipantTimeline (
+public data class CallParticipantTimeline (
     @Json(name = "severity")
-    val severity: String,
+    public val severity: String,
 
     @Json(name = "timestamp")
-    val timestamp: org.threeten.bp.OffsetDateTime,
+    public val timestamp: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "type")
-    val type: String,
+    public val type: String,
 
     @Json(name = "data")
-    val data: Map<String, Any?> = emptyMap()
+    public val data: Map<String, Any?> = emptyMap()
 )

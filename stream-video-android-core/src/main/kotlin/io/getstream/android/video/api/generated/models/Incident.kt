@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class Incident (
+public data class Incident (
     @Json(name = "from")
-    val from: String,
+    public val from: String,
 
     @Json(name = "peak_concurrency")
-    val peakConcurrency: Int,
+    public val peakConcurrency: Int,
 
     @Json(name = "to")
-    val to: String,
+    public val to: String,
 
     @Json(name = "viewers_interrupted")
-    val viewersInterrupted: Int
+    public val viewersInterrupted: Int
 )

@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * RTMPSettingsResponse is the payload for RTMP settings
  */
-data class RTMPSettingsResponse (
+public data class RTMPSettingsResponse (
     @Json(name = "enabled")
-    val enabled: Boolean,
+    public val enabled: Boolean,
 
     @Json(name = "quality")
-    val quality: String
+    public val quality: String
 )

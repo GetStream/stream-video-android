@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class VideoReactionResponse (
+public data class VideoReactionResponse (
     @Json(name = "type")
-    val type: String,
+    public val type: String,
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserResponse,
+    public val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "emoji_code")
-    val emojiCode: String? = null,
+    public val emojiCode: String? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = null
+    public val custom: Map<String, Any?>? = null
 )

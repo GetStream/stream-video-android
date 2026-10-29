@@ -33,31 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * CallClosedCaption represents a closed caption of a call.
  */
-data class CallClosedCaption (
+public data class CallClosedCaption (
     @Json(name = "end_time")
-    val endTime: org.threeten.bp.OffsetDateTime,
+    public val endTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "language")
-    val language: String,
+    public val language: String,
 
     @Json(name = "speaker_id")
-    val speakerId: String,
+    public val speakerId: String,
 
     @Json(name = "start_time")
-    val startTime: org.threeten.bp.OffsetDateTime,
+    public val startTime: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "text")
-    val text: String,
+    public val text: String,
 
     @Json(name = "translated")
-    val translated: Boolean,
+    public val translated: Boolean,
 
     @Json(name = "user")
-    val user: io.getstream.android.video.api.generated.models.UserResponse,
+    public val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "service")
-    val service: String? = null
+    public val service: String? = null
 )

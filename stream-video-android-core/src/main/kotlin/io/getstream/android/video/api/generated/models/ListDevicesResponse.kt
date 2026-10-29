@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * List devices response
  */
-data class ListDevicesResponse (
+public data class ListDevicesResponse (
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "devices")
-    val devices: List<io.getstream.android.video.api.generated.models.DeviceResponse> = emptyList()
+    public val devices: List<io.getstream.android.video.api.generated.models.DeviceResponse> = emptyList()
 )

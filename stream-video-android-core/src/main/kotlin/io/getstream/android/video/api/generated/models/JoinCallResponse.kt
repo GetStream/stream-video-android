@@ -33,28 +33,28 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class JoinCallResponse (
+public data class JoinCallResponse (
     @Json(name = "created")
-    val created: Boolean,
+    public val created: Boolean,
 
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "members")
-    val members: List<io.getstream.android.video.api.generated.models.MemberResponse> = emptyList(),
+    public val members: List<io.getstream.android.video.api.generated.models.MemberResponse> = emptyList(),
 
     @Json(name = "own_capabilities")
-    val ownCapabilities: List<io.getstream.android.video.api.generated.models.OwnCapability> = emptyList(),
+    public val ownCapabilities: List<io.getstream.android.video.api.generated.models.OwnCapability> = emptyList(),
 
     @Json(name = "call")
-    val call: io.getstream.android.video.api.generated.models.CallResponse,
+    public val call: io.getstream.android.video.api.generated.models.CallResponse,
 
     @Json(name = "credentials")
-    val credentials: io.getstream.android.video.api.generated.models.Credentials,
+    public val credentials: io.getstream.android.video.api.generated.models.Credentials,
 
     @Json(name = "stats_options")
-    val statsOptions: io.getstream.android.video.api.generated.models.StatsOptions,
+    public val statsOptions: io.getstream.android.video.api.generated.models.StatsOptions,
 
     @Json(name = "membership")
-    val membership: io.getstream.android.video.api.generated.models.MemberResponse? = null
+    public val membership: io.getstream.android.video.api.generated.models.MemberResponse? = null
 )

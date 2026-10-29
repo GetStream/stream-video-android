@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * UnpinResponse is the payload for unpinning a message.
  */
-data class UnpinResponse (
+public data class UnpinResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

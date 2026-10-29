@@ -33,18 +33,18 @@ import com.squareup.moshi.ToJson
 /**
  * This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen
  */
-data class CallReactionEvent (
+public data class CallReactionEvent (
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "created_at")
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: org.threeten.bp.OffsetDateTime,
 
     @Json(name = "reaction")
-    val reaction: io.getstream.android.video.api.generated.models.VideoReactionResponse,
+    public val reaction: io.getstream.android.video.api.generated.models.VideoReactionResponse,
 
     @Json(name = "type")
-    val type: String = "call.reaction_new"
+    public val type: String = "call.reaction_new"
 )
 : io.getstream.android.video.api.generated.models.VideoEvent(), io.getstream.android.video.api.generated.models.WSCallEvent
 {
