@@ -139,6 +139,33 @@ class StreamVideoClientTest {
         return ClientHarness(client, streamClientMock, tokenRepo)
     }
 
+    private fun prepareClientWithDefaultProvider(repositoryToken: String): ClientHarness {
+        val context = mockk<Context>(relaxed = true)
+        val lifecycle = mockk<Lifecycle>(relaxed = true)
+        val coordinator = mockk<CoordinatorConnectionModule>(relaxed = true)
+        val tokenRepo = mockk<TokenRepository>(relaxed = true)
+        every { tokenRepo.getToken() } returns repositoryToken
+        val streamClientMock = mockk<StreamClient>(relaxed = true)
+        every { streamClientMock.subscribe(any()) } returns Result.success(mockk(relaxed = true))
+        every { streamClientMock.connectionState } returns MutableStateFlow(StreamConnectionState.Idle)
+        val client = StreamVideoClient(
+            context = context,
+            initialUser = User(id = "user-1", type = UserType.Authenticated),
+            apiKey = "apikey",
+            token = "token",
+            lifecycle = lifecycle,
+            coordinatorConnectionModule = coordinator,
+            streamClient = streamClientMock,
+            tokenRepository = tokenRepo,
+            streamNotificationManager = mockk(relaxed = true),
+            enableCallNotificationUpdates = false,
+            sounds = mockk(relaxed = true),
+            vibrationConfig = mockk(relaxed = true),
+            analytics = mockk(relaxed = true),
+        )
+        return ClientHarness(client, streamClientMock, tokenRepo)
+    }
+
     private fun mockAuthHttpException(): HttpException {
         val body = """{"code":5,"message":"token expired"}"""
         val response = retrofit2.Response.error<String>(
@@ -630,6 +657,53 @@ class StreamVideoClientTest {
     // Guard for the fix above: authenticated users must still refresh and retry exactly
     // once on an auth error, so the anonymous early-return doesn't skip the retry for
     // everyone else.
+    // The client's default provider is the fallback when the builder does not pass one.
+    // A blank repository token must resolve to the constructor token, and a stored token
+    // must be returned as-is. Both branches of ifBlank have to run.
+    @Test
+    fun `default token provider falls back to the constructor token when the repository is blank`() = runTest {
+        val harness = prepareClientWithDefaultProvider(repositoryToken = "")
+
+        val result = harness.client.apiCall<String> { throw mockAuthHttpException() }
+
+        verify { harness.tokenRepository.updateToken("token") }
+        assertTrue(result is Failure)
+    }
+
+    @Test
+    fun `default token provider returns the repository token when one is stored`() = runTest {
+        val harness = prepareClientWithDefaultProvider(repositoryToken = "repo-jwt")
+
+        harness.client.apiCall<String> { throw mockAuthHttpException() }
+
+        verify { harness.tokenRepository.updateToken("repo-jwt") }
+    }
+
+    // A non-auth HTTP failure must not refresh. This is the other branch of the retry
+    // condition, next to the anonymous and authenticated cases above.
+    @Test
+    fun `apiCall does not refresh the token on a non-auth HTTP error`() = runTest {
+        var providerCalls = 0
+        val provider = StreamTokenProvider {
+            providerCalls++
+            StreamToken.fromString("fresh-token")
+        }
+        val harness = prepareClient(
+            user = User(id = "auth-1", type = UserType.Authenticated),
+            tokenProvider = provider,
+        )
+        val body = """{"code":4,"message":"validation"}"""
+        val response = retrofit2.Response.error<String>(
+            400,
+            okhttp3.ResponseBody.create(null, body),
+        )
+
+        val result = harness.client.apiCall<String> { throw HttpException(response) }
+
+        assertEquals(0, providerCalls)
+        assertTrue(result is Failure)
+    }
+
     @Test
     fun `apiCall retries once with a fresh token for authenticated users on auth error`() = runTest {
         var providerCalls = 0
