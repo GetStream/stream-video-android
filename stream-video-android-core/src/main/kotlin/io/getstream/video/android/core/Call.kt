@@ -893,15 +893,6 @@ public class Call(
         listener: VideoEventListener<VideoEvent>,
     ): EventSubscription = eventManager.subscribeFor(*eventTypes, listener = listener)
 
-    @Deprecated(
-        level = DeprecationLevel.WARNING,
-        message = "Deprecated in favor of the `events` flow.",
-        replaceWith = ReplaceWith("events.collect { }"),
-    )
-    public fun subscribe(
-        listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription = eventManager.subscribe(listener)
-
     public suspend fun blockUser(userId: String): Result<BlockUserResponse> =
         apiClient.blockUser(userId)
 

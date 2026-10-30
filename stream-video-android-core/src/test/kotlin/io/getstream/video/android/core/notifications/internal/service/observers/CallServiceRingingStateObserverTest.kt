@@ -28,7 +28,6 @@ import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.core.sounds.MutedRingingConfig
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
 import io.getstream.video.android.core.sounds.RingingConfig
-import io.getstream.video.android.core.sounds.Sounds
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -107,15 +106,11 @@ class CallServiceRingingStateObserverTest {
             every { this@mockk.playOutgoingSoundIfMuted } returns true
         }
 
-        val sounds = mockk<Sounds> {
-            every { this@mockk.ringingConfig } returns ringingConfig
-            every { mutedRingingConfig } returns mutedConfig
-        }
-
         streamVideo = mockk {
             every { this@mockk.context } returns testContext
             every { this@mockk.vibrationConfig } returns vibrationConfig
-            every { this@mockk.sounds } returns sounds
+            every { this@mockk.ringingConfig } returns ringingConfig
+            every { this@mockk.mutedRingingConfig } returns mutedConfig
         }
 
         observer = CallServiceRingingStateObserver(

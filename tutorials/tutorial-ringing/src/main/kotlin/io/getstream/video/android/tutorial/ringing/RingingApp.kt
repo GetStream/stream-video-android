@@ -102,7 +102,6 @@ class RingingApp : Application() {
                             ),
                         )
                     }
-                    logOut()
                 }
 
                 StreamVideo.removeClient()

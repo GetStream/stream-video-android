@@ -44,7 +44,10 @@ import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 
 @Composable
 internal fun LivestreamRenderer(
@@ -52,7 +55,7 @@ internal fun LivestreamRenderer(
     configuration: VideoRendererConfig = videoRenderConfig(),
     enablePausing: Boolean,
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
-    livestreamFlow: Flow<ParticipantState.Video?> = call.state.livestream,
+    livestreamFlow: Flow<ParticipantState.Video?> = defaultLivestreamFlow(call),
     onAudioToggle: (Boolean) -> Unit = {},
 ) {
     var isPaused by rememberSaveable { mutableStateOf(false) }
@@ -103,3 +106,14 @@ internal fun LivestreamRenderer(
         }
     }
 }
+
+private fun defaultLivestreamFlow(call: Call): Flow<ParticipantState.Video?> =
+    call.state.participants.flatMapLatest { participants ->
+        if (participants.isEmpty()) {
+            flow { emit(null) }
+        } else {
+            combine(participants.map { it.video }) { videos ->
+                videos.firstOrNull { it?.enabled == true }
+            }
+        }
+    }

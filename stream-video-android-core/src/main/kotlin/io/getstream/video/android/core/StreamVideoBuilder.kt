@@ -57,11 +57,11 @@ import io.getstream.video.android.core.socket.coordinator.v2.GuestStreamTokenPro
 import io.getstream.video.android.core.socket.coordinator.v2.IntegrationStreamTokenProvider
 import io.getstream.video.android.core.socket.coordinator.v2.VideoEventSerialization
 import io.getstream.video.android.core.socket.coordinator.v2.WritableUserRepository
+import io.getstream.video.android.core.sounds.MutedRingingConfig
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
-import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.sounds.RingingConfig
 import io.getstream.video.android.core.sounds.defaultResourcesRingingConfig
 import io.getstream.video.android.core.sounds.disableVibrationConfig
-import io.getstream.video.android.core.sounds.toSounds
 import io.getstream.video.android.core.user.StreamUserRepositoryImpl
 import io.getstream.video.android.core.utils.isAndroid17OrHigher
 import io.getstream.video.android.model.ApiKey
@@ -83,10 +83,8 @@ import java.util.concurrent.atomic.AtomicReference
  *      apiKey = apiKey,
  *      user = user,
  *      token = token,
- *      sounds = ringingConfig(
- *                 defaultResourcesRingingConfig(context),
- *                 defaultMutedRingingConfig(true, true)
- *             ),
+ *      ringingConfig = defaultResourcesRingingConfig(context),
+ *      mutedRingingConfig = defaultMutedRingingConfig(true, true),
  *      loggingLevel = LoggingLevel.BODY,
  *
  *      // ...
@@ -108,7 +106,8 @@ import java.util.concurrent.atomic.AtomicReference
  * @property ensureSingleInstance Verify that only 1 version of the video client exists. Prevents integration mistakes.
  * @property videoDomain URL overwrite to allow for testing against a local instance of video.
  * @property localCoordinatorAddress Local coordinator address (IP:port) to be used for testing. Leave null if not needed.
- * @property sounds Overwrite the default SDK sounds. See [io.getstream.video.android.core.sounds.RingingConfig].
+ * @property ringingConfig Sounds played for incoming and outgoing calls. See [io.getstream.video.android.core.sounds.RingingConfig].
+ * @property mutedRingingConfig Whether those sounds play while the device is muted. Null keeps the default of staying silent.
  * @property permissionCheck Used to check for system permission based on call capabilities. See [StreamPermissionCheck].
  * @property crashOnMissingPermission Throw an exception or just log an error if [permissionCheck] fails.
  * @property appName Optional name for the application that is using the Stream Video SDK. Used for logging and debugging purposes.
@@ -151,7 +150,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
     private val videoDomain: String = "video.stream-io-api.com",
     private val callServiceConfigRegistry: CallServiceConfigRegistry? = null,
     private val localCoordinatorAddress: String? = null,
-    private val sounds: Sounds = defaultResourcesRingingConfig(context).toSounds(),
+    private val ringingConfig: RingingConfig = defaultResourcesRingingConfig(context),
+    private val mutedRingingConfig: MutedRingingConfig? = null,
     private val vibrationConfig: RingingCallVibrationConfig = disableVibrationConfig(),
     private val crashOnMissingPermission: Boolean = false,
     private val permissionCheck: StreamPermissionCheck = DefaultStreamPermissionCheck(),
@@ -373,7 +373,8 @@ public class StreamVideoBuilder @JvmOverloads constructor(
             userRepository = userRepository,
             enableCallNotificationUpdates = notificationConfig.enableCallNotificationUpdates,
             callServiceConfigRegistry = callConfigRegistry,
-            sounds = sounds,
+            ringingConfig = ringingConfig,
+            mutedRingingConfig = mutedRingingConfig,
             permissionCheck = permissionCheck,
             crashOnMissingPermission = crashOnMissingPermission,
             appName = appName,

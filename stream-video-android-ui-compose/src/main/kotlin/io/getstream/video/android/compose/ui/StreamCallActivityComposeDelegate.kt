@@ -480,7 +480,7 @@ public open class StreamCallActivityComposeDelegate : StreamCallActivityComposeU
         logger.d { "[AudioCallContent], call_id = ${call.id}" }
         val micEnabled by call.microphone.isEnabled.collectAsStateWithLifecycle()
 
-        io.getstream.video.android.compose.ui.components.call.activecall.AudioCallContent(
+        io.getstream.video.android.compose.ui.components.call.activecall.AudioOnlyCallContent(
             call = call,
             isMicrophoneEnabled = micEnabled,
             onCallAction = { onCallAction(call, it) },
