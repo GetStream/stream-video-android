@@ -18,6 +18,7 @@ package io.getstream.video.android.core.call
 
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.models.VideoEvent
+import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.result.Result
 import io.getstream.result.Result.Failure
@@ -40,8 +41,8 @@ import stream.video.sfu.signal.ICERestartResponse
  * media.
  *
  * It never creates the SFU connection or any peer connection and leaves the shared peer
- * connection factory untouched. Every public member is a no-op: stats are `null` and ICE
- * restarts fail. It must not be installed as the active session in [CallSessionManager], since
+ * connection factory untouched. Every public member is a no-op that logs a warning: stats are
+ * `null` and ICE restarts fail. It must not be installed as the active session in [CallSessionManager], since
  * the reconnect, stats and rendering paths read that session as a live SFU connection.
  */
 internal class EmptyRtcSession(
@@ -71,7 +72,11 @@ internal class EmptyRtcSession(
     initializeRtc = false,
 ) {
 
-    override suspend fun reconnect(forceRestart: Boolean) = Unit
+    private val logger by taggedLogger("Video:EmptyRtcSession")
+
+    override suspend fun reconnect(forceRestart: Boolean) {
+        logIgnored("reconnect")
+    }
 
     @Deprecated(
         message = "Use connectInternal() which returns SfuConnectionResult instead of throwing.",
@@ -80,25 +85,45 @@ internal class EmptyRtcSession(
     override suspend fun connect(
         reconnectDetails: ReconnectDetails?,
         options: List<PublishOption>?,
-    ) = Unit
+    ) {
+        logIgnored("connect")
+    }
 
-    override fun setScreenShareTrack() = Unit
+    override fun setScreenShareTrack() {
+        logIgnored("setScreenShareTrack")
+    }
 
-    override fun handleEvent(event: VideoEvent) = Unit
+    override fun handleEvent(event: VideoEvent) {
+        logIgnored("handleEvent")
+    }
 
-    override suspend fun handleIceTrickle(event: ICETrickleEvent) = Unit
+    override suspend fun handleIceTrickle(event: ICETrickleEvent) {
+        logIgnored("handleIceTrickle")
+    }
 
-    override suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) = Unit
+    override suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
+        logIgnored("handleSubscriberOffer")
+    }
 
-    override suspend fun getPublisherStats(): RtcStatsReport? = null
+    override suspend fun getPublisherStats(): RtcStatsReport? {
+        logIgnored("getPublisherStats")
+        return null
+    }
 
-    override suspend fun getSubscriberStats(): RtcStatsReport? = null
+    override suspend fun getSubscriberStats(): RtcStatsReport? {
+        logIgnored("getSubscriberStats")
+        return null
+    }
 
-    override suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> =
-        noSfuConnection()
+    override suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> {
+        logIgnored("requestSubscriberIceRestart")
+        return noSfuConnection()
+    }
 
-    override suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> =
-        noSfuConnection()
+    override suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> {
+        logIgnored("requestPublisherIceRestart")
+        return noSfuConnection()
+    }
 
     override fun updateTrackDimensions(
         sessionId: String,
@@ -106,7 +131,13 @@ internal class EmptyRtcSession(
         visible: Boolean,
         dimensions: VideoDimension,
         viewportId: String,
-    ) = Unit
+    ) {
+        logIgnored("updateTrackDimensions")
+    }
+
+    private fun logIgnored(function: String) {
+        logger.w { "[$function] Ignored: EmptyRtcSession has no SFU connection" }
+    }
 
     private fun noSfuConnection(): Result<ICERestartResponse> =
         Failure(Error.GenericError("EmptyRtcSession has no SFU connection"))
