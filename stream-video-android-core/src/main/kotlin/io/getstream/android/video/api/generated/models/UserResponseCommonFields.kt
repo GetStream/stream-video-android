@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 public data class UserResponseCommonFields (
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "id")
     public val id: String,
@@ -47,7 +47,7 @@ public data class UserResponseCommonFields (
     public val role: String,
 
     @Json(name = "updated_at")
-    public val updatedAt: org.threeten.bp.OffsetDateTime,
+    public val updatedAt: kotlin.time.Instant,
 
     @Json(name = "blocked_user_ids")
     public val blockedUserIds: List<String> = emptyList(),
@@ -62,16 +62,16 @@ public data class UserResponseCommonFields (
     public val avgResponseTime: Int? = null,
 
     @Json(name = "deactivated_at")
-    public val deactivatedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val deactivatedAt: kotlin.time.Instant? = null,
 
     @Json(name = "deleted_at")
-    public val deletedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val deletedAt: kotlin.time.Instant? = null,
 
     @Json(name = "image")
     public val image: String? = null,
 
     @Json(name = "last_active")
-    public val lastActive: org.threeten.bp.OffsetDateTime? = null,
+    public val lastActive: kotlin.time.Instant? = null,
 
     @Json(name = "name")
     public val name: String? = null,

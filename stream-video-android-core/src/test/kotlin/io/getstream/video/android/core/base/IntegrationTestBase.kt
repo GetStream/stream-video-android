@@ -63,11 +63,10 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
-import org.threeten.bp.Clock
-import org.threeten.bp.OffsetDateTime
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.time.Clock
 
 object IntegrationTestState {
     var client: StreamVideo? = null
@@ -235,7 +234,7 @@ open class IntegrationTestBase(val connectCoordinatorWS: Boolean = true) : TestB
 
 // convert a Call object to a CallResponse object
 internal fun Call.toResponse(createdBy: UserResponse): CallResponse {
-    val now = OffsetDateTime.now(Clock.systemUTC())
+    val now = Clock.System.now()
     val ingress =
         CallIngressResponse(
             rtmp = RTMPIngress(address = ""),

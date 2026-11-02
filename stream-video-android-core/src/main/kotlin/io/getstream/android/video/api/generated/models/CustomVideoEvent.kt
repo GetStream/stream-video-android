@@ -38,7 +38,7 @@ public data class CustomVideoEvent (
     public val callCid: String,
 
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "custom")
     public val custom: Map<String, Any?> = emptyMap(),

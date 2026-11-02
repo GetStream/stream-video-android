@@ -72,9 +72,7 @@ public object Serializer {
         .add(io.getstream.android.video.internal.generated.infrastructure.ByteArrayAdapter())
         .add(io.getstream.android.video.internal.generated.infrastructure.URIAdapter())
         .add(io.getstream.android.video.internal.generated.infrastructure.UUIDAdapter())
-        .add(io.getstream.android.video.internal.generated.infrastructure.OffsetDateTimeAdapter())
-        .add(io.getstream.android.video.internal.generated.infrastructure.LocalDateAdapter())
-        .add(io.getstream.android.video.internal.generated.infrastructure.LocalDateTimeAdapter())
+        .add(io.getstream.android.video.internal.generated.infrastructure.InstantAdapter())
         .addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
     
     @JvmStatic

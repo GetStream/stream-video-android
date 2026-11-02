@@ -44,7 +44,7 @@ public data class CallResponse (
     public val cid: String,
 
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "current_session_id")
     public val currentSessionId: String,
@@ -65,7 +65,7 @@ public data class CallResponse (
     public val type: String,
 
     @Json(name = "updated_at")
-    public val updatedAt: org.threeten.bp.OffsetDateTime,
+    public val updatedAt: kotlin.time.Instant,
 
     @Json(name = "blocked_user_ids")
     public val blockedUserIds: List<String> = emptyList(),
@@ -89,7 +89,7 @@ public data class CallResponse (
     public val channelCid: String? = null,
 
     @Json(name = "ended_at")
-    public val endedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val endedAt: kotlin.time.Instant? = null,
 
     @Json(name = "join_ahead_time_seconds")
     public val joinAheadTimeSeconds: Int? = null,
@@ -98,7 +98,7 @@ public data class CallResponse (
     public val routingNumber: String? = null,
 
     @Json(name = "starts_at")
-    public val startsAt: org.threeten.bp.OffsetDateTime? = null,
+    public val startsAt: kotlin.time.Instant? = null,
 
     @Json(name = "team")
     public val team: String? = null,

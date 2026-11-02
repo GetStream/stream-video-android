@@ -41,7 +41,7 @@ public data class CallStatsParticipant (
     public val sessions: List<io.getstream.android.video.api.generated.models.CallStatsParticipantSession> = emptyList(),
 
     @Json(name = "latest_activity_at")
-    public val latestActivityAt: org.threeten.bp.OffsetDateTime? = null,
+    public val latestActivityAt: kotlin.time.Instant? = null,
 
     @Json(name = "name")
     public val name: String? = null,

@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 public data class UserBannedEvent (
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "custom")
     public val custom: Map<String, Any?> = emptyMap(),
@@ -62,13 +62,13 @@ public data class UserBannedEvent (
     public val cid: String? = null,
 
     @Json(name = "expiration")
-    public val expiration: org.threeten.bp.OffsetDateTime? = null,
+    public val expiration: kotlin.time.Instant? = null,
 
     @Json(name = "reason")
     public val reason: String? = null,
 
     @Json(name = "received_at")
-    public val receivedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val receivedAt: kotlin.time.Instant? = null,
 
     @Json(name = "review_queue_item_id")
     public val reviewQueueItemId: String? = null,

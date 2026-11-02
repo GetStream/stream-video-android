@@ -35,12 +35,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import org.threeten.bp.Instant
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.ZoneOffset
 import stream.video.sfu.models.Participant
 import stream.video.sfu.models.ParticipantSource
 import stream.video.sfu.models.TrackType
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Represents the state of a participant in a call.
@@ -121,8 +120,8 @@ public data class ParticipantState(
     /**
      * When you joined the call
      */
-    internal val _joinedAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
-    val joinedAt: StateFlow<OffsetDateTime?> = _joinedAt
+    internal val _joinedAt: MutableStateFlow<Instant?> = MutableStateFlow(null)
+    val joinedAt: StateFlow<Instant?> = _joinedAt
 
     /**
      * The audio level of the participant, single float value
@@ -150,8 +149,8 @@ public data class ParticipantState(
     internal val _speaking: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val speaking: StateFlow<Boolean> = _speaking
 
-    internal val _lastSpeakingAt: MutableStateFlow<OffsetDateTime?> = MutableStateFlow(null)
-    val lastSpeakingAt: StateFlow<OffsetDateTime?> = _lastSpeakingAt
+    internal val _lastSpeakingAt: MutableStateFlow<Instant?> = MutableStateFlow(null)
+    val lastSpeakingAt: StateFlow<Instant?> = _lastSpeakingAt
 
     internal val _reactions = MutableStateFlow<List<Reaction>>(emptyList())
     val reactions: StateFlow<List<Reaction>> = _reactions
@@ -229,10 +228,9 @@ public data class ParticipantState(
     fun updateFromParticipantInfo(participant: Participant) {
         sessionId = participant.session_id
 
-        val joinedAtMilli =
-            participant.joined_at?.toEpochMilli() ?: OffsetDateTime.now().toEpochSecond()
-        val instant = Instant.ofEpochSecond(joinedAtMilli)
-        _joinedAt.value = OffsetDateTime.ofInstant(instant, ZoneOffset.UTC)
+        _joinedAt.value = participant.joined_at
+            ?.let { Instant.fromEpochSeconds(it.epochSecond, it.nano) }
+            ?: Clock.System.now()
 
         trackLookupPrefix = participant.track_lookup_prefix
         _networkQuality.value = NetworkQuality.fromConnectionQuality(participant.connection_quality)

@@ -47,5 +47,5 @@ public data class ParticipantCountByMinuteResponse (
     public val min: Int,
 
     @Json(name = "start_ts")
-    public val startTs: org.threeten.bp.OffsetDateTime
+    public val startTs: kotlin.time.Instant
 )

@@ -21,11 +21,11 @@ import io.getstream.video.android.model.User
 
 @Stable
 public data class Member(
-    val createdAt: org.threeten.bp.OffsetDateTime,
+    val createdAt: kotlin.time.Instant,
     val custom: Map<String, Any?>,
-    val updatedAt: org.threeten.bp.OffsetDateTime,
+    val updatedAt: kotlin.time.Instant,
     val user: User,
     val userId: String,
-    val deletedAt: org.threeten.bp.OffsetDateTime? = null,
+    val deletedAt: kotlin.time.Instant? = null,
     val role: String? = null,
 )

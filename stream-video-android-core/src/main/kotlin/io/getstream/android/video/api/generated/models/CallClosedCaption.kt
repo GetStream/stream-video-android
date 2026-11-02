@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 public data class CallClosedCaption (
     @Json(name = "end_time")
-    public val endTime: org.threeten.bp.OffsetDateTime,
+    public val endTime: kotlin.time.Instant,
 
     @Json(name = "id")
     public val id: String,
@@ -47,7 +47,7 @@ public data class CallClosedCaption (
     public val speakerId: String,
 
     @Json(name = "start_time")
-    public val startTime: org.threeten.bp.OffsetDateTime,
+    public val startTime: kotlin.time.Instant,
 
     @Json(name = "text")
     public val text: String,

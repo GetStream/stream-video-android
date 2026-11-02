@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 public data class AppUpdatedEvent (
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "app")
     public val app: io.getstream.android.video.api.generated.models.AppEventResponse,
@@ -47,7 +47,7 @@ public data class AppUpdatedEvent (
     public val type: String = "app.updated",
 
     @Json(name = "received_at")
-    public val receivedAt: org.threeten.bp.OffsetDateTime? = null
+    public val receivedAt: kotlin.time.Instant? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {

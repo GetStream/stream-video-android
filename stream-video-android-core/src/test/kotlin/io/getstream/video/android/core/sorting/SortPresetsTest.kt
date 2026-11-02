@@ -25,7 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import org.junit.Test
-import org.threeten.bp.OffsetDateTime
+import kotlin.time.Instant
 
 class SortPresetsTest {
 
@@ -59,7 +59,7 @@ class SortPresetsTest {
         //   combineComparators(pinned, dominantSpeaker, publishingAudio, publishingVideo, screenSharing)
         // Expected: [F, D, B, A, E, C]
         val pins = mapOf(
-            "6" to pinUpdateAt("6", OffsetDateTime.parse("2026-05-14T10:00:00Z"), PinType.Local),
+            "6" to pinUpdateAt("6", Instant.parse("2026-05-14T10:00:00Z"), PinType.Local),
         )
         val comparator = combineComparators(
             pinned(pins),
@@ -94,7 +94,7 @@ class SortPresetsTest {
             p.also { it._visibleOnScreen.value = VisibilityOnScreenState.UNKNOWN }
         }
         val pins = mapOf(
-            "6" to pinUpdateAt("6", OffsetDateTime.parse("2026-05-14T10:00:00Z"), PinType.Local),
+            "6" to pinUpdateAt("6", Instant.parse("2026-05-14T10:00:00Z"), PinType.Local),
         )
         val sorted = ps.sortedWith(SortPreset.Default.build(pins))
         assertThat(sorted.map { it.name.value })
@@ -128,8 +128,8 @@ class SortPresetsTest {
             p.also { it._visibleOnScreen.value = VisibilityOnScreenState.UNKNOWN }
         }
         val pins = mapOf(
-            "6" to pinUpdateAt("6", OffsetDateTime.parse("2026-05-14T10:00:00Z"), PinType.Local),
-            "3" to pinUpdateAt("3", OffsetDateTime.parse("2026-05-14T10:00:01Z"), PinType.Server),
+            "6" to pinUpdateAt("6", Instant.parse("2026-05-14T10:00:00Z"), PinType.Local),
+            "3" to pinUpdateAt("3", Instant.parse("2026-05-14T10:00:01Z"), PinType.Server),
         )
         val sorted = ps.sortedWith(SortPreset.Default.build(pins))
         assertThat(
@@ -203,7 +203,7 @@ class SortPresetsTest {
     fun `Default preset - pinned outside visibility guard, jumps to top regardless`() {
         val ps = participants15(scope, callActions).toMutableList()
         val pins = mapOf(
-            "13" to pinUpdateAt("13", OffsetDateTime.parse("2026-05-14T10:00:00Z"), PinType.Local),
+            "13" to pinUpdateAt("13", Instant.parse("2026-05-14T10:00:00Z"), PinType.Local),
         )
         val sorted = ps.sortedWith(SortPreset.Default.build(pins))
         assertThat(sorted.first().name.value).isEqualTo("P13")
@@ -273,7 +273,7 @@ class SortPresetsTest {
 
     private fun pinUpdateAt(
         sessionId: String,
-        at: OffsetDateTime,
+        at: Instant,
         type: PinType,
     ): PinEntry = PinEntry(
         pinTarget = PinUpdate(sessionId = sessionId, userId = "user-$sessionId"),

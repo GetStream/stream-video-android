@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 public data class CallTranscription (
     @Json(name = "end_time")
-    public val endTime: org.threeten.bp.OffsetDateTime,
+    public val endTime: kotlin.time.Instant,
 
     @Json(name = "filename")
     public val filename: String,
@@ -44,7 +44,7 @@ public data class CallTranscription (
     public val sessionId: String,
 
     @Json(name = "start_time")
-    public val startTime: org.threeten.bp.OffsetDateTime,
+    public val startTime: kotlin.time.Instant,
 
     @Json(name = "url")
     public val url: String

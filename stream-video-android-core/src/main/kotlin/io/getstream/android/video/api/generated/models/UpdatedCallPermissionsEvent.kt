@@ -38,7 +38,7 @@ public data class UpdatedCallPermissionsEvent (
     public val callCid: String,
 
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "own_capabilities")
     public val ownCapabilities: List<io.getstream.android.video.api.generated.models.OwnCapability> = emptyList(),

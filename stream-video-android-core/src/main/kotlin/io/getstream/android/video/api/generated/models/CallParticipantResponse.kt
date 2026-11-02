@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 public data class CallParticipantResponse (
     @Json(name = "joined_at")
-    public val joinedAt: org.threeten.bp.OffsetDateTime,
+    public val joinedAt: kotlin.time.Instant,
 
     @Json(name = "role")
     public val role: String,

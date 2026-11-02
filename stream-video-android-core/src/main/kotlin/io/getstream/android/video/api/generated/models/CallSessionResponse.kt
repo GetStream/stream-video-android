@@ -44,29 +44,29 @@ public data class CallSessionResponse (
     public val participants: List<io.getstream.android.video.api.generated.models.CallParticipantResponse> = emptyList(),
 
     @Json(name = "accepted_by")
-    public val acceptedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val acceptedBy: Map<String, kotlin.time.Instant> = emptyMap(),
 
     @Json(name = "missed_by")
-    public val missedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val missedBy: Map<String, kotlin.time.Instant> = emptyMap(),
 
     @Json(name = "participants_count_by_role")
     public val participantsCountByRole: Map<String, Int> = emptyMap(),
 
     @Json(name = "rejected_by")
-    public val rejectedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val rejectedBy: Map<String, kotlin.time.Instant> = emptyMap(),
 
     @Json(name = "ended_at")
-    public val endedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val endedAt: kotlin.time.Instant? = null,
 
     @Json(name = "live_ended_at")
-    public val liveEndedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val liveEndedAt: kotlin.time.Instant? = null,
 
     @Json(name = "live_started_at")
-    public val liveStartedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val liveStartedAt: kotlin.time.Instant? = null,
 
     @Json(name = "started_at")
-    public val startedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val startedAt: kotlin.time.Instant? = null,
 
     @Json(name = "timer_ends_at")
-    public val timerEndsAt: org.threeten.bp.OffsetDateTime? = null
+    public val timerEndsAt: kotlin.time.Instant? = null
 )

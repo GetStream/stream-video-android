@@ -35,10 +35,10 @@ import com.squareup.moshi.ToJson
  */
 public data class MemberResponse (
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "updated_at")
-    public val updatedAt: org.threeten.bp.OffsetDateTime,
+    public val updatedAt: kotlin.time.Instant,
 
     @Json(name = "user_id")
     public val userId: String,
@@ -50,7 +50,7 @@ public data class MemberResponse (
     public val user: io.getstream.android.video.api.generated.models.UserResponse,
 
     @Json(name = "deleted_at")
-    public val deletedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val deletedAt: kotlin.time.Instant? = null,
 
     @Json(name = "role")
     public val role: String? = null

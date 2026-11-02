@@ -22,16 +22,16 @@ import io.getstream.result.Result
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.utils.toUser
 import io.getstream.video.android.model.User
-import org.threeten.bp.Clock
-import org.threeten.bp.OffsetDateTime
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 data class PermissionRequest(
     val call: Call,
     val user: User,
-    val createdAt: OffsetDateTime,
+    val createdAt: Instant,
     val permissions: List<String>,
-    var grantedAt: OffsetDateTime? = null,
-    var rejectedAt: OffsetDateTime? = null,
+    var grantedAt: Instant? = null,
+    var rejectedAt: Instant? = null,
 ) {
     constructor(call: Call, event: PermissionRequestEvent) : this(
         call = call,
@@ -43,12 +43,12 @@ data class PermissionRequest(
     suspend fun grant(): Result<UpdateUserPermissionsResponse> {
         val result = call.grantPermissions(userId = user.id, permissions = permissions)
         result.onSuccess {
-            grantedAt = OffsetDateTime.now(Clock.systemUTC())
+            grantedAt = Clock.System.now()
         }
         return result
     }
 
     fun reject() {
-        rejectedAt = OffsetDateTime.now(Clock.systemUTC())
+        rejectedAt = Clock.System.now()
     }
 }

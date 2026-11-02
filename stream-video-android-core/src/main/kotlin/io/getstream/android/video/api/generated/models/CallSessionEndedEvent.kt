@@ -38,7 +38,7 @@ public data class CallSessionEndedEvent (
     public val callCid: String,
 
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "session_id")
     public val sessionId: String,

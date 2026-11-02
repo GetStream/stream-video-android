@@ -24,8 +24,8 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.threeten.bp.Clock
-import org.threeten.bp.OffsetDateTime
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 
 @Ignore("Temporary ignoring it to pass the CI check")
 @RunWith(RobolectricTestRunner::class)
@@ -45,7 +45,7 @@ class AudioRoomTest : IntegrationTestBase() {
      */
     @Test
     fun `query calls - about to start`() = runTest {
-        val threeHoursFromNow = OffsetDateTime.now(Clock.systemUTC()).plusHours(3)
+        val threeHoursFromNow = Clock.System.now() + 3.hours
         // TODO: support null for ended_at
         val filters = mutableMapOf(
             "members" to mutableMapOf("\$in" to listOf("tommaso")),

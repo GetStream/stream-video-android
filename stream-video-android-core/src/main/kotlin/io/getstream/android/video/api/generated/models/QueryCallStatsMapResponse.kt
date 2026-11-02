@@ -50,22 +50,22 @@ public data class QueryCallStatsMapResponse (
     public val counts: io.getstream.android.video.api.generated.models.CallStatsParticipantCounts,
 
     @Json(name = "call_ended_at")
-    public val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val callEndedAt: kotlin.time.Instant? = null,
 
     @Json(name = "call_started_at")
-    public val callStartedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val callStartedAt: kotlin.time.Instant? = null,
 
     @Json(name = "data_source")
     public val dataSource: String? = null,
 
     @Json(name = "end_time")
-    public val endTime: org.threeten.bp.OffsetDateTime? = null,
+    public val endTime: kotlin.time.Instant? = null,
 
     @Json(name = "generated_at")
-    public val generatedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val generatedAt: kotlin.time.Instant? = null,
 
     @Json(name = "start_time")
-    public val startTime: org.threeten.bp.OffsetDateTime? = null,
+    public val startTime: kotlin.time.Instant? = null,
 
     @Json(name = "publishers")
     public val publishers: io.getstream.android.video.api.generated.models.CallStatsMapPublishers? = null,

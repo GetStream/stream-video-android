@@ -38,7 +38,7 @@ public data class CallUpdatedEvent (
     public val callCid: String,
 
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "call")
     public val call: io.getstream.android.video.api.generated.models.CallResponse,

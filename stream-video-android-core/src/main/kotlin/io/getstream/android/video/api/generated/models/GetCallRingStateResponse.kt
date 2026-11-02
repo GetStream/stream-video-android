@@ -47,20 +47,20 @@ public data class GetCallRingStateResponse (
     public val sessionId: String,
 
     @Json(name = "accepted_by")
-    public val acceptedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val acceptedBy: Map<String, kotlin.time.Instant> = emptyMap(),
 
     @Json(name = "missed_by")
-    public val missedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val missedBy: Map<String, kotlin.time.Instant> = emptyMap(),
 
     @Json(name = "rejected_by")
-    public val rejectedBy: Map<String, org.threeten.bp.OffsetDateTime> = emptyMap(),
+    public val rejectedBy: Map<String, kotlin.time.Instant> = emptyMap(),
 
     @Json(name = "call_ended_at")
-    public val callEndedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val callEndedAt: kotlin.time.Instant? = null,
 
     @Json(name = "session_ended_at")
-    public val sessionEndedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val sessionEndedAt: kotlin.time.Instant? = null,
 
     @Json(name = "session_started_at")
-    public val sessionStartedAt: org.threeten.bp.OffsetDateTime? = null
+    public val sessionStartedAt: kotlin.time.Instant? = null
 )

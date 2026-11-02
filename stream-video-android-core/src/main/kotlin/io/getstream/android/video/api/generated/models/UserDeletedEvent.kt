@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 public data class UserDeletedEvent (
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "delete_conversation")
     public val deleteConversation: String,
@@ -65,7 +65,7 @@ public data class UserDeletedEvent (
     public val type: String = "user.deleted",
 
     @Json(name = "received_at")
-    public val receivedAt: org.threeten.bp.OffsetDateTime? = null
+    public val receivedAt: kotlin.time.Instant? = null
 )
 : io.getstream.android.video.api.generated.models.VideoEvent()
 {

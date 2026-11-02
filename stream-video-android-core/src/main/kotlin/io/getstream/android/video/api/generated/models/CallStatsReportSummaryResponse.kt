@@ -47,10 +47,10 @@ public data class CallStatsReportSummaryResponse (
     public val callStatus: String,
 
     @Json(name = "first_stats_time")
-    public val firstStatsTime: org.threeten.bp.OffsetDateTime,
+    public val firstStatsTime: kotlin.time.Instant,
 
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime? = null,
+    public val createdAt: kotlin.time.Instant? = null,
 
     @Json(name = "min_user_rating")
     public val minUserRating: Int? = null,

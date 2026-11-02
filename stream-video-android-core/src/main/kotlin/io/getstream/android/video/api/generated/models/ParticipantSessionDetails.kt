@@ -50,8 +50,8 @@ public data class ParticipantSessionDetails (
     public val durationInSeconds: Int? = null,
 
     @Json(name = "joined_at")
-    public val joinedAt: org.threeten.bp.OffsetDateTime? = null,
+    public val joinedAt: kotlin.time.Instant? = null,
 
     @Json(name = "left_at")
-    public val leftAt: org.threeten.bp.OffsetDateTime? = null
+    public val leftAt: kotlin.time.Instant? = null
 )

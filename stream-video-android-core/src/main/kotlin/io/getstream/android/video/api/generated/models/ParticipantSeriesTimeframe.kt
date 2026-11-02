@@ -38,11 +38,11 @@ public data class ParticipantSeriesTimeframe (
     public val maxPoints: Int,
 
     @Json(name = "since")
-    public val since: org.threeten.bp.OffsetDateTime,
+    public val since: kotlin.time.Instant,
 
     @Json(name = "step_seconds")
     public val stepSeconds: Int,
 
     @Json(name = "until")
-    public val until: org.threeten.bp.OffsetDateTime
+    public val until: kotlin.time.Instant
 )

@@ -35,7 +35,7 @@ import com.squareup.moshi.ToJson
  */
 public data class SIPTrunkResponse (
     @Json(name = "created_at")
-    public val createdAt: org.threeten.bp.OffsetDateTime,
+    public val createdAt: kotlin.time.Instant,
 
     @Json(name = "id")
     public val id: String,
@@ -47,7 +47,7 @@ public data class SIPTrunkResponse (
     public val password: String,
 
     @Json(name = "updated_at")
-    public val updatedAt: org.threeten.bp.OffsetDateTime,
+    public val updatedAt: kotlin.time.Instant,
 
     @Json(name = "uri")
     public val uri: String,

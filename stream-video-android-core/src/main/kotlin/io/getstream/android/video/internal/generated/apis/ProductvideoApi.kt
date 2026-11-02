@@ -486,8 +486,8 @@ public interface ProductvideoApi {
         @Path("session") session: String,
         @Path("user") user: String,
         @Path("user_session") userSession: String,
-        @Query("since") since: org.threeten.bp.OffsetDateTime? = null,
-        @Query("until") until: org.threeten.bp.OffsetDateTime? = null
+        @Query("since") since: kotlin.time.Instant? = null,
+        @Query("until") until: kotlin.time.Instant? = null
     ): io.getstream.android.video.api.generated.models.GetCallParticipantSessionMetricsResponse
     
     /**
@@ -763,8 +763,8 @@ public interface ProductvideoApi {
         @Path("call_type") callType: String,
         @Path("call_id") callId: String,
         @Path("session") session: String,
-        @Query("start_time") startTime: org.threeten.bp.OffsetDateTime? = null,
-        @Query("end_time") endTime: org.threeten.bp.OffsetDateTime? = null,
+        @Query("start_time") startTime: kotlin.time.Instant? = null,
+        @Query("end_time") endTime: kotlin.time.Instant? = null,
         @Query("exclude_publishers") excludePublishers: Boolean? = null,
         @Query("exclude_subscribers") excludeSubscribers: Boolean? = null,
         @Query("exclude_sfus") excludeSfus: Boolean? = null
