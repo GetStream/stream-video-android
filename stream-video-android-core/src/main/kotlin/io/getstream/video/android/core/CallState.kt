@@ -136,7 +136,6 @@ import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -144,10 +143,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
@@ -389,89 +386,6 @@ public class CallState(
             }
         },
     )
-
-    private val livestreamFlow: Flow<ParticipantState.Video?> = channelFlow {
-        fun emitLivestreamVideo() {
-            val participants = participants.value
-            val filteredVideo = participants.firstOrNull {
-                it.video.value?.enabled == true
-            }?.video?.value
-            scope.launch {
-                if (_backstage.value) {
-                    send(null)
-                } else {
-                    send(filteredVideo)
-                }
-            }
-        }
-
-        scope.launch {
-            _participants.collect {
-                logger.v {
-                    "[livestreamFlow] #track; participants: ${it.size} =>" + "${it.map { "${it.value.userId.value} - ${it.value.video.value?.enabled}" }}"
-                }
-                emitLivestreamVideo()
-            }
-        }
-
-        // The caller i.e. `livestream` is deprecated as well
-        call.subscribe {
-            logger.v { "[livestreamFlow] #track; event.type: ${it.getEventType()}" }
-            if (it is TrackPublishedEvent) {
-                val participant = getOrCreateParticipant(
-                    it.sessionId,
-                    it.userId,
-                    source = it.participant?.source
-                        ?: ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
-                )
-
-                if (it.trackType == TrackType.TRACK_TYPE_VIDEO) {
-                    participant._videoEnabled.value = true
-                } else if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
-                    participant._audioEnabled.value = true
-                }
-            }
-
-            if (it is TrackUnpublishedEvent) {
-                val participant = getOrCreateParticipant(
-                    it.sessionId,
-                    it.userId,
-                    source = it.participant?.source
-                        ?: ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
-                )
-
-                if (it.trackType == TrackType.TRACK_TYPE_VIDEO) {
-                    participant._videoEnabled.value = false
-                } else if (it.trackType == TrackType.TRACK_TYPE_AUDIO) {
-                    participant._audioEnabled.value = false
-                }
-            }
-
-            emitLivestreamVideo()
-        }
-
-        // emit livestream Video
-        logger.d { "[livestreamFlow] #track; no args" }
-        emitLivestreamVideo()
-
-        awaitClose { }
-    }
-
-    @Deprecated(
-        message = "The correct approach is to find the participant with video from the participants list or if the id of the user who is host is known query that one directly.",
-        level = DeprecationLevel.WARNING,
-        replaceWith = ReplaceWith(
-            """
-                            call.state.participants.flatMapLatest { participants ->
-                                combine(participants.map { p -> p.videoEnabled.map { enabled -> p to enabled } }) { pairs ->
-                                    pairs.filter { (_, e) -> e }.map { (p, _) -> p }
-                                }
-                            }
-                         """,
-        ),
-    )
-    val livestream: StateFlow<ParticipantState.Video?> =
-        livestreamFlow.debounce(1000).stateIn(scope, SharingStarted.WhileSubscribed(10_000L), null)
 
     private val _sortedParticipantsState = SortedParticipantsState(
         scope = scope,

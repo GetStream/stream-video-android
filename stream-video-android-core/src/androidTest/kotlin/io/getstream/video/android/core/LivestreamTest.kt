@@ -17,6 +17,8 @@
 package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
@@ -85,8 +87,10 @@ class LivestreamTest : IntegrationTestBase() {
     @Test
     fun participantCount() = runTest {
         val call = client.call("livestream")
-        client.subscribe {
-            println("hi123 event: $it")
+        backgroundScope.launch(Dispatchers.Default) {
+            client.events.collect {
+                println("hi123 event: $it")
+            }
         }
         call.join(create = true)
         print("debugging: call cid is:  " + call.cid)
