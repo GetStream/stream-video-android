@@ -140,7 +140,7 @@ class CallJoinCoordinatorTest {
         unmockkAll()
     }
 
-    private fun coordinator(hlsPlaybackSupported: Boolean = false) = CallJoinCoordinator(
+    private fun coordinator() = CallJoinCoordinator(
         clientImpl = clientImpl,
         state = state,
         callAnalytics = callAnalytics,
@@ -157,13 +157,12 @@ class CallJoinCoordinatorTest {
         callRegistry = callRegistry,
         hasRequiredPermissions = { true },
         createPlaybackSession = { playbackSession },
-        hlsPlaybackSupported = hlsPlaybackSupported,
     )
 
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {
         coEvery {
             apiClient.joinRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns result
     }
@@ -767,34 +766,10 @@ class CallJoinCoordinatorTest {
     }
 
     @Test
-    fun `first join declares HLS playback only when supported`() = runTest(testDispatcher) {
-        stubJoinCall(Success(mockJoinResponse))
-        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
-
-        coordinator(hlsPlaybackSupported = false).join()
-        advanceUntilIdle()
-        coVerify {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), null)
-        }
-
-        sessionFlow.value = null
-        coordinator(hlsPlaybackSupported = true).join()
-        advanceUntilIdle()
-        coVerify {
-            apiClient.joinRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(),
-                listOf(
-                    "hls",
-                ),
-            )
-        }
-    }
-
-    @Test
     fun `HLS playback joins without an SFU connection`() = runTest(testDispatcher) {
         stubHlsPlayback()
 
-        val result = coordinator(hlsPlaybackSupported = true).join()
+        val result = coordinator().join()
         advanceUntilIdle()
 
         assertThat((result as Success).value).isSameInstanceAs(playbackSession)
@@ -811,7 +786,7 @@ class CallJoinCoordinatorTest {
     @Test
     fun `join after HLS playback returns the playback session`() = runTest(testDispatcher) {
         stubHlsPlayback()
-        val coordinator = coordinator(hlsPlaybackSupported = true)
+        val coordinator = coordinator()
 
         coordinator.join()
         advanceUntilIdle()
@@ -820,15 +795,20 @@ class CallJoinCoordinatorTest {
 
         assertThat((second as Success).value).isSameInstanceAs(playbackSession)
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
     @Test
-    fun `HLS playback fails the join when HLS support is off`() = runTest(testDispatcher) {
-        stubHlsPlayback()
+    fun `an unplayable playback grant fails the join`() = runTest(testDispatcher) {
+        every { mockJoinResponse.playback } returns PlaybackResponse(
+            playlistUrl = HLS_URL,
+            reason = PlaybackResponse.Reason.Percentage,
+            type = PlaybackResponse.Type.Unknown("dash"),
+        )
+        stubJoinCall(Success(mockJoinResponse))
 
-        val result = coordinator(hlsPlaybackSupported = false).join()
+        val result = coordinator().join()
         advanceUntilIdle()
 
         assertThat(result).isInstanceOf(Failure::class.java)

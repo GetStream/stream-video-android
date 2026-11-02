@@ -18,6 +18,7 @@ package io.getstream.video.android.core.call.components
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.PlaybackResponse
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.CallLeaveReason
 import io.getstream.video.android.core.CallState
@@ -28,6 +29,7 @@ import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectionResult
 import io.getstream.video.android.core.call.connection.Publisher
+import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -48,6 +50,10 @@ import stream.video.sfu.models.WebsocketReconnectStrategy
  */
 class CallReconnectorTest {
 
+    private companion object {
+        const val HLS_URL = "https://hls.example.com/playlist.m3u8"
+    }
+
     private val testDispatcher = StandardTestDispatcher()
 
     private lateinit var clientImpl: StreamVideoClient
@@ -59,6 +65,8 @@ class CallReconnectorTest {
     private lateinit var apiClient: CallApiClient
     private lateinit var callAnalytics: CallAnalytics
     private lateinit var sessionFactory: RtcSessionFactory
+    private lateinit var playbackTypeFlow: MutableStateFlow<PlaybackType>
+    private lateinit var playbackSession: RtcSession
 
     @Before
     fun setup() {
@@ -83,6 +91,9 @@ class CallReconnectorTest {
         } returns true
         every { state.connection } returns connectionFlow
         every { state._connection } returns connectionFlow
+        playbackTypeFlow = MutableStateFlow(PlaybackType.WebRtc)
+        playbackSession = mockk(relaxed = true)
+        every { state._playbackType } returns playbackTypeFlow
     }
 
     private fun reconnector() = CallReconnector(
@@ -94,6 +105,7 @@ class CallReconnectorTest {
         state = state,
         callAnalytics = callAnalytics,
         sessionMonitor = { sessionMonitor },
+        createPlaybackSession = { playbackSession },
         type = "default",
         id = "call-id",
     )
@@ -178,7 +190,7 @@ class CallReconnectorTest {
     fun `rejoin swaps in the new session and monitors it on success`() = runTest(testDispatcher) {
         val oldSession = mockk<RtcSession>(relaxed = true)
         val newSession = mockk<RtcSession>(relaxed = true)
-        val joinResponse = mockk<JoinCallResponse>(relaxed = true)
+        val joinResponse = sfuJoinResponse()
         prepareRejoinOrMigrate(oldSession, newSession, joinResponse)
         coEvery { newSession.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
@@ -196,7 +208,7 @@ class CallReconnectorTest {
     fun `rejoin failures are retried until the attempts are exhausted`() = runTest(testDispatcher) {
         val oldSession = mockk<RtcSession>(relaxed = true)
         val newSession = mockk<RtcSession>(relaxed = true)
-        val joinResponse = mockk<JoinCallResponse>(relaxed = true)
+        val joinResponse = sfuJoinResponse()
         prepareRejoinOrMigrate(oldSession, newSession, joinResponse)
         coEvery { newSession.connectInternal(any(), any()) } returns SfuConnectionResult.Failure(
             Exception("rejoin failed"),
@@ -218,7 +230,7 @@ class CallReconnectorTest {
     ) {
         val oldSession = mockk<RtcSession>(relaxed = true)
         val newSession = mockk<RtcSession>(relaxed = true)
-        val joinResponse = mockk<JoinCallResponse>(relaxed = true)
+        val joinResponse = sfuJoinResponse()
         prepareRejoinOrMigrate(oldSession, newSession, joinResponse)
         coEvery { newSession.connectInternal(any(), any()) } returns SfuConnectionResult.Success
 
@@ -237,7 +249,7 @@ class CallReconnectorTest {
     fun `rejoin leaves the call once the rejoin budget is spent`() = runTest(testDispatcher) {
         val oldSession = mockk<RtcSession>(relaxed = true)
         val newSession = mockk<RtcSession>(relaxed = true)
-        prepareRejoinOrMigrate(oldSession, newSession, mockk(relaxed = true))
+        prepareRejoinOrMigrate(oldSession, newSession, sfuJoinResponse())
         repeat(RejoinRateLimiter.MAX_ATTEMPTS) { sessionManager.rejoinRateLimiter.tryRegister() }
 
         reconnector().reconnect(
@@ -258,7 +270,7 @@ class CallReconnectorTest {
     fun `migrate counts against the rejoin budget`() = runTest(testDispatcher) {
         val oldSession = mockk<RtcSession>(relaxed = true)
         val newSession = mockk<RtcSession>(relaxed = true)
-        prepareRejoinOrMigrate(oldSession, newSession, mockk(relaxed = true))
+        prepareRejoinOrMigrate(oldSession, newSession, sfuJoinResponse())
         repeat(RejoinRateLimiter.MAX_ATTEMPTS) { sessionManager.rejoinRateLimiter.tryRegister() }
 
         reconnector().reconnect(
@@ -295,7 +307,7 @@ class CallReconnectorTest {
     fun `a rejoin with budget left still issues a join request`() = runTest(testDispatcher) {
         val oldSession = mockk<RtcSession>(relaxed = true)
         val newSession = mockk<RtcSession>(relaxed = true)
-        prepareRejoinOrMigrate(oldSession, newSession, mockk(relaxed = true))
+        prepareRejoinOrMigrate(oldSession, newSession, sfuJoinResponse())
         coEvery { newSession.connectInternal(any(), any()) } returns SfuConnectionResult.Success
         repeat(RejoinRateLimiter.MAX_ATTEMPTS - 1) {
             sessionManager.rejoinRateLimiter.tryRegister()
@@ -308,6 +320,106 @@ class CallReconnectorTest {
         advanceUntilIdle()
 
         assertThat(sessionManager.session.value).isSameInstanceAs(newSession)
+        verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
+    }
+
+    @Test
+    fun `rejoin answered with HLS moves the viewer to HLS playback`() = runTest(testDispatcher) {
+        val oldSession = mockk<RtcSession>(relaxed = true)
+        prepareRejoinOrMigrate(oldSession, mockk(relaxed = true), hlsJoinResponse())
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+            "rejoin",
+        )
+        advanceUntilIdle()
+
+        assertHlsPlayback(oldSession)
+    }
+
+    @Test
+    fun `migrate answered with HLS moves the viewer to HLS playback`() = runTest(testDispatcher) {
+        val oldSession = mockk<RtcSession>(relaxed = true)
+        prepareRejoinOrMigrate(oldSession, mockk(relaxed = true), hlsJoinResponse())
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_MIGRATE,
+            "migrate",
+        )
+        advanceUntilIdle()
+
+        assertHlsPlayback(oldSession)
+        verify(exactly = 0) { oldSession.enterMigration() }
+    }
+
+    @Test
+    fun `an unplayable grant on rejoin gives up without leaving the SFU session`() = runTest(
+        testDispatcher,
+    ) {
+        val oldSession = mockk<RtcSession>(relaxed = true)
+        val joinResponse = mockk<JoinCallResponse>(relaxed = true)
+        every { joinResponse.playback } returns PlaybackResponse(
+            playlistUrl = "",
+            reason = PlaybackResponse.Reason.Percentage,
+            type = PlaybackResponse.Type.Hls,
+        )
+        prepareRejoinOrMigrate(oldSession, mockk(relaxed = true), joinResponse)
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+            "rejoin",
+        )
+        advanceUntilIdle()
+
+        assertThat(connectionFlow.value)
+            .isInstanceOf(RealtimeConnection.ReconnectingFailed::class.java)
+        assertThat(sessionManager.playbackSession).isNull()
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+        verify(exactly = 0) { sessionMonitor.stopMonitoring() }
+        coVerify(exactly = 0) { oldSession.prepareRejoin(any()) }
+    }
+
+    @Test
+    fun `reconnect is skipped during HLS playback`() = runTest(testDispatcher) {
+        sessionManager.playbackSession = mockk(relaxed = true)
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+            "network",
+        )
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+        verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Reconnecting)
+    }
+
+    private fun sfuJoinResponse(): JoinCallResponse = mockk<JoinCallResponse>(relaxed = true).also {
+        every { it.playback } returns null
+    }
+
+    private fun hlsJoinResponse(): JoinCallResponse = mockk<JoinCallResponse>(relaxed = true).also {
+        every { it.playback } returns PlaybackResponse(
+            playlistUrl = HLS_URL,
+            reason = PlaybackResponse.Reason.Percentage,
+            type = PlaybackResponse.Type.Hls,
+        )
+    }
+
+    private fun assertHlsPlayback(oldSession: RtcSession) {
+        assertThat(sessionManager.session.value).isNull()
+        assertThat(sessionManager.playbackSession).isSameInstanceAs(playbackSession)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(HLS_URL))
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Connected)
+        verify { sessionMonitor.stopMonitoring() }
+        coVerify { oldSession.prepareRejoin(any()) }
+        verify { state.clearParticipants() }
+        verify(
+            exactly = 0,
+        ) { sessionFactory.create(any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { sessionMonitor.monitorSession(any()) }
         verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
     }
 

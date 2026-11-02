@@ -76,12 +76,9 @@ internal class CallJoinCoordinator(
     private val createPlaybackSession: () -> RtcSession,
     // Reads and clears the source of a ring-driven join; see Call.consumeJoinSource.
     private val consumeJoinSource: () -> RingJoinSource? = { null },
-    // Declares HLS playback support on the first join. Off until the UI can render HLS.
-    private val hlsPlaybackSupported: Boolean = false,
 ) {
     private companion object {
         const val JOIN_FLIGHT_KEY = "join"
-        const val PLAYBACK_HLS = "hls"
     }
 
     private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
@@ -436,7 +433,6 @@ internal class CallJoinCoordinator(
                 // The coordinator rejects a join whose flag disagrees with the call. This is
                 // the first join; rejoin / migrate omit it and CallApiClient reads the manager.
                 e2ee = state.e2eeEnabled.value,
-                playbackCapabilities = if (hlsPlaybackSupported) listOf(PLAYBACK_HLS) else null,
             )
 
         if (result !is Success) {
@@ -493,20 +489,18 @@ internal class CallJoinCoordinator(
      * session.
      */
     private fun joinPlayback(playback: PlaybackResponse): Result<RtcSession> {
-        if (!hlsPlaybackSupported ||
-            playback.type != PlaybackResponse.Type.Hls ||
-            playback.playlistUrl.isBlank()
-        ) {
+        val playlistUrl = playback.hlsPlaylistUrlOrNull()
+        if (playlistUrl == null) {
             logger.e {
                 "[joinInternal] Unsupported playback (type=${playback.type}, " +
-                    "hlsSupported=$hlsPlaybackSupported, hasUrl=${playback.playlistUrl.isNotBlank()})"
+                    "hasUrl=${playback.playlistUrl.isNotBlank()})"
             }
             return Failure(Error.GenericError("Unsupported playback type: ${playback.type}"))
         }
         logger.i { "[joinInternal] Joined with HLS playback (reason=${playback.reason})" }
         val session = createPlaybackSession()
         sessionManager.playbackSession = session
-        state._playbackType.value = PlaybackType.Hls(playback.playlistUrl)
+        state._playbackType.value = PlaybackType.Hls(playlistUrl)
         state._connection.value = RealtimeConnection.Joined(session)
         callRegistry.markActive()
         state._connection.value = RealtimeConnection.Connected

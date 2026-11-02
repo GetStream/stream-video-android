@@ -210,6 +210,19 @@ public class Call(
         )
     }
 
+    /** Creates the [EmptyRtcSession] that join / rejoin / migrate return for HLS playback. */
+    private val playbackSessionFactory: () -> RtcSession = {
+        EmptyRtcSession(
+            client = clientImpl,
+            call = this,
+            sessionManager = sessionManager,
+            sessionId = sessionManager.sessionId,
+            apiKey = clientImpl.apiKey,
+            lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
+            sfuAnalytics = callAnalytics.sfuAnalytics,
+        )
+    }
+
     /**
      * The call's registration in the client-level ringing / active / telecom registries. Every
      * operation needs this instance, which the extracted components deliberately don't hold.
@@ -425,6 +438,7 @@ public class Call(
         state = state,
         callAnalytics = callAnalytics,
         sessionMonitor = { sessionMonitor },
+        createPlaybackSession = playbackSessionFactory,
         type = type,
         id = id,
     )
@@ -540,17 +554,7 @@ public class Call(
             clientImpl.permissionCheck
                 .checkAndroidPermissionsGroup(clientImpl.context, this@Call).first
         },
-        createPlaybackSession = {
-            EmptyRtcSession(
-                client = clientImpl,
-                call = this,
-                sessionManager = sessionManager,
-                sessionId = sessionManager.sessionId,
-                apiKey = clientImpl.apiKey,
-                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
-                sfuAnalytics = callAnalytics.sfuAnalytics,
-            )
-        },
+        createPlaybackSession = playbackSessionFactory,
         consumeJoinSource = { consumeJoinSource() },
     )
 

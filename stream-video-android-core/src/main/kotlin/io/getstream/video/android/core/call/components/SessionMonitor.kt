@@ -85,4 +85,16 @@ internal class SessionMonitor(
         iceMonitor.start()
         connectivityMonitor.subscribe()
     }
+
+    /**
+     * Stops everything [monitorSession] started, for a call that moves from the SFU to HLS
+     * playback. Network changes must no longer trigger SFU reconnects.
+     */
+    fun stopMonitoring() {
+        cancelSfuObservers()
+        statsReporter.stop()
+        iceMonitor.stop()
+        connectivityMonitor.cancelLeaveTimeout()
+        connectivityMonitor.unsubscribe()
+    }
 }

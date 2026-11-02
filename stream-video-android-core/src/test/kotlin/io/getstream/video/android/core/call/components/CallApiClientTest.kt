@@ -335,7 +335,7 @@ class CallApiClientTest {
         coEvery {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
 
@@ -348,7 +348,7 @@ class CallApiClientTest {
         coVerify {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
             )
         }
     }
@@ -374,7 +374,7 @@ class CallApiClientTest {
         coEvery {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
 
@@ -400,6 +400,48 @@ class CallApiClientTest {
                 migratingFromList = any(),
                 hintHighScaleLivestreamPublisher = any(),
                 e2ee = true,
+                playbackCapabilities = any(),
+            )
+        }
+    }
+
+    @Test
+    fun `joinRequest declares HLS playback support on every join`() = runTest(testDispatcher) {
+        coEvery {
+            clientImpl.joinCall(
+                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
+            )
+        } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
+
+        apiClient.joinRequest(
+            location = "test-location",
+            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
+        )
+        apiClient.joinRequest(
+            location = "test-location",
+            migratingFrom = "sfu-1",
+            joinAnalyticsModel = JoinAnalyticsModel(1, JoinReason.Migrate),
+        )
+
+        coVerify(exactly = 2) {
+            clientImpl.joinCall(
+                type = any(),
+                id = any(),
+                create = any(),
+                members = any(),
+                custom = any(),
+                settingsOverride = any(),
+                startsAt = any(),
+                team = any(),
+                ring = any(),
+                notify = any(),
+                location = any(),
+                migratingFrom = any(),
+                migratingFromList = any(),
+                hintHighScaleLivestreamPublisher = any(),
+                e2ee = any(),
+                playbackCapabilities = listOf("hls"),
             )
         }
     }
