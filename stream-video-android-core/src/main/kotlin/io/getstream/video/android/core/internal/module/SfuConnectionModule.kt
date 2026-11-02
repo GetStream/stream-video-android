@@ -24,7 +24,7 @@ import io.getstream.video.android.core.api.SignalServerService
 import io.getstream.video.android.core.call.utils.RetryableSignalingServiceDecorator
 import io.getstream.video.android.core.header.HeadersUtil
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
-import io.getstream.video.android.core.socket.common.token.ConstantTokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenLoader
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.core.trace.Tracer
@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit
 internal class SfuConnectionModule(
     context: Context,
     val tokenRepository: TokenRepository,
+    val tokenLoader: TokenLoader,
     val sfuAnalytics: SfuAnalytics,
     override val apiKey: ApiKey,
     override val apiUrl: String,
@@ -100,7 +101,7 @@ internal class SfuConnectionModule(
         apiKey = apiKey,
         scope = scope,
         httpClient = http,
-        tokenProvider = ConstantTokenProvider(tokenRepository.getToken()),
+        tokenProvider = tokenLoader,
         lifecycle = lifecycle,
         networkStateProvider = networkStateProvider,
         tokenRepository = tokenRepository,
