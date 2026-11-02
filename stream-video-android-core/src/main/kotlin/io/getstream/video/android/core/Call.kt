@@ -54,6 +54,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
+import io.getstream.video.android.core.call.EmptyRtcSession
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.components.CallApiClient
@@ -538,6 +539,17 @@ public class Call(
         hasRequiredPermissions = {
             clientImpl.permissionCheck
                 .checkAndroidPermissionsGroup(clientImpl.context, this@Call).first
+        },
+        createPlaybackSession = {
+            EmptyRtcSession(
+                client = clientImpl,
+                call = this,
+                sessionManager = sessionManager,
+                sessionId = sessionManager.sessionId,
+                apiKey = clientImpl.apiKey,
+                lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
+                sfuAnalytics = callAnalytics.sfuAnalytics,
+            )
         },
         consumeJoinSource = { consumeJoinSource() },
     )

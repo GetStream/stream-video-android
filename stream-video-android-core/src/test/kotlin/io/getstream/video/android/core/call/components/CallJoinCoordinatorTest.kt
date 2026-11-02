@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call.components
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.PlaybackResponse
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.result.Error
@@ -36,6 +37,7 @@ import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -67,6 +69,10 @@ import kotlin.test.assertFailsWith
  */
 class CallJoinCoordinatorTest {
 
+    private companion object {
+        const val HLS_URL = "https://hls.example.com/playlist.m3u8"
+    }
+
     @get:Rule
     val dispatcherRule = DispatcherRule()
 
@@ -88,6 +94,9 @@ class CallJoinCoordinatorTest {
     private lateinit var connectionFlow: MutableStateFlow<RealtimeConnection>
     private lateinit var mockSession: RtcSession
     private lateinit var mockJoinResponse: JoinCallResponse
+    private lateinit var playbackTypeFlow: MutableStateFlow<PlaybackType>
+    private lateinit var playbackSession: RtcSession
+    private var heldPlaybackSession: RtcSession? = null
 
     @Before
     fun setup() {
@@ -114,6 +123,16 @@ class CallJoinCoordinatorTest {
         every { state.settings } returns MutableStateFlow<CallSettingsResponse?>(null)
         every { state.e2eeEnabled } returns MutableStateFlow(false)
         coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
+
+        playbackTypeFlow = MutableStateFlow(PlaybackType.WebRtc)
+        playbackSession = mockk(relaxed = true)
+        heldPlaybackSession = null
+        every { state._playbackType } returns playbackTypeFlow
+        every { mockJoinResponse.playback } returns null
+        every { sessionManager.playbackSession } answers { heldPlaybackSession }
+        every { sessionManager.playbackSession = any() } answers {
+            heldPlaybackSession = firstArg()
+        }
     }
 
     @After
@@ -121,7 +140,7 @@ class CallJoinCoordinatorTest {
         unmockkAll()
     }
 
-    private fun coordinator() = CallJoinCoordinator(
+    private fun coordinator(hlsPlaybackSupported: Boolean = false) = CallJoinCoordinator(
         clientImpl = clientImpl,
         state = state,
         callAnalytics = callAnalytics,
@@ -137,14 +156,25 @@ class CallJoinCoordinatorTest {
         sessionMonitor = sessionMonitor,
         callRegistry = callRegistry,
         hasRequiredPermissions = { true },
+        createPlaybackSession = { playbackSession },
+        hlsPlaybackSupported = hlsPlaybackSupported,
     )
 
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {
         coEvery {
             apiClient.joinRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns result
+    }
+
+    private fun stubHlsPlayback() {
+        every { mockJoinResponse.playback } returns PlaybackResponse(
+            playlistUrl = HLS_URL,
+            reason = PlaybackResponse.Reason.Percentage,
+            type = PlaybackResponse.Type.Hls,
+        )
+        stubJoinCall(Success(mockJoinResponse))
     }
 
     @Test
@@ -734,5 +764,78 @@ class CallJoinCoordinatorTest {
 
         assertThat(result).isInstanceOf(Failure::class.java)
         coVerify { lifecycle.leave(any<CallLeaveReason>()) }
+    }
+
+    @Test
+    fun `first join declares HLS playback only when supported`() = runTest(testDispatcher) {
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+
+        coordinator(hlsPlaybackSupported = false).join()
+        advanceUntilIdle()
+        coVerify {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), null)
+        }
+
+        sessionFlow.value = null
+        coordinator(hlsPlaybackSupported = true).join()
+        advanceUntilIdle()
+        coVerify {
+            apiClient.joinRequest(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                listOf(
+                    "hls",
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `HLS playback joins without an SFU connection`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+
+        val result = coordinator(hlsPlaybackSupported = true).join()
+        advanceUntilIdle()
+
+        assertThat((result as Success).value).isSameInstanceAs(playbackSession)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(HLS_URL))
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Connected)
+        assertThat(heldPlaybackSession).isSameInstanceAs(playbackSession)
+        assertThat(sessionFlow.value).isNull()
+        verify { callRegistry.markActive() }
+        coVerify(exactly = 0) { mockSession.connectInternal() }
+        verify(exactly = 0) { sessionMonitor.monitorSession(any()) }
+        verify(exactly = 0) { media.updateMediaManagerFromSettings(any()) }
+    }
+
+    @Test
+    fun `join after HLS playback returns the playback session`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+        val coordinator = coordinator(hlsPlaybackSupported = true)
+
+        coordinator.join()
+        advanceUntilIdle()
+        val second = coordinator.join()
+        advanceUntilIdle()
+
+        assertThat((second as Success).value).isSameInstanceAs(playbackSession)
+        coVerify(exactly = 1) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `HLS playback fails the join when HLS support is off`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+
+        val result = coordinator(hlsPlaybackSupported = false).join()
+        advanceUntilIdle()
+
+        assertThat(result).isInstanceOf(Failure::class.java)
+        assertThat(connectionFlow.value).isInstanceOf(RealtimeConnection.Failed::class.java)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+        assertThat(heldPlaybackSession).isNull()
+        verify(exactly = 0) { callRegistry.markActive() }
+        coVerify(exactly = 0) { mockSession.connectInternal() }
     }
 }
