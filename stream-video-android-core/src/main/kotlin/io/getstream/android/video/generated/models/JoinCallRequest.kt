@@ -60,6 +60,9 @@ data class JoinCallRequest (
     @Json(name = "notify")
     val notify: kotlin.Boolean? = null,
 
+    @Json(name = "prefer")
+    val prefer: kotlin.String? = null,
+
     @Json(name = "ring")
     val ring: kotlin.Boolean? = null,
 
@@ -68,6 +71,9 @@ data class JoinCallRequest (
 
     @Json(name = "migrating_from_list")
     val migratingFromList: kotlin.collections.List<kotlin.String>? = emptyList(),
+
+    @Json(name = "playback_capabilities")
+    val playbackCapabilities: kotlin.collections.List<kotlin.String>? = emptyList(),
 
     @Json(name = "data")
     val data: io.getstream.android.video.generated.models.CallRequest? = null

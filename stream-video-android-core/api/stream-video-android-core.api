@@ -4203,21 +4203,23 @@ public final class io/getstream/android/video/generated/models/IngressVideoLayer
 }
 
 public final class io/getstream/android/video/generated/models/JoinCallRequest {
-	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Lio/getstream/android/video/generated/models/CallRequest;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Lio/getstream/android/video/generated/models/CallRequest;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallRequest;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallRequest;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component10 ()Ljava/util/List;
-	public final fun component11 ()Lio/getstream/android/video/generated/models/CallRequest;
+	public final fun component10 ()Ljava/lang/Boolean;
+	public final fun component11 ()Ljava/util/List;
+	public final fun component12 ()Ljava/util/List;
+	public final fun component13 ()Lio/getstream/android/video/generated/models/CallRequest;
 	public final fun component2 ()Ljava/lang/Boolean;
 	public final fun component3 ()Ljava/lang/Boolean;
 	public final fun component4 ()Ljava/lang/Boolean;
 	public final fun component5 ()Ljava/lang/Integer;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Ljava/lang/Boolean;
-	public final fun component8 ()Ljava/lang/Boolean;
+	public final fun component8 ()Ljava/lang/String;
 	public final fun component9 ()Ljava/lang/Boolean;
-	public final fun copy (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Lio/getstream/android/video/generated/models/CallRequest;)Lio/getstream/android/video/generated/models/JoinCallRequest;
-	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/JoinCallRequest;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Lio/getstream/android/video/generated/models/CallRequest;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/JoinCallRequest;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallRequest;)Lio/getstream/android/video/generated/models/JoinCallRequest;
+	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/JoinCallRequest;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/String;Ljava/lang/Boolean;Ljava/lang/Boolean;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallRequest;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/JoinCallRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCreate ()Ljava/lang/Boolean;
 	public final fun getData ()Lio/getstream/android/video/generated/models/CallRequest;
@@ -4228,6 +4230,8 @@ public final class io/getstream/android/video/generated/models/JoinCallRequest {
 	public final fun getMigratingFrom ()Ljava/lang/String;
 	public final fun getMigratingFromList ()Ljava/util/List;
 	public final fun getNotify ()Ljava/lang/Boolean;
+	public final fun getPlaybackCapabilities ()Ljava/util/List;
+	public final fun getPrefer ()Ljava/lang/String;
 	public final fun getRing ()Ljava/lang/Boolean;
 	public final fun getVideo ()Ljava/lang/Boolean;
 	public fun hashCode ()I
@@ -4235,8 +4239,8 @@ public final class io/getstream/android/video/generated/models/JoinCallRequest {
 }
 
 public final class io/getstream/android/video/generated/models/JoinCallResponse {
-	public fun <init> (ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallResponse;Lio/getstream/android/video/generated/models/Credentials;Lio/getstream/android/video/generated/models/StatsOptions;Lio/getstream/android/video/generated/models/MemberResponse;)V
-	public synthetic fun <init> (ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallResponse;Lio/getstream/android/video/generated/models/Credentials;Lio/getstream/android/video/generated/models/StatsOptions;Lio/getstream/android/video/generated/models/MemberResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallResponse;Lio/getstream/android/video/generated/models/Credentials;Lio/getstream/android/video/generated/models/StatsOptions;Lio/getstream/android/video/generated/models/MemberResponse;Lio/getstream/android/video/generated/models/PlaybackResponse;)V
+	public synthetic fun <init> (ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallResponse;Lio/getstream/android/video/generated/models/Credentials;Lio/getstream/android/video/generated/models/StatsOptions;Lio/getstream/android/video/generated/models/MemberResponse;Lio/getstream/android/video/generated/models/PlaybackResponse;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/util/List;
@@ -4245,8 +4249,9 @@ public final class io/getstream/android/video/generated/models/JoinCallResponse 
 	public final fun component6 ()Lio/getstream/android/video/generated/models/Credentials;
 	public final fun component7 ()Lio/getstream/android/video/generated/models/StatsOptions;
 	public final fun component8 ()Lio/getstream/android/video/generated/models/MemberResponse;
-	public final fun copy (ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallResponse;Lio/getstream/android/video/generated/models/Credentials;Lio/getstream/android/video/generated/models/StatsOptions;Lio/getstream/android/video/generated/models/MemberResponse;)Lio/getstream/android/video/generated/models/JoinCallResponse;
-	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/JoinCallResponse;ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallResponse;Lio/getstream/android/video/generated/models/Credentials;Lio/getstream/android/video/generated/models/StatsOptions;Lio/getstream/android/video/generated/models/MemberResponse;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/JoinCallResponse;
+	public final fun component9 ()Lio/getstream/android/video/generated/models/PlaybackResponse;
+	public final fun copy (ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallResponse;Lio/getstream/android/video/generated/models/Credentials;Lio/getstream/android/video/generated/models/StatsOptions;Lio/getstream/android/video/generated/models/MemberResponse;Lio/getstream/android/video/generated/models/PlaybackResponse;)Lio/getstream/android/video/generated/models/JoinCallResponse;
+	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/JoinCallResponse;ZLjava/lang/String;Ljava/util/List;Ljava/util/List;Lio/getstream/android/video/generated/models/CallResponse;Lio/getstream/android/video/generated/models/Credentials;Lio/getstream/android/video/generated/models/StatsOptions;Lio/getstream/android/video/generated/models/MemberResponse;Lio/getstream/android/video/generated/models/PlaybackResponse;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/JoinCallResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCall ()Lio/getstream/android/video/generated/models/CallResponse;
 	public final fun getCreated ()Z
@@ -4255,6 +4260,7 @@ public final class io/getstream/android/video/generated/models/JoinCallResponse 
 	public final fun getMembers ()Ljava/util/List;
 	public final fun getMembership ()Lio/getstream/android/video/generated/models/MemberResponse;
 	public final fun getOwnCapabilities ()Ljava/util/List;
+	public final fun getPlayback ()Lio/getstream/android/video/generated/models/PlaybackResponse;
 	public final fun getStatsOptions ()Lio/getstream/android/video/generated/models/StatsOptions;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -5186,6 +5192,21 @@ public final class io/getstream/android/video/generated/models/PinResponse {
 	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/PinResponse;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/PinResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDuration ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/android/video/generated/models/PlaybackResponse {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/getstream/android/video/generated/models/PlaybackResponse;
+	public static synthetic fun copy$default (Lio/getstream/android/video/generated/models/PlaybackResponse;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/android/video/generated/models/PlaybackResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPlaylistUrl ()Ljava/lang/String;
+	public final fun getReason ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -9170,6 +9191,7 @@ public final class io/getstream/video/android/core/CallState {
 	public final fun getEndedAt ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getEndedByUser ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getErrors ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getHlsPlayback ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getIndividualRecording ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getIngress ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getLive ()Lkotlinx/coroutines/flow/StateFlow;
@@ -13278,6 +13300,19 @@ public final class io/getstream/video/android/core/model/EdgeData {
 	public final fun getLongitude ()F
 	public final fun getRed ()I
 	public final fun getYellow ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/video/android/core/model/HlsPlayback {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lio/getstream/video/android/core/model/HlsPlayback;
+	public static synthetic fun copy$default (Lio/getstream/video/android/core/model/HlsPlayback;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/getstream/video/android/core/model/HlsPlayback;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPlaylistUrl ()Ljava/lang/String;
+	public final fun getReason ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

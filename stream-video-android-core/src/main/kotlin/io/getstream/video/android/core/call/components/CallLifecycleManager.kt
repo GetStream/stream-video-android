@@ -93,6 +93,7 @@ internal class CallLifecycleManager(
         callAnalytics.stopObservers()
         sessionMonitor().cancelSfuObservers()
         state._connection.value = RealtimeConnection.Disconnected
+        state._hlsPlayback.value = null
         logger.v { "[leave] #ringing; call_id = $id" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }

@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call.components
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.video.generated.models.CallSettingsResponse
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.PlaybackResponse
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.android.video.generated.models.RingCallResponse
 import io.getstream.result.Error
@@ -36,6 +37,7 @@ import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.model.HlsPlayback
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -88,6 +90,8 @@ class CallJoinCoordinatorTest {
     private lateinit var connectionFlow: MutableStateFlow<RealtimeConnection>
     private lateinit var mockSession: RtcSession
     private lateinit var mockJoinResponse: JoinCallResponse
+    private val detachedSession: RtcSession = mockk(relaxed = true)
+    private val hlsPlaybackFlow = MutableStateFlow<HlsPlayback?>(null)
 
     @Before
     fun setup() {
@@ -113,6 +117,8 @@ class CallJoinCoordinatorTest {
         every { state.connection } returns connectionFlow
         every { state.settings } returns MutableStateFlow<CallSettingsResponse?>(null)
         every { state.e2eeEnabled } returns MutableStateFlow(false)
+        every { state._hlsPlayback } returns hlsPlaybackFlow
+        every { mockJoinResponse.playback } returns null
         coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
     }
 
@@ -130,6 +136,7 @@ class CallJoinCoordinatorTest {
         scope = testScope,
         sessionManager = sessionManager,
         sessionFactory = RtcSessionFactory { _, _, _, _, _, _, _ -> mockSession },
+        detachedSessionFactory = { detachedSession },
         media = media,
         lifecycle = lifecycle,
         apiClient = apiClient,
@@ -142,7 +149,7 @@ class CallJoinCoordinatorTest {
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {
         coEvery {
             apiClient.joinRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns result
     }
@@ -159,6 +166,49 @@ class CallJoinCoordinatorTest {
         assertThat((result as Success).value).isSameInstanceAs(mockSession)
         verify { sessionMonitor.monitorSession(mockJoinResponse) }
     }
+
+    @Test
+    fun `first join offers hls playback`() = runTest(testDispatcher) {
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+
+        coordinator().join()
+        advanceUntilIdle()
+
+        coVerify {
+            apiClient.joinRequest(
+                create = any(),
+                location = any(),
+                migratingFrom = any(),
+                migratingFromList = any(),
+                ring = any(),
+                notify = any(),
+                hintHighScaleLivestreamPublisher = any(),
+                joinAnalyticsModel = any(),
+                e2ee = any(),
+                playbackCapabilities = listOf("hls"),
+            )
+        }
+    }
+
+    @Test
+    fun `hls playback grant returns a detached session without touching the sfu`() =
+        runTest(testDispatcher) {
+            every { mockJoinResponse.playback } returns
+                PlaybackResponse(playlistUrl = "https://cdn/playlist.m3u8", reason = "percentage", type = "hls")
+            stubJoinCall(Success(mockJoinResponse))
+
+            val result = coordinator().join()
+            advanceUntilIdle()
+
+            assertThat((result as Success).value).isSameInstanceAs(detachedSession)
+            assertThat(sessionFlow.value).isNull()
+            assertThat(hlsPlaybackFlow.value)
+                .isEqualTo(HlsPlayback("https://cdn/playlist.m3u8", "percentage"))
+            coVerify(exactly = 0) { mockSession.connectInternal(any(), any()) }
+            verify(exactly = 0) { sessionMonitor.monitorSession(any()) }
+            verify(exactly = 0) { media.updateMediaManagerFromSettings(any()) }
+        }
 
     @Test
     fun `join restores the full rejoin budget`() = runTest(testDispatcher) {
@@ -194,6 +244,7 @@ class CallJoinCoordinatorTest {
                 hintHighScaleLivestreamPublisher = any(),
                 joinAnalyticsModel = any(),
                 e2ee = true,
+                playbackCapabilities = any(),
             )
         }
     }
@@ -240,6 +291,7 @@ class CallJoinCoordinatorTest {
                 any(),
                 any(),
                 any(),
+                any(),
             )
         }
     }
@@ -262,7 +314,7 @@ class CallJoinCoordinatorTest {
         verify(exactly = 0) { sessionManager.setActiveSession(null) }
         verify(exactly = 1) { callAnalytics.joinAnalytics.onJoinFunctionStart() }
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         // The single outer gate must also stop a second RtcSession from being installed.
         verify(exactly = 0) { sessionManager.setActiveSession(mockSession) }
@@ -280,7 +332,7 @@ class CallJoinCoordinatorTest {
         val joinAnalytics = callAnalytics.joinAnalytics
         verify(exactly = 1) { joinAnalytics.onJoinFunctionStart() }
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -299,7 +351,7 @@ class CallJoinCoordinatorTest {
         assertThat(result).isInstanceOf(Success::class.java)
         assertThat((result as Success).value).isSameInstanceAs(existing)
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         verify { existing.sfuTracer.trace("join-already-joined", any()) }
         // The guard must not tear down the live session's SFU observers: nothing on this path
@@ -359,7 +411,7 @@ class CallJoinCoordinatorTest {
         assertThat(results.map { (it as Success).value }.distinct()).hasSize(1)
         // One join request and one SFU connect for five callers.
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         coVerify(exactly = 1) { mockSession.connectInternal() }
         verify(exactly = 1) { sessionManager.setActiveSession(mockSession) }
@@ -469,7 +521,7 @@ class CallJoinCoordinatorTest {
 
         verify(exactly = 1) { state.callJoinInterceptor = interceptor }
         coVerify(exactly = 0) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
 
         guestGate.complete(Unit)
@@ -494,7 +546,7 @@ class CallJoinCoordinatorTest {
         advanceUntilIdle()
 
         coVerify(exactly = 2) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -527,7 +579,7 @@ class CallJoinCoordinatorTest {
 
         assertThat(secondResult).isInstanceOf(Success::class.java)
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
         coVerify(exactly = 1) { mockSession.connectInternal() }
     }
@@ -536,7 +588,7 @@ class CallJoinCoordinatorTest {
     fun `cancelling the last waiter does not abort the shared join`() = runTest(testDispatcher) {
         val joinRequestGate = CompletableDeferred<Unit>()
         coEvery {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         } coAnswers {
             joinRequestGate.await()
             Success(mockJoinResponse)
@@ -568,7 +620,7 @@ class CallJoinCoordinatorTest {
         assertThat(retry).isInstanceOf(Success::class.java)
         assertThat((retry as Success).value).isSameInstanceAs(mockSession)
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -578,7 +630,7 @@ class CallJoinCoordinatorTest {
     ) {
         val joinRequestGate = CompletableDeferred<Unit>()
         coEvery {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         } coAnswers {
             joinRequestGate.await()
             Success(mockJoinResponse)
@@ -632,7 +684,7 @@ class CallJoinCoordinatorTest {
         assertThat(retry).isInstanceOf(Success::class.java)
         assertThat((retry as Success).value).isSameInstanceAs(mockSession)
         coVerify(exactly = 1) {
-            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         }
     }
 

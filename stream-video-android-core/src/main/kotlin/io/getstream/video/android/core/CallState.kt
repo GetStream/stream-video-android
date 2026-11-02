@@ -104,7 +104,9 @@ import io.getstream.video.android.core.events.SFUHealthCheckEvent
 import io.getstream.video.android.core.events.SubscriberOfferEvent
 import io.getstream.video.android.core.events.TrackPublishedEvent
 import io.getstream.video.android.core.events.TrackUnpublishedEvent
+import io.getstream.video.android.core.internal.ExperimentalStreamVideoApi
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
+import io.getstream.video.android.core.model.HlsPlayback
 import io.getstream.video.android.core.model.Ingress
 import io.getstream.video.android.core.model.NetworkQuality
 import io.getstream.video.android.core.model.RTMP
@@ -271,6 +273,16 @@ public class CallState(
 
     internal val _connection = MutableStateFlow<RealtimeConnection>(RealtimeConnection.PreJoin)
     public val connection: StateFlow<RealtimeConnection> = _connection
+
+    internal val _hlsPlayback = MutableStateFlow<HlsPlayback?>(null)
+
+    /**
+     * Set when the coordinator served this viewer HLS instead of WebRTC. While it is non-null
+     * the call has no SFU connection, so play [HlsPlayback.playlistUrl] instead of rendering
+     * participant video. Cleared on leave.
+     */
+    @ExperimentalStreamVideoApi
+    public val hlsPlayback: StateFlow<HlsPlayback?> = _hlsPlayback
 
     public val isReconnecting: StateFlow<Boolean> = _connection.mapState {
         it is RealtimeConnection.Reconnecting

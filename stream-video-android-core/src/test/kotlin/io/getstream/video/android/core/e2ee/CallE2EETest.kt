@@ -97,7 +97,7 @@ class CallE2EETest {
         coEvery {
             mockClientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Result.Failure(Error.GenericError("not under test"))
 

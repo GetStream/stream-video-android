@@ -40,6 +40,7 @@ import io.getstream.video.android.core.call.components.CallSessionManager
 import io.getstream.video.android.core.call.components.ClientCallRegistry
 import io.getstream.video.android.core.call.components.RtcSessionFactory
 import io.getstream.video.android.core.call.components.SessionMonitor
+import io.getstream.video.android.core.model.HlsPlayback
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -83,6 +84,8 @@ class JoinRecoverableFailureTest {
     private lateinit var reconnector: CallReconnector
     private lateinit var mockSession: RtcSession
     private lateinit var mockJoinResponse: JoinCallResponse
+    private val detachedSession: RtcSession = mockk(relaxed = true)
+    private val hlsPlaybackFlow = MutableStateFlow<HlsPlayback?>(null)
     private lateinit var connectionFlow: MutableStateFlow<RealtimeConnection>
 
     @Before
@@ -101,10 +104,12 @@ class JoinRecoverableFailureTest {
         every { state.connection } returns connectionFlow
         every { state.settings } returns MutableStateFlow<CallSettingsResponse?>(null)
         every { state.e2eeEnabled } returns MutableStateFlow(false)
+        every { state._hlsPlayback } returns hlsPlaybackFlow
+        every { mockJoinResponse.playback } returns null
         coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
         coEvery {
             apiClient.joinRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Success(mockJoinResponse)
     }
@@ -123,6 +128,7 @@ class JoinRecoverableFailureTest {
         scope = testScope,
         sessionManager = sessionManager,
         sessionFactory = RtcSessionFactory { _, _, _, _, _, _, _ -> mockSession },
+        detachedSessionFactory = { detachedSession },
         media = mockk<CallMediaManager>(relaxed = true),
         lifecycle = mockk<CallLifecycleManager>(relaxed = true),
         apiClient = apiClient,

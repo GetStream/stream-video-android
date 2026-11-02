@@ -20,6 +20,7 @@ import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.result.Error
+import io.getstream.result.Result
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.MediaManagerImpl
@@ -58,6 +59,7 @@ import io.mockk.spyk
 import io.mockk.unmockkAll
 import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
@@ -201,6 +203,47 @@ class RtcSessionTest2 {
             rtcSession.subscriber.value,
         )
         assertEquals("Wrong sessionId", sessionId, rtcSession.fieldValue("sessionId"))
+    }
+
+    @Test
+    fun `detached session never connects to an sfu and ignores every operation`() = runTest(
+        UnconfinedTestDispatcher(),
+    ) {
+        var sfuModuleCreated = false
+
+        val rtcSession = RtcSession(
+            client = mockStreamVideo,
+            powerManager = mockPowerManager,
+            call = mockCall,
+            sessionManager = CallSessionManager(),
+            sessionId = "test-session-id",
+            apiKey = "test-api-key",
+            lifecycle = mockLifecycle,
+            sfuUrl = "",
+            sfuWsUrl = "",
+            sfuToken = "",
+            sfuName = "",
+            remoteIceServers = emptyList(),
+            clientImpl = mockVideoClient,
+            coroutineScope = testScope,
+            sfuConnectionModuleProvider = {
+                sfuModuleCreated = true
+                mockk(relaxed = true)
+            },
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+            detached = true,
+        )
+
+        rtcSession.reconnect(forceRestart = true)
+        rtcSession.updateTrackDimensions("other", TrackType.TRACK_TYPE_VIDEO, visible = true)
+        rtcSession.cleanup()
+
+        assertFalse(sfuModuleCreated)
+        assertNull(rtcSession.subscriber.value)
+        assertNull(rtcSession.getSubscriberStats())
+        assertTrue(rtcSession.requestPublisherIceRestart() is Result.Failure)
+        assertTrue(rtcSession.requestSubscriberIceRestart() is Result.Failure)
+        verify(exactly = 0) { mockCall.peerConnectionFactory }
     }
 
     @Suppress("DEPRECATION")

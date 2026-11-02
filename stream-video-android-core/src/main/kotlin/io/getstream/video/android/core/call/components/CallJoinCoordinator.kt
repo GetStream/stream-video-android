@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.call.components
 
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.PlaybackResponse
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -38,6 +39,7 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.model.HlsPlayback
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
@@ -63,6 +65,7 @@ internal class CallJoinCoordinator(
     private val scope: CoroutineScope,
     private val sessionManager: CallSessionManager,
     private val sessionFactory: RtcSessionFactory,
+    private val detachedSessionFactory: () -> RtcSession,
     private val media: CallMediaManager,
     private val lifecycle: CallLifecycleManager,
     private val apiClient: CallApiClient,
@@ -75,6 +78,7 @@ internal class CallJoinCoordinator(
 ) {
     private companion object {
         const val JOIN_FLIGHT_KEY = "join"
+        const val PLAYBACK_HLS = "hls"
     }
 
     private val logger by taggedLogger("Call:JoinCoordinator:$type:$id")
@@ -276,6 +280,8 @@ internal class CallJoinCoordinator(
                 hintHighScaleLivestreamPublisher,
                 JoinAnalyticsModel(retryCount, JoinReason.FirstAttempt, joinSource),
             )
+            // An HLS viewer publishes nothing, so camera and mic stay as they are.
+            if (result is Success && state._hlsPlayback.value != null) return result
             if (result is Success) {
                 // we initialise the camera, mic and other according to local + backend settings
                 // only when the call is joined to make sure we don't switch and override
@@ -425,11 +431,14 @@ internal class CallJoinCoordinator(
                 // The coordinator rejects a join whose flag disagrees with the call. This is
                 // the first join; rejoin / migrate omit it and CallApiClient reads the manager.
                 e2ee = state.e2eeEnabled.value,
+                // Only the first join offers HLS. Rejoin / migrate need SFU credentials back.
+                playbackCapabilities = listOf(PLAYBACK_HLS),
             )
 
         if (result !is Success) {
             return result as Failure
         }
+        result.value.playback?.let { return joinHlsPlayback(it) }
         val sfuToken = result.value.credentials.token
         val sfuUrl = result.value.credentials.server.url
         val sfuWsUrl = result.value.credentials.server.wsEndpoint
@@ -466,6 +475,19 @@ internal class CallJoinCoordinator(
             }
             throw ce
         }
+    }
+
+    /**
+     * The coordinator served this viewer HLS, so there is no SFU to connect to. The returned
+     * session only keeps `join()`'s signature: it is detached, never installed as the active
+     * session, and every `session == null` check keeps treating the call as SFU-less.
+     */
+    private fun joinHlsPlayback(playback: PlaybackResponse): Result<RtcSession> {
+        logger.i { "[joinInternal] HLS playback granted (${playback.reason}), skipping the SFU" }
+        val detached = detachedSessionFactory()
+        state._hlsPlayback.value = HlsPlayback(playback.playlistUrl, playback.reason)
+        state._connection.value = RealtimeConnection.Joined(detached)
+        return Success(detached)
     }
 
     private suspend fun completeJoinAfterSessionInstall(

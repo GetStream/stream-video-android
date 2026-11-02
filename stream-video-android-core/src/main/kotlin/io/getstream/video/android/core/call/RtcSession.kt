@@ -327,6 +327,12 @@ public class RtcSession internal constructor(
             sfuAnalytics = sfuAnalytics,
         )
     },
+    /**
+     * A detached session stands in for the call when the coordinator hands the viewer an HLS
+     * playback grant instead of SFU credentials. It never connects to an SFU, is never installed
+     * as the call's active session, and every public operation on it is a no-op.
+     */
+    internal val detached: Boolean = false,
 ) {
     private val muteStateSyncJobs = TrackKeyedJobs()
 
@@ -713,6 +719,14 @@ public class RtcSession internal constructor(
     }
 
     init {
+        if (detached) {
+            logger.i { "<init> #sfu; detached, no SFU connection" }
+        } else {
+            attachToSfu()
+        }
+    }
+
+    private fun attachToSfu() {
         if (!isSDKInitialized()) {
             throw IllegalArgumentException(
                 "SDK hasn't been initialised yet - can't start a RtcSession",
@@ -977,6 +991,7 @@ public class RtcSession internal constructor(
      * regardless of their current connection status (even if they are CONNECTED)
      */
     suspend fun reconnect(forceRestart: Boolean) {
+        if (detached) return
         // ice restart
         val subscriberAsync = rtcSessionScope.async {
             subscriber.value?.let {
@@ -1306,6 +1321,7 @@ public class RtcSession internal constructor(
     }
 
     fun setScreenShareTrack() {
+        if (detached) return
         setLocalTrack(
             TrackType.TRACK_TYPE_SCREEN_SHARE,
             VideoTrack(
@@ -1347,6 +1363,7 @@ public class RtcSession internal constructor(
     private val atomicCleanup = AtomicUnitCall()
 
     fun cleanup() = atomicCleanup {
+        if (detached) return@atomicCleanup
         logger.i { "[cleanup] #sfu; #track; no args" }
 
         coroutineScope.launch {
@@ -1664,6 +1681,7 @@ public class RtcSession internal constructor(
     }
 
     fun handleEvent(event: VideoEvent) {
+        if (detached) return
         logger.i { "[rtc handleEvent] #sfu; event: $event" }
         if (event is SfuDataEvent) {
             coroutineScope.launch {
@@ -1924,6 +1942,7 @@ public class RtcSession internal constructor(
      * Triggered whenever we receive new ice candidate from the SFU
      */
     suspend fun handleIceTrickle(event: ICETrickleEvent) {
+        if (detached) return
         if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED && publisher.value == null && sfuConnectionModule.socketConnection.state().value is SfuSocketState.Connected) {
             logger.v {
                 "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; publisher is null, adding to pending"
@@ -2117,6 +2136,7 @@ public class RtcSession internal constructor(
         )
 
     suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> = safeApiCall {
+        check(!detached) { "No SFU connection in HLS playback" }
         val request = ICERestartRequest(
             session_id = sessionId,
             peer_type = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
@@ -2152,6 +2172,7 @@ public class RtcSession internal constructor(
         dimensions: VideoDimension = Subscriber.defaultVideoDimension,
         viewportId: String = sessionId,
     ) {
+        if (detached) return
         logger.v {
             "[updateTrackDimensions] #track; #sfu; sessionId: $sessionId, trackType: $trackType, visible: $visible, dimensions: $dimensions"
         }

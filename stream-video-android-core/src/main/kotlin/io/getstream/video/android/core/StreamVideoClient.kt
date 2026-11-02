@@ -865,10 +865,12 @@ internal class StreamVideoClient internal constructor(
         migratingFromList: List<String>? = null,
         hintHighScaleLivestreamPublisher: Boolean? = null,
         e2ee: Boolean? = null,
+        playbackCapabilities: List<String>? = null,
     ): Result<JoinCallResponse> {
         val joinCallRequest = JoinCallRequest(
             create = create,
             e2ee = e2ee,
+            playbackCapabilities = playbackCapabilities,
             data = CallRequest(
                 members = members,
                 custom = custom,
