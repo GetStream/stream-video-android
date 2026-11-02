@@ -33,7 +33,6 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.socket.common.token.TokenRepository
@@ -55,6 +54,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -152,37 +152,42 @@ class StreamVideoClientTest {
     }
 
     @Test
-    fun `notifyClientSubscriptions triggers listener when no filter`() {
+    fun `emitClientEvent emits the event to the events flow`() = runTest {
         val event = mockk<VideoEvent>()
-        val listener = mockk<VideoEventListener<VideoEvent>>(relaxed = true)
-
-        val sub = EventSubscription(listener)
-
-        client::class.java.getDeclaredField("subscriptions").apply {
-            isAccessible = true
-            set(client, mutableSetOf(sub))
+        val received = mutableListOf<VideoEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            client.events.collect { received.add(it) }
         }
 
-        client.notifyClientSubscriptions(event)
+        client.emitClientEvent(event)
 
-        verify { listener.onEvent(event) }
+        assertEquals(listOf(event), received)
     }
 
     @Test
-    fun `notifyClientSubscriptions triggers only when filter matches`() {
-        val event = mockk<VideoEvent>()
-        val listener = mockk<VideoEventListener<VideoEvent>>(relaxed = true)
-
-        val sub = EventSubscription(listener) { false }
-
-        client::class.java.getDeclaredField("subscriptions").apply {
-            isAccessible = true
-            set(client, mutableSetOf(sub))
+    fun `events emits client-level events in dispatch order`() = runTest {
+        val first = mockk<CallSessionStartedEvent>(relaxed = true)
+        val second = mockk<CallSessionStartedEvent>(relaxed = true)
+        val received = mutableListOf<VideoEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            client.events.collect { received.add(it) }
         }
 
-        client.notifyClientSubscriptions(event)
+        client.fireEvent(first)
+        client.fireEvent(second)
 
-        verify(exactly = 0) { listener.onEvent(any()) }
+        assertEquals(listOf<VideoEvent>(first, second), received)
+    }
+
+    @Test
+    fun `events does not replay events emitted before collection`() = runTest {
+        client.emitClientEvent(mockk<VideoEvent>())
+        val received = mutableListOf<VideoEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            client.events.collect { received.add(it) }
+        }
+
+        assertTrue(received.isEmpty())
     }
 
     @Test
@@ -544,16 +549,18 @@ class StreamVideoClientTest {
     }
 
     @Test
-    fun `streamClientListener forwards VideoEvents into the event pipeline`() {
+    fun `streamClientListener forwards VideoEvents into the event pipeline`() = runTest {
         // The listener belongs to the underlying instance, not the spyk copy, so verify
         // through the shared subscriptions set instead of spy recording.
         val harness = prepareClient()
         val listener = slot<StreamClientListener>()
         verify { harness.streamClient.subscribe(capture(listener)) }
         val received = mutableListOf<VideoEvent>()
-        harness.client.subscribe { received.add(it) }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            harness.client.events.collect { received.add(it) }
+        }
         // CallSessionStartedEvent has no ClientState.handleEvent branch, so the dispatch
-        // reaches client subscriptions without side effects.
+        // reaches the client events flow without side effects.
         val event = mockk<CallSessionStartedEvent>(relaxed = true)
 
         listener.captured.onEvent(event)
@@ -562,12 +569,14 @@ class StreamVideoClientTest {
     }
 
     @Test
-    fun `streamClientListener ignores non-VideoEvent payloads`() {
+    fun `streamClientListener ignores non-VideoEvent payloads`() = runTest {
         val harness = prepareClient()
         val listener = slot<StreamClientListener>()
         verify { harness.streamClient.subscribe(capture(listener)) }
         val received = mutableListOf<VideoEvent>()
-        harness.client.subscribe { received.add(it) }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            harness.client.events.collect { received.add(it) }
+        }
 
         listener.captured.onEvent("not-a-video-event")
 
