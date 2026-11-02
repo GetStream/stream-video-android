@@ -10125,21 +10125,21 @@ public final class io/getstream/video/android/core/call/CallType$Livestream : io
 	public fun getSortPreset ()Lio/getstream/video/android/core/sorting/SortPreset;
 }
 
-public final class io/getstream/video/android/core/call/RtcSession {
+public class io/getstream/video/android/core/call/RtcSession {
 	public final fun cleanup ()V
-	public final fun connect (Lstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun connect (Lstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun connect$default (Lio/getstream/video/android/core/call/RtcSession;Lstream/video/sfu/event/ReconnectDetails;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public final fun getPublisherStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getPublisherStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun getSfuSocketState ()Lkotlinx/coroutines/flow/StateFlow;
-	public final fun getSubscriberStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun handleEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
-	public final fun handleIceTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun handleSubscriberOffer (Lio/getstream/video/android/core/events/SubscriberOfferEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun reconnect (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun requestPublisherIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun requestSubscriberIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun setScreenShareTrack ()V
-	public final fun updateTrackDimensions (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;Ljava/lang/String;)V
+	public fun getSubscriberStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun handleEvent (Lio/getstream/android/video/generated/models/VideoEvent;)V
+	public fun handleIceTrickle (Lio/getstream/video/android/core/events/ICETrickleEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun handleSubscriberOffer (Lio/getstream/video/android/core/events/SubscriberOfferEvent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun reconnect (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun requestPublisherIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun requestSubscriberIceRestart (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun setScreenShareTrack ()V
+	public fun updateTrackDimensions (Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;Ljava/lang/String;)V
 	public static synthetic fun updateTrackDimensions$default (Lio/getstream/video/android/core/call/RtcSession;Ljava/lang/String;Lstream/video/sfu/models/TrackType;ZLstream/video/sfu/models/VideoDimension;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
