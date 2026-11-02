@@ -42,8 +42,8 @@ import stream.video.sfu.signal.ICERestartResponse
  *
  * It never creates the SFU connection or any peer connection and leaves the shared peer
  * connection factory untouched. Every public member is a no-op that logs a warning: stats are
- * `null` and ICE restarts fail. It must not be installed as the active session in [CallSessionManager], since
- * the reconnect, stats and rendering paths read that session as a live SFU connection.
+ * `null` and ICE restarts fail. [CallSessionManager.setActiveSession] refuses it, since the
+ * reconnect, stats and rendering paths read the active session as a live SFU connection.
  */
 internal class EmptyRtcSession(
     client: StreamVideo,

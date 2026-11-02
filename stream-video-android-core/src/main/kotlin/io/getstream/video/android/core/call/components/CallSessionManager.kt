@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.call.components
 
+import io.getstream.log.taggedLogger
+import io.getstream.video.android.core.call.EmptyRtcSession
 import io.getstream.video.android.core.call.RtcSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +34,8 @@ import java.util.concurrent.ConcurrentHashMap
  * lifecycle collaborators a single source of truth to depend on.
  */
 internal class CallSessionManager() {
+    private val logger by taggedLogger("Video:CallSessionManager")
+
     private val _session: MutableStateFlow<RtcSession?> = MutableStateFlow(null)
 
     /**
@@ -41,8 +45,17 @@ internal class CallSessionManager() {
      */
     val session: StateFlow<RtcSession?> = _session.asStateFlow()
 
-    /** Sole write path for [session]: swaps in a new RTC session or clears it with `null`. */
+    /**
+     * Sole write path for [session]: swaps in a new RTC session or clears it with `null`.
+     *
+     * An [EmptyRtcSession] is rejected and the current session is kept: the reconnect, leave and
+     * stats paths read the active session as a live SFU connection, which it does not have.
+     */
     fun setActiveSession(rtcSession: RtcSession?) {
+        if (rtcSession is EmptyRtcSession) {
+            logger.e { "[setActiveSession] Rejected: EmptyRtcSession must not be the active session" }
+            return
+        }
         _session.value = rtcSession
     }
 
