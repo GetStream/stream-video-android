@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class MetricTimeSeries (
+public data class MetricTimeSeries (
     @Json(name = "data_points")
-    val dataPoints: List<List<Double>>? = null
+    public val dataPoints: List<List<Double>>? = null
 )

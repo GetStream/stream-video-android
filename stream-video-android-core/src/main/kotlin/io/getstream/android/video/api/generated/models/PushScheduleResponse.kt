@@ -31,30 +31,12 @@ import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
 /**
- * 
+ * A recurring quiet-hours schedule: while any quiet window is active, push notifications for the user are suppressed. Suppressed notifications are dropped, not delayed.
  */
-data class FeedsPreferencesResponse (
-    @Json(name = "comment")
-    val comment: String? = null,
+public data class PushScheduleResponse (
+    @Json(name = "timezone")
+    public val timezone: String,
 
-    @Json(name = "comment_mention")
-    val commentMention: String? = null,
-
-    @Json(name = "comment_reaction")
-    val commentReaction: String? = null,
-
-    @Json(name = "comment_reply")
-    val commentReply: String? = null,
-
-    @Json(name = "follow")
-    val follow: String? = null,
-
-    @Json(name = "mention")
-    val mention: String? = null,
-
-    @Json(name = "reaction")
-    val reaction: String? = null,
-
-    @Json(name = "custom_activity_types")
-    val customActivityTypes: Map<String, String>? = null
+    @Json(name = "quiet_hours")
+    public val quietHours: List<io.getstream.android.video.api.generated.models.QuietHoursRuleResponse> = emptyList()
 )

@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class UserRatingReportResponse (
+public data class UserRatingReportResponse (
     @Json(name = "average")
-    val average: Double,
+    public val average: Double,
 
     @Json(name = "count")
-    val count: Int
+    public val count: Int
 )

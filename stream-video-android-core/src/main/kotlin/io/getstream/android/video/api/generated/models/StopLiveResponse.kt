@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class StopLiveResponse (
+public data class StopLiveResponse (
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "call")
-    val call: io.getstream.android.video.api.generated.models.CallResponse
+    public val call: io.getstream.android.video.api.generated.models.CallResponse
 )

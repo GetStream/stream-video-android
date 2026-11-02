@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class AbsentMetric (
+public data class AbsentMetric (
     @Json(name = "metric")
-    val metric: String,
+    public val metric: String,
 
     @Json(name = "reason")
-    val reason: String
+    public val reason: String
 )

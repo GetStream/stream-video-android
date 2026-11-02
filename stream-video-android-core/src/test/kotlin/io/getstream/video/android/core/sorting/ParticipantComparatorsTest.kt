@@ -26,8 +26,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import org.junit.Test
-import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.ParticipantSource
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 class ParticipantComparatorsTest {
 
@@ -112,9 +113,9 @@ class ParticipantComparatorsTest {
 
     @Test
     fun `byJoinedAt sorts earliest first, nulls last`() {
-        val t = OffsetDateTime.parse("2026-05-14T10:00:00Z")
+        val t = Instant.parse("2026-05-14T10:00:00Z")
         val a = participant("a", scope, callActions, joinedAt = t)
-        val b = participant("b", scope, callActions, joinedAt = t.plusSeconds(10))
+        val b = participant("b", scope, callActions, joinedAt = t + 10.seconds)
         val c = participant("c", scope, callActions, joinedAt = null)
         assertThat(byJoinedAt.compare(a, b)).isLessThan(0)
         assertThat(byJoinedAt.compare(b, a)).isGreaterThan(0)
@@ -251,7 +252,7 @@ class ParticipantComparatorsTest {
 
     @Test
     fun `pinned sorts pinned before unpinned`() {
-        val now = OffsetDateTime.parse("2026-05-14T10:00:00Z")
+        val now = Instant.parse("2026-05-14T10:00:00Z")
         val pin = pinUpdateAt("a", now, PinType.Server)
         val cmp = pinned(mapOf("a" to pin))
         val a = participant("a", scope, callActions)
@@ -262,7 +263,7 @@ class ParticipantComparatorsTest {
 
     @Test
     fun `pinned prefers local pin over server pin`() {
-        val now = OffsetDateTime.parse("2026-05-14T10:00:00Z")
+        val now = Instant.parse("2026-05-14T10:00:00Z")
         val pins = mapOf(
             "a" to pinUpdateAt("a", now, PinType.Local),
             "b" to pinUpdateAt("b", now, PinType.Server),
@@ -276,8 +277,8 @@ class ParticipantComparatorsTest {
 
     @Test
     fun `pinned prefers more recently pinned within same type`() {
-        val earlier = OffsetDateTime.parse("2026-05-14T10:00:00Z")
-        val later = OffsetDateTime.parse("2026-05-14T11:00:00Z")
+        val earlier = Instant.parse("2026-05-14T10:00:00Z")
+        val later = Instant.parse("2026-05-14T11:00:00Z")
         val pins = mapOf(
             "a" to pinUpdateAt("a", earlier, PinType.Server),
             "b" to pinUpdateAt("b", later, PinType.Server),
@@ -291,7 +292,7 @@ class ParticipantComparatorsTest {
 
     private fun pinUpdateAt(
         sessionId: String,
-        at: OffsetDateTime,
+        at: Instant,
         type: PinType,
     ): PinEntry = PinEntry(
         pinTarget = PinUpdate(sessionId = sessionId, userId = "user-$sessionId"),
@@ -311,11 +312,11 @@ class ParticipantComparatorsTest {
     private companion object {
         private val USER_DUMMY: io.getstream.android.video.api.generated.models.UserResponse =
             io.getstream.android.video.api.generated.models.UserResponse(
-                createdAt = OffsetDateTime.parse("2026-05-14T00:00:00Z"),
+                createdAt = Instant.parse("2026-05-14T00:00:00Z"),
                 id = "u",
                 language = "en",
                 role = "user",
-                updatedAt = OffsetDateTime.parse("2026-05-14T00:00:00Z"),
+                updatedAt = Instant.parse("2026-05-14T00:00:00Z"),
             )
     }
 }

@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * PIN protection configuration response
  */
-data class SIPPinProtectionConfigsResponse (
+public data class SIPPinProtectionConfigsResponse (
     @Json(name = "enabled")
-    val enabled: Boolean,
+    public val enabled: Boolean,
 
     @Json(name = "default_pin")
-    val defaultPin: String? = null,
+    public val defaultPin: String? = null,
 
     @Json(name = "max_attempts")
-    val maxAttempts: Int? = null,
+    public val maxAttempts: Int? = null,
 
     @Json(name = "required_pin_digits")
-    val requiredPinDigits: Int? = null
+    public val requiredPinDigits: Int? = null
 )

@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class CollectUserFeedbackResponse (
+public data class CollectUserFeedbackResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

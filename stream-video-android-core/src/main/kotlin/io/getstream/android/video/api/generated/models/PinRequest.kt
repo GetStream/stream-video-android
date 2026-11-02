@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * PinRequest is the payload for pinning a message.
  */
-data class PinRequest (
+public data class PinRequest (
     @Json(name = "session_id")
-    val sessionId: String,
+    public val sessionId: String,
 
     @Json(name = "user_id")
-    val userId: String
+    public val userId: String
 )

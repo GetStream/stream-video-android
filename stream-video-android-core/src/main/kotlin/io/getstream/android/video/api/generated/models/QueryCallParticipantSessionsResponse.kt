@@ -33,34 +33,34 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class QueryCallParticipantSessionsResponse (
+public data class QueryCallParticipantSessionsResponse (
     @Json(name = "call_id")
-    val callId: String,
+    public val callId: String,
 
     @Json(name = "call_session_id")
-    val callSessionId: String,
+    public val callSessionId: String,
 
     @Json(name = "call_type")
-    val callType: String,
+    public val callType: String,
 
     @Json(name = "duration")
-    val duration: Int,
+    public val duration: Int,
 
     @Json(name = "total_participant_duration")
-    val totalParticipantDuration: Int,
+    public val totalParticipantDuration: Int,
 
     @Json(name = "total_participant_sessions")
-    val totalParticipantSessions: Int,
+    public val totalParticipantSessions: Int,
 
     @Json(name = "participants_sessions")
-    val participantsSessions: List<io.getstream.android.video.api.generated.models.ParticipantSessionDetails> = emptyList(),
+    public val participantsSessions: List<io.getstream.android.video.api.generated.models.ParticipantSessionDetails> = emptyList(),
 
     @Json(name = "next")
-    val next: String? = null,
+    public val next: String? = null,
 
     @Json(name = "prev")
-    val prev: String? = null,
+    public val prev: String? = null,
 
     @Json(name = "session")
-    val session: io.getstream.android.video.api.generated.models.CallSessionResponse? = null
+    public val session: io.getstream.android.video.api.generated.models.CallSessionResponse? = null
 )

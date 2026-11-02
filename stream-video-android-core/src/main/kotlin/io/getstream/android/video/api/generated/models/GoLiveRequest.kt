@@ -33,31 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class GoLiveRequest (
+public data class GoLiveRequest (
     @Json(name = "recording_storage_name")
-    val recordingStorageName: String? = null,
+    public val recordingStorageName: String? = null,
 
     @Json(name = "start_closed_caption")
-    val startClosedCaption: Boolean? = null,
+    public val startClosedCaption: Boolean? = null,
 
     @Json(name = "start_composite_recording")
-    val startCompositeRecording: Boolean? = null,
+    public val startCompositeRecording: Boolean? = null,
 
     @Json(name = "start_hls")
-    val startHls: Boolean? = null,
+    public val startHls: Boolean? = null,
 
     @Json(name = "start_individual_recording")
-    val startIndividualRecording: Boolean? = null,
+    public val startIndividualRecording: Boolean? = null,
 
     @Json(name = "start_raw_recording")
-    val startRawRecording: Boolean? = null,
+    public val startRawRecording: Boolean? = null,
 
     @Json(name = "start_recording")
-    val startRecording: Boolean? = null,
+    public val startRecording: Boolean? = null,
 
     @Json(name = "start_transcription")
-    val startTranscription: Boolean? = null,
+    public val startTranscription: Boolean? = null,
 
     @Json(name = "transcription_storage_name")
-    val transcriptionStorageName: String? = null
+    public val transcriptionStorageName: String? = null
 )

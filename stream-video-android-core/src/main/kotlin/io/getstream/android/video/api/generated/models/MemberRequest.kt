@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * MemberRequest is the payload for adding a member to a call.
  */
-data class MemberRequest (
+public data class MemberRequest (
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "role")
-    val role: String? = null,
+    public val role: String? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = null
+    public val custom: Map<String, Any?>? = null
 )

@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallStatsMapPublishers (
+public data class CallStatsMapPublishers (
     @Json(name = "publishers")
-    val publishers: List<io.getstream.android.video.api.generated.models.CallStatsMapPublisher> = emptyList()
+    public val publishers: List<io.getstream.android.video.api.generated.models.CallStatsMapPublisher> = emptyList()
 )

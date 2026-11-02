@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class IngressSettingsRequest (
+public data class IngressSettingsRequest (
     @Json(name = "enabled")
-    val enabled: Boolean? = null,
+    public val enabled: Boolean? = null,
 
     @Json(name = "audio_encoding_options")
-    val audioEncodingOptions: io.getstream.android.video.api.generated.models.IngressAudioEncodingOptionsRequest? = null,
+    public val audioEncodingOptions: io.getstream.android.video.api.generated.models.IngressAudioEncodingOptionsRequest? = null,
 
     @Json(name = "video_encoding_options")
-    val videoEncodingOptions: Map<String, io.getstream.android.video.api.generated.models.IngressVideoEncodingOptionsRequest>? = null
+    public val videoEncodingOptions: Map<String, io.getstream.android.video.api.generated.models.IngressVideoEncodingOptionsRequest>? = null
 )

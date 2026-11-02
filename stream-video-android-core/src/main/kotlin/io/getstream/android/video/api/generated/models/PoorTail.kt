@@ -33,22 +33,22 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class PoorTail (
+public data class PoorTail (
     @Json(name = "healthy_viewers")
-    val healthyViewers: Int,
+    public val healthyViewers: Int,
 
     @Json(name = "note")
-    val note: String,
+    public val note: String,
 
     @Json(name = "poor_total")
-    val poorTotal: Int,
+    public val poorTotal: Int,
 
     @Json(name = "poor_by_cause")
-    val poorByCause: io.getstream.android.video.api.generated.models.PoorByCause,
+    public val poorByCause: io.getstream.android.video.api.generated.models.PoorByCause,
 
     @Json(name = "supporting")
-    val supporting: io.getstream.android.video.api.generated.models.Supporting,
+    public val supporting: io.getstream.android.video.api.generated.models.Supporting,
 
     @Json(name = "healthy_pct")
-    val healthyPct: Double? = null
+    public val healthyPct: Double? = null
 )

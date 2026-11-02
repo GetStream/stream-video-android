@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class BackstageSettingsRequest (
+public data class BackstageSettingsRequest (
     @Json(name = "enabled")
-    val enabled: Boolean? = null,
+    public val enabled: Boolean? = null,
 
     @Json(name = "join_ahead_time_seconds")
-    val joinAheadTimeSeconds: Int? = null
+    public val joinAheadTimeSeconds: Int? = null
 )

@@ -113,12 +113,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.ClientCapability
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.WebsocketReconnectStrategy
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.time.Instant
 
 /**
  * The call class gives you access to all call level API calls
@@ -585,7 +585,7 @@ public class Call(
         members: List<MemberRequest>? = null,
         custom: Map<String, Any>? = null,
         settings: CallSettingsRequest? = null,
-        startsAt: OffsetDateTime? = null,
+        startsAt: Instant? = null,
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
@@ -606,7 +606,7 @@ public class Call(
     suspend fun update(
         custom: Map<String, Any>? = null,
         settingsOverride: CallSettingsRequest? = null,
-        startsAt: OffsetDateTime? = null,
+        startsAt: Instant? = null,
     ): Result<UpdateCallResponse> = apiClient.update(custom, settingsOverride, startsAt)
 
     /**
@@ -1386,7 +1386,7 @@ public data class CreateCallOptions(
     val members: List<MemberRequest>? = null,
     val custom: Map<String, Any>? = null,
     val settings: CallSettingsRequest? = null,
-    val startsAt: OffsetDateTime? = null,
+    val startsAt: Instant? = null,
     val team: String? = null,
 ) {
     fun memberRequestsFromIds(): List<MemberRequest> {

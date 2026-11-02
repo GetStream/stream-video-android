@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-package io.getstream.android.video.internal.generated.infrastructure
+@file:Suppress(
+    "ArrayInDataClass",
+    "EnumEntryName",
+    "RemoveRedundantQualifierName",
+    "UnusedImport"
+)
+
+package io.getstream.android.video.api.generated.models
 
 import com.squareup.moshi.FromJson
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.format.DateTimeFormatter
 
-class OffsetDateTimeAdapter {
-    @ToJson
-    fun toJson(value: OffsetDateTime): String {
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(value)
-    }
+/**
+ * One recurring quiet window, expressed in local wall-clock time in the schedule's timezone.
+ */
+public data class QuietHoursRuleResponse (
+    @Json(name = "end")
+    public val end: String,
 
-    @FromJson
-    fun fromJson(value: String): OffsetDateTime {
-        return OffsetDateTime.parse(value, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-    }
+    @Json(name = "start")
+    public val start: String,
 
-}
+    @Json(name = "days")
+    public val days: List<String>? = null
+)

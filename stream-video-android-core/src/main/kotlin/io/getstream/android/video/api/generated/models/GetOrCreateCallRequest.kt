@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class GetOrCreateCallRequest (
+public data class GetOrCreateCallRequest (
     @Json(name = "members_limit")
-    val membersLimit: Int? = null,
+    public val membersLimit: Int? = null,
 
     @Json(name = "notify")
-    val notify: Boolean? = null,
+    public val notify: Boolean? = null,
 
     @Json(name = "ring")
-    val ring: Boolean? = null,
+    public val ring: Boolean? = null,
 
     @Json(name = "video")
-    val video: Boolean? = null,
+    public val video: Boolean? = null,
 
     @Json(name = "data")
-    val data: io.getstream.android.video.api.generated.models.CallRequest? = null
+    public val data: io.getstream.android.video.api.generated.models.CallRequest? = null
 )

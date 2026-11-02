@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * Websocket auth message
  */
-data class WSAuthMessage (
+public data class WSAuthMessage (
     @Json(name = "token")
-    val token: String,
+    public val token: String,
 
     @Json(name = "user_details")
-    val userDetails: io.getstream.android.video.api.generated.models.ConnectUserDetailsRequest,
+    public val userDetails: io.getstream.android.video.api.generated.models.ConnectUserDetailsRequest,
 
     @Json(name = "event_protocol")
-    val eventProtocol: Int? = null,
+    public val eventProtocol: Int? = null,
 
     @Json(name = "member_custom_include")
-    val memberCustomInclude: List<String>? = null,
+    public val memberCustomInclude: List<String>? = null,
 
     @Json(name = "products")
-    val products: List<String>? = null
+    public val products: List<String>? = null
 )

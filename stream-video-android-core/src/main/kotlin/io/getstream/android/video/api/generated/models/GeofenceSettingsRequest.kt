@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class GeofenceSettingsRequest (
+public data class GeofenceSettingsRequest (
     @Json(name = "names")
-    val names: List<String>? = null
+    public val names: List<String>? = null
 )

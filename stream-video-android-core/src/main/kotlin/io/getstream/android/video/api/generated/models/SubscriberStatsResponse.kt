@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SubscriberStatsResponse (
+public data class SubscriberStatsResponse (
     @Json(name = "total")
-    val total: Int,
+    public val total: Int,
 
     @Json(name = "total_subscribed_duration_seconds")
-    val totalSubscribedDurationSeconds: Int,
+    public val totalSubscribedDurationSeconds: Int,
 
     @Json(name = "unique")
-    val unique: Int
+    public val unique: Int
 )

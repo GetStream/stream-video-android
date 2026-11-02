@@ -41,7 +41,7 @@ class TraceRecordTest {
     fun `serialize returns correct array`() {
         val record = TraceRecord(tag = "tag1", id = "id1", data = "payload", timestamp = 12345L)
         val arr = record.serialize()
-        assertArrayEquals(arrayOf("tag1", "id1", "payload", 12345L), arr)
+        assertArrayEquals(arrayOf<Any?>("tag1", "id1", "payload", 12345L), arr)
     }
 
     @Test
@@ -58,7 +58,7 @@ class TraceRecordTest {
     fun `null id and data are handled`() {
         val record = TraceRecord(tag = "t", id = null, data = null, timestamp = 0L)
         val arr = record.serialize()
-        assertArrayEquals(arrayOf("t", null, null, 0L), arr)
+        assertArrayEquals(arrayOf<Any?>("t", null, null, 0L), arr)
     }
 
     @Test

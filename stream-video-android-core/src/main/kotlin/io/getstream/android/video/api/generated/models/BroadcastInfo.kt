@@ -33,31 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class BroadcastInfo (
+public data class BroadcastInfo (
     @Json(name = "app_id")
-    val appId: Int,
+    public val appId: Int,
 
     @Json(name = "call_cid")
-    val callCid: String,
+    public val callCid: String,
 
     @Json(name = "call_session_id")
-    val callSessionId: String,
+    public val callSessionId: String,
 
     @Json(name = "call_type")
-    val callType: String,
+    public val callType: String,
 
     @Json(name = "duration_min")
-    val durationMin: Double,
+    public val durationMin: Double,
 
     @Json(name = "ended_at")
-    val endedAt: String,
+    public val endedAt: String,
 
     @Json(name = "started_at")
-    val startedAt: String,
+    public val startedAt: String,
 
     @Json(name = "creators")
-    val creators: List<String> = emptyList(),
+    public val creators: List<String> = emptyList(),
 
     @Json(name = "source_mode")
-    val sourceMode: String? = null
+    public val sourceMode: String? = null
 )

@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * StartFrameRecordingResponse is the response payload for the start frame recording endpoint.
  */
-data class StartFrameRecordingResponse (
+public data class StartFrameRecordingResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

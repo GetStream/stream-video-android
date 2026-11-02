@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * CallIngressResponse is the payload for ingress settings
  */
-data class CallIngressResponse (
+public data class CallIngressResponse (
     @Json(name = "rtmp")
-    val rtmp: io.getstream.android.video.api.generated.models.RTMPIngress,
+    public val rtmp: io.getstream.android.video.api.generated.models.RTMPIngress,
 
     @Json(name = "srt")
-    val srt: io.getstream.android.video.api.generated.models.SRTIngress,
+    public val srt: io.getstream.android.video.api.generated.models.SRTIngress,
 
     @Json(name = "whip")
-    val whip: io.getstream.android.video.api.generated.models.WHIPIngress
+    public val whip: io.getstream.android.video.api.generated.models.WHIPIngress
 )

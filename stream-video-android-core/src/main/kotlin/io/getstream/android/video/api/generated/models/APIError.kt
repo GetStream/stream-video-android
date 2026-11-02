@@ -33,31 +33,31 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class APIError (
+public data class APIError (
     @Json(name = "code")
-    val code: Int,
+    public val code: Int,
 
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "message")
-    val message: String,
+    public val message: String,
 
     @Json(name = "more_info")
-    val moreInfo: String,
+    public val moreInfo: String,
 
     @Json(name = "StatusCode")
-    val statusCode: Int,
+    public val statusCode: Int,
 
     @Json(name = "details")
-    val details: List<Int> = emptyList(),
+    public val details: List<Int> = emptyList(),
 
     @Json(name = "cooldown_remaining_ms")
-    val cooldownRemainingMs: Int? = null,
+    public val cooldownRemainingMs: Int? = null,
 
     @Json(name = "unrecoverable")
-    val unrecoverable: Boolean? = null,
+    public val unrecoverable: Boolean? = null,
 
     @Json(name = "exception_fields")
-    val exceptionFields: Map<String, String>? = null
+    public val exceptionFields: Map<String, String>? = null
 )

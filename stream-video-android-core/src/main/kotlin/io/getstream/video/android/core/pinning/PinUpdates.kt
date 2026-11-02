@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.pinning
 
 import io.getstream.video.android.core.events.PinUpdate
-import org.threeten.bp.OffsetDateTime
+import kotlin.time.Instant
 
 /**
  * Describes the two types of pins.
@@ -37,4 +37,4 @@ internal enum class PinType {
  * @param at at what time was the update received/created
  * @param type what type of update is it from SFU, or local
  */
-internal data class PinEntry(val pinTarget: PinUpdate, val at: OffsetDateTime, val type: PinType)
+internal data class PinEntry(val pinTarget: PinUpdate, val at: Instant, val type: PinType)

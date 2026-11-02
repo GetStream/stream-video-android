@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ChatActivityStatsResponse (
+public data class ChatActivityStatsResponse (
     @Json(name = "Messages")
-    val messages: io.getstream.android.video.api.generated.models.MessageStatsResponse? = null
+    public val messages: io.getstream.android.video.api.generated.models.MessageStatsResponse? = null
 )

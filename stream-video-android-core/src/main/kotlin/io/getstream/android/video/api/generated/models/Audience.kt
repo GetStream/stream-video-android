@@ -33,37 +33,37 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class Audience (
+public data class Audience (
     @Json(name = "avg_concurrent_viewers")
-    val avgConcurrentViewers: Int,
+    public val avgConcurrentViewers: Int,
 
     @Json(name = "hours_watched")
-    val hoursWatched: Double,
+    public val hoursWatched: Double,
 
     @Json(name = "peak_concurrent_viewers")
-    val peakConcurrentViewers: Int,
+    public val peakConcurrentViewers: Int,
 
     @Json(name = "unique_viewers")
-    val uniqueViewers: Int,
+    public val uniqueViewers: Int,
 
     @Json(name = "viewer_connections")
-    val viewerConnections: Int,
+    public val viewerConnections: Int,
 
     @Json(name = "concurrency_by_minute")
-    val concurrencyByMinute: List<io.getstream.android.video.api.generated.models.ConcurrencyMinute> = emptyList(),
+    public val concurrencyByMinute: List<io.getstream.android.video.api.generated.models.ConcurrencyMinute> = emptyList(),
 
     @Json(name = "peak_at")
-    val peakAt: String? = null,
+    public val peakAt: String? = null,
 
     @Json(name = "ramp_up_min_to_90pct_peak")
-    val rampUpMinTo90pctPeak: Int? = null,
+    public val rampUpMinTo90pctPeak: Int? = null,
 
     @Json(name = "retention_at_90pct_mark")
-    val retentionAt90pctMark: Double? = null,
+    public val retentionAt90pctMark: Double? = null,
 
     @Json(name = "retention_at_midpoint")
-    val retentionAtMidpoint: Double? = null,
+    public val retentionAtMidpoint: Double? = null,
 
     @Json(name = "shape")
-    val shape: String? = null
+    public val shape: String? = null
 )

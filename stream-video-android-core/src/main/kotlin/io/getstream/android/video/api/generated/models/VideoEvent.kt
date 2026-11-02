@@ -30,13 +30,13 @@ import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.ToJson
 
-abstract class VideoEvent {
-    abstract fun getEventType(): String 
+public abstract class VideoEvent {
+    public abstract fun getEventType(): String 
         
 }
 
 
-class VideoEventAdapter : JsonAdapter<VideoEvent>() {
+public class VideoEventAdapter : JsonAdapter<VideoEvent>() {
 
     @FromJson
     override fun fromJson(reader: JsonReader): VideoEvent? {
@@ -139,10 +139,10 @@ class VideoEventAdapter : JsonAdapter<VideoEvent>() {
     }
 }
 
-class UnsupportedVideoEvent(val type: String) : VideoEvent() {
+public class UnsupportedVideoEvent(public val type: String) : VideoEvent() {
     override fun getEventType(): String {
         return type
     }
 }
 
-class UnsupportedVideoEventException(val type: String) : Exception()
+public class UnsupportedVideoEventException(public val type: String) : Exception()

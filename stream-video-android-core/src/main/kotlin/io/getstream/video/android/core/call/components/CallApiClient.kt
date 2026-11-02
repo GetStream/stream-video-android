@@ -62,7 +62,7 @@ import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.utils.toQueriedMembers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.threeten.bp.OffsetDateTime
+import kotlin.time.Instant
 
 /**
  * Wraps all coordinator (REST) API calls for a call. Each method delegates to the
@@ -153,7 +153,7 @@ internal class CallApiClient(
         members: List<MemberRequest>? = null,
         custom: Map<String, Any>? = null,
         settings: CallSettingsRequest? = null,
-        startsAt: OffsetDateTime? = null,
+        startsAt: Instant? = null,
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
@@ -204,7 +204,7 @@ internal class CallApiClient(
     suspend fun update(
         custom: Map<String, Any>? = null,
         settingsOverride: CallSettingsRequest? = null,
-        startsAt: OffsetDateTime? = null,
+        startsAt: Instant? = null,
     ): Result<UpdateCallResponse> {
         val request = UpdateCallRequest(
             custom = custom,

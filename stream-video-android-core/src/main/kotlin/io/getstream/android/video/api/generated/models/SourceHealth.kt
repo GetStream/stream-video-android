@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SourceHealth (
+public data class SourceHealth (
     @Json(name = "co_host_peak")
-    val coHostPeak: Int,
+    public val coHostPeak: Int,
 
     @Json(name = "dead_air_s")
-    val deadAirS: Int,
+    public val deadAirS: Int,
 
     @Json(name = "interruptions")
-    val interruptions: List<io.getstream.android.video.api.generated.models.SourceInterruption> = emptyList(),
+    public val interruptions: List<io.getstream.android.video.api.generated.models.SourceInterruption> = emptyList(),
 
     @Json(name = "publisher_sessions")
-    val publisherSessions: List<io.getstream.android.video.api.generated.models.PublisherSession> = emptyList()
+    public val publisherSessions: List<io.getstream.android.video.api.generated.models.PublisherSession> = emptyList()
 )

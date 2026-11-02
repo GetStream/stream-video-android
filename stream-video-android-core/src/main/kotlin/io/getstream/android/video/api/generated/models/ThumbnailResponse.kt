@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ThumbnailResponse (
+public data class ThumbnailResponse (
     @Json(name = "image_url")
-    val imageUrl: String
+    public val imageUrl: String
 )

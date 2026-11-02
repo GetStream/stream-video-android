@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * SIP caller configuration response
  */
-data class SIPCallerConfigsResponse (
+public data class SIPCallerConfigsResponse (
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "custom_data")
-    val customData: Map<String, Any?> = emptyMap()
+    public val customData: Map<String, Any?> = emptyMap()
 )

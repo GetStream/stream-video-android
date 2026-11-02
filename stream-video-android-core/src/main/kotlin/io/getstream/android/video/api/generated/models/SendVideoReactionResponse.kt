@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class SendVideoReactionResponse (
+public data class SendVideoReactionResponse (
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "reaction")
-    val reaction: io.getstream.android.video.api.generated.models.VideoReactionResponse
+    public val reaction: io.getstream.android.video.api.generated.models.VideoReactionResponse
 )

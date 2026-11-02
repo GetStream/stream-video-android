@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ConcurrencyMinute (
+public data class ConcurrencyMinute (
     @Json(name = "joins")
-    val joins: Int,
+    public val joins: Int,
 
     @Json(name = "leaves")
-    val leaves: Int,
+    public val leaves: Int,
 
     @Json(name = "max")
-    val max: Int,
+    public val max: Int,
 
     @Json(name = "min")
-    val min: Int,
+    public val min: Int,
 
     @Json(name = "minute")
-    val minute: String
+    public val minute: String
 )

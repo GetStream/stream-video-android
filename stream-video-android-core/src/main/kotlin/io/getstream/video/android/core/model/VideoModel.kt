@@ -95,8 +95,8 @@ internal fun CallResponse.toCallInfo(): CallInfo {
         createdByUserId = createdBy.id,
         broadcastingEnabled = settings.broadcasting.enabled,
         recordingEnabled = settings.recording.audioOnly, // TODO - how do we know if it's enabled or not
-        createdAt = Date(createdAt.toEpochSecond() * 1000L),
-        updatedAt = Date(updatedAt.toEpochSecond() * 1000L),
+        createdAt = Date(createdAt.toEpochMilliseconds()),
+        updatedAt = Date(updatedAt.toEpochMilliseconds()),
 //        callEgress = CallEgress(
 //            broadcastEgress = broadcastEgress,
 //            recordEgress = recordEgress

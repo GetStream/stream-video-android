@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class TargetResolution (
+public data class TargetResolution (
     @Json(name = "height")
-    val height: Int,
+    public val height: Int,
 
     @Json(name = "width")
-    val width: Int,
+    public val width: Int,
 
     @Json(name = "bitrate")
-    val bitrate: Int? = null
+    public val bitrate: Int? = null
 )

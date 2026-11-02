@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * Response containing resolved SIP inbound routing information
  */
-data class ResolveSipInboundResponse (
+public data class ResolveSipInboundResponse (
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "credentials")
-    val credentials: io.getstream.android.video.api.generated.models.SipInboundCredentials,
+    public val credentials: io.getstream.android.video.api.generated.models.SipInboundCredentials,
 
     @Json(name = "sip_routing_rule")
-    val sipRoutingRule: io.getstream.android.video.api.generated.models.SIPInboundRoutingRuleResponse? = null,
+    public val sipRoutingRule: io.getstream.android.video.api.generated.models.SIPInboundRoutingRuleResponse? = null,
 
     @Json(name = "sip_trunk")
-    val sipTrunk: io.getstream.android.video.api.generated.models.SIPTrunkResponse? = null
+    public val sipTrunk: io.getstream.android.video.api.generated.models.SIPTrunkResponse? = null
 )

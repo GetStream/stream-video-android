@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ResolutionMetricsTimeSeries (
+public data class ResolutionMetricsTimeSeries (
     @Json(name = "height")
-    val height: io.getstream.android.video.api.generated.models.MetricTimeSeries? = null,
+    public val height: io.getstream.android.video.api.generated.models.MetricTimeSeries? = null,
 
     @Json(name = "width")
-    val width: io.getstream.android.video.api.generated.models.MetricTimeSeries? = null
+    public val width: io.getstream.android.video.api.generated.models.MetricTimeSeries? = null
 )
