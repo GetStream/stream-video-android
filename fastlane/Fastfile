@@ -59,9 +59,13 @@ lane :run_e2e_test do |options|
   adb_test_results_path = '/sdcard/googletest/test_outputfiles'
   sh("rm -rf #{allure_results_path}")
   sh("adb shell rm -rf #{adb_test_results_path}/#{allure_results_path}")
-  # A system ANR dialog (e.g. "Quickstep isn't responding") would cover the app for the whole run.
-  # With dialogs hidden, Android kills the unresponsive process instead.
-  sh('adb shell settings put global hide_error_dialogs 1') if is_ci
+  if is_ci
+    # A system ANR dialog (e.g. "System UI isn't responding") would cover the app for the whole run.
+    # With dialogs hidden, Android kills the unresponsive process instead. A dialog from an ANR
+    # during the emulator boot is already on screen, so it is closed after the setting is applied.
+    sh('adb shell settings put global hide_error_dialogs 1')
+    sh('adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS')
+  end
 
   start_video_buddy
   install_test_services
