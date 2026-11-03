@@ -1195,8 +1195,13 @@ public class Call(
                 .filterNotNull()
                 .combine(
                     state.ownCapabilities,
-                ) { settings, capabilities -> settings to capabilities }
-                .collect { (settings, capabilities) ->
+                ) { _, _ -> }
+                .collect {
+                    // combine collects each upstream on its own coroutine, so the pair it hands
+                    // over can be stale — new settings next to the capabilities from before them.
+                    // Deciding on that would withdraw noise cancellation the server just granted.
+                    val settings = state.settings.value
+                    val capabilities = state.ownCapabilities.value
                     if (!noiseCancellationPolicy.isAllowed(capabilities, settings)) {
                         // Withdraws unconditionally rather than only when something is already
                         // processing: a state wanted before the factory existed is remembered and
