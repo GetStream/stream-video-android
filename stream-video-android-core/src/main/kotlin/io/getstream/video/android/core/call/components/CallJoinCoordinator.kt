@@ -433,6 +433,7 @@ internal class CallJoinCoordinator(
                 // The coordinator rejects a join whose flag disagrees with the call. This is
                 // the first join; rejoin / migrate omit it and CallApiClient reads the manager.
                 e2ee = state.e2eeEnabled.value,
+                playbackCapabilities = listOf(PlaybackResponse.Type.Hls.value),
             )
 
         if (result !is Success) {
@@ -489,8 +490,8 @@ internal class CallJoinCoordinator(
      * session.
      */
     private fun joinPlayback(playback: PlaybackResponse): Result<RtcSession> {
-        val playlistUrl = playback.hlsPlaylistUrlOrNull()
-        if (playlistUrl == null) {
+        val playlistUrl = playback.playlistUrl
+        if (playback.type != PlaybackResponse.Type.Hls || playlistUrl.isBlank()) {
             logger.e {
                 "[joinInternal] Unsupported playback (type=${playback.type}, " +
                     "hasUrl=${playback.playlistUrl.isNotBlank()})"

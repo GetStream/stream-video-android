@@ -107,7 +107,7 @@ class JoinRecoverableFailureTest {
         coEvery { clientImpl.getCachedLocation() } returns Success("test-location")
         coEvery {
             apiClient.joinRequest(
-                any(), any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Success(mockJoinResponse)
     }

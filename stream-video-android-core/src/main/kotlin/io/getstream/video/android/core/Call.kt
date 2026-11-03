@@ -210,7 +210,7 @@ public class Call(
         )
     }
 
-    /** Creates the [EmptyRtcSession] that join / rejoin / migrate return for HLS playback. */
+    /** Creates the [EmptyRtcSession] that the first join returns for HLS playback. */
     private val playbackSessionFactory: () -> RtcSession = {
         EmptyRtcSession(
             client = clientImpl,
@@ -438,7 +438,6 @@ public class Call(
         state = state,
         callAnalytics = callAnalytics,
         sessionMonitor = { sessionMonitor },
-        createPlaybackSession = playbackSessionFactory,
         type = type,
         id = id,
     )

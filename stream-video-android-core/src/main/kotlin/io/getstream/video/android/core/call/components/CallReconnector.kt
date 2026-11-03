@@ -16,7 +16,6 @@
 
 package io.getstream.video.android.core.call.components
 
-import io.getstream.android.video.generated.models.PlaybackResponse
 import io.getstream.log.taggedLogger
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.BackendCause
@@ -30,9 +29,7 @@ import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyti
 import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAbortReason
 import io.getstream.video.android.core.call.FastReconnectResult
-import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectionResult
-import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.model.toIceServer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
@@ -82,8 +79,6 @@ internal class CallReconnector(
     // Lazy provider: the session monitor is built from the connectivity monitor, which takes
     // this component, so it can only be resolved after construction.
     private val sessionMonitor: () -> SessionMonitor,
-    // Builds the EmptyRtcSession used when a rejoin or migrate is answered with HLS playback.
-    private val createPlaybackSession: () -> RtcSession,
     private val type: String,
     private val id: String,
 ) {
@@ -405,9 +400,6 @@ internal class CallReconnector(
                 Exception("Failed to get join response: ${joinResponse.errorOrNull()}"),
             )
         }
-        joinResponse.value.playback?.let { playback ->
-            return switchToPlayback(oldSession, playback)
-        }
 
         val cred = joinResponse.value.credentials
         val currentOptions = oldSession.publisher.value?.currentOptions()
@@ -478,9 +470,6 @@ internal class CallReconnector(
                 ),
             )
         }
-        joinResponse.value.playback?.let { playback ->
-            return switchToPlayback(oldSession, playback)
-        }
 
         val cred = joinResponse.value.credentials
         val currentOptions = oldSession.publisher.value?.currentOptions()
@@ -526,31 +515,6 @@ internal class CallReconnector(
         } finally {
             oldSession.finalizeMigration()
         }
-    }
-
-    /**
-     * Moves a viewer from the SFU to HLS playback when a rejoin or migrate is answered with an
-     * HLS grant. The old session leaves the SFU, SFU monitoring stops, and participants (whose
-     * tracks came from the SFU) are cleared. An unplayable grant is terminal: the stable
-     * backend bucket would answer every retry the same way.
-     */
-    private suspend fun switchToPlayback(
-        oldSession: RtcSession,
-        playback: PlaybackResponse,
-    ): ReconnectOutcome {
-        val playlistUrl = playback.hlsPlaylistUrlOrNull()
-            ?: return ReconnectOutcome.PreconditionNotMet(
-                "Unsupported playback type: ${playback.type}",
-            )
-        logger.i { "[reconnect] Moving to HLS playback (reason=${playback.reason})" }
-        sessionMonitor().stopMonitoring()
-        oldSession.prepareRejoin("playback-hls")
-        sessionManager.setActiveSession(null)
-        state.clearParticipants()
-        sessionManager.playbackSession = createPlaybackSession()
-        state._playbackType.value = PlaybackType.Hls(playlistUrl)
-        state._connection.value = RealtimeConnection.Connected
-        return ReconnectOutcome.Success
     }
 
     suspend fun fastReconnect(reason: String = "unknown") {
