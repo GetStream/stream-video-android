@@ -59,6 +59,9 @@ lane :run_e2e_test do |options|
   adb_test_results_path = '/sdcard/googletest/test_outputfiles'
   sh("rm -rf #{allure_results_path}")
   sh("adb shell rm -rf #{adb_test_results_path}/#{allure_results_path}")
+  # A system ANR dialog (e.g. "Quickstep isn't responding") would cover the app for the whole run.
+  # With dialogs hidden, Android kills the unresponsive process instead.
+  sh('adb shell settings put global hide_error_dialogs 1') if is_ci
 
   start_video_buddy
   install_test_services
