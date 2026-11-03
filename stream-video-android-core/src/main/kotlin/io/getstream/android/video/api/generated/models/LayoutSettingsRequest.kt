@@ -33,32 +33,32 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class LayoutSettingsRequest (
+public data class LayoutSettingsRequest (
     @Json(name = "name")
-    val name: Name,
+    public val name: Name,
 
     @Json(name = "detect_orientation")
-    val detectOrientation: Boolean? = null,
+    public val detectOrientation: Boolean? = null,
 
     @Json(name = "external_app_url")
-    val externalAppUrl: String? = null,
+    public val externalAppUrl: String? = null,
 
     @Json(name = "external_css_url")
-    val externalCssUrl: String? = null,
+    public val externalCssUrl: String? = null,
 
     @Json(name = "options")
-    val options: Map<String, Any?>? = null
+    public val options: Map<String, Any?>? = null
 )
 {
     
     /**
     * Name Enum
     */
-    sealed class Name(val value: String) {
+    public sealed class Name(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Name = when (s) {
+            public companion object {
+                public fun fromString(s: String): Name = when (s) {
                     "custom" -> Custom
                     "grid" -> Grid
                     "mobile" -> Mobile
@@ -67,15 +67,15 @@ data class LayoutSettingsRequest (
                     else -> Unknown(s)
                 }
             }
-            object Custom : Name("custom")
-            object Grid : Name("grid")
-            object Mobile : Name("mobile")
-            object SingleParticipant : Name("single-participant")
-            object Spotlight : Name("spotlight")
-            data class Unknown(val unknownValue: String) : Name(unknownValue)
+            public object Custom : Name("custom")
+            public object Grid : Name("grid")
+            public object Mobile : Name("mobile")
+            public object SingleParticipant : Name("single-participant")
+            public object Spotlight : Name("spotlight")
+            public data class Unknown(val unknownValue: String) : Name(unknownValue)
         
 
-        class NameAdapter : JsonAdapter<Name>() {
+        public class NameAdapter : JsonAdapter<Name>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Name? {
                 val s = reader.nextString() ?: return null

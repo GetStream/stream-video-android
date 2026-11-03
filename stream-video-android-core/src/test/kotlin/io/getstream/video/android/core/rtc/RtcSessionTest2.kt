@@ -16,6 +16,8 @@
 
 package io.getstream.video.android.core.rtc
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.os.PowerManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.api.generated.models.OwnCapability
@@ -202,6 +204,38 @@ class RtcSessionTest2 {
             rtcSession.subscriber.value,
         )
         assertEquals("Wrong sessionId", sessionId, rtcSession.fieldValue("sessionId"))
+    }
+
+    // The default SFU module is what production uses. Tests otherwise replace it with a
+    // mock, so the join-token loader wired there never ran. It must return the session's
+    // join credential, which is the only token the SFU accepts.
+    @Test
+    fun `default SFU connection loads the join credential`() = runTest(UnconfinedTestDispatcher()) {
+        val connectivity = mockk<ConnectivityManager>(relaxed = true)
+        val context = mockk<Context>(relaxed = true)
+        every { context.getSystemService(Context.CONNECTIVITY_SERVICE) } returns connectivity
+        every { mockVideoClient.context } returns context
+        every { mockVideoClient.connectionTimeoutInMs } returns 1_000L
+
+        val rtcSession = RtcSession(
+            client = mockStreamVideo,
+            powerManager = mockPowerManager,
+            call = mockCall,
+            sessionManager = CallSessionManager(),
+            sessionId = "test-session-id",
+            apiKey = "test-api-key",
+            lifecycle = mockLifecycle,
+            sfuUrl = "https://test-sfu.stream.com",
+            sfuWsUrl = "wss://test-sfu.stream.com",
+            sfuToken = "join-credential",
+            sfuName = "test-sfu-edge",
+            remoteIceServers = emptyList(),
+            clientImpl = mockVideoClient,
+            coroutineScope = testScope,
+            sfuAnalytics = SfuAnalytics.getFakeSfuAnalytics(),
+        )
+
+        assertEquals("join-credential", rtcSession.sfuConnectionModule.tokenLoader.loadToken())
     }
 
     @Test

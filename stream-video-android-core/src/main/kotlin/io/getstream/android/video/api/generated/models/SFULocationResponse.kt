@@ -33,19 +33,19 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SFULocationResponse (
+public data class SFULocationResponse (
     @Json(name = "datacenter")
-    val datacenter: String,
+    public val datacenter: String,
 
     @Json(name = "id")
-    val id: String,
+    public val id: String,
 
     @Json(name = "coordinates")
-    val coordinates: io.getstream.android.video.api.generated.models.CoordinatesResponse,
+    public val coordinates: io.getstream.android.video.api.generated.models.CoordinatesResponse,
 
     @Json(name = "location")
-    val location: io.getstream.android.video.api.generated.models.LocationResponse,
+    public val location: io.getstream.android.video.api.generated.models.LocationResponse,
 
     @Json(name = "count")
-    val count: Int? = null
+    public val count: Int? = null
 )

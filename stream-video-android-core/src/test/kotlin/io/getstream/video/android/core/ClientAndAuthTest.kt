@@ -18,8 +18,7 @@ package io.getstream.video.android.core
 
 import com.google.common.truth.Truth.assertThat
 import io.getstream.android.core.api.model.connection.StreamConnectionState
-import io.getstream.android.video.api.generated.models.ConnectedEvent
-import io.getstream.android.video.api.generated.models.VideoEvent
+import io.getstream.android.core.api.model.value.StreamToken
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
 import io.getstream.video.android.core.base.TestBase
@@ -190,41 +189,6 @@ class ClientAndAuthTest : TestBase() {
 
     @Test
     @Ignore
-    fun subscribeToAllEvents() = runTest {
-        val client = StreamVideoBuilder(
-            context = context,
-            apiKey = authData!!.apiKey,
-            user = User(
-                id = "guest",
-                type = UserType.Guest,
-            ),
-        ).build()
-        val sub = client.subscribe { event: VideoEvent ->
-            logger.d { event.toString() }
-        }
-        sub.dispose()
-    }
-
-    @Test
-    @Ignore
-    fun subscribeToSpecificEvents() = runTest {
-        val client = StreamVideoBuilder(
-            context = context,
-            apiKey = authData!!.apiKey,
-            user = User(
-                id = "guest",
-                type = UserType.Guest,
-            ),
-        ).build()
-        // Subscribe for new message events
-        val sub = client.subscribeFor<ConnectedEvent> { newMessageEvent ->
-            logger.d { newMessageEvent.toString() }
-        }
-        sub.dispose()
-    }
-
-    @Test
-    @Ignore
     fun waitForWSConnection() = runTest {
         val client = StreamVideoBuilder(
             context = context,
@@ -283,8 +247,8 @@ class ClientAndAuthTest : TestBase() {
             apiKey = authData!!.apiKey,
             user = testData.users["thierry"]!!,
             token = testData.expiredToken,
-            legacyTokenProvider = { error ->
-                testData.tokens["thierry"]!!
+            tokenProvider = { _ ->
+                StreamToken.fromString(testData.tokens["thierry"]!!)
             },
         ).build()
 
@@ -329,8 +293,6 @@ class ClientAndAuthTest : TestBase() {
             token = authData!!.token,
         ).build()
         val clientImpl = client as StreamVideoClient
-        client.subscribe {
-        }
         val deferred = clientImpl.connectAsync()
         deferred.join()
     }

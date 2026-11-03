@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class QualityScoreReport (
+public data class QualityScoreReport (
     @Json(name = "histogram")
-    val histogram: List<io.getstream.android.video.api.generated.models.ReportByHistogramBucket> = emptyList()
+    public val histogram: List<io.getstream.android.video.api.generated.models.ReportByHistogramBucket> = emptyList()
 )

@@ -22,8 +22,8 @@ import io.getstream.video.android.core.model.VisibilityOnScreenState
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
-import org.threeten.bp.OffsetDateTime
 import stream.video.sfu.models.ParticipantSource
+import kotlin.time.Instant
 
 internal fun stubCallActions(): CallActions =
     mockk<CallActions>(relaxed = true) {
@@ -44,8 +44,8 @@ internal fun participant(
     roles: List<String> = emptyList(),
     source: ParticipantSource = ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
     visibility: VisibilityOnScreenState = VisibilityOnScreenState.UNKNOWN,
-    joinedAt: OffsetDateTime? = null,
-    lastSpeakingAt: OffsetDateTime? = null,
+    joinedAt: Instant? = null,
+    lastSpeakingAt: Instant? = null,
 ): ParticipantState = ParticipantState(
     sessionId = sessionId,
     scope = scope,

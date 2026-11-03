@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class TrackStatsResponse (
+public data class TrackStatsResponse (
     @Json(name = "duration_seconds")
-    val durationSeconds: Int,
+    public val durationSeconds: Int,
 
     @Json(name = "track_type")
-    val trackType: String
+    public val trackType: String
 )

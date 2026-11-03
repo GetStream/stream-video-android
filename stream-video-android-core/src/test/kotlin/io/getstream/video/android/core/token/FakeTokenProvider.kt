@@ -16,9 +16,9 @@
 
 package io.getstream.video.android.core.token
 
-import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenLoader
 
-internal class FakeTokenProvider(vararg val tokens: String) : TokenProvider {
+internal class FakeTokenProvider(vararg val tokens: String) : TokenLoader {
 
     var tokenId = 0
 

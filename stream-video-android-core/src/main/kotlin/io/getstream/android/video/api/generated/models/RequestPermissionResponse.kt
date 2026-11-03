@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class RequestPermissionResponse (
+public data class RequestPermissionResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

@@ -33,10 +33,10 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class TimeWindow (
+public data class TimeWindow (
     @Json(name = "from")
-    val from: String,
+    public val from: String,
 
     @Json(name = "to")
-    val to: String
+    public val to: String
 )

@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class CallLevelEventPayload (
+public data class CallLevelEventPayload (
     @Json(name = "event_type")
-    val eventType: String,
+    public val eventType: String,
 
     @Json(name = "timestamp")
-    val timestamp: Int,
+    public val timestamp: Int,
 
     @Json(name = "user_id")
-    val userId: String,
+    public val userId: String,
 
     @Json(name = "payload")
-    val payload: Map<String, Any?>? = null
+    public val payload: Map<String, Any?>? = null
 )

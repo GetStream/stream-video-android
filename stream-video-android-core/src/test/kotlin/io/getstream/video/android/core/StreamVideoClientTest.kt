@@ -19,7 +19,9 @@ package io.getstream.video.android.core
 import android.content.Context
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.core.api.StreamClient
+import io.getstream.android.core.api.authentication.StreamTokenProvider
 import io.getstream.android.core.api.model.connection.StreamConnectionState
+import io.getstream.android.core.api.model.value.StreamToken
 import io.getstream.android.core.api.socket.listeners.StreamClientListener
 import io.getstream.android.core.api.subscribe.StreamSubscription
 import io.getstream.android.video.api.generated.models.CallAcceptedEvent
@@ -33,7 +35,6 @@ import io.getstream.result.Result.Failure
 import io.getstream.result.Result.Success
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.call.RtcSession
-import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.socket.common.token.TokenRepository
@@ -55,15 +56,17 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
-import org.threeten.bp.OffsetDateTime
+import retrofit2.HttpException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 class StreamVideoClientTest {
     private lateinit var client: StreamVideoClient
@@ -98,6 +101,7 @@ class StreamVideoClientTest {
 
     private fun prepareClient(
         user: User = User(id = "user-1", type = UserType.Authenticated),
+        tokenProvider: StreamTokenProvider? = null,
     ): ClientHarness {
         val context = mockk<Context>(relaxed = true)
         val lifecycle = mockk<Lifecycle>(relaxed = true)
@@ -121,6 +125,9 @@ class StreamVideoClientTest {
                 coordinatorConnectionModule = coordinator,
                 streamClient = streamClientMock,
                 tokenRepository = tokenRepo,
+                tokenProvider = tokenProvider ?: StreamTokenProvider {
+                    StreamToken.fromString(tokenRepo.getToken().ifBlank { "token" })
+                },
                 streamNotificationManager = notificationManager,
                 enableCallNotificationUpdates = false,
                 ringingConfig = ringingConfig,
@@ -130,6 +137,42 @@ class StreamVideoClientTest {
             recordPrivateCalls = true,
         )
         return ClientHarness(client, streamClientMock, tokenRepo)
+    }
+
+    private fun prepareClientWithDefaultProvider(repositoryToken: String): ClientHarness {
+        val context = mockk<Context>(relaxed = true)
+        val lifecycle = mockk<Lifecycle>(relaxed = true)
+        val coordinator = mockk<CoordinatorConnectionModule>(relaxed = true)
+        val tokenRepo = mockk<TokenRepository>(relaxed = true)
+        every { tokenRepo.getToken() } returns repositoryToken
+        val streamClientMock = mockk<StreamClient>(relaxed = true)
+        every { streamClientMock.subscribe(any()) } returns Result.success(mockk(relaxed = true))
+        every { streamClientMock.connectionState } returns MutableStateFlow(StreamConnectionState.Idle)
+        val client = StreamVideoClient(
+            context = context,
+            initialUser = User(id = "user-1", type = UserType.Authenticated),
+            apiKey = "apikey",
+            token = "token",
+            lifecycle = lifecycle,
+            coordinatorConnectionModule = coordinator,
+            streamClient = streamClientMock,
+            tokenRepository = tokenRepo,
+            streamNotificationManager = mockk(relaxed = true),
+            enableCallNotificationUpdates = false,
+            ringingConfig = mockk(relaxed = true),
+            vibrationConfig = mockk(relaxed = true),
+            analytics = mockk(relaxed = true),
+        )
+        return ClientHarness(client, streamClientMock, tokenRepo)
+    }
+
+    private fun mockAuthHttpException(): HttpException {
+        val body = """{"code":5,"message":"token expired"}"""
+        val response = retrofit2.Response.error<String>(
+            401,
+            okhttp3.ResponseBody.create(null, body),
+        )
+        return HttpException(response)
     }
 
     @Test
@@ -152,37 +195,42 @@ class StreamVideoClientTest {
     }
 
     @Test
-    fun `notifyClientSubscriptions triggers listener when no filter`() {
+    fun `emitClientEvent emits the event to the events flow`() = runTest {
         val event = mockk<VideoEvent>()
-        val listener = mockk<VideoEventListener<VideoEvent>>(relaxed = true)
-
-        val sub = EventSubscription(listener)
-
-        client::class.java.getDeclaredField("subscriptions").apply {
-            isAccessible = true
-            set(client, mutableSetOf(sub))
+        val received = mutableListOf<VideoEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            client.events.collect { received.add(it) }
         }
 
-        client.notifyClientSubscriptions(event)
+        client.emitClientEvent(event)
 
-        verify { listener.onEvent(event) }
+        assertEquals(listOf(event), received)
     }
 
     @Test
-    fun `notifyClientSubscriptions triggers only when filter matches`() {
-        val event = mockk<VideoEvent>()
-        val listener = mockk<VideoEventListener<VideoEvent>>(relaxed = true)
-
-        val sub = EventSubscription(listener) { false }
-
-        client::class.java.getDeclaredField("subscriptions").apply {
-            isAccessible = true
-            set(client, mutableSetOf(sub))
+    fun `events emits client-level events in dispatch order`() = runTest {
+        val first = mockk<CallSessionStartedEvent>(relaxed = true)
+        val second = mockk<CallSessionStartedEvent>(relaxed = true)
+        val received = mutableListOf<VideoEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            client.events.collect { received.add(it) }
         }
 
-        client.notifyClientSubscriptions(event)
+        client.fireEvent(first)
+        client.fireEvent(second)
 
-        verify(exactly = 0) { listener.onEvent(any()) }
+        assertEquals(listOf<VideoEvent>(first, second), received)
+    }
+
+    @Test
+    fun `events does not replay events emitted before collection`() = runTest {
+        client.emitClientEvent(mockk<VideoEvent>())
+        val received = mutableListOf<VideoEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            client.events.collect { received.add(it) }
+        }
+
+        assertTrue(received.isEmpty())
     }
 
     @Test
@@ -435,11 +483,11 @@ class StreamVideoClientTest {
             accessToken = "guest-jwt",
             duration = "1ms",
             user = UserResponse(
-                createdAt = OffsetDateTime.MIN,
+                createdAt = Instant.DISTANT_PAST,
                 id = "server_normalized_id",
                 language = "en",
                 role = "guest",
-                updatedAt = OffsetDateTime.MIN,
+                updatedAt = Instant.DISTANT_PAST,
                 name = "Guest",
             ),
         )
@@ -544,16 +592,18 @@ class StreamVideoClientTest {
     }
 
     @Test
-    fun `streamClientListener forwards VideoEvents into the event pipeline`() {
+    fun `streamClientListener forwards VideoEvents into the event pipeline`() = runTest {
         // The listener belongs to the underlying instance, not the spyk copy, so verify
         // through the shared subscriptions set instead of spy recording.
         val harness = prepareClient()
         val listener = slot<StreamClientListener>()
         verify { harness.streamClient.subscribe(capture(listener)) }
         val received = mutableListOf<VideoEvent>()
-        harness.client.subscribe { received.add(it) }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            harness.client.events.collect { received.add(it) }
+        }
         // CallSessionStartedEvent has no ClientState.handleEvent branch, so the dispatch
-        // reaches client subscriptions without side effects.
+        // reaches the client events flow without side effects.
         val event = mockk<CallSessionStartedEvent>(relaxed = true)
 
         listener.captured.onEvent(event)
@@ -562,12 +612,14 @@ class StreamVideoClientTest {
     }
 
     @Test
-    fun `streamClientListener ignores non-VideoEvent payloads`() {
+    fun `streamClientListener ignores non-VideoEvent payloads`() = runTest {
         val harness = prepareClient()
         val listener = slot<StreamClientListener>()
         verify { harness.streamClient.subscribe(capture(listener)) }
         val received = mutableListOf<VideoEvent>()
-        harness.client.subscribe { received.add(it) }
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            harness.client.events.collect { received.add(it) }
+        }
 
         listener.captured.onEvent("not-a-video-event")
 
@@ -584,6 +636,106 @@ class StreamVideoClientTest {
         listener.captured.onState(reported)
 
         assertEquals(reported, harness.client.state.connection.value)
+    }
+
+    // Regression: AnonymousStreamTokenProvider always throws (anonymous users never open a
+    // coordinator socket, so there's nothing to refresh). apiCall used to call the provider
+    // on every auth error regardless of user type, which turned a 401 into a confusing
+    // IllegalStateException. Anonymous users must get the original error back untouched.
+    @Test
+    fun `apiCall surfaces the original auth error for anonymous users without touching the token provider`() = runTest {
+        var providerCalls = 0
+        val throwingProvider = StreamTokenProvider {
+            providerCalls++
+            throw IllegalStateException("must not be called for anonymous users")
+        }
+        val harness = prepareClient(
+            user = User(id = "anon-1", type = UserType.Anonymous),
+            tokenProvider = throwingProvider,
+        )
+        val authError = mockAuthHttpException()
+
+        val result = harness.client.apiCall<String> { throw authError }
+
+        assertEquals(0, providerCalls, "AnonymousStreamTokenProvider must not be invoked")
+        assertTrue(result is Failure)
+        val error = result.value as io.getstream.result.Error.ThrowableError
+        assertEquals(authError, error.cause)
+    }
+
+    // Guard for the fix above: authenticated users must still refresh and retry exactly
+    // once on an auth error, so the anonymous early-return doesn't skip the retry for
+    // everyone else.
+    // The client's default provider is the fallback when the builder does not pass one.
+    // A blank repository token must resolve to the constructor token, and a stored token
+    // must be returned as-is. Both branches of ifBlank have to run.
+    @Test
+    fun `default token provider falls back to the constructor token when the repository is blank`() = runTest {
+        val harness = prepareClientWithDefaultProvider(repositoryToken = "")
+
+        val result = harness.client.apiCall<String> { throw mockAuthHttpException() }
+
+        verify { harness.tokenRepository.updateToken("token") }
+        assertTrue(result is Failure)
+    }
+
+    @Test
+    fun `default token provider returns the repository token when one is stored`() = runTest {
+        val harness = prepareClientWithDefaultProvider(repositoryToken = "repo-jwt")
+
+        harness.client.apiCall<String> { throw mockAuthHttpException() }
+
+        verify { harness.tokenRepository.updateToken("repo-jwt") }
+    }
+
+    // A non-auth HTTP failure must not refresh. This is the other branch of the retry
+    // condition, next to the anonymous and authenticated cases above.
+    @Test
+    fun `apiCall does not refresh the token on a non-auth HTTP error`() = runTest {
+        var providerCalls = 0
+        val provider = StreamTokenProvider {
+            providerCalls++
+            StreamToken.fromString("fresh-token")
+        }
+        val harness = prepareClient(
+            user = User(id = "auth-1", type = UserType.Authenticated),
+            tokenProvider = provider,
+        )
+        val body = """{"code":4,"message":"validation"}"""
+        val response = retrofit2.Response.error<String>(
+            400,
+            okhttp3.ResponseBody.create(null, body),
+        )
+
+        val result = harness.client.apiCall<String> { throw HttpException(response) }
+
+        assertEquals(0, providerCalls)
+        assertTrue(result is Failure)
+    }
+
+    @Test
+    fun `apiCall retries once with a fresh token for authenticated users on auth error`() = runTest {
+        var providerCalls = 0
+        val provider = StreamTokenProvider {
+            providerCalls++
+            StreamToken.fromString("fresh-token")
+        }
+        val harness = prepareClient(
+            user = User(id = "auth-1", type = UserType.Authenticated),
+            tokenProvider = provider,
+        )
+        val authError = mockAuthHttpException()
+        var attempt = 0
+
+        val result = harness.client.apiCall {
+            attempt++
+            if (attempt == 1) throw authError else "ok"
+        }
+
+        assertEquals(1, providerCalls, "Authenticated retry must call the token provider once")
+        assertEquals(2, attempt, "The request must be retried after refreshing the token")
+        assertTrue(result is Success)
+        assertEquals("ok", result.value)
     }
 
     @Test

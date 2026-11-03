@@ -33,43 +33,43 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class IngressVideoLayerRequest (
+public data class IngressVideoLayerRequest (
     @Json(name = "bitrate")
-    val bitrate: Int,
+    public val bitrate: Int,
 
     @Json(name = "codec")
-    val codec: Codec,
+    public val codec: Codec,
 
     @Json(name = "frame_rate_limit")
-    val frameRateLimit: Int,
+    public val frameRateLimit: Int,
 
     @Json(name = "max_dimension")
-    val maxDimension: Int,
+    public val maxDimension: Int,
 
     @Json(name = "min_dimension")
-    val minDimension: Int
+    public val minDimension: Int
 )
 {
     
     /**
     * Codec Enum
     */
-    sealed class Codec(val value: String) {
+    public sealed class Codec(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Codec = when (s) {
+            public companion object {
+                public fun fromString(s: String): Codec = when (s) {
                     "h264" -> H264
                     "vp8" -> Vp8
                     else -> Unknown(s)
                 }
             }
-            object H264 : Codec("h264")
-            object Vp8 : Codec("vp8")
-            data class Unknown(val unknownValue: String) : Codec(unknownValue)
+            public object H264 : Codec("h264")
+            public object Vp8 : Codec("vp8")
+            public data class Unknown(val unknownValue: String) : Codec(unknownValue)
         
 
-        class CodecAdapter : JsonAdapter<Codec>() {
+        public class CodecAdapter : JsonAdapter<Codec>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Codec? {
                 val s = reader.nextString() ?: return null

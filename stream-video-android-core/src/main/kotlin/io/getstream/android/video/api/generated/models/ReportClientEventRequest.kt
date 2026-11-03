@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * Reports a batch of client-side telemetry events. Each event is validated and processed independently; one invalid event does not block the rest of the batch.
  */
-data class ReportClientEventRequest (
+public data class ReportClientEventRequest (
     @Json(name = "events")
-    val events: List<io.getstream.android.video.api.generated.models.ClientEvent> = emptyList()
+    public val events: List<io.getstream.android.video.api.generated.models.ClientEvent> = emptyList()
 )

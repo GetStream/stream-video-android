@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class RingCallResponse (
+public data class RingCallResponse (
     @Json(name = "duration")
-    val duration: String,
+    public val duration: String,
 
     @Json(name = "members_ids")
-    val membersIds: List<String> = emptyList(),
+    public val membersIds: List<String> = emptyList(),
 
     @Json(name = "ring_id")
-    val ringId: String? = null
+    public val ringId: String? = null
 )

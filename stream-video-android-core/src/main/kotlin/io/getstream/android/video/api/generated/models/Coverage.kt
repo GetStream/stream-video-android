@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class Coverage (
+public data class Coverage (
     @Json(name = "publisher_encoding_profiles")
-    val publisherEncodingProfiles: Int,
+    public val publisherEncodingProfiles: Int,
 
     @Json(name = "absent")
-    val absent: List<io.getstream.android.video.api.generated.models.AbsentMetric> = emptyList(),
+    public val absent: List<io.getstream.android.video.api.generated.models.AbsentMetric> = emptyList(),
 
     @Json(name = "metrics_pct")
-    val metricsPct: io.getstream.android.video.api.generated.models.MetricsPct
+    public val metricsPct: io.getstream.android.video.api.generated.models.MetricsPct
 )

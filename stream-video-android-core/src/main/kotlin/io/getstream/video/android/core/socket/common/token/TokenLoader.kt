@@ -16,8 +16,10 @@
 
 package io.getstream.video.android.core.socket.common.token
 
-internal class RepositoryTokenProvider(val tokenRepository: TokenRepository) : TokenProvider {
-    override suspend fun loadToken(): String {
-        return tokenRepository.getToken()
-    }
+/**
+ * Internal token load used by the SFU socket. Callers supply a raw JWT string.
+ * Customer code uses core's [io.getstream.android.core.api.authentication.StreamTokenProvider].
+ */
+internal fun interface TokenLoader {
+    suspend fun loadToken(): String
 }

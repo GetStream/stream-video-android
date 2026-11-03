@@ -19,10 +19,10 @@ package io.getstream.android.video.internal.generated.infrastructure
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
 
-class ByteArrayAdapter {
+public class ByteArrayAdapter {
     @ToJson
-    fun toJson(data: ByteArray): String = String(data)
+    public fun toJson(data: ByteArray): String = String(data)
 
     @FromJson
-    fun fromJson(data: String): ByteArray = data.toByteArray()
+    public fun fromJson(data: String): ByteArray = data.toByteArray()
 }

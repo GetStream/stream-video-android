@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SendVideoReactionRequest (
+public data class SendVideoReactionRequest (
     @Json(name = "type")
-    val type: String,
+    public val type: String,
 
     @Json(name = "emoji_code")
-    val emojiCode: String? = null,
+    public val emojiCode: String? = null,
 
     @Json(name = "custom")
-    val custom: Map<String, Any?>? = null
+    public val custom: Map<String, Any?>? = null
 )

@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * Basic response information
  */
-data class StopHLSBroadcastingResponse (
+public data class StopHLSBroadcastingResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

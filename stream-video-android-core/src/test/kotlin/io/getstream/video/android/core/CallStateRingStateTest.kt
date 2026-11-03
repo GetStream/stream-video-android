@@ -23,8 +23,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.ZoneOffset
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 /**
  * Covers how a polled ring state is folded into call state. The join that may follow is not
@@ -34,11 +34,11 @@ import org.threeten.bp.ZoneOffset
 class CallStateRingStateTest : IntegrationTestBase(connectCoordinatorWS = false) {
 
     private fun ringState(
-        acceptedBy: Map<String, OffsetDateTime> = emptyMap(),
-        rejectedBy: Map<String, OffsetDateTime> = emptyMap(),
-        missedBy: Map<String, OffsetDateTime> = emptyMap(),
-        sessionEndedAt: OffsetDateTime? = null,
-        callEndedAt: OffsetDateTime? = null,
+        acceptedBy: Map<String, Instant> = emptyMap(),
+        rejectedBy: Map<String, Instant> = emptyMap(),
+        missedBy: Map<String, Instant> = emptyMap(),
+        sessionEndedAt: Instant? = null,
+        callEndedAt: Instant? = null,
     ) = GetCallRingStateResponse(
         callCid = "default:ring-state",
         createdByUserId = "caller",
@@ -53,8 +53,8 @@ class CallStateRingStateTest : IntegrationTestBase(connectCoordinatorWS = false)
 
     // A fixed instant on a plain UTC offset: ThreeTenBP has no time-zone data registered in
     // unit tests, so anything resolving a zone id throws.
-    private val now: OffsetDateTime =
-        OffsetDateTime.of(2026, 9, 15, 12, 0, 0, 0, ZoneOffset.UTC)
+    private val now: Instant =
+        Instant.parse("2026-09-15T12:00:00Z")
 
     @Test
     fun `a polled accept lands in acceptedBy`() = runTest {
@@ -124,7 +124,7 @@ class CallStateRingStateTest : IntegrationTestBase(connectCoordinatorWS = false)
     @Test
     fun `an already known end is not overwritten by a later read`() = runTest {
         val call = client.call("default", randomUUID())
-        val earlier = now.minusSeconds(30)
+        val earlier = now - 30.seconds
 
         call.state.updateFromRingState(ringState(callEndedAt = earlier))
         call.state.updateFromRingState(ringState(callEndedAt = now))

@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class Credentials (
+public data class Credentials (
     @Json(name = "token")
-    val token: String,
+    public val token: String,
 
     @Json(name = "ice_servers")
-    val iceServers: List<io.getstream.android.video.api.generated.models.ICEServerResponse> = emptyList(),
+    public val iceServers: List<io.getstream.android.video.api.generated.models.ICEServerResponse> = emptyList(),
 
     @Json(name = "server")
-    val server: io.getstream.android.video.api.generated.models.SFUResponse
+    public val server: io.getstream.android.video.api.generated.models.SFUResponse
 )

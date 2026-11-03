@@ -33,39 +33,39 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class FrameRecordingSettingsRequest (
+public data class FrameRecordingSettingsRequest (
     @Json(name = "capture_interval_in_seconds")
-    val captureIntervalInSeconds: Int,
+    public val captureIntervalInSeconds: Int,
 
     @Json(name = "mode")
-    val mode: Mode,
+    public val mode: Mode,
 
     @Json(name = "quality")
-    val quality: Quality? = null
+    public val quality: Quality? = null
 )
 {
     
     /**
     * Mode Enum
     */
-    sealed class Mode(val value: String) {
+    public sealed class Mode(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Mode = when (s) {
+            public companion object {
+                public fun fromString(s: String): Mode = when (s) {
                     "auto-on" -> AutoOn
                     "available" -> Available
                     "disabled" -> Disabled
                     else -> Unknown(s)
                 }
             }
-            object AutoOn : Mode("auto-on")
-            object Available : Mode("available")
-            object Disabled : Mode("disabled")
-            data class Unknown(val unknownValue: String) : Mode(unknownValue)
+            public object AutoOn : Mode("auto-on")
+            public object Available : Mode("available")
+            public object Disabled : Mode("disabled")
+            public data class Unknown(val unknownValue: String) : Mode(unknownValue)
         
 
-        class ModeAdapter : JsonAdapter<Mode>() {
+        public class ModeAdapter : JsonAdapter<Mode>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Mode? {
                 val s = reader.nextString() ?: return null
@@ -81,11 +81,11 @@ data class FrameRecordingSettingsRequest (
     /**
     * Quality Enum
     */
-    sealed class Quality(val value: String) {
+    public sealed class Quality(public val value: String) {
             override fun toString(): String = value
 
-            companion object {
-                fun fromString(s: String): Quality = when (s) {
+            public companion object {
+                public fun fromString(s: String): Quality = when (s) {
                     "1080p" -> Quality1080p
                     "1440p" -> Quality1440p
                     "360p" -> Quality360p
@@ -94,15 +94,15 @@ data class FrameRecordingSettingsRequest (
                     else -> Unknown(s)
                 }
             }
-            object Quality1080p : Quality("1080p")
-            object Quality1440p : Quality("1440p")
-            object Quality360p : Quality("360p")
-            object Quality480p : Quality("480p")
-            object Quality720p : Quality("720p")
-            data class Unknown(val unknownValue: String) : Quality(unknownValue)
+            public object Quality1080p : Quality("1080p")
+            public object Quality1440p : Quality("1440p")
+            public object Quality360p : Quality("360p")
+            public object Quality480p : Quality("480p")
+            public object Quality720p : Quality("720p")
+            public data class Unknown(val unknownValue: String) : Quality(unknownValue)
         
 
-        class QualityAdapter : JsonAdapter<Quality>() {
+        public class QualityAdapter : JsonAdapter<Quality>() {
             @FromJson
             override fun fromJson(reader: JsonReader): Quality? {
                 val s = reader.nextString() ?: return null

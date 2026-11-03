@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * RecordSettings is the payload for recording settings
  */
-data class RecordSettingsResponse (
+public data class RecordSettingsResponse (
     @Json(name = "audio_only")
-    val audioOnly: Boolean,
+    public val audioOnly: Boolean,
 
     @Json(name = "mode")
-    val mode: String,
+    public val mode: String,
 
     @Json(name = "quality")
-    val quality: String
+    public val quality: String
 )

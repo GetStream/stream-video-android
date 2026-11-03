@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ScreensharingSettingsResponse (
+public data class ScreensharingSettingsResponse (
     @Json(name = "access_request_enabled")
-    val accessRequestEnabled: Boolean,
+    public val accessRequestEnabled: Boolean,
 
     @Json(name = "enabled")
-    val enabled: Boolean,
+    public val enabled: Boolean,
 
     @Json(name = "target_resolution")
-    val targetResolution: io.getstream.android.video.api.generated.models.TargetResolution? = null
+    public val targetResolution: io.getstream.android.video.api.generated.models.TargetResolution? = null
 )

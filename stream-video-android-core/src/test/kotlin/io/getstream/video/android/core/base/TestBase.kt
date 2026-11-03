@@ -29,9 +29,8 @@ import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
-import org.threeten.bp.Clock
-import org.threeten.bp.OffsetDateTime
 import java.util.UUID
+import kotlin.time.Clock
 
 public open class TestBase {
     @get:Rule
@@ -53,7 +52,7 @@ public open class TestBase {
     /** Android context */
     val context = testData.context
 
-    val nowUtc = OffsetDateTime.now(Clock.systemUTC())
+    val nowUtc = Clock.System.now()
 
     @get:Rule
     val mockkRule = MockKRule(this)

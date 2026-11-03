@@ -36,7 +36,7 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.threeten.bp.OffsetDateTime
+import kotlin.time.Instant
 
 /**
  * Focused tests on the SortedParticipantsState's reactive surface — preset changes,
@@ -71,7 +71,7 @@ class SortedParticipantsStateTest {
         assertThat(sut.sorted.value.map { it.sessionId }.first()).isEqualTo("a")
 
         sut.pinned.value = mapOf(
-            "b" to pinUpdateAt("b", OffsetDateTime.parse("2026-05-14T10:00:00Z"), PinType.Local),
+            "b" to pinUpdateAt("b", Instant.parse("2026-05-14T10:00:00Z"), PinType.Local),
         )
         advanceUntilIdle()
         assertThat(sut.sorted.value.map { it.sessionId }.first()).isEqualTo("b")
@@ -264,7 +264,7 @@ class SortedParticipantsStateTest {
 
     private fun pinUpdateAt(
         sessionId: String,
-        at: OffsetDateTime,
+        at: Instant,
         type: PinType,
     ): PinEntry = PinEntry(
         pinTarget = PinUpdate(sessionId = sessionId, userId = "user-$sessionId"),

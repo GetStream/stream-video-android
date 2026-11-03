@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * KickUserResponse is the payload for kicking a user from a call.
  */
-data class KickUserResponse (
+public data class KickUserResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

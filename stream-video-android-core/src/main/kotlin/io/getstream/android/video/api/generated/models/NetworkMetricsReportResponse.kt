@@ -33,16 +33,16 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class NetworkMetricsReportResponse (
+public data class NetworkMetricsReportResponse (
     @Json(name = "average_connection_time")
-    val averageConnectionTime: Double? = null,
+    public val averageConnectionTime: Double? = null,
 
     @Json(name = "average_jitter")
-    val averageJitter: Double? = null,
+    public val averageJitter: Double? = null,
 
     @Json(name = "average_latency")
-    val averageLatency: Double? = null,
+    public val averageLatency: Double? = null,
 
     @Json(name = "average_time_to_reconnect")
-    val averageTimeToReconnect: Double? = null
+    public val averageTimeToReconnect: Double? = null
 )

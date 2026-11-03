@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.token
 
 import io.getstream.video.android.core.socket.common.token.CacheableTokenProvider
-import io.getstream.video.android.core.socket.common.token.TokenProvider
+import io.getstream.video.android.core.socket.common.token.TokenLoader
 import io.getstream.video.android.core.utils.positiveRandomInt
 import io.getstream.video.android.core.utils.randomString
 import io.mockk.coEvery
@@ -29,7 +29,7 @@ import kotlin.test.assertEquals
 
 internal class CacheableTokenProviderTest {
 
-    private val delegatedTokenProvider: TokenProvider = mockk(relaxed = true)
+    private val delegatedTokenProvider: TokenLoader = mockk(relaxed = true)
     private val cacheableTokenProvider = CacheableTokenProvider(delegatedTokenProvider)
 
     @Test

@@ -33,25 +33,25 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class EgressResponse (
+public data class EgressResponse (
     @Json(name = "broadcasting")
-    val broadcasting: Boolean,
+    public val broadcasting: Boolean,
 
     @Json(name = "rtmps")
-    val rtmps: List<io.getstream.android.video.api.generated.models.EgressRTMPResponse> = emptyList(),
+    public val rtmps: List<io.getstream.android.video.api.generated.models.EgressRTMPResponse> = emptyList(),
 
     @Json(name = "composite_recording")
-    val compositeRecording: io.getstream.android.video.api.generated.models.CompositeRecordingResponse? = null,
+    public val compositeRecording: io.getstream.android.video.api.generated.models.CompositeRecordingResponse? = null,
 
     @Json(name = "frame_recording")
-    val frameRecording: io.getstream.android.video.api.generated.models.FrameRecordingResponse? = null,
+    public val frameRecording: io.getstream.android.video.api.generated.models.FrameRecordingResponse? = null,
 
     @Json(name = "hls")
-    val hls: io.getstream.android.video.api.generated.models.EgressHLSResponse? = null,
+    public val hls: io.getstream.android.video.api.generated.models.EgressHLSResponse? = null,
 
     @Json(name = "individual_recording")
-    val individualRecording: io.getstream.android.video.api.generated.models.IndividualRecordingResponse? = null,
+    public val individualRecording: io.getstream.android.video.api.generated.models.IndividualRecordingResponse? = null,
 
     @Json(name = "raw_recording")
-    val rawRecording: io.getstream.android.video.api.generated.models.RawRecordingResponse? = null
+    public val rawRecording: io.getstream.android.video.api.generated.models.RawRecordingResponse? = null
 )

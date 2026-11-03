@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class StopAllRTMPBroadcastsResponse (
+public data class StopAllRTMPBroadcastsResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

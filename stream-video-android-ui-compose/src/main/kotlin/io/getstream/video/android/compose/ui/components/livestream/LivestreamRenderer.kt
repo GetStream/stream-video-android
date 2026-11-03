@@ -43,11 +43,13 @@ import io.getstream.video.android.compose.ui.components.video.config.videoRender
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 @Composable
 internal fun LivestreamRenderer(
@@ -55,7 +57,9 @@ internal fun LivestreamRenderer(
     configuration: VideoRendererConfig = videoRenderConfig(),
     enablePausing: Boolean,
     onPausedPlayer: ((isPaused: Boolean) -> Unit)? = {},
-    livestreamFlow: Flow<ParticipantState.Video?> = defaultLivestreamFlow(call),
+    livestreamFlow: Flow<ParticipantState.Video?> = firstVideoEnabledParticipantVideo(
+        call.state.participants,
+    ),
     onAudioToggle: (Boolean) -> Unit = {},
 ) {
     var isPaused by rememberSaveable { mutableStateOf(false) }
@@ -107,13 +111,24 @@ internal fun LivestreamRenderer(
     }
 }
 
-private fun defaultLivestreamFlow(call: Call): Flow<ParticipantState.Video?> =
-    call.state.participants.flatMapLatest { participants ->
-        if (participants.isEmpty()) {
-            flow { emit(null) }
+/**
+ * The video of the first participant in [participants] whose video is enabled, or `null` when
+ * no participant has video enabled. Follows changes to both the participant list and each
+ * participant's [ParticipantState.videoEnabled] / [ParticipantState.video] state.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+internal fun firstVideoEnabledParticipantVideo(
+    participants: Flow<List<ParticipantState>>,
+): Flow<ParticipantState.Video?> = participants
+    .flatMapLatest { list ->
+        if (list.isEmpty()) {
+            flowOf(null)
         } else {
-            combine(participants.map { it.video }) { videos ->
-                videos.firstOrNull { it?.enabled == true }
-            }
+            combine(
+                list.map { participant ->
+                    participant.videoEnabled.map { enabled -> participant to enabled }
+                },
+            ) { pairs -> pairs.firstOrNull { (_, enabled) -> enabled }?.first }
         }
     }
+    .flatMapLatest { participant -> participant?.video ?: flowOf(null) }

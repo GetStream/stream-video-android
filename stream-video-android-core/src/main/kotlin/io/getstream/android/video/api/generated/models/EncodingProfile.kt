@@ -33,49 +33,49 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class EncodingProfile (
+public data class EncodingProfile (
     @Json(name = "getstats_snapshots")
-    val getstatsSnapshots: Int,
+    public val getstatsSnapshots: Int,
 
     @Json(name = "source_file")
-    val sourceFile: String,
+    public val sourceFile: String,
 
     @Json(name = "svc_modes")
-    val svcModes: List<String> = emptyList(),
+    public val svcModes: List<String> = emptyList(),
 
     @Json(name = "quality_limitation_durations_s")
-    val qualityLimitationDurationsS: Map<String, Int> = emptyMap(),
+    public val qualityLimitationDurationsS: Map<String, Int> = emptyMap(),
 
     @Json(name = "quality_limitation_samples")
-    val qualityLimitationSamples: Map<String, Int> = emptyMap(),
+    public val qualityLimitationSamples: Map<String, Int> = emptyMap(),
 
     @Json(name = "avg_send_kbps")
-    val avgSendKbps: Int? = null,
+    public val avgSendKbps: Int? = null,
 
     @Json(name = "codec")
-    val codec: String? = null,
+    public val codec: String? = null,
 
     @Json(name = "encoder_impl")
-    val encoderImpl: String? = null,
+    public val encoderImpl: String? = null,
 
     @Json(name = "fps_p10")
-    val fpsP10: Int? = null,
+    public val fpsP10: Int? = null,
 
     @Json(name = "fps_p50")
-    val fpsP50: Int? = null,
+    public val fpsP50: Int? = null,
 
     @Json(name = "hardware_encode")
-    val hardwareEncode: Boolean? = null,
+    public val hardwareEncode: Boolean? = null,
 
     @Json(name = "ladder_type")
-    val ladderType: String? = null,
+    public val ladderType: String? = null,
 
     @Json(name = "power_efficient")
-    val powerEfficient: Boolean? = null,
+    public val powerEfficient: Boolean? = null,
 
     @Json(name = "resolution")
-    val resolution: String? = null,
+    public val resolution: String? = null,
 
     @Json(name = "simulcast_layers")
-    val simulcastLayers: Int? = null
+    public val simulcastLayers: Int? = null
 )

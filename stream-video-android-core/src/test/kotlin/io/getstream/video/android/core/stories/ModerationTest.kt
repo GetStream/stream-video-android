@@ -23,6 +23,8 @@ import io.getstream.android.video.api.generated.models.CallMemberUpdatedPermissi
 import io.getstream.android.video.api.generated.models.OwnCapability
 import io.getstream.android.video.api.generated.models.PermissionRequestEvent
 import io.getstream.video.android.core.base.IntegrationTestBase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Test
@@ -121,8 +123,10 @@ class ModerationTest : IntegrationTestBase() {
     @Ignore
     fun `Basic moderation - Request permission to talk`() = runTest {
         Thread.sleep(100L)
-        client.subscribe {
-            println("event $it all events ${events.map { it.javaClass.simpleName }}")
+        backgroundScope.launch(Dispatchers.Default) {
+            client.events.collect {
+                println("event $it all events ${events.map { it.javaClass.simpleName }}")
+            }
         }
         val ownCapabilities = call.state.ownCapabilities.value
         // TODO: maybe not use strings for the permissions

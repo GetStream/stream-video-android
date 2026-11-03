@@ -22,7 +22,10 @@ import android.os.Looper
 import androidx.collection.LruCache
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.core.api.StreamClient
+import io.getstream.android.core.api.authentication.StreamTokenProvider
 import io.getstream.android.core.api.model.connection.StreamConnectionState
+import io.getstream.android.core.api.model.value.StreamToken
+import io.getstream.android.core.api.model.value.StreamUserId
 import io.getstream.android.core.api.socket.listeners.StreamClientListener
 import io.getstream.android.core.api.subscribe.StreamSubscription
 import io.getstream.android.push.PushDevice
@@ -94,7 +97,6 @@ import io.getstream.video.android.core.audio.AudioExecutionContext
 import io.getstream.video.android.core.call.CallBusyHandler
 import io.getstream.video.android.core.dispatchers.DispatcherProvider
 import io.getstream.video.android.core.errors.VideoErrorCode
-import io.getstream.video.android.core.events.VideoEventListener
 import io.getstream.video.android.core.filter.Filters
 import io.getstream.video.android.core.filter.toMap
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
@@ -120,8 +122,6 @@ import io.getstream.video.android.core.recording.RecordingType
 import io.getstream.video.android.core.ringing.RingStatePollingConfig
 import io.getstream.video.android.core.socket.ErrorResponse
 import io.getstream.video.android.core.socket.common.scope.ClientScope
-import io.getstream.video.android.core.socket.common.token.RepositoryTokenProvider
-import io.getstream.video.android.core.socket.common.token.TokenProvider
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.CallSoundAndVibrationPlayer
 import io.getstream.video.android.core.sounds.MutedRingingConfig
@@ -155,6 +155,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -191,7 +194,9 @@ internal class StreamVideoClient internal constructor(
     internal val coordinatorConnectionModule: CoordinatorConnectionModule,
     internal val streamClient: StreamClient,
     internal val tokenRepository: TokenRepository,
-    internal val tokenProvider: TokenProvider = RepositoryTokenProvider(tokenRepository),
+    internal val tokenProvider: StreamTokenProvider = StreamTokenProvider {
+        StreamToken.fromString(tokenRepository.getToken().ifBlank { token })
+    },
     internal val streamNotificationManager: StreamNotificationManager,
     internal val userRepository: WritableUserRepository = StreamUserRepositoryImpl(initialUser),
     internal val enableCallNotificationUpdates: Boolean,
@@ -245,7 +250,10 @@ internal class StreamVideoClient internal constructor(
         get() = userRepository.user.id
 
     private val logger by taggedLogger("Call:StreamVideo")
-    private var subscriptions = mutableSetOf<EventSubscription>()
+
+    private val _events = MutableSharedFlow<VideoEvent>(extraBufferCapacity = 150)
+    public override val events: SharedFlow<VideoEvent> = _events.asSharedFlow()
+
     private var calls = mutableMapOf<String, Call>()
     private val destroyedCalls = LruCache<Int, Call>(100)
     internal val callSoundAndVibrationPlayer = CallSoundAndVibrationPlayer(context)
@@ -380,12 +388,14 @@ internal class StreamVideoClient internal constructor(
         try {
             apiCall()
         } catch (e: HttpException) {
-            // Retry once with a new token if the token is expired.
+            // Retry once with a new token if the token is expired. Anonymous users have no
+            // provider to refresh from (AnonymousStreamTokenProvider always throws), so the
+            // original auth error is the result instead of a confusing IllegalStateException.
             // REST-side: tokenRepository update stays for CoordinatorAuthInterceptor until
             // HTTP is unified through core. WS-side: handled by core's StreamTokenManager
             // via the StreamTokenProvider wired at builder time.
-            if (e.isAuthError()) {
-                val newToken = tokenProvider.loadToken()
+            if (e.isAuthError() && user.type != UserType.Anonymous) {
+                val newToken = tokenProvider.loadToken(StreamUserId.fromString(userId)).rawValue
                 tokenRepository.updateToken(newToken)
                 token = newToken
                 apiCall()
@@ -457,26 +467,6 @@ internal class StreamVideoClient internal constructor(
                 cause = Throwable(error.moreInfo),
             ),
         )
-    }
-
-    public override fun subscribeFor(
-        vararg eventTypes: Class<out VideoEvent>,
-        listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription {
-        val filter = { event: VideoEvent ->
-            eventTypes.any { type -> type.isInstance(event) }
-        }
-        val sub = EventSubscription(listener, filter)
-        subscriptions.add(sub)
-        return sub
-    }
-
-    public override fun subscribe(
-        listener: VideoEventListener<VideoEvent>,
-    ): EventSubscription {
-        val sub = EventSubscription(listener)
-        subscriptions.add(sub)
-        return sub
     }
 
     override suspend fun connectIfNotAlreadyConnected() = safeSuspendingCall {
@@ -645,8 +635,8 @@ internal class StreamVideoClient internal constructor(
      */
 
     /**
-     * Internal function that fires the event. It starts by updating client state and call state
-     * After that it loops over the subscriptions and calls their listener
+     * Internal function that fires the event. It updates the client state, emits the event to
+     * [events], then forwards it to the matching call (call events, then call state).
      */
 
     internal fun fireEvent(event: VideoEvent, cid: String = "") {
@@ -658,7 +648,7 @@ internal class StreamVideoClient internal constructor(
 
         val selectedCid = resolveSelectedCid(event, cid)
 
-        notifyClientSubscriptions(event)
+        emitClientEvent(event)
 
         if (selectedCid.isEmpty()) return
 
@@ -689,13 +679,9 @@ internal class StreamVideoClient internal constructor(
         return callEvent?.getCallCID().orEmpty()
     }
 
-    internal fun notifyClientSubscriptions(event: VideoEvent) {
-        subscriptions.forEach { sub ->
-            if (sub.isDisposed) return@forEach
-
-            if (sub.filter == null || sub.filter.invoke(event)) {
-                sub.listener.onEvent(event)
-            }
+    internal fun emitClientEvent(event: VideoEvent) {
+        if (!_events.tryEmit(event)) {
+            logger.e { "Failed to emit event to observers: [event: $event]" }
         }
     }
 
@@ -778,7 +764,7 @@ internal class StreamVideoClient internal constructor(
         memberIds: List<String>? = null,
         custom: Map<String, Any>? = null,
         settingsOverride: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        startsAt: kotlin.time.Instant? = null,
         team: String? = null,
         ring: Boolean,
         notify: Boolean,
@@ -810,7 +796,7 @@ internal class StreamVideoClient internal constructor(
         members: List<MemberRequest>? = null,
         custom: Map<String, Any>? = null,
         settingsOverride: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        startsAt: kotlin.time.Instant? = null,
         team: String? = null,
         ring: Boolean,
         notify: Boolean,
@@ -890,7 +876,7 @@ internal class StreamVideoClient internal constructor(
         members: List<MemberRequest>? = null,
         custom: Map<String, Any>? = null,
         settingsOverride: CallSettingsRequest? = null,
-        startsAt: org.threeten.bp.OffsetDateTime? = null,
+        startsAt: kotlin.time.Instant? = null,
         team: String? = null,
         ring: Boolean = false,
         notify: Boolean = false,
@@ -1384,16 +1370,4 @@ internal class StreamVideoClient internal constructor(
             )
         }
     }
-}
-
-/** Extension function that makes it easy to use on kotlin, but keeps Java usable as well */
-public inline fun <reified T : VideoEvent> StreamVideo.subscribeFor(
-    listener: VideoEventListener<T>,
-): EventSubscription {
-    return this.subscribeFor(
-        T::class.java,
-        listener = { event ->
-            listener.onEvent(event as T)
-        },
-    )
 }

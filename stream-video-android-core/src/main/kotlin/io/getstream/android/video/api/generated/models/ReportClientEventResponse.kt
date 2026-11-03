@@ -33,7 +33,7 @@ import com.squareup.moshi.ToJson
 /**
  * Response for reporting client-side telemetry events
  */
-data class ReportClientEventResponse (
+public data class ReportClientEventResponse (
     @Json(name = "duration")
-    val duration: String
+    public val duration: String
 )

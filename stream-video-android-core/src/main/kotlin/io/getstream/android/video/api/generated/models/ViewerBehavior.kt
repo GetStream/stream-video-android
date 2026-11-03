@@ -33,28 +33,28 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class ViewerBehavior (
+public data class ViewerBehavior (
     @Json(name = "connection_duration_p50_s")
-    val connectionDurationP50S: Int,
+    public val connectionDurationP50S: Int,
 
     @Json(name = "connections_per_viewer_mean")
-    val connectionsPerViewerMean: Double,
+    public val connectionsPerViewerMean: Double,
 
     @Json(name = "median_watch_min")
-    val medianWatchMin: Double,
+    public val medianWatchMin: Double,
 
     @Json(name = "note")
-    val note: String,
+    public val note: String,
 
     @Json(name = "p90_watch_min")
-    val p90WatchMin: Double,
+    public val p90WatchMin: Double,
 
     @Json(name = "bounce_rate_pct")
-    val bounceRatePct: Double? = null,
+    public val bounceRatePct: Double? = null,
 
     @Json(name = "connections_under_30s_pct")
-    val connectionsUnder30sPct: Double? = null,
+    public val connectionsUnder30sPct: Double? = null,
 
     @Json(name = "return_visit_rate_pct")
-    val returnVisitRatePct: Double? = null
+    public val returnVisitRatePct: Double? = null
 )

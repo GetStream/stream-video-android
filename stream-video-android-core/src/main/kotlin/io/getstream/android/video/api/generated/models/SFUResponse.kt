@@ -33,13 +33,13 @@ import com.squareup.moshi.ToJson
 /**
  * 
  */
-data class SFUResponse (
+public data class SFUResponse (
     @Json(name = "edge_name")
-    val edgeName: String,
+    public val edgeName: String,
 
     @Json(name = "url")
-    val url: String,
+    public val url: String,
 
     @Json(name = "ws_endpoint")
-    val wsEndpoint: String
+    public val wsEndpoint: String
 )

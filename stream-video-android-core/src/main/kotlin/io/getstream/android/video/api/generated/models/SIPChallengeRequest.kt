@@ -33,52 +33,52 @@ import com.squareup.moshi.ToJson
 /**
  * SIP digest challenge authentication data
  */
-data class SIPChallengeRequest (
+public data class SIPChallengeRequest (
     @Json(name = "a1")
-    val a1: String? = null,
+    public val a1: String? = null,
 
     @Json(name = "algorithm")
-    val algorithm: String? = null,
+    public val algorithm: String? = null,
 
     @Json(name = "charset")
-    val charset: String? = null,
+    public val charset: String? = null,
 
     @Json(name = "cnonce")
-    val cnonce: String? = null,
+    public val cnonce: String? = null,
 
     @Json(name = "method")
-    val method: String? = null,
+    public val method: String? = null,
 
     @Json(name = "nc")
-    val nc: String? = null,
+    public val nc: String? = null,
 
     @Json(name = "nonce")
-    val nonce: String? = null,
+    public val nonce: String? = null,
 
     @Json(name = "opaque")
-    val opaque: String? = null,
+    public val opaque: String? = null,
 
     @Json(name = "realm")
-    val realm: String? = null,
+    public val realm: String? = null,
 
     @Json(name = "response")
-    val response: String? = null,
+    public val response: String? = null,
 
     @Json(name = "stale")
-    val stale: Boolean? = null,
+    public val stale: Boolean? = null,
 
     @Json(name = "uri")
-    val uri: String? = null,
+    public val uri: String? = null,
 
     @Json(name = "userhash")
-    val userhash: Boolean? = null,
+    public val userhash: Boolean? = null,
 
     @Json(name = "username")
-    val username: String? = null,
+    public val username: String? = null,
 
     @Json(name = "domain")
-    val domain: List<String>? = null,
+    public val domain: List<String>? = null,
 
     @Json(name = "qop")
-    val qop: List<String>? = null
+    public val qop: List<String>? = null
 )
