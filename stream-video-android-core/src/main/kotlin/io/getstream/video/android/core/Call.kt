@@ -1168,10 +1168,10 @@ public class Call(
      * Whether the server permits noise cancellation for this call, per the capability granted to
      * the user and the call type's noise-cancellation mode.
      */
-    private fun isNoiseCancellationAllowed(): Boolean = noiseCancellationPolicy.isAllowed(
-        capabilities = state.ownCapabilities.value,
-        settings = state.settings.value,
-    )
+    private fun isNoiseCancellationAllowed(): Boolean {
+        val (settings, capabilities) = state.settingsAndCapabilities()
+        return noiseCancellationPolicy.isAllowed(capabilities = capabilities, settings = settings)
+    }
 
     /**
      * Publishes the state observers should see: what the call asked for while no factory exists,
@@ -1197,11 +1197,11 @@ public class Call(
                     state.ownCapabilities,
                 ) { _, _ -> }
                 .collect {
-                    // combine collects each upstream on its own coroutine, so the pair it hands
-                    // over can be stale — new settings next to the capabilities from before them.
-                    // Deciding on that would withdraw noise cancellation the server just granted.
-                    val settings = state.settings.value
-                    val capabilities = state.ownCapabilities.value
+                    // Neither the pair combine hands over nor two separate reads is safe to decide
+                    // on: combine collects each upstream on its own coroutine, and a response
+                    // writes the two fields one after the other. A mixed pair can withdraw noise
+                    // cancellation the server just granted, or latch auto-on against old settings.
+                    val (settings, capabilities) = state.settingsAndCapabilities()
                     if (!noiseCancellationPolicy.isAllowed(capabilities, settings)) {
                         // Withdraws unconditionally rather than only when something is already
                         // processing: a state wanted before the factory existed is remembered and
