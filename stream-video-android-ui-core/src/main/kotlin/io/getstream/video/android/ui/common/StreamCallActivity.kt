@@ -74,7 +74,6 @@ import io.getstream.video.android.core.notifications.internal.service.StreamFore
 import io.getstream.video.android.core.notifications.internal.telecom.TelecomCallController
 import io.getstream.video.android.model.StreamCallId
 import io.getstream.video.android.model.streamCallId
-import io.getstream.video.android.ui.common.StreamCallActivity.Companion.callIntent
 import io.getstream.video.android.ui.common.models.StreamCallActivityException
 import io.getstream.video.android.ui.common.permission.PermissionManager
 import io.getstream.video.android.ui.common.util.StreamCallActivityDelicateApi
@@ -198,13 +197,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
         _renderPermissionUi.value = render
     }
 
-    @Deprecated(
-        "Use configurationMap instead",
-        replaceWith = ReplaceWith("configurationMap"),
-        level = DeprecationLevel.WARNING,
-    )
-    protected lateinit var config: StreamCallActivityConfiguration
-        private set
+    private lateinit var config: StreamCallActivityConfiguration
 
     /**
      * Map of a call id with StreamCallActivityConfiguration
@@ -281,31 +274,6 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
      * Any extending activity must provide its own ui delegate that manages the UI.
      */
     public abstract val uiDelegate: StreamActivityUiDelegate<StreamCallActivity>
-
-    /**
-     * A configuration object returned for this activity controlling various behaviors of the activity.
-     * Can be overridden for further control on the behavior.
-     *
-     * This is delicate API because it loads the config from the extra, you can pass the
-     * configuration object in the [callIntent] method and it will be correctly passed here.
-     * You can override it and return a custom configuration all the time, in which case
-     * the configuration passed in [callIntent] is ignored.
-     */
-    @Deprecated(
-        "Accessing configuration before onCreate may lead to unintended behavior. Use configurationMap instead.",
-        level = DeprecationLevel.WARNING,
-    )
-    @StreamCallActivityDelicateApi
-    public open val configuration: StreamCallActivityConfiguration
-        get() {
-            if (!::config.isInitialized) {
-                logger.w {
-                    "Deprecated configuration getter accessed before onCreate. Use onCreate-initialized configurationMap instead."
-                }
-                config = loadConfigFromIntent(intent) // safe fallback
-            }
-            return config
-        }
 
     protected open fun loadConfigFromIntent(intent: Intent?): StreamCallActivityConfiguration {
         val bundledConfig = intent?.getBundleExtra(
@@ -660,13 +628,7 @@ public abstract class StreamCallActivity : ComponentActivity(), ActivityCallOper
     }
 
     private fun initializeConfig(intent: Intent?) {
-        val configurationFromIntent = loadConfigFromIntent(intent)
-        config = configuration.copy(
-            closeScreenOnCallEnded = configurationFromIntent.closeScreenOnCallEnded,
-            closeScreenOnError = configurationFromIntent.closeScreenOnError,
-            canSkipPermissionRationale = configurationFromIntent.canSkipPermissionRationale,
-            canKeepScreenOn = configurationFromIntent.canKeepScreenOn,
-        )
+        config = loadConfigFromIntent(intent)
 
         val streamCallId = intent?.streamCallId(NotificationHandler.INTENT_EXTRA_CALL_CID)
         streamCallId?.let {

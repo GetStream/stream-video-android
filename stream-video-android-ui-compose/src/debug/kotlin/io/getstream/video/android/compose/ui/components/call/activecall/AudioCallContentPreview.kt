@@ -25,29 +25,11 @@ import io.getstream.video.android.mock.previewCall
 
 @Preview
 @Composable
-private fun AudioCallContentRootPreview() {
-    StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
-    VideoTheme {
-        AudioCallContentPreview()
-    }
-}
-
-@Preview
-@Composable
 private fun AudioOnlyCallContentRootPreview() {
     StreamPreviewDataUtils.initializeStreamVideo(LocalContext.current)
     VideoTheme {
         AudioOnlyCallContentPreview()
     }
-}
-
-@Composable
-internal fun AudioCallContentPreview() {
-    AudioCallContent(
-        call = previewCall,
-        isMicrophoneEnabled = false,
-        durationPlaceholder = "11:45",
-    )
 }
 
 @Composable

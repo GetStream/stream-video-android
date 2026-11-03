@@ -120,6 +120,19 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         assertEquals(expected, signalled.lastOrNull())
     }
 
+    /**
+     * Signals run on a coroutine of their own, so one requested before any session exists can
+     * still be in flight when the test installs one — and would then reach the session alongside
+     * the join signal. Waits until it has run and parked itself as pending.
+     */
+    private fun Call.awaitSignalPending() {
+        val deadline = System.currentTimeMillis() + SIGNAL_TIMEOUT_MS
+        while (!isNoiseCancellationSignalPending() && System.currentTimeMillis() < deadline) {
+            Thread.sleep(SIGNAL_POLL_MS)
+        }
+        assertEquals(true, isNoiseCancellationSignalPending())
+    }
+
     @Test
     fun `enabling audio processing signals the SFU that noise cancellation started`() = runTest {
         val (call, session) = callWithProcessor()
@@ -208,6 +221,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         // The call type's auto-on default and any pre-join change land while joining is still in
         // progress, so the signal has nowhere to go yet.
         call.setAudioProcessingEnabled(true)
+        call.awaitSignalPending()
 
         val session = mockk<RtcSession>(relaxed = true)
         val signalled = record(session)
@@ -278,6 +292,7 @@ class NoiseCancellationSignalTest : IntegrationTestBase(connectCoordinatorWS = f
         // Wanted before any factory exists, so nothing is applied yet and the signal finds no
         // session to send at.
         call.setAudioProcessingEnabled(true)
+        call.awaitSignalPending()
 
         // The factory is built while joining and applies the wanted state, so by the time a
         // session appears noise cancellation really is running.

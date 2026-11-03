@@ -263,7 +263,6 @@ class CallLobbyViewModel @Inject constructor(
         viewModelScope.launch {
             googleSignInClient.signOut()
             dataStore.clear()
-            StreamVideo.instance().logOut()
             ChatClient.instance().disconnect(true).enqueue()
             delay(200)
             StreamVideo.removeClient()

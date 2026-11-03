@@ -114,9 +114,9 @@ class RingTest : IntegrationTestBase() {
 
     @Test
     fun `Reject a call`() = runTest {
-        val call = client.call("default")
-        val createResponse = call.create(memberIds = listOf("tommaso", "thierry"), ring = true)
-        assertSuccess(createResponse)
+        // Not created on the server: every call.ring / call.created / call.updated it sends back
+        // replaces rejectedBy with the server's view, which never includes this synthetic reject.
+        val call = client.call("default", randomUUID())
         val userResponse = testData.users["tommaso"]!!.toResponse()
 
         val rejectEvent = CallRejectedEvent(
@@ -127,9 +127,6 @@ class RingTest : IntegrationTestBase() {
             type = "",
         )
         clientImpl.fireEvent(rejectEvent)
-
-        // we need to fix this later, but rejecting an incoming call with real API calls is difficult
-        advanceTimeBy(3000)
 
         // verify that call.state.rejectedBy is updated
         assertThat(call.state.rejectedBy.value).contains("tommaso")

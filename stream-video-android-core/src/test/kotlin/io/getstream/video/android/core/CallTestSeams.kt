@@ -158,6 +158,16 @@ internal fun CallState.injectServerState(
     settings?.let { mutableStateField<CallSettingsResponse?>("_settings").value = it }
 }
 
+/**
+ * Whether a noise-cancellation signal found no joined session and is waiting for one, so a test
+ * can tell that signal has already run before it installs a session.
+ */
+internal fun Call.isNoiseCancellationSignalPending(): Boolean {
+    val field = Call::class.java.getDeclaredField("noiseCancellationSignalPending")
+    field.isAccessible = true
+    return field.get(this) as Boolean
+}
+
 /** Builds the minimum settings object the noise-cancellation policy reads. */
 internal fun noiseCancellationSettings(
     mode: NoiseCancellationSettings.Mode,

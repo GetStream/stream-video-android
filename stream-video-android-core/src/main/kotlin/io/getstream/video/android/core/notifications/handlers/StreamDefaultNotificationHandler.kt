@@ -1394,7 +1394,7 @@ constructor(
                 ?.vibratePattern
             channelInfo.createRingingChannel(
                 manager = notificationManager,
-                soundUri = streamVideo.sounds.ringingConfig.incomingCallSoundUri,
+                soundUri = streamVideo.ringingConfig.incomingCallSoundUri,
                 audioAttributes = audioAttributes,
                 vibrationPattern = vibrationPattern,
             )

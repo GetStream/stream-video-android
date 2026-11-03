@@ -99,8 +99,6 @@ public abstract class io/getstream/video/android/ui/common/StreamCallActivity : 
 	protected fun getCallHandlerDelegate ()Lio/getstream/video/android/ui/common/IncomingCallHandlerDelegate;
 	protected fun getCallJoinInterceptor ()Lio/getstream/video/android/core/CallJoinInterceptor;
 	protected fun getCallTransitionTime ()J
-	protected final fun getConfig ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
-	public fun getConfiguration ()Lio/getstream/video/android/ui/common/StreamCallActivityConfiguration;
 	public final fun getConfigurationMap ()Ljava/util/HashMap;
 	protected final fun getOnErrorFinish ()Lkotlin/jvm/functions/Function2;
 	protected final fun getOnSuccessFinish ()Lkotlin/jvm/functions/Function2;

@@ -39,7 +39,7 @@ import io.getstream.video.android.core.internal.module.CoordinatorConnectionModu
 import io.getstream.video.android.core.notifications.internal.StreamNotificationManager
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.sounds.RingingCallVibrationConfig
-import io.getstream.video.android.core.sounds.Sounds
+import io.getstream.video.android.core.sounds.RingingConfig
 import io.getstream.video.android.model.User
 import io.getstream.video.android.model.UserType
 import io.mockk.coEvery
@@ -108,7 +108,7 @@ class StreamVideoClientTest {
         val coordinator = mockk<CoordinatorConnectionModule>(relaxed = true)
         val tokenRepo = mockk<TokenRepository>(relaxed = true)
         val notificationManager = mockk<StreamNotificationManager>(relaxed = true)
-        val sounds = mockk<Sounds>(relaxed = true)
+        val ringingConfig = mockk<RingingConfig>(relaxed = true)
         val vibration = mockk<RingingCallVibrationConfig>(relaxed = true)
         val streamClientMock = mockk<StreamClient>(relaxed = true)
         val subscription = mockk<StreamSubscription>(relaxed = true)
@@ -130,7 +130,7 @@ class StreamVideoClientTest {
                 },
                 streamNotificationManager = notificationManager,
                 enableCallNotificationUpdates = false,
-                sounds = sounds,
+                ringingConfig = ringingConfig,
                 vibrationConfig = vibration,
                 analytics = mockk(relaxed = true),
             ),
@@ -159,7 +159,7 @@ class StreamVideoClientTest {
             tokenRepository = tokenRepo,
             streamNotificationManager = mockk(relaxed = true),
             enableCallNotificationUpdates = false,
-            sounds = mockk(relaxed = true),
+            ringingConfig = mockk(relaxed = true),
             vibrationConfig = mockk(relaxed = true),
             analytics = mockk(relaxed = true),
         )
@@ -507,7 +507,7 @@ class StreamVideoClientTest {
             tokenRepository = mockk(relaxed = true),
             streamNotificationManager = mockk(relaxed = true),
             enableCallNotificationUpdates = false,
-            sounds = mockk(relaxed = true),
+            ringingConfig = mockk(relaxed = true),
             vibrationConfig = mockk(relaxed = true),
             analytics = mockk(relaxed = true),
         )

@@ -76,8 +76,8 @@ internal class CallServiceRingingStateObserver(
 
                 // Play incoming call sound
                 soundPlayer?.playCallSound(
-                    streamVideo.sounds.ringingConfig.incomingCallSoundUri,
-                    streamVideo.sounds.mutedRingingConfig?.playIncomingSoundIfMuted ?: false,
+                    streamVideo.ringingConfig.incomingCallSoundUri,
+                    streamVideo.mutedRingingConfig?.playIncomingSoundIfMuted ?: false,
                 )
             } else {
                 // Call accepted - stop sounds immediately for better responsiveness
@@ -92,8 +92,8 @@ internal class CallServiceRingingStateObserver(
     private fun handleOutgoingState(state: RingingState.Outgoing) {
         if (!state.acceptedByCallee) {
             soundPlayer?.playCallSound(
-                streamVideo.sounds.ringingConfig.outgoingCallSoundUri,
-                streamVideo.sounds.mutedRingingConfig?.playOutgoingSoundIfMuted ?: false,
+                streamVideo.ringingConfig.outgoingCallSoundUri,
+                streamVideo.mutedRingingConfig?.playOutgoingSoundIfMuted ?: false,
             )
         } else {
             // Call accepted - stop sounds immediately

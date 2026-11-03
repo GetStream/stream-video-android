@@ -149,7 +149,6 @@ class CallJoinViewModel @Inject constructor(
                     null
                 }
                 device?.let { streamVideo.deleteDevice(it) }
-                streamVideo.logOut()
             }
 
             StreamVideo.removeClient()
