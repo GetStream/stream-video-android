@@ -18,6 +18,8 @@ package io.getstream.video.android.compose.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 
 /**
@@ -36,7 +38,11 @@ import androidx.compose.runtime.remember
  * }
  * ```
  *
- * @param keys Optional keys to control the recomposition of the compound factory.
+ * The [factory] function is called once, and again only when the current [VideoComponentFactory],
+ * the [factory] instance, one of the [keys], or Compose state read inside [factory] changes.
+ *
+ * @param keys Optional keys for values the [factory] function reads that Compose does not track,
+ * such as plain fields. If any of the keys change, the [factory] function is called again.
  * @param factory Builds the new [VideoComponentFactory] from the current one.
  * @param content The content that uses the compound factory.
  */
@@ -47,8 +53,8 @@ public fun CompoundComponentFactory(
     content: @Composable () -> Unit,
 ) {
     val currentComponentFactory = LocalComponentFactory.current
-    val compoundComponentFactory = remember(currentComponentFactory, factory, *keys) {
-        factory(currentComponentFactory)
+    val compoundComponentFactory by remember(currentComponentFactory, factory, keys.toList()) {
+        derivedStateOf { factory(currentComponentFactory) }
     }
     CompositionLocalProvider(
         value = LocalComponentFactory provides compoundComponentFactory,
