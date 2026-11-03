@@ -65,6 +65,11 @@ lane :run_e2e_test do |options|
     # during the emulator boot is already on screen, so it is closed after the setting is applied.
     sh('adb shell settings put global hide_error_dialogs 1')
     sh('adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS')
+    # The retry rule clears logcat at every attempt, so this is the only record of the emulator
+    # boot. A system ANR is printed to the job log, which is kept even when the shard passes and
+    # uploads no artifacts.
+    sh('adb logcat -d -b all > boot-logcat.txt')
+    sh("grep -A 20 'ANR in' boot-logcat.txt || true")
   end
 
   start_video_buddy
@@ -101,14 +106,6 @@ lane :run_e2e_test do |options|
       # independent sample. Used to reproduce a failure that only shows on one API level.
       "-e class #{targeted_class}"
     end
-
-  if is_ci
-    # The retry rule clears logcat at every attempt, so this is the only record of what happened
-    # between the emulator boot and the first test. A system ANR is printed to the job log, which
-    # is kept even when the shard passes and uploads no artifacts.
-    sh('adb logcat -d -b all > boot-logcat.txt')
-    sh("grep -A 20 'ANR in' boot-logcat.txt || true")
-  end
 
   result = sh(
     "adb shell 'CLASSPATH=#{androidx_test_services_path}' " \
