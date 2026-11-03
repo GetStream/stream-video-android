@@ -120,6 +120,7 @@ jobs:
             fastlane/allure-results/*
             fastlane/video-buddy-server.log
             fastlane/video-buddy-console.log
+            fastlane/boot-logcat.txt
   # The single required check for E2E, so the shard count can change without touching branch
   # protection.
   e2e-result:
