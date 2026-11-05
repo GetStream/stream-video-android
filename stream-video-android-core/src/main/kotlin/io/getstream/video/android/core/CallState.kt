@@ -629,6 +629,16 @@ public class CallState(
         MutableStateFlow(emptyList())
     public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
 
+    /**
+     * Held while a response writes both [ownCapabilities] and [settings], so
+     * [settingsAndCapabilities] never sees one updated and the other not.
+     */
+    private val serverStateLock = Any()
+
+    /** [settings] and [ownCapabilities] as one consistent snapshot. */
+    internal fun settingsAndCapabilities(): Pair<CallSettingsResponse?, List<OwnCapability>> =
+        synchronized(serverStateLock) { _settings.value to _ownCapabilities.value }
+
     internal val _permissionRequests = MutableStateFlow<List<PermissionRequest>>(emptyList())
     val permissionRequests: StateFlow<List<PermissionRequest>> = _permissionRequests
 
@@ -1869,11 +1879,13 @@ public class CallState(
     }
 
     fun updateFromResponse(response: GetOrCreateCallResponse) {
-        val members = response.members
-        updateFromResponse(members)
-        _ownCapabilities.value = response.ownCapabilities
-        val callResponse = response.call
-        updateFromResponse(callResponse)
+        synchronized(serverStateLock) {
+            val members = response.members
+            updateFromResponse(members)
+            _ownCapabilities.value = response.ownCapabilities
+            val callResponse = response.call
+            updateFromResponse(callResponse)
+        }
     }
 
     private fun updateFromResponse(members: List<MemberResponse>) {
@@ -1881,21 +1893,27 @@ public class CallState(
     }
 
     fun updateFromResponse(response: UpdateCallResponse) {
-        updateFromResponse(response.call)
-        _ownCapabilities.value = response.ownCapabilities
-        updateFromResponse(response.members)
+        synchronized(serverStateLock) {
+            updateFromResponse(response.call)
+            _ownCapabilities.value = response.ownCapabilities
+            updateFromResponse(response.members)
+        }
     }
 
     fun updateFromResponse(response: GetCallResponse) {
-        updateFromResponse(response.call)
-        _ownCapabilities.value = response.ownCapabilities
-        updateFromResponse(response.members)
+        synchronized(serverStateLock) {
+            updateFromResponse(response.call)
+            _ownCapabilities.value = response.ownCapabilities
+            updateFromResponse(response.members)
+        }
     }
 
     fun updateFromResponse(response: JoinCallResponse) {
-        _ownCapabilities.value = response.ownCapabilities
-        updateFromResponse(response.members)
-        updateFromResponse(response.call)
+        synchronized(serverStateLock) {
+            _ownCapabilities.value = response.ownCapabilities
+            updateFromResponse(response.members)
+            updateFromResponse(response.call)
+        }
     }
 
     fun getMember(userId: String): MemberState? {
@@ -1903,9 +1921,11 @@ public class CallState(
     }
 
     fun updateFromResponse(callData: CallStateResponseFields) {
-        updateFromResponse(callData.call)
-        _ownCapabilities.value = callData.ownCapabilities
-        updateFromResponse(callData.members)
+        synchronized(serverStateLock) {
+            updateFromResponse(callData.call)
+            _ownCapabilities.value = callData.ownCapabilities
+            updateFromResponse(callData.members)
+        }
     }
 
     fun updateFromResponse(it: QueryCallMembersResponse) {
