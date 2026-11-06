@@ -257,7 +257,7 @@ internal sealed class FastReconnectResult {
     data class Failed(val error: Exception) : FastReconnectResult()
 }
 
-public class RtcSession internal constructor(
+public open class RtcSession internal constructor(
     client: StreamVideo,
     private val sessionCounter: Int = 0,
     private val powerManager: PowerManager?,
@@ -327,6 +327,11 @@ public class RtcSession internal constructor(
             sfuAnalytics = sfuAnalytics,
         )
     },
+    /**
+     * When false, the session never creates the SFU connection or any peer connection, and
+     * leaves the shared peer connection factory untouched. Only [EmptyRtcSession] passes false.
+     */
+    initializeRtc: Boolean = true,
 ) {
     private val muteStateSyncJobs = TrackKeyedJobs()
 
@@ -718,6 +723,12 @@ public class RtcSession internal constructor(
                 "SDK hasn't been initialised yet - can't start a RtcSession",
             )
         }
+        if (initializeRtc) {
+            setUpRtc()
+        }
+    }
+
+    private fun setUpRtc() {
         logger.i { "<init> #sfu; #track; no args" }
 
         traceE2EEConfiguration()
@@ -976,7 +987,7 @@ public class RtcSession internal constructor(
      * @param forceRestart - set to true if you want to force restart both ICE connections
      * regardless of their current connection status (even if they are CONNECTED)
      */
-    suspend fun reconnect(forceRestart: Boolean) {
+    public open suspend fun reconnect(forceRestart: Boolean) {
         // ice restart
         val subscriberAsync = rtcSessionScope.async {
             subscriber.value?.let {
@@ -1010,7 +1021,7 @@ public class RtcSession internal constructor(
         message = "Use connectInternal() which returns SfuConnectionResult instead of throwing.",
         replaceWith = ReplaceWith("connectInternal(reconnectDetails, options)"),
     )
-    suspend fun connect(
+    public open suspend fun connect(
         reconnectDetails: ReconnectDetails? = null,
         options: List<PublishOption>? = null,
     ) {
@@ -1305,7 +1316,7 @@ public class RtcSession internal constructor(
         return
     }
 
-    fun setScreenShareTrack() {
+    public open fun setScreenShareTrack() {
         setLocalTrack(
             TrackType.TRACK_TYPE_SCREEN_SHARE,
             VideoTrack(
@@ -1349,11 +1360,13 @@ public class RtcSession internal constructor(
     fun cleanup() = atomicCleanup {
         logger.i { "[cleanup] #sfu; #track; no args" }
 
-        coroutineScope.launch {
-            serialProcessor.submit("cleanupSfuConnections") {
-                sfuConnectionModule.socketConnection.disconnect()
-                sfuConnectionMigrationModule?.socketConnection?.disconnect()
-                Unit
+        if (::sfuConnectionModule.isInitialized) {
+            coroutineScope.launch {
+                serialProcessor.submit("cleanupSfuConnections") {
+                    sfuConnectionModule.socketConnection.disconnect()
+                    sfuConnectionMigrationModule?.socketConnection?.disconnect()
+                    Unit
+                }
             }
         }
         sfuConnectionMigrationModule = null
@@ -1663,7 +1676,7 @@ public class RtcSession internal constructor(
         logger.d { "[setVideoSubscriptions] #sfu; #track; useDefaults: $useDefaults" }
     }
 
-    fun handleEvent(event: VideoEvent) {
+    public open fun handleEvent(event: VideoEvent) {
         logger.i { "[rtc handleEvent] #sfu; event: $event" }
         if (event is SfuDataEvent) {
             coroutineScope.launch {
@@ -1923,7 +1936,7 @@ public class RtcSession internal constructor(
     /**
      * Triggered whenever we receive new ice candidate from the SFU
      */
-    suspend fun handleIceTrickle(event: ICETrickleEvent) {
+    public open suspend fun handleIceTrickle(event: ICETrickleEvent) {
         if (event.peerType == PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED && publisher.value == null && sfuConnectionModule.socketConnection.state().value is SfuSocketState.Connected) {
             logger.v {
                 "[handleIceTrickle] #sfu; #${event.peerType.stringify()}; publisher is null, adding to pending"
@@ -1961,7 +1974,7 @@ public class RtcSession internal constructor(
      * - Sets the local description
      * - Sends the answer back to the SFU
      */
-    suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
+    public open suspend fun handleSubscriberOffer(offerEvent: SubscriberOfferEvent) {
         logger.d { "[handleSubscriberOffer] #sfu; #subscriber; event: $offerEvent" }
         if (subscriber.value == null) {
             subscriberPendingEvents.add(offerEvent)
@@ -1977,14 +1990,14 @@ public class RtcSession internal constructor(
     /**
      * @return [StateFlow] that holds [RtcStatsReport] that the publisher exposes.
      */
-    suspend fun getPublisherStats(): RtcStatsReport? {
+    public open suspend fun getPublisherStats(): RtcStatsReport? {
         return publisher.value?.getStats()
     }
 
     /**
      * @return [StateFlow] that holds [RTCStatsReport] that the subscriber exposes.
      */
-    suspend fun getSubscriberStats(): RtcStatsReport? {
+    public open suspend fun getSubscriberStats(): RtcStatsReport? {
         return subscriber.value?.getStats()
     }
 
@@ -2108,7 +2121,7 @@ public class RtcSession internal constructor(
     }
 
     // share what size and which participants we're looking at
-    suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> =
+    public open suspend fun requestSubscriberIceRestart(): Result<ICERestartResponse> =
         subscriber.value?.restartIce() ?: Failure(
             Error.ThrowableError(
                 "Subscriber is null",
@@ -2116,7 +2129,7 @@ public class RtcSession internal constructor(
             ),
         )
 
-    suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> = safeApiCall {
+    public open suspend fun requestPublisherIceRestart(): Result<ICERestartResponse> = safeApiCall {
         val request = ICERestartRequest(
             session_id = sessionId,
             peer_type = PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED,
@@ -2145,7 +2158,7 @@ public class RtcSession internal constructor(
 
     // sets display track visibility
     @Synchronized
-    fun updateTrackDimensions(
+    public open fun updateTrackDimensions(
         sessionId: String,
         trackType: TrackType,
         visible: Boolean,
