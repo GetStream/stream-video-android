@@ -223,6 +223,11 @@ dependencies {
 
     implementation(libs.androidx.media.media)
 
+    // HLS playback. ExoPlayer only; the UI layer supplies the surface, so media3-ui is not needed.
+    // Version matches stream-chat-android 7.13 so an app using both gets a single Media3.
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.exoplayer.hls)
+
     // unit tests
     testImplementation(libs.stream.result)
     testImplementation(libs.stream.result.call)

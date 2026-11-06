@@ -25,6 +25,7 @@ import io.getstream.video.android.core.SdkCause
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.call.scope.ScopeProvider
+import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.utils.AtomicUnitCall
 import io.getstream.video.android.core.utils.safeCall
 import kotlinx.coroutines.launch
@@ -93,6 +94,7 @@ internal class CallLifecycleManager(
         callAnalytics.stopObservers()
         sessionMonitor().cancelSfuObservers()
         state._connection.value = RealtimeConnection.Disconnected
+        clearPlayback()
         logger.v { "[leave] #ringing; call_id = $id" }
         if (isDestroyed) {
             logger.w { "[leave] #ringing; Call already destroyed, ignoring" }
@@ -144,8 +146,15 @@ internal class CallLifecycleManager(
         statsReporter.stop()
         media.cleanup() // TODO Rahul, Verify Later: need to check which call has owned the media at the moment(probably use active call)
         sessionManager.setActiveSession(null)
+        clearPlayback()
         // Cleanup the call's scope provider
         scopeProvider.cleanup()
+    }
+
+    private fun clearPlayback() {
+        sessionManager.playbackSession?.cleanup()
+        sessionManager.playbackSession = null
+        state._playbackType.value = PlaybackType.WebRtc
     }
 
     /** Stops the ICE and connectivity monitors. */

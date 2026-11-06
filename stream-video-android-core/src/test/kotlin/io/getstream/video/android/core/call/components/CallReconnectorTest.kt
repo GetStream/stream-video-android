@@ -311,6 +311,23 @@ class CallReconnectorTest {
         verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
     }
 
+    @Test
+    fun `reconnect is skipped during HLS playback`() = runTest(testDispatcher) {
+        sessionManager.playbackSession = mockk(relaxed = true)
+
+        reconnector().reconnect(
+            WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_REJOIN,
+            "network",
+        )
+        advanceUntilIdle()
+
+        coVerify(exactly = 0) {
+            apiClient.joinRequest(any(), any(), any(), any(), any(), any(), any(), any())
+        }
+        verify(exactly = 0) { lifecycle.leave(any<CallLeaveReason>()) }
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Reconnecting)
+    }
+
     /**
      * Wires up the shared happy-path state a rejoin/migrate needs: a resolvable location,
      * an existing (old) session, a stubbed join request and an injected new session.

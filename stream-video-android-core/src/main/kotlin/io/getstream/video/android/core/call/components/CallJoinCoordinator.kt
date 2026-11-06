@@ -17,6 +17,7 @@
 package io.getstream.video.android.core.call.components
 
 import io.getstream.android.video.generated.models.JoinCallResponse
+import io.getstream.android.video.generated.models.PlaybackResponse
 import io.getstream.android.video.generated.models.RingCallRequest
 import io.getstream.log.taggedLogger
 import io.getstream.result.Error
@@ -38,6 +39,7 @@ import io.getstream.video.android.core.analytics.reporting.model.AnalyticsCallAb
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.model.toIceServer
 import io.getstream.video.android.core.ringing.RingJoinSource
 import io.getstream.video.android.core.utils.StreamRefCountedSingleFlightProcessor
@@ -70,6 +72,8 @@ internal class CallJoinCoordinator(
     private val sessionMonitor: SessionMonitor,
     private val callRegistry: ClientCallRegistry,
     private val hasRequiredPermissions: () -> Boolean,
+    // Builds the EmptyRtcSession returned when the backend serves HLS playback.
+    private val createPlaybackSession: () -> RtcSession,
     // Reads and clears the source of a ring-driven join; see Call.consumeJoinSource.
     private val consumeJoinSource: () -> RingJoinSource? = { null },
 ) {
@@ -222,7 +226,7 @@ internal class CallJoinCoordinator(
     ): Result<RtcSession> {
         // Subsequent join() calls while a session is live return that session instead of
         // building a second one. [joinInternal] repeats the same check for direct callers.
-        sessionManager.session.value?.let { existing ->
+        joinedSession()?.let { existing ->
             logger.w { "[join] Call already joined — returning existing session" }
             existing.sfuTracer.trace("join-already-joined", "join() while session already live")
             return Success(existing)
@@ -277,6 +281,10 @@ internal class CallJoinCoordinator(
                 JoinAnalyticsModel(retryCount, JoinReason.FirstAttempt, joinSource),
             )
             if (result is Success) {
+                // An HLS viewer publishes nothing, so local capture stays as it is.
+                if (state._playbackType.value is PlaybackType.Hls) {
+                    return result
+                }
                 // we initialise the camera, mic and other according to local + backend settings
                 // only when the call is joined to make sure we don't switch and override
                 // the settings during a call.
@@ -382,7 +390,7 @@ internal class CallJoinCoordinator(
         // Gate before any teardown: cancelSfuObservers() would leave the live session without
         // its SFU event subscription, and only monitorSession() (further down, on the new-session
         // path) restores it.
-        sessionManager.session.value?.let { existing ->
+        joinedSession()?.let { existing ->
             logger.i { "[joinInternal] Call already joined — returning existing session" }
             existing.sfuTracer.trace(
                 "join-already-joined",
@@ -425,10 +433,14 @@ internal class CallJoinCoordinator(
                 // The coordinator rejects a join whose flag disagrees with the call. This is
                 // the first join; rejoin / migrate omit it and CallApiClient reads the manager.
                 e2ee = state.e2eeEnabled.value,
+                playbackCapabilities = listOf(PlaybackResponse.Type.Hls.value),
             )
 
         if (result !is Success) {
             return result as Failure
+        }
+        result.value.playback?.let { playback ->
+            return joinPlayback(playback)
         }
         val sfuToken = result.value.credentials.token
         val sfuUrl = result.value.credentials.server.url
@@ -466,6 +478,34 @@ internal class CallJoinCoordinator(
             }
             throw ce
         }
+    }
+
+    private fun joinedSession(): RtcSession? =
+        sessionManager.session.value ?: sessionManager.playbackSession
+
+    /**
+     * Completes a join the backend served as HLS playback. No SFU connection is made, so the
+     * session monitor (SFU events, network-driven reconnects) and the stats reporter never start.
+     * The returned session is held as [CallSessionManager.playbackSession], never as the active
+     * session.
+     */
+    private fun joinPlayback(playback: PlaybackResponse): Result<RtcSession> {
+        val playlistUrl = playback.playlistUrl
+        if (playback.type != PlaybackResponse.Type.Hls || playlistUrl.isBlank()) {
+            logger.e {
+                "[joinInternal] Unsupported playback (type=${playback.type}, " +
+                    "hasUrl=${playback.playlistUrl.isNotBlank()})"
+            }
+            return Failure(Error.GenericError("Unsupported playback type: ${playback.type}"))
+        }
+        logger.i { "[joinInternal] Joined with HLS playback (reason=${playback.reason})" }
+        val session = createPlaybackSession()
+        sessionManager.playbackSession = session
+        state._playbackType.value = PlaybackType.Hls(playlistUrl)
+        state._connection.value = RealtimeConnection.Joined(session)
+        callRegistry.markActive()
+        state._connection.value = RealtimeConnection.Connected
+        return Success(session)
     }
 
     private suspend fun completeJoinAfterSessionInstall(

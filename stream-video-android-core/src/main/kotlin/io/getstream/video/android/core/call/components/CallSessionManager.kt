@@ -59,6 +59,13 @@ internal class CallSessionManager() {
         _session.value = rtcSession
     }
 
+    /**
+     * The [EmptyRtcSession] returned by `join()` when the backend served HLS playback. Held
+     * apart from [session] so a repeated `join()` returns it instead of joining again.
+     */
+    @Volatile
+    var playbackSession: RtcSession? = null
+
     var sessionId = UUID.randomUUID().toString()
 
     val unifiedSessionId = UUID.randomUUID().toString()

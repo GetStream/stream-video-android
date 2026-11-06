@@ -29,11 +29,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.compose.ui.components.livestream.state.LivestreamState
+import io.getstream.video.android.compose.ui.components.video.HlsVideoRenderer
 import io.getstream.video.android.compose.ui.components.video.config.VideoRendererConfig
 import io.getstream.video.android.compose.ui.components.video.config.videoRenderConfig
 import io.getstream.video.android.core.Call
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.RealtimeConnection
+import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.sorting.bySourcePriority
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -137,7 +139,9 @@ public fun LivestreamPlayer(
     )
 
     val livestream by livestreamFlow.collectAsStateWithLifecycle(initialValue = null)
+    val playback by call.state.playbackType.collectAsStateWithLifecycle()
     val hostVideoAvailable = livestream?.enabled == true
+    val playingHls = playback is PlaybackType.Hls
 
     val connection by call.state.connection.collectAsStateWithLifecycle()
     val endedAt by call.state.endedAt.collectAsStateWithLifecycle()
@@ -171,6 +175,7 @@ public fun LivestreamPlayer(
         videoRendererConfig = videoRendererConfig,
         livestreamFlow = livestreamFlow,
         hostVideoAvailable = hostVideoAvailable,
+        playingHls = playingHls,
         livestreamState = livestreamState,
         rendererContent = wrappedRenderer,
         overlayContent = wrappedOverlay,
@@ -191,6 +196,7 @@ internal fun LivestreamPlayerImpl(
     videoRendererConfig: VideoRendererConfig,
     livestreamFlow: Flow<ParticipantState.Video?>,
     hostVideoAvailable: Boolean,
+    playingHls: Boolean,
     livestreamState: LivestreamState,
     rendererContent: @Composable BoxScope.(Call) -> Unit,
     overlayContent: @Composable BoxScope.(Call) -> Unit,
@@ -225,10 +231,13 @@ internal fun LivestreamPlayerImpl(
             }
 
             LivestreamState.LIVE -> {
-                if (hostVideoAvailable) {
-                    rendererContent.invoke(this, call)
-                } else {
-                    liveStreamHostVideoNotAvailableContent.invoke(this, call)
+                when {
+                    playingHls -> HlsVideoRenderer(
+                        call = call,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    hostVideoAvailable -> rendererContent.invoke(this, call)
+                    else -> liveStreamHostVideoNotAvailableContent.invoke(this, call)
                 }
                 overlayContent.invoke(this, call)
             }
