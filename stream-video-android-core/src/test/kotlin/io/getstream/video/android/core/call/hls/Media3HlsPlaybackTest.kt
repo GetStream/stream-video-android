@@ -23,7 +23,6 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.Call
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -36,48 +35,110 @@ internal class Media3HlsPlaybackTest {
 
     private companion object {
         const val URL = "https://example.com/live.m3u8"
+        const val OTHER_URL = "https://example.com/other.m3u8"
     }
 
-    private val defaultFactory = HlsPlaybackStore.factory
     private val created = mutableListOf<FakeHlsPlayback>()
-
-    @After
-    fun tearDown() {
-        HlsPlaybackStore.reset()
-        HlsPlaybackStore.factory = defaultFactory
-    }
+    private val store = HlsPlaybackStore { _, url -> FakeHlsPlayback(url).also { created += it } }
+    private val context = mockk<Context>(relaxed = true)
 
     @Test
     fun `one call shares a single player until the last renderer leaves`() {
         val call = mockk<Call>()
-        HlsPlaybackStore.factory = { _, url -> FakeHlsPlayback(url).also { created += it } }
 
-        val context = mockk<Context>(relaxed = true)
-        val first = HlsPlaybackStore.acquire(context, call, URL)
-        val second = HlsPlaybackStore.acquire(context, call, URL)
+        val first = store.acquire(context, call, URL)
+        val second = store.acquire(context, call, URL)
 
         assertThat(second).isSameInstanceAs(first)
         assertThat(created).hasSize(1)
 
-        HlsPlaybackStore.release(call, first)
+        store.release(call, first)
         assertThat(created.single().released).isFalse()
-        HlsPlaybackStore.release(call, second)
+        store.release(call, second)
         assertThat(created.single().released).isTrue()
+    }
+
+    @Test
+    fun `a new playlist releases the previous player before the next one starts`() {
+        val call = mockk<Call>()
+
+        val old = store.acquire(context, call, URL)
+        val new = store.acquire(context, call, OTHER_URL)
+
+        assertThat(new).isNotSameInstanceAs(old)
+        assertThat(created.map { it.playlistUrl }).containsExactly(URL, OTHER_URL).inOrder()
+        assertThat(created[0].released).isTrue()
+        assertThat(created[1].released).isFalse()
+    }
+
+    @Test
+    fun `releasing a replaced player leaves the current one playing`() {
+        val call = mockk<Call>()
+        val old = store.acquire(context, call, URL)
+        store.acquire(context, call, OTHER_URL)
+
+        store.release(call, old)
+
+        assertThat(created[1].released).isFalse()
+    }
+
+    @Test
+    fun `different calls get different players`() {
+        val first = store.acquire(context, mockk<Call>(), URL)
+        val second = store.acquire(context, mockk<Call>(), URL)
+
+        assertThat(second).isNotSameInstanceAs(first)
+        assertThat(created).hasSize(2)
+    }
+
+    @Test
+    fun `a failing factory leaves nothing behind for the next acquire`() {
+        val call = mockk<Call>()
+        var fail = true
+        val failing = HlsPlaybackStore { _, url ->
+            if (fail) error("decoder unavailable")
+            FakeHlsPlayback(url).also { created += it }
+        }
+
+        assertThat(runCatching { failing.acquire(context, call, URL) }.isFailure).isTrue()
+        fail = false
+        failing.acquire(context, call, URL)
+
+        assertThat(created).hasSize(1)
+        assertThat(created.single().released).isFalse()
     }
 
     @Test
     fun `exoplayer is pointed at the playlist`() {
         val playback = Media3HlsPlayback(
             context = RuntimeEnvironment.getApplication(),
-            playlistUrl = "https://example.com/live.m3u8",
+            playlistUrl = URL,
         )
         try {
             assertThat(playback.player.currentMediaItem?.localConfiguration?.uri.toString())
-                .isEqualTo("https://example.com/live.m3u8")
+                .isEqualTo(URL)
             assertThat(playback.player.playWhenReady).isTrue()
         } finally {
             playback.release()
         }
+    }
+
+    @Test
+    fun `swapping surfaces and calling after release does not throw`() {
+        val application = RuntimeEnvironment.getApplication()
+        val playback = Media3HlsPlayback(context = application, playlistUrl = URL)
+        val first = SurfaceView(application)
+        val second = SurfaceView(application)
+
+        playback.attach(first)
+        playback.attach(first)
+        playback.attach(second)
+        playback.detach(first)
+        playback.detach(second)
+        playback.release()
+        playback.release()
+        playback.attach(first)
+        playback.detach(first)
     }
 
     @Test

@@ -24,7 +24,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +36,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.core.Call
+import io.getstream.video.android.core.call.hls.HlsPlayback
 import io.getstream.video.android.core.call.hls.HlsPlaybackStore
 import io.getstream.video.android.core.model.PlaybackType
 
@@ -50,27 +54,43 @@ public fun HlsVideoRenderer(
     call: Call,
     modifier: Modifier = Modifier,
 ) {
+    HlsVideoRendererImpl(call = call, store = defaultHlsPlaybackStore, modifier = modifier)
+}
+
+private val defaultHlsPlaybackStore = HlsPlaybackStore()
+
+@Composable
+internal fun HlsVideoRendererImpl(
+    call: Call,
+    store: HlsPlaybackStore,
+    modifier: Modifier = Modifier,
+) {
     val playbackType by call.state.playbackType.collectAsStateWithLifecycle()
     val playlistUrl = (playbackType as? PlaybackType.Hls)?.playlistUrl ?: return
     val context = LocalContext.current
-    val playback = remember(call, playlistUrl) {
-        HlsPlaybackStore.acquire(context, call, playlistUrl)
+    var playback by remember(store, call, playlistUrl) { mutableStateOf<HlsPlayback?>(null) }
+    // Acquired here rather than in remember: an abandoned composition never runs onDispose,
+    // so a player started during composition would never be released.
+    DisposableEffect(store, call, playlistUrl) {
+        val acquired = store.acquire(context, call, playlistUrl)
+        playback = acquired
+        onDispose { store.release(call, acquired) }
     }
-    DisposableEffect(playback) {
-        onDispose { HlsPlaybackStore.release(call, playback) }
-    }
-    val aspectRatio by playback.videoAspectRatio.collectAsStateWithLifecycle()
+    val current = playback ?: return
+    val aspectRatio by current.videoAspectRatio.collectAsStateWithLifecycle()
     Box(
         modifier = modifier.background(Color.Black),
         contentAlignment = Alignment.Center,
     ) {
-        AndroidView(
-            factory = { viewContext ->
-                SurfaceView(viewContext).also { playback.attach(it) }
-            },
-            onRelease = { surface -> playback.detach(surface) },
-            modifier = (aspectRatio?.let { Modifier.aspectRatio(it) } ?: Modifier.fillMaxSize())
-                .testTag("hls_video_renderer"),
-        )
+        key(current) {
+            AndroidView(
+                factory = { viewContext ->
+                    SurfaceView(viewContext).also { current.attach(it) }
+                },
+                onRelease = { surface -> current.detach(surface) },
+                modifier = (aspectRatio?.let { Modifier.aspectRatio(it) } ?: Modifier.fillMaxSize())
+                    .testTag("hls_video_renderer"),
+            )
+        }
     }
 }

@@ -110,21 +110,17 @@ internal fun videoAspectRatioOf(videoSize: VideoSize): Float? {
 
 /**
  * Hands out one [HlsPlayback] per [Call], reference counted across the renderers that show it.
+ *
+ * @param factory Builds the [HlsPlayback] for a playlist.
  */
 @InternalStreamVideoApi
-public object HlsPlaybackStore {
+public class HlsPlaybackStore(
+    private val factory: (Context, String) -> HlsPlayback = ::Media3HlsPlayback,
+) {
 
     private class Ref(val playback: HlsPlayback, var count: Int)
 
     private val byCall = HashMap<Call, Ref>()
-
-    /**
-     * Builds the [HlsPlayback] for a playlist. Tests replace this so renderers can be exercised
-     * without starting a decoder.
-     */
-    public var factory: (Context, String) -> HlsPlayback = { context, playlistUrl ->
-        Media3HlsPlayback(context, playlistUrl)
-    }
 
     public fun acquire(context: Context, call: Call, playlistUrl: String): HlsPlayback {
         synchronized(byCall) {
@@ -154,14 +150,6 @@ public object HlsPlaybackStore {
                 byCall.remove(call)
                 playback.release()
             }
-        }
-    }
-
-    /** Drops every player. Test-only. */
-    public fun reset() {
-        synchronized(byCall) {
-            byCall.values.forEach { it.playback.release() }
-            byCall.clear()
         }
     }
 }
