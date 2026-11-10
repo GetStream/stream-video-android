@@ -71,6 +71,8 @@ androidxUiAutomator = "2.4.0-alpha01"
 androidxContraintLayout = "2.1.4"
 androidxEspresso = "3.5.1"
 androidxMedia = "1.7.0"
+# Same version stream-chat-android 7.13 depends on, so an app using both resolves one Media3.
+media3 = "1.6.1"
 paparazzi = "1.3.4"
 robolectric = "4.11.1"
 junit = "4.13.2"
@@ -175,6 +177,9 @@ stream-chat-compose = { group = "io.getstream", name = "stream-chat-android-comp
 stream-chat-offline = { group = "io.getstream", name = "stream-chat-android-offline", version.ref = "streamChat" }
 stream-chat-state = { group = "io.getstream", name = "stream-chat-android-state", version.ref = "streamChat" }
 stream-chat-ui-utils = { group = "io.getstream", name = "stream-chat-android-ui-utils", version.ref = "streamChat" }
+
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+media3-exoplayer-hls = { group = "androidx.media3", name = "media3-exoplayer-hls", version.ref = "media3" }
 
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit",  version.ref = "kotlinTestJunit" }
 

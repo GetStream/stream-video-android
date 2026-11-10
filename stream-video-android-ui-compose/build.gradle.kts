@@ -25,6 +25,11 @@ android {
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 // Paparazzi renders and compresses every snapshot in the forked test worker, which defaults to a
