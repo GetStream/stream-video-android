@@ -70,5 +70,43 @@ data class JoinCallRequest (
     val migratingFromList: kotlin.collections.List<kotlin.String>? = emptyList(),
 
     @Json(name = "data")
-    val data: io.getstream.android.video.generated.models.CallRequest? = null
+    val data: io.getstream.android.video.generated.models.CallRequest? = null,
+
+    @Json(name = "prefer")
+    val prefer: Prefer? = null,
+
+    @Json(name = "playback_capabilities")
+    val playbackCapabilities: kotlin.collections.List<kotlin.String>? = emptyList()
 )
+{
+    
+    /**
+    * Prefer Enum
+    */
+    sealed class Prefer(val value: kotlin.String) {
+            override fun toString(): String = value
+
+            companion object {
+                fun fromString(s: kotlin.String): Prefer = when (s) {
+                    "hls" -> Hls
+                    else -> Unknown(s)
+                }
+            }
+            object Hls : Prefer("hls")
+            data class Unknown(val unknownValue: kotlin.String) : Prefer(unknownValue)
+        
+
+        class PreferAdapter : JsonAdapter<Prefer>() {
+            @FromJson
+            override fun fromJson(reader: JsonReader): Prefer? {
+                val s = reader.nextString() ?: return null
+                return Prefer.fromString(s)
+            }
+
+            @ToJson
+            override fun toJson(writer: JsonWriter, value: Prefer?) {
+                writer.value(value?.value)
+            }
+        }
+    }    
+}

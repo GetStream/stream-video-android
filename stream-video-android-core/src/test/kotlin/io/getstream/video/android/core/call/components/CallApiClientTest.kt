@@ -33,6 +33,7 @@ import io.getstream.video.android.core.analytics.call.observer.model.JoinReason
 import io.getstream.video.android.core.model.RejectReason
 import io.getstream.video.android.core.model.SortField
 import io.getstream.video.android.core.recording.RecordingType
+import io.mockk.MockKMatcherScope
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -335,7 +336,7 @@ class CallApiClientTest {
         coEvery {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
 
@@ -348,7 +349,7 @@ class CallApiClientTest {
         coVerify {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
             )
         }
     }
@@ -374,7 +375,7 @@ class CallApiClientTest {
         coEvery {
             clientImpl.joinCall(
                 any(), any(), any(), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
             )
         } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
 
@@ -400,7 +401,54 @@ class CallApiClientTest {
                 migratingFromList = any(),
                 hintHighScaleLivestreamPublisher = any(),
                 e2ee = true,
+                playbackCapabilities = any(),
             )
         }
     }
+
+    @Test
+    fun `joinRequest forwards playback capabilities only when the caller passes them`() = runTest(
+        testDispatcher,
+    ) {
+        coEvery {
+            clientImpl.joinCall(
+                any(), any(), any(), any(), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any(), any(),
+            )
+        } returns Result.Failure(io.getstream.result.Error.GenericError("boom"))
+
+        apiClient.joinRequest(
+            location = "test-location",
+            joinAnalyticsModel = JoinAnalyticsModel(0, JoinReason.FirstAttempt),
+            playbackCapabilities = listOf("hls"),
+        )
+        apiClient.joinRequest(
+            location = "test-location",
+            migratingFrom = "sfu-1",
+            joinAnalyticsModel = JoinAnalyticsModel(1, JoinReason.Migrate),
+        )
+
+        coVerify(exactly = 1) { joinCallWithCapabilities(listOf("hls")) }
+        coVerify(exactly = 1) { joinCallWithCapabilities(null) }
+    }
+
+    private suspend fun MockKMatcherScope.joinCallWithCapabilities(capabilities: List<String>?) =
+        clientImpl.joinCall(
+            type = any(),
+            id = any(),
+            create = any(),
+            members = any(),
+            custom = any(),
+            settingsOverride = any(),
+            startsAt = any(),
+            team = any(),
+            ring = any(),
+            notify = any(),
+            location = any(),
+            migratingFrom = any(),
+            migratingFromList = any(),
+            hintHighScaleLivestreamPublisher = any(),
+            e2ee = any(),
+            playbackCapabilities = capabilities,
+        )
 }

@@ -107,6 +107,7 @@ import io.getstream.video.android.core.events.TrackUnpublishedEvent
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.Ingress
 import io.getstream.video.android.core.model.NetworkQuality
+import io.getstream.video.android.core.model.PlaybackType
 import io.getstream.video.android.core.model.RTMP
 import io.getstream.video.android.core.model.Reaction
 import io.getstream.video.android.core.model.RejectReason
@@ -275,6 +276,18 @@ public class CallState(
     public val isReconnecting: StateFlow<Boolean> = _connection.mapState {
         it is RealtimeConnection.Reconnecting
     }
+
+    internal val _playbackType = MutableStateFlow<PlaybackType>(PlaybackType.WebRtc)
+
+    /**
+     * How this client receives the call's media. The backend decides on join: a viewer can be
+     * served the call's HLS broadcast instead of joining the SFU, in which case this is
+     * [PlaybackType.Hls] and participants carry no video or audio tracks. Back to
+     * [PlaybackType.WebRtc] after leaving.
+     *
+     * Beta: HLS delivery is enabled per call type by Stream and may change.
+     */
+    public val playbackType: StateFlow<PlaybackType> = _playbackType
 
     private val internalParticipants = ConcurrentHashMap<SessionId, ParticipantState>()
     private val _participants = MutableStateFlow<Map<String, ParticipantState>>(emptyMap())
@@ -1614,9 +1627,10 @@ public class CallState(
         // participant counts. Coordinator session snapshots (counts_updated, participant_joined/left,
         // and any event carrying a CallSessionResponse) carry a smaller, stale view at scale and
         // must NOT clobber the SFU value — that produces wild fluctuations in livestreams.
+        // An HLS viewer has no SFU, so the coordinator stays its only source.
         if (sfuHealthCheckEvent != null) {
             _participantCounts.value = sfuHealthCheckEvent.participantCount
-        } else if (session != null && !isInCall()) {
+        } else if (session != null && (!isInCall() || _playbackType.value is PlaybackType.Hls)) {
             val byRoleCount = session.participantsCountByRole.values.sum()
             val nonAnonymous = maxOf(byRoleCount, session.participants.size)
             _participantCounts.value = ParticipantCount(

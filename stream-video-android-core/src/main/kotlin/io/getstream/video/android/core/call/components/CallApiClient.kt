@@ -90,6 +90,9 @@ internal class CallApiClient(
     /**
      * Executes the coordinator join request. Shared by the join flow and the reconnect flow
      * (rejoin / migrate), which is why it lives here rather than in either of them.
+     *
+     * Only the first join passes [playbackCapabilities]. Rejoin and migrate recover an SFU
+     * session, so they must always get SFU credentials back.
      */
     suspend fun joinRequest(
         create: CreateCallOptions? = null,
@@ -101,6 +104,7 @@ internal class CallApiClient(
         hintHighScaleLivestreamPublisher: Boolean? = null,
         joinAnalyticsModel: JoinAnalyticsModel,
         e2ee: Boolean? = null,
+        playbackCapabilities: List<String>? = null,
     ): Result<JoinCallResponse> {
         val migratingFromList =
             migratingFromList ?: sessionManager.failedSfuIdsSnapshot().takeIf { it.isNotEmpty() }
@@ -129,6 +133,7 @@ internal class CallApiClient(
             migratingFromList = migratingFromList,
             hintHighScaleLivestreamPublisher = hintHighScaleLivestreamPublisher,
             e2ee = requestE2ee,
+            playbackCapabilities = playbackCapabilities,
         )
         result.onSuccess {
             callAnalytics.joinAnalytics.onJoinRequestSuccess(

@@ -61,5 +61,8 @@ data class JoinCallResponse (
     val statsOptions: io.getstream.android.video.generated.models.StatsOptions,
 
     @Json(name = "membership")
-    val membership: io.getstream.android.video.generated.models.MemberResponse? = null
+    val membership: io.getstream.android.video.generated.models.MemberResponse? = null,
+
+    @Json(name = "playback")
+    val playback: io.getstream.android.video.generated.models.PlaybackResponse? = null
 )

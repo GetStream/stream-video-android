@@ -54,6 +54,7 @@ import io.getstream.log.taggedLogger
 import io.getstream.result.Result
 import io.getstream.video.android.core.analytics.call.CallAnalytics
 import io.getstream.video.android.core.analytics.call.observer.model.JoinAnalyticsModel
+import io.getstream.video.android.core.call.EmptyRtcSession
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.audio.InputAudioFilter
 import io.getstream.video.android.core.call.components.CallApiClient
@@ -206,6 +207,19 @@ public class Call(
             sfuAnalytics = callAnalytics.sfuAnalytics.apply {
                 sfuAnalyticsStateHolder.updateSfuId(sfuName)
             },
+        )
+    }
+
+    /** Creates the [EmptyRtcSession] that the first join returns for HLS playback. */
+    private val playbackSessionFactory: () -> RtcSession = {
+        EmptyRtcSession(
+            client = clientImpl,
+            call = this,
+            sessionManager = sessionManager,
+            sessionId = sessionManager.sessionId,
+            apiKey = clientImpl.apiKey,
+            lifecycle = clientImpl.coordinatorConnectionModule.lifecycle,
+            sfuAnalytics = callAnalytics.sfuAnalytics,
         )
     }
 
@@ -539,6 +553,7 @@ public class Call(
             clientImpl.permissionCheck
                 .checkAndroidPermissionsGroup(clientImpl.context, this@Call).first
         },
+        createPlaybackSession = playbackSessionFactory,
         consumeJoinSource = { consumeJoinSource() },
     )
 
