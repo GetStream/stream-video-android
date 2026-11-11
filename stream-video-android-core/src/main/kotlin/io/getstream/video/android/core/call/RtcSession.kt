@@ -84,8 +84,6 @@ import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.core.model.StreamPeerType
 import io.getstream.video.android.core.model.VideoTrack
 import io.getstream.video.android.core.model.toPeerType
-import io.getstream.video.android.core.socket.common.VideoParser
-import io.getstream.video.android.core.socket.common.parser2.MoshiVideoParser
 import io.getstream.video.android.core.socket.common.token.TokenRepository
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
 import io.getstream.video.android.core.toJson
@@ -359,7 +357,6 @@ public class RtcSession internal constructor(
     private val networkStateProvider by lazy {
         clientImpl.coordinatorConnectionModule.networkStateProvider
     }
-    private val parser: VideoParser = MoshiVideoParser()
 
     /**
      * Data class representing a track that arrived before its participant existed.
@@ -939,31 +936,33 @@ public class RtcSession internal constructor(
     }
 
     private fun traceEvent(it: SfuDataEvent) = safeCall {
+        // Wire and data-class toString() read fields directly. Moshi reflection here
+        // required keeping every stream.video.sfu class, and minification dropped the trace.
         when (it) {
             is ChangePublishQualityEvent -> {
                 sfuTracer.trace(
                     PeerConnectionTraceKey.CHANGE_PUBLISH_QUALITY.value,
-                    parser.toJson(it.changePublishQuality),
+                    it.changePublishQuality.toString(),
                 )
             }
 
             is ChangePublishOptionsEvent -> {
                 sfuTracer.trace(
                     PeerConnectionTraceKey.CHANGE_PUBLISH_OPTIONS.value,
-                    parser.toJson(it.change.publish_options),
+                    it.change.publish_options.toString(),
                 )
             }
 
             is GoAwayEvent -> {
-                sfuTracer.trace(PeerConnectionTraceKey.GO_AWAY.value, parser.toJson(it))
+                sfuTracer.trace(PeerConnectionTraceKey.GO_AWAY.value, it.toString())
             }
 
             is CallEndedSfuEvent -> {
-                sfuTracer.trace(PeerConnectionTraceKey.CALL_ENDED.value, parser.toJson(it))
+                sfuTracer.trace(PeerConnectionTraceKey.CALL_ENDED.value, it.toString())
             }
 
             is ErrorEvent -> {
-                sfuTracer.trace(PeerConnectionTraceKey.SFU_ERROR.value, parser.toJson(it))
+                sfuTracer.trace(PeerConnectionTraceKey.SFU_ERROR.value, it.toString())
             }
 
             else -> {
