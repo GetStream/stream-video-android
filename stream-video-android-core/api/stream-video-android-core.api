@@ -9564,14 +9564,14 @@ public abstract interface class io/getstream/android/video/internal/generated/ap
 	public abstract fun queryAggregateCallStats (Lio/getstream/android/video/api/generated/models/QueryAggregateCallStatsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun queryAggregateCallStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun queryCallMembers (Lio/getstream/android/video/api/generated/models/QueryCallMembersRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun queryCallParticipantSessions (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun queryCallParticipantSessions$default (Lio/getstream/android/video/internal/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun queryCallParticipantSessions (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/internal/generated/infrastructure/JsonQuery;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun queryCallParticipantSessions$default (Lio/getstream/android/video/internal/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/internal/generated/infrastructure/JsonQuery;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun queryCallParticipants (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Lio/getstream/android/video/api/generated/models/QueryCallParticipantsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun queryCallParticipants (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun queryCallParticipants$default (Lio/getstream/android/video/internal/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Lio/getstream/android/video/api/generated/models/QueryCallParticipantsRequest;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static synthetic fun queryCallParticipants$default (Lio/getstream/android/video/internal/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public abstract fun queryCallSessionParticipantStats (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun queryCallSessionParticipantStats$default (Lio/getstream/android/video/internal/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public abstract fun queryCallSessionParticipantStats (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/internal/generated/infrastructure/JsonQuery;Lio/getstream/android/video/internal/generated/infrastructure/JsonQuery;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun queryCallSessionParticipantStats$default (Lio/getstream/android/video/internal/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/internal/generated/infrastructure/JsonQuery;Lio/getstream/android/video/internal/generated/infrastructure/JsonQuery;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun queryCallSessionStats (Lio/getstream/android/video/api/generated/models/QueryCallSessionStatsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun queryCallSessionStats (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun queryCallStats (Lio/getstream/android/video/api/generated/models/QueryCallStatsRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -9608,7 +9608,8 @@ public abstract interface class io/getstream/android/video/internal/generated/ap
 	public abstract fun stopHLSBroadcasting (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun stopLive (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/StopLiveRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun stopLive (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun stopRecording (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun stopRecording (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun stopRecording$default (Lio/getstream/android/video/internal/generated/apis/ProductvideoApi;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun stopTranscription (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/StopTranscriptionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun stopTranscription (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun unblockUser (Ljava/lang/String;Ljava/lang/String;Lio/getstream/android/video/api/generated/models/UnblockUserRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -9644,6 +9645,23 @@ public final class io/getstream/android/video/internal/generated/infrastructure/
 	public fun <init> ()V
 	public final fun fromJson (Ljava/lang/String;)Lkotlin/time/Instant;
 	public final fun toJson (Lkotlin/time/Instant;)Ljava/lang/String;
+}
+
+public final class io/getstream/android/video/internal/generated/infrastructure/JsonQuery {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/getstream/android/video/internal/generated/infrastructure/JsonQuery;
+	public static synthetic fun copy$default (Lio/getstream/android/video/internal/generated/infrastructure/JsonQuery;Ljava/lang/Object;ILjava/lang/Object;)Lio/getstream/android/video/internal/generated/infrastructure/JsonQuery;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/getstream/android/video/internal/generated/infrastructure/QueryConverterFactory : retrofit2/Converter$Factory {
+	public static final field RFC_3339_PATTERN Ljava/lang/String;
+	public fun <init> (Lcom/squareup/moshi/Moshi;)V
+	public fun stringConverter (Ljava/lang/reflect/Type;[Ljava/lang/annotation/Annotation;Lretrofit2/Retrofit;)Lretrofit2/Converter;
 }
 
 public final class io/getstream/android/video/internal/generated/infrastructure/Serializer {
