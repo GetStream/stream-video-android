@@ -20,6 +20,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import androidx.lifecycle.Lifecycle
 import io.getstream.android.video.internal.generated.apis.ProductvideoApi
+import io.getstream.android.video.internal.generated.infrastructure.QueryConverterFactory
 import io.getstream.android.video.internal.generated.infrastructure.Serializer
 import io.getstream.log.streamLog
 import io.getstream.video.android.core.header.HeadersUtil
@@ -61,6 +62,7 @@ internal class CoordinatorConnectionModule(
     private val authInterceptor = CoordinatorAuthInterceptor(apiKey, tokenRepository)
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder().baseUrl(apiUrl)
+            .addConverterFactory(QueryConverterFactory(Serializer.moshi))
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(Serializer.moshi))
             // Not `client(http)`: that would build the client right here. See `http`.
