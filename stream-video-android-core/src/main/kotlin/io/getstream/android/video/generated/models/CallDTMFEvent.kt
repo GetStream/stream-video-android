@@ -29,6 +29,7 @@ import kotlin.collections.*
 import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -38,6 +39,7 @@ import com.squareup.moshi.ToJson
  * This event is sent asynchronously when a single DTMF digit is received from a SIP participant. The event is broadcast after the digit press ends. Use seq_number for ordering within a session and timestamp for the actual detection time.
  */
 
+@JsonClass(generateAdapter = true)
 data class CallDTMFEvent (
     @Json(name = "call_cid")
     val callCid: kotlin.String,

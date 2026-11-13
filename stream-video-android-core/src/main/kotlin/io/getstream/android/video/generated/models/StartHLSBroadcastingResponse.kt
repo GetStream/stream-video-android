@@ -29,6 +29,7 @@ import kotlin.collections.*
 import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -38,6 +39,7 @@ import com.squareup.moshi.ToJson
  * StartHLSBroadcastingResponse is the payload for starting an HLS broadcasting.
  */
 
+@JsonClass(generateAdapter = true)
 data class StartHLSBroadcastingResponse (
     @Json(name = "duration")
     val duration: kotlin.String,

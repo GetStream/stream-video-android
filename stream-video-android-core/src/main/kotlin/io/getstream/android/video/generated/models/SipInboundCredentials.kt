@@ -29,6 +29,7 @@ import kotlin.collections.*
 import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -38,6 +39,7 @@ import com.squareup.moshi.ToJson
  * Credentials for SIP inbound call authentication
  */
 
+@JsonClass(generateAdapter = true)
 data class SipInboundCredentials (
     @Json(name = "api_key")
     val apiKey: kotlin.String,

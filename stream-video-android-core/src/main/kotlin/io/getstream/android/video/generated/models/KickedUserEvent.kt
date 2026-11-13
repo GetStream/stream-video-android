@@ -29,6 +29,7 @@ import kotlin.collections.*
 import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -38,6 +39,7 @@ import com.squareup.moshi.ToJson
  * This event is sent to call participants to notify when a user is kicked from a call. Clients should make the kicked user leave the call UI.
  */
 
+@JsonClass(generateAdapter = true)
 data class KickedUserEvent (
     @Json(name = "call_cid")
     val callCid: kotlin.String,

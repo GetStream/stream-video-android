@@ -5,11 +5,12 @@
 
 -keep class com.squareup.moshi.JsonReader
 -keep class com.squareup.moshi.JsonAdapter
-# kotlin-reflect loads this implementation by name. Its own rules do not keep it.
--keep class kotlin.reflect.jvm.internal.ReflectionFactoryImpl { <init>(); }
+# Video parses JSON through Moshi codegen adapters. It does not ship kotlin-reflect.
 
 ## Moshi model classes
--keep class io.getstream.android.video.generated.** { *; }
+# Generated models use @JsonClass(generateAdapter = true). Moshi loads
+# ClassNameJsonAdapter by name, and its own rules keep those adapters.
+# Do not keep the model package; that retain was only for reflection.
 
 ## Kotlin serialized classes
 # kotlinx-serialization already keeps its generated serializers. This rule only

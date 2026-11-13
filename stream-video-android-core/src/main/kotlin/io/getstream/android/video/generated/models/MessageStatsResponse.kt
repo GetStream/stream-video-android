@@ -29,6 +29,7 @@ import kotlin.collections.*
 import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -38,6 +39,7 @@ import com.squareup.moshi.ToJson
  * 
  */
 
+@JsonClass(generateAdapter = true)
 data class MessageStatsResponse (
     @Json(name = "count_over_time")
     val countOverTime: kotlin.collections.List<io.getstream.android.video.generated.models.CountByMinuteResponse>? = emptyList()
