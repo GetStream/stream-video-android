@@ -19,6 +19,12 @@ dependencyResolutionManagement {
         mavenCentral()
         maven(url = "https://plugins.gradle.org/m2/")
         maven("https://stream-io-repo.com")
+        // m156 is a snapshot on the Stream snapshot repo, not Maven Central.
+        maven("https://snapshots.stream-io-repo.com") {
+            content {
+                includeModule("io.getstream", "stream-video-webrtc-android")
+            }
+        }
     }
 }
 
