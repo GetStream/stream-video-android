@@ -23,6 +23,7 @@ plugins {
     id(libs.plugins.kotlin.serialization.get().pluginId)
     id(libs.plugins.kotlin.parcelize.get().pluginId)
     id(libs.plugins.wire.get().pluginId)
+    id(libs.plugins.ksp.get().pluginId)
 }
 
 wire {
@@ -195,8 +196,8 @@ dependencies {
     implementation(libs.ituDate)
 
     implementation(libs.moshi)
-    implementation(libs.moshi.kotlin)
     implementation(libs.moshi.adapters)
+    ksp(libs.moshi.kotlin.codegen)
 
     api(libs.threentenabp2)
 

@@ -29,6 +29,7 @@ import kotlin.collections.*
 import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -38,6 +39,7 @@ import com.squareup.moshi.ToJson
  * HLSSettings is the payload for HLS settings
  */
 
+@JsonClass(generateAdapter = true)
 data class HLSSettingsResponse (
     @Json(name = "auto_on")
     val autoOn: kotlin.Boolean,
