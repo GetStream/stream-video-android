@@ -935,7 +935,8 @@ public class RtcSession internal constructor(
         }
     }
 
-    private fun traceEvent(it: SfuDataEvent) = safeCall {
+    /** Records an SFU event on [sfuTracer]. Internal so tests can cover each branch. */
+    internal fun traceEvent(it: SfuDataEvent) = safeCall {
         // Wire and data-class toString() read fields directly. Moshi reflection here
         // required keeping every stream.video.sfu class, and minification dropped the trace.
         when (it) {
