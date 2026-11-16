@@ -31,7 +31,8 @@ import kotlinx.coroutines.flow.StateFlow
  * Plays one HLS playlist and draws it on a [SurfaceView] supplied by the UI layer.
  *
  * One instance is shared by every renderer of the same [Call], so two tiles cannot start two
- * players for the same broadcast.
+ * players for the same broadcast. The player draws to one surface at a time: showing the same call
+ * in two renderers at once is not supported.
  */
 @InternalStreamVideoApi
 public interface HlsPlayback {
@@ -46,6 +47,9 @@ public interface HlsPlayback {
     public fun attach(surfaceView: SurfaceView)
 
     public fun detach(surfaceView: SurfaceView)
+
+    /** Mutes the broadcast audio when [enabled] is false. Playback continues either way. */
+    public fun setAudioEnabled(enabled: Boolean)
 
     public fun release()
 }
@@ -92,6 +96,11 @@ internal class Media3HlsPlayback(
         if (released || attached !== surfaceView) return
         player.clearVideoSurfaceView(surfaceView)
         attached = null
+    }
+
+    override fun setAudioEnabled(enabled: Boolean) {
+        if (released) return
+        player.volume = if (enabled) 1f else 0f
     }
 
     override fun release() {

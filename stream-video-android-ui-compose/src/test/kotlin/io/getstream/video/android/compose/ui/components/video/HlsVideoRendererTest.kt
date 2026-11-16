@@ -28,6 +28,8 @@ import androidx.compose.runtime.BroadcastFrameClock
 import androidx.compose.runtime.Composition
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Recomposer
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -195,10 +197,29 @@ internal class HlsVideoRendererTest {
         assertThat(created.single().released).isTrue()
     }
 
+    @Test
+    fun `the audio toggle mutes the player and a replacement player starts muted`() {
+        val playback = MutableStateFlow<PlaybackType>(PlaybackType.Hls(URL))
+        val audioEnabled = mutableStateOf(true)
+        show(call(playback), audioEnabled)
+        assertThat(created.single().audioEnabled).isTrue()
+
+        audioEnabled.value = false
+        settle()
+        assertThat(created.single().audioEnabled).isFalse()
+
+        playback.value = PlaybackType.Hls(OTHER_URL)
+        settle()
+        assertThat(created[1].audioEnabled).isFalse()
+    }
+
     private fun show(playback: MutableStateFlow<PlaybackType>): ComponentActivity =
         show(call(playback)).first
 
-    private fun show(call: Call): Pair<ComponentActivity, ActivityController<ComponentActivity>> {
+    private fun show(
+        call: Call,
+        audioEnabled: State<Boolean> = mutableStateOf(true),
+    ): Pair<ComponentActivity, ActivityController<ComponentActivity>> {
         val controller = Robolectric.buildActivity(ComponentActivity::class.java).setup()
         activities += controller
         val activity = controller.get()
@@ -209,6 +230,7 @@ internal class HlsVideoRendererTest {
                     call = call,
                     store = store,
                     modifier = Modifier.fillMaxSize(),
+                    audioEnabled = audioEnabled.value,
                 )
             }
         }
@@ -268,12 +290,17 @@ internal class HlsVideoRendererTest {
         override val videoAspectRatio = MutableStateFlow<Float?>(null)
         var attachCount = 0
         var released = false
+        var audioEnabled: Boolean? = null
 
         override fun attach(surfaceView: SurfaceView) {
             attachCount += 1
         }
 
         override fun detach(surfaceView: SurfaceView) = Unit
+
+        override fun setAudioEnabled(enabled: Boolean) {
+            audioEnabled = enabled
+        }
 
         override fun release() {
             released = true

@@ -142,6 +142,25 @@ internal class Media3HlsPlaybackTest {
     }
 
     @Test
+    fun `disabling audio mutes the player without stopping it`() {
+        val playback = Media3HlsPlayback(
+            context = RuntimeEnvironment.getApplication(),
+            playlistUrl = URL,
+        )
+        try {
+            playback.setAudioEnabled(false)
+            assertThat(playback.player.volume).isEqualTo(0f)
+            assertThat(playback.player.playWhenReady).isTrue()
+
+            playback.setAudioEnabled(true)
+            assertThat(playback.player.volume).isEqualTo(1f)
+        } finally {
+            playback.release()
+        }
+        playback.setAudioEnabled(false)
+    }
+
+    @Test
     fun `aspect ratio uses the display shape and stays unknown without a frame size`() {
         assertThat(videoAspectRatioOf(VideoSize(1920, 1080))).isWithin(0.001f).of(16f / 9f)
         assertThat(videoAspectRatioOf(VideoSize(960, 1080, 2f))).isWithin(0.001f).of(16f / 9f)
@@ -157,6 +176,8 @@ internal class Media3HlsPlaybackTest {
         override fun attach(surfaceView: SurfaceView) = Unit
 
         override fun detach(surfaceView: SurfaceView) = Unit
+
+        override fun setAudioEnabled(enabled: Boolean) = Unit
 
         override fun release() {
             released = true

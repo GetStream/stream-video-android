@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -48,13 +49,24 @@ import io.getstream.video.android.core.model.PlaybackType
  * the last one leaves.
  *
  * The broadcast is an already composed layout, so the frame is fitted rather than cropped.
+ *
+ * [Call.setIncomingAudioEnabled] only reaches WebRTC tracks, so HLS audio is muted through
+ * [audioEnabled] instead.
+ *
+ * @param audioEnabled Plays the broadcast audio when true, mutes it when false.
  */
 @Composable
 public fun HlsVideoRenderer(
     call: Call,
     modifier: Modifier = Modifier,
+    audioEnabled: Boolean = true,
 ) {
-    HlsVideoRendererImpl(call = call, store = defaultHlsPlaybackStore, modifier = modifier)
+    HlsVideoRendererImpl(
+        call = call,
+        store = defaultHlsPlaybackStore,
+        modifier = modifier,
+        audioEnabled = audioEnabled,
+    )
 }
 
 private val defaultHlsPlaybackStore = HlsPlaybackStore()
@@ -64,6 +76,7 @@ internal fun HlsVideoRendererImpl(
     call: Call,
     store: HlsPlaybackStore,
     modifier: Modifier = Modifier,
+    audioEnabled: Boolean = true,
 ) {
     val playbackType by call.state.playbackType.collectAsStateWithLifecycle()
     val playlistUrl = (playbackType as? PlaybackType.Hls)?.playlistUrl ?: return
@@ -77,6 +90,7 @@ internal fun HlsVideoRendererImpl(
         onDispose { store.release(call, acquired) }
     }
     val current = playback ?: return
+    SideEffect { current.setAudioEnabled(audioEnabled) }
     val aspectRatio by current.videoAspectRatio.collectAsStateWithLifecycle()
     Box(
         modifier = modifier.background(Color.Black),

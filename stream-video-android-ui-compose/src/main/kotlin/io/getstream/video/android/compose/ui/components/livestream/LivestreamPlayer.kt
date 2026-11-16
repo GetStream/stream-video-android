@@ -176,6 +176,7 @@ public fun LivestreamPlayer(
         livestreamFlow = livestreamFlow,
         hostVideoAvailable = hostVideoAvailable,
         playingHls = playingHls,
+        isAudioEnabled = isAudioEnabled,
         livestreamState = livestreamState,
         rendererContent = wrappedRenderer,
         overlayContent = wrappedOverlay,
@@ -197,6 +198,7 @@ internal fun LivestreamPlayerImpl(
     livestreamFlow: Flow<ParticipantState.Video?>,
     hostVideoAvailable: Boolean,
     playingHls: Boolean,
+    isAudioEnabled: Boolean,
     livestreamState: LivestreamState,
     rendererContent: @Composable BoxScope.(Call) -> Unit,
     overlayContent: @Composable BoxScope.(Call) -> Unit,
@@ -235,6 +237,7 @@ internal fun LivestreamPlayerImpl(
                     playingHls -> HlsVideoRenderer(
                         call = call,
                         modifier = Modifier.fillMaxSize(),
+                        audioEnabled = isAudioEnabled,
                     )
                     hostVideoAvailable -> rendererContent.invoke(this, call)
                     else -> liveStreamHostVideoNotAvailableContent.invoke(this, call)

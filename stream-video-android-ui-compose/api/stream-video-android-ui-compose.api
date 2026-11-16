@@ -2070,7 +2070,7 @@ public final class io/getstream/video/android/compose/ui/components/participants
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/HlsVideoRendererKt {
-	public static final fun HlsVideoRenderer (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+	public static final fun HlsVideoRenderer (Lio/getstream/video/android/core/Call;Landroidx/compose/ui/Modifier;ZLandroidx/compose/runtime/Composer;II)V
 }
 
 public final class io/getstream/video/android/compose/ui/components/video/VideoRendererKt {
