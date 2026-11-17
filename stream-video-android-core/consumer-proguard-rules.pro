@@ -69,8 +69,3 @@
 -keep class io.getstream.android.push.delegate.PushDelegate { *; }
 -keep class io.getstream.android.push.delegate.AndroidPushDelegateProvider { *; }
 -keep class io.getstream.android.push.permissions.PushPermissionsInitializer { *; }
-
-# defines consumer proguard rules for org.webrt
--keep class org.webrtc.** { *; }
-# Keep the jni_zero library (required by modern WebRTC)
--keep class org.jni_zero.** { *; }
