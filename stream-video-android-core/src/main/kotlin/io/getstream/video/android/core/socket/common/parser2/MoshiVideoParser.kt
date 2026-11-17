@@ -26,7 +26,6 @@ import com.squareup.moshi.ToJson
 import io.getstream.android.video.generated.infrastructure.BigDecimalAdapter
 import io.getstream.android.video.generated.infrastructure.BigIntegerAdapter
 import io.getstream.android.video.generated.infrastructure.ByteArrayAdapter
-import io.getstream.android.video.generated.infrastructure.GeneratedJsonAdapterFactory
 import io.getstream.android.video.generated.infrastructure.LocalDateAdapter
 import io.getstream.android.video.generated.infrastructure.LocalDateTimeAdapter
 import io.getstream.android.video.generated.infrastructure.OffsetDateTimeAdapter
@@ -139,9 +138,7 @@ internal class MoshiVideoParser : VideoParser {
                 lenientAdapter(
                     io.getstream.android.video.generated.models.TranscriptionSettingsResponse.Language.LanguageAdapter(),
                 ),
-            )
-            // Factories
-            .addLast(GeneratedJsonAdapterFactory).build()
+            ).build()
     }
 
     private inline fun <reified T> Moshi.Builder.addAdapter(adapter: JsonAdapter<T>) = apply {

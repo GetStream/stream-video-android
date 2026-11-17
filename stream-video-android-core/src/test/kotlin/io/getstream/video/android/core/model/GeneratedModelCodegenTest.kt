@@ -18,6 +18,7 @@ package io.getstream.video.android.core.model
 
 import androidx.test.core.app.ApplicationProvider
 import com.jakewharton.threetenabp.AndroidThreeTen
+import com.squareup.moshi.JsonClass
 import io.getstream.android.video.generated.infrastructure.Serializer
 import io.getstream.android.video.generated.models.CallRequest
 import io.getstream.android.video.generated.models.ConnectionErrorEvent
@@ -33,6 +34,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.io.File
+import java.lang.reflect.Modifier
+import java.util.jar.JarFile
 
 /**
  * Codegen and reflection disagree on missing fields, nulls, and defaults.
@@ -46,6 +50,17 @@ class GeneratedModelCodegenTest {
     @Before
     fun setUp() {
         AndroidThreeTen.init(ApplicationProvider.getApplicationContext())
+    }
+
+    @Test
+    fun `every generated model keeps its codegen adapter`() {
+        val models = generatedModelClasses()
+        assertTrue("expected the generated models on the test classpath", models.size > 300)
+        val missing = models
+            .filter { it.getAnnotation(JsonClass::class.java)?.generateAdapter != true }
+            .map { it.simpleName }
+            .sorted()
+        assertEquals(emptyList<String>(), missing)
     }
 
     @Test
@@ -131,5 +146,60 @@ class GeneratedModelCodegenTest {
         assertEquals("", error.duration)
         assertEquals(1, error.details.single().code)
         assertEquals(listOf("bad"), error.details.single().messages)
+    }
+
+    /**
+     * Top-level types emitted by the OpenAPI generator. Nested sealed values and
+     * their handwritten adapters are separate class files and are not codegen models.
+     * [io.getstream.android.video.generated.models.LocalCallAcceptedPostEvent] and
+     * [io.getstream.android.video.generated.models.LocalCallRejectedPostEvent] are
+     * constructed in `CallState`, and [io.getstream.android.video.generated.models.OwnCapability]
+     * uses its own adapter.
+     */
+    private fun generatedModelClasses(): List<Class<*>> {
+        val packageName = "io.getstream.android.video.generated.models"
+        val handwritten = setOf(
+            "VideoEvent",
+            "VideoEventAdapter",
+            "UnsupportedVideoEvent",
+            "UnsupportedVideoEventException",
+            "OwnCapability",
+            "LocalCallAcceptedPostEvent",
+            "LocalCallRejectedPostEvent",
+            "LocalCallMissedEvent",
+            "LocalEvent",
+        )
+        val path = packageName.replace('.', '/')
+        val loader = requireNotNull(Thread.currentThread().contextClassLoader)
+        val names = linkedSetOf<String>()
+        val resources = loader.getResources(path)
+        while (resources.hasMoreElements()) {
+            val url = resources.nextElement()
+            when (url.protocol) {
+                "file" -> File(url.toURI()).listFiles()?.forEach { file ->
+                    if (file.isFile && file.extension == "class" && '$' !in file.name) {
+                        names += file.nameWithoutExtension
+                    }
+                }
+                "jar" -> {
+                    val jarPath = url.path.substringBefore('!').removePrefix("file:")
+                    JarFile(jarPath).use { jar ->
+                        jar.entries().asSequence().forEach { entry ->
+                            val name = entry.name
+                            val inPackage = name.startsWith("$path/") &&
+                                name.endsWith(".class") &&
+                                name.count { it == '/' } == path.count { it == '/' } + 1
+                            if (inPackage && '$' !in name) {
+                                names += name.substringAfterLast('/').removeSuffix(".class")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return names
+            .filter { it !in handwritten && !it.endsWith("JsonAdapter") }
+            .map { Class.forName("$packageName.$it", false, loader) }
+            .filter { !it.isInterface && !Modifier.isAbstract(it.modifiers) }
     }
 }
