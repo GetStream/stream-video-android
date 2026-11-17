@@ -1,17 +1,22 @@
 ## Stream Video Android Core Proguard Rules
 
-# Wire protocol buffer model classes
--keep class stream.video.sfu.** { *; }
+# SFU protobufs are decoded through Wire's generated ADAPTER fields, which
+# retrofit2-wire-converter already keeps. Do not keep the whole package.
 
 -keep class com.squareup.moshi.JsonReader
 -keep class com.squareup.moshi.JsonAdapter
--keep class kotlin.reflect.jvm.internal.* { *; }
+# Video parses JSON through Moshi codegen adapters. It does not ship kotlin-reflect.
 
 ## Moshi model classes
--keep class io.getstream.android.video.generated.** { *; }
+# Generated models use @JsonClass(generateAdapter = true). Moshi loads
+# ClassNameJsonAdapter by name, and its own rules keep those adapters.
+# Do not keep the model package; that retain was only for reflection.
 
 ## Kotlin serialized classes
--keep @kotlinx.serialization.Serializable class * {*;}
+# kotlinx-serialization already keeps its generated serializers. This rule only
+# preserves Stream's own models, so a host app that reflects on them still works.
+# It must not match every @Serializable class in the host app.
+-keep @kotlinx.serialization.Serializable class io.getstream.video.** { *; }
 
 ## Retrofit (https://github.com/square/retrofit/blob/master/retrofit/src/main/resources/META-INF/proguard/retrofit2.pro)
 

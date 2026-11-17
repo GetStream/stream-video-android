@@ -16,6 +16,9 @@
 
 package io.getstream.video.android.core.socket.common
 
+import com.squareup.moshi.JsonClass
+
+@JsonClass(generateAdapter = true)
 internal data class ErrorResponse(
     val code: Int = -1,
     var message: String = "",

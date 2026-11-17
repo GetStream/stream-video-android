@@ -29,6 +29,7 @@ import kotlin.collections.*
 import kotlin.io.*
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -38,6 +39,7 @@ import com.squareup.moshi.ToJson
  * This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen
  */
 
+@JsonClass(generateAdapter = true)
 data class CallEndedEvent (
     @Json(name = "call_cid")
     val callCid: kotlin.String,
