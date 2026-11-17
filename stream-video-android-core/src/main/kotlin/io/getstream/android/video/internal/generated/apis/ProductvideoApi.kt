@@ -376,7 +376,8 @@ public interface ProductvideoApi {
     public suspend fun stopRecording(
         @Path("type") type: String,
         @Path("id") id: String,
-        @Path("recording_type") recordingType: String
+        @Path("recording_type") recordingType: String ,
+        @Body body: kotlin.collections.Map<kotlin.String, @JvmSuppressWildcards kotlin.Any> = emptyMap()
     ): io.getstream.android.video.api.generated.models.StopRecordingResponse
     
     /**
@@ -502,7 +503,7 @@ public interface ProductvideoApi {
         @Query("limit") limit: Int? = null,
         @Query("prev") prev: String? = null,
         @Query("next") next: String? = null,
-        @Query("filter_conditions") filterConditions: Map<String, Any?>? = null
+        @Query("filter_conditions") filterConditions: io.getstream.android.video.internal.generated.infrastructure.JsonQuery<Map<String, Any?>>? = null
     ): io.getstream.android.video.api.generated.models.QueryCallParticipantSessionsResponse
     
     /**
@@ -798,8 +799,8 @@ public interface ProductvideoApi {
         @Query("limit") limit: Int? = null,
         @Query("prev") prev: String? = null,
         @Query("next") next: String? = null,
-        @Query("sort") sort: List<io.getstream.android.video.api.generated.models.SortParamRequest>? = null,
-        @Query("filter_conditions") filterConditions: Map<String, Any?>? = null
+        @Query("sort") sort: io.getstream.android.video.internal.generated.infrastructure.JsonQuery<List<io.getstream.android.video.api.generated.models.SortParamRequest>>? = null,
+        @Query("filter_conditions") filterConditions: io.getstream.android.video.internal.generated.infrastructure.JsonQuery<Map<String, Any?>>? = null
     ): io.getstream.android.video.api.generated.models.QueryCallSessionParticipantStatsResponse
     
     /**
