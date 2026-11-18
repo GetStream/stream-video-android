@@ -218,6 +218,12 @@ public sealed interface RealtimeConnection {
 internal typealias SessionId = String
 internal typealias IsPinned = Boolean
 
+/** Settings and capabilities published together for the noise-cancellation policy. */
+internal data class ServerStateSnapshot(
+    val settings: CallSettingsResponse?,
+    val capabilities: List<OwnCapability>,
+)
+
 /**
  * The CallState class keeps all state for a call
  * It's available on every call object
@@ -642,6 +648,28 @@ public class CallState(
         MutableStateFlow(emptyList())
     public val ownCapabilities: StateFlow<List<OwnCapability>> = _ownCapabilities
 
+    /**
+     * Last settings and capabilities published together. A response writes the two fields one
+     * after the other, and the noise-cancellation policy runs on the same dispatcher as rejoin,
+     * so it can resume inside one of those writes. It collects this snapshot instead, which is
+     * assigned once after both fields are current.
+     */
+    private val _serverSnapshot = MutableStateFlow(ServerStateSnapshot(null, emptyList()))
+    internal val serverSnapshot: StateFlow<ServerStateSnapshot> = _serverSnapshot
+
+    /** [settings] and [ownCapabilities] as last published together. */
+    internal fun settingsAndCapabilities(): Pair<CallSettingsResponse?, List<OwnCapability>> {
+        val snapshot = _serverSnapshot.value
+        return snapshot.settings to snapshot.capabilities
+    }
+
+    internal fun publishServerSnapshot() {
+        val next = ServerStateSnapshot(_settings.value, _ownCapabilities.value)
+        if (_serverSnapshot.value != next) {
+            _serverSnapshot.value = next
+        }
+    }
+
     internal val _permissionRequests = MutableStateFlow<List<PermissionRequest>>(emptyList())
     val permissionRequests: StateFlow<List<PermissionRequest>> = _permissionRequests
 
@@ -1046,6 +1074,7 @@ public class CallState(
             is UpdatedCallPermissionsEvent -> {
                 if (event.user.id == client.userId) {
                     _ownCapabilities.value = event.ownCapabilities
+                    publishServerSnapshot()
                 }
             }
 
@@ -1837,6 +1866,11 @@ public class CallState(
     }
 
     fun updateFromResponse(response: CallResponse) {
+        applyCallResponse(response)
+        publishServerSnapshot()
+    }
+
+    private fun applyCallResponse(response: CallResponse) {
         _backstage.value = response.backstage
         _blockedUserIds.value = response.blockedUserIds
         _egress.value = response.egress
@@ -1886,8 +1920,8 @@ public class CallState(
         val members = response.members
         updateFromResponse(members)
         _ownCapabilities.value = response.ownCapabilities
-        val callResponse = response.call
-        updateFromResponse(callResponse)
+        applyCallResponse(response.call)
+        publishServerSnapshot()
     }
 
     private fun updateFromResponse(members: List<MemberResponse>) {
@@ -1895,21 +1929,24 @@ public class CallState(
     }
 
     fun updateFromResponse(response: UpdateCallResponse) {
-        updateFromResponse(response.call)
+        applyCallResponse(response.call)
         _ownCapabilities.value = response.ownCapabilities
         updateFromResponse(response.members)
+        publishServerSnapshot()
     }
 
     fun updateFromResponse(response: GetCallResponse) {
-        updateFromResponse(response.call)
+        applyCallResponse(response.call)
         _ownCapabilities.value = response.ownCapabilities
         updateFromResponse(response.members)
+        publishServerSnapshot()
     }
 
     fun updateFromResponse(response: JoinCallResponse) {
         _ownCapabilities.value = response.ownCapabilities
         updateFromResponse(response.members)
-        updateFromResponse(response.call)
+        applyCallResponse(response.call)
+        publishServerSnapshot()
     }
 
     fun getMember(userId: String): MemberState? {
@@ -1917,9 +1954,10 @@ public class CallState(
     }
 
     fun updateFromResponse(callData: CallStateResponseFields) {
-        updateFromResponse(callData.call)
+        applyCallResponse(callData.call)
         _ownCapabilities.value = callData.ownCapabilities
         updateFromResponse(callData.members)
+        publishServerSnapshot()
     }
 
     fun updateFromResponse(it: QueryCallMembersResponse) {
@@ -2074,6 +2112,7 @@ public class CallState(
     @InternalStreamVideoApi
     fun setOwnCapabilities(ownCapability: List<OwnCapability>) {
         this._ownCapabilities.value = ownCapability
+        publishServerSnapshot()
     }
 
     /**

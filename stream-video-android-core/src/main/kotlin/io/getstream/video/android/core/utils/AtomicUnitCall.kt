@@ -24,6 +24,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 internal class AtomicUnitCall {
     private var called = AtomicBoolean(false)
 
+    /** True once [invoke] has been called, even while its block is still running. */
+    val hasBeenCalled: Boolean get() = called.get()
+
     /**
      * Executes the given block of code only once, no matter how many consecutive calls are made.
      */

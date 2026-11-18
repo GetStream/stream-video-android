@@ -300,6 +300,12 @@ internal class CallJoinCoordinator(
                 return result
             }
             if (result is Failure) {
+                // Leave wins over the join that was in flight. Setting Failed here would
+                // overwrite the Disconnected state leave just published.
+                if (lifecycle.hasLeaveStarted()) {
+                    logger.i { "[join] Leave started during join — discarding the result" }
+                    return result
+                }
                 sessionManager.setActiveSession(null)
                 logger.e { "Join failed with error $result" }
                 if (isPermanentError(result.value)) {
@@ -498,14 +504,25 @@ internal class CallJoinCoordinator(
             }
             return Failure(Error.GenericError("Unsupported playback type: ${playback.type}"))
         }
-        logger.i { "[joinInternal] Joined with HLS playback (reason=${playback.reason})" }
-        val session = createPlaybackSession()
-        sessionManager.playbackSession = session
-        state._playbackType.value = PlaybackType.Hls(playlistUrl)
-        state._connection.value = RealtimeConnection.Joined(session)
-        callRegistry.markActive()
-        state._connection.value = RealtimeConnection.Connected
-        return Success(session)
+        // The grant is installed below without suspending, so a leave that started while
+        // joinRequest was in flight cannot cancel it. The lock keeps that leave from landing
+        // between the check and the writes.
+        return lifecycle.withLeaveLock {
+            if (lifecycle.hasLeaveStarted()) {
+                logger.w { "[joinPlayback] Leave already started — discarding HLS grant" }
+                return@withLeaveLock Failure(
+                    Error.GenericError("Call left before HLS playback started"),
+                )
+            }
+            logger.i { "[joinInternal] Joined with HLS playback (reason=${playback.reason})" }
+            val session = createPlaybackSession()
+            sessionManager.playbackSession = session
+            state._playbackType.value = PlaybackType.Hls(playlistUrl)
+            state._connection.value = RealtimeConnection.Joined(session)
+            callRegistry.markActive()
+            state._connection.value = RealtimeConnection.Connected
+            Success(session)
+        }
     }
 
     private suspend fun completeJoinAfterSessionInstall(

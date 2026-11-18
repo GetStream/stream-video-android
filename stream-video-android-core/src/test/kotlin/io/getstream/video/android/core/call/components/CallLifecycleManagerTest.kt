@@ -87,4 +87,18 @@ class CallLifecycleManagerTest {
             verify { playbackSession.cleanup() }
             coVerify(exactly = 0) { playbackSession.sendLeaveEvent(any()) }
         }
+
+    @Test
+    fun `leave marks the call left until the next join resets the guard`() = runTest(
+        testDispatcher,
+    ) {
+        val manager = manager()
+
+        assertThat(manager.hasLeaveStarted()).isFalse()
+        manager.leave("user")
+        assertThat(manager.hasLeaveStarted()).isTrue()
+
+        manager.resetLeaveGuard()
+        assertThat(manager.hasLeaveStarted()).isFalse()
+    }
 }

@@ -62,8 +62,16 @@ internal class CallLifecycleManager(
 
     private val cid = "$type:$id"
 
-    // Atomic controls
+    // Atomic controls. Replaced by [resetLeaveGuard], read from the join path.
+    @Volatile
     private var atomicLeave = AtomicUnitCall()
+
+    /**
+     * Orders a leave against an HLS grant being installed. [AtomicUnitCall] flips its flag before
+     * the leave body runs, so the body takes this lock first: it then either waits for an install
+     * already in progress and cleans it up, or runs before the install, which then sees the leave.
+     */
+    private val leaveLock = Any()
 
     /** Call has been left and the object is cleaned up and destroyed. */
     var isDestroyed = false
@@ -76,8 +84,20 @@ internal class CallLifecycleManager(
 
     /** Resets the leave guard so a fresh join can run after a previous leave. */
     fun resetLeaveGuard() {
-        atomicLeave = AtomicUnitCall()
+        synchronized(leaveLock) { atomicLeave = AtomicUnitCall() }
     }
+
+    /**
+     * True from the start of [leave] until the next [resetLeaveGuard]. [isDestroyed] cannot
+     * stand in for it: that flag is never cleared, so a later join would look left forever.
+     */
+    fun hasLeaveStarted(): Boolean = atomicLeave.hasBeenCalled
+
+    /**
+     * Runs [block] without interleaving it with [leave]. Playback install uses this: it does not
+     * suspend, so cancelling the call scope cannot stop it from running after leave has started.
+     */
+    fun <T> withLeaveLock(block: () -> T): T = synchronized(leaveLock, block)
 
     fun leave(reason: CallLeaveReason) {
         logger.d { "[leave] #ringing; call_cid:$cid" }
@@ -90,6 +110,8 @@ internal class CallLifecycleManager(
     }
 
     private fun internalLeave(reason: CallLeaveReason) = atomicLeave {
+        // Barrier only, see [leaveLock]: waits out a grant that is mid-install.
+        synchronized(leaveLock) { }
         stopConnectionMonitors()
         callAnalytics.stopObservers()
         sessionMonitor().cancelSfuObservers()
