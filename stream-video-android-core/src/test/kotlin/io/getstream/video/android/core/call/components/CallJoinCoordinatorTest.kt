@@ -37,6 +37,7 @@ import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -132,6 +133,10 @@ class CallJoinCoordinatorTest {
         every { sessionManager.playbackSession } answers { heldPlaybackSession }
         every { sessionManager.playbackSession = any() } answers {
             heldPlaybackSession = firstArg()
+        }
+        every { lifecycle.hasLeaveStarted() } returns false
+        every { lifecycle.withLeaveLock(any<() -> Any?>()) } answers {
+            firstArg<() -> Any?>().invoke()
         }
     }
 
@@ -843,5 +848,59 @@ class CallJoinCoordinatorTest {
         assertThat(heldPlaybackSession).isNull()
         verify(exactly = 0) { callRegistry.markActive() }
         coVerify(exactly = 0) { mockSession.connectInternal() }
+    }
+
+    @Test
+    fun `an HLS grant that arrives after leave does not activate the call`() = runTest(
+        testDispatcher,
+    ) {
+        val sessions = CallSessionManager()
+        sessionManager = sessions
+        lifecycle = CallLifecycleManager(
+            clientImpl = clientImpl,
+            sessionManager = sessions,
+            scopeProvider = mockk<ScopeProvider>(relaxed = true),
+            callRegistry = callRegistry,
+            shutDownJobs = {},
+            state = state,
+            callAnalytics = callAnalytics,
+            statsReporter = mockk<CallStatsReporter>(relaxed = true),
+            media = media,
+            iceMonitor = mockk<CallIceConnectionMonitor>(relaxed = true),
+            sessionMonitor = { sessionMonitor },
+            connectivityMonitor = { mockk<CallConnectivityMonitor>(relaxed = true) },
+            type = "default",
+            id = "test-call",
+        )
+        every { clientImpl.scope } returns testScope
+        stubHlsPlayback()
+        var requests = 0
+        coEvery {
+            apiClient.joinRequest(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+            )
+        } coAnswers {
+            requests += 1
+            if (requests == 1) lifecycle.leave("user")
+            Success(mockJoinResponse)
+        }
+
+        val coordinator = coordinator()
+        val first = coordinator.join()
+
+        assertThat(first).isInstanceOf(Failure::class.java)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+        assertThat(sessions.playbackSession).isNull()
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Disconnected)
+        verify(exactly = 0) { callRegistry.markActive() }
+
+        advanceUntilIdle()
+        val second = coordinator.join()
+        advanceUntilIdle()
+
+        assertThat((second as Success).value).isSameInstanceAs(playbackSession)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(HLS_URL))
+        assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Connected)
+        verify(exactly = 1) { callRegistry.markActive() }
     }
 }
