@@ -24,6 +24,7 @@
 package io.getstream.android.video.generated.models
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
 /**
  *
@@ -32,6 +33,7 @@ import com.squareup.moshi.Json
  * @param userDetails
  */
 
+@JsonClass(generateAdapter = true)
 data class WSAuthMessageRequest(
 
     @Json(name = "token")

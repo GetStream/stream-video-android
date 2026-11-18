@@ -25,6 +25,7 @@ package io.getstream.android.video.generated.models
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
 import com.squareup.moshi.JsonWriter
@@ -33,6 +34,7 @@ import com.squareup.moshi.ToJson
 /**
  * The ring state of a call session: who accepted, rejected, or missed the ring.
  */
+@JsonClass(generateAdapter = true)
 data class GetCallRingStateResponse (
     @Json(name = "call_cid")
     val callCid: kotlin.String,

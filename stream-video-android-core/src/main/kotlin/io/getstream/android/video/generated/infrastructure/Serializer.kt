@@ -76,8 +76,7 @@ object Serializer {
         .add(io.getstream.android.video.generated.infrastructure.OffsetDateTimeAdapter())
         .add(io.getstream.android.video.generated.infrastructure.LocalDateAdapter())
         .add(io.getstream.android.video.generated.infrastructure.LocalDateTimeAdapter())
-        .addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
-    
+
     @JvmStatic
     val moshi: Moshi by lazy {
         moshiBuilder.build()

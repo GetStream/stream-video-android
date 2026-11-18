@@ -30,6 +30,11 @@ import io.getstream.video.android.core.analytics.call.observer.SfuAnalytics
 import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.components.CallSessionManager
+import io.getstream.video.android.core.events.CallEndedSfuEvent
+import io.getstream.video.android.core.events.ChangePublishOptionsEvent
+import io.getstream.video.android.core.events.ChangePublishQualityEvent
+import io.getstream.video.android.core.events.ErrorEvent
+import io.getstream.video.android.core.events.GoAwayEvent
 import io.getstream.video.android.core.events.JoinCallResponseEvent
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.module.SfuConnectionModule
@@ -37,6 +42,7 @@ import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.video.android.core.trace.PeerConnectionTraceKey
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -52,9 +58,17 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import stream.video.sfu.event.ChangePublishOptions
+import stream.video.sfu.event.ChangePublishQuality
+import stream.video.sfu.event.VideoSender
+import stream.video.sfu.models.Codec
+import stream.video.sfu.models.GoAwayReason
+import stream.video.sfu.models.PublishOption
+import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.WebsocketReconnectStrategy
 
 /**
@@ -373,5 +387,59 @@ class SfuConnectionRetryTest {
     fun `sfuName is stored correctly in RtcSession`() = runTest {
         val session = createRtcSession(sfuName = "edge-eu-west-1")
         assert(session.sfuName == "edge-eu-west-1")
+    }
+
+    @Test
+    fun `sfu events are traced with proto field values`() = runTest {
+        every { mockVideoClient.enableStatsCollection } returns true
+        val session = createRtcSession()
+        advance()
+
+        session.traceEvent(
+            ChangePublishQualityEvent(
+                ChangePublishQuality(
+                    video_senders = listOf(
+                        VideoSender(
+                            track_type = TrackType.TRACK_TYPE_VIDEO,
+                            codec = Codec(96, "VP9"),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        session.traceEvent(
+            ChangePublishOptionsEvent(
+                ChangePublishOptions(
+                    publish_options = listOf(
+                        PublishOption(
+                            track_type = TrackType.TRACK_TYPE_VIDEO,
+                            codec = Codec(96, "VP9"),
+                            bitrate = 1_050_000,
+                        ),
+                    ),
+                ),
+            ),
+        )
+        session.traceEvent(GoAwayEvent(GoAwayReason.GO_AWAY_REASON_REBALANCE))
+        session.traceEvent(CallEndedSfuEvent(reason = 1))
+        session.traceEvent(
+            ErrorEvent(
+                error = stream.video.sfu.models.Error(message = "sfu down"),
+                reconnectStrategy = WebsocketReconnectStrategy.WEBSOCKET_RECONNECT_STRATEGY_FAST,
+            ),
+        )
+
+        val traced = session.sfuTracer.take().snapshot.associate { it.tag to it.data.toString() }
+        assertTrue(
+            traced.getValue(PeerConnectionTraceKey.CHANGE_PUBLISH_QUALITY.value).contains("VP9"),
+        )
+        assertTrue(
+            traced.getValue(
+                PeerConnectionTraceKey.CHANGE_PUBLISH_OPTIONS.value,
+            ).contains("1050000"),
+        )
+        assertTrue(traced.getValue(PeerConnectionTraceKey.GO_AWAY.value).contains("REBALANCE"))
+        assertTrue(traced.getValue(PeerConnectionTraceKey.CALL_ENDED.value).contains("reason=1"))
+        assertTrue(traced.getValue(PeerConnectionTraceKey.SFU_ERROR.value).contains("sfu down"))
     }
 }
