@@ -106,8 +106,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -1191,40 +1189,35 @@ public class Call(
      */
     private fun observeNoiseCancellationPolicy() {
         scope.launch {
-            state.settings
-                .filterNotNull()
-                .combine(
-                    state.ownCapabilities,
-                ) { _, _ -> }
-                .collect {
-                    // Neither the pair combine hands over nor two separate reads is safe to decide
-                    // on: combine collects each upstream on its own coroutine, and a response
-                    // writes the two fields one after the other. A mixed pair can withdraw noise
-                    // cancellation the server just granted, or latch auto-on against old settings.
-                    val (settings, capabilities) = state.settingsAndCapabilities()
-                    if (!noiseCancellationPolicy.isAllowed(capabilities, settings)) {
-                        // Withdraws unconditionally rather than only when something is already
-                        // processing: a state wanted before the factory existed is remembered and
-                        // would otherwise be applied the moment one is built, after the server
-                        // had withheld it.
-                        val wasProcessing = media.isAudioProcessingEnabledIfCreated()
-                        if (wasProcessing || media.isAudioProcessingWanted()) {
-                            logger.i {
-                                "[noiseCancellation] withdrawing, no longer allowed for this call"
-                            }
-                            media.setAudioProcessingEnabled(false)
-                            publishAudioProcessingState()
-                            notifyNoiseCancellationState(false)
+            state.serverSnapshot.collect { snapshot ->
+                // Wait until a response has published settings. Deciding on the live fields here
+                // would run inside one of their writes whenever this collector and the writer
+                // share a thread.
+                val settings = snapshot.settings ?: return@collect
+                val capabilities = snapshot.capabilities
+                if (!noiseCancellationPolicy.isAllowed(capabilities, settings)) {
+                    // Withdraws unconditionally rather than only when something is already
+                    // processing: a state wanted before the factory existed is remembered and
+                    // would otherwise be applied the moment one is built, after the server
+                    // had withheld it.
+                    val wasProcessing = media.isAudioProcessingEnabledIfCreated()
+                    if (wasProcessing || media.isAudioProcessingWanted()) {
+                        logger.i {
+                            "[noiseCancellation] withdrawing, no longer allowed for this call"
                         }
-                        return@collect
+                        media.setAudioProcessingEnabled(false)
+                        publishAudioProcessingState()
+                        notifyNoiseCancellationState(false)
                     }
-                    if (!autoOnApplied) {
-                        autoOnApplied = true
-                        if (noiseCancellationPolicy.isAutoOn(capabilities, settings)) {
-                            setAudioProcessingEnabled(true)
-                        }
+                    return@collect
+                }
+                if (!autoOnApplied) {
+                    autoOnApplied = true
+                    if (noiseCancellationPolicy.isAutoOn(capabilities, settings)) {
+                        setAudioProcessingEnabled(true)
                     }
                 }
+            }
         }
     }
 

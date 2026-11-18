@@ -23,6 +23,7 @@ import io.getstream.android.video.generated.models.OwnCapability
 import io.getstream.video.android.core.base.IntegrationTestBase
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -30,10 +31,13 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * A response writes [CallState.ownCapabilities] and [CallState.settings] one after the other.
- * Policy decisions read both, so they must never see a response half applied.
+ * The noise-cancellation policy reads the snapshot published after both, so a read during the
+ * gap still sees the previous pair.
  */
 @RunWith(RobolectricTestRunner::class)
 class CallStateServerSnapshotTest : IntegrationTestBase(connectCoordinatorWS = false) {
@@ -44,7 +48,7 @@ class CallStateServerSnapshotTest : IntegrationTestBase(connectCoordinatorWS = f
     }
 
     @Test
-    fun `a snapshot taken while a join response is applied sees it whole`() {
+    fun `a snapshot taken while a join response is applied stays on the previous pair`() {
         val state = client.call("default", randomUUID()).state
         val oldSettings = noiseCancellationSettings(NoiseCancellationSettings.Mode.Available)
         state.injectServerState(capabilities = emptyList(), settings = oldSettings)
@@ -57,16 +61,15 @@ class CallStateServerSnapshotTest : IntegrationTestBase(connectCoordinatorWS = f
             every { ownCapabilities } returns newCapabilities
             every { members } returns emptyList()
             every { call.settings } answers {
-                // The first read is the one that writes settings, so capabilities are already
-                // written and settings are not: read from another thread right in that gap, and
-                // give it time to return the mixed pair if it can.
+                // Capabilities are already written and settings are not. The published snapshot
+                // must still be the previous pair, including for a reader on another thread.
                 if (concurrentRead == null) {
                     val read = CompletableFuture.supplyAsync { state.settingsAndCapabilities() }
                     concurrentRead = read
                     try {
                         read.get(CONCURRENT_READ_WAIT_MS, TimeUnit.MILLISECONDS)
                     } catch (_: TimeoutException) {
-                        // Blocked behind the response being applied, as it should be.
+                        // The read shares no lock with the writer, so this is unexpected.
                     }
                 }
                 newSettings
@@ -75,7 +78,32 @@ class CallStateServerSnapshotTest : IntegrationTestBase(connectCoordinatorWS = f
 
         state.updateFromResponse(response)
 
-        val snapshot = concurrentRead!!.get(RESULT_TIMEOUT_MS, TimeUnit.MILLISECONDS)
-        assertEquals(newSettings to newCapabilities, snapshot)
+        val during = concurrentRead!!.get(RESULT_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        assertEquals(oldSettings to emptyList(), during)
+        assertEquals(newSettings to newCapabilities, state.settingsAndCapabilities())
     }
+
+    @Test
+    fun `auto-on applies when a join response grants the capability and the mode together`() =
+        runTest {
+            val call = client.call("default", randomUUID())
+            call.state.injectServerState(
+                capabilities = emptyList(),
+                settings = noiseCancellationSettings(NoiseCancellationSettings.Mode.Available),
+            )
+            assertFalse(call.isAudioProcessingWanted())
+
+            // The policy collector shares the test dispatcher with this write, so it resumes
+            // inside the snapshot assignment. A decision taken on the half-applied response
+            // would latch auto-on against the previous Available mode and never start it.
+            val response = mockk<JoinCallResponse>(relaxed = true)
+            every { response.ownCapabilities } returns listOf(OwnCapability.EnableNoiseCancellation)
+            every { response.members } returns emptyList()
+            every { response.call.settings } returns noiseCancellationSettings(
+                NoiseCancellationSettings.Mode.AutoOn,
+            )
+            call.state.updateFromResponse(response)
+
+            assertTrue(call.isAudioProcessingWanted())
+        }
 }
