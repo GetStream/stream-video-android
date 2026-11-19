@@ -57,27 +57,31 @@ internal class ExoHlsPlayerTest {
     }
 
     @Test
-    fun `detaching pauses and a later attach resumes the same exoplayer`() {
+    fun `detaching keeps playing and a later attach shows the same exoplayer`() {
         val first = SurfaceView(application)
         player.attach(first)
         val exoPlayer = player.exoPlayer
 
         player.detach(first)
-        assertThat(exoPlayer!!.playWhenReady).isFalse()
+        assertThat(player.attachedSurface).isNull()
+        assertThat(exoPlayer!!.playWhenReady).isTrue()
 
-        player.attach(SurfaceView(application))
+        val second = SurfaceView(application)
+        player.attach(second)
         assertThat(player.exoPlayer).isSameInstanceAs(exoPlayer)
-        assertThat(exoPlayer.playWhenReady).isTrue()
+        assertThat(player.attachedSurface).isSameInstanceAs(second)
     }
 
     @Test
-    fun `detaching a surface that is no longer shown keeps playing`() {
+    fun `detaching a surface that is no longer shown keeps the current surface`() {
         val first = SurfaceView(application)
+        val second = SurfaceView(application)
         player.attach(first)
-        player.attach(SurfaceView(application))
+        player.attach(second)
 
         player.detach(first)
 
+        assertThat(player.attachedSurface).isSameInstanceAs(second)
         assertThat(player.exoPlayer!!.playWhenReady).isTrue()
     }
 

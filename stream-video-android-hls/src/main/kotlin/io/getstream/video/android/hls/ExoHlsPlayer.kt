@@ -72,6 +72,7 @@ internal class ExoHlsPlayer(
     private var released = false
 
     internal val exoPlayer: ExoPlayer? get() = player
+    internal val attachedSurface: SurfaceView? get() = surface
 
     override fun attach(surfaceView: SurfaceView) {
         if (released) return
@@ -86,9 +87,7 @@ internal class ExoHlsPlayer(
 
     override fun detach(surfaceView: SurfaceView) {
         if (released || surface !== surfaceView) return
-        val player = player ?: return
-        player.pause()
-        player.clearVideoSurfaceView(surfaceView)
+        player?.clearVideoSurfaceView(surfaceView)
         surface = null
     }
 

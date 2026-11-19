@@ -38,9 +38,10 @@ import io.getstream.video.android.core.model.PlaybackType
  * Shows the call's HLS broadcast.
  *
  * Renders nothing unless [Call.state.playbackType] is [PlaybackType.Hls], which requires an
- * [ExoHlsPlayerFactory] registered on the client. The call owns the player: this renderer plays
- * it while shown and pauses it when removed, and leaving the call releases it. Recreating the
- * renderer, for example on rotation, resumes the same player without loading the stream again.
+ * [ExoHlsPlayerFactory] registered on the client. The call owns the player: this renderer only
+ * shows its video, playback and audio continue while it is not shown, and leaving the call
+ * releases it. Recreating the renderer, for example on rotation, shows the same player without
+ * loading the stream again.
  *
  * The broadcast is an already composed layout, so the frame is fitted rather than cropped.
  *
