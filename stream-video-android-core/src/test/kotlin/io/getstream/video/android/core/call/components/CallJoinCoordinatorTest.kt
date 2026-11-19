@@ -37,6 +37,7 @@ import io.getstream.video.android.core.base.DispatcherRule
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.SfuConnectFailureCause
 import io.getstream.video.android.core.call.SfuConnectionResult
+import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coEvery
@@ -98,6 +99,8 @@ class CallJoinCoordinatorTest {
     private lateinit var playbackTypeFlow: MutableStateFlow<PlaybackType>
     private lateinit var playbackSession: RtcSession
     private var heldPlaybackSession: RtcSession? = null
+    private lateinit var hlsPlayer: HlsPlayer
+    private lateinit var hlsPlayerFlow: MutableStateFlow<HlsPlayer?>
 
     @Before
     fun setup() {
@@ -134,6 +137,9 @@ class CallJoinCoordinatorTest {
         every { sessionManager.playbackSession = any() } answers {
             heldPlaybackSession = firstArg()
         }
+        hlsPlayer = mockk(relaxed = true)
+        hlsPlayerFlow = MutableStateFlow(null)
+        every { sessionManager.hlsPlayer } returns hlsPlayerFlow
         every { lifecycle.hasLeaveStarted() } returns false
         every { lifecycle.withLeaveLock(any<() -> Any?>()) } answers {
             firstArg<() -> Any?>().invoke()
@@ -145,7 +151,9 @@ class CallJoinCoordinatorTest {
         unmockkAll()
     }
 
-    private fun coordinator() = CallJoinCoordinator(
+    private fun coordinator(
+        createHlsPlayer: ((String) -> HlsPlayer)? = { hlsPlayer },
+    ) = CallJoinCoordinator(
         clientImpl = clientImpl,
         state = state,
         callAnalytics = callAnalytics,
@@ -162,6 +170,7 @@ class CallJoinCoordinatorTest {
         callRegistry = callRegistry,
         hasRequiredPermissions = { true },
         createPlaybackSession = { playbackSession },
+        createHlsPlayer = createHlsPlayer,
     )
 
     private fun stubJoinCall(result: io.getstream.result.Result<JoinCallResponse>) {
@@ -234,13 +243,32 @@ class CallJoinCoordinatorTest {
     }
 
     @Test
-    fun `first join declares HLS playback support`() = runTest(testDispatcher) {
+    fun `first join declares HLS playback when a player factory is registered`() = runTest(
+        testDispatcher,
+    ) {
         stubJoinCall(Success(mockJoinResponse))
         coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
 
         coordinator().join()
         advanceUntilIdle()
 
+        verifyPlaybackCapabilities(listOf("hls"))
+    }
+
+    @Test
+    fun `first join does not declare HLS playback without a player factory`() = runTest(
+        testDispatcher,
+    ) {
+        stubJoinCall(Success(mockJoinResponse))
+        coEvery { mockSession.connectInternal() } returns SfuConnectionResult.Success
+
+        coordinator(createHlsPlayer = null).join()
+        advanceUntilIdle()
+
+        verifyPlaybackCapabilities(null)
+    }
+
+    private fun verifyPlaybackCapabilities(expected: List<String>?) {
         coVerify {
             apiClient.joinRequest(
                 create = any(),
@@ -252,7 +280,7 @@ class CallJoinCoordinatorTest {
                 hintHighScaleLivestreamPublisher = any(),
                 joinAnalyticsModel = any(),
                 e2ee = any(),
-                playbackCapabilities = listOf("hls"),
+                playbackCapabilities = expected,
             )
         }
     }
@@ -807,6 +835,7 @@ class CallJoinCoordinatorTest {
         assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(HLS_URL))
         assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Connected)
         assertThat(heldPlaybackSession).isSameInstanceAs(playbackSession)
+        assertThat(hlsPlayerFlow.value).isSameInstanceAs(hlsPlayer)
         assertThat(sessionFlow.value).isNull()
         verify { callRegistry.markActive() }
         coVerify(exactly = 0) { mockSession.connectInternal() }
@@ -846,8 +875,40 @@ class CallJoinCoordinatorTest {
         assertThat(connectionFlow.value).isInstanceOf(RealtimeConnection.Failed::class.java)
         assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
         assertThat(heldPlaybackSession).isNull()
+        assertThat(hlsPlayerFlow.value).isNull()
         verify(exactly = 0) { callRegistry.markActive() }
         coVerify(exactly = 0) { mockSession.connectInternal() }
+    }
+
+    @Test
+    fun `an HLS grant without a player factory fails the join`() = runTest(testDispatcher) {
+        stubHlsPlayback()
+
+        val result = coordinator(createHlsPlayer = null).join()
+        advanceUntilIdle()
+
+        assertThat(result).isInstanceOf(Failure::class.java)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+        assertThat(heldPlaybackSession).isNull()
+        verify(exactly = 0) { callRegistry.markActive() }
+    }
+
+    @Test
+    fun `a player that cannot be created fails the HLS join without installing it`() = runTest(
+        testDispatcher,
+    ) {
+        stubHlsPlayback()
+
+        val result = coordinator(createHlsPlayer = { error("no player") }).join()
+        advanceUntilIdle()
+
+        assertThat(result).isInstanceOf(Failure::class.java)
+        assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
+        assertThat(heldPlaybackSession).isNull()
+        assertThat(hlsPlayerFlow.value).isNull()
+        assertThat(connectionFlow.value).isInstanceOf(RealtimeConnection.Failed::class.java)
+        verify { playbackSession.cleanup() }
+        verify(exactly = 0) { callRegistry.markActive() }
     }
 
     @Test
@@ -891,6 +952,7 @@ class CallJoinCoordinatorTest {
         assertThat(first).isInstanceOf(Failure::class.java)
         assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
         assertThat(sessions.playbackSession).isNull()
+        assertThat(sessions.hlsPlayer.value).isNull()
         assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Disconnected)
         verify(exactly = 0) { callRegistry.markActive() }
 
@@ -900,6 +962,7 @@ class CallJoinCoordinatorTest {
 
         assertThat((second as Success).value).isSameInstanceAs(playbackSession)
         assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.Hls(HLS_URL))
+        assertThat(sessions.hlsPlayer.value).isSameInstanceAs(hlsPlayer)
         assertThat(connectionFlow.value).isEqualTo(RealtimeConnection.Connected)
         verify(exactly = 1) { callRegistry.markActive() }
     }

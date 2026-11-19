@@ -174,9 +174,12 @@ internal class CallLifecycleManager(
     }
 
     private fun clearPlayback() {
+        val player = sessionManager.hlsPlayer.value
+        sessionManager.hlsPlayer.value = null
+        state._playbackType.value = PlaybackType.WebRtc
         sessionManager.playbackSession?.cleanup()
         sessionManager.playbackSession = null
-        state._playbackType.value = PlaybackType.WebRtc
+        player?.release()
     }
 
     /** Stops the ICE and connectivity monitors. */
