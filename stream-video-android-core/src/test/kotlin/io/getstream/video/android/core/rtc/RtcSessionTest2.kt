@@ -48,6 +48,8 @@ import io.getstream.video.android.core.model.IceServer
 import io.getstream.video.android.core.socket.common.ConnectionConf
 import io.getstream.video.android.core.socket.sfu.SfuSocketConnection
 import io.getstream.video.android.core.socket.sfu.state.SfuSocketState
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.SessionDescription
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -78,8 +80,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.webrtc.PeerConnection
-import org.webrtc.SessionDescription
 import stream.video.sfu.event.ReconnectDetails
 import stream.video.sfu.models.ParticipantCount
 import stream.video.sfu.models.PeerType
@@ -853,7 +853,7 @@ class RtcSessionTest2 {
         ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
         val (rtcSession, publisherMock) = createRtcSessionSpyWithMockSocket()
         rtcSession.publisher.value = publisherMock
-        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+        val audioTrack = mockk<io.getstream.webrtc.AudioTrack>(relaxed = true)
         coEvery {
             publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
         } returns audioTrack
@@ -1131,7 +1131,7 @@ class RtcSessionTest2 {
             ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
             val (rtcSession, publisherMock) = muteSyncSession(signalService)
             rtcSession.publisher.value = publisherMock
-            val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+            val audioTrack = mockk<io.getstream.webrtc.AudioTrack>(relaxed = true)
             coEvery {
                 publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
             } returns audioTrack
@@ -1153,7 +1153,7 @@ class RtcSessionTest2 {
         ownCapabilitiesFlow.value = listOf(OwnCapability.SendAudio)
         val (rtcSession, publisherMock) = muteSyncSession(signalService)
         rtcSession.publisher.value = publisherMock
-        val audioTrack = mockk<org.webrtc.AudioTrack>(relaxed = true)
+        val audioTrack = mockk<io.getstream.webrtc.AudioTrack>(relaxed = true)
         coEvery {
             publisherMock.publishStream(any(), TrackType.TRACK_TYPE_AUDIO)
         } returns audioTrack

@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.compose.ui.components.video
 
-import org.webrtc.RendererCommon
+import io.getstream.webrtc.RendererCommon
 
 /**
  * Types of video scaling:

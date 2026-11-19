@@ -62,10 +62,10 @@ public final class io/getstream/video/android/xml/databinding/StreamVideoActivit
 }
 
 public final class io/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding : androidx/viewbinding/ViewBinding {
-	public final field participantView Lorg/webrtc/SurfaceViewRenderer;
+	public final field participantView Lio/getstream/webrtc/SurfaceViewRenderer;
 	public static fun bind (Landroid/view/View;)Lio/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Lorg/webrtc/SurfaceViewRenderer;
+	public fun getRoot ()Lio/getstream/webrtc/SurfaceViewRenderer;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lio/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lio/getstream/video/android/xml/databinding/StreamVideoItemParticipantBinding;
 }

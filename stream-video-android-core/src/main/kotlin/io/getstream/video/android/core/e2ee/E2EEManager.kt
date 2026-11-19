@@ -16,8 +16,8 @@
 
 package io.getstream.video.android.core.e2ee
 
-import org.webrtc.RtpReceiver
-import org.webrtc.RtpSender
+import io.getstream.webrtc.RtpReceiver
+import io.getstream.webrtc.RtpSender
 
 /**
  * Attaches end-to-end encryption to the media that flows through a call.

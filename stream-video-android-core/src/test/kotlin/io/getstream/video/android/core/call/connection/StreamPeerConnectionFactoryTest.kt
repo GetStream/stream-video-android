@@ -21,6 +21,13 @@ import android.media.MediaRecorder
 import io.getstream.video.android.core.MediaManagerImpl
 import io.getstream.video.android.core.ParticipantState
 import io.getstream.video.android.core.api.SignalServerService
+import io.getstream.webrtc.EglBase
+import io.getstream.webrtc.ManagedAudioProcessingFactory
+import io.getstream.webrtc.MediaConstraints
+import io.getstream.webrtc.PeerConnection
+import io.getstream.webrtc.PeerConnection.Observer
+import io.getstream.webrtc.PeerConnectionFactory
+import io.getstream.webrtc.audio.JavaAudioDeviceModule
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
@@ -36,13 +43,6 @@ import kotlinx.coroutines.test.TestScope
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.webrtc.EglBase
-import org.webrtc.ManagedAudioProcessingFactory
-import org.webrtc.MediaConstraints
-import org.webrtc.PeerConnection
-import org.webrtc.PeerConnection.Observer
-import org.webrtc.PeerConnectionFactory
-import org.webrtc.audio.JavaAudioDeviceModule
 import stream.video.sfu.models.AudioBitrateProfile
 import stream.video.sfu.models.PublishOption
 

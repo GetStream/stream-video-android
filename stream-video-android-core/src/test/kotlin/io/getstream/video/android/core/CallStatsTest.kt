@@ -17,6 +17,8 @@
 package io.getstream.video.android.core
 
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
+import io.getstream.webrtc.RTCStats
+import io.getstream.webrtc.RTCStatsReport
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,8 +27,6 @@ import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import org.webrtc.RTCStats
-import org.webrtc.RTCStatsReport
 
 /**
  * Covers the audio side of [CallStats] — the send/receive rate derived from the RTP byte

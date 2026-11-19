@@ -26,7 +26,7 @@ import io.getstream.video.android.core.analytics.reporting.model.EventStage
 import io.getstream.video.android.core.analytics.reporting.model.EventType
 import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionRole
 import io.getstream.video.android.core.ringing.RingJoinSource
-import org.webrtc.PeerConnection
+import io.getstream.webrtc.PeerConnection
 import kotlin.time.Clock
 
 internal class ClientEventFactory(

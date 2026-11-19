@@ -20,8 +20,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import io.getstream.video.android.core.Call
+import io.getstream.webrtc.VideoTrack
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
-import org.webrtc.VideoTrack
 
 public class ParticipantItemView : VideoTextureViewRenderer {
 

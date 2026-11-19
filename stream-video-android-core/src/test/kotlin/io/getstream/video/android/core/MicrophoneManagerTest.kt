@@ -37,6 +37,7 @@ import io.getstream.video.android.core.call.connection.StreamPeerConnectionFacto
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.JetpackTelecomRepository
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCall
 import io.getstream.video.android.core.notifications.internal.telecom.jetpack.TelecomCallAction
+import io.getstream.webrtc.AudioTrack
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -58,7 +59,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import org.webrtc.AudioTrack
 import stream.video.sfu.models.AudioBitrateProfile
 
 @RunWith(RobolectricTestRunner::class)

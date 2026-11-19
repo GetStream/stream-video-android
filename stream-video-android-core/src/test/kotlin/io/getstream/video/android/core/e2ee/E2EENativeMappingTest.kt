@@ -17,14 +17,14 @@
 package io.getstream.video.android.core.e2ee
 
 import com.google.common.truth.Truth.assertThat
+import io.getstream.webrtc.EncryptionManager
 import org.junit.Test
-import org.webrtc.EncryptionManager
 import stream.video.sfu.models.TrackType
 
 /**
  * Guards the hand-written mappings between the SDK's public E2EE enums and WebRTC's.
  *
- * These exist because the public API should not force apps onto `org.webrtc` types, but that means
+ * These exist because the public API should not force apps onto `io.getstream.webrtc` types, but that means
  * a WebRTC bump adding an enum constant leaves the mapping silently incomplete. Asserting over
  * `values()` on both sides makes that a test failure instead of a runtime surprise.
  */

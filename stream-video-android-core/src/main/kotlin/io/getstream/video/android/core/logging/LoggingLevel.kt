@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.logging
 
 import io.getstream.log.Priority
-import org.webrtc.Logging
+import io.getstream.webrtc.Logging
 
 /**
  * Represents and wraps SDK logging levels for Stream logger, HTTP interceptor and native WebRTC logging.

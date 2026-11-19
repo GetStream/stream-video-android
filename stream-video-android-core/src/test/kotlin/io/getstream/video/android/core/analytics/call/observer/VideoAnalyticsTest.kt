@@ -36,7 +36,7 @@ class VideoAnalyticsTest {
     private val joinHolder = JoinAnalyticsStateHolder()
     private val sfuHolder = SfuAnalyticsStateHolder()
 
-    private val webRtcTrack = mockk<org.webrtc.VideoTrack>()
+    private val webRtcTrack = mockk<io.getstream.webrtc.VideoTrack>()
     private val remoteSubscriber = mockk<Subscriber>()
     private val rtcSession = mockk<RtcSession>()
     private val myParticipant = mockk<ParticipantState>()

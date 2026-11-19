@@ -23,6 +23,7 @@ import io.getstream.video.android.core.analytics.reporting.model.PeerConnectionR
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.webrtc.PeerConnection
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -39,7 +40,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.webrtc.PeerConnection
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PeerConnectionAnalyticsTest {

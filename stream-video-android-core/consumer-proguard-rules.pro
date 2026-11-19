@@ -74,3 +74,8 @@
 -keep class io.getstream.android.push.delegate.PushDelegate { *; }
 -keep class io.getstream.android.push.delegate.AndroidPushDelegateProvider { *; }
 -keep class io.getstream.android.push.permissions.PushPermissionsInitializer { *; }
+
+# Consumer ProGuard rules for io.getstream.webrtc (repackaged WebRTC).
+# The repackaged 156 AAR does not ship its own rules.
+-keep class io.getstream.webrtc.** { *; }
+-keep class org.jni_zero.** { *; }

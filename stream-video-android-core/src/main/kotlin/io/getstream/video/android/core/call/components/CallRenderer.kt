@@ -24,13 +24,13 @@ import io.getstream.video.android.core.call.video.YuvFrame
 import io.getstream.video.android.core.model.AudioTrack
 import io.getstream.video.android.core.model.PreferredVideoResolution
 import io.getstream.video.android.core.model.VideoTrack
+import io.getstream.webrtc.EglBase
+import io.getstream.webrtc.RendererCommon
+import io.getstream.webrtc.VideoSink
 import io.getstream.webrtc.android.ui.VideoTextureViewRenderer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.webrtc.EglBase
-import org.webrtc.RendererCommon
-import org.webrtc.VideoSink
 import stream.video.sfu.models.TrackType
 import stream.video.sfu.models.VideoDimension
 import kotlin.coroutines.resume

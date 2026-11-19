@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.e2ee
 
-import org.webrtc.EncryptionManager
+import io.getstream.webrtc.EncryptionManager
 
 /**
  * A state change reported by [StreamEncryptionManager], most usefully a decryption failure for a

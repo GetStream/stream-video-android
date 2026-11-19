@@ -19,14 +19,14 @@ package io.getstream.video.android.core
 import android.os.Build
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.stats.model.RtcStatsReport
+import io.getstream.webrtc.CameraEnumerationAndroid
+import io.getstream.webrtc.RTCStats
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import org.webrtc.CameraEnumerationAndroid
-import org.webrtc.RTCStats
 import stream.video.sfu.models.TrackType
 
 data class MediaStatsInfo(

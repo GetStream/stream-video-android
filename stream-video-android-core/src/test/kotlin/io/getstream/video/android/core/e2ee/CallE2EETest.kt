@@ -30,6 +30,8 @@ import io.getstream.video.android.core.injectSession
 import io.getstream.video.android.core.internal.module.CoordinatorConnectionModule
 import io.getstream.video.android.core.internal.network.NetworkStateProvider
 import io.getstream.video.android.model.User
+import io.getstream.webrtc.RtpReceiver
+import io.getstream.webrtc.RtpSender
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -45,8 +47,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.webrtc.RtpReceiver
-import org.webrtc.RtpSender
 
 /**
  * Covers the [Call]-level end-to-end encryption surface: attaching a manager, the guard that keeps

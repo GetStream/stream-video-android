@@ -17,7 +17,7 @@
 package io.getstream.video.android.core.call.connection.transceivers
 
 import io.getstream.video.android.core.call.connection.utils.OptimalVideoLayer
-import org.webrtc.RtpTransceiver
+import io.getstream.webrtc.RtpTransceiver
 import stream.video.sfu.models.PublishOption
 import stream.video.sfu.models.TrackType
 import java.util.Collections

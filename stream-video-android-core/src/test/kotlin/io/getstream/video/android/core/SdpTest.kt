@@ -20,11 +20,11 @@ import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.base.TestBase
 import io.getstream.video.android.core.utils.MinimalSdpParser
 import io.getstream.video.android.core.utils.mangleSdpUtil
+import io.getstream.webrtc.SessionDescription
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import org.webrtc.SessionDescription
 
 @RunWith(RobolectricTestRunner::class)
 class SdpTest : TestBase() {

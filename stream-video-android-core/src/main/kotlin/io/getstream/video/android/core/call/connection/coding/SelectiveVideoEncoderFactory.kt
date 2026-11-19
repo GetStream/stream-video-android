@@ -16,13 +16,13 @@
 
 package io.getstream.video.android.core.call.connection.coding
 
-import org.webrtc.EglBase
-import org.webrtc.ResolutionAdjustment
-import org.webrtc.SimulcastAlignedVideoEncoderFactory
-import org.webrtc.SoftwareVideoEncoderFactory
-import org.webrtc.VideoCodecInfo
-import org.webrtc.VideoEncoder
-import org.webrtc.VideoEncoderFactory
+import io.getstream.webrtc.EglBase
+import io.getstream.webrtc.ResolutionAdjustment
+import io.getstream.webrtc.SimulcastAlignedVideoEncoderFactory
+import io.getstream.webrtc.SoftwareVideoEncoderFactory
+import io.getstream.webrtc.VideoCodecInfo
+import io.getstream.webrtc.VideoEncoder
+import io.getstream.webrtc.VideoEncoderFactory
 
 internal class SelectiveVideoEncoderFactory(
     sharedContext: EglBase.Context?,

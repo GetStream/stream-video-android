@@ -44,8 +44,8 @@ import io.getstream.video.android.core.call.stats.model.RtcVideoSourceStats
 import io.getstream.video.android.core.call.stats.model.discriminator.RtcMediaKind
 import io.getstream.video.android.core.call.stats.model.discriminator.RtcQualityLimitationReason
 import io.getstream.video.android.core.call.stats.model.discriminator.RtcReportType
-import org.webrtc.RTCStats
-import org.webrtc.RTCStatsReport
+import io.getstream.webrtc.RTCStats
+import io.getstream.webrtc.RTCStatsReport
 
 private const val TAG = "RtcParser"
 private const val DEBUG = false

@@ -16,7 +16,7 @@
 
 package io.getstream.video.android.core.call.connection.utils
 
-import org.webrtc.RtpParameters
+import io.getstream.webrtc.RtpParameters
 import stream.video.sfu.models.DegradationPreference as SfuDegradationPreference
 
 /**

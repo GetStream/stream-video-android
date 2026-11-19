@@ -17,8 +17,8 @@
 package io.getstream.video.android.core.call.video
 
 import android.graphics.Bitmap
-import org.webrtc.SurfaceTextureHelper
-import org.webrtc.VideoFrame
+import io.getstream.webrtc.SurfaceTextureHelper
+import io.getstream.webrtc.VideoFrame
 
 /**
  * Do not create instances directly. Use [BitmapVideoFilter] or [RawVideoFilter]

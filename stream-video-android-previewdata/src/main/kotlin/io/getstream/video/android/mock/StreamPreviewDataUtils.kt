@@ -25,11 +25,11 @@ import io.getstream.video.android.core.StreamVideoBuilder
 import io.getstream.video.android.core.internal.InternalStreamVideoApi
 import io.getstream.video.android.core.model.MediaTrack
 import io.getstream.video.android.model.User
+import io.getstream.webrtc.VideoTrack
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import org.webrtc.VideoTrack
 import java.util.UUID
 import kotlin.time.Instant
 

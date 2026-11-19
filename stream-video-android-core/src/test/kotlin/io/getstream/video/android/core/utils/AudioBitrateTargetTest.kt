@@ -16,11 +16,11 @@
 
 package io.getstream.video.android.core.utils
 
+import io.getstream.webrtc.MediaConstraints
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.webrtc.MediaConstraints
 import stream.video.sfu.models.AudioBitrateProfile
 
 /**

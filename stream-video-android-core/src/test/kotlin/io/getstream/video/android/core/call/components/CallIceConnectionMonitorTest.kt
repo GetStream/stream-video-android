@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call.components
 import io.getstream.video.android.core.call.RtcSession
 import io.getstream.video.android.core.call.connection.Publisher
 import io.getstream.video.android.core.call.connection.Subscriber
+import io.getstream.webrtc.PeerConnection
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -29,7 +30,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.webrtc.PeerConnection
 
 /**
  * Tests [CallIceConnectionMonitor], which watches the publisher / subscriber ICE states

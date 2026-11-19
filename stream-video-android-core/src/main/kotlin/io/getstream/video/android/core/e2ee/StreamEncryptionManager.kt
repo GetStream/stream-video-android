@@ -19,9 +19,9 @@ package io.getstream.video.android.core.e2ee
 import io.getstream.log.StreamLog
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.utils.safeCall
-import org.webrtc.EncryptionManager
-import org.webrtc.RtpReceiver
-import org.webrtc.RtpSender
+import io.getstream.webrtc.EncryptionManager
+import io.getstream.webrtc.RtpReceiver
+import io.getstream.webrtc.RtpSender
 
 /**
  * The SDK's default [E2EEManager], backed by WebRTC's framed AES-GCM encryption. Frames are
@@ -64,7 +64,7 @@ public class StreamEncryptionManager private constructor(
         } catch (e: LinkageError) {
             StreamLog.w(
                 "Call:E2EE",
-            ) { "org.webrtc.EncryptionManager is unavailable: ${e.message}" }
+            ) { "io.getstream.webrtc.EncryptionManager is unavailable: ${e.message}" }
             false
         }
 
