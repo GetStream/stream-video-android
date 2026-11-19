@@ -21,6 +21,7 @@ import io.getstream.video.android.core.CallState
 import io.getstream.video.android.core.RealtimeConnection
 import io.getstream.video.android.core.StreamVideoClient
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.getstream.video.android.core.model.PlaybackType
 import io.mockk.coVerify
 import io.mockk.every
@@ -74,17 +75,21 @@ class CallLifecycleManagerTest {
     }
 
     @Test
-    fun `leave after HLS playback cleans up the playback session and resets the playback type`() =
+    fun `leave after HLS playback releases the player and resets the playback type`() =
         runTest(testDispatcher) {
             val playbackSession = mockk<RtcSession>(relaxed = true)
+            val player = mockk<HlsPlayer>(relaxed = true)
             sessionManager.playbackSession = playbackSession
+            sessionManager.hlsPlayer.value = player
 
             manager().leave("user")
             advanceUntilIdle()
 
             assertThat(sessionManager.playbackSession).isNull()
+            assertThat(sessionManager.hlsPlayer.value).isNull()
             assertThat(playbackTypeFlow.value).isEqualTo(PlaybackType.WebRtc)
             verify { playbackSession.cleanup() }
+            verify(exactly = 1) { player.release() }
             coVerify(exactly = 0) { playbackSession.sendLeaveEvent(any()) }
         }
 

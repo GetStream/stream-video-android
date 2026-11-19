@@ -74,6 +74,7 @@ import io.getstream.video.android.core.call.components.NoiseCancellationPolicy
 import io.getstream.video.android.core.call.components.RtcSessionFactory
 import io.getstream.video.android.core.call.components.SessionMonitor
 import io.getstream.video.android.core.call.connection.StreamPeerConnectionFactory
+import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.getstream.video.android.core.call.scope.ScopeProvider
 import io.getstream.video.android.core.call.scope.ScopeProviderImpl
 import io.getstream.video.android.core.call.video.VideoFilter
@@ -169,6 +170,14 @@ public class Call(
     //  replaces it rather than overloading it (defaults are source-level only). CallSessionManager
     //  is also internal, so it cannot appear in a public signature at all.
     internal val session: StateFlow<RtcSession?> get() = sessionManager.session
+
+    /**
+     * Plays the call's HLS broadcast. Set while [CallState.playbackType] is
+     * [io.getstream.video.android.core.model.PlaybackType.Hls], null otherwise. Read by the HLS
+     * renderer in `stream-video-android-hls`.
+     */
+    @InternalStreamVideoApi
+    public val hlsPlayer: StateFlow<HlsPlayer?> get() = sessionManager.hlsPlayer
 
     var sessionId: String
         get() = sessionManager.sessionId
@@ -553,6 +562,12 @@ public class Call(
         },
         createPlaybackSession = playbackSessionFactory,
         consumeJoinSource = { consumeJoinSource() },
+        createHlsPlayer = clientImpl.hlsPlayerFactory?.let { factory ->
+            {
+                    playlistUrl ->
+                factory.create(clientImpl.context, playlistUrl)
+            }
+        },
     )
 
     internal var reconnectDeadlineMillis: Int

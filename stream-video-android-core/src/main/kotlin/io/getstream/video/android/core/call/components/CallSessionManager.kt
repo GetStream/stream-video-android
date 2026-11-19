@@ -19,6 +19,7 @@ package io.getstream.video.android.core.call.components
 import io.getstream.log.taggedLogger
 import io.getstream.video.android.core.call.EmptyRtcSession
 import io.getstream.video.android.core.call.RtcSession
+import io.getstream.video.android.core.call.hls.HlsPlayer
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -65,6 +66,9 @@ internal class CallSessionManager() {
      */
     @Volatile
     var playbackSession: RtcSession? = null
+
+    /** The call's HLS player. Set and cleared together with [playbackSession]. */
+    val hlsPlayer = MutableStateFlow<HlsPlayer?>(null)
 
     var sessionId = UUID.randomUUID().toString()
 
