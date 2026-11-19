@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.video
+package io.getstream.video.android.hls
 
 import android.os.Handler
 import android.os.Looper
@@ -23,27 +23,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.AbstractApplier
 import androidx.compose.runtime.BroadcastFrameClock
-import androidx.compose.runtime.Composition
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Recomposer
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.CallState
-import io.getstream.video.android.core.call.hls.HlsPlayback
-import io.getstream.video.android.core.call.hls.HlsPlaybackStore
-import io.getstream.video.android.core.model.PlaybackType
+import io.getstream.video.android.core.call.hls.HlsPlayer
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
@@ -57,12 +46,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.android.controller.ActivityController
 import org.robolectric.annotation.Config
 import java.time.Duration
-import kotlin.coroutines.EmptyCoroutineContext
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
@@ -75,14 +62,6 @@ internal class HlsVideoRendererTest {
         const val FRAME_MS = 20L
     }
 
-    private val created = mutableListOf<FakeHlsPlayback>()
-    private var aspectRatio: Float? = null
-    private val store = HlsPlaybackStore { _, url ->
-        FakeHlsPlayback(url).also {
-            it.videoAspectRatio.value = aspectRatio
-            created += it
-        }
-    }
     private val activities = mutableListOf<ActivityController<ComponentActivity>>()
 
     // Compose caches the window recomposer's dispatcher per thread, bound to the first test's
@@ -103,40 +82,58 @@ internal class HlsVideoRendererTest {
     }
 
     @Test
-    fun `hls playback renders the playlist`() {
-        val playback = MutableStateFlow<PlaybackType>(PlaybackType.Hls(URL))
+    fun `the call's player is shown and hidden when playback ends`() {
+        val player = FakeHlsPlayer(URL)
+        val hlsPlayer = MutableStateFlow<HlsPlayer?>(player)
 
-        val activity = show(playback)
+        val activity = show(call(hlsPlayer)).first
 
-        assertThat(containsSurfaceView(activity.window.decorView)).isTrue()
-        assertThat(created.map { it.playlistUrl }).containsExactly(URL)
-        assertThat(created.single().attachCount).isEqualTo(1)
+        assertThat(activity.window.decorView.findSurfaceView()).isNotNull()
+        assertThat(player.shownOn).isNotNull()
 
-        playback.value = PlaybackType.WebRtc
+        hlsPlayer.value = null
         settle()
 
-        assertThat(containsSurfaceView(activity.window.decorView)).isFalse()
-        assertThat(created.single().released).isTrue()
+        assertThat(activity.window.decorView.findSurfaceView()).isNull()
+        assertThat(player.shownOn).isNull()
+        assertThat(player.released).isFalse()
     }
 
     @Test
-    fun `a new playlist attaches the new player and releases the old one`() {
-        val playback = MutableStateFlow<PlaybackType>(PlaybackType.Hls(URL))
-        show(playback)
+    fun `a recreated renderer resumes the same player without releasing it`() {
+        val player = FakeHlsPlayer(URL)
+        val call = call(MutableStateFlow(player))
 
-        playback.value = PlaybackType.Hls(OTHER_URL)
+        val (_, first) = show(call)
+        activities.remove(first)
+        first.pause().stop().destroy()
+        assertThat(player.shownOn).isNull()
+
+        show(call)
+
+        assertThat(player.shownOn).isNotNull()
+        assertThat(player.attachCount).isEqualTo(2)
+        assertThat(player.released).isFalse()
+    }
+
+    @Test
+    fun `a replacement player is shown in place of the previous one`() {
+        val old = FakeHlsPlayer(URL)
+        val new = FakeHlsPlayer(OTHER_URL)
+        val hlsPlayer = MutableStateFlow<HlsPlayer?>(old)
+        show(call(hlsPlayer))
+
+        hlsPlayer.value = new
         settle()
 
-        assertThat(created.map { it.playlistUrl }).containsExactly(URL, OTHER_URL).inOrder()
-        assertThat(created[0].released).isTrue()
-        assertThat(created[1].released).isFalse()
-        assertThat(created[1].attachCount).isEqualTo(1)
+        assertThat(old.shownOn).isNull()
+        assertThat(new.shownOn).isNotNull()
     }
 
     @Test
     fun `hls surface keeps the stream aspect ratio instead of stretching to the tile`() {
-        aspectRatio = 16f / 9f
-        val activity = show(MutableStateFlow(PlaybackType.Hls(URL)))
+        val player = FakeHlsPlayer(URL).apply { videoAspectRatio.value = 16f / 9f }
+        val activity = show(call(MutableStateFlow(player))).first
         val container = activity.findViewById<View>(android.R.id.content)
         assertThat(container.height).isGreaterThan(container.width)
 
@@ -146,75 +143,29 @@ internal class HlsVideoRendererTest {
     }
 
     @Test
-    fun `webrtc playback does not create an hls player`() {
-        val activity = show(MutableStateFlow(PlaybackType.WebRtc))
+    fun `a call without an hls player renders nothing`() {
+        val activity = show(call(MutableStateFlow(null))).first
 
-        assertThat(containsSurfaceView(activity.window.decorView)).isFalse()
-        assertThat(created).isEmpty()
-    }
-
-    @Test
-    fun `an abandoned composition does not start a player`() {
-        val call = call(MutableStateFlow(PlaybackType.Hls(URL)))
-        // A private recomposer keeps the failing composition away from the main-thread one
-        // that the activity-based tests share.
-        val recomposer = Recomposer(EmptyCoroutineContext)
-        val composition = Composition(NoNodeApplier(), recomposer)
-
-        val result = runCatching {
-            composition.setContent {
-                CompositionLocalProvider(
-                    LocalContext provides RuntimeEnvironment.getApplication(),
-                    LocalLifecycleOwner provides ResumedLifecycleOwner(),
-                ) {
-                    HlsVideoRendererImpl(call = call, store = store)
-                }
-                error("composition abandoned before it was applied")
-            }
-        }
-        runCatching { composition.dispose() }
-        recomposer.cancel()
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(created).isEmpty()
-    }
-
-    @Test
-    fun `two renderers of one call share a player and the second release stops it`() {
-        val playback = MutableStateFlow<PlaybackType>(PlaybackType.Hls(URL))
-        val call = call(playback)
-
-        val first = show(call)
-        val second = show(call)
-
-        assertThat(created).hasSize(1)
-        activities.remove(first.second)
-        first.second.pause().stop().destroy()
-        assertThat(created.single().released).isFalse()
-
-        activities.remove(second.second)
-        second.second.pause().stop().destroy()
-        assertThat(created.single().released).isTrue()
+        assertThat(activity.window.decorView.findSurfaceView()).isNull()
     }
 
     @Test
     fun `the audio toggle mutes the player and a replacement player starts muted`() {
-        val playback = MutableStateFlow<PlaybackType>(PlaybackType.Hls(URL))
+        val player = FakeHlsPlayer(URL)
+        val hlsPlayer = MutableStateFlow<HlsPlayer?>(player)
         val audioEnabled = mutableStateOf(true)
-        show(call(playback), audioEnabled)
-        assertThat(created.single().audioEnabled).isTrue()
+        show(call(hlsPlayer), audioEnabled)
+        assertThat(player.audioEnabled).isTrue()
 
         audioEnabled.value = false
         settle()
-        assertThat(created.single().audioEnabled).isFalse()
+        assertThat(player.audioEnabled).isFalse()
 
-        playback.value = PlaybackType.Hls(OTHER_URL)
+        val replacement = FakeHlsPlayer(OTHER_URL)
+        hlsPlayer.value = replacement
         settle()
-        assertThat(created[1].audioEnabled).isFalse()
+        assertThat(replacement.audioEnabled).isFalse()
     }
-
-    private fun show(playback: MutableStateFlow<PlaybackType>): ComponentActivity =
-        show(call(playback)).first
 
     private fun show(
         call: Call,
@@ -226,9 +177,8 @@ internal class HlsVideoRendererTest {
         val view = ComposeView(activity).apply {
             setParentCompositionContext(recomposer)
             setContent {
-                HlsVideoRendererImpl(
+                HlsVideoRenderer(
                     call = call,
-                    store = store,
                     modifier = Modifier.fillMaxSize(),
                     audioEnabled = audioEnabled.value,
                 )
@@ -250,15 +200,9 @@ internal class HlsVideoRendererTest {
         }
     }
 
-    private fun call(playback: MutableStateFlow<PlaybackType>): Call {
-        val state = mockk<CallState>()
-        every { state.playbackType } returns playback
-        return mockk {
-            every { this@mockk.state } returns state
-        }
+    private fun call(hlsPlayer: MutableStateFlow<HlsPlayer?>): Call = mockk {
+        every { this@mockk.hlsPlayer } returns hlsPlayer
     }
-
-    private fun containsSurfaceView(view: View): Boolean = view.findSurfaceView() != null
 
     private fun View.findSurfaceView(): SurfaceView? {
         if (this is SurfaceView) return this
@@ -270,33 +214,23 @@ internal class HlsVideoRendererTest {
         return null
     }
 
-    private class NoNodeApplier : AbstractApplier<Unit>(Unit) {
-        override fun insertTopDown(index: Int, instance: Unit) = Unit
-        override fun insertBottomUp(index: Int, instance: Unit) = Unit
-        override fun remove(index: Int, count: Int) = Unit
-        override fun move(from: Int, to: Int, count: Int) = Unit
-        override fun onClear() = Unit
-    }
-
-    private class ResumedLifecycleOwner : LifecycleOwner {
-        override val lifecycle: Lifecycle = LifecycleRegistry.createUnsafe(this).apply {
-            currentState = Lifecycle.State.RESUMED
-        }
-    }
-
-    private class FakeHlsPlayback(
+    private class FakeHlsPlayer(
         override val playlistUrl: String,
-    ) : HlsPlayback {
+    ) : HlsPlayer {
         override val videoAspectRatio = MutableStateFlow<Float?>(null)
+        var shownOn: SurfaceView? = null
         var attachCount = 0
         var released = false
         var audioEnabled: Boolean? = null
 
         override fun attach(surfaceView: SurfaceView) {
             attachCount += 1
+            shownOn = surfaceView
         }
 
-        override fun detach(surfaceView: SurfaceView) = Unit
+        override fun detach(surfaceView: SurfaceView) {
+            if (shownOn === surfaceView) shownOn = null
+        }
 
         override fun setAudioEnabled(enabled: Boolean) {
             audioEnabled = enabled

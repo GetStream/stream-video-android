@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getstream.video.android.compose.ui.components.video
+package io.getstream.video.android.hls
 
 import android.view.SurfaceView
 import androidx.compose.foundation.background
@@ -22,31 +22,25 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.getstream.video.android.core.Call
-import io.getstream.video.android.core.call.hls.HlsPlayback
-import io.getstream.video.android.core.call.hls.HlsPlaybackStore
 import io.getstream.video.android.core.model.PlaybackType
 
 /**
- * Plays the call's HLS broadcast.
+ * Shows the call's HLS broadcast.
  *
- * Renders nothing while [Call.state.playbackType] is not [PlaybackType.Hls]. The playlist is on
- * the call. One player is shared by every [HlsVideoRenderer] of the same call, and released when
- * the last one leaves.
+ * Renders nothing unless [Call.state.playbackType] is [PlaybackType.Hls], which requires an
+ * [ExoHlsPlayerFactory] registered on the client. The call owns the player: this renderer plays
+ * it while shown and pauses it when removed, and leaving the call releases it. Recreating the
+ * renderer, for example on rotation, resumes the same player without loading the stream again.
  *
  * The broadcast is an already composed layout, so the frame is fitted rather than cropped.
  *
@@ -61,35 +55,8 @@ public fun HlsVideoRenderer(
     modifier: Modifier = Modifier,
     audioEnabled: Boolean = true,
 ) {
-    HlsVideoRendererImpl(
-        call = call,
-        store = defaultHlsPlaybackStore,
-        modifier = modifier,
-        audioEnabled = audioEnabled,
-    )
-}
-
-private val defaultHlsPlaybackStore = HlsPlaybackStore()
-
-@Composable
-internal fun HlsVideoRendererImpl(
-    call: Call,
-    store: HlsPlaybackStore,
-    modifier: Modifier = Modifier,
-    audioEnabled: Boolean = true,
-) {
-    val playbackType by call.state.playbackType.collectAsStateWithLifecycle()
-    val playlistUrl = (playbackType as? PlaybackType.Hls)?.playlistUrl ?: return
-    val context = LocalContext.current
-    var playback by remember(store, call, playlistUrl) { mutableStateOf<HlsPlayback?>(null) }
-    // Acquired here rather than in remember: an abandoned composition never runs onDispose,
-    // so a player started during composition would never be released.
-    DisposableEffect(store, call, playlistUrl) {
-        val acquired = store.acquire(context, call, playlistUrl)
-        playback = acquired
-        onDispose { store.release(call, acquired) }
-    }
-    val current = playback ?: return
+    val player by call.hlsPlayer.collectAsStateWithLifecycle()
+    val current = player ?: return
     SideEffect { current.setAudioEnabled(audioEnabled) }
     val aspectRatio by current.videoAspectRatio.collectAsStateWithLifecycle()
     Box(
@@ -98,9 +65,7 @@ internal fun HlsVideoRendererImpl(
     ) {
         key(current) {
             AndroidView(
-                factory = { viewContext ->
-                    SurfaceView(viewContext).also { current.attach(it) }
-                },
+                factory = { context -> SurfaceView(context).also { current.attach(it) } },
                 onRelease = { surface -> current.detach(surface) },
                 modifier = (aspectRatio?.let { Modifier.aspectRatio(it) } ?: Modifier.fillMaxSize())
                     .testTag("hls_video_renderer"),
